@@ -5,13 +5,13 @@ Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen
 Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.
 Herzlichen Dank an "godfuture"
 
-Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktif ist und 
+Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv ist und 
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
 
 Folgende Installationen erfolgen auf einem Ubuntu/Mint 
 
-Folgende Installationen sind nötig, damit die Pythonscripte funktionieren
+Folgende Installationen sind nötig, damit die Pythonskripte funktionieren
 
 apt install python3
 
@@ -48,13 +48,13 @@ stellt die Verbindung Zum Wechselrichter (GENR24 Plus) her.
 
 SymoGen24Controller2.py
 
-berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und giebt sie aus.
+berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und gibt sie aus.
 Mit dem Parameter "schreiben" aufgerufen schreibt er die Ladewerte auf den Wechselrichter.
 
 
 LoggingSymoGen24.py (optional)
 
 schreibt folgende Werte in die Log.csv zur Auswertung der Ergebnisse mit z.B. libreoffice Calc
-Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.solar,Aktuelle Ladegrenze,Battreiestand in Prozent
+Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.solar,Aktuelle Ladegrenze,Batteriestand in Prozent
 
 
