@@ -6,6 +6,7 @@ import json
 import configparser
 import os.path
 import pytz
+from pathlib import Path
 
 def loadConfig():
 	config = configparser.ConfigParser()
@@ -17,11 +18,13 @@ def loadConfig():
 	return config
 	
 def loadWeatherData(config):
-	data = None
-	with open(config['env']['filePathWeatherData']) as json_file:
-		data = json.load(json_file)
+    data = None
+    weatherfile = Path(config['env']['filePathWeatherData'])
+    if weatherfile.is_file():
+	    with open(config['env']['filePathWeatherData']) as json_file:
+		    data = json.load(json_file)
 	
-	return data
+    return data
 	
 def loadLatestWeatherData(config):
 	lat = config['forecast.solar']['lat']
