@@ -1,4 +1,5 @@
 GEN24_Ladesteuerung
+
 Ladesteuerung für  Fronius Symo GEN24 Plus
 um die 70% Kappung zu umgehen
 Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.
@@ -20,9 +21,9 @@ pip install pytz
 die Startskripte können per Cronjobs gestartet werden mit at starten
 Beispiele Crontabeintraege
 
-*/5 05-20 * * * <DIR>/start_LoggingSymoGen24.sh
-*/30 04-20 * * * <DIR>/start_SymoGen24Controller2.sh
-25 06 * * * <DIR>/start_WeatherDataProvider2.sh
+*/5 05-20 * * * DIR/start_LoggingSymoGen24.sh
+*/30 04-20 * * * DIR/start_SymoGen24Controller2.sh
+25 06 * * * DIR/start_WeatherDataProvider2.sh
 
 WeatherDataProvider2.py
 holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json
