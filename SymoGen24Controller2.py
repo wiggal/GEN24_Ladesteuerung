@@ -244,8 +244,8 @@ if __name__ == '__main__':
                     print("newPercent: ", newPercent)
                     print("newPercent_schreiben: ", newPercent_schreiben)
                     print("Grundlast_Summe: ", Grundlast_Summe)
-                    dataBatteryStats = gen24.read_section('StorageDevice')
-                    print(f'Battery Stats: {dataBatteryStats}') 
+                    # dataBatteryStats = gen24.read_section('StorageDevice')
+                    # print(f'Battery Stats: {dataBatteryStats}') 
                     print()
 
 
