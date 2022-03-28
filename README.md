@@ -1,7 +1,7 @@
 GEN24_Ladesteuerung
 
-Ladesteuerung für  Fronius Symo GEN24 Plus
-um die 70% Kappung zu umgehen
+Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen
+
 Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.
 Herzlichen Dank an "godfuture"
 
@@ -25,7 +25,7 @@ pip install pytz
 
 
 
-die Startskripte können per Cronjobs gestartet werden mit at starten
+Die Startskripte können per Cronjobs gestartet werden.
 
 Beispiele Crontabeintraege
 
@@ -39,15 +39,18 @@ WeatherDataProvider2.py
 
 holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json
 
+
 SymoGen24Connector.py
 
 Wird von SymoGen24Controller2.py aufgerufen und
 stellt die Verbindung Zum Wechselrichter (GENR24 Plus) her.
 
+
 SymoGen24Controller2.py
 
 berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und giebt sie aus.
 Mit dem Parameter "schreiben" aufgerufen schreibt er die Ladewerte auf den Wechselrichter.
+
 
 LoggingSymoGen24.py (optional)
 
