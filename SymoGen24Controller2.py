@@ -80,9 +80,17 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         # zu jeder Minute den genauen Zwischenwert der beiden Stundenprognosen rechnen
         Pro_Akt = int((Pro_Akt1 * (60 - Akt_Minute_Versch) + Pro_Akt2 * Akt_Minute_Versch) / 60)
 
-        # ????EVTL. AKTUELLE PV-LEISTUNG BERUECKSICHTIGEN????
         # Nun den Aktuellen Ladewert rechnen * ProzLadedaempfung - (DiffLadedaempfung)
         aktuellerLadewert = int((Pro_Akt - AbzugWatt) * ProzLadedaempfung - (DiffLadedaempfung))
+
+        # Aktuelle PV-Leistung beruecksichtigen
+        aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/10)
+        aktuellerUeberschuss = (aktuelleProduktion - Einspeizegerenze - Grundlast) 
+        # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
+        if aktuellerUeberschuss > aktuellerLadewert:
+            aktuellerLadewert = aktuellerUeberschuss
+
+
 
         if aktuellerLadewert < 10:
             aktuellerLadewert = 10
@@ -99,7 +107,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
             aktuellerLadewert = MaxLadung
 
         # Wenn  PV-Produktion kleiner Grundlast, Ladeleistung ausschalten
-        aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/10)
         if aktuelleProduktion < Grundlast:
             aktuellerLadewert = 10
 

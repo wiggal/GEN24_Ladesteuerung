@@ -31,13 +31,15 @@ Beispiele Crontabeintraege
 
 */5 05-20 * * * DIR/start_LoggingSymoGen24.sh
 
-*/30 04-20 * * * DIR/start_SymoGen24Controller2.sh
+*/15 04-20 * * * DIR/start_SymoGen24Controller2.sh
 
-25 06 * * * DIR/start_WeatherDataProvider2.sh
+05 */3 * * * DIR/start_WeatherDataProvider2.sh
 
 WeatherDataProvider2.py
 
 holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json
+
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 3 Std)
 
 
 SymoGen24Connector.py
