@@ -80,6 +80,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         # zu jeder Minute den genauen Zwischenwert der beiden Stundenprognosen rechnen
         Pro_Akt = int((Pro_Akt1 * (60 - Akt_Minute_Versch) + Pro_Akt2 * Akt_Minute_Versch) / 60)
 
+        # ????EVTL. AKTUELLE PV-LEISTUNG BERUECKSICHTIGEN????
         # Nun den Aktuellen Ladewert rechnen * ProzLadedaempfung - (DiffLadedaempfung)
         aktuellerLadewert = int((Pro_Akt - AbzugWatt) * ProzLadedaempfung - (DiffLadedaempfung))
 
@@ -111,8 +112,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         return Pro_Uebersch_Tag, Pro_Ertrag_Tag, aktuellerLadewert, Grundlast_Sum
 
 def setLadewert(fun_Ladewert):
-        # Prozent auch hie auf 10 runden
-        newPercent = (int(fun_Ladewert/BattganzeKapazWatt*1000)) * 10
+        # Prozent auch hie auf 100 runden damit nicht so oft auf den WR geschrieben wird
+        newPercent = (int(fun_Ladewert/BattganzeKapazWatt*100+0.5)) * 100
         # Prozent des Ladewertes auf volle 10 kappen
         if newPercent < 10:
             newPercent = 10
