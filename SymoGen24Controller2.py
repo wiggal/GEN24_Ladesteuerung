@@ -36,6 +36,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         i = Akt_Std_Versch
         Pro_Uebersch_Tag = 0
         Pro_Ertrag_Tag = 0
+        Pro_Spitze = 0
         Grundlast_Sum = 0
 
         while i < 22:
@@ -46,6 +47,10 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
                     Pro = 0
 
             Pro_Uebersch = Pro - AbzugWatt
+
+            # Prognosenspitzenwert für Tag ermitteln
+            if Pro > Pro_Spitze:
+                Pro_Spitze = Pro
 
             # wenn nicht zur vollen Stunde, Wert anteilsmaessig
             if i == Akt_Std_Versch:
@@ -86,11 +91,10 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         # Aktuelle PV-Leistung beruecksichtigen
         aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/10)
         aktuellerUeberschuss = (aktuelleProduktion - Einspeizegerenze - Grundlast) 
-        # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
         if aktuellerUeberschuss > aktuellerLadewert:
             aktuellerLadewert = aktuellerUeberschuss
 
-
+        # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
 
         if aktuellerLadewert < 10:
             aktuellerLadewert = 10
@@ -116,7 +120,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         if aktuellerLadewert < 10:
             aktuellerLadewert = 10
 
-        return Pro_Uebersch_Tag, Pro_Ertrag_Tag, aktuellerLadewert, Grundlast_Sum
+        return Pro_Uebersch_Tag, Pro_Ertrag_Tag, aktuellerLadewert, Grundlast_Sum, Pro_Spitze
 
 def setLadewert(fun_Ladewert):
         # Prozent auch hie auf 100 runden damit nicht so oft auf den WR geschrieben wird
@@ -169,6 +173,7 @@ if __name__ == '__main__':
                 MinVerschiebewert = eval(config['Ladeberechnung']['MinVerschiebewert'])
                 MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
                 Einspeizegerenze = eval(config['Ladeberechnung']['Einspeizegerenze'])
+                MindestSpitzenwert = eval(config['Ladeberechnung']['MindestSpitzenwert'])
                 Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                 MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
                 NullLadung = eval(config['Ladeberechnung']['NullLadung'])
@@ -212,6 +217,7 @@ if __name__ == '__main__':
                         TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
                         aktuellerLadewert = PrognoseUNDUeberschuss[2]
                         Grundlast_Summe = PrognoseUNDUeberschuss[3]
+                        Pro_Spitze = PrognoseUNDUeberschuss[4]
                         PrognoseAbzugswert = i
                         i -= 100
 
@@ -228,6 +234,12 @@ if __name__ == '__main__':
                     else:
 
                         if (TagesPrognoseGesamt > Grundlast) and ((TagesPrognoseGesamt - Grundlast_Summe) < BattKapaWatt_akt):
+                            # volle Ladung ;-)
+                            DATA = setLadewert(MaxLadung)
+                            newPercent = DATA[0]
+                            newPercent_schreiben = DATA[1]
+
+                        elif Pro_Spitze < MindestSpitzenwert:
                             # volle Ladung ;-)
                             DATA = setLadewert(MaxLadung)
                             newPercent = DATA[0]
