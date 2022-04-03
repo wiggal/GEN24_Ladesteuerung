@@ -36,7 +36,7 @@ def loadLatestWeatherData(config):
     
     url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
     try:
-        apiResponse = requests.get(url, timeout=2.50)
+        apiResponse = requests.get(url, timeout=12.50)
         return dict(json.loads(apiResponse.text))
     except:
         return("False")

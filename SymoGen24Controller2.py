@@ -198,6 +198,12 @@ if __name__ == '__main__':
                 ## Ab hier gehts los wie Ablaufdiagramm
                 #######################################
 
+                TagesPrognoseUeberschuss = 0
+                TagesPrognoseGesamt = 0
+                aktuellerLadewert = 0
+                PrognoseAbzugswert = 0
+                Grundlast_Summe = 0
+
                 if ((BattStatusProz < MindBattLad)):
                     # volle Ladung ;-)
                     DATA = setLadewert(MaxLadung)
@@ -207,8 +213,6 @@ if __name__ == '__main__':
                 else:
                     
                     i = StartKappGrenze
-                    TagesPrognoseUeberschuss = 0
-                    TagesPrognoseGesamt = 0
                     # Gesamte Tagesprognose, Tagesüberschuß aus Prognose und aktuellen Ladewert ermitteln
                     # and (i >= 0) damit PrognoseAbzugswert nicht ins Minus laeuft
                     while (TagesPrognoseUeberschuss <= BattKapaWatt_akt) and (i >= 0):
