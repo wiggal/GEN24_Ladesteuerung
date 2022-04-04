@@ -88,11 +88,11 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         # Nun den Aktuellen Ladewert rechnen * ProzLadedaempfung - (DiffLadedaempfung)
         aktuellerLadewert = int((Pro_Akt - AbzugWatt) * ProzLadedaempfung - (DiffLadedaempfung))
 
-        # Aktuelle PV-Leistung beruecksichtigen
+        # Aktuelle PV-Leistung beruecksichtigen => Mittelwert aus aktuellerUeberschuss und aktuellerLadewert
         aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/10)
         aktuellerUeberschuss = (aktuelleProduktion - Einspeizegerenze - Grundlast) 
         if aktuellerUeberschuss > aktuellerLadewert:
-            aktuellerLadewert = aktuellerUeberschuss
+            aktuellerLadewert = (aktuellerUeberschuss + aktuellerLadewert) / 2
 
         # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
 
@@ -183,7 +183,8 @@ if __name__ == '__main__':
                 StartKappGrenze = eval(config['Ladeberechnung']['StartKappGrenze'])
                 WattpilotAn = eval(config['Ladeberechnung']['WattpilotAn'])
                 Grundlast_Einspeizegerenze = Grundlast + Einspeizegerenze
-                BattganzeKapazWatt = (gen24.read_data('Battery_capa'))
+                # BattganzeKapazWatt = (gen24.read_data('Battery_capa'))
+                BattganzeKapazWatt = (gen24.read_data('BatteryChargeRate'))
                 BattStatusProz = gen24.read_data('Battery_SoC')/100
                 BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeKapazWatt)
 
@@ -231,7 +232,7 @@ if __name__ == '__main__':
                     # Wattpiloteinbindung muss noch programmiert werden
                     # Aktuell nur ueber die Configvariable  WattpilotAn steuerbar
                     if WattpilotAn == 1:
-                        DATA = setLadewert(10)
+                        DATA = setLadewert(MaxLadung)
                         newPercent = DATA[0]
                         newPercent_schreiben = DATA[1]
 

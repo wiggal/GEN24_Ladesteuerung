@@ -85,7 +85,7 @@ if __name__ == '__main__':
                 ############## CSV_Datei schreiben
                 ############ Aktuelle_Produktion aus Register zeitweise 10 fach?????
 
-                Zeit = datetime.strftime(now, "%H:%M")
+                Zeit = datetime.strftime(now, "%m-%d %H:%M")
                 # Aktuelle_Produktion = int(((gen24.read_data('MPPT_1_DC_Power') + (gen24.read_data('MPPT_2_DC_Power'))))/10)
                 Prognose_forecast_solar = int(Watt_Prognose)
                 Aktuelle_Ladegrenze = gen24.read_data('BatteryMaxChargePercent')
