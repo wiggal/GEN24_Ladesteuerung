@@ -92,7 +92,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/10)
         aktuellerUeberschuss = (aktuelleProduktion - Einspeizegerenze - Grundlast) 
         if aktuellerUeberschuss > aktuellerLadewert:
-            aktuellerLadewert = (aktuellerUeberschuss + aktuellerLadewert) / 2
+            aktuellerLadewert = (aktuellerUeberschuss * GewichtAktUebersch + aktuellerLadewert) / (GewichtAktUebersch +1) 
 
         # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
 
@@ -180,6 +180,7 @@ if __name__ == '__main__':
                 MaxKapp = eval(config['Ladeberechnung']['MaxKapp'])
                 ProzLadedaempfung = eval(config['Ladeberechnung']['ProzLadedaempfung'])
                 DiffLadedaempfung = eval(config['Ladeberechnung']['DiffLadedaempfung'])
+                GewichtAktUebersch = eval(config['Ladeberechnung']['GewichtAktUebersch'])
                 StartKappGrenze = eval(config['Ladeberechnung']['StartKappGrenze'])
                 WattpilotAn = eval(config['Ladeberechnung']['WattpilotAn'])
                 Grundlast_Einspeizegerenze = Grundlast + Einspeizegerenze
