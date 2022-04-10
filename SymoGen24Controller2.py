@@ -3,6 +3,7 @@ import json
 import configparser
 from datetime import datetime, timedelta
 import pytz
+import requests
 import SymoGen24Connector
 
 def loadConfig():
@@ -25,6 +26,13 @@ def loadWeatherData(config):
                 data = json.load(json_file)
 
         return data
+
+def holeGitHubConfig(Link):
+    url = Link
+    r = requests.get(url, allow_redirects=True)
+    open('config.ini', 'wb').write(r.content)
+    return
+
 
 def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
 
@@ -88,18 +96,19 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         # Nun den Aktuellen Ladewert rechnen * ProzLadedaempfung - (DiffLadedaempfung)
         aktuellerLadewert = int((Pro_Akt - AbzugWatt) * ProzLadedaempfung - (DiffLadedaempfung))
 
+        if aktuellerLadewert < 10:
+            aktuellerLadewert = 10
+        # print(LadewertStd, Pro_Akt, Pro_Akt1, Pro_Akt2, AbzugWatt, aktuellerLadewert, Akt_Minute_Versch)
+
         # Aktuelle PV-Leistung beruecksichtigen => Mittelwert aus aktuellerUeberschuss und aktuellerLadewert
-        aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/10)
+        scaling = 10
+        if gen24.read_data('MPPT_Power_Scale_Factor') == 0:
+            scaling = 1
+        aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/scaling)
         aktuellerUeberschuss = (aktuelleProduktion - Einspeizegerenze - Grundlast) 
         if aktuellerUeberschuss > aktuellerLadewert:
             aktuellerLadewert = (aktuellerUeberschuss * GewichtAktUebersch + aktuellerLadewert) / (GewichtAktUebersch +1) 
-
-        # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
-
-        if aktuellerLadewert < 10:
-            aktuellerLadewert = 10
-
-        # print(LadewertStd, Pro_Akt, Pro_Akt1, Pro_Akt2, AbzugWatt, aktuellerLadewert, Akt_Minute_Versch)
+        #print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
 
 
         # Ladeleistung auf 30% Kappung begrenzen
@@ -145,8 +154,14 @@ def storeSettingsToDb(db):
 
 if __name__ == '__main__':
         config = loadConfig()
+
+        # Wenn Githubsteuerung = yes config.ini von GitHub holen und nochmal lesen
+        if config['GithubSteuerung']['Githubsteuerung'] == 'yes':
+            holeGitHubConfig(config['GithubSteuerung']['Github_Link'])
+            config = loadConfig()
+
         db = pickledb.load(config['env']['filePathConfigDb'], True)
-        
+
         #now = datetime.now(pytz.timezone(config['env']['timezone']))
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
