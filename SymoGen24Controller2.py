@@ -6,12 +6,12 @@ import pytz
 import requests
 import SymoGen24Connector
 
-def loadConfig():
+def loadConfig(conf_file):
         config = configparser.ConfigParser()
         try:
-                config.read('config.ini')
+                config.read_file(open('config.ini'))
+                config.read(conf_file)
         except:
-                print('config file not found.')
                 exit()
         return config
 
@@ -27,11 +27,13 @@ def loadWeatherData(config):
 
         return data
 
-def holeGitHubConfig(Link):
-    url = Link
-    r = requests.get(url, allow_redirects=True)
-    open('config.ini', 'wb').write(r.content)
-    return
+def holeGitHubConfig(Link, filename):
+    try:
+        web_ini = requests.get(Link, allow_redirects=True)
+        open(filename, 'wb').write(web_ini.content)
+        return("True")
+    except:
+        return("False")
 
 
 def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
@@ -153,12 +155,16 @@ def storeSettingsToDb(db):
         db.dump()
 
 if __name__ == '__main__':
-        config = loadConfig()
+        config = loadConfig('config.ini')
 
         # Wenn Githubsteuerung = yes config.ini von GitHub holen und nochmal lesen
         if config['GithubSteuerung']['Githubsteuerung'] == 'yes':
-            holeGitHubConfig(config['GithubSteuerung']['Github_Link'])
-            config = loadConfig()
+            ERG = holeGitHubConfig(config['GithubSteuerung']['Github_Link'], config['GithubSteuerung']['Github_ini_filename'])
+            if ERG == "True":
+                config = loadConfig(config['GithubSteuerung']['Github_ini_filename'])
+            else:
+                print(config['GithubSteuerung']['Github_Link'], "nicht vorhanden")
+
 
         db = pickledb.load(config['env']['filePathConfigDb'], True)
 
@@ -197,7 +203,7 @@ if __name__ == '__main__':
                 DiffLadedaempfung = eval(config['Ladeberechnung']['DiffLadedaempfung'])
                 GewichtAktUebersch = eval(config['Ladeberechnung']['GewichtAktUebersch'])
                 StartKappGrenze = eval(config['Ladeberechnung']['StartKappGrenze'])
-                WattpilotAn = eval(config['Ladeberechnung']['WattpilotAn'])
+                FesteLadeleistung = eval(config['Ladeberechnung']['FesteLadeleistung'])
                 Grundlast_Einspeizegerenze = Grundlast + Einspeizegerenze
                 # BattganzeKapazWatt = (gen24.read_data('Battery_capa'))
                 BattganzeKapazWatt = (gen24.read_data('BatteryChargeRate'))
@@ -243,12 +249,10 @@ if __name__ == '__main__':
                         i -= 100
 
                     # Nun habe ich die Werte und muss hier weiter Verzweigen
-                    # Diagramm: Resttagesprognose - RestGrundlast größer (aktuelle Batteriekapazität) Aber Tagesprognose nicht 0 sonst ist abends.
 
-                    # Wattpiloteinbindung muss noch programmiert werden
-                    # Aktuell nur ueber die Configvariable  WattpilotAn steuerbar
-                    if WattpilotAn == 1:
-                        DATA = setLadewert(MaxLadung)
+                    # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
+                    if FesteLadeleistung > 0:
+                        DATA = setLadewert(FesteLadeleistung)
                         newPercent = DATA[0]
                         newPercent_schreiben = DATA[1]
 
