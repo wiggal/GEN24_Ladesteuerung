@@ -109,8 +109,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/scaling)
         aktuellerUeberschuss = (aktuelleProduktion - Einspeizegerenze - Grundlast) 
         if aktuellerUeberschuss > aktuellerLadewert:
+            # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
             aktuellerLadewert = (aktuellerUeberschuss * GewichtAktUebersch + aktuellerLadewert) / (GewichtAktUebersch +1) 
-        #print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
 
 
         # Ladeleistung auf 30% Kappung begrenzen
@@ -118,7 +118,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
             aktuellerLadewert = MaxKapp
 
         # Wenn Batterie voll, Volle Ladung
-        if (BattStatusProz > 97 ):
+        if (BattStatusProz > BattertieVoll ):
             aktuellerLadewert = MaxLadung
 
         # Wenn  PV-Produktion kleiner Grundlast, Ladeleistung ausschalten
@@ -197,6 +197,7 @@ if __name__ == '__main__':
                 MindestSpitzenwert = eval(config['Ladeberechnung']['MindestSpitzenwert'])
                 Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                 MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
+                BattertieVoll = eval(config['Ladeberechnung']['BattertieVoll'])
                 NullLadung = eval(config['Ladeberechnung']['NullLadung'])
                 MaxKapp = eval(config['Ladeberechnung']['MaxKapp'])
                 ProzLadedaempfung = eval(config['Ladeberechnung']['ProzLadedaempfung'])
