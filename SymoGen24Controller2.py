@@ -58,7 +58,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
 
             Pro_Uebersch = Pro - AbzugWatt
 
-            # Prognosenspitzenwert für Tag ermitteln
+            # Prognosenspitzenwert für Resttag ermitteln
             if Pro > Pro_Spitze:
                 Pro_Spitze = Pro
 
@@ -100,17 +100,20 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
 
         if aktuellerLadewert < 10:
             aktuellerLadewert = 10
-        # print(LadewertStd, Pro_Akt, Pro_Akt1, Pro_Akt2, AbzugWatt, aktuellerLadewert, Akt_Minute_Versch)
+        # print("LadewertStd, Pro_Akt, Pro_Akt1, Pro_Akt2, AbzugWatt, aktuellerLadewert, Akt_Minute_Versch: ", LadewertStd, Pro_Akt, Pro_Akt1, Pro_Akt2, AbzugWatt, aktuellerLadewert, Akt_Minute_Versch)
 
         # Aktuelle PV-Leistung beruecksichtigen => Mittelwert aus aktuellerUeberschuss und aktuellerLadewert
-        scaling = 10
-        if gen24.read_data('MPPT_Power_Scale_Factor') == 0:
-            scaling = 1
-        aktuelleProduktion =  int((gen24.read_data('MPPT_1_DC_Power') + gen24.read_data('MPPT_2_DC_Power'))/scaling)
-        aktuellerUeberschuss = (aktuelleProduktion - Einspeizegerenze - Grundlast) 
+        MPPT_Power_Scale_Factor = gen24.read_data('MPPT_Power_Scale_Factor')
+        MPPT_1_DC_Power = int(gen24.read_data('MPPT_1_DC_Power'))
+        MPPT_2_DC_Power = int(gen24.read_data('MPPT_2_DC_Power'))
+
+        skalierung = 10**(MPPT_Power_Scale_Factor-65536)
+        aktuelleProduktion =  (MPPT_1_DC_Power + MPPT_2_DC_Power)*skalierung
+        aktuellerUeberschuss = int((aktuelleProduktion - Einspeizegerenze - Grundlast))
+        # print("MPPT_Power_Scale_Factor, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion: ", MPPT_Power_Scale_Factor, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion)
         if aktuellerUeberschuss > aktuellerLadewert:
             # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
-            aktuellerLadewert = (aktuellerUeberschuss * GewichtAktUebersch + aktuellerLadewert) / (GewichtAktUebersch +1) 
+            aktuellerLadewert = int((aktuellerUeberschuss * GewichtAktUebersch + aktuellerLadewert) / (GewichtAktUebersch +1))
 
 
         # Ladeleistung auf 30% Kappung begrenzen
@@ -131,7 +134,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         if aktuellerLadewert < 10:
             aktuellerLadewert = 10
 
-        return Pro_Uebersch_Tag, Pro_Ertrag_Tag, aktuellerLadewert, Grundlast_Sum, Pro_Spitze
+        return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Spitze, aktuelleProduktion
 
 def setLadewert(fun_Ladewert):
         # Prozent auch hie auf 100 runden damit nicht so oft auf den WR geschrieben wird
@@ -246,6 +249,7 @@ if __name__ == '__main__':
                         aktuellerLadewert = PrognoseUNDUeberschuss[2]
                         Grundlast_Summe = PrognoseUNDUeberschuss[3]
                         Pro_Spitze = PrognoseUNDUeberschuss[4]
+                        aktuelleProduktion = PrognoseUNDUeberschuss[5]
                         PrognoseAbzugswert = i
                         i -= 100
 
@@ -283,9 +287,10 @@ if __name__ == '__main__':
                     print(datetime.now())
                     print("TagesPrognoseUeberschuss: ", TagesPrognoseUeberschuss)
                     print("TagesPrognoseGesamt: ", TagesPrognoseGesamt)
-                    print("aktuellerLadewert: ", aktuellerLadewert)
+                    print("aktuelleProduktion: ", aktuelleProduktion)
                     print("PrognoseAbzugswert: ", PrognoseAbzugswert)
                     print("BattKapaWatt_akt: ", BattKapaWatt_akt)
+                    print("aktuellerLadewert: ", aktuellerLadewert)
                     print("oldPercent :", oldPercent)
                     print("newPercent: ", newPercent)
                     print("newPercent_schreiben: ", newPercent_schreiben)
