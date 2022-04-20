@@ -23,6 +23,8 @@ pip install pickledb
 
 pip install pytz
 
+sudo pip install xmltodict
+
 
 
 Die Startskripte können per Cronjobs gestartet werden.
@@ -31,7 +33,7 @@ Beispiele Crontabeintraege
 
 */5 05-20 * * * DIR/start_LoggingSymoGen24.sh
 
-*/15 04-20 * * * DIR/start_SymoGen24Controller2.sh
+*/5 04-20 * * * DIR/start_SymoGen24Controller2.sh
 
 05 */3 * * * DIR/start_WeatherDataProvider2.sh
 

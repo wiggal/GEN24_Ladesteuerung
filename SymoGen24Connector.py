@@ -1,5 +1,6 @@
 from pyModbusTCP.client import ModbusClient
 from pyModbusTCP import utils
+from datetime import datetime
 
 class SymoGen24:
 	def __init__(self, ipaddr, port, auto=True):
@@ -189,18 +190,19 @@ if __name__ == "__main__":
 	
 	gen24 = SymoGen24(ipaddr="192.168.178.50", port="502")
 
+	print("MPPT-Zeit: ", datetime.now())
 	# Sunspec ID (should be 113)
 	# print(gen24.read_uint16(40070))
 	# Current AC Output Power
-	print(gen24.read_float(40092))
+	# print(gen24.read_float(40092))
 	
-	print(gen24.read_data("SunspecID"))
+	# print(gen24.read_data("SunspecID"))
 	# print(gen24.read_section('StorageDevice'))
 		
 	gen24.print_all()
 	# gen24.print_raw()
 
-	print("40069", gen24.read_uint16(40069))
+	# print("40069", gen24.read_uint16(40069))
 	# print("40357", gen24.read_uint16(40357))
 	# print("40358", gen24.read_uint16(40358))
 
