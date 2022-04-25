@@ -49,7 +49,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         Pro_Spitze = 0
         Grundlast_Sum = 0
 
-        while i < 22:
+        while i < BattVollUm:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
             if data['result']['watts'].get(Std):
                     Pro = data['result']['watts'].get(Std)
@@ -200,6 +200,7 @@ if __name__ == '__main__':
                 # Benoetigte Variablen definieren
                 # Rechenwerte aus Config in Zahlen umwandeln
                 print_level = eval(config['Ladeberechnung']['print_level'])
+                BattVollUm = eval(config['Ladeberechnung']['BattVollUm'])
                 MinVerschiebewert = eval(config['Ladeberechnung']['MinVerschiebewert'])
                 MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
                 Einspeizegerenze = eval(config['Ladeberechnung']['Einspeizegerenze'])

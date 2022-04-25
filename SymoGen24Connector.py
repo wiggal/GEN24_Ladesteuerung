@@ -37,11 +37,14 @@ class SymoGen24:
 				"AC_Voltage_Phase-C-N" : [40090, "float", 1],
 				"AC_Output_Power" : [40092, "float", 1],
 				"AC_Frequency" : [40094, "float", 1],
+				"DC_Power" : [40101, "uint16", 1],
+				"AC_Power" : [40088, "uint16", 1],
 				"Cabinet_Temperature" : [40110, "float", 1],
 				"Operating_State" : [40118, "uint16", 1]
 			},
 			"StorageDevice": {
 				"Battery_capa" : [40141, "uint16", 1],
+				"Battery_DC_Power" : [40315, "uint16", 1],
 				"Battery_SunspecID" : [40344, "uint16", 1],
 				"Battery_SoC" : [40352, "uint16", 1],
 				"Battery_Status" : [40355, "uint16", 1],
