@@ -113,7 +113,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
             skalierung = 10**(MPPT_Power_Scale_Factor-65536)
 
         aktuelleProduktion =  int((MPPT_1_DC_Power + MPPT_2_DC_Power)*skalierung)
-        aktuellerUeberschuss = int((aktuelleProduktion - Einspeizegerenze - Grundlast))
+        aktuellerUeberschuss = int((aktuelleProduktion - Einspeizegerenze - Grundlast - DiffLadedaempfung))
         # if MPPT_Power_Scale_Factor == 0:
             # print("MPPT_Power_Scale_Factor, skalierung, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion: ", MPPT_Power_Scale_Factor, skalierung, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion)
 
