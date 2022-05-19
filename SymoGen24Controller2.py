@@ -100,7 +100,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
 
         if aktuellerLadewert < 10:
             aktuellerLadewert = 10
-        # print("LadewertStd, Pro_Akt, Pro_Akt1, Pro_Akt2, AbzugWatt, aktuellerLadewert, Akt_Minute_Versch: ", LadewertStd, Pro_Akt, Pro_Akt1, Pro_Akt2, AbzugWatt, aktuellerLadewert, Akt_Minute_Versch)
 
         # Aktuelle PV-Leistung beruecksichtigen => Mittelwert aus aktuellerUeberschuss und aktuellerLadewert
         MPPT_Power_Scale_Factor = gen24.read_data('MPPT_Power_Scale_Factor')
@@ -113,13 +112,14 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
             skalierung = 10**(MPPT_Power_Scale_Factor-65536)
 
         aktuelleProduktion =  int((MPPT_1_DC_Power + MPPT_2_DC_Power)*skalierung)
-        aktuellerUeberschuss = int((aktuelleProduktion - Einspeizegerenze - Grundlast - DiffLadedaempfung))
+        aktuellerUeberschuss = int(aktuelleProduktion - Einspeizegerenze - Grundlast)
         # if MPPT_Power_Scale_Factor == 0:
-            # print("MPPT_Power_Scale_Factor, skalierung, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion: ", MPPT_Power_Scale_Factor, skalierung, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion)
+        #    print("MPPT_Power_Scale_Factor, skalierung, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion: ", MPPT_Power_Scale_Factor, skalierung, MPPT_1_DC_Power, MPPT_2_DC_Power, aktuelleProduktion)
 
         if aktuellerUeberschuss > aktuellerLadewert:
             # print("aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert: ", aktuelleProduktion, aktuellerUeberschuss, aktuellerLadewert)
-            aktuellerLadewert = int((aktuellerUeberschuss * GewichtAktUebersch + aktuellerLadewert) / (GewichtAktUebersch +1))
+            # aktuellerLadewert = int((aktuellerUeberschuss * GewichtAktUebersch + aktuellerLadewert) / (GewichtAktUebersch +1))
+            aktuellerLadewert = int(aktuellerUeberschuss)
 
 
         # Ladeleistung auf 30% Kappung begrenzen
@@ -143,14 +143,17 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert ):
         return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Spitze, aktuelleProduktion, Pro_Akt
 
 def setLadewert(fun_Ladewert):
-        # Prozent auch hie auf 100 runden damit nicht so oft auf den WR geschrieben wird
+        # Prozent auch hier auf 100 runden damit nicht so oft auf den WR geschrieben wird
         newPercent = (int(fun_Ladewert/BattganzeKapazWatt*100+0.5)) * 100
         # Prozent des Ladewertes auf volle 10 kappen
         if newPercent < 10:
             newPercent = 10
 
         # mit altem Wert vergleichen
-        if ( newPercent == oldPercent ):
+        diffPercent = abs(newPercent - oldPercent)
+
+        # Wenn die Differenz in hundertstel Prozent kleiner als die Schreingrenze nix schreiben
+        if ( diffPercent < WRSchreibGrenze ):
             newPercent_schreiben = 0
         else:
             newPercent_schreiben = 1
@@ -210,6 +213,7 @@ if __name__ == '__main__':
                 BattertieVoll = eval(config['Ladeberechnung']['BattertieVoll'])
                 NullLadung = eval(config['Ladeberechnung']['NullLadung'])
                 MaxKapp = eval(config['Ladeberechnung']['MaxKapp'])
+                WRSchreibGrenze = eval(config['Ladeberechnung']['WRSchreibGrenze'])
                 ProzLadedaempfung = eval(config['Ladeberechnung']['ProzLadedaempfung'])
                 DiffLadedaempfung = eval(config['Ladeberechnung']['DiffLadedaempfung'])
                 GewichtAktUebersch = eval(config['Ladeberechnung']['GewichtAktUebersch'])
@@ -326,7 +330,7 @@ if __name__ == '__main__':
 
                 else:
                     if print_level == 1:
-                        print("Alte Werte sind gleich den neuen ( ",oldPercent, " == ", newPercent, " ), nichts zu schreiben!!\n")
+                        print("Alte und Neue Werte unterscheiden sich weniger als die Schreingrenze des WR ( abs(",oldPercent, "-", newPercent, ") <", WRSchreibGrenze,"), nichts zu schreiben!!\n")
 
 
         finally:
