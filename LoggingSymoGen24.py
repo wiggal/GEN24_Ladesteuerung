@@ -63,7 +63,8 @@ if __name__ == '__main__':
 
                 ################## JSON per API
 
-                url = requests.get("http://192.168.178.50/solar_api/v1/GetPowerFlowRealtimeData.fcgi")
+                gen24url = "http://"+config['gen24']['hostNameOrIp']+"/solar_api/v1/GetPowerFlowRealtimeData.fcgi"
+                url = requests.get(gen24url)
                 text = url.text
                 data = json.loads(text)
 

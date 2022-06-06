@@ -9,7 +9,7 @@ Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv ist und
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
 
-Folgende Installationen erfolgen auf einem Ubuntu/Mint 
+Folgende Installationen erfolgten auf einem Ubuntu/Mint 
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren
 
@@ -23,7 +23,9 @@ pip install pickledb
 
 pip install pytz
 
-sudo pip install xmltodict
+pip install xmltodict
+
+pip install NumPy
 
 
 
@@ -35,7 +37,8 @@ Beispiele Crontabeintraege
 
 */5 04-20 * * * DIR/start_SymoGen24Controller2.sh
 
-05 */3 * * * DIR/start_WeatherDataProvider2.sh
+33 */2 * * * DIR/start_WeatherDataProvider2.sh
+
 
 WeatherDataProvider2.py
 
@@ -52,8 +55,8 @@ stellt die Verbindung Zum Wechselrichter (GENR24 Plus) her.
 
 SymoGen24Controller2.py
 
-berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und gibt sie aus.
-Mit dem Parameter "schreiben" aufgerufen schreibt er die Ladewerte auf den Wechselrichter.
+berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
+Mit dem Parameter "schreiben" aufgerufen schreibt er die Ladewerte auf den Wechselrichter falls Aenderungen in den gesetzten Grenzen sind.
 
 
 LoggingSymoGen24.py (optional)
