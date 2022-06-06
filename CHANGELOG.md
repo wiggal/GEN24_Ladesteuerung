@@ -1,8 +1,19 @@
 ﻿
+[0.3.1] – 2022-06-08
+
+Aenderung von Firex2 von www.photovoltaikforum.com  eingearbeitet
+
+    config.ini
+    WeatherDataProvider2.py
+
+- durch einen Eintrag in der config.ini kann ein zweites PV-Feld mit anderer Ausrichtung usw. in die Prognosewerte einfließen.
+
+
 
 [0.3.0] – 2022-06-06
 
 Danke an Firex2 von www.photovoltaikforum.com für die Tests und Hinweise
+
 
 	SymoGen24Connector.py
 
@@ -17,6 +28,7 @@ Danke an Firex2 von www.photovoltaikforum.com für die Tests und Hinweise
 	SymoGen24Controller2.py
 
 Umfangreiche Umstellung des zu ermittelnden Ladewertes
+
 1.) 
 - der Ladewert wird aus der Datei „weatherData.json“ von forecast.solar ermittelt. Er dient hauptsächlich dazu, dass die Batterie möglichst voll wird.
 - Mit der Variablen „BattVollUm“ kann gesteuert werden, wann die Batterie ungefähr voll sein soll.
