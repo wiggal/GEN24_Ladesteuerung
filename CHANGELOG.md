@@ -4,6 +4,7 @@
 
 Danke an Firex2 von www.photovoltaikforum.com für die Tests und Hinweise
 
+
 	SymoGen24Connector.py
 
 - Lesen der config.ini zum ermitteln der der WR-IP, es reicht nun die WR-IP in der config.ini anzugeben.
@@ -17,6 +18,7 @@ Danke an Firex2 von www.photovoltaikforum.com für die Tests und Hinweise
 	SymoGen24Controller2.py
 
 Umfangreiche Umstellung des zu ermittelnden Ladewertes
+
 1.) 
 - der Ladewert wird aus der Datei „weatherData.json“ von forecast.solar ermittelt. Er dient hauptsächlich dazu, dass die Batterie möglichst voll wird.
 - Mit der Variablen „BattVollUm“ kann gesteuert werden, wann die Batterie ungefähr voll sein soll.
