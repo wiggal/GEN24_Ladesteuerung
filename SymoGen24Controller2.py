@@ -58,8 +58,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
             else:
                     Prognose = 0
 
-            # Stundendaempung anbringen und zwar auf Minuten genau
-            tmp_Stundendaempfung = (BattVollUm - i - (Akt_Minute_Versch/60+1)) * BatSparFaktor
+            # Stundendaempung rechnen 
+            tmp_Stundendaempfung = (BattVollUm - i) * BatSparFaktor
             if tmp_Stundendaempfung < 1:
                 tmp_Stundendaempfung = 1
 
@@ -75,6 +75,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
                 Pro_Uebersch = (Pro_Uebersch / 60 * (60 - Akt_Minute_Versch))
 
             Pro_Ertrag_Tag += Prognose
+
+            # print("Std, Akt_Minute_Versch, Prognose, Pro_Uebersch, tmp_Stundendaempfung :", i, Akt_Minute_Versch, int(Prognose), int(Pro_Uebersch), tmp_Stundendaempfung )
 
             if Prognose > 0:
                 Grundlast_Sum += Grundlast
@@ -293,7 +295,7 @@ if __name__ == '__main__':
                             DATA = setLadewert(MaxLadung)
                             newPercent = DATA[0]
                             newPercent_schreiben = DATA[1]
-                            LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe) < BattKapaWatt_akt"
+                            LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
 
                         elif (BattStatusProz > BattertieVoll ):
                             # Wenn Batterie voll, Volle Ladung
