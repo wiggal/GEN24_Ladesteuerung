@@ -1,4 +1,4 @@
-﻿[0.3.2] – 2022-06-09
+﻿[0.3.4] – 2022-06-09
 
 Aenderung in SymoGen24Connector.py
 
