@@ -1,4 +1,10 @@
-﻿
+﻿[0.3.2] – 2022-06-09
+
+Aenderung in SymoGen24Connector.py
+
+- Die Formel zur Berechnung  des Batterieladewertes aus der Prognose, war falsch. Die Batterie wurde nur mit ca. 10% der nötigen Energie geladen.
+
+
 [0.3.1] – 2022-06-08
 
 Aenderung von Firex2 von www.photovoltaikforum.com  eingearbeitet
