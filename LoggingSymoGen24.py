@@ -1,4 +1,3 @@
-import pickledb
 import json
 import requests, json
 import configparser
@@ -26,7 +25,6 @@ def loadWeatherData(config):
 
 if __name__ == '__main__':
         config = loadConfig()
-        db = pickledb.load(config['env']['filePathConfigDb'], True)
         
         #now = datetime.now(pytz.timezone(config['env']['timezone']))
         now = datetime.now()
@@ -35,10 +33,6 @@ if __name__ == '__main__':
         gen24 = None
         auto = False
         try:            
-                chargeStart = None
-                if (db.get('ChargeStart')):
-                        chargeStart = datetime.strptime(db.get('ChargeStart'), format)
-                        # print(f'Current chargeStart loaded from db: {chargeStart}')
                 
                 newPercent = None
 

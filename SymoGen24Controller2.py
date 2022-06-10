@@ -1,4 +1,3 @@
-import pickledb
 import json
 import configparser
 from datetime import datetime, timedelta
@@ -170,12 +169,6 @@ def setLadewert(fun_Ladewert):
 
         return(newPercent, newPercent_schreiben)
 
-
-def storeSettingsToDb(db):
-        latestBatteryMaxPower = db.get('latestBatteryMaxPower')
-        db.set('latestBatteryMaxPower', 'value')
-        db.dump()
-
 if __name__ == '__main__':
         config = loadConfig('config.ini')
 
@@ -188,20 +181,12 @@ if __name__ == '__main__':
                 print(config['GithubSteuerung']['Github_Link'], "nicht vorhanden")
 
 
-        db = pickledb.load(config['env']['filePathConfigDb'], True)
-
-        #now = datetime.now(pytz.timezone(config['env']['timezone']))
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
         
         gen24 = None
         auto = False
         try:            
-                chargeStart = None
-                if (db.get('ChargeStart')):
-                        chargeStart = datetime.strptime(db.get('ChargeStart'), format)
-                        # print(f'Current chargeStart loaded from db: {chargeStart}')
-                
                 newPercent = None
 
                 ###############################
@@ -331,7 +316,7 @@ if __name__ == '__main__':
                     print("BattKapaWatt_akt: ", BattKapaWatt_akt)
                     print("aktuellerLadewert: ", aktuellerLadewert)
                     print("LadewertGrund: ", LadewertGrund)
-                    print("oldPercent :", oldPercent)
+                    print("oldPercent:", oldPercent)
                     print("newPercent: ", newPercent)
                     print("newPercent_schreiben: ", newPercent_schreiben)
                     print("Grundlast_Summe: ", Grundlast_Summe)

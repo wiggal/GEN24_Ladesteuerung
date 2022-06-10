@@ -1,4 +1,16 @@
-﻿[0.3.5] – 2022-06-10
+﻿[0.3.6] – 2022-06-12
+
+- Beschreibung in Ladeintelligenz.pdf ergänzt
+
+Aenderung in SymoGen24Connector.py
+
+- Historiche nicht mehr benötigte Elemente entfernt
+
+
+
+
+
+[0.3.5] – 2022-06-10
 
 Aenderung in SymoGen24Connector.py
 
