@@ -1,4 +1,12 @@
-﻿[0.3.4] – 2022-06-09
+﻿[0.3.5] – 2022-06-10
+
+Aenderung in SymoGen24Connector.py
+
+- Kleine Änderung in Formel "Stundendaempfung"
+
+Tippfehler bereinigt
+
+[0.3.4] – 2022-06-09
 
 Aenderung in SymoGen24Connector.py
 
