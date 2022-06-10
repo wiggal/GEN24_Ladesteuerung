@@ -108,7 +108,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
 
         # BatSparFaktor aus der config.ini = Faktor um Batteriekapazitaet fuer spaeter zu sparen
         # Daempfungsfaktor rechnen 
-        Stundendaempfung = (BattVollUm - Akt_Std_Versch - (Akt_Minute_Versch/60+1)) * BatSparFaktor
+        Stundendaempfung = (BattVollUm - Akt_Std_Versch - (Akt_Minute_Versch/60)) * BatSparFaktor
         if Stundendaempfung < 1:
             Stundendaempfung = 1
 
