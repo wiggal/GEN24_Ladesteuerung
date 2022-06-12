@@ -1,4 +1,15 @@
-﻿[0.4.0] – 2022-06-14
+﻿[0.4.1] – 2022-06-15
+
+Änderung in SymoGen24Controller2.py
+
+- Wenn die Prognosen so gering sind, dass die Batteriekapazietät nicht erreicht wird, obwohl der Abzugswert 0 ist
+  wird der Batterieladewert auf "MaxLadung" gesetzt. Dadurch enfällt der Wert "MindestSpitzenwert".
+
+Änderung in config.ini
+
+- Zeile "MindestSpitzenwert = 2000" mit Erläuterung entfernt
+
+[0.4.0] – 2022-06-14
 
 - Beschreibung in Ladeintelligenz.pdf ergänzt
 

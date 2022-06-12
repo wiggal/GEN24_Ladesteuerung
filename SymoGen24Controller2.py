@@ -201,7 +201,6 @@ if __name__ == '__main__':
                 MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
                 Einspeisegrenze = eval(config['Ladeberechnung']['Einspeisegrenze'])
                 WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
-                MindestSpitzenwert = eval(config['Ladeberechnung']['MindestSpitzenwert'])
                 Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                 MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
                 BattertieVoll = eval(config['Ladeberechnung']['BattertieVoll'])
@@ -253,7 +252,7 @@ if __name__ == '__main__':
                     while (Schleifenwert_TagesPrognoseUeberschuss >= BattKapaWatt_akt):
                         PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss( i, MinVerschiebewert, aktuelleEinspeisung, aktuellePVProduktion )
                         Schleifenwert_TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
-                        if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt):
+                        if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt) or (i == 0):
                             PrognoseAbzugswert = i
                             TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                             TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
@@ -289,12 +288,12 @@ if __name__ == '__main__':
                             newPercent_schreiben = DATA[1]
                             LadewertGrund = "Batterie voll"
     
-                        elif Pro_Spitze < MindestSpitzenwert:
+                        elif PrognoseAbzugswert == 0:
                             # volle Ladung ;-)
                             DATA = setLadewert(MaxLadung)
                             newPercent = DATA[0]
                             newPercent_schreiben = DATA[1]
-                            LadewertGrund = "Pro_Spitze < MindestSpitzenwert" + str(Pro_Spitze) + str(MindestSpitzenwert)
+                            LadewertGrund = "PrognoseAbzugswert == 0"
 
 
                         else: 
