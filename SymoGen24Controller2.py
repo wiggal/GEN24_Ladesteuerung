@@ -14,11 +14,6 @@ def loadConfig(conf_file):
                 exit()
         return config
 
-def setDbValue(db, name, value):
-        valueOld = db.get(name)
-        if (valueOld != value):
-                db.set(name, value)
-        
 def loadWeatherData(config):
         data = None
         with open(config['env']['filePathWeatherData']) as json_file:
@@ -75,13 +70,15 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
 
             Pro_Ertrag_Tag += Prognose
 
-            # print("Std, Akt_Minute_Versch, Prognose, Pro_Uebersch, tmp_Stundendaempfung :", i, Akt_Minute_Versch, int(Prognose), int(Pro_Uebersch), tmp_Stundendaempfung )
-
             if Prognose > 0:
                 Grundlast_Sum += Grundlast
 
             if Pro_Uebersch > 0:
                 Pro_Uebersch_Tag += Pro_Uebersch
+            else:
+                Pro_Uebersch = 0
+
+            # print("Std, Akt_Minute_Versch, Prognose, Pro_Uebersch, tmp_Stundendaempfung :", i, Akt_Minute_Versch, int(Prognose), int(Pro_Uebersch), tmp_Stundendaempfung )
 
             i  += 1
 
@@ -213,7 +210,6 @@ if __name__ == '__main__':
                 WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
                 WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
                 DiffLadedaempfung = eval(config['Ladeberechnung']['DiffLadedaempfung'])
-                StartKappGrenze = eval(config['Ladeberechnung']['StartKappGrenze'])
                 FesteLadeleistung = eval(config['Ladeberechnung']['FesteLadeleistung'])
                 # BattganzeKapazWatt = (gen24.read_data('Battery_capa'))
                 BattganzeKapazWatt = (gen24.read_data('BatteryChargeRate'))
@@ -233,11 +229,13 @@ if __name__ == '__main__':
                 ## Ab hier gehts los wie Ablaufdiagramm
                 #######################################
 
-                TagesPrognoseUeberschuss = 0
+                Schleifenwert_TagesPrognoseUeberschuss = 1000000
                 TagesPrognoseGesamt = 0
                 aktuellerLadewert = 0
                 PrognoseAbzugswert = 0
                 Grundlast_Summe = 0
+                Pro_Spitze = 0
+                aktuelleVorhersage = 0
                 LadewertGrund = ""
 
                 if ((BattStatusProz < MindBattLad)):
@@ -249,20 +247,22 @@ if __name__ == '__main__':
 
                 else:
                     
-                    i = StartKappGrenze
+                    i = 0
                     # Gesamte Tagesprognose, Tagesüberschuß aus Prognose und aktuellen Ladewert ermitteln
-                    # and (i >= 0) damit PrognoseAbzugswert nicht ins Minus laeuft
-                    while (TagesPrognoseUeberschuss <= BattKapaWatt_akt) and (i >= 0):
+                    # Schleife laeft von 0 nach oben, bis der Prognoseueberschuss die aktuelle Batteriekapazietaet erreicht
+                    while (Schleifenwert_TagesPrognoseUeberschuss >= BattKapaWatt_akt):
                         PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss( i, MinVerschiebewert, aktuelleEinspeisung, aktuellePVProduktion )
-                        PrognoseAbzugswert = i
-                        TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
-                        TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
-                        aktuellerLadewert = PrognoseUNDUeberschuss[2]
-                        Grundlast_Summe = PrognoseUNDUeberschuss[3]
-                        Pro_Spitze = PrognoseUNDUeberschuss[4]
-                        aktuelleVorhersage = PrognoseUNDUeberschuss[5]
-                        LadewertGrund = PrognoseUNDUeberschuss[6]
-                        i -= 100
+                        Schleifenwert_TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
+                        if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt):
+                            PrognoseAbzugswert = i
+                            TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
+                            TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
+                            aktuellerLadewert = PrognoseUNDUeberschuss[2]
+                            Grundlast_Summe = PrognoseUNDUeberschuss[3]
+                            Pro_Spitze = PrognoseUNDUeberschuss[4]
+                            aktuelleVorhersage = PrognoseUNDUeberschuss[5]
+                            LadewertGrund = PrognoseUNDUeberschuss[6]
+                        i += 100
 
                     # Nun habe ich die Werte und muss hier weiter Verzweigen
 

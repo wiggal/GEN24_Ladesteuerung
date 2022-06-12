@@ -1,18 +1,28 @@
-﻿[0.3.6] – 2022-06-12
+﻿[0.4.0] – 2022-06-14
 
 - Beschreibung in Ladeintelligenz.pdf ergänzt
 
-Aenderung in SymoGen24Connector.py
+Aenderung in SymoGen24Controller2.py
 
 - Historiche nicht mehr benötigte Elemente entfernt
+- Schleife zur ermittlung des Ladewertes aus den Prognosewerten läuft nun von 0 nach oben, 
+  dadurch entfällt der Wert "StartKappGrenze" in der config.ini
+  Der Wert "StartKappGrenze" muss nun nicht mehr an die PV-Größe angepasst werden.
 
+Aenderung in config.ini
 
+- den Eintrag "StartKappGrenze = 11000" entfernt
+- Erläuterungen ergänzt
 
+Datei hinzugefügt: Prognosewerte_Vergleichtabelle.ods
+
+- Durch Eintraege in den roten Zellen werden die Ladewerte in den Blauen Zellen berechnet
+  Um die errechneten Werten von "SymoGen24Connector.py" auszugeben den Print (akt. Zeile 81) einkommentieren
 
 
 [0.3.5] – 2022-06-10
 
-Aenderung in SymoGen24Connector.py
+Aenderung in SymoGen24Controller2.py
 
 - Kleine Änderung in Formel "Stundendaempfung"
 
@@ -20,7 +30,7 @@ Tippfehler bereinigt
 
 [0.3.4] – 2022-06-09
 
-Aenderung in SymoGen24Connector.py
+Aenderung in SymoGen24Controller2.py
 
 - Die Formel zur Berechnung  des Batterieladewertes aus der Prognose, war falsch. Die Batterie wurde nur mit ca. 10% der nötigen Energie geladen.
 
