@@ -78,7 +78,10 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
             else:
                 Pro_Uebersch = 0
 
-            # print("Std, Akt_Minute_Versch, Prognose, Pro_Uebersch, tmp_Stundendaempfung :", i, Akt_Minute_Versch, int(Prognose), int(Pro_Uebersch), tmp_Stundendaempfung )
+            # Ab hier Ausgabe zum Vergleich mit der Tabelle Prognosewerte_Vergleichtabelle.ods
+            #if i == Akt_Std_Versch:
+            #    print("ACHTUNG: Im vorletzte Block sind die richtigen Werte zum Vergleich mit der Tabelle Prognosewerte_Vergleichtabelle.ods!!")
+            #print("Std, Akt_Minute_Versch, Prognose, Pro_Uebersch, tmp_Stundendaempfung :", i, Akt_Minute_Versch, int(Prognose), int(Pro_Uebersch), tmp_Stundendaempfung )
 
             i  += 1
 
@@ -100,7 +103,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
         # zu jeder Minute den genauen Zwischenwert mit den beiden Stundenprognosen rechnen
         Pro_Akt = int((Pro_Akt1 * (60 - Akt_Minute_Versch) + Pro_Akt2 * Akt_Minute_Versch) / 60)
 
-        # Nun den Aktuellen Ladewert rechnen - DiffLadedaempfung
+        # Nun den Aktuellen Ladewert rechnen 
 
         # BatSparFaktor aus der config.ini = Faktor um Batteriekapazitaet fuer spaeter zu sparen
         # Daempfungsfaktor rechnen 
@@ -109,7 +112,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
             Stundendaempfung = 1
 
         # Batterieladewert mit allen Einfluessen aus der Prognose rechnen
-        aktuellerLadewert = int(((Pro_Akt - AbzugWatt) - (DiffLadedaempfung))/Stundendaempfung)
+        aktuellerLadewert = int((Pro_Akt - AbzugWatt)/Stundendaempfung)
         LadewertGrund = "Prognoseberechnung / Stundendaempfung"
 
         # Wenn noch genuegend Prognosewert zum Laden der Batterie uebrig, Batteriekapazitaet aufsparen
@@ -139,12 +142,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, MinVerschiebewert, aktuelleEinsp
         return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Spitze, Pro_Akt, LadewertGrund
 
 def setLadewert(fun_Ladewert):
-        # Prozent auch hier auf 100 runden damit nicht so oft auf den WR geschrieben wird
-        # Division durch Null abfangen
-        global BattganzeKapazWatt
-        if ( BattganzeKapazWatt*100 == 0 ):
-            BattganzeKapazWatt = 1
-
         if fun_Ladewert > MaxLadung:
             fun_Ladewert = MaxLadung
 
@@ -168,16 +165,6 @@ def setLadewert(fun_Ladewert):
 
 if __name__ == '__main__':
         config = loadConfig('config.ini')
-
-        # Wenn Githubsteuerung = yes config.ini von GitHub holen und nochmal lesen
-        if config['GithubSteuerung']['Githubsteuerung'] == 'yes':
-            ERG = holeGitHubConfig(config['GithubSteuerung']['Github_Link'], config['GithubSteuerung']['Github_ini_filename'])
-            if ERG == "True":
-                config = loadConfig(config['GithubSteuerung']['Github_ini_filename'])
-            else:
-                print(config['GithubSteuerung']['Github_Link'], "nicht vorhanden")
-
-
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
         
@@ -204,11 +191,9 @@ if __name__ == '__main__':
                 Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                 MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
                 BattertieVoll = eval(config['Ladeberechnung']['BattertieVoll'])
-                NullLadung = eval(config['Ladeberechnung']['NullLadung'])
                 MaxKapp = eval(config['Ladeberechnung']['MaxKapp'])
                 WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
                 WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
-                DiffLadedaempfung = eval(config['Ladeberechnung']['DiffLadedaempfung'])
                 FesteLadeleistung = eval(config['Ladeberechnung']['FesteLadeleistung'])
                 # BattganzeKapazWatt = (gen24.read_data('Battery_capa'))
                 BattganzeKapazWatt = (gen24.read_data('BatteryChargeRate'))
@@ -249,7 +234,7 @@ if __name__ == '__main__':
                     i = 0
                     # Gesamte Tagesprognose, Tagesüberschuß aus Prognose und aktuellen Ladewert ermitteln
                     # Schleife laeft von 0 nach oben, bis der Prognoseueberschuss die aktuelle Batteriekapazietaet erreicht
-                    while (Schleifenwert_TagesPrognoseUeberschuss >= BattKapaWatt_akt):
+                    while (Schleifenwert_TagesPrognoseUeberschuss > BattKapaWatt_akt):
                         PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss( i, MinVerschiebewert, aktuelleEinspeisung, aktuellePVProduktion )
                         Schleifenwert_TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                         if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt) or (i == 0):

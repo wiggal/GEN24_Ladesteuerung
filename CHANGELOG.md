@@ -1,4 +1,14 @@
-﻿[0.4.1] – 2022-06-15
+﻿[0.4.2] – 2022-06-XX
+
+Änderung in SymoGen24Controller2.py
+
+- Fehler bereinigt: Wenn TagesPrognoseUeberschuss und BattKapaWatt_akt = 0, ist Programm in Enlosschleife
+- Steuerung über Github entfernt (auch in config.ini)
+
+- Variable "DiffLadedaempfung" und Auswirkungen entfernt
+
+
+[0.4.1] – 2022-06-15
 
 Änderung in SymoGen24Controller2.py
 
