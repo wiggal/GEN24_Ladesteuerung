@@ -1,14 +1,22 @@
-﻿[0.4.2] – 2022-06-XX
+﻿[0.4.4] – 2022-06-16
+
+Änderung in SymoGen24Controller2.py
+
+- Variable "MinVerschiebewert" entfernt, nicht mehr benötigt (auch aus config.ini)
+- Abgefangen, wenn WR offline 
+
+
+[0.4.2] – 2022-06-14
 
 Änderung in SymoGen24Controller2.py
 
 - Fehler bereinigt: Wenn TagesPrognoseUeberschuss und BattKapaWatt_akt = 0, ist Programm in Enlosschleife
-- Steuerung über Github entfernt (auch in config.ini)
+- Steuerung über Github entfernt (auch aus config.ini)
 
 - Variable "DiffLadedaempfung" und Auswirkungen entfernt
 
 
-[0.4.1] – 2022-06-15
+[0.4.1] – 2022-06-12
 
 Änderung in SymoGen24Controller2.py
 
@@ -19,7 +27,7 @@
 
 - Zeile "MindestSpitzenwert = 2000" mit Erläuterung entfernt
 
-[0.4.0] – 2022-06-14
+[0.4.0] – 2022-06-12
 
 - Beschreibung in Ladeintelligenz.pdf ergänzt
 

@@ -13,19 +13,21 @@ Folgende Installationen erfolgten auf einem Ubuntu/Mint
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren
 
-apt install python3
+sudo apt install python3
 
-apt install python3-pip
+sudo apt install python3-pip
 
-pip install pyModbusTCP
+sudo pip install pyModbusTCP==v0.1.10   # Version 0.2.0 verursachte Fehler auf meinem Raspberry Pi
 
-pip install pickledb
+sudo pip install pickledb
 
-pip install pytz
+sudo pip install pytz
 
-pip install xmltodict
+sudo pip install xmltodict
 
-pip install NumPy
+sudo pip install NumPy
+
+sudo pip install ping3
 
 
 
