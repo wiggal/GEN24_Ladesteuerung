@@ -1,4 +1,8 @@
-﻿[0.5.0] – 2022-06-20
+﻿[0.5.1] – 2022-06-20
+
+Ladewerte_Vergleichtabelle.ods hinzugefügt.
+
+[0.5.0] – 2022-06-20
 
 Mit neuem Skript Solarprognose_WeatherData.py, damit kann alternativ eine Prognose
 von http://www.solarprognose.de abgerufen werden.
