@@ -35,19 +35,26 @@ Die Startskripte können per Cronjobs gestartet werden.
 
 Beispiele Crontabeintraege
 
-*/5 05-20 * * * DIR/start_LoggingSymoGen24.sh
+*/5 05-20 * * * /DIR/start_LoggingSymoGen24.sh
 
-*/5 04-20 * * * DIR/start_SymoGen24Controller2.sh
+*/5 04-20 * * * /DIR/start_SymoGen24Controller2.sh
 
-33 */2 * * * DIR/start_WeatherDataProvider2.sh
+33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh
+
+8 6,9,13,16 * * * /DIR/start_Solarprognose_WeatherData.py.sh
 
 
 WeatherDataProvider2.py
 
 holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 2 Std)
 
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 3 Std)
+Solarprognose_WeatherData.py 
 
+Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich,
+hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben.
+Holt die Sonnenstundenprognosen von solarprognose.de und schreibt sie in weatherData.json
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 2 Std)
 
 SymoGen24Connector.py
 

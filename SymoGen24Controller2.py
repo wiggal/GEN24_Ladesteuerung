@@ -337,5 +337,6 @@ if __name__ == '__main__':
 
 
         else:
+            print(datetime.now())
             print("WR offline")
 
