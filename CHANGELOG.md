@@ -1,4 +1,12 @@
-﻿[0.4.4] – 2022-06-16
+﻿[0.5.0] – 2022-06-20
+
+Mit neuem Skript Solarprognose_WeatherData.py, damit kann alternativ eine Prognose
+von http://www.solarprognose.de abgerufen werden.
+Dafür ist auf http://www.solarprognose.de/ ein Account erforderlich
+Evtl. kann ein Prognoseskript als Backup verwendet werden, falls ein Dienst ausfällt, entspechende dataAgeMaxInMinutes hoch stzen (z.B. 1000).
+
+
+[0.4.4] – 2022-06-16
 
 Änderung in SymoGen24Controller2.py
 
