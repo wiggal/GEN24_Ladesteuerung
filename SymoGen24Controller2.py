@@ -233,13 +233,15 @@ if __name__ == '__main__':
     
                     else:
                         
-                        i = 0
+                        # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
+                        # die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
+                        i = Grundlast
                         # Gesamte Tagesprognose, Tagesüberschuß aus Prognose und aktuellen Ladewert ermitteln
                         # Schleife laeft von 0 nach oben, bis der Prognoseueberschuss die aktuelle Batteriekapazietaet erreicht
                         while (Schleifenwert_TagesPrognoseUeberschuss > BattKapaWatt_akt):
                             PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss( i, aktuelleEinspeisung, aktuellePVProduktion )
                             Schleifenwert_TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
-                            if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt) or (i == 0):
+                            if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt) or (i == Grundlast):
                                 PrognoseAbzugswert = i
                                 TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                                 TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
@@ -275,12 +277,12 @@ if __name__ == '__main__':
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Batterie voll"
         
-                            elif PrognoseAbzugswert == 0:
+                            elif PrognoseAbzugswert == Grundlast:
                                 # volle Ladung ;-)
                                 DATA = setLadewert(MaxLadung)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
-                                LadewertGrund = "PrognoseAbzugswert == 0"
+                                LadewertGrund = "PrognoseAbzugswert <= Grundlast"
 
 
                             else: 

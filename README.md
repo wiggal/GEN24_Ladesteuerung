@@ -41,7 +41,7 @@ Beispiele Crontabeintraege
 
 33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh
 
-8 6,9,13,16 * * * /DIR/start_Solarprognose_WeatherData.py.sh
+8 5,8,11,14 * * * /DIR/start_Solarprognose_WeatherData.py.sh
 
 
 WeatherDataProvider2.py

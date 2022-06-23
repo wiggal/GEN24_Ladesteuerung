@@ -1,4 +1,11 @@
-﻿[0.5.1] – 2022-06-20
+﻿[0.5.2] – 2022-06-23
+
+Änderung in SymoGen24Controller2.py
+
+- Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet, 
+  die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll 
+
+[0.5.1] – 2022-06-20
 
 Ladewerte_Vergleichtabelle.ods hinzugefügt.
 
