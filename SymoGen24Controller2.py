@@ -277,7 +277,7 @@ if __name__ == '__main__':
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Batterie voll"
         
-                            elif PrognoseAbzugswert == Grundlast:
+                            elif TagesPrognoseUeberschuss < BattKapaWatt_akt:
                                 # volle Ladung ;-)
                                 DATA = setLadewert(MaxLadung)
                                 newPercent = DATA[0]
