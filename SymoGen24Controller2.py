@@ -151,6 +151,7 @@ def setLadewert(fun_Ladewert):
         if newPercent < 10:
             newPercent = 10
 
+        # Schaltvezögerung
         # mit altem Ladewert vergleichen
         diffLadewert_nachOben = int(fun_Ladewert - oldPercent*BattganzeKapazWatt/10000)
         diffLadewert_nachUnten = int((oldPercent*BattganzeKapazWatt/10000) - fun_Ladewert)
@@ -277,14 +278,25 @@ if __name__ == '__main__':
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Batterie voll"
         
-                            elif TagesPrognoseUeberschuss < BattKapaWatt_akt:
+                            elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) or (PrognoseAbzugswert == Grundlast):
+                                # Auch hier die Schaltverzögerung anbringen, aber nur mit halben Wert
+                                Daempfunghier = 0
+                                if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachUnten / 2:
+                                   WRSchreibGrenze_nachUnten = 10000
+                                   Daempfunghier = 1
+                                if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben / 2:
+                                   WRSchreibGrenze_nachOben = 10000
+                                   Daempfunghier = 1
+
                                 # volle Ladung ;-)
                                 DATA = setLadewert(MaxLadung)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "PrognoseAbzugswert <= Grundlast"
 
-
+                                # Wenn durch die Dämpfung hier nicht geschrieben wird, Hinweis ausgeben
+                                if (newPercent_schreiben == 0) and (Daempfunghier == 1):
+                                    LadewertGrund = "PrognoseAbzugswert <= Grundlast (Unterschied zu gering zum Schreiben)"
                             else: 
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
@@ -330,7 +342,7 @@ if __name__ == '__main__':
     
                     else:
                         if print_level == 1:
-                            print("Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenze des WR, nichts zu schreiben!!\n")
+                            print("Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, nichts geschreiben!!\n")
     
 
             finally:

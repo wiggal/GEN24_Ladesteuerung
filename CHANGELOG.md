@@ -1,4 +1,12 @@
-﻿[0.5.2] – 2022-06-23
+﻿[0.5.3] – 2022-07-02
+
+Änderung in SymoGen24Controller2.py
+
+- Waren die Prognosen an der Grenze zur Grundlast wechselte das Programm öfters zwischen keiner und voller Lagung. 
+  In dem Bereich "PrognoseAbzugswert <= Grundlast" wurde eine Schaltverzögerung angebracht.
+
+
+[0.5.2] – 2022-06-23
 
 Änderung in SymoGen24Controller2.py
 
