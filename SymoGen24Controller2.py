@@ -74,6 +74,9 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             if Prognose > 0:
                 Grundlast_Sum += Grundlast
 
+            if Pro_Uebersch > MaxLadung:
+                Pro_Uebersch = MaxLadung
+
             if Pro_Uebersch > 0:
                 Pro_Uebersch_Tag += Pro_Uebersch
             else:
