@@ -1,4 +1,10 @@
-﻿[0.5.3] – 2022-07-02
+﻿[0.5.4] – 2022-07-04
+
+Änderung in SymoGen24Controller2.py und Ladewerte_Vergleichtabelle.ods
+
+- Ladewert bei Prognoseberechnung darf nicht größer als MaxLadung werden.
+
+[0.5.3] – 2022-07-02
 
 Änderung in SymoGen24Controller2.py
 
