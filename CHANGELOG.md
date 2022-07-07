@@ -1,4 +1,11 @@
-﻿[0.5.4] – 2022-07-04
+﻿[0.5.5] – 2022-07-07
+
+Änderung in SymoGen24Controller2.py
+
+- Ist "FesteLadeleistung" gesetzt wird sie nun immer geschrieben, unabhängig von den Schreibgrenzen des WR,
+  ausser sie ist genau gleich dem alten Wert.
+
+[0.5.4] – 2022-07-04
 
 Änderung in SymoGen24Controller2.py und Ladewerte_Vergleichtabelle.ods
 

@@ -262,7 +262,10 @@ if __name__ == '__main__':
                         if FesteLadeleistung > 0:
                             DATA = setLadewert(FesteLadeleistung)
                             newPercent = DATA[0]
-                            newPercent_schreiben = DATA[1]
+                            if newPercent == oldPercent:
+                                newPercent_schreiben = 0
+                            else:
+                                newPercent_schreiben = 1
                             LadewertGrund = "FesteLadeleistung"
     
                         else:
