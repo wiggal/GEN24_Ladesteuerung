@@ -152,4 +152,3 @@ cython_debug/
 #.idea/
 weatherData.json
 Ladeintelligenz.xml
-web_config.ini
