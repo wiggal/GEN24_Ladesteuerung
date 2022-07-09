@@ -152,3 +152,4 @@ cython_debug/
 #.idea/
 weatherData.json
 Ladeintelligenz.xml
+diff_git_PI.sh

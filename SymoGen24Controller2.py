@@ -5,6 +5,7 @@ import pytz
 import requests
 import SymoGen24Connector
 from ping3 import ping
+from sys import argv
 
 def loadConfig(conf_file):
         config = configparser.ConfigParser()
@@ -201,8 +202,10 @@ if __name__ == '__main__':
                     WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
                     WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
                     FesteLadeleistung = eval(config['Ladeberechnung']['FesteLadeleistung'])
-                    BattganzeKapazWatt = 1
-                    BattganzeKapazWatt = (gen24.read_data('BatteryChargeRate'))
+                    Fallback_on = eval(config['Fallback']['Fallback_on'])
+                    Cronjob_Minutenabstand = eval(config['Fallback']['Cronjob_Minutenabstand'])
+                    Fallback_Zeitabstand_Std = eval(config['Fallback']['Fallback_Zeitabstand_Std'])
+                    BattganzeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattStatusProz = gen24.read_data('Battery_SoC')/100
                     BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeKapazWatt)
                     aktuelleEinspeisung = int(gen24.get_meter_power() * -1)
@@ -303,6 +306,7 @@ if __name__ == '__main__':
                                 # Wenn durch die Dämpfung hier nicht geschrieben wird, Hinweis ausgeben
                                 if (newPercent_schreiben == 0) and (Daempfunghier == 1):
                                     LadewertGrund = "PrognoseAbzugswert <= Grundlast (Unterschied zu gering zum Schreiben)"
+                                    newPercent = oldPercent
                             else: 
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
@@ -332,24 +336,70 @@ if __name__ == '__main__':
 
 
 
+                    ### AB HIER SCHARF wenn Argument "schreiben" übergeben
+
+                    bereits_geschrieben = 0
+                    Schreib_Ausgabe = ""
+                    # Neuen Ladewert in Prozent schreiben, wenn newPercent_schreiben == 1
                     if newPercent_schreiben == 1:
-                        ### HIER SCHARF wenn Argument "schreiben" übergeben
-                        from sys import argv
                         if len(argv) > 1 and (argv[1] == "schreiben"):
                             valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
-                            if print_level == 1:
-                                    print("Folgender Wert wurde geschrieben: ", newPercent)
-                            # Ladelimit aktivieren wenn nicht aktiv
-                            if gen24.read_data('StorageControlMode') == 0:
-                                Ladelimit = gen24.write_data('StorageControlMode', 1 )
+                            bereits_geschrieben = 1
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben: " + str(newPercent) + "\n\n"
                         else:
-                            if print_level == 1:
-                                print("Es wurde nix geschrieben, da nicht \"schreiben\" übergeben wurde: \n")
-    
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n\n"
                     else:
-                        if print_level == 1:
-                            print("Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, nichts geschreiben!!\n")
+                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS geschreiben!!\n\n"
+
+                    # Ladungsspeichersteuerungsmodus aktivieren wenn nicht aktiv
+                    # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
+                    if gen24.read_data('StorageControlMode') == 0:
+                        if len(argv) > 1 and (argv[1] == "schreiben"):
+                            Ladelimit = gen24.write_data('StorageControlMode', 1 )
+                            bereits_geschrieben = 1
+                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu geschrieben.\n"
+                        else:
+                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
+
+                    if print_level == 1:
+                        print(Schreib_Ausgabe)
     
+
+                    # FALLBACK des Wechselrichters bei Ausfall der Steuerung
+                    if Fallback_on != 0:
+                        Fallback_Schreib_Ausgabe = ""
+                        akt_Fallback_time = gen24.read_data('InOutWRte_RvrtTms_Fallback')
+                        if Fallback_on == 2:
+                            Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback ist eingeschaltet.\n"
+                            Akt_Zeit_Rest = int(datetime.strftime(now, "%H%M")) % (Fallback_Zeitabstand_Std*100)
+                            Fallback_Sekunden = int((Fallback_Zeitabstand_Std * 3600) + (Cronjob_Minutenabstand * 60 * 0.9))
+                            # Zur vollen Fallbackstunde wenn noch kein Schreibzugriff war Fallback schreiben
+                            if Akt_Zeit_Rest == 0 or akt_Fallback_time != Fallback_Sekunden:
+                                if bereits_geschrieben == 0 or akt_Fallback_time != Fallback_Sekunden:
+                                    if len(argv) > 1 and (argv[1] == "schreiben"):
+                                        fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', Fallback_Sekunden)
+                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback geschrieben.\n"
+                                    else:
+                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
+                                else:
+                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da bereits auf den WR geschrieben wurde.\n"
+
+                        else:
+                            Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback ist NICHT eingeschaltet.\n"
+                            if akt_Fallback_time != 0:
+                                if len(argv) > 1 and (argv[1] == "schreiben"):
+                                    fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', 0)
+                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung geschrieben.\n"
+                                else:
+                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
+
+                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "InOutWRte_RvrtTms_Fallback: " + str(gen24.read_data('InOutWRte_RvrtTms_Fallback')) + "\n"
+                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "StorageControlMode:    " + str(gen24.read_data('StorageControlMode')) + "\n"
+
+                        if print_level == 1:
+                            print(Fallback_Schreib_Ausgabe)
+                    # FALLBACK ENDE
+
 
             finally:
                     if (gen24 and not auto):
