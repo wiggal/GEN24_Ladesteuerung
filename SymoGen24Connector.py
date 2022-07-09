@@ -52,6 +52,7 @@ class SymoGen24:
                 "DC_Power" : [40101, "uint16", 1],
                 "AC_Power" : [40088, "uint16", 1],
                 "Cabinet_Temperature" : [40110, "float", 1],
+                "InOutWRte_RvrtTms_Fallback" : [40359, "uint16", 1],
                 "Operating_State" : [40118, "uint16", 1]
             },
             "StorageDevice": {

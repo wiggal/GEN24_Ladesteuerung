@@ -1,4 +1,23 @@
-﻿[0.5.5] – 2022-07-07
+﻿[0.6.0] – 2022-07-10
+
+Änderung in SymoGen24Controller2.py, SymoGen24Connector.py und config.ini
+
+- Implementierung der Fallbackfunktion des Wechselrichters
+ 
+  INFOS:
+  Im Register 40359 InOutWRte_RvrtTms wird der Zeitraum bis zum Fallback in Sekunden geschrieben
+  Wird innerhalb dieses Zeitraums etwas über Modbus auf den Wechselrichter geschrieben, wird der Counter neu gestartet
+  Wird innerhalb des Fallbackzeitraums nicht auf den WR geschrieben erfolgt der Fallback.
+  Beim Fallback wird das Register 40349 StorCtl_Mod auf 0 gesetzt, also der Ladungsspeichersteuerungsmodus deaktiviert.
+
+- Fallback kann in der config.ini im Bereich [Fallback] ein/aus geschaltet und der Zeitabstand eingestellt werden (Auslieferung AUS)
+- Register 40359 "InOutWRte_RvrtTms_Fallback" in SymoGen24Connector.py hinzugefügt
+- In SymoGen24Controller2.py wird zu jeder vollen Stunde des Zeitabstandes das Register 40359 neu geschrieben 
+  und dadurch der Counter zurückgesetzt, ausser es ist zu dem Zeitpunkt ein anderer Schreibzugriff passiert.
+
+
+
+[0.5.5] – 2022-07-07
 
 Änderung in SymoGen24Controller2.py
 
