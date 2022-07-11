@@ -1,4 +1,10 @@
-﻿[0.6.0] – 2022-07-10
+﻿[0.6.0] – 2022-07-11
+
+Änderung in Solarprognose_WeatherData.py und config.ini
+
+-  Zum Abrufen der Prognose von http://www.solarprognose.de, den Parameter "algorithm=mosmix|own-v1|clearsky" eingebaut.
+
+[0.6.0] – 2022-07-10
 
 Änderung in SymoGen24Controller2.py, SymoGen24Connector.py und config.ini
 
