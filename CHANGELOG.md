@@ -1,4 +1,12 @@
-﻿[0.6.0] – 2022-07-11
+﻿[0.6.2] – 2022-07-12
+
+Änderung in SymoGen24Connector.py und SymoGen24Controller2.py
+
+- Fehlermeldungen abgefangen, wenn:
+  die Batterie offline ist und
+  Modbus ausgeschaltet ist
+
+[0.6.1] – 2022-07-11
 
 Änderung in Solarprognose_WeatherData.py und config.ini
 

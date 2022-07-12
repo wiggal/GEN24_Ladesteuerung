@@ -186,6 +186,12 @@ if __name__ == '__main__':
                     data = loadWeatherData(config)
                     gen24 = SymoGen24Connector.SymoGen24(config['gen24']['hostNameOrIp'], config['gen24']['port'], auto)
                     # print(data)
+
+                    if gen24.read_data('Battery_Status') == 1:
+                        print(datetime.now())
+                        print("Batterie ist Offline keine Steuerung möglich: ")
+                        print()
+                        exit()
     
                     # Benoetigte Variablen definieren
                     # Rechenwerte aus Config in Zahlen umwandeln
