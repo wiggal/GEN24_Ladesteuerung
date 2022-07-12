@@ -19,13 +19,24 @@ class SymoGen24:
         if (auto):
             self.modbus = ModbusClient(host=ipaddr, port=port, auto_open=True, auto_close=True)
             self.modbus.unit_id(1)
+            # Testen ob Modbus aktiv
+            if not self.modbus.open():
+                print(datetime.now())
+                print("Modbus nicht Aktiv!!!")
+                print()
+                exit()
+
             # self.modbus.debug(True)
         else:
             self.modbus = ModbusClient()
             self.modbus.host(ipaddr)
             self.modbus.port(port)
             self.modbus.unit_id(1)
-            self.modbus.open()
+            if not self.modbus.open():
+                print(datetime.now())
+                print("Modbus nicht Aktiv!!!")
+                print()
+                exit()
         
         sunspecid = self.read_uint16(40070)
 
