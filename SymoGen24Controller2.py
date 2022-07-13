@@ -18,9 +18,12 @@ def loadConfig(conf_file):
 
 def loadWeatherData(config):
         data = None
-        with open(config['env']['filePathWeatherData']) as json_file:
+        try:
+            with open(config['env']['filePathWeatherData']) as json_file:
                 data = json.load(json_file)
-
+        except:
+                print('Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!')
+                exit()
         return data
 
 def holeGitHubConfig(Link, filename):
@@ -189,7 +192,7 @@ if __name__ == '__main__':
 
                     if gen24.read_data('Battery_Status') == 1:
                         print(datetime.now())
-                        print("Batterie ist Offline keine Steuerung möglich: ")
+                        print("Batterie ist Offline keine Steuerung möglich!!! ")
                         print()
                         exit()
     
@@ -203,7 +206,7 @@ if __name__ == '__main__':
                     WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                     MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
-                    BattertieVoll = eval(config['Ladeberechnung']['BattertieVoll'])
+                    BatterieVoll = eval(config['Ladeberechnung']['BatterieVoll'])
                     MaxKapp = eval(config['Ladeberechnung']['MaxKapp'])
                     WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
                     WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
@@ -286,7 +289,7 @@ if __name__ == '__main__':
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
     
-                            elif (BattStatusProz > BattertieVoll ):
+                            elif (BattStatusProz > BatterieVoll ):
                                 # Wenn Batterie voll, Volle Ladung
                                 DATA = setLadewert(MaxLadung)
                                 newPercent = DATA[0]
