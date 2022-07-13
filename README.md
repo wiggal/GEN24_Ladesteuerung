@@ -32,8 +32,9 @@ sudo pip install ping3
 
 
 Die Startskripte können per Cronjobs gestartet werden.
+Als Erstes muss ein start_WeatherData.. aufgerufen werden, damit Prognosedaten vorhanden sind!!!
 
-Beispiele Crontabeintraege
+Beispiele Crontabeintraege (Ausführrechte für die start_...sh skripte setzen nicht vergessen)
 
 */5 05-20 * * * /DIR/start_LoggingSymoGen24.sh
 
@@ -54,7 +55,7 @@ Solarprognose_WeatherData.py
 Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich,
 hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben.
 Holt die Sonnenstundenprognosen von solarprognose.de und schreibt sie in weatherData.json
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 2 Std)
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 3 Std)
 
 SymoGen24Connector.py
 

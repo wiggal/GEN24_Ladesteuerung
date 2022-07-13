@@ -1,4 +1,11 @@
-﻿[0.6.2] – 2022-07-12
+﻿[0.6.3] – 2022-07-13
+
+Änderung in SymoGen24Controller2.py und LoggingSymoGen24.py
+
+- Fehlermeldungen bei fehlender weatherData.json abgefangen.
+- Tippfehler in Variable  "BatterieVoll"
+
+[0.6.2] – 2022-07-12
 
 Änderung in SymoGen24Connector.py und SymoGen24Controller2.py
 

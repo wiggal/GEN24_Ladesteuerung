@@ -18,8 +18,12 @@ def loadConfig():
 
 def loadWeatherData(config):
         data = None
-        with open(config['env']['filePathWeatherData']) as json_file:
+        try:
+            with open(config['env']['filePathWeatherData']) as json_file:
                 data = json.load(json_file)
+        except:
+            print('Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!')
+            exit()
 
         return data
 
