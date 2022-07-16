@@ -125,7 +125,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # Wenn noch genuegend Prognosewert zum Laden der Batterie uebrig, Batteriekapazitaet aufsparen
         if Pro_LadeKapa_Rest > BattKapaWatt_akt:
-            aktuellerLadewert = 10
+            aktuellerLadewert = LadungAus
             LadewertGrund = "Prognoseberechnung > Batteriekapazitaet ",Pro_LadeKapa_Rest, BattKapaWatt_akt
 
         # Aktuelle Einspeise-Leistung beruecksichtigen
@@ -143,9 +143,9 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
            aktuellerLadewert = int(aktuellePVProduktion - WR_Kapazitaet)
            LadewertGrund = "PV-Produktion > WR_Kapazitaet"
 
-        # Bei Minuswerten 10 setzen
-        if aktuellerLadewert < 10:
-            aktuellerLadewert = 10
+        # Bei Minuswerten "LadungAus" setzen
+        if aktuellerLadewert < LadungAus:
+            aktuellerLadewert = LadungAus
 
         return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Spitze, Pro_Akt, LadewertGrund
 
@@ -153,10 +153,9 @@ def setLadewert(fun_Ladewert):
         if fun_Ladewert > MaxLadung:
             fun_Ladewert = MaxLadung
 
-        newPercent = (int(fun_Ladewert/BattganzeKapazWatt*100)) * 100
-        # Prozent des Ladewertes auf volle 10 kappen
-        if newPercent < 10:
-            newPercent = 10
+        newPercent = (int(fun_Ladewert/BattganzeKapazWatt*10000))
+        if newPercent < LadungAus:
+            newPercent = LadungAus
 
         # Schaltvezögerung
         # mit altem Ladewert vergleichen
@@ -202,6 +201,7 @@ if __name__ == '__main__':
                     BattVollUm = eval(config['Ladeberechnung']['BattVollUm'])
                     BatSparFaktor = eval(config['Ladeberechnung']['BatSparFaktor'])
                     MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
+                    LadungAus = eval(config['Ladeberechnung']['LadungAus'])
                     Einspeisegrenze = eval(config['Ladeberechnung']['Einspeisegrenze'])
                     WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
