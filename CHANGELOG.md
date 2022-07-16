@@ -1,4 +1,11 @@
-﻿[0.6.3] – 2022-07-13
+﻿[0.6.4] – 2022-07-16
+
+- Kappung des Ladewertes auf 100er ist nicht mehr nötig, wegen Schreibgrenzen "WRSchreibGrenze_nachOben/Unten",
+  schreibe nun genau den errechneten Wert.
+
+- LadungAus war bisher auf 10 Watt in der Prozedur festgelegt, kann nun in der config.ini als "LadungAus" festgelegt werden (z.B. 0 oder 10 Watt)
+
+[0.6.3] – 2022-07-13
 
 Änderung in SymoGen24Controller2.py und LoggingSymoGen24.py
 
