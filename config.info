@@ -1,0 +1,142 @@
+####################################################
+# Erläuterungen zu den Einstellungen der config.ini
+####################################################
+
+# Name der Datei mit den Wetterprognosewerten
+[env]
+filePathWeatherData=weatherData.json
+
+# Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier anzahl=2 eintragen
+# und die Werte für das zweite PV-Feld unter [forecast.solar2] eintragen
+[pv.strings]
+anzahl=1
+
+[forecast.solar]
+# PV Standpunkt ermitteln z.B. unter https://www.solarserver.de/photovoltaik-leistungsprognose-fuer-mehrere-tage/
+# Breitengrad des PV Standpunktes
+lat=48.577
+# Längengrad des PV Standpunktes
+lon=12.732
+# Dachneigung bzw. Neigung der PV-Module
+dec=30
+# Ausrichtung der Modulfelder (z.B. 0 ist genau nach Süden ausgerichtet)
+az=0
+# Leistung der Modulfelder
+kwp=11.4
+# Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
+# bei mir 1000 da nur Backup zu forecast.solar2, ansonsten sollte sie irgendwo bei 70 Minuten sein, um alle 2 Stunden anfordern zu können.
+dataAgeMaxInMinutes=1000
+
+# Hier die Werte für ein PV-Feld mit andere Ausrichtung wie oben beschrieben eingeben.
+[forecast.solar2]
+lat=11.111
+lon=6.666
+dec=22
+az=135
+kwp=4.44
+
+# Hier die Werte eintragen, wenn die Prognose mit Solarprognose_WeatherData.py von http://www.solarprognose.de geholt werden soll
+# Dazu ist eine Registrierung auf http://www.solarprognose.de erforderlich!
+[solarprognose]
+# Name der Datei mit den Wetterprognosewerten
+weatherfile = weatherData.json
+# Zugriffsschlüssel (ACCESS_TOKEN) von solarprognose.de
+accesstoken = sDN45B3Hz0Sx1HW2j1at0mZpTROP-Gfa
+# alle Werte von solarprognose.de
+item = inverter
+id = 1297
+type = hourly
+# Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
+dataAgeMaxInMinutes = 100
+# Sekunden des sleep = Vorgabe von solarprognose.de
+WaitSec = 21
+# mögliche Werte des Prognosealgorithmus mosmix|own-v1|clearsky
+algorithm=own-v1
+
+[gen24]
+# IP des Wechselrichters
+hostNameOrIp=192.168.178.50
+# Modbusport des Wechselrichters
+port=502
+
+################################################################################
+# Ab hier müssen die Werte zur Ladesteuerung auf die PV-Anlage angepasst werden!
+################################################################################
+
+# Allgemeines:
+# Die Ladeleistung wird bei jedem Programmlauf (z.B. alle 5 Minuten) ,
+# mit folgenden AKTUELLEN Werten neu berechnet:
+# Batteriekapazität, Prognosewert, Einspeisewert, Produktion ...
+
+[Ladeberechnung]
+# Wenn die Variable "FesteLadeleistung" ungleich "0" Watt ist, 
+# wird der Wert fest als Ladeleistung geschrieben unabhängig der WRSchreibGrenzen, 
+# ausser der WR steht bereits genau diesem Wert.
+FesteLadeleistung = 0
+
+# Bis zu welcher Stunde die Batterie durch die Prognoseberechnungen voll sein soll. 
+# Der Zeitpunkt wird häufig nicht genau zutreffen, da durch Verbrauch, Überschusseinspeisungen 
+# oder durch die WRSchreibGrenzen die Ladenmengen beinflußt werden.
+BattVollUm = 17
+
+# Faktor um Batteriekapazität für später aufzusparen.
+# Der aus der Prognose errechnete Batterieladewert wird durch ((BattVollUm - AktuelleStunde) * BatSparFaktor) geteilt. 
+# Dadurch wird der Batterieladewert gedämpft und die Batteriekapazität für später Richtung Mittag aufgespart.
+# bei BatSparFaktor = 0 wird die Verschiebung zum Mittag nicht angewendet.
+BatSparFaktor = 1.2
+
+# BatWaitFaktor ist für eine exakt nach Süden ausgerichtete PV-Anlage hilfreich!
+# Der BatWaitFaktor kann von 0 bis "BatWaitFaktor_Max" gesetzt weren, je höher der Wert ist, umso später beginnt die Ladung.
+# Formel: WENN (TagesPrognoseGesamt - Grundlast_Summe) / (BatWaitFaktor_Max - BatWaitFaktor + 1) größer BattKapaWatt_akt dann wird mit der Ladung gewartet
+# Dadurch verschiebt sich der Ladebeginn je nach Faktor und Wetterprognose nach hinten.
+# bei Wert 0 wird der BatWaitFaktor NICHT angewendet!!!
+BatWaitFaktor = 4.0
+BatWaitFaktor_Max = 10
+
+# Ausgabe von Werten steuern, um Die Wirkung der Einstellungen prüfen zu können.
+# print_level 1=Ausgabe 0=keine Ausgabe
+print_level = 1
+
+# Größter Batterieladewert, der im WR gesetzt werden soll, darf nicht kleiner als die 30% Kappung der PV_Leistung WKp sein.
+# Um die Batterie schonend zu laden sollte er auch nicht zu hoch sein.
+MaxLadung = 3000
+
+# die Einspeisegrenze bzw. WR_Kapazitaet sollte ein wenig unterhalb der wirklichen Grenze liegen,
+# da sonst der Wechselrichter bereits ab regelt, bevor das Programm die Überproduktion erkennt (bei mir ca 5%)
+# Einspeisegrenze: Wenn die Einspeisung darüber liegt, wird der Überschuss in die Batterie geladen.
+# WR_Kapazitaet: Wenn die Produktion über der AC-Leistungsgrenze (WR_Kapazitaet) ist, wird der Überschuss in die Batterie geladen.
+Einspeisegrenze = 8000
+WR_Kapazitaet = 9700
+
+# Grundlast wird verwendet um den aktuellerUeberschuss zu berechnen
+# Grundlast ist 300W + 100W Mindesteinspeisung
+Grundlast = 500
+
+# Schaltverzögerung
+# Ab welchem Unterschied in Watt soll der neue Ladewert auf dem Wechselrichter geschrieben werden
+# Damit nicht zu häufig Schreibvorgänge auf dem Wechselrichter erfolgen, sollte der Wert WRSchreibGrenze_nachUnten größer gesetzt werden
+# Damit wird nicht jede kleine Schwankung nach unten auf den WR geschrieben, 
+# und abends geht die Produktion zurück und der Ladewert geht sowieso nach oben.
+WRSchreibGrenze_nachOben = 350
+WRSchreibGrenze_nachUnten = 1289
+
+# Liegt der Batteriestatus unter MindBattLad in % wird voll geladen.
+MindBattLad = 20
+# Wenn der Batteriestand in % bei "BatterieVoll" ist, erfolgt volle Ladung
+BatterieVoll = 95
+# Wenn keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt (z.B. 0 oder 10 )
+LadungAus = 0
+
+############################################################
+# Ab hier kann die Fallbackfunktion des WR aktiviert werden.
+############################################################
+
+[Fallback]
+# Fallback_on = 0 Programmfunktion ganz ausgeschaltet, KEINE Prüfung ob eine Fallbackzeit geschrieben ist
+# Fallback_on = 1 ausgeschaltet, Prüfung ob eine Fallbackzeit geschrieben ist, evtl. auf 0 setzen
+# Fallback_on = 2 eingeschaltet
+# War Fallback bereits aktiv erst mit Fallback_on = 1 Fallbackzeit auf 0 setzen lassen und dann auf Fallback_on = 0 gehen
+Fallback_on = 0
+# Fallbackzeit = (Fallback_Zeitabstand_Std * 3600 + Cronjob_Minutenabstand *60 *0.9)
+Fallback_Zeitabstand_Std = 5
+Cronjob_Minutenabstand = 5
