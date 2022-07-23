@@ -57,7 +57,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             else:
                     Prognose = 0
 
-            # Stundendaempung rechnen 
+            # Stundendaempung rechnen  mit BatSparFaktor
             tmp_Stundendaempfung = (BattVollUm - i) * BatSparFaktor
             if tmp_Stundendaempfung < 1:
                 tmp_Stundendaempfung = 1
@@ -123,10 +123,13 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         aktuellerLadewert = int((Pro_Akt - AbzugWatt)/Stundendaempfung)
         LadewertGrund = "Prognoseberechnung / Stundendaempfung"
 
-        # Wenn noch genuegend Prognosewert zum Laden der Batterie uebrig, Batteriekapazitaet aufsparen
-        if Pro_LadeKapa_Rest > BattKapaWatt_akt:
+        # BatWaitFaktor hier anwenden
+        Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
+        BattKapaProz_akt = int(BattKapaWatt_akt /  BattganzeKapazWatt*100)
+        # print("Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor: ", Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor)
+        if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattKapaProz_akt > 30 and Akt_Std < 13:
             aktuellerLadewert = LadungAus
-            LadewertGrund = "Prognoseberechnung > Batteriekapazitaet ",Pro_LadeKapa_Rest, BattKapaWatt_akt
+            LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
 
         # Aktuelle Einspeise-Leistung beruecksichtigen
         aktuellerUeberschuss = int(aktuelleEinspeisung + (BattganzeKapazWatt * oldPercent/10000) - Einspeisegrenze)
@@ -135,8 +138,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             LadewertGrund = "aktuelleEinspeisung + aktueller Ladewert > Einspeisegrenze"
 
         # Ladeleistung auf 30% Kappung begrenzen
-        if (aktuellerLadewert > MaxKapp):
-            aktuellerLadewert = MaxKapp
+        if (aktuellerLadewert > MaxLadung):
+            aktuellerLadewert = MaxLadung
 
         # Wenn  PV-Produktion > WR_Kapazitaet 
         if (aktuellePVProduktion - WR_Kapazitaet > aktuellerLadewert ):
@@ -146,6 +149,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # Bei Minuswerten "LadungAus" setzen
         if aktuellerLadewert < LadungAus:
             aktuellerLadewert = LadungAus
+
 
         return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Spitze, Pro_Akt, LadewertGrund
 
@@ -200,6 +204,8 @@ if __name__ == '__main__':
                     print_level = eval(config['Ladeberechnung']['print_level'])
                     BattVollUm = eval(config['Ladeberechnung']['BattVollUm'])
                     BatSparFaktor = eval(config['Ladeberechnung']['BatSparFaktor'])
+                    BatWaitFaktor = eval(config['Ladeberechnung']['BatWaitFaktor'])
+                    BatWaitFaktor_Max = eval(config['Ladeberechnung']['BatWaitFaktor_Max'])
                     MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
                     LadungAus = eval(config['Ladeberechnung']['LadungAus'])
                     Einspeisegrenze = eval(config['Ladeberechnung']['Einspeisegrenze'])
@@ -207,7 +213,6 @@ if __name__ == '__main__':
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                     MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
                     BatterieVoll = eval(config['Ladeberechnung']['BatterieVoll'])
-                    MaxKapp = eval(config['Ladeberechnung']['MaxKapp'])
                     WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
                     WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
                     FesteLadeleistung = eval(config['Ladeberechnung']['FesteLadeleistung'])

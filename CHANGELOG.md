@@ -1,4 +1,22 @@
-﻿[0.6.4] – 2022-07-16
+﻿[0.7.0] – 2022-08-23
+
+
+- Zusammenführen der fast wirkungsgleichen Parameter "MaxKapp" und "MaxLadung" zu "MaxLadung"
+
+- Einführen der Variablen "BatWaitFaktor" und "BatWaitFaktor_Max". 
+  Mit den Variablen kann für exakt nach Süden ausgerichtete PV-Anlagen der Zeipunkt
+  des Ladebeginns in Abhängigkeit der Prognose nach hinten verschoben werden. Ist nur aktiv vor 13:00 Uhr.
+  Auslieferung: 
+  BatWaitFaktor = 0.0  # Funtion ist nicht aktiv, wenn der Wert 0 ist. Sinnvoller Wert um die 1-5.
+  BatWaitFaktor_Max = 10  # Kann so bleiben
+
+- "BatWaitFaktor" in Ladewerte_Vergleichtabelle.ods als Näherung eingearbeitet.
+
+- Die meisten Eräuterungen aus der config.ini in die neue Datei config.info ausgelagert, 
+  damit die config.ini übersichtlicher bleibt.
+
+
+[0.6.4] – 2022-07-16
 
 - Kappung des Ladewertes auf 100er ist nicht mehr nötig, wegen Schreibgrenzen "WRSchreibGrenze_nachOben/Unten",
   schreibe nun genau den errechneten Wert.
