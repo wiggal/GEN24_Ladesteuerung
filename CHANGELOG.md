@@ -1,4 +1,14 @@
-﻿[0.7.0] – 2022-08-23
+﻿[0.7.1] – 2022-08-07
+
+- umbenannt: config.info -> config.ini.info
+
+- Variable BattganzeKapazWatt umbenannt in BattganzeLadeKapazWatt
+
+- StorageControlMode auf 3 stellen (bisher 1) 
+
+- WRSchreibGrenze_nachUnten Erhöhung wenn "PrognoseAbzugswert <= Grundlast" nicht nötig
+
+[0.7.0] – 2022-07-23
 
 
 - Zusammenführen der fast wirkungsgleichen Parameter "MaxKapp" und "MaxLadung" zu "MaxLadung"

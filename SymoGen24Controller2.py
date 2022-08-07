@@ -125,15 +125,15 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # BatWaitFaktor hier anwenden
         Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
-        BattKapaProz_akt = int(BattKapaWatt_akt /  BattganzeKapazWatt*100)
+        BattKapaProz_akt = int(BattKapaWatt_akt /  BattganzeLadeKapazWatt*100)
         # print("Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor: ", Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor)
         if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattKapaProz_akt > 30 and Akt_Std < 13:
             aktuellerLadewert = LadungAus
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
 
         # Aktuelle Einspeise-Leistung beruecksichtigen
-        aktuellerUeberschuss = int(aktuelleEinspeisung + (BattganzeKapazWatt * oldPercent/10000) - Einspeisegrenze)
-        if aktuellerUeberschuss > aktuellerLadewert:
+        aktuellerUeberschuss = int(aktuelleEinspeisung + (BattganzeLadeKapazWatt * oldPercent/10000) - Einspeisegrenze)
+        if aktuellerUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
             aktuellerLadewert = int(aktuellerUeberschuss)
             LadewertGrund = "aktuelleEinspeisung + aktueller Ladewert > Einspeisegrenze"
 
@@ -157,14 +157,14 @@ def setLadewert(fun_Ladewert):
         if fun_Ladewert > MaxLadung:
             fun_Ladewert = MaxLadung
 
-        newPercent = (int(fun_Ladewert/BattganzeKapazWatt*10000))
+        newPercent = (int(fun_Ladewert/BattganzeLadeKapazWatt*10000))
         if newPercent < LadungAus:
             newPercent = LadungAus
 
         # Schaltvezögerung
         # mit altem Ladewert vergleichen
-        diffLadewert_nachOben = int(fun_Ladewert - oldPercent*BattganzeKapazWatt/10000)
-        diffLadewert_nachUnten = int((oldPercent*BattganzeKapazWatt/10000) - fun_Ladewert)
+        diffLadewert_nachOben = int(fun_Ladewert - oldPercent*BattganzeLadeKapazWatt/10000)
+        diffLadewert_nachUnten = int((oldPercent*BattganzeLadeKapazWatt/10000) - fun_Ladewert)
 
         # Wenn die Differenz in hundertstel Prozent kleiner als die Schreibgrenze nix schreiben
         newPercent_schreiben = 0
@@ -219,9 +219,9 @@ if __name__ == '__main__':
                     Fallback_on = eval(config['Fallback']['Fallback_on'])
                     Cronjob_Minutenabstand = eval(config['Fallback']['Cronjob_Minutenabstand'])
                     Fallback_Zeitabstand_Std = eval(config['Fallback']['Fallback_Zeitabstand_Std'])
-                    BattganzeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattStatusProz = gen24.read_data('Battery_SoC')/100
-                    BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeKapazWatt)
+                    BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeLadeKapazWatt)
                     aktuelleEinspeisung = int(gen24.get_meter_power() * -1)
                     aktuellePVProduktion = int(gen24.get_mppt_power())
     
@@ -304,9 +304,10 @@ if __name__ == '__main__':
                             elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) or (PrognoseAbzugswert == Grundlast):
                                 # Auch hier die Schaltverzögerung anbringen, aber nur mit halben Wert
                                 Daempfunghier = 0
-                                if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachUnten / 2:
-                                   WRSchreibGrenze_nachUnten = 10000
-                                   Daempfunghier = 1
+                                # Hier immer MaxLadung, also immer nach oben, deshalb keine WRSchreibGrenze_nachUnten nötig
+                                # if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachUnten / 2:
+                                   # WRSchreibGrenze_nachUnten = 10000
+                                   # Daempfunghier = 1
                                 if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben / 2:
                                    WRSchreibGrenze_nachOben = 10000
                                    Daempfunghier = 1
@@ -367,9 +368,9 @@ if __name__ == '__main__':
 
                     # Ladungsspeichersteuerungsmodus aktivieren wenn nicht aktiv
                     # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
-                    if gen24.read_data('StorageControlMode') == 0:
+                    if gen24.read_data('StorageControlMode') != 3:
                         if len(argv) > 1 and (argv[1] == "schreiben"):
-                            Ladelimit = gen24.write_data('StorageControlMode', 1 )
+                            Ladelimit = gen24.write_data('StorageControlMode', 3 )
                             bereits_geschrieben = 1
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu geschrieben.\n"
                         else:
