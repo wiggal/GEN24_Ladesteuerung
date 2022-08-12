@@ -1,4 +1,12 @@
-﻿[0.7.1] – 2022-08-07
+﻿[0.7.2] – 2022-08-12
+
+Änderung in SymoGen24Controller2.py 
+
+- Wenn der Ladestand der Batterie unter den Wert der Variablen MindBattLad fiel, wurde die Variable TagesPrognoseUeberschuss nicht definiert.
+
+
+
+[0.7.1] – 2022-08-07
 
 - umbenannt: config.info -> config.ini.info
 
