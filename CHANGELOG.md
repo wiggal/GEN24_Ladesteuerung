@@ -3,8 +3,8 @@
 Änderung in SymoGen24Controller2.py 
 
 - Wenn der Ladestand der Batterie unter den Wert der Variablen MindBattLad fiel, wurde die Variable TagesPrognoseUeberschuss nicht definiert.
-
-
+- Eventuellen Fehler in den Printbefehlen abgefangen, damit stürtzt nicht das ganze Programm ab, wenn ein Fehler in der Variablenausgabe auftritt.
+- Fehler beim Berechnen der Batteriekapazität, der das Ladeverhalten von Batterien die nicht ungefähr 10KW haben stark  verfälscht, bereiningt.
 
 [0.7.1] – 2022-08-07
 

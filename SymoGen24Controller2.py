@@ -126,7 +126,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # BatWaitFaktor hier anwenden
         Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
         BattKapaProz_akt = int(BattKapaWatt_akt /  BattganzeLadeKapazWatt*100)
-        # print("Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor: ", Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor)
+        print("Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor: ", Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor)
         if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattKapaProz_akt > 30 and Akt_Std < 13:
             aktuellerLadewert = LadungAus
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
@@ -219,7 +219,8 @@ if __name__ == '__main__':
                     Fallback_on = eval(config['Fallback']['Fallback_on'])
                     Cronjob_Minutenabstand = eval(config['Fallback']['Cronjob_Minutenabstand'])
                     Fallback_Zeitabstand_Std = eval(config['Fallback']['Fallback_Zeitabstand_Std'])
-                    BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    # BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeLadeKapazWatt = (gen24.read_data('Battery_capa')) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattStatusProz = gen24.read_data('Battery_SoC')/100
                     BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeLadeKapazWatt)
                     aktuelleEinspeisung = int(gen24.get_meter_power() * -1)
@@ -331,24 +332,30 @@ if __name__ == '__main__':
                 
 
                     if print_level == 1:
-                        print()
-                        print(datetime.now())
-                        print("TagesPrognoseUeberschuss: ", TagesPrognoseUeberschuss)
-                        print("TagesPrognoseGesamt: ", TagesPrognoseGesamt)
-                        print("aktuellePVProduktion: ", aktuellePVProduktion)
-                        print("aktuelleEinspeisung: ", aktuelleEinspeisung)
-                        print("aktuelleVorhersage: ", aktuelleVorhersage)
-                        print("PrognoseAbzugswert: ", PrognoseAbzugswert)
-                        print("BattKapaWatt_akt: ", BattKapaWatt_akt)
-                        print("aktuellerLadewert: ", aktuellerLadewert)
-                        print("LadewertGrund: ", LadewertGrund)
-                        print("oldPercent:", oldPercent)
-                        print("newPercent: ", newPercent)
-                        print("newPercent_schreiben: ", newPercent_schreiben)
-                        print("Grundlast_Summe: ", Grundlast_Summe)
-                        # dataBatteryStats = gen24.read_section('StorageDevice')
-                        # print(f'Battery Stats: {dataBatteryStats}') 
-                        print()
+                        try:
+                            print()
+                            print(datetime.now())
+                            print("TagesPrognoseUeberschuss: ", TagesPrognoseUeberschuss)
+                            print("TagesPrognoseGesamt: ", TagesPrognoseGesamt)
+                            print("aktuellePVProduktion: ", aktuellePVProduktion)
+                            print("aktuelleEinspeisung: ", aktuelleEinspeisung)
+                            print("aktuelleVorhersage: ", aktuelleVorhersage)
+                            print("PrognoseAbzugswert: ", PrognoseAbzugswert)
+                            print("BattKapaWatt_akt: ", BattKapaWatt_akt)
+                            print("aktuellerLadewert: ", aktuellerLadewert)
+                            print("LadewertGrund: ", LadewertGrund)
+                            print("oldPercent:", oldPercent)
+                            print("newPercent: ", newPercent)
+                            print("newPercent_schreiben: ", newPercent_schreiben)
+                            print("Grundlast_Summe: ", Grundlast_Summe)
+                            # dataBatteryStats = gen24.read_section('StorageDevice')
+                            # print(f'Battery Stats: {dataBatteryStats}') 
+                            print()
+                        except Exception as e:
+                            print()
+                            print("Fehler in den Printbefehlen, Ausgabe nicht möglich!")
+                            print("Fehlermeldung:", e)
+                            print()
 
 
 
