@@ -237,6 +237,7 @@ if __name__ == '__main__':
                     #######################################
     
                     Schleifenwert_TagesPrognoseUeberschuss = 1000000
+                    TagesPrognoseUeberschuss = 0
                     TagesPrognoseGesamt = 0
                     aktuellerLadewert = 0
                     PrognoseAbzugswert = 0
