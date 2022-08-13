@@ -126,7 +126,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # BatWaitFaktor hier anwenden
         Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
         BattKapaProz_akt = int(BattKapaWatt_akt /  BattganzeLadeKapazWatt*100)
-        print("Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor: ", Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor)
+        # print("Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor: ", Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor)
         if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattKapaProz_akt > 30 and Akt_Std < 13:
             aktuellerLadewert = LadungAus
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
