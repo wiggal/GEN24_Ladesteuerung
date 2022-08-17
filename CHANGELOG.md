@@ -1,4 +1,13 @@
-﻿[0.7.2] – 2022-08-12
+﻿[0.7.3] – 2022-08-18
+
+- Fehler in Ladewerte_Vergleichtabelle.ods bereinigt.
+
+Änderung in SymoGen24Controller2.py 
+
+- Kleine Anpassungen in den Variablen BattganzeLadeKapazWatt und BattganzeKapazWatt
+- Ausgabe der Tagessumme für den BatWaitFaktor
+
+[0.7.2] – 2022-08-12
 
 Änderung in SymoGen24Controller2.py 
 

@@ -125,9 +125,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # BatWaitFaktor hier anwenden
         Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
-        BattKapaProz_akt = int(BattKapaWatt_akt /  BattganzeLadeKapazWatt*100)
-        # print("Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor: ", Tagessumme_Faktor, BattKapaProz_akt, BatWaitFaktor)
-        if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattKapaProz_akt > 30 and Akt_Std < 13:
+        # BattStatusProz < 70; damit die Ladung nicht abschlatet, wenn die Batterie fast voll ist
+        if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattStatusProz < 70 and Akt_Std < 13:
             aktuellerLadewert = LadungAus
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
 
@@ -151,7 +150,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             aktuellerLadewert = LadungAus
 
 
-        return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Spitze, Pro_Akt, LadewertGrund
+        return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Spitze, Pro_Akt, LadewertGrund, Tagessumme_Faktor
 
 def setLadewert(fun_Ladewert):
         if fun_Ladewert > MaxLadung:
@@ -219,10 +218,10 @@ if __name__ == '__main__':
                     Fallback_on = eval(config['Fallback']['Fallback_on'])
                     Cronjob_Minutenabstand = eval(config['Fallback']['Cronjob_Minutenabstand'])
                     Fallback_Zeitabstand_Std = eval(config['Fallback']['Fallback_Zeitabstand_Std'])
-                    # BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattganzeLadeKapazWatt = (gen24.read_data('Battery_capa')) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeKapazWatt = (gen24.read_data('Battery_capa')) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattStatusProz = gen24.read_data('Battery_SoC')/100
-                    BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeLadeKapazWatt)
+                    BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeKapazWatt)
                     aktuelleEinspeisung = int(gen24.get_meter_power() * -1)
                     aktuellePVProduktion = int(gen24.get_mppt_power())
     
@@ -273,6 +272,7 @@ if __name__ == '__main__':
                                 Pro_Spitze = PrognoseUNDUeberschuss[4]
                                 aktuelleVorhersage = PrognoseUNDUeberschuss[5]
                                 LadewertGrund = PrognoseUNDUeberschuss[6]
+                                Tagessumme_Faktor = PrognoseUNDUeberschuss[7]
                             i += 100
 
                         # Nun habe ich die Werte und muss hier weiter Verzweigen
@@ -341,6 +341,7 @@ if __name__ == '__main__':
                             print("aktuelleEinspeisung: ", aktuelleEinspeisung)
                             print("aktuelleVorhersage: ", aktuelleVorhersage)
                             print("PrognoseAbzugswert: ", PrognoseAbzugswert)
+                            print("Tagessumme/BatWaitFaktor: ", Tagessumme_Faktor)
                             print("BattKapaWatt_akt: ", BattKapaWatt_akt)
                             print("aktuellerLadewert: ", aktuellerLadewert)
                             print("LadewertGrund: ", LadewertGrund)
