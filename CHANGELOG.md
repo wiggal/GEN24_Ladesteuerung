@@ -1,4 +1,4 @@
-﻿[0.7.3] – 2022-08-18
+﻿[0.7.4] – 2022-08-18
 
 - Fehler in Ladewerte_Vergleichtabelle.ods bereinigt.
 
