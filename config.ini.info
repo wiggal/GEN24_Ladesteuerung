@@ -14,9 +14,9 @@ anzahl=1
 [forecast.solar]
 # PV Standpunkt ermitteln z.B. unter https://www.solarserver.de/photovoltaik-leistungsprognose-fuer-mehrere-tage/
 # Breitengrad des PV Standpunktes
-lat=48.577
+lat=44.444
 # Längengrad des PV Standpunktes
-lon=12.732
+lon=11.111
 # Dachneigung bzw. Neigung der PV-Module
 dec=30
 # Ausrichtung der Modulfelder (z.B. 0 ist genau nach Süden ausgerichtet)
@@ -41,10 +41,10 @@ kwp=4.44
 # Name der Datei mit den Wetterprognosewerten
 weatherfile = weatherData.json
 # Zugriffsschlüssel (ACCESS_TOKEN) von solarprognose.de
-accesstoken = sDN45B3Hz0Sx1HW2j1at0mZpTROP-Gfa
+accesstoken = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 # alle Werte von solarprognose.de
 item = inverter
-id = 1297
+id = 1111
 type = hourly
 # Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
 dataAgeMaxInMinutes = 100
