@@ -125,8 +125,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # BatWaitFaktor hier anwenden
         Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
-        # BattStatusProz < 70; damit die Ladung nicht abschlatet, wenn die Batterie fast voll ist
-        if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattStatusProz < 70 and Akt_Std < 13:
+        # BattStatusProz < 75; damit die Ladung nicht abschlatet, wenn die Batterie fast voll ist
+        if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattStatusProz < 75 and Akt_Std < 13 :
             aktuellerLadewert = LadungAus
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
 
@@ -248,6 +248,7 @@ if __name__ == '__main__':
     
                     if ((BattStatusProz < MindBattLad)):
                         # volle Ladung ;-)
+                        aktuellerLadewert = MaxLadung
                         DATA = setLadewert(MaxLadung)
                         newPercent = DATA[0]
                         newPercent_schreiben = DATA[1]
@@ -291,6 +292,7 @@ if __name__ == '__main__':
     
                             if (TagesPrognoseGesamt > Grundlast) and ((TagesPrognoseGesamt - Grundlast_Summe) < BattKapaWatt_akt):
                                 # volle Ladung ;-)
+                                aktuellerLadewert = MaxLadung
                                 DATA = setLadewert(MaxLadung)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
@@ -298,32 +300,30 @@ if __name__ == '__main__':
     
                             elif (BattStatusProz > BatterieVoll ):
                                 # Wenn Batterie voll, Volle Ladung
+                                aktuellerLadewert = MaxLadung
                                 DATA = setLadewert(MaxLadung)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Batterie voll"
         
                             elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) or (PrognoseAbzugswert == Grundlast):
-                                # Auch hier die Schaltverzögerung anbringen, aber nur mit halben Wert
-                                Daempfunghier = 0
-                                # Hier immer MaxLadung, also immer nach oben, deshalb keine WRSchreibGrenze_nachUnten nötig
-                                # if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachUnten / 2:
-                                   # WRSchreibGrenze_nachUnten = 10000
-                                   # Daempfunghier = 1
-                                if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben / 2:
-                                   WRSchreibGrenze_nachOben = 10000
-                                   Daempfunghier = 1
-
-                                # volle Ladung ;-)
-                                DATA = setLadewert(MaxLadung)
-                                newPercent = DATA[0]
-                                newPercent_schreiben = DATA[1]
-                                LadewertGrund = "PrognoseAbzugswert <= Grundlast"
-
-                                # Wenn durch die Dämpfung hier nicht geschrieben wird, Hinweis ausgeben
-                                if (newPercent_schreiben == 0) and (Daempfunghier == 1):
-                                    LadewertGrund = "PrognoseAbzugswert <= Grundlast (Unterschied zu gering zum Schreiben)"
-                                    newPercent = oldPercent
+                                # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
+                                if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben:
+                                    # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
+                                    WRSchreibGrenze_nachUnten = 100000
+                                    DATA = setLadewert(aktuellerLadewert)
+                                    newPercent = DATA[0]
+                                    newPercent_schreiben = DATA[1]
+                                    # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
+                                    if newPercent_schreiben == 0:
+                                        LadewertGrund = "PrognoseAbzugswert <= Grundlast (Unterschied zu gering zum Schreiben)"
+                                else:
+                                    # volle Ladung ;-)
+                                    aktuellerLadewert = MaxLadung
+                                    DATA = setLadewert(MaxLadung)
+                                    newPercent = DATA[0]
+                                    newPercent_schreiben = DATA[1]
+                                    LadewertGrund = "PrognoseAbzugswert <= Grundlast"
                             else: 
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
@@ -335,20 +335,21 @@ if __name__ == '__main__':
                         try:
                             print()
                             print(datetime.now())
-                            print("TagesPrognoseUeberschuss: ", TagesPrognoseUeberschuss)
-                            print("TagesPrognoseGesamt: ", TagesPrognoseGesamt)
-                            print("aktuellePVProduktion: ", aktuellePVProduktion)
-                            print("aktuelleEinspeisung: ", aktuelleEinspeisung)
-                            print("aktuelleVorhersage: ", aktuelleVorhersage)
-                            print("PrognoseAbzugswert: ", PrognoseAbzugswert)
-                            print("Tagessumme/BatWaitFaktor: ", Tagessumme_Faktor)
-                            print("BattKapaWatt_akt: ", BattKapaWatt_akt)
-                            print("aktuellerLadewert: ", aktuellerLadewert)
+                            print("aktuellePrognose:           ", aktuelleVorhersage)
+                            print("TagesPrognoseGesamt:        ", TagesPrognoseGesamt)
+                            print("TagesPrognose - Abzugswerte:", TagesPrognoseUeberschuss)
+                            print("Tagessumme/BatWaitFaktor:   ", Tagessumme_Faktor)
+                            print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
+                            print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
+                            print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
+                            print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("LadewertGrund: ", LadewertGrund)
-                            print("oldPercent:", oldPercent)
-                            print("newPercent: ", newPercent)
-                            print("newPercent_schreiben: ", newPercent_schreiben)
-                            print("Grundlast_Summe: ", Grundlast_Summe)
+                            print("Bisheriger Ladewert/Watt:   ", int(oldPercent*BattganzeLadeKapazWatt/10000))
+                            print("Bisheriger Ladewert/Prozent:", oldPercent/100,"%")
+                            print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
+                            print("Neuer Ladewert/Prozent:     ", newPercent/100,"%")
+                            print("newPercent_schreiben:       ", newPercent_schreiben)
+                            # print("Grundlast_Summe:            ", Grundlast_Summe)
                             # dataBatteryStats = gen24.read_section('StorageDevice')
                             # print(f'Battery Stats: {dataBatteryStats}') 
                             print()
