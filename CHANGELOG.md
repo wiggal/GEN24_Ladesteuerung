@@ -1,4 +1,9 @@
-﻿[0.7.4] – 2022-08-18
+﻿[0.7.5] – 2022-09-06
+
+- Erklärungen in config.ini.info präzisiert, bzw. berichtigt 
+- Ausgabewerte von SymoGen24Controller2.py neu gestaltet
+
+[0.7.4] – 2022-08-18
 
 - Fehler in Ladewerte_Vergleichtabelle.ods bereinigt.
 
