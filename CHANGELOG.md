@@ -9,6 +9,7 @@
 
 - Fehlerbereinigung: Wenn die Ladung der Batterie in % unter "MindBattLad" war, lief das Programm auf den Fehler:
                      Fehlermeldung: name 'Tagessumme_Faktor' is not defined
+  Prognoseberechnung vorangestellt, damit wird sie jetzt immer ausgeführt, auch wenn sie durch andere Bedingungen nicht verwendet wird.                   
 
 [0.7.5] – 2022-09-06
 

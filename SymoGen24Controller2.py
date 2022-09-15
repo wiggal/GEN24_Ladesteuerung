@@ -248,6 +248,27 @@ if __name__ == '__main__':
                     aktuelleVorhersage = 0
                     LadewertGrund = ""
                     Tagessumme_Faktor = 0
+                        
+                    # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
+                    # die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
+                    i = Grundlast
+                    # Gesamte Tagesprognose, Tagesüberschuß aus Prognose und aktuellen Ladewert ermitteln
+                    # Schleife laeft von 0 nach oben, bis der Prognoseueberschuss die aktuelle Batteriekapazietaet erreicht
+                    while (Schleifenwert_TagesPrognoseUeberschuss > BattKapaWatt_akt):
+                        PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss( i, aktuelleEinspeisung, aktuellePVProduktion )
+                        Schleifenwert_TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
+                        if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt) or (i == Grundlast):
+                            PrognoseAbzugswert = i
+                            TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
+                            TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
+                            aktuellerLadewert = PrognoseUNDUeberschuss[2]
+                            Grundlast_Summe = PrognoseUNDUeberschuss[3]
+                            Pro_Spitze = PrognoseUNDUeberschuss[4]
+                            aktuelleVorhersage = PrognoseUNDUeberschuss[5]
+                            LadewertGrund = PrognoseUNDUeberschuss[6]
+                            Tagessumme_Faktor = PrognoseUNDUeberschuss[7]
+                        i += 100
+                    # Nun habe ich die Werte und muss hier weiter Verzweigen
     
                     if ((BattStatusProz < MindBattLad)):
                         # volle Ladung ;-)
@@ -258,28 +279,6 @@ if __name__ == '__main__':
                         LadewertGrund = "BattStatusProz < MindBattLad"
     
                     else:
-                        
-                        # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
-                        # die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
-                        i = Grundlast
-                        # Gesamte Tagesprognose, Tagesüberschuß aus Prognose und aktuellen Ladewert ermitteln
-                        # Schleife laeft von 0 nach oben, bis der Prognoseueberschuss die aktuelle Batteriekapazietaet erreicht
-                        while (Schleifenwert_TagesPrognoseUeberschuss > BattKapaWatt_akt):
-                            PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss( i, aktuelleEinspeisung, aktuellePVProduktion )
-                            Schleifenwert_TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
-                            if(PrognoseUNDUeberschuss[0] >= BattKapaWatt_akt) or (i == Grundlast):
-                                PrognoseAbzugswert = i
-                                TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
-                                TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
-                                aktuellerLadewert = PrognoseUNDUeberschuss[2]
-                                Grundlast_Summe = PrognoseUNDUeberschuss[3]
-                                Pro_Spitze = PrognoseUNDUeberschuss[4]
-                                aktuelleVorhersage = PrognoseUNDUeberschuss[5]
-                                LadewertGrund = PrognoseUNDUeberschuss[6]
-                                Tagessumme_Faktor = PrognoseUNDUeberschuss[7]
-                            i += 100
-
-                        # Nun habe ich die Werte und muss hier weiter Verzweigen
     
                         # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                         if FesteLadeleistung > 0:
