@@ -69,14 +69,16 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
                 Pro_Spitze = Prognose
 
             # wenn nicht zur vollen Stunde, Wert anteilsmaessig
+            Grundlast_tmp = Grundlast
             if i == Akt_Std:
                 Prognose = (Prognose / 60 * (60 - Akt_Minute))
                 Pro_Uebersch = (Pro_Uebersch / 60 * (60 - Akt_Minute))
+                Grundlast_tmp = int((Grundlast / 60 * (60 - Akt_Minute)))
 
             Pro_Ertrag_Tag += Prognose
 
             if Prognose > 0:
-                Grundlast_Sum += Grundlast
+                Grundlast_Sum += Grundlast_tmp
 
             if Pro_Uebersch > MaxLadung:
                 Pro_Uebersch = MaxLadung
@@ -245,6 +247,7 @@ if __name__ == '__main__':
                     Pro_Spitze = 0
                     aktuelleVorhersage = 0
                     LadewertGrund = ""
+                    Tagessumme_Faktor = 0
     
                     if ((BattStatusProz < MindBattLad)):
                         # volle Ladung ;-)
@@ -291,12 +294,23 @@ if __name__ == '__main__':
                         else:
     
                             if (TagesPrognoseGesamt > Grundlast) and ((TagesPrognoseGesamt - Grundlast_Summe) < BattKapaWatt_akt):
-                                # volle Ladung ;-)
-                                aktuellerLadewert = MaxLadung
-                                DATA = setLadewert(MaxLadung)
-                                newPercent = DATA[0]
-                                newPercent_schreiben = DATA[1]
-                                LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
+                                # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
+                                if BattKapaWatt_akt - TagesPrognoseGesamt - Grundlast_Summe < WRSchreibGrenze_nachOben:
+                                    # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
+                                    WRSchreibGrenze_nachUnten = 100000
+                                    DATA = setLadewert(aktuellerLadewert)
+                                    newPercent = DATA[0]
+                                    newPercent_schreiben = DATA[1]
+                                    # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
+                                    if newPercent_schreiben == 0:
+                                        LadewertGrund = " TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt (Unterschied weniger als Schreibgrenze)"
+                                else:
+                                    # volle Ladung ;-)
+                                    aktuellerLadewert = MaxLadung
+                                    DATA = setLadewert(MaxLadung)
+                                    newPercent = DATA[0]
+                                    newPercent_schreiben = DATA[1]
+                                    LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
     
                             elif (BattStatusProz > BatterieVoll ):
                                 # Wenn Batterie voll, Volle Ladung
@@ -306,7 +320,8 @@ if __name__ == '__main__':
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Batterie voll"
         
-                            elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) or (PrognoseAbzugswert == Grundlast):
+                            # PrognoseAbzugswert - 100 um Schaltverzögerung wieder nach unten zu erreichen
+                            elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) or (PrognoseAbzugswert - 100 <= Grundlast):
                                 # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
                                 if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben:
                                     # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
@@ -316,14 +331,14 @@ if __name__ == '__main__':
                                     newPercent_schreiben = DATA[1]
                                     # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
                                     if newPercent_schreiben == 0:
-                                        LadewertGrund = "PrognoseAbzugswert <= Grundlast (Unterschied zu gering zum Schreiben)"
+                                        LadewertGrund = "PrognoseAbzugswert nahe Grundlast (Unterschied weniger als Schreibgrenze)"
                                 else:
                                     # volle Ladung ;-)
                                     aktuellerLadewert = MaxLadung
                                     DATA = setLadewert(MaxLadung)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
-                                    LadewertGrund = "PrognoseAbzugswert <= Grundlast"
+                                    LadewertGrund = "PrognoseAbzugswert kleiner Grundlast und Schreibgrenze"
                             else: 
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
@@ -337,9 +352,10 @@ if __name__ == '__main__':
                             print(datetime.now())
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognoseGesamt:        ", TagesPrognoseGesamt)
+                            print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
                             print("TagesPrognose - Abzugswerte:", TagesPrognoseUeberschuss)
                             print("Tagessumme/BatWaitFaktor:   ", Tagessumme_Faktor)
-                            print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
+                            print("Grundlast_Summe für Tag:    ", Grundlast_Summe)
                             print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
@@ -349,7 +365,6 @@ if __name__ == '__main__':
                             print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
                             print("Neuer Ladewert/Prozent:     ", newPercent/100,"%")
                             print("newPercent_schreiben:       ", newPercent_schreiben)
-                            # print("Grundlast_Summe:            ", Grundlast_Summe)
                             # dataBatteryStats = gen24.read_section('StorageDevice')
                             # print(f'Battery Stats: {dataBatteryStats}') 
                             print()

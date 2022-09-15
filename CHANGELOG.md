@@ -1,4 +1,16 @@
-﻿[0.7.5] – 2022-09-06
+﻿[0.7.6] – 2022-09-15
+
+Änderung in SymoGen24Controller2.py
+
+- Schaltverzögerungen eingebaut, wenn
+  "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
+  und
+  "PrognoseAbzugswert kleiner Grundlast und Schreibgrenze"
+
+- Fehlerbereinigung: Wenn die Ladung der Batterie in % unter "MindBattLad" war, lief das Programm auf den Fehler:
+                     Fehlermeldung: name 'Tagessumme_Faktor' is not defined
+
+[0.7.5] – 2022-09-06
 
 - Erklärungen in config.ini.info präzisiert, bzw. berichtigt 
 - Ausgabewerte von SymoGen24Controller2.py neu gestaltet
