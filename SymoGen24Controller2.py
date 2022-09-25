@@ -268,7 +268,7 @@ if __name__ == '__main__':
                             LadewertGrund = PrognoseUNDUeberschuss[6]
                             Tagessumme_Faktor = PrognoseUNDUeberschuss[7]
                         i += 100
-                    # Nun habe ich die Werte und muss hier weiter Verzweigen
+                    # Nun habe ich die Werte und muss hier Verzweigen
     
                     if ((BattStatusProz < MindBattLad)):
                         # volle Ladung ;-)
@@ -283,6 +283,7 @@ if __name__ == '__main__':
                         # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                         if FesteLadeleistung > 0:
                             DATA = setLadewert(FesteLadeleistung)
+                            aktuellerLadewert = FesteLadeleistung
                             newPercent = DATA[0]
                             if newPercent == oldPercent:
                                 newPercent_schreiben = 0
@@ -294,7 +295,7 @@ if __name__ == '__main__':
     
                             if (TagesPrognoseGesamt > Grundlast) and ((TagesPrognoseGesamt - Grundlast_Summe) < BattKapaWatt_akt):
                                 # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
-                                if BattKapaWatt_akt - TagesPrognoseGesamt - Grundlast_Summe < WRSchreibGrenze_nachOben:
+                                if BattKapaWatt_akt + Grundlast_Summe - TagesPrognoseGesamt < WRSchreibGrenze_nachOben:
                                     # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
                                     WRSchreibGrenze_nachUnten = 100000
                                     DATA = setLadewert(aktuellerLadewert)

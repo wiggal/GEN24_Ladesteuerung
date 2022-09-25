@@ -1,4 +1,12 @@
-﻿[0.7.6] – 2022-09-15
+﻿[0.7.7] – 2022-09-25
+
+Änderung in SymoGen24Controller2.py
+
+- Ausgabe "Neuer Ladewert/Watt" bei FesterLadeleistung berichtigt
+- Formel bei "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt" berichtigt
+
+
+[0.7.6] – 2022-09-15
 
 Änderung in SymoGen24Controller2.py
 
