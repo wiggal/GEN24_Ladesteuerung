@@ -88,8 +88,9 @@ Bei Apache ist dies z.B.:
 
 Installation:
 
-sudo apt install apache2 php
+sudo apt install apache2 php <br>
 In /etc/apache2/apache2.conf  -->> <Directory /home/GEN24/html/>
+
 In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /home/GEN24/html/
 
 Apache neu starten und Reservierung im Browser aufrufen.
