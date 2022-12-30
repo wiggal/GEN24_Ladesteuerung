@@ -84,8 +84,10 @@ Modul zur Reservierung von groesseren Mengen PV-Leistung
 Das Modul ist in PHP programmiert und setzt einen entprechend konfigurierten Webserver (z.B. Apache) voraus.
 Konfiguration kann in der "config.php" angepasst werden.
 
-In meinem Fall ist dies der Apache:
+Bei Apache ist dies z.B.:
+
 Installation:
+
 sudo apt install apache2 php
 In /etc/apache2/apache2.conf  -->> <Directory /home/GEN24/html/>
 In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /home/GEN24/html/
