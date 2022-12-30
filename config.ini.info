@@ -5,6 +5,8 @@
 # Name der Datei mit den Wetterprognosewerten
 [env]
 filePathWeatherData=weatherData.json
+PV_ReservieungsDatei=Watt_Reservierung.json
+
 
 # Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier anzahl=2 eintragen
 # und die Werte für das zweite PV-Feld unter [forecast.solar2] eintragen
@@ -127,6 +129,11 @@ MindBattLad = 20
 BatterieVoll = 95
 # Wenn keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt (z.B. 0 oder 10 )
 LadungAus = 0
+# Hier kann die PV-Reserierung z.B. für ein E-Auto nachmittags eingeschatet werden (1=ein, 0=aus)
+# Zur Reservierung muss eine Datei  "Watt_Reservierung.json" vorhanden sein, und geplegt werden.
+# Ich verwende dazu ein PHP Program auf dem RaspberryPi
+PV_Reservierung_AUS_EIN = 0
+
 
 ############################################################
 # Ab hier kann die Fallbackfunktion des WR aktiviert werden.

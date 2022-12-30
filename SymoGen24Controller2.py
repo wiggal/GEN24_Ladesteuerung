@@ -26,6 +26,16 @@ def loadWeatherData(config):
                 exit()
         return data
 
+def loadPVReservierung(config):
+        reservierungdata = None
+        try:
+            with open(config['Reservierung']['PV_ReservieungsDatei']) as json_file:
+                reservierungdata = json.load(json_file)
+        except:
+                print('Reservieungsdatei fehlt, bitte erzeugen oder Reservierung abschalten !!')
+                exit()
+        return reservierungdata
+
 def holeGitHubConfig(Link, filename):
     try:
         web_ini = requests.get(Link, allow_redirects=True)
@@ -53,9 +63,16 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         while i < BattVollUm:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
             if data['result']['watts'].get(Std):
-                    Prognose = data['result']['watts'].get(Std)
+                    # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
+                    if ( PV_Reservierung_steuern == 1 and reservierungdata.get(Std)):
+                        data['result']['watts'][Std] = data['result']['watts'][Std] - reservierungdata[Std]
+                        if (data['result']['watts'][Std] < 0): data['result']['watts'][Std] = 0
+                    Prognose = data['result']['watts'][Std]
             else:
                     Prognose = 0
+
+            # print("Std, Prognose-Reservierung: ", Std, Prognose) 
+
 
             # Stundendaempung rechnen  mit BatSparFaktor
             tmp_Stundendaempfung = (BattVollUm - i) * BatSparFaktor
@@ -191,6 +208,13 @@ if __name__ == '__main__':
                     ###############################
     
                     data = loadWeatherData(config)
+
+                    # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
+                    PV_Reservierung_steuern = eval(config['Reservierung']['PV_Reservierung_steuern'])
+                    if  PV_Reservierung_steuern == 1:
+                        reservierungdata = loadPVReservierung(config)
+                        # print(reservierungdata)
+
                     gen24 = SymoGen24Connector.SymoGen24(config['gen24']['hostNameOrIp'], config['gen24']['port'], auto)
                     # print(data)
 
@@ -315,10 +339,10 @@ if __name__ == '__main__':
                             elif (BattStatusProz > BatterieVoll ):
                                 # Wenn Batterie voll, Volle Ladung
                                 aktuellerLadewert = MaxLadung
-                                DATA = setLadewert(MaxLadung)
+                                DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
-                                LadewertGrund = "Batterie voll"
+                                LadewertGrund = "           Batterie fast voll!!"
         
                             # PrognoseAbzugswert - 100 um Schaltverzögerung wieder nach unten zu erreichen
                             elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) or (PrognoseAbzugswert - 100 <= Grundlast):
@@ -389,7 +413,7 @@ if __name__ == '__main__':
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n\n"
                     else:
-                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS geschreiben!!\n\n"
+                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS zu schreiben!!\n\n"
 
                     # Ladungsspeichersteuerungsmodus aktivieren wenn nicht aktiv
                     # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
