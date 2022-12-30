@@ -1,4 +1,15 @@
-﻿[0.7.7] – 2022-09-25
+﻿[0.8.0] – 2023-01-12
+
+- README.md angepasst
+
+- Modul zur Reservierung von groesseren Menegen PV Leisung für Elektroautos usw. eingebaut.
+  Zum Betrieb ist ein Webserver mit PHP auf dem Steuerungsrechner noetig.
+  Weiteres siehe README
+
+
+
+
+[0.7.7] – 2022-09-25
 
 Änderung in SymoGen24Controller2.py
 

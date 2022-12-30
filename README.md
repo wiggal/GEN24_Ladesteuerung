@@ -1,6 +1,7 @@
-GEN24_Ladesteuerung
+GEN24_Ladesteuerung (getestet unter Python 3.8 und 3.9)
 
-Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen
+Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen,
+und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.
 
 Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.
 Herzlichen Dank an "godfuture"
@@ -9,7 +10,7 @@ Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv ist und
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
 
-Folgende Installationen erfolgten auf einem Ubuntu/Mint 
+Folgende Installationen erfolgten auf einem Ubuntu/Mint bzw. auf einem Raspberry Pi mit Debian GNU/Linux 11
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren
 
@@ -74,4 +75,23 @@ LoggingSymoGen24.py (optional)
 schreibt folgende Werte in die Log.csv zur Auswertung der Ergebnisse mit z.B. libreoffice Calc
 Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.solar,Aktuelle Ladegrenze,Batteriestand in Prozent
 
+
+#####################################################################
+
+Modul zur Reservierung von groesseren Mengen PV-Leistung
+(z.B. E-Autos)
+
+Das Modul ist in PHP programmiert und setzt einen entprechend konfigurierten Webserver (z.B. Apache) voraus.
+Konfiguration kann in der "config.php" angepasst werden.
+
+In meinem Fall ist dies der Apache:
+Installation:
+sudo apt install apache2 php
+In /etc/apache2/apache2.conf  -->> <Directory /home/GEN24/html/>
+In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /home/GEN24/html/
+
+Apache neu starten und Reservierung im Browser aufrufen.
+
+Alle eingetragenen Reservierungen werden in die Datei /home/GEN24/Watt_Reservierung.json geschrieben.
+Ist das Modul eingeschaltet (in /home/GEN24/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
 
