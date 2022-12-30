@@ -81,20 +81,18 @@ Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.s
 Modul zur Reservierung von groesseren Mengen PV-Leistung
 (z.B. E-Autos)
 
-Das Modul ist in PHP programmiert und setzt einen entprechend konfigurierten Webserver (z.B. Apache) voraus.
+Das Modul ist in PHP programmiert und setzt einen entprechend konfigurierten Webserver (z.B. Apache) voraus. <br>
 Konfiguration kann in der "config.php" angepasst werden.
 
 Bei Apache ist dies z.B.:
 
-Installation:
-
+Installation: <br>
 sudo apt install apache2 php <br>
-In /etc/apache2/apache2.conf  -->> <Directory /home/GEN24/html/>
-
-In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /home/GEN24/html/
+In /etc/apache2/apache2.conf  -->> <Directory /home/GEN24/html/> <br>
+In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /home/GEN24/html/ <br>
 
 Apache neu starten und Reservierung im Browser aufrufen.
 
-Alle eingetragenen Reservierungen werden in die Datei /home/GEN24/Watt_Reservierung.json geschrieben.
+Alle eingetragenen Reservierungen werden in die Datei /home/GEN24/Watt_Reservierung.json geschrieben. <br>
 Ist das Modul eingeschaltet (in /home/GEN24/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
 
