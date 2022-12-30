@@ -6,9 +6,6 @@
   Zum Betrieb ist ein Webserver mit PHP auf dem Steuerungsrechner noetig.
   Weiteres siehe README
 
-
-
-
 [0.7.7] – 2022-09-25
 
 Änderung in SymoGen24Controller2.py
