@@ -68,7 +68,8 @@ class SymoGen24:
             },
             "StorageDevice": {
                 "Battery_capa" : [40141, "uint16", 1],
-                "Battery_DC_Power" : [40315, "uint16", 1],
+                "Battery_DC_Power_in" : [40315, "uint16", 1],
+                "Battery_DC_Power_out" : [40335, "uint16", 1],
                 "Battery_SunspecID" : [40344, "uint16", 1],
                 "Battery_SoC" : [40352, "uint16", 1],
                 "Battery_Status" : [40355, "uint16", 1],
@@ -211,12 +212,17 @@ class SymoGen24:
         mpppt_1_power = self.read_data('MPPT_1_DC_Power')
         mpppt_2_power = self.read_data('MPPT_2_DC_Power')
         power_scale_tmp = np.float64(np.int16(self.read_data('MPPT_Power_Scale_Factor')))
-        return (mpppt_1_power + mpppt_2_power) * (10 ** power_scale_tmp)
+        return int((mpppt_1_power + mpppt_2_power) * (10 ** power_scale_tmp))
 
     def get_meter_power(self):
         meter_power_total = self.read_data('Meter_Power_Total')
         meter_power_scale_tmp = np.float64(np.int16(self.read_data('Meter_Power_Scale_Factor')))
-        return np.int16(meter_power_total) * (10 ** meter_power_scale_tmp)
+        return int(np.int16(meter_power_total) * (10 ** meter_power_scale_tmp))
+        
+    def get_batterie_power(self):
+        batterie_power_total = self.read_data('Battery_DC_Power_out') - self.read_data('Battery_DC_Power_in')
+        batterie_power_scale_tmp = np.float64(np.int16(self.read_data('MPPT_Power_Scale_Factor')))
+        return int(batterie_power_total * (10 ** batterie_power_scale_tmp))
         
 # Test program
 if __name__ == "__main__":
@@ -247,9 +253,14 @@ if __name__ == "__main__":
     # print(gen24.read_uint16(40070))
     # print(gen24.read_float(40098))
 
-    # print("Meter_Power_Scale_Factor", gen24.read_data("Meter_Power_Scale_Factor"))
+    print("Battery_DC_Power_in", gen24.read_data("Battery_DC_Power_in"))
+    print("Battery_DC_Power_out", gen24.read_data("Battery_DC_Power_out"))
+    print("Meter_Power_Scale_Factor", gen24.read_data("Meter_Power_Scale_Factor"))
     # print("Meter_Power_Total", gen24.read_data("Meter_Power_Total"))
     
+    # print("PV_Produktion ", gen24.get_mppt_power())
+    # print("Meter_Power ", gen24.get_meter_power())
+    print("Batterie_Power ", gen24.get_batterie_power())
     # PV_Produktion = gen24.get_mppt_power()
     # Meter_Power = gen24.get_meter_power()
     # print(datetime.now(), ",", PV_Produktion, ",", Meter_Power * -1)

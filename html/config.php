@@ -1,5 +1,5 @@
 <?php
-
+// Hier die Variablen für die PV-Reservierung definieren
 $PrognoseFile = "/home/GEN24/weatherData.json";
 $ReservierungsFile = "EV_Reservierung.json";
 $WattReservierungsFile = "/home/GEN24/Watt_Reservierung.json";

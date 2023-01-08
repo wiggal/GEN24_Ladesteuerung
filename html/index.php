@@ -74,6 +74,9 @@
  </head>
 
  <body>
+ <div  style="position:absolute; right:5%; top:3px;">
+ <input type=button onClick="location.href='hilfe.html'" value='Hilfeseite' ></div>
+
   <div class="container">
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">PV Planung ==&#62;&#62; speichern</button></div>
@@ -133,7 +136,7 @@ $Hintergrund_Rest = '#CCFFCC';
 } else {
 $Hintergrund_Rest = '#ff9090';
 }
-// Prognose in % von 11.4 KWp
+// Prognose in % von $PV_Leistung_KWp
 $ProgProzent = $Prognosewert / $PV_Leistung_KWp * 100;
 
 // Ausgabe der Summen
