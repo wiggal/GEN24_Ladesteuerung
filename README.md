@@ -37,31 +37,29 @@ Als Erstes muss ein start_WeatherData.. aufgerufen werden, damit Prognosedaten v
 
 Beispiele Crontabeintraege (Ausführrechte für die start_...sh skripte setzen nicht vergessen)
 
-*/5 05-20 * * * /DIR/start_LoggingSymoGen24.sh
+*/5 05-20 * * * /DIR/start_LoggingSymoGen24.sh <br>
+*/5 04-20 * * * /DIR/start_SymoGen24Controller2.sh <br>
+33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh <br>
+8 5,10,15,19 * * * /DIR/start_Solarprognose_WeatherData.py.sh <br>
 
-*/5 04-20 * * * /DIR/start_SymoGen24Controller2.sh
-
-33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh
-
-8 5,8,11,14 * * * /DIR/start_Solarprognose_WeatherData.py.sh
-
+### /DIR/Crontab.log jeden Montag abräumen <br>
+0 5 * * 1 mv /DIR/Crontab.log /home/GEN24/Crontab.log_weg <br>
 
 WeatherDataProvider2.py
 
-holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json
+holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json <br>
 Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 2 Std)
 
 Solarprognose_WeatherData.py 
 
-Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich,
-hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben.
-Holt die Sonnenstundenprognosen von solarprognose.de und schreibt sie in weatherData.json
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 3 Std)
+Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich, <br>
+hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben. <br>
+Holt die Sonnenstundenprognosen von solarprognose.de und schreibt sie in weatherData.json <br>
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (hier alle 3 Std) <br>
 
 SymoGen24Connector.py
 
-Wird von SymoGen24Controller2.py aufgerufen und
-stellt die Verbindung Zum Wechselrichter (GENR24 Plus) her.
+Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung Zum Wechselrichter (GENR24 Plus) her.
 
 
 SymoGen24Controller2.py
@@ -78,7 +76,8 @@ Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.s
 
 #####################################################################
 
-Modul zur Reservierung von groesseren Mengen PV-Leistung
+Modul zur Reservierung von groesseren Mengen PV-Leistung <br>
+======================================================= <br>
 (z.B. E-Autos)
 
 Das Modul ist in PHP programmiert und setzt einen entprechend konfigurierten Webserver (z.B. Apache) voraus. <br>
@@ -95,4 +94,14 @@ Apache neu starten und Reservierung im Browser aufrufen.
 
 Alle eingetragenen Reservierungen werden in die Datei /home/GEN24/Watt_Reservierung.json geschrieben. <br>
 Ist das Modul eingeschaltet (in /home/GEN24/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
+
+Batterieentladesteuerung <br>
+  Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab.<br>
+  ( Nur in Verbindung mit der "Reservierung von groesseren Mengen PV Leisung" möglich )<br>
+
+  Zum Beispiel unter folgenden Bedingungen:<br>
+
+            Akkuladestatus ist unter 80 %<br>
+        UND Reservierte Leistung zur aktuellen Stunde ist über 2KW<br>
+        UND Verbrauch im Haus ist größer als 90% der reservierten Leistung<br>
 

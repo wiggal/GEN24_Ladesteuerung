@@ -1,8 +1,34 @@
-﻿[0.8.0] – 2023-01-12
+﻿[0.8.1] – 2023-01-10
+
+Änderung in SymoGen24Connector.py
+
+- Funtion zum Auslesen der Batteriepower (Laden bzw. entladen)
+  get_batterie_power()
+
+html/hilfe.html hinzugefügt und in html/index.php eingebunden.
+
+Änderung in config.ini
+
+- Werte für Batterieentladesteuerung hinzugefügt.
+
+Änderung in SymoGen24Controller2.py
+
+- Batterieentladesteuerung hinzugefügt.
+  Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab.
+  ( Nur in Verbindung mit der "Reservierung von groesseren Mengen PV Leisung" möglich )
+
+  Zum Beispiel unter folgenden Bedingungen:
+
+            Akkuladestatus ist unter 80 %
+        UND Reservierte Leistung zur aktuellen Stunde ist über 2KW
+        UND Verbrauch im Haus ist größer als 90% der reservierten Leistung
+
+
+[0.8.0] – 2022-12-30
 
 - README.md angepasst
 
-- Modul zur Reservierung von groesseren Menegen PV Leisung für Elektroautos usw. eingebaut.
+- Modul zur Reservierung von groesseren Mengen PV Leisung für Elektroautos usw. eingebaut.
   Zum Betrieb ist ein Webserver mit PHP auf dem Steuerungsrechner noetig.
   Weiteres siehe README
 

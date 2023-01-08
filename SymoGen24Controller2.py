@@ -250,6 +250,8 @@ if __name__ == '__main__':
                     BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeKapazWatt)
                     aktuelleEinspeisung = int(gen24.get_meter_power() * -1)
                     aktuellePVProduktion = int(gen24.get_mppt_power())
+                    aktuelleBatteriePower = int(gen24.get_batterie_power())
+                    BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
     
                     # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
                     newPercent_schreiben = 0
@@ -372,7 +374,7 @@ if __name__ == '__main__':
 
                     if print_level == 1:
                         try:
-                            print()
+                            print("\n######### L A D E S T E U E R U N G #########\n")
                             print(datetime.now())
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognoseGesamt:        ", TagesPrognoseGesamt)
@@ -382,6 +384,7 @@ if __name__ == '__main__':
                             print("Grundlast_Summe für Tag:    ", Grundlast_Summe)
                             print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
+                            print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("LadewertGrund: ", LadewertGrund)
                             print("Bisheriger Ladewert/Watt:   ", int(oldPercent*BattganzeLadeKapazWatt/10000))
@@ -409,11 +412,11 @@ if __name__ == '__main__':
                         if len(argv) > 1 and (argv[1] == "schreiben"):
                             valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
                             bereits_geschrieben = 1
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben: " + str(newPercent) + "\n\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben: " + str(newPercent) + "\n"
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                     else:
-                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS zu schreiben!!\n\n"
+                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS zu schreiben!!\n"
 
                     # Ladungsspeichersteuerungsmodus aktivieren wenn nicht aktiv
                     # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
@@ -428,6 +431,56 @@ if __name__ == '__main__':
                     if print_level == 1:
                         print(Schreib_Ausgabe)
     
+                    ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
+
+                    Batterieentlandung_steuern = eval(config['Reservierung']['Batterieentlandung_steuern'])
+                    if  Batterieentlandung_steuern == 1 and PV_Reservierung_steuern == 1:
+                        print("######### E N T L A D E S T E U E R U N G #########\n")
+                        # Variablen bereitstellen
+                        BisLadestandEIN = eval(config['Reservierung']['BisLadestandEIN'])
+                        AbReservierungEIN = eval(config['Reservierung']['AbReservierungEIN'])
+                        MaxEntladung = eval(config['Reservierung']['MaxEntladung'])
+                        EntladungAus = eval(config['Reservierung']['EntladungAus'])
+                        GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
+                        aktStd = datetime.strftime(now, format_aktStd)
+
+                        if (reservierungdata.get(aktStd)):
+                            ReservierteWatt = reservierungdata[aktStd]
+                        else:
+                            ReservierteWatt = 0
+
+                        ## Werte zum Überprüfen ausgeben
+                        print("Batteriestatus in Prozent: ", BattStatusProz)
+                        print("BisLadestandEIN: ", BisLadestandEIN)
+                        print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
+                        print("Reservierung Watt: ", ReservierteWatt)
+                        print("AbReservierungEIN: ", AbReservierungEIN)
+                        print("Batterieentladegrenze in %: ", BatteryMaxDischargePercent)
+                        print()
+
+                        # Wenn .... Entladung ausschalten
+                        if (BattStatusProz < BisLadestandEIN) and (GesamtverbrauchHaus > ReservierteWatt * 0.9) and (ReservierteWatt > AbReservierungEIN):
+                            Neu_BatteryMaxDischargePercent = EntladungAus
+                        else:
+                            Neu_BatteryMaxDischargePercent = MaxEntladung
+
+                        Schreib_Ausgabe = ""
+
+                        if (Neu_BatteryMaxDischargePercent != BatteryMaxDischargePercent):
+                            if len(argv) > 1 and (argv[1] == "schreiben"):
+                                valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n\n"
+                            else:
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n\n"
+                        else:
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte der Batterieentladung ("+ str(Neu_BatteryMaxDischargePercent) + "%) sind identisch, NICHTS zu schreiben!!\n\n"
+
+
+                        if print_level == 1:
+                            print(Schreib_Ausgabe)
+
+                    ######## PV Reservierung ENDE
+
 
                     # FALLBACK des Wechselrichters bei Ausfall der Steuerung
                     if Fallback_on != 0:
