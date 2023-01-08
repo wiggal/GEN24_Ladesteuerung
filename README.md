@@ -101,7 +101,7 @@ Batterieentladesteuerung <br>
 
   Zum Beispiel unter folgenden Bedingungen:<br>
 
-    Akkuladestatus ist unter 80 %<br>
+  Akkuladestatus ist unter 80 %<br>
 UND Reservierte Leistung zur aktuellen Stunde ist über 2KW<br>
 UND Verbrauch im Haus ist größer als 90% der reservierten Leistung<br>
 
