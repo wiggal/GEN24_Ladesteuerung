@@ -36,15 +36,6 @@ def loadPVReservierung(config):
                 exit()
         return reservierungdata
 
-def holeGitHubConfig(Link, filename):
-    try:
-        web_ini = requests.get(Link, allow_redirects=True)
-        open(filename, 'wb').write(web_ini.content)
-        return("True")
-    except:
-        return("False")
-
-
 def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion ):
 
         # alle Prognodewerte zwischen aktueller Stunde und 22:00 lesen
