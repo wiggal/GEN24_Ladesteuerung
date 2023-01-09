@@ -13,15 +13,17 @@ html/hilfe.html hinzugefügt und in html/index.php eingebunden.
 
 Änderung in SymoGen24Controller2.py
 
+- Funktion zum Holen der Config von Github entfernt
+
 - Batterieentladesteuerung hinzugefügt.
   Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab.
   ( Nur in Verbindung mit der "Reservierung von groesseren Mengen PV Leisung" möglich )
 
   Zum Beispiel unter folgenden Bedingungen:
 
-            Akkuladestatus ist unter 80 %
-        UND Reservierte Leistung zur aktuellen Stunde ist über 2KW
-        UND Verbrauch im Haus ist größer als 90% der reservierten Leistung
+  Akkuladestatus ist unter 80 %
+  UND Reservierte Leistung zur aktuellen Stunde ist über 2KW
+  UND Verbrauch im Haus ist größer als 90% der reservierten Leistung
 
 
 [0.8.0] – 2022-12-30

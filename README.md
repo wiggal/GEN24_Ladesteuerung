@@ -42,7 +42,7 @@ Beispiele Crontabeintraege (Ausführrechte für die start_...sh skripte setzen n
 33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh <br>
 8 5,10,15,19 * * * /DIR/start_Solarprognose_WeatherData.py.sh <br>
 
-### /DIR/Crontab.log jeden Montag abräumen <br>
+Crontab.log jeden Montag abräumen <br>
 0 5 * * 1 mv /DIR/Crontab.log /home/GEN24/Crontab.log_weg <br>
 
 WeatherDataProvider2.py
