@@ -1,4 +1,4 @@
-﻿[0.8.1] – 2023-01-10
+﻿[0.8.1] – 2023-01-15
 
 Änderung in SymoGen24Connector.py
 
