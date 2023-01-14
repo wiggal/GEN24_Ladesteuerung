@@ -97,7 +97,7 @@ Alle eingetragenen Reservierungen werden in die Datei /home/GEN24/Watt_Reservier
 Ist das Modul eingeschaltet (in /home/GEN24/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
 
 Batterieentladesteuerung <br>
-  Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab.<br>
+  Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab, wenn sehr hohe reservierte Verbräuche anliegen.<br>
   ( Nur in Verbindung mit der "Reservierung von groesseren Mengen PV Leisung" möglich )<br>
 
   Zum Beispiel unter folgenden Bedingungen:<br>
