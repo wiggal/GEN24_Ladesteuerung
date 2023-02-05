@@ -1,4 +1,13 @@
-﻿[0.8.1] – 2023-01-15
+﻿[0.8.2] – 2023-02-05
+
+html/hilfe.html angepasst
+
+Änderung in SymoGen24Connector.py
+
+- die reservierte PV-Leistung wurde meisst mehrfach von der Prognose abgezogen. (Fehler bereinigt)
+- Änderungen bei der Protokollierung
+
+[0.8.1] – 2023-01-15
 
 Änderung in SymoGen24Connector.py
 

@@ -36,6 +36,20 @@ def loadPVReservierung(config):
                 exit()
         return reservierungdata
 
+def getPrognose(Stunde):
+        if data['result']['watts'].get(Stunde):
+            data_tmp = data['result']['watts'][Stunde]
+            # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
+            if ( PV_Reservierung_steuern == 1 and reservierungdata.get(Stunde)):
+                data_tmp = data['result']['watts'][Stunde] - reservierungdata[Stunde]
+                # Minuswerte verhindern
+                if ( data_tmp< 0): data_tmp = 0
+            getPrognose = data_tmp
+        else:
+            getPrognose = 0
+        return getPrognose
+
+
 def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion ):
 
         # alle Prognodewerte zwischen aktueller Stunde und 22:00 lesen
@@ -53,24 +67,17 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         while i < BattVollUm:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
-            if data['result']['watts'].get(Std):
-                    # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
-                    if ( PV_Reservierung_steuern == 1 and reservierungdata.get(Std)):
-                        data['result']['watts'][Std] = data['result']['watts'][Std] - reservierungdata[Std]
-                        if (data['result']['watts'][Std] < 0): data['result']['watts'][Std] = 0
-                    Prognose = data['result']['watts'][Std]
-            else:
-                    Prognose = 0
+            Prognose = getPrognose(Std)
 
-            # print("Std, Prognose-Reservierung: ", Std, Prognose) 
-
-
+            # AKTUELL AUS
             # Stundendaempung rechnen  mit BatSparFaktor
-            tmp_Stundendaempfung = (BattVollUm - i) * BatSparFaktor
-            if tmp_Stundendaempfung < 1:
-                tmp_Stundendaempfung = 1
+            #tmp_Stundendaempfung = (BattVollUm - i) * BatSparFaktor
+            #if tmp_Stundendaempfung < 1:
+            #    tmp_Stundendaempfung = 1
+            #Pro_Uebersch = (Prognose - AbzugWatt) * tmp_Stundendaempfung
+            # AKTUELL AUS evtl nicht nötig
 
-            Pro_Uebersch = (Prognose - AbzugWatt) / tmp_Stundendaempfung
+            Pro_Uebersch = (Prognose - AbzugWatt)
 
             # Prognosenspitzenwert für Resttag ermitteln
             if Prognose > Pro_Spitze:
@@ -99,7 +106,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             # Ab hier Ausgabe zum Vergleich mit der Tabelle Prognosewerte_Vergleichtabelle.ods
             #if i == Akt_Std:
             #    print("ACHTUNG: Im vorletzte Block sind die richtigen Werte zum Vergleich mit der Tabelle Prognosewerte_Vergleichtabelle.ods!!")
-            #print("Std, Akt_Minute, Prognose, Pro_Uebersch, tmp_Stundendaempfung :", i, Akt_Minute, int(Prognose), int(Pro_Uebersch), tmp_Stundendaempfung )
+            #print("Std, Akt_Minute, Prognose, Pro_Uebersch:", i, Akt_Minute, int(Prognose), int(Pro_Uebersch))
 
             i  += 1
 
@@ -107,19 +114,14 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # Hier noch den aktuellen Ladewert der Schleife ermitteln und im return mitgeben
         LadewertStd = datetime.strftime(now, format_aktStd)
         LadewertStd_naechste = datetime.strftime(now + timedelta(minutes = (60)), format_aktStd)
-        
-        if data['result']['watts'].get(LadewertStd):
-                Pro_Akt1 = (data['result']['watts'].get(LadewertStd))
-        else:
-                Pro_Akt1 = 0
 
-        if data['result']['watts'].get(LadewertStd_naechste):
-                Pro_Akt2 = (data['result']['watts'].get(LadewertStd_naechste))
-        else:
-                Pro_Akt2 = 0
-            
+        Pro_Akt1 = (getPrognose(LadewertStd))
+        Pro_Akt2 = (getPrognose(LadewertStd_naechste))
+
         # zu jeder Minute den genauen Zwischenwert mit den beiden Stundenprognosen rechnen
         Pro_Akt = int((Pro_Akt1 * (60 - Akt_Minute) + Pro_Akt2 * Akt_Minute) / 60)
+        if ( Pro_Akt< 0): Pro_Akt = 0
+        # print("Std, Pro_Akt1, Pro_Akt2, Pro_Akt: ", LadewertStd, Pro_Akt1, Pro_Akt2, Pro_Akt)
 
         # Nun den Aktuellen Ladewert rechnen 
 
@@ -135,7 +137,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # BatWaitFaktor hier anwenden
         Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
-        # BattStatusProz < 75; damit die Ladung nicht abschlatet, wenn die Batterie fast voll ist
+        # BattStatusProz < 75; damit die Ladung nicht abschaltet, wenn die Batterie fast voll ist
         if Tagessumme_Faktor > BattKapaWatt_akt and BatWaitFaktor != 0 and BattStatusProz < 75 and Akt_Std < 13 :
             aktuellerLadewert = LadungAus
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
@@ -365,8 +367,8 @@ if __name__ == '__main__':
 
                     if print_level == 1:
                         try:
+                            print("************* BEGINN: ", datetime.now(),"************* ")
                             print("\n######### L A D E S T E U E R U N G #########\n")
-                            print(datetime.now())
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognoseGesamt:        ", TagesPrognoseGesamt)
                             print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
@@ -449,7 +451,7 @@ if __name__ == '__main__':
                         print("Batterieentladegrenze in %: ", BatteryMaxDischargePercent)
                         print()
 
-                        # Wenn .... Entladung ausschalten
+                        # Wenn folgende Bedingungen wahr, Entladung ausschalten
                         if (BattStatusProz < BisLadestandEIN) and (GesamtverbrauchHaus > ReservierteWatt * 0.9) and (ReservierteWatt > AbReservierungEIN):
                             Neu_BatteryMaxDischargePercent = EntladungAus
                         else:
@@ -460,12 +462,11 @@ if __name__ == '__main__':
                         if (Neu_BatteryMaxDischargePercent != BatteryMaxDischargePercent):
                             if len(argv) > 1 and (argv[1] == "schreiben"):
                                 valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n\n"
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n"
                             else:
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n\n"
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladung wurde NICHT " + str(Neu_BatteryMaxDischargePercent) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte der Batterieentladung ("+ str(Neu_BatteryMaxDischargePercent) + "%) sind identisch, NICHTS zu schreiben!!\n\n"
-
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte der Batterieentladung ("+ str(Neu_BatteryMaxDischargePercent) + "%) sind identisch, NICHTS zu schreiben!!\n"
 
                         if print_level == 1:
                             print(Schreib_Ausgabe)
@@ -507,6 +508,7 @@ if __name__ == '__main__':
                         if print_level == 1:
                             print(Fallback_Schreib_Ausgabe)
                     # FALLBACK ENDE
+                    print("************* ENDE: ", datetime.now(),"************* \n")
 
 
             finally:
