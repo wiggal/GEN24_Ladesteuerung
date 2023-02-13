@@ -1,4 +1,14 @@
-﻿[0.8.2] – 2023-02-05
+﻿[0.8.3] – 2023-02-13
+
+Änderung in SymoGen24Controller2.py
+
+Schaltverzögerungen eingebaut, damit nicht so oft auf den WR geschrieben wird, bei:
+  - Ladesteuerung,  Mindestbatterieladung
+  - Entladesteuerung, BisLadestandEIN
+
+- Erklärungen in config.ini.info bezüglich Reservierung ergänzt
+
+[0.8.2] – 2023-02-05
 
 html/hilfe.html angepasst
 

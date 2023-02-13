@@ -245,10 +245,11 @@ if __name__ == '__main__':
                     aktuellePVProduktion = int(gen24.get_mppt_power())
                     aktuelleBatteriePower = int(gen24.get_batterie_power())
                     BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
-    
+
                     # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
                     newPercent_schreiben = 0
                     oldPercent = gen24.read_data('BatteryMaxChargePercent')
+                    alterLadewert = int(oldPercent*BattganzeLadeKapazWatt/10000)
     
                     format_aktStd = "%Y-%m-%d %H:00:00"
     
@@ -289,6 +290,11 @@ if __name__ == '__main__':
                         i += 100
                     # Nun habe ich die Werte und muss hier Verzweigen
     
+                    # Schaltverzögerung für MindBattLad
+                    if (alterLadewert+2 > MaxLadung):
+                        MindBattLad = MindBattLad +5
+                    # print("MaxLadung, alterLadewert, MindBattLad:", MaxLadung, alterLadewert, MindBattLad)
+
                     if ((BattStatusProz < MindBattLad)):
                         # volle Ladung ;-)
                         aktuellerLadewert = MaxLadung
@@ -380,7 +386,7 @@ if __name__ == '__main__':
                             print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("LadewertGrund: ", LadewertGrund)
-                            print("Bisheriger Ladewert/Watt:   ", int(oldPercent*BattganzeLadeKapazWatt/10000))
+                            print("Bisheriger Ladewert/Watt:   ", alterLadewert)
                             print("Bisheriger Ladewert/Prozent:", oldPercent/100,"%")
                             print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
                             print("Neuer Ladewert/Prozent:     ", newPercent/100,"%")
@@ -452,7 +458,9 @@ if __name__ == '__main__':
                         print()
 
                         # Wenn folgende Bedingungen wahr, Entladung ausschalten
-                        if (BattStatusProz < BisLadestandEIN) and (GesamtverbrauchHaus > ReservierteWatt * 0.9) and (ReservierteWatt > AbReservierungEIN):
+                        # Schaltverzögerung berechnen und anbringen.
+                        Entladung_Daempfung = 5 - BatteryMaxDischargePercent/100*5
+                        if (BattStatusProz < (BisLadestandEIN + Entladung_Daempfung)) and (GesamtverbrauchHaus > ReservierteWatt * 0.9) and (ReservierteWatt > AbReservierungEIN):
                             Neu_BatteryMaxDischargePercent = EntladungAus
                         else:
                             Neu_BatteryMaxDischargePercent = MaxEntladung
