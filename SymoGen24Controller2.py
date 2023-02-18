@@ -245,6 +245,8 @@ if __name__ == '__main__':
                     aktuellePVProduktion = int(gen24.get_mppt_power())
                     aktuelleBatteriePower = int(gen24.get_batterie_power())
                     BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
+                    Push_Message_EIN = eval(config['messaging']['Push_Message_EIN'])
+                    Push_Message_Url = config['messaging']['Push_Message_Url']
 
                     # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
                     newPercent_schreiben = 0
@@ -290,31 +292,31 @@ if __name__ == '__main__':
                         i += 100
                     # Nun habe ich die Werte und muss hier Verzweigen
     
-                    # Schaltverzögerung für MindBattLad
-                    if (alterLadewert+2 > MaxLadung):
-                        MindBattLad = MindBattLad +5
-                    # print("MaxLadung, alterLadewert, MindBattLad:", MaxLadung, alterLadewert, MindBattLad)
-
-                    if ((BattStatusProz < MindBattLad)):
-                        # volle Ladung ;-)
-                        aktuellerLadewert = MaxLadung
-                        DATA = setLadewert(MaxLadung)
+                    # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
+                    if FesteLadeleistung > 0:
+                        DATA = setLadewert(FesteLadeleistung)
+                        aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
-                        newPercent_schreiben = DATA[1]
-                        LadewertGrund = "BattStatusProz < MindBattLad"
+                        if newPercent == oldPercent:
+                            newPercent_schreiben = 0
+                        else:
+                            newPercent_schreiben = 1
+                        LadewertGrund = "FesteLadeleistung"
     
                     else:
-    
-                        # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
-                        if FesteLadeleistung > 0:
-                            DATA = setLadewert(FesteLadeleistung)
-                            aktuellerLadewert = FesteLadeleistung
+
+                        # Schaltverzögerung für MindBattLad
+                        if (alterLadewert+2 > MaxLadung):
+                            MindBattLad = MindBattLad +5
+                        # print("MaxLadung, alterLadewert, MindBattLad:", MaxLadung, alterLadewert, MindBattLad)
+
+                        if ((BattStatusProz < MindBattLad)):
+                            # volle Ladung ;-)
+                            aktuellerLadewert = MaxLadung
+                            DATA = setLadewert(MaxLadung)
                             newPercent = DATA[0]
-                            if newPercent == oldPercent:
-                                newPercent_schreiben = 0
-                            else:
-                                newPercent_schreiben = 1
-                            LadewertGrund = "FesteLadeleistung"
+                            newPercent_schreiben = DATA[1]
+                            LadewertGrund = "BattStatusProz < MindBattLad"
     
                         else:
     
@@ -406,12 +408,14 @@ if __name__ == '__main__':
 
                     bereits_geschrieben = 0
                     Schreib_Ausgabe = ""
+                    Push_Schreib_Ausgabe = ""
                     # Neuen Ladewert in Prozent schreiben, wenn newPercent_schreiben == 1
                     if newPercent_schreiben == 1:
                         if len(argv) > 1 and (argv[1] == "schreiben"):
                             valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
                             bereits_geschrieben = 1
                             Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben: " + str(newPercent) + "\n"
+                            Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                     else:
@@ -424,6 +428,7 @@ if __name__ == '__main__':
                             Ladelimit = gen24.write_data('StorageControlMode', 3 )
                             bereits_geschrieben = 1
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu geschrieben.\n"
+                            Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
 
@@ -471,6 +476,7 @@ if __name__ == '__main__':
                             if len(argv) > 1 and (argv[1] == "schreiben"):
                                 valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n"
+                                Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladung wurde NICHT " + str(Neu_BatteryMaxDischargePercent) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                         else:
@@ -478,6 +484,12 @@ if __name__ == '__main__':
 
                         if print_level == 1:
                             print(Schreib_Ausgabe)
+
+                        # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+                        if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
+                            apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'))
+                            print("PushMeldung an ", Push_Message_Url, " gesendet.")
+
 
                     ######## PV Reservierung ENDE
 

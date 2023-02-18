@@ -1,4 +1,18 @@
-﻿[0.8.3] – 2023-02-13
+﻿[0.8.4] – 2023-02-18
+
+Änderung in SymoGen24Controller2.py
+
+- FesterLadeleistung an erste Stelle gezogen, war bisher hinter MindBattLad,
+  dadurch wurde "FesterLadeleistung" erst aktiv, wenn der Batteriestand über MindBattLad war.
+
+NEUE FUNKTION [messaging] ermöglicht eine Nachricht über https://ntfy.sh/ auf das Smartphone,
+              wenn auf den WR geschrieben wird.
+
+- Patameter zur Steuerung in config.ini unter [messaging] eingebaut
+- Funtionalität in SymoGen24Controller2.py eingebaut
+
+
+[0.8.3] – 2023-02-13
 
 Änderung in SymoGen24Controller2.py
 
