@@ -292,6 +292,13 @@ if __name__ == '__main__':
                         i += 100
                     # Nun habe ich die Werte und muss hier Verzweigen
     
+                    # Wenn über die PV-Planung Volle Ladung angewählt wurde
+                    MaxladungDurchPV_Planung = ""
+                    if (PV_Reservierung_steuern == 1) and (reservierungdata.get('VollePulle')):
+                        if (reservierungdata.get('VollePulle') == 2000):
+                            FesteLadeleistung = MaxLadung
+                            MaxladungDurchPV_Planung = "Maximale Ladung in PV-Planung ausgewählt."
+
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                     if FesteLadeleistung > 0:
                         DATA = setLadewert(FesteLadeleistung)
@@ -301,7 +308,10 @@ if __name__ == '__main__':
                             newPercent_schreiben = 0
                         else:
                             newPercent_schreiben = 1
-                        LadewertGrund = "FesteLadeleistung"
+                        if MaxladungDurchPV_Planung == "":
+                            LadewertGrund = "FesteLadeleistung"
+                        else:
+                            LadewertGrund = MaxladungDurchPV_Planung
     
                     else:
 
