@@ -1,4 +1,10 @@
-﻿[0.8.5] – 2023-02-24
+﻿[0.8.6] – 2023-03-01
+
+Änderung im Solarprognose_WeatherData.py
+- KW_Faktor eingefügt, falls sich die Anlagengröße auf dem Dach zu der in Solarprognose unterscheidet.
+
+
+[0.8.5] – 2023-02-24
 
 Änderung im Reservierungsmodul:
 - Mit der Option "Hausakku mit voller Kapazität laden!!" wird die volle Batterieladung direkt nach dem Sichern eingeschaltet.
