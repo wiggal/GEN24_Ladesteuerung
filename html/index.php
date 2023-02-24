@@ -70,6 +70,69 @@
 	position:relative;
 	top:1px;
   }
+  form.example {
+  /*
+  width: 100%;
+  float: left;
+  border:1px dotted red;
+  box-sizing: border-box;
+  margin: 15px 0;
+  */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+  [type="checkbox"] {
+  position: relative;
+  left: 30px;
+  top: 0px;
+  z-index: 0;
+  -webkit-appearance: none;
+}
+[type="checkbox"] + label {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 24px;
+  line-height: 1.3;
+  padding-left:70px;
+  position: relative;
+  margin-top: -30px;
+}
+[type="checkbox"] + label:before {
+  width: 60px;
+  height: 30px;
+  border-radius: 30px;
+  border: 2px solid #ddd;
+  background-color: #EEE;
+  content: "";
+  margin-right: 15px;
+  transition: background-color 0.5s linear;
+  z-index: 5;
+  position: absolute;
+  left: 0px;
+}
+[type="checkbox"] + label:after {
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+  background-color: #fff;
+  content: "";
+  transition: margin 0.1s linear;
+  box-shadow: 0px 0px 5px #aaa;
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  z-index: 10;
+}
+[type="checkbox"]:checked + label:before {
+  background-color: #44c767;
+}
+[type="checkbox"]:checked + label:after {
+  margin: 0 0 0 30px;
+}
   </style>
  </head>
 
@@ -81,11 +144,22 @@
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">PV Planung ==&#62;&#62; speichern</button></div>
    <br />
+
+   <br />
    <div id="csv_file_data">
 <?php
 include "config.php";
 $Prognose = json_decode(file_get_contents($PrognoseFile), true);
 $EV_Reservierung = json_decode(file_get_contents($ReservierungsFile), true);
+
+$VollePulle_check = '';
+if (!isset($EV_Reservierung['VollePulle']['Res_Feld1'])) $EV_Reservierung['VollePulle']['Res_Feld1'] ='';
+// echo $EV_Reservierung['VollePulle']['Res_Feld1'];
+if ($EV_Reservierung['VollePulle']['Res_Feld1'] == 1) $VollePulle_check = 'checked';
+echo "<form class=\"example\"><input type=\"checkbox\" id=\"VollePulle\" $VollePulle_check>";
+echo "<label for=\"VollePulle\"> Hausakku mit voller Kapazität laden!!</label>";
+echo "</form><br>";
+
 echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>Prognose(KW)</th><th>Rest</th><th>$Res_Feld1</th><th>$Res_Feld2</th></tr>";
 echo "\n";
 
@@ -192,6 +266,14 @@ $(document).ready(function(){
   $('.Res_Feld2').each(function(){
    Res_Feld2.push($(this).text());
   });
+  const js = document.querySelector('#VollePulle');
+  if (js.checked) {
+  Tag_Zeit.push("VollePulle");
+  Res_Feld1.push(1);
+  Res_Feld2.push(1);
+  // alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
+  }
+
   $.ajax({
    url:"speichern.php",
    method:"post",
@@ -199,7 +281,6 @@ $(document).ready(function(){
    success:function(data)
    {
     location.reload();
-    //$('#csv_file_data').html('<div class="alert alert-success">Daten erfolgreich gespeichert!</div>');
    }
   })
  });

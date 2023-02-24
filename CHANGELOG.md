@@ -1,4 +1,13 @@
-﻿[0.8.4] – 2023-02-18
+﻿[0.8.5] – 2023-02-24
+
+Änderung im Reservierungsmodul:
+- Mit der Option "Hausakku mit voller Kapazität laden!!" wird die volle Batterieladung direkt nach dem Sichern eingeschaltet.
+
+Änderung in SymoGen24Controller2.py
+
+- Volle Batterieladung aus Reservierungsmodul eingebaut.
+
+[0.8.4] – 2023-02-18
 
 Änderung in SymoGen24Controller2.py
 
