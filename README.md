@@ -107,5 +107,5 @@ UND Reservierte Leistung zur aktuellen Stunde ist über 2KW<br>
 UND Verbrauch im Haus ist größer als 90% der reservierten Leistung<br>
 
 Mit der Option "Hausakku mit voller Kapazität laden!!" wird die volle Batterieladung direkt nach dem Sichern eingeschaltet,
-und die Prognosebasierte Ladesteuerung zeitweise deaktivieren.<br>
+und die prognosebasierte Ladesteuerung zeitweise deaktivieren.<br>
 
