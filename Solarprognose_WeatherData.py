@@ -37,7 +37,7 @@ def loadLatestWeatherData():
 
     for key, value in json_data1.get('data',{}).items():
         key_neu = str(datetime.fromtimestamp(value[0]))
-        dict_watts['result']['watts'][key_neu] = int(value[1]*1000)
+        dict_watts['result']['watts'][key_neu] = int(value[1]*1000*KW_Faktor)
     return(dict_watts)
         
     
@@ -58,6 +58,7 @@ if __name__ == '__main__':
     item = config['solarprognose']['item']
     id = eval(config['solarprognose']['id'])
     type = config['solarprognose']['type']
+    KW_Faktor = eval(config['solarprognose']['KW_Faktor'])
     algorithm = config['solarprognose']['algorithm']
     dataAgeMaxInMinutes = eval(config['solarprognose']['dataAgeMaxInMinutes'])
     WaitSec = eval(config['solarprognose']['WaitSec'])
