@@ -153,6 +153,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             aktuellerLadewert = MaxLadung
 
         # Wenn  PV-Produktion > WR_Kapazitaet 
+        if aktuellerLadewert < 0: aktuellerLadewert=0
         if (aktuellePVProduktion - WR_Kapazitaet > aktuellerLadewert ):
            aktuellerLadewert = int(aktuellePVProduktion - WR_Kapazitaet)
            LadewertGrund = "PV-Produktion > WR_Kapazitaet"
