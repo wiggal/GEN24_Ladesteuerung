@@ -1,4 +1,4 @@
-﻿[0.8.6] – 2023-03-01
+﻿[0.8.6] – 2023-03-20
 
 Änderung im Solarprognose_WeatherData.py
 - KW_Faktor eingefügt, falls sich die Anlagengröße auf dem Dach zu der in Solarprognose unterscheidet.
