@@ -148,7 +148,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             aktuellerLadewert = int(aktuellerUeberschuss)
             LadewertGrund = "aktuelleEinspeisung + aktueller Ladewert > Einspeisegrenze"
 
-        # Ladeleistung auf 30% Kappung begrenzen
+        # Ladeleistung auf MaxLadung begrenzen
         if (aktuellerLadewert > MaxLadung):
             aktuellerLadewert = MaxLadung
 
@@ -295,10 +295,10 @@ if __name__ == '__main__':
     
                     # Wenn über die PV-Planung Volle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
-                    if (PV_Reservierung_steuern == 1) and (reservierungdata.get('VollePulle')):
-                        if (reservierungdata.get('VollePulle') == 2000):
-                            FesteLadeleistung = MaxLadung
-                            MaxladungDurchPV_Planung = "Maximale Ladung in PV-Planung ausgewählt."
+                    if (PV_Reservierung_steuern == 1) and (reservierungdata.get('ManuelleSteuerung')):
+                        FesteLadeleistung = MaxLadung * reservierungdata.get('ManuelleSteuerung')
+                        if (reservierungdata.get('ManuelleSteuerung') != 0):
+                            MaxladungDurchPV_Planung = "Manuelle Ladesteuerung in PV-Planung ausgewählt."
 
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                     if FesteLadeleistung > 0:

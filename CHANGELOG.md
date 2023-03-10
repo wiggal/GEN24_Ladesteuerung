@@ -6,6 +6,13 @@
 Änderung in SymoGen24Controller2.py
 - Wenn die Prognose ins Minus ging, wurde die überschreitung der Wechselrichterkapazietät falsch berechnet. -Bereinigt
 
+Änderung im Reservierungsmodul:
+- Mit "Hausakkuladung" kann nun unter 4 Otionen ausgeählt werden:
+    „AUTO“ = Automatische Ladesteuerung nach Prognose
+    „AUS“    = Batterieladung wird ausgeschaltet
+    „HALB“ = Batterieladung erfolgt mit halber Leistung
+    „VOLL“ = Batterieladung erfolgt mit voller Leistung
+
 [0.8.5] – 2023-02-24
 
 Änderung im Reservierungsmodul:
