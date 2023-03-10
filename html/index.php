@@ -83,56 +83,88 @@
   align-items: center;
   padding: 15px;
 }
-  [type="checkbox"] {
-  position: relative;
-  left: 30px;
-  top: 0px;
-  z-index: 0;
-  -webkit-appearance: none;
+/* RADIOBUTTON */
+.wrapper{
+  display: inline-flex;
+  background: #fff;
+  align-items: center;
+  padding: 20px 15px;
+  box-shadow: 5px 5px 30px rgba(0,0,0,0.2);
 }
-[type="checkbox"] + label {
-  position: relative;
-  display: block;
+.wrapper .option{
+  background: #fff;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin: 0 10px;
+  border-radius: 5px;
   cursor: pointer;
-  font-family: sans-serif;
-  font-size: 24px;
-  line-height: 1.3;
-  padding-left:70px;
+  padding: 0 10px;
+  border: 2px solid lightgrey;
+  transition: all 0.3s ease;
+}
+.wrapper .option .dot{
+  height: 20px;
+  width: 20px;
+  background: #d9d9d9;
+  border-radius: 50%;
   position: relative;
-  margin-top: -30px;
 }
-[type="checkbox"] + label:before {
-  width: 60px;
-  height: 30px;
-  border-radius: 30px;
-  border: 2px solid #ddd;
-  background-color: #EEE;
-  content: "";
-  margin-right: 15px;
-  transition: background-color 0.5s linear;
-  z-index: 5;
+.wrapper .option .dot::before{
   position: absolute;
-  left: 0px;
-}
-[type="checkbox"] + label:after {
-  width: 30px;
-  height: 30px;
-  border-radius: 30px;
-  background-color: #fff;
   content: "";
-  transition: margin 0.1s linear;
-  box-shadow: 0px 0px 5px #aaa;
-  position: absolute;
-  left: 2px;
-  top: 2px;
-  z-index: 10;
+  top: 4px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
+  background: #44c767;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(1.5);
+  transition: all 0.3s ease;
 }
-[type="checkbox"]:checked + label:before {
-  background-color: #44c767;
+input[type="radio"]{
+  display: none;
 }
-[type="checkbox"]:checked + label:after {
-  margin: 0 0 0 30px;
+#auto:checked:checked ~ .auto,
+#aus:checked:checked ~ .aus,
+#halb:checked:checked ~ .halb,
+#voll:checked:checked ~ .voll{
+  border-color: #44c767;
+  background: #44c767;
 }
+#auto:checked:checked ~ .auto .dot,
+#aus:checked:checked ~ .aus .dot,
+#halb:checked:checked ~ .halb .dot,
+#voll:checked:checked ~ .voll .dot{
+  background: #000;
+}
+#auto:checked:checked ~ .auto .dot::before,
+#aus:checked:checked ~ .aus .dot::before,
+#halb:checked:checked ~ .halb .dot::before,
+#voll:checked:checked ~ .voll .dot::before{
+  opacity: 1;
+  transform: scale(1);
+}
+.wrapper .option span{
+  font-family:Arial;
+  font-size:130%;
+  color: #808080;
+}
+.wrapper .beschiftung{
+  font-family:Arial;
+  font-size:150%;
+  color: #000000;
+}
+#auto:checked:checked ~ .auto span,
+#aus:checked:checked ~ .aus span,
+#halb:checked:checked ~ .halb span,
+#voll:checked:checked ~ .voll span{
+  color: #000;
+}
+
   </style>
  </head>
 
@@ -145,21 +177,57 @@
   <div align="center"><button type="button" id="import_data" class="speichern">PV Planung ==&#62;&#62; speichern</button></div>
    <br />
 
-   <br />
-   <div id="csv_file_data">
 <?php
 include "config.php";
 $Prognose = json_decode(file_get_contents($PrognoseFile), true);
 $EV_Reservierung = json_decode(file_get_contents($ReservierungsFile), true);
 
-$VollePulle_check = '';
-if (!isset($EV_Reservierung['VollePulle']['Res_Feld1'])) $EV_Reservierung['VollePulle']['Res_Feld1'] ='';
-// echo $EV_Reservierung['VollePulle']['Res_Feld1'];
-if ($EV_Reservierung['VollePulle']['Res_Feld1'] == 1) $VollePulle_check = 'checked';
-echo "<form class=\"example\"><input type=\"checkbox\" id=\"VollePulle\" $VollePulle_check>";
-echo "<label for=\"VollePulle\"> Hausakku mit voller Kapazität laden!!</label>";
-echo "</form><br>";
+//$ManuelleSteuerung_check = array('auto', 'aus', 'halb', 'voll');
+$ManuelleSteuerung_check = array(
+    "auto" => "",
+    "aus" => "",
+    "halb" => "",
+    "voll" => "",
+);
 
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0) $ManuelleSteuerung_check['auto'] = 'checked';
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.000001) $ManuelleSteuerung_check['aus'] = 'checked';
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.0005) $ManuelleSteuerung_check['halb'] = 'checked';
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.001) $ManuelleSteuerung_check['voll'] = 'checked';
+?>
+
+<center>
+<div class="wrapper">
+<div class="beschiftung" title="Ladung des Hausakkus mit einem Anteil der konfigurierten Maximallagung 
+                  (Auto=% nach Prognose, AUS=0%, HALB=50%, VOLL=100%)">
+<nobr>Hausakkuladung</nobr>
+</div>
+ <input type="radio" name="hausakkuladung" id="auto" value="0" <?php echo $ManuelleSteuerung_check['auto'] ?>>
+ <input type="radio" name="hausakkuladung" id="aus" value="0.000001" <?php echo $ManuelleSteuerung_check['aus'] ?> >
+ <input type="radio" name="hausakkuladung" id="halb" value="0.0005" <?php echo $ManuelleSteuerung_check['halb'] ?> >
+ <input type="radio" name="hausakkuladung" id="voll" value="0.001" <?php echo $ManuelleSteuerung_check['voll'] ?> >
+   <label for="auto" class="option auto">
+     <div class="dot"></div>
+      <span>&nbsp;AUTO</span>
+      </label>
+   <label for="aus" class="option aus">
+     <div class="dot"></div>
+      <span>&nbsp;AUS</span>
+      </label>
+   <label for="halb" class="option halb">
+     <div class="dot"></div>
+      <span>&nbsp;HALB</span>
+   </label>
+   <label for="voll" class="option voll">
+     <div class="dot"></div>
+      <span>&nbsp;VOLL</span>
+   </label>
+</div>
+</center>
+   <br />
+   <div id="csv_file_data">
+
+<?php
 echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>Prognose(KW)</th><th>Rest</th><th>$Res_Feld1</th><th>$Res_Feld2</th></tr>";
 echo "\n";
 
@@ -266,12 +334,17 @@ $(document).ready(function(){
   $('.Res_Feld2').each(function(){
    Res_Feld2.push($(this).text());
   });
-  const js = document.querySelector('#VollePulle');
-  if (js.checked) {
-  Tag_Zeit.push("VollePulle");
-  Res_Feld1.push(1);
-  Res_Feld2.push(1);
-  // alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
+  const js = document.querySelectorAll('input[name="hausakkuladung"]');
+  for(var i=0; i < js.length; i++){
+        if(js[i].checked == true){
+            js_value = js[i].value;
+        }
+    }
+  if (js != "") {
+  Tag_Zeit.push("ManuelleSteuerung");
+  Res_Feld1.push(js_value);
+  Res_Feld2.push(0);
+  //alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
   }
 
   $.ajax({
