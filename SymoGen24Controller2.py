@@ -134,6 +134,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # Batterieladewert mit allen Einfluessen aus der Prognose rechnen
         aktuellerLadewert = int((Pro_Akt - AbzugWatt)/Stundendaempfung)
         LadewertGrund = "Prognoseberechnung / Stundendaempfung"
+        if aktuellerLadewert < 0: aktuellerLadewert = 0
 
         # BatWaitFaktor hier anwenden
         Tagessumme_Faktor = int((Pro_Ertrag_Tag - Grundlast_Sum) / (BatWaitFaktor_Max - BatWaitFaktor + 1))
@@ -153,7 +154,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             aktuellerLadewert = MaxLadung
 
         # Wenn  PV-Produktion > WR_Kapazitaet 
-        if aktuellerLadewert < 0: aktuellerLadewert=0
         if (aktuellePVProduktion - WR_Kapazitaet > aktuellerLadewert ):
            aktuellerLadewert = int(aktuellePVProduktion - WR_Kapazitaet)
            LadewertGrund = "PV-Produktion > WR_Kapazitaet"
