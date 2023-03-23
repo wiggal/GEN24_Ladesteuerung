@@ -1,4 +1,9 @@
-﻿[0.8.6] – 2023-03-20
+﻿[0.8.7] – 2023-03-23
+
+Änderung in SymoGen24Controller2.py
+- Messaging wurde nur ausgeführt, wenn Batterieentlandesteuerung aktiv ist: fixed
+
+[0.8.6] – 2023-03-20
 
 Änderung im Solarprognose_WeatherData.py
 - KW_Faktor eingefügt, falls sich die Anlagengröße auf dem Dach zu der in Solarprognose unterscheidet.
