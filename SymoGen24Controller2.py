@@ -496,10 +496,10 @@ if __name__ == '__main__':
                         if print_level == 1:
                             print(Schreib_Ausgabe)
 
-                        # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
-                        if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
-                            apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'))
-                            print("PushMeldung an ", Push_Message_Url, " gesendet.")
+                    # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+                    if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
+                        apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'))
+                        print("PushMeldung an ", Push_Message_Url, " gesendet.")
 
 
                     ######## PV Reservierung ENDE
