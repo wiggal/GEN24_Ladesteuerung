@@ -1,3 +1,10 @@
+# Da Programm nur mit pyModbusTCP Version 0.1.10 lauffähig hier abprüfen
+import pyModbusTCP
+if (pyModbusTCP.__version__ != '0.1.10'):
+    print(" pyModbusTCP Version =", pyModbusTCP.__version__ ,"!")
+    print(" Bitte pyModbusTCP Version 0.1.10 installieren!")
+    exit()
+
 from pyModbusTCP.client import ModbusClient
 from pyModbusTCP import utils
 from datetime import datetime

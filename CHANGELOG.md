@@ -1,4 +1,12 @@
-﻿[0.8.7] – 2023-03-23
+﻿[0.8.8] – 2023-05-01
+
+Änderung in SymoGen24Controller2.py
+- Message an ntfy.sh optisch aufbepeppt ;-)
+
+Änderung in SymoGen24Connector.py
+- Da Programm nur mit pyModbusTCP Version 0.1.10 lauffähig abprüfen
+
+[0.8.7] – 2023-03-23
 
 Änderung in SymoGen24Controller2.py
 - Messaging wurde nur ausgeführt, wenn Batterieentlandesteuerung aktiv ist: fixed
