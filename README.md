@@ -44,7 +44,7 @@ Beispiele Crontabeintraege (Ausführrechte für die start_...sh skripte setzen n
 8 5,10,15,19 * * * /DIR/start_Solarprognose_WeatherData.py.sh <br>
 
 Crontab.log jeden Montag abräumen <br>
-0 5 * * 1 mv /DIR/Crontab.log /home/GEN24/Crontab.log_weg <br>
+0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
 
 WeatherDataProvider2.py
 
@@ -88,13 +88,13 @@ Bei Apache ist dies z.B.:
 
 Installation: <br>
 sudo apt install apache2 php <br>
-In /etc/apache2/apache2.conf  -->> <Directory /home/GEN24/html/> <br>
-In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /home/GEN24/html/ <br>
+In /etc/apache2/apache2.conf  -->> <Directory /DIR/html/> <br>
+In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /DIR/html/ <br>
 
 Apache neu starten und Reservierung im Browser aufrufen.
 
-Alle eingetragenen Reservierungen werden in die Datei /home/GEN24/Watt_Reservierung.json geschrieben. <br>
-Ist das Modul eingeschaltet (in /home/GEN24/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
+Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
+Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
 
 Batterieentladesteuerung <br>
   Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab, wenn sehr hohe reservierte Verbräuche anliegen.<br>
