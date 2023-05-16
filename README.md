@@ -94,7 +94,10 @@ In /etc/apache2/apache2.conf  <br>
 In /etc/apache2/sites-available/000-default.conf <br>
 DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
-Apache neu starten und Reservierung im Browser aufrufen.
+Apache neu starten <br>
+sudo systemctl restart apache2 <br>
+
+und Reservierung im Browser aufrufen (IP oder localen Namen des RasberryPi).
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
 Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
