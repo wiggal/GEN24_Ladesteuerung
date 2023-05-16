@@ -88,8 +88,11 @@ Bei Apache ist dies z.B.:
 
 Installation: <br>
 sudo apt install apache2 php <br>
-In /etc/apache2/apache2.conf  -->> <Directory /DIR/html/> <br>
-In /etc/apache2/sites-available/000-default.conf -->> DocumentRoot /DIR/html/ <br>
+In /etc/apache2/apache2.conf  <br>
+<Directory /srv/> durch <Directory /DIR/html/> ersetzen!<br>
+
+In /etc/apache2/sites-available/000-default.conf <br>
+DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
 Apache neu starten und Reservierung im Browser aufrufen.
 
