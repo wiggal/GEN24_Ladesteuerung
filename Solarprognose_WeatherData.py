@@ -38,9 +38,7 @@ def loadLatestWeatherData():
     for key, value in json_data1.get('data',{}).items():
         key_neu = str(datetime.fromtimestamp(value[0]))
         dict_watts['result']['watts'][key_neu] = int(value[1]*1000*KW_Faktor)
-    return(dict_watts)
-        
-    
+    return(dict_watts, json_data1)
 
 def storeWeatherData(config, data, now):
     outFilePath = weatherfile
@@ -85,7 +83,9 @@ if __name__ == '__main__':
 
     if (dataIsExpired):
         data = loadLatestWeatherData()
-        if(data['result']['watts'] != {}):
+        if(data[0]['result']['watts'] != {}):
             if not data == "False":
-                storeWeatherData(weatherfile, data, now)
-    
+                storeWeatherData(weatherfile, data[0], now)
+        else:
+            print("Fehler bei Datenanforderung solarprognose.de:")
+            print(data[1])
