@@ -1,4 +1,11 @@
-﻿[0.8.8] – 2023-05-01
+﻿[0.8.9] – 2023-05-21
+
+Ergänzungen in der README.md
+
+Änderung in Solarprognose_WeatherData.py
+- weatherData.json nicht schreiben, wenn keine Daten kommen
+
+[0.8.8] – 2023-05-01
 
 Änderung in SymoGen24Controller2.py
 - Message an ntfy.sh optisch aufbepeppt ;-)

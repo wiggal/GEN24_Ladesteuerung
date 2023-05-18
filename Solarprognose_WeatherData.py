@@ -85,6 +85,7 @@ if __name__ == '__main__':
 
     if (dataIsExpired):
         data = loadLatestWeatherData()
-        if not data == "False":
-            storeWeatherData(weatherfile, data, now)
+        if(data['result']['watts'] != {}):
+            if not data == "False":
+                storeWeatherData(weatherfile, data, now)
     
