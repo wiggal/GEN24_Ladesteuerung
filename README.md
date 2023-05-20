@@ -41,7 +41,7 @@ Beispiele Crontabeintraege (Ausführrechte für die start_...sh skripte setzen n
 */5 05-20 * * * /DIR/start_LoggingSymoGen24.sh <br>
 */5 04-20 * * * /DIR/start_SymoGen24Controller2.sh <br>
 33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh <br>
-8 5,10,15,19 * * * /DIR/start_Solarprognose_WeatherData.py.sh <br>
+8 5,10,15,19 * * * /DIR/start_Solarprognose_WeatherData.py.sh #Minuten und Sekunden (config.ini) anpassen <br>
 
 Crontab.log jeden Montag abräumen <br>
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
@@ -100,6 +100,8 @@ sudo systemctl restart apache2 <br>
 und Reservierung im Browser aufrufen (IP oder localen Namen des RasberryPi).
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
+In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
+
 Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung beim Laden der Batterie beruecksichtigt.
 
 Batterieentladesteuerung <br>

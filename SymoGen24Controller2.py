@@ -389,7 +389,7 @@ if __name__ == '__main__':
                             print("************* BEGINN: ", datetime.now(),"************* ")
                             print("\n######### L A D E S T E U E R U N G #########\n")
                             print("aktuellePrognose:           ", aktuelleVorhersage)
-                            print("TagesPrognoseGesamt:        ", TagesPrognoseGesamt)
+                            print("RestTagesPrognose:          ", TagesPrognoseGesamt)
                             print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
                             print("TagesPrognose - Abzugswerte:", TagesPrognoseUeberschuss)
                             print("Tagessumme/BatWaitFaktor:   ", Tagessumme_Faktor)
