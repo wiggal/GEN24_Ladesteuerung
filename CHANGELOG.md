@@ -1,10 +1,10 @@
 ﻿[0.8.9] – 2023-05-21
 
-Ergänzungen in der README.md
+Ergänzungen und präzisere Beschreibungen in der README.md
 
 Änderung in Solarprognose_WeatherData.py
 - weatherData.json nicht schreiben, wenn keine Daten kommen
-  Fehlermeldungen in Crontab.log schreiben
+  und Fehlermeldungen in Crontab.log schreiben
 
 [0.8.8] – 2023-05-01
 
