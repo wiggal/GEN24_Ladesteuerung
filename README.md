@@ -4,13 +4,13 @@
 Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen,
 und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.
 
-Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.
+Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
 Herzlichen Dank an "godfuture"
 
-Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv ist und 
+Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv <br>
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
-Folgende Installationen sind nötig, damit die Pythonskripte funktionieren
+Folgende Installationen sind nötig, damit die Pythonskripte funktionieren <br>
 (getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
 
 sudo apt install python3
@@ -42,7 +42,7 @@ Ausführrechte für die start_...sh skripte setzen nicht vergessen (chmod +x sta
 33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh <br>
 8 5,10,15,19 * * * /DIR/start_Solarprognose_WeatherData.py.sh #Minuten und Sekunden (config.ini) anpassen <br>
 
-# Crontab.log jeden Montag abräumen <br>
+#Crontab.log jeden Montag abräumen <br>
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
 
 
@@ -67,22 +67,22 @@ SymoGen24Controller2.py
 
 berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
 Mit dem Parameter "schreiben" aufgerufen (was in der start_SymoGen24Controller2.sh geschieht) schreibt er die Ladewerte auf den Wechselrichter <br>
-falls Aenderungen ausserhalb der gesetzten Grenzen sind.
+falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 
 LoggingSymoGen24.py (optional)
 
-schreibt folgende Werte in die Log.csv zur Auswertung der Ergebnisse mit z.B. libreoffice Calci, in folgendem Format:
+schreibt folgende Werte in die Log.csv zur Auswertung der Ergebnisse mit z.B. libreoffice Calc, in folgendem Format:
 Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.solar,Aktuelle Ladegrenze,Batteriestand in Prozent
 
 
 #####################################################################
 
-Modul zur Reservierung von groesseren Mengen PV-Leistung <br>
+Modul zur Reservierung von größeren Mengen PV-Leistung <br>
 ======================================================= <br>
 (z.B. E-Autos)
 
-Das Modul ist in PHP programmiert und setzt einen entprechend konfigurierten Webserver (z.B. Apache) voraus. <br>
+Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache) voraus. <br>
 Konfiguration muss in der "config.php" angepasst werden.
 
 Bei Apache ist dies z.B.:
@@ -108,12 +108,12 @@ beim nächsten Aufruf von SymoGen24Controller2.py mit eingerechnet.
 
  der gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung beim nächsten Aufruf von SymoGen24Controller2.py berücksichtigt.
 Mit der gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die volle Batterieladung nach dem Sichern eingeschaltet,
-und eim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
+und beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
 
 BatterieENTladesteuerung <br>
   Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab, wenn sehr hohe reservierte Verbräuche anliegen.<br>
-  ( Nur in Verbindung mit der "Reservierung von groesseren Mengen PV Leisung" möglich )<br>
+  ( Nur in Verbindung mit der "Reservierung von größeren Mengen PV Leistung" möglich )<br>
 
   Zum Beispiel unter folgenden Bedingungen (Einstellungen in config.ini):<br>
 
