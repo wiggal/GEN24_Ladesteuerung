@@ -96,6 +96,7 @@ In /etc/apache2/sites-available/000-default.conf <br>
 DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
 ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für Apache haben!!
+Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.
 
 Apache neu starten <br>
 sudo systemctl restart apache2 <br>
