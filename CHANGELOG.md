@@ -1,4 +1,11 @@
-﻿[0.8.9] – 2023-05-21
+﻿[0.9.0] – 2023-05-25
+
+Seite des Reservierungsmoduls umgebaut:
+- Die verschiedenen Seiten werden nun als "TAB" dargestellt.
+- Ein Tab zur Ausgeabe der config.ini der Ladesteuerung eingefügt
+- Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "TAB" eingebunden werden. 
+
+[0.8.9] – 2023-05-21
 
 Ergänzungen und präzisere Beschreibungen in der README.md
 
