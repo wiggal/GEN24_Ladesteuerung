@@ -95,7 +95,7 @@ In /etc/apache2/apache2.conf  <br>
 In /etc/apache2/sites-available/000-default.conf <br>
 DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
-/DIR/ und /DIR/html/ muss schreibrechte für Apache haben!!
+ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für Apache haben!!
 
 Apache neu starten <br>
 sudo systemctl restart apache2 <br>
