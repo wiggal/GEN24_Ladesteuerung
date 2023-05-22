@@ -95,10 +95,12 @@ In /etc/apache2/apache2.conf  <br>
 In /etc/apache2/sites-available/000-default.conf <br>
 DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
+/DIR/ und /DIR/html/ muss schreibrechte für Apache haben!!
+
 Apache neu starten <br>
 sudo systemctl restart apache2 <br>
 
-und Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
+Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
 In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
