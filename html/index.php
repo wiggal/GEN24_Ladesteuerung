@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-<meta name="viewport" >
+<title>PV_Planung</title>
 <style>
 html, body {
   font-family: Arial;
@@ -51,6 +51,7 @@ html, body {
 
 <?php
 $class_tab='<div class="tab">'."\n";
+$class_link='';
 $files = scandir( './' );
 foreach ($files as $value) {
     if (strstr($value, '_tab_')){
@@ -61,7 +62,8 @@ foreach ($files as $value) {
         } else {
             $id_default = '';
         }
-        if ($linktext_a2[1] == 'php' OR $linktext_a2[1] == 'html') {
+        $a2_anzahl = count($linktext_a2)-1;
+        if ($linktext_a2[$a2_anzahl] == 'php' OR $linktext_a2[$a2_anzahl] == 'html') {
             $class_tab .= '<button class="tablinks" onclick="openCity(event,\''.$linktext_a2[0].'\')" '.$id_default.'>'.$linktext_a2[0].'</button>'."\n";
             $class_link .= '<div id="'.$linktext_a2[0].'" class="tabcontent"> <iframe src="'.$value.'" style="border:none;" height="100%" width="100%" title="description"></iframe> </div>'."\n";
         }
