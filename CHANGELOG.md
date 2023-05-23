@@ -2,7 +2,8 @@
 
 Seite des Reservierungsmoduls umgebaut:
 - Die verschiedenen Seiten werden nun als "TAB" dargestellt.
-- Ein Tab zur Ausgeabe der config.ini der Ladesteuerung eingefügt
+- Ein Tab zur Ausgabe der config.ini der Ladesteuerung eingefügt
+- Ein Tab zur Ausgabe der Crontab.log von Heute der Ladesteuerung eingefügt
 - Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "TAB" eingebunden werden. 
 
 [0.8.9] – 2023-05-21
