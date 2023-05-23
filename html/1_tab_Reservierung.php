@@ -187,10 +187,14 @@ $ManuelleSteuerung_check = array(
     "voll" => "",
 );
 
+if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
 if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0) $ManuelleSteuerung_check['auto'] = 'checked';
 if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.000001) $ManuelleSteuerung_check['aus'] = 'checked';
 if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.0005) $ManuelleSteuerung_check['halb'] = 'checked';
 if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.001) $ManuelleSteuerung_check['voll'] = 'checked';
+} else {
+$ManuelleSteuerung_check['auto'] = 'checked';
+}
 ?>
 
 <center>
@@ -248,13 +252,23 @@ $Rest_KW_Sum = number_format($Rest_KW_Sum + (float) $Rest_KW,1);
 $Res_Feld1_Watt_Sum = number_format($Res_Feld1_Watt_Sum + (float) $Res_Feld1_Watt,1);
 $Res_Feld2_Watt_Sum = number_format($Res_Feld2_Watt_Sum + (float) $Res_Feld2_Watt,1);
 
-if (isset($EV_Reservierung[$date]['Res_Feld1'])) $Res_Feld1_wert = (float) $EV_Reservierung[$date]['Res_Feld1'];
+if (isset($EV_Reservierung[$date]['Res_Feld1'])){
+    $Res_Feld1_wert = (float) $EV_Reservierung[$date]['Res_Feld1'];
+} else {
+    $Res_Feld1_wert = 0;
+}
+
 if ($Res_Feld1_wert <> 0) {
 $Res_Feld1_Watt = number_format($Res_Feld1_wert, 1);
 } else  { 
 $Res_Feld1_Watt = "" ;
 }
-if (isset($EV_Reservierung[$date]['Res_Feld2'])) $Res_Feld2_wert = (float) $EV_Reservierung[$date]['Res_Feld2'];
+
+if (isset($EV_Reservierung[$date]['Res_Feld2'])){
+    $Res_Feld2_wert = (float) $EV_Reservierung[$date]['Res_Feld2'];
+} else {
+    $Res_Feld2_wert = 0;
+}
 if ($Res_Feld2_wert <> 0) {
 $Res_Feld2_Watt = number_format($Res_Feld2_wert, 1);
 } else  { 
