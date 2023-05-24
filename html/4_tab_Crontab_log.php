@@ -17,8 +17,6 @@ while(!feof($myfile)) {
         echo $Zeile . "<br>";
     }
   }
-#$config_ini = file_get_contents($path_parts['dirname'].'/Crontab.log');
-#echo nl2br($config_ini);
 ?>
 
 <a name="bottom" href="#top">An den Anfang springen!</a>

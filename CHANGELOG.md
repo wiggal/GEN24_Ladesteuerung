@@ -1,4 +1,11 @@
-﻿[0.9.0] – 2023-05-25
+﻿[0.9.0] – 2023-05-28
+
+Änderung in SymoGen24Controller2.py
+- LadewertGrund = "aktuelleEinspeisung + aktueller Ladewert > Einspeisegrenze"
+  geändert in:
+  LadewertGrund = "aktuelleEinspeisung + aktuelle Batterieladung > Einspeisegrenze"
+  - Da die tatsächliche aktuelle Batterieladung weniger als die Ladegrenze sein kann (wenns auch bei so viel Überschuss nicht sein dürfte),
+    wurde der Ladewert wenn er über der Einspeisegrenze lag, in seltenen Fällen falsch berechnet.
 
 Seite des Reservierungsmoduls umgebaut:
 - Die verschiedenen Seiten werden nun als "TAB" dargestellt.

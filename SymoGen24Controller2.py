@@ -144,10 +144,10 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
 
         # Aktuelle Einspeise-Leistung beruecksichtigen
-        aktuellerUeberschuss = int(aktuelleEinspeisung + (BattganzeLadeKapazWatt * oldPercent/10000) - Einspeisegrenze)
+        aktuellerUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
         if aktuellerUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
             aktuellerLadewert = int(aktuellerUeberschuss)
-            LadewertGrund = "aktuelleEinspeisung + aktueller Ladewert > Einspeisegrenze"
+            LadewertGrund = "aktuelleEinspeisung + aktuelle Batterieladung > Einspeisegrenze"
 
         # Ladeleistung auf MaxLadung begrenzen
         if (aktuellerLadewert > MaxLadung):
