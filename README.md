@@ -82,10 +82,14 @@ Modul zur Reservierung von größeren Mengen PV-Leistung <br>
 ======================================================= <br>
 (z.B. E-Autos)
 
-Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache) voraus. <br>
-Konfiguration muss in der "config.php" angepasst werden.
+Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus. <br>
+Konfiguration muss in der "config.php" angepasst werden.<br>
 
-Bei Apache ist dies z.B.:
+Nur zum testen kann der PHPeigene Webserver benutzt werden. Einfach unter /DIR/html/ folgendes aufrufen:<br>
+php -S 0.0.0.0:7777 <br>
+Und im Browser localhost:7777 aufrufen.<br>
+
+Webserver Apache z.B.:
 
 Installation: <br>
 sudo apt install apache2 php <br>
@@ -97,6 +101,11 @@ DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
 ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für Apache haben!!<br>
 Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.
+Vorhandene Module:
+1_tab_Reservierung.php ==>> Reservierung von großen PV-Mengen
+2_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen
+3_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini
+4_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log
 
 Apache neu starten <br>
 sudo systemctl restart apache2 <br>
