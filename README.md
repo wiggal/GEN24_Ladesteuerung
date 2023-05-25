@@ -13,22 +13,14 @@ und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren <br>
 (getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
 
-sudo apt install python3
-
-sudo apt install python3-pip
-
-sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig
-
-sudo pip install pickledb
-
-sudo pip install pytz
-
-sudo pip install xmltodict
-
-sudo pip install NumPy
-
-sudo pip install ping3
-
+sudo apt install python3 <br>
+sudo apt install python3-pip <br>
+sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig <br>
+sudo pip install pickledb <br>
+sudo pip install pytz <br>
+sudo pip install xmltodict <br>
+sudo pip install NumPy <br>
+sudo pip install ping3 <br>
 
 
 Die Startskripte können per Cronjobs gestartet werden. <br>
@@ -44,7 +36,6 @@ Ausführrechte für die start_...sh skripte setzen nicht vergessen (chmod +x sta
 
 #Crontab.log jeden Montag abräumen <br>
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
-
 
 WeatherDataProvider2.py
 
