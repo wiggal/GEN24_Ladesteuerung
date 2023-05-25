@@ -9,7 +9,8 @@
 
 Seite des Reservierungsmoduls umgebaut:
 - Die verschiedenen Seiten werden nun als "TAB" dargestellt.
-- Ein Tab zur Ausgabe der config.ini der Ladesteuerung eingefügt
+- Ein Tab zum Ausgeben UND Editieren der config.ini der Ladesteuerung eingefügt
+  Dazu Kennwort in die html/config.php eingefügt ($passwd_configedit)
 - Ein Tab zur Ausgabe der Crontab.log der Ladesteuerung von Heute eingefügt
 - Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "TAB" eingebunden werden. 
 

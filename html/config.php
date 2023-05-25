@@ -7,4 +7,5 @@ $PV_Leistung_KWp = 11.4;
 $Faktor_PVLeistung_Prognose = 1.00;
 $Res_Feld1 = "VW.ID3";
 $Res_Feld2 = "Tesla";
+$passwd_configedit = "0815"
 ?>
