@@ -100,12 +100,12 @@ In /etc/apache2/sites-available/000-default.conf <br>
 DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
 ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für Apache haben!!<br>
-Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.
-Vorhandene Module:
-1_tab_Reservierung.php ==>> Reservierung von großen PV-Mengen
-2_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen
-3_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini
-4_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log
+Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.<br>
+Vorhandene Module:<br>
+1_tab_Reservierung.php ==>> Reservierung von großen PV-Mengen<br>
+2_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen<br>
+3_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini<br>
+4_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log<br>
 
 Apache neu starten <br>
 sudo systemctl restart apache2 <br>
