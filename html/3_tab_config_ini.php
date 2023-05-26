@@ -10,7 +10,7 @@ table {
 
 td, th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 4px;
 }
 
 /*
@@ -29,9 +29,23 @@ button {
   background-color: #4CAF50;
 }
 @media screen and (max-width: 64em) {
-button {
-    font-size: 3.0em;
-  }
+body{ font-size: 160%; }
+input { font-size: 100%; }
+th { font-size: 1.5em; }
+td {font-size: 160%;
+    width:48%;
+	max-width: 120px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+/*
+td:hover {
+  overflow: visible;
+}
+td { width: 50px; }
+button { font-size: 3.0em; }
+*/
 }
 
 </style>
@@ -62,6 +76,7 @@ echo '<br>';
 
 $myfile = fopen($file, "r") or die("Kann Datei ".$file." nicht öffnen!");
 $config_ini = file_get_contents($file);
+echo '<nobr>';
 echo nl2br($config_ini);
 fclose($myfile);
 
@@ -75,11 +90,13 @@ echo '<button type="submit">Zurück zu config.ini lesen</button>';
 echo '</form>'."\n";
 echo '<br><br>';
 
+echo '<span style="color:red"><b>ACHTUNG!!</b></span><br>Sicherungskopie der config.ini erstellen.<br>';
 
+echo '<br><br>';
+echo 'Kennwort um config.ini zu editieren:<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<label>Kennwort um config.ini zu editieren:</label><br>';
 echo '<input type="hidden" name="case" value="editieren_passwd">'."\n";
-echo '<input type="password" name="password">'."\n";
+echo '<input type="password" name="password" size="10">'."\n";
 echo '<button type="submit">OK</button>';
 echo '</form>'."\n";
 echo '<br>';
