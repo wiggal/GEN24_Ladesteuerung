@@ -19,7 +19,8 @@ sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig <br
 sudo pip install pickledb <br>
 sudo pip install pytz <br>
 sudo pip install xmltodict <br>
-sudo pip install NumPy <br>
+sudo pip install NumPy==v1.23.1 <br>
+sudo pip install requests <br>
 sudo pip install ping3 <br>
 
 
