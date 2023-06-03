@@ -143,20 +143,32 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             aktuellerLadewert = LadungAus
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
 
-        # Aktuelle Einspeise-Leistung beruecksichtigen
-        aktuellerUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
-        if aktuellerUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
-            aktuellerLadewert = int(aktuellerUeberschuss)
-            LadewertGrund = "aktuelleEinspeisung + aktuelle Batterieladung > Einspeisegrenze"
+        # aktuelleBatteriePower ist beim Laden der Batterie minus
+        # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb Puffer_Einspeisegrenze addieren
+        if aktuelleEinspeisung > Einspeisegrenze:
+            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + Puffer_Einspeisegrenze)
+        else:
+            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
+        # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
+        if EinspeisegrenzUeberschuss > PV_Leistung_Watt - Einspeisegrenze:
+            EinspeisegrenzUeberschuss = PV_Leistung_Watt - Einspeisegrenze
+
+        if EinspeisegrenzUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
+            aktuellerLadewert = int(EinspeisegrenzUeberschuss)
+            LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
 
         # Ladeleistung auf MaxLadung begrenzen
         if (aktuellerLadewert > MaxLadung):
             aktuellerLadewert = MaxLadung
 
-        # Wenn  PV-Produktion > WR_Kapazitaet 
-        if (aktuellePVProduktion - WR_Kapazitaet > aktuellerLadewert ):
-           aktuellerLadewert = int(aktuellePVProduktion - WR_Kapazitaet)
-           LadewertGrund = "PV-Produktion > WR_Kapazitaet"
+        # Wenn  PV-Produktion + Puffer_WR_Kapazitaet > WR_Kapazitaet 
+        if aktuellePVProduktion > WR_Kapazitaet:
+            kapazitaetsueberschuss = int(aktuellePVProduktion - WR_Kapazitaet + Puffer_WR_Kapazitaet)
+            if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
+                kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
+            if (kapazitaetsueberschuss > aktuellerLadewert ):
+                aktuellerLadewert = kapazitaetsueberschuss
+                LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
 
         # Bei Minuswerten "LadungAus" setzen
         if aktuellerLadewert < LadungAus:
@@ -228,7 +240,10 @@ if __name__ == '__main__':
                     MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
                     LadungAus = eval(config['Ladeberechnung']['LadungAus'])
                     Einspeisegrenze = eval(config['Ladeberechnung']['Einspeisegrenze'])
+                    Puffer_Einspeisegrenze = eval(config['Ladeberechnung']['Puffer_Einspeisegrenze'])
                     WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
+                    PV_Leistung_Watt = eval(config['Ladeberechnung']['PV_Leistung_Watt'])
+                    Puffer_WR_Kapazitaet = eval(config['Ladeberechnung']['Puffer_WR_Kapazitaet'])
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                     MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
                     BatterieVoll = eval(config['Ladeberechnung']['BatterieVoll'])
