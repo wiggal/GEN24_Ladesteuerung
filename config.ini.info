@@ -108,12 +108,17 @@ print_level = 1
 # Um die Batterie schonend zu laden sollte er auch nicht zu hoch sein.
 MaxLadung = 3000
 
-# die Einspeisegrenze bzw. WR_Kapazitaet sollte ein wenig unterhalb der wirklichen Grenze liegen,
-# da sonst der Wechselrichter bereits abregelt, bevor das Programm die Überproduktion erkennt (bei mir ca 5%)
-# Einspeisegrenze: Wenn die Einspeisung darüber liegt, wird der Überschuss in die Batterie geladen.
+# die Einspeisegrenze sollte etwas unterhalb der wirklichen Grenze liegen (1-2%).
+Einspeisegrenze = 7900
+# AC Kapazität des Wechselrichters um den Überschuss in die Batterie zu laden (etwas darunter bleiben 1-2%)
 # WR_Kapazitaet: Wenn die Produktion über der AC-Leistungsgrenze (WR_Kapazitaet) ist, wird der Überschuss in die Batterie geladen.
-Einspeisegrenze = 8000
-WR_Kapazitaet = 9700
+WR_Kapazitaet = 9900
+# Puffer für die Einspeisebegrenzung und Wechselrichterkapazität in Watt,
+# da die durch den WR abgeregelte Energiemenge nicht gemessen werden kann.
+# sollte etwar der WRSchreibGrenze_nachOben entsprechen.
+Puffer_Einspeisegrenze = 300
+Puffer_WR_Kapazitaet = 300
+
 
 # Grundlast wird verwendet um den aktuellerUeberschuss zu berechnen
 # Grundlast ist 300W + 100W Mindesteinspeisung

@@ -1,4 +1,21 @@
-﻿[0.9.0] – 2023-05-28
+﻿[0.9.1] – 2023-06-04
+
+# ACHTUNG bitte in config.ini anpassen!!!
+Änderung in config.ini
+- Folgende neue Variablen eingeführt, um die Leistung, die der WR abregelt, besser zu steuern.
+  Puffer_Einspeisegrenze
+  Puffer_WR_Kapazitaet
+  
+Änderung in SymoGen24Controller2.py
+
+- Puffer an den Grenzen zur Einspeisegrenze und zur WR AC Kapazität eingeführt.
+  Da Der Wechselrichter schon abregelt, wenn man an die jeweiligen Grenzen kommt,
+  kann die Differenz über der Grenze nicht ermittelt werden, deshal muss entweder 
+  die konfigurierte Grenze unterhalb der WR Grenze konfiguriert werden.
+  Damit hier nicht zuviel in die Batterie geladen wird und sie zu schnell voll ist,
+  wird der Puffer angewendet, wenn die Grenze aus der config.ini erreicht wird.
+
+[0.9.0] – 2023-05-28
 
 Änderung in SymoGen24Controller2.py
 - LadewertGrund = "aktuelleEinspeisung + aktueller Ladewert > Einspeisegrenze"
