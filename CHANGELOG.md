@@ -2,9 +2,11 @@
 
 # ACHTUNG bitte in config.ini anpassen!!!
 Änderung in config.ini
-- Folgende neue Variablen eingeführt, um die Leistung, die der WR abregelt, besser zu steuern.
-  Puffer_Einspeisegrenze
-  Puffer_WR_Kapazitaet
+- Folgende neue Variablen eingeführt, um die Leistung, die der WR abregelt, besser zu steuern.<br>
+  Zeile 76 bis 79: <br>
+  Puffer_Einspeisegrenze<br>
+  PV_Leistung_Watt <br>
+  Puffer_WR_Kapazitaet<br>
   
 Änderung in SymoGen24Controller2.py
 
