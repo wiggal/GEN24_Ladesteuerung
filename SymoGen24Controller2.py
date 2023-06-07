@@ -230,6 +230,16 @@ if __name__ == '__main__':
                         print()
                         exit()
     
+                    # VARIABLENPRUEFUNG VERSION 9.1 
+                    if not config.has_option('Ladeberechnung', 'Puffer_Einspeisegrenze' ) \
+                    or not config.has_option('Ladeberechnung', 'PV_Leistung_Watt' ) \
+                    or not config.has_option('Ladeberechnung', 'Puffer_WR_Kapazitaet' ):
+                        print ('\nAb Version 9.1 werden in der config.ini die Variablen')
+                        print ('  Puffer_Einspeisegrenze, PV_Leistung_Watt, Puffer_WR_Kapazitaet benötigt!')
+                        print ('BITTE config.ini ergänzen! \n')
+                        exit()
+                    # ENDE VARIABLENPRUEFUNG VERSION 9.1 
+
                     # Benoetigte Variablen definieren
                     # Rechenwerte aus Config in Zahlen umwandeln
                     print_level = eval(config['Ladeberechnung']['print_level'])
@@ -240,8 +250,8 @@ if __name__ == '__main__':
                     MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
                     LadungAus = eval(config['Ladeberechnung']['LadungAus'])
                     Einspeisegrenze = eval(config['Ladeberechnung']['Einspeisegrenze'])
-                    Puffer_Einspeisegrenze = eval(config['Ladeberechnung']['Puffer_Einspeisegrenze'])
                     WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
+                    Puffer_Einspeisegrenze = eval(config['Ladeberechnung']['Puffer_Einspeisegrenze'])
                     PV_Leistung_Watt = eval(config['Ladeberechnung']['PV_Leistung_Watt'])
                     Puffer_WR_Kapazitaet = eval(config['Ladeberechnung']['Puffer_WR_Kapazitaet'])
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
