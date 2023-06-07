@@ -1,4 +1,13 @@
-﻿[0.9.1] – 2023-06-04
+﻿[0.9.2] – 2023-06-07
+
+Änderung in html/3_tab_config_ini.php
+- Prüfung ob config.ini Schreibrechte hat engebaut
+
+Änderung in SymoGen24Controller2.py
+- Prüfung, ob die neuen Varaiblen Puffer_Einspeisegrenze, PV_Leistung_Watt 
+  und Puffer_WR_Kapazitaet in der config.ini sind, eingebaut.
+
+[0.9.1] – 2023-06-04
 
 # ACHTUNG bitte in config.ini anpassen!!!
 Änderung in config.ini

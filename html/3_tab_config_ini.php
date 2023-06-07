@@ -169,13 +169,17 @@ foreach($Zeile AS $zeile_key => $zeile_value) {
  $Zeile[$zeile_key] = rtrim($Zeile[$zeile_key]);
 }
 $write = implode("\n",$Zeile);
-$handle = fopen($file,"w");
-if (fwrite($handle, $write)) {
-    $nachricht= '<span style="color:green"> '.$file.' wurde neu geschrieben!</span>';
+if(is_writeable($file,)) {
+    $handle = fopen($file,"w");
+    if (fwrite($handle, $write)) {
+        $nachricht= '<span style="color:green"> '.$file.' wurde neu geschrieben!</span>';
+    } else {
+        $nachricht= '<span style="color:red"> '.$file.' konnte nicht geschrieben werden!!!</span>';
+    }
+    fclose($handle);
 } else {
     $nachricht= '<span style="color:red"> '.$file.' konnte nicht geschrieben werden!!!</span>';
 }
-fclose($handle);
 
 header('location: '.$_SERVER["PHP_SELF"].'?nachricht='.$nachricht);
 exit();
