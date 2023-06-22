@@ -1,4 +1,9 @@
-﻿[0.9.2] – 2023-06-07
+﻿[0.9.3] – 2023-07-02
+
+Änderung in SymoGen24Controller2.py
+- Wenn Ladewert erstmals den MaxLadung erreicht immer schreiben, unabhängig der Schreibgrenzen
+
+[0.9.2] – 2023-06-07
 
 Änderung in html/3_tab_config_ini.php
 - Prüfung ob config.ini Schreibrechte hat engebaut
