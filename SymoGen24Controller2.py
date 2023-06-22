@@ -197,6 +197,10 @@ def setLadewert(fun_Ladewert):
         if ( diffLadewert_nachUnten > WRSchreibGrenze_nachUnten ):
             newPercent_schreiben = 1
 
+        # Wenn MaxLadung erstmals erreicht ist immer schreiben
+        if (fun_Ladewert == MaxLadung) and (abs(diffLadewert_nachOben) > 3):
+            newPercent_schreiben = 1
+
         return(newPercent, newPercent_schreiben)
 
 if __name__ == '__main__':
