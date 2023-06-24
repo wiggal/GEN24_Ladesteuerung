@@ -1,6 +1,18 @@
 <html>
+<head>
+<style>
+button {
+  font-size: 1.3em;
+  background-color: #4CAF50;
+}
+@media screen and (max-width: 64em) {
+body{ font-size: 160%; }
+input { font-size: 100%; }
+}
+</style>
+</head>
 <body>
-<a href="#bottom">Ans Ende springen!</a>
+<a name="top" href="#bottom">Ans Ende springen!</a>
 <br><br><br>
 <?php
 include "config.php";
@@ -20,5 +32,9 @@ while(!feof($myfile)) {
 ?>
 
 <a name="bottom" href="#top">An den Anfang springen!</a>
+<br><br>
+<form method="post" action="#bottom" enctype="multipart/form-data">
+<button type="submit">Neu laden</button>
+</form>
 </body>
 </html>
