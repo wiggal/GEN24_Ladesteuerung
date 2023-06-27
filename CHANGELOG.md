@@ -1,10 +1,11 @@
 ﻿[0.9.3] – 2023-07-02
 
 Änderung in SymoGen24Controller2.py
-- Wenn Ladewert erstmals den MaxLadung erreicht immer schreiben, unabhängig der Schreibgrenzen
+- Wenn Ladewert erstmals den Wert von "MaxLadung" erreicht immer schreiben, unabhängig der Schreibgrenzen
 
 Änderung in html/4_tab_Crontab_log.php
 - "Neu laden" Button am Ende der Ausgabe hinzugefügt
+- Filter, um nur bestimmte Zeilen aus der Crontab.log auszugeben
 
 [0.9.2] – 2023-06-07
 
