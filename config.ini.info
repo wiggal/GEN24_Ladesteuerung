@@ -12,7 +12,7 @@ filePathWeatherData=weatherData.json
 PV_ReservieungsDatei=Watt_Reservierung.json
 
 
-# Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier anzahl=2 eintragen
+# Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen
 # und die Werte für das zweite PV-Feld unter [forecast.solar2] eintragen
 [pv.strings]
 anzahl=1
@@ -30,7 +30,7 @@ az=0
 # Leistung der Modulfelder
 kwp=11.4
 # Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
-# bei mir 1000 da nur Backup für solarprognose, solange der Abruf bei solarprognose funtioniert, wird von forecast.solar nicht angefordert.
+# bei mir 1000 da nur Backup für solarprognose, solange der Abruf bei solarprognose funktioniert, wird von forecast.solar nicht angefordert.
 # ansonsten sollte sie irgendwo bei 70 Minuten sein, um alle 2 Stunden anfordern zu können.
 dataAgeMaxInMinutes=1000
 
@@ -83,7 +83,7 @@ FesteLadeleistung = 0
 
 # Bis zu welcher Stunde die Batterie durch die Prognoseberechnungen voll sein soll. 
 # Der Zeitpunkt wird häufig nicht genau zutreffen, da durch Verbrauch, Überschusseinspeisungen 
-# oder durch die WRSchreibGrenzen die Ladenmengen beinflußt werden.
+# oder durch die WRSchreibGrenzen die Ladenmengen beeinflusst werden.
 BattVollUm = 17
 
 # Faktor um Batteriekapazität für später aufzusparen.
@@ -120,7 +120,7 @@ Puffer_Einspeisegrenze = 300
 Puffer_WR_Kapazitaet = 300
 
 
-# Grundlast wird verwendet um den aktuellerUeberschuss zu berechnen
+# Grundlast wird verwendet um den Wert "aktuellerUeberschuss" zu berechnen
 # Grundlast ist 300W + 100W Mindesteinspeisung
 Grundlast = 500
 
@@ -133,7 +133,7 @@ WRSchreibGrenze_nachOben = 350
 WRSchreibGrenze_nachUnten = 1289
 
 # Liegt der Batteriestatus unter MindBattLad in % wird voll geladen.
-# Eine 5% Schaltverzögerung verhindert einhäufiges hin und her schaltem (z.B. 25% ein 20% aus)
+# Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 25% ein 20% aus)
 MindBattLad = 20
 # Wenn der Batteriestand in % bei "BatterieVoll" ist, erfolgt volle Ladung
 BatterieVoll = 95
@@ -151,10 +151,11 @@ PV_ReservieungsDatei=Watt_Reservierung.json
 PV_Reservierung_steuern = 1
 
 # Batterieentladung ein- bzw. ausschalten (1=ein)
+# funktioniert nur wenn PV_Reservierung_steuern = 1, da die Werte der Reservierung benoetigt werden
 Batterieentlandung_steuern = 1
-# Drei Faktoren muessen gleichzeitig eintreten, damit die Batterieentladung auf minimum geschaltet wird.
+# Drei Faktoren muessen gleichzeitig eintreten, damit die Batterieentladung auf Minimum geschaltet wird.
 # 1. Batterieladestand in % darf nicht über "BisLadestandEIN" sein (z.B. 80%)
-# Eine 5% Schaltverzögerung verhindert einhäufiges hin und her schaltem (z.B. 85% ein 80% aus)
+# Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 85% ein 80% aus)
 BisLadestandEIN = 80
 # 2. Reservierte Leistung zur aktuellen Stunde ist über "AbReservierungEIN" Watt (z.B. 2000W)
 AbReservierungEIN = 2000
