@@ -131,20 +131,38 @@ input[type="radio"]{
 #auto:checked:checked ~ .auto,
 #aus:checked:checked ~ .aus,
 #halb:checked:checked ~ .halb,
-#voll:checked:checked ~ .voll{
+#voll:checked:checked ~ .voll,
+#E0:checked:checked ~ .E0,
+#E20:checked:checked ~ .E20,
+#E40:checked:checked ~ .E40,
+#E60:checked:checked ~ .E60,
+#E80:checked:checked ~ .E80,
+#E100:checked:checked ~ .E100{
   border-color: #44c767;
   background: #44c767;
 }
 #auto:checked:checked ~ .auto .dot,
 #aus:checked:checked ~ .aus .dot,
 #halb:checked:checked ~ .halb .dot,
-#voll:checked:checked ~ .voll .dot{
+#voll:checked:checked ~ .voll .dot,
+#E0:checked:checked ~ .E0 .dot,
+#E20:checked:checked ~ .E20 .dot,
+#E40:checked:checked ~ .E40 .dot,
+#E60:checked:checked ~ .E60 .dot,
+#E80:checked:checked ~ .E80 .dot,
+#E100:checked:checked ~ .E100 .dot{
   background: #000;
 }
 #auto:checked:checked ~ .auto .dot::before,
 #aus:checked:checked ~ .aus .dot::before,
 #halb:checked:checked ~ .halb .dot::before,
-#voll:checked:checked ~ .voll .dot::before{
+#voll:checked:checked ~ .voll .dot::before,
+#E0:checked:checked ~ .E0 .dot::before,
+#E20:checked:checked ~ .E20 .dot::before,
+#E40:checked:checked ~ .E40 .dot::before,
+#E60:checked:checked ~ .E60 .dot::before,
+#E80:checked:checked ~ .E80 .dot::before,
+#E100:checked:checked ~ .E100 .dot::before{
   opacity: 1;
   transform: scale(1);
 }
@@ -153,7 +171,7 @@ input[type="radio"]{
   font-size:130%;
   color: #808080;
 }
-.wrapper .beschiftung{
+.wrapper .beschriftung{
   font-family:Arial;
   font-size:150%;
   color: #000000;
@@ -161,7 +179,13 @@ input[type="radio"]{
 #auto:checked:checked ~ .auto span,
 #aus:checked:checked ~ .aus span,
 #halb:checked:checked ~ .halb span,
-#voll:checked:checked ~ .voll span{
+#voll:checked:checked ~ .voll span,
+#E0:checked:checked ~ .E0 span,
+#E20:checked:checked ~ .E20 span,
+#E40:checked:checked ~ .E40 span,
+#E60:checked:checked ~ .E60 span,
+#E80:checked:checked ~ .E80 span,
+#E100:checked:checked ~ .E100 span{
   color: #000;
 }
 
@@ -179,8 +203,8 @@ include "config.php";
 $Prognose = json_decode(file_get_contents($PrognoseFile), true);
 $EV_Reservierung = json_decode(file_get_contents($ReservierungsFile), true);
 
-//$ManuelleSteuerung_check = array('auto', 'aus', 'halb', 'voll');
-$ManuelleSteuerung_check = array(
+//$ManuelleLadeSteuerung_check = array('auto', 'aus', 'halb', 'voll');
+$ManuelleLadeSteuerung_check = array(
     "auto" => "",
     "aus" => "",
     "halb" => "",
@@ -188,25 +212,26 @@ $ManuelleSteuerung_check = array(
 );
 
 if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0) $ManuelleSteuerung_check['auto'] = 'checked';
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.000001) $ManuelleSteuerung_check['aus'] = 'checked';
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.0005) $ManuelleSteuerung_check['halb'] = 'checked';
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.001) $ManuelleSteuerung_check['voll'] = 'checked';
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0) $ManuelleLadeSteuerung_check['auto'] = 'checked';
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.000001) $ManuelleLadeSteuerung_check['aus'] = 'checked';
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.0005) $ManuelleLadeSteuerung_check['halb'] = 'checked';
+if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.001) $ManuelleLadeSteuerung_check['voll'] = 'checked';
 } else {
-$ManuelleSteuerung_check['auto'] = 'checked';
+$ManuelleLadeSteuerung_check['auto'] = 'checked';
 }
+
 ?>
 
 <center>
 <div class="wrapper">
-<div class="beschiftung" title="Ladung des Hausakkus mit einem Anteil der konfigurierten Maximallagung 
+<div class="beschriftung" title="Ladung des Hausakkus mit einem Anteil der konfigurierten Maximallagung 
                   (Auto=% nach Prognose, AUS=0%, HALB=50%, VOLL=100%)">
-<nobr>Hausakkuladung</nobr>
+<nobr>Hausakkuladung&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</nobr>
 </div>
- <input type="radio" name="hausakkuladung" id="auto" value="0" <?php echo $ManuelleSteuerung_check['auto'] ?>>
- <input type="radio" name="hausakkuladung" id="aus" value="0.000001" <?php echo $ManuelleSteuerung_check['aus'] ?> >
- <input type="radio" name="hausakkuladung" id="halb" value="0.0005" <?php echo $ManuelleSteuerung_check['halb'] ?> >
- <input type="radio" name="hausakkuladung" id="voll" value="0.001" <?php echo $ManuelleSteuerung_check['voll'] ?> >
+ <input type="radio" name="hausakkuladung" id="auto" value="0" <?php echo $ManuelleLadeSteuerung_check['auto'] ?>>
+ <input type="radio" name="hausakkuladung" id="aus" value="0.000001" <?php echo $ManuelleLadeSteuerung_check['aus'] ?> >
+ <input type="radio" name="hausakkuladung" id="halb" value="0.0005" <?php echo $ManuelleLadeSteuerung_check['halb'] ?> >
+ <input type="radio" name="hausakkuladung" id="voll" value="0.001" <?php echo $ManuelleLadeSteuerung_check['voll'] ?> >
    <label for="auto" class="option auto">
      <div class="dot"></div>
       <span>&nbsp;AUTO</span>
@@ -222,6 +247,67 @@ $ManuelleSteuerung_check['auto'] = 'checked';
    <label for="voll" class="option voll">
      <div class="dot"></div>
       <span>&nbsp;VOLL</span>
+   </label>
+</div>
+</center>
+
+<?php
+//$ManuelleENTLadeSteuerung_check = array('E0', 'E20', 'E40', 'E60', 'E80', 'E100');
+$ManuelleENTLadeSteuerung_check = array(
+    "E0" => "",
+    "E20" => "",
+    "E40" => "",
+    "E60" => "",
+    "E80" => "",
+    "E100" => "",
+);
+
+if (isset($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'])) {
+if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0) $ManuelleENTLadeSteuerung_check['E0'] = 'checked';
+if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.02) $ManuelleENTLadeSteuerung_check['E20'] = 'checked';
+if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.04) $ManuelleENTLadeSteuerung_check['E40'] = 'checked';
+if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.06) $ManuelleENTLadeSteuerung_check['E60'] = 'checked';
+if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.08) $ManuelleENTLadeSteuerung_check['E80'] = 'checked';
+if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.1) $ManuelleENTLadeSteuerung_check['E100'] = 'checked';
+} else {
+$ManuelleENTLadeSteuerung_check['E100'] = 'checked';
+}
+?>
+
+<center>
+<div class="wrapper">
+<div class="beschriftung" title="Entladung des Hausakkus in Prozent">
+<nobr>Entladesteuerung %</nobr>
+</div>
+ <input type="radio" name="hausakkuentladung" id="E0" value="0" <?php echo $ManuelleENTLadeSteuerung_check['E0'] ?>>
+ <input type="radio" name="hausakkuentladung" id="E20" value="0.02" <?php echo $ManuelleENTLadeSteuerung_check['E20'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E40" value="0.04" <?php echo $ManuelleENTLadeSteuerung_check['E40'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E60" value="0.06" <?php echo $ManuelleENTLadeSteuerung_check['E60'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E80" value="0.08" <?php echo $ManuelleENTLadeSteuerung_check['E80'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E100" value="0.1" <?php echo $ManuelleENTLadeSteuerung_check['E100'] ?> >
+   <label for="E0" class="option E0">
+     <div class="dot"></div>
+      <span>&nbsp;0</span>
+      </label>
+   <label for="E20" class="option E20">
+     <div class="dot"></div>
+      <span>&nbsp;20</span>
+      </label>
+   <label for="E40" class="option E40">
+     <div class="dot"></div>
+      <span>&nbsp;40</span>
+   </label>
+   <label for="E60" class="option E60">
+     <div class="dot"></div>
+      <span>&nbsp;60</span>
+   </label>
+   <label for="E80" class="option E80">
+     <div class="dot"></div>
+      <span>&nbsp;80</span>
+   </label>
+   <label for="E100" class="option E100">
+     <div class="dot"></div>
+      <span>&nbsp;100</span>
    </label>
 </div>
 </center>
@@ -354,6 +440,18 @@ $(document).ready(function(){
   if (js != "") {
   Tag_Zeit.push("ManuelleSteuerung");
   Res_Feld1.push(js_value);
+  Res_Feld2.push(0);
+  //alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
+  }
+  const je = document.querySelectorAll('input[name="hausakkuentladung"]');
+  for(var i=0; i < je.length; i++){
+        if(je[i].checked == true){
+            je_value = je[i].value;
+        }
+    }
+  if (je != "") {
+  Tag_Zeit.push("ManuelleEntladesteuerung");
+  Res_Feld1.push(je_value);
   Res_Feld2.push(0);
   //alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
   }
