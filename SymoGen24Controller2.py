@@ -260,7 +260,6 @@ if __name__ == '__main__':
                     Puffer_WR_Kapazitaet = eval(config['Ladeberechnung']['Puffer_WR_Kapazitaet'])
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                     MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
-                    BatterieVoll = eval(config['Ladeberechnung']['BatterieVoll'])
                     WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
                     WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
                     FesteLadeleistung = eval(config['Ladeberechnung']['FesteLadeleistung'])
