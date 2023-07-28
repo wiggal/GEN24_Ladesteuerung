@@ -14,6 +14,9 @@
 Änderung in config.ini und config.ini.info
 - Variable "BatterieVoll" entfernt.
 
+Änderung in 2_tab_Hilfe.html
+- Manuelle Entladesteuerung in Prozent in Hilfe beschrieben.
+
 [0.9.3] – 2023-07-02
 
 Änderung in SymoGen24Controller2.py
