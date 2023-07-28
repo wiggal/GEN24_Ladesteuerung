@@ -1,4 +1,20 @@
-﻿[0.9.3] – 2023-07-02
+﻿[0.9.4] – 2023-08-06
+
+Änderung in 1_tab_Reservierung.php
+- Manuelle Entladesteuerung in Prozent für den Hausakku eingebaut
+
+Änderung in SymoGen24Controller2.py
+- Ersetzen der Variablen BatterieVoll ab den Prozenten (z.B. 97%) die Ladung auf MaxLadung geschaltet wurde.
+  Die Funktion arbeitete nicht zufriedenstellend und verhinderte nicht immer das hoch und runterschalten der Batterieladung.
+  Neu:
+  Der Wert "WRSchreibGrenze_nachUnten" wird ab 90% um 1+(Ladestand%-90%)/10 erhöht, 
+  dadurch soll das hoch und runterschalten der Batterieladung besser verhindert werden.
+- Lesen der manuellen Entladesteuerung eingebaut
+
+Änderung in config.ini und config.ini.info
+- Variable "BatterieVoll" entfernt.
+
+[0.9.3] – 2023-07-02
 
 Änderung in SymoGen24Controller2.py
 - Wenn Ladewert erstmals den Wert von "MaxLadung" erreicht immer schreiben, unabhängig der Schreibgrenzen

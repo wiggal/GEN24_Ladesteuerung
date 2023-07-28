@@ -135,8 +135,6 @@ WRSchreibGrenze_nachUnten = 1289
 # Liegt der Batteriestatus unter MindBattLad in % wird voll geladen.
 # Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 25% ein 20% aus)
 MindBattLad = 20
-# Wenn der Batteriestand in % bei "BatterieVoll" ist, erfolgt volle Ladung
-BatterieVoll = 95
 # Wenn keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt (z.B. 0 oder 10 )
 LadungAus = 0
 PV_Reservierung_AUS_EIN = 0

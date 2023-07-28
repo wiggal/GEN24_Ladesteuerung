@@ -245,7 +245,7 @@ if __name__ == '__main__':
                     # ENDE VARIABLENPRUEFUNG VERSION 9.1 
 
                     # Benoetigte Variablen definieren
-                    # Rechenwerte aus Config in Zahlen umwandeln
+                    # eval = Rechenwerte aus Config in Zahlen umwandeln
                     print_level = eval(config['Ladeberechnung']['print_level'])
                     BattVollUm = eval(config['Ladeberechnung']['BattVollUm'])
                     BatSparFaktor = eval(config['Ladeberechnung']['BatSparFaktor'])
@@ -300,7 +300,12 @@ if __name__ == '__main__':
                     aktuelleVorhersage = 0
                     LadewertGrund = ""
                     Tagessumme_Faktor = 0
-                        
+
+                    # WRSchreibGrenze_nachUnten ab 90% prozentual erhöhen (ersetzen von BatterieVoll!!  Baustelle)
+                    if ( BattStatusProz - 90 > 0 ):
+                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 10))
+                        print("*** WRSchreibGrenze_nachUnten = ", WRSchreibGrenze_nachUnten)
+
                     # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
                     # die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
                     i = Grundlast
@@ -322,7 +327,7 @@ if __name__ == '__main__':
                         i += 100
                     # Nun habe ich die Werte und muss hier Verzweigen
     
-                    # Wenn über die PV-Planung Volle Ladung angewählt wurde
+                    # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
                     if (PV_Reservierung_steuern == 1) and (reservierungdata.get('ManuelleSteuerung')):
                         FesteLadeleistung = MaxLadung * reservierungdata.get('ManuelleSteuerung')
@@ -343,6 +348,14 @@ if __name__ == '__main__':
                         else:
                             LadewertGrund = MaxladungDurchPV_Planung
     
+                    # Hier Volle Ladung, wenn Stunde aus BattVollUm erreicht ist!
+                    elif (int(datetime.strftime(now, "%H")) >= int(BattVollUm)):
+                         aktuellerLadewert = MaxLadung
+                         DATA = setLadewert(aktuellerLadewert)
+                         newPercent = DATA[0]
+                         newPercent_schreiben = DATA[1]
+                         LadewertGrund = "Stunde aus BattVollUm erreicht!!"
+        
                     else:
 
                         # Schaltverzögerung für MindBattLad
@@ -379,14 +392,6 @@ if __name__ == '__main__':
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
     
-                            elif (BattStatusProz > BatterieVoll ):
-                                # Wenn Batterie voll, Volle Ladung
-                                aktuellerLadewert = MaxLadung
-                                DATA = setLadewert(aktuellerLadewert)
-                                newPercent = DATA[0]
-                                newPercent_schreiben = DATA[1]
-                                LadewertGrund = "           Batterie fast voll!!"
-        
                             # PrognoseAbzugswert - 100 um Schaltverzögerung wieder nach unten zu erreichen
                             elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) or (PrognoseAbzugswert - 100 <= Grundlast):
                                 # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
@@ -406,6 +411,7 @@ if __name__ == '__main__':
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "PrognoseAbzugswert kleiner Grundlast und Schreibgrenze"
+
                             else: 
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
@@ -427,6 +433,7 @@ if __name__ == '__main__':
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
                             print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
+                            print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
                             print("Bisheriger Ladewert/Watt:   ", alterLadewert)
                             print("Bisheriger Ladewert/Prozent:", oldPercent/100,"%")
@@ -484,6 +491,11 @@ if __name__ == '__main__':
                         BisLadestandEIN = eval(config['Reservierung']['BisLadestandEIN'])
                         AbReservierungEIN = eval(config['Reservierung']['AbReservierungEIN'])
                         MaxEntladung = eval(config['Reservierung']['MaxEntladung'])
+                        # ENTLADE Baustelle
+                        if (reservierungdata.get('ManuelleEntladesteuerung')):
+                            print("Manuelle Entladesteuerung: ", reservierungdata.get('ManuelleEntladesteuerung'), "%")
+                            MaxEntladung = reservierungdata.get('ManuelleEntladesteuerung')
+
                         EntladungAus = eval(config['Reservierung']['EntladungAus'])
                         GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
                         aktStd = datetime.strftime(now, format_aktStd)
@@ -494,12 +506,12 @@ if __name__ == '__main__':
                             ReservierteWatt = 0
 
                         ## Werte zum Überprüfen ausgeben
-                        print("Batteriestatus in Prozent: ", BattStatusProz)
-                        print("BisLadestandEIN: ", BisLadestandEIN)
+                        print("Batteriestatus in Prozent: ", BattStatusProz, "%")
+                        print("BisLadestandEIN: ", BisLadestandEIN, "%")
                         print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
                         print("Reservierung Watt: ", ReservierteWatt)
                         print("AbReservierungEIN: ", AbReservierungEIN)
-                        print("Batterieentladegrenze in %: ", BatteryMaxDischargePercent)
+                        print("Batterieentladegrenze: ", BatteryMaxDischargePercent, "%")
                         print()
 
                         # Wenn folgende Bedingungen wahr, Entladung ausschalten
