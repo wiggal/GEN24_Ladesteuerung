@@ -19,8 +19,7 @@
 	</style>
 </head>
 <body lang="de-DE" link="#000080" vlink="#800000" dir="ltr"><p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
-<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b>PV
-Planung</b></font></font></p>
+<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b>PV Planung</b></font></font></p>
 <p align="center"><br/>
 <br/>
 
@@ -36,30 +35,29 @@ werden, wie die Batterieladung erfolgen soll:
 </ul>
 <br/>
 
-<p align="center">Unter &quot;Entladesteuerung&quot; kann die Entladeleistung in Prozent fest eingestellt werden.
+<p align="center">Unter &quot;Entladesteuerung&quot; kann die maximale Entladeleistung in Prozent fest eingestellt werden.
 </p>
 <ul>
-    <li>in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent der Entladeleistung
+    <li>maximale Entladeleistung in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent
 </ul>
 <br/>
 
-<p align="center">In den Spalten <b>vier</b> und <b>fünf</b> können PV-Leistungen in KW eingetragen werden. </p>
-<p align="center">Die Leistungsreservierung wird dann bei der
-Ladungsplanung des Hausakkus berücksichtigt<br/>
-(der Hausakku wird
-dadurch früher vollgeladen).</p>
+</p>
+<p align="center" style="text-decoration: none">Automatisches Abschalten der Entladung des Hausakkus</p>
+<p align="center">Die Entladung wird unter folgenden Kriterien abgeschaltet (Einstellung in config.ini).</p>
+<ul>
+<li>Akkuladestatus in Prozent ist kleiner als BisLadestandEIN aus config.ini
+<li>Reservierte Leistung zur aktuellen Stunde ist größer als AbReservierungEIN aus config.ini
+<li>Verbrauch im Haus ist größer als 90% der reservierten Leistung
+<br/>
+</ul>
+<br/>
+<p align="center">In den Spalten <b>vier</b> und <b>fünf</b> der Prognosetabelle können PV-Leistungen in KW zur Reservierung eingetragen werden. </p>
+<p align="center">Die Leistungsreservierung wird dann bei der Ladungsplanung des Hausakkus berücksichtigt,<br/>
+bzw. als Kriterium für die Abschaltung der Akkuentladung verwendet.<br/>
+(der Hausakku wird dadurch früher vollgeladen).</p>
 <p align="center"><br/>
 <br/>
 
-</p>
-<p align="center" style="text-decoration: none"><u><b>Entladen des Hausakkus abschalten</b></u></p>
-<p align="center">Die Abschaltung erfolgt <b>zum Beispiel</b> unter diesen Kriterien.</p>
-<p align="center"><i>Akkuladestatus ist unter 80 %</i></p>
-<p align="center"><i>+ Reservierte Leistung zur aktuellen Stunde ist
-über 2KW</i></p>
-<p align="center"><i>+ Verbrauch im Haus ist größer als 90% der reservierten Leistung</i></p>
-<p align="center"><br/>
-<br/>
-</p>
 </body>
 </html>
