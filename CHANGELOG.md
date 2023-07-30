@@ -11,6 +11,7 @@
   dadurch soll das hoch und runterschalten der Batterieladung besser verhindert werden.
 - Lesen der manuellen Entladesteuerung eingebaut
 
+# ACHTUNG bitte in config.ini anpassen!!!
 Änderung in config.ini und config.ini.info
 - Variable "BatterieVoll" entfernt.
 
