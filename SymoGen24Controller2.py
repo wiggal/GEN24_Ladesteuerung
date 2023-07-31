@@ -300,10 +300,9 @@ if __name__ == '__main__':
                     LadewertGrund = ""
                     Tagessumme_Faktor = 0
 
-                    # WRSchreibGrenze_nachUnten ab 90% prozentual erhöhen (ersetzen von BatterieVoll!!  Baustelle)
+                    # WRSchreibGrenze_nachUnten ab 90% prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz - 90 > 0 ):
                         WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 10))
-                        print("*** WRSchreibGrenze_nachUnten = ", WRSchreibGrenze_nachUnten)
 
                     # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
                     # die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
@@ -490,7 +489,7 @@ if __name__ == '__main__':
                         BisLadestandEIN = eval(config['Reservierung']['BisLadestandEIN'])
                         AbReservierungEIN = eval(config['Reservierung']['AbReservierungEIN'])
                         MaxEntladung = eval(config['Reservierung']['MaxEntladung'])
-                        # ENTLADE Baustelle
+                        # Manuellen Entladewert lesen
                         if (reservierungdata.get('ManuelleEntladesteuerung')):
                             print("Manuelle Entladesteuerung: ", reservierungdata.get('ManuelleEntladesteuerung'), "%")
                             MaxEntladung = reservierungdata.get('ManuelleEntladesteuerung')
