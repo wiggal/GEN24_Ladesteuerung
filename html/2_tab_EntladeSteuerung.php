@@ -194,13 +194,13 @@ $ManuelleSteuerung_check = array(
     "E100" => "",
 );
 
-if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0) $ManuelleSteuerung_check['E0'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.02) $ManuelleSteuerung_check['E20'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.04) $ManuelleSteuerung_check['E40'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.06) $ManuelleSteuerung_check['E60'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.08) $ManuelleSteuerung_check['E80'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.1) $ManuelleSteuerung_check['E100'] = 'checked';
+if (isset($Akku_EntLadung['ManuelleEntladesteuerung'])) {
+if ($Akku_EntLadung['ManuelleEntladesteuerung'] == 0) $ManuelleSteuerung_check['E0'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.02) $ManuelleSteuerung_check['E20'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.04) $ManuelleSteuerung_check['E40'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.06) $ManuelleSteuerung_check['E60'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.08) $ManuelleSteuerung_check['E80'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.1) $ManuelleSteuerung_check['E100'] = 'checked';
 } else {
 $ManuelleSteuerung_check['E100'] = 'checked';
 }
@@ -261,8 +261,8 @@ foreach($Akku_EntLadung AS $date => $Watt) {
 
 if ($date == 'ManuelleEntladesteuerung') break;
 
-if (isset($Akku_EntLadung[$date]['Res_Feld1'])){
-    $Res_Feld1_wert = (float) $Akku_EntLadung[$date]['Res_Feld1'];
+if (isset($Akku_EntLadung[$date])){
+    $Res_Feld1_wert = (float) $Akku_EntLadung[$date]/1000;
 } else {
     $Res_Feld1_wert = 0;
 }
