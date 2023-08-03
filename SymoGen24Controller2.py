@@ -26,10 +26,10 @@ def loadWeatherData(config):
                 exit()
         return data
 
-def loadPVReservierung(config):
+def loadPVReservierung(file):
         reservierungdata = None
         try:
-            with open(config['Reservierung']['PV_ReservieungsDatei']) as json_file:
+            with open(file) as json_file:
                 reservierungdata = json.load(json_file)
         except:
                 print('Reservieungsdatei fehlt, bitte erzeugen oder Reservierung abschalten !!')
@@ -222,8 +222,7 @@ if __name__ == '__main__':
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     PV_Reservierung_steuern = eval(config['Reservierung']['PV_Reservierung_steuern'])
                     if  PV_Reservierung_steuern == 1:
-                        reservierungdata = loadPVReservierung(config)
-                        # print(reservierungdata)
+                        reservierungdata = loadPVReservierung(config['Reservierung']['PV_ReservieungsDatei'])
 
                     gen24 = SymoGen24Connector.SymoGen24(config['gen24']['hostNameOrIp'], config['gen24']['port'], auto)
                     # print(data)
@@ -482,41 +481,36 @@ if __name__ == '__main__':
     
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
-                    Batterieentlandung_steuern = eval(config['Reservierung']['Batterieentlandung_steuern'])
-                    if  Batterieentlandung_steuern == 1 and PV_Reservierung_steuern == 1:
+                    Batterieentlandung_steuern = eval(config['Entladung']['Batterieentlandung_steuern'])
+                    if  Batterieentlandung_steuern == 1:
+                        MaxEntladung = 100
                         print("######### E N T L A D E S T E U E R U N G #########\n")
-                        # Variablen bereitstellen
-                        BisLadestandEIN = eval(config['Reservierung']['BisLadestandEIN'])
-                        AbReservierungEIN = eval(config['Reservierung']['AbReservierungEIN'])
-                        MaxEntladung = eval(config['Reservierung']['MaxEntladung'])
+                        entladesteurungsdata = loadPVReservierung(config['Entladung']['Akku_EntladeSteuerungsFile'])
                         # Manuellen Entladewert lesen
-                        if (reservierungdata.get('ManuelleEntladesteuerung')):
-                            print("Manuelle Entladesteuerung: ", reservierungdata.get('ManuelleEntladesteuerung'), "%")
-                            MaxEntladung = reservierungdata.get('ManuelleEntladesteuerung')
+                        if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
+                            print("Manuelle Entladesteuerung: ", entladesteurungsdata.get('ManuelleEntladesteuerung'), "%")
+                            MaxEntladung = entladesteurungsdata.get('ManuelleEntladesteuerung')
 
-                        EntladungAus = eval(config['Reservierung']['EntladungAus'])
                         GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
-                        aktStd = datetime.strftime(now, format_aktStd)
+                        aktStd = datetime.strftime(now, "%H:00")
 
-                        if (reservierungdata.get(aktStd)):
-                            ReservierteWatt = reservierungdata[aktStd]
+                        if (entladesteurungsdata.get(aktStd)):
+                            KeineAkkuleistung = entladesteurungsdata[aktStd]
                         else:
-                            ReservierteWatt = 0
+                            KeineAkkuleistung = 0
 
                         ## Werte zum Überprüfen ausgeben
                         print("Batteriestatus in Prozent: ", BattStatusProz, "%")
-                        print("BisLadestandEIN: ", BisLadestandEIN, "%")
                         print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
-                        print("Reservierung Watt: ", ReservierteWatt)
-                        print("AbReservierungEIN: ", AbReservierungEIN)
+                        print("Keine Akkuleistung: ", KeineAkkuleistung)
                         print("Batterieentladegrenze: ", BatteryMaxDischargePercent, "%")
                         print()
 
-                        # Wenn folgende Bedingungen wahr, Entladung ausschalten
+                        # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Schaltverzögerung berechnen und anbringen.
-                        Entladung_Daempfung = 5 - BatteryMaxDischargePercent/100*5
-                        if (BattStatusProz < (BisLadestandEIN + Entladung_Daempfung)) and (GesamtverbrauchHaus > ReservierteWatt * 0.9) and (ReservierteWatt > AbReservierungEIN):
-                            Neu_BatteryMaxDischargePercent = EntladungAus
+                        # SPO Entladung_Daempfung = 5 - BatteryMaxDischargePercent/100*5
+                        if (GesamtverbrauchHaus > KeineAkkuleistung and KeineAkkuleistung > 0):
+                            Neu_BatteryMaxDischargePercent = int((GesamtverbrauchHaus - KeineAkkuleistung)/BattganzeLadeKapazWatt*100)
                         else:
                             Neu_BatteryMaxDischargePercent = MaxEntladung
 
