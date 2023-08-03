@@ -184,8 +184,8 @@ input[type="radio"]{
 include "config.php";
 $Akku_EntLadung = json_decode(file_get_contents($EntLadeSteuerFile), true);
 
-//$ManuelleENTLadeSteuerung_check = array('E0', 'E20', 'E40', 'E60', 'E80', 'E100');
-$ManuelleENTLadeSteuerung_check = array(
+//$ManuelleSteuerung_check = array('E0', 'E20', 'E40', 'E60', 'E80', 'E100');
+$ManuelleSteuerung_check = array(
     "E0" => "",
     "E20" => "",
     "E40" => "",
@@ -194,15 +194,15 @@ $ManuelleENTLadeSteuerung_check = array(
     "E100" => "",
 );
 
-if (isset($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'])) {
-if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0) $ManuelleENTLadeSteuerung_check['E0'] = 'checked';
-if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.02) $ManuelleENTLadeSteuerung_check['E20'] = 'checked';
-if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.04) $ManuelleENTLadeSteuerung_check['E40'] = 'checked';
-if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.06) $ManuelleENTLadeSteuerung_check['E60'] = 'checked';
-if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.08) $ManuelleENTLadeSteuerung_check['E80'] = 'checked';
-if ($EV_Reservierung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.1) $ManuelleENTLadeSteuerung_check['E100'] = 'checked';
+if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0) $ManuelleSteuerung_check['E0'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.02) $ManuelleSteuerung_check['E20'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.04) $ManuelleSteuerung_check['E40'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.06) $ManuelleSteuerung_check['E60'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.08) $ManuelleSteuerung_check['E80'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0.1) $ManuelleSteuerung_check['E100'] = 'checked';
 } else {
-$ManuelleENTLadeSteuerung_check['E100'] = 'checked';
+$ManuelleSteuerung_check['E100'] = 'checked';
 }
 ?>
 
@@ -211,12 +211,12 @@ $ManuelleENTLadeSteuerung_check['E100'] = 'checked';
 <div class="beschriftung" title="Entladung des Hausakkus in Prozent">
 <nobr>Entladesteuerung %</nobr>
 </div>
- <input type="radio" name="hausakkuentladung" id="E0" value="0" <?php echo $ManuelleENTLadeSteuerung_check['E0'] ?>>
- <input type="radio" name="hausakkuentladung" id="E20" value="0.02" <?php echo $ManuelleENTLadeSteuerung_check['E20'] ?> >
- <input type="radio" name="hausakkuentladung" id="E40" value="0.04" <?php echo $ManuelleENTLadeSteuerung_check['E40'] ?> >
- <input type="radio" name="hausakkuentladung" id="E60" value="0.06" <?php echo $ManuelleENTLadeSteuerung_check['E60'] ?> >
- <input type="radio" name="hausakkuentladung" id="E80" value="0.08" <?php echo $ManuelleENTLadeSteuerung_check['E80'] ?> >
- <input type="radio" name="hausakkuentladung" id="E100" value="0.1" <?php echo $ManuelleENTLadeSteuerung_check['E100'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E0" value="0" <?php echo $ManuelleSteuerung_check['E0'] ?>>
+ <input type="radio" name="hausakkuentladung" id="E20" value="0.02" <?php echo $ManuelleSteuerung_check['E20'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E40" value="0.04" <?php echo $ManuelleSteuerung_check['E40'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E60" value="0.06" <?php echo $ManuelleSteuerung_check['E60'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E80" value="0.08" <?php echo $ManuelleSteuerung_check['E80'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E100" value="0.1" <?php echo $ManuelleSteuerung_check['E100'] ?> >
    <label for="E0" class="option E0">
      <div class="dot"></div>
       <span>&nbsp;0</span>
@@ -247,16 +247,10 @@ $ManuelleENTLadeSteuerung_check['E100'] = 'checked';
    <div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze (KW)</th></tr>";
 echo "\n";
 
 // Variablen definieren
-$Stunden = array("01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","24:00");
-$Prognosewert_Sum = 0;
-$Rest_KW_Sum = 0;
-$Res_Feld1_Watt_Sum = 0;
-$Res_Feld2_Watt_Sum = 0;
-$Prognosewert = 0;
 $Rest_KW = 0;
 $Res_Feld1_Watt = 0;
 $Res_Feld2_Watt = 0;
@@ -264,6 +258,8 @@ $Res_Feld2_Watt = 0;
 
 
 foreach($Akku_EntLadung AS $date => $Watt) {
+
+if ($date == 'ManuelleEntladesteuerung') break;
 
 if (isset($Akku_EntLadung[$date]['Res_Feld1'])){
     $Res_Feld1_wert = (float) $Akku_EntLadung[$date]['Res_Feld1'];
@@ -277,66 +273,16 @@ $Res_Feld1_Watt = number_format($Res_Feld1_wert, 1);
 $Res_Feld1_Watt = "" ;
 }
 
-/*
-if (isset($EV_Reservierung[$date]['Res_Feld2'])){
-    $Res_Feld2_wert = (float) $EV_Reservierung[$date]['Res_Feld2'];
-} else {
-    $Res_Feld2_wert = 0;
-}
-if ($Res_Feld2_wert <> 0) {
-$Res_Feld2_Watt = number_format($Res_Feld2_wert, 1);
-} else  { 
-$Res_Feld2_Watt = "" ;
-}
-$Prognosewert =number_format($Watt/1000*$Faktor_PVLeistung_Prognose, 1);
-$Rest_KW = number_format($Prognosewert - (float) $Res_Feld2_Watt - (float) $Res_Feld1_Watt, 1);
-*/
-
-// Hintergrund heute bzw. morgen 
-$Tag_akt_Schl = substr($date,0,10);
-$Tag_heute = date("Y-m-d");
-$Hintergrund_Tag = '#FFFFFF';
-if ($Tag_akt_Schl != $Tag_heute) $Hintergrund_Tag = '#F1F3F4';
-
-// Hintergrund Rest
-if ($Rest_KW >= 0) {
-$Hintergrund_Rest = '#CCFFCC';
-} else {
-$Hintergrund_Rest = '#ff9090';
-}
-// Prognose in % von $PV_Leistung_KWp
-$ProgProzent = $Prognosewert / $PV_Leistung_KWp * 100;
-
-/*
-// Ausgabe der Summen
-if (isset($Tag_vor_Schl) and $Tag_akt_Schl != $Tag_vor_Schl) {
-echo "<tr bgcolor=#C1C0C0><td>Summen: </td><td style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</td><td>$Prognosewert_Sum</td><td>$Rest_KW_Sum</td><td>$Res_Feld1_Watt_Sum</td><td>$Res_Feld2_Watt_Sum</td></tr>";
-$Prognosewert_Sum = 0;
-$Rest_KW_Sum = 0;
-$Res_Feld1_Watt_Sum = 0;
-$Res_Feld2_Watt_Sum = 0;
-}
-*/
-
-$Tag_vor_Schl = $Tag_akt_Schl;
-
-echo '<tr><td style="white-space: nowrap;" bgcolor='.$Hintergrund_Tag.' class="Tag_Zeit_lesbar" contenteditable="false">';
+echo '<tr><td style="white-space: nowrap;" bgcolor=#F1F3F4 class="Tag_Zeit_lesbar" contenteditable="false">';
 echo $date;
 echo '<td style="white-space: nowrap; display:none" class="Tag_Zeit" contenteditable="false">';
 echo $date;
-//echo '</td><td style="background: linear-gradient(90deg,  #ff5733 '.$ProgProzent.'%, '.$Hintergrund_Tag.' 0%)" class="Prognose" contenteditable="false">';
-//echo $Prognosewert;
-//echo '</td><td bgcolor='.$Hintergrund_Rest.' class="Rest" contenteditable="false">';
-//echo $Rest_KW;
-echo '</td><td bgcolor='.$Hintergrund_Tag.' class="Res_Feld1" contenteditable="true">';
+echo '</td><td bgcolor=#F1F3F4 class="Res_Feld1" contenteditable="true">';
 echo $Res_Feld1_Watt;
-//echo '</td><td bgcolor='.$Hintergrund_Tag.' class="Res_Feld2" contenteditable="true">';
-//echo $Res_Feld2_Watt;
 echo "</td></tr>\n";
 
 } //foreach($Prognose....
 
-//echo "<tr bgcolor=#C1C0C0><td>Summen: </td><td style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</td><td>$Prognosewert_Sum</td><td>$Rest_KW_Sum</td><td>$Res_Feld1_Watt_Sum</td><td>$Res_Feld2_Watt_Sum</td></tr>";
 echo "</tbody></table>\n";
 ?>
    <br />
@@ -367,7 +313,7 @@ $(document).ready(function(){
   if (je != "") {
   Tag_Zeit.push("ManuelleEntladesteuerung");
   Res_Feld1.push(je_value);
-  alert (Tag_Zeit + "\n" + Res_Feld1 );
+  // alert (Tag_Zeit + "\n" + Res_Feld1 );
   }
 
   $.ajax({
