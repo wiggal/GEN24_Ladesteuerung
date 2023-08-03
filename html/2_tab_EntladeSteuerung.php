@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
  <head>
-  <title>PV_Planung</title>
+  <title>Akku Entladesteuerung</title>
   <script src="jquery.min.js"></script>
     <!--
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
@@ -31,12 +31,10 @@
   table-layout: auto;
   }
   th, td {
-  /*
-  font-size: calc(6px + (20 - 6) * (100vw - 400px) / (800 - 400));
-  */
   font-size: 200%;
   font-weight: normal;
-  text-align: right;
+  text-align: center;
+  padding: .2em 1em;
   }
 
   th, caption {
@@ -51,7 +49,7 @@
   */
 
   .speichern {
-	background-color:#44c767;
+	background-color:#2E64FE;
 	border-radius:28px;
 	border:1px solid #18ab29;
 	display:inline-block;
@@ -64,7 +62,7 @@
 	text-shadow:0px 1px 0px #2f6627;
   }
   .speichern:hover {
-	background-color:#5cbf2a;
+	background-color:#58ACFA;
   }
   .speichern:active {
 	position:relative;
@@ -119,7 +117,7 @@
   left: 4px;
   width: 12px;
   height: 12px;
-  background: #44c767;
+  background: #2E64FE;
   border-radius: 50%;
   opacity: 0;
   transform: scale(1.5);
@@ -128,23 +126,15 @@
 input[type="radio"]{
   display: none;
 }
-#auto:checked:checked ~ .auto,
-#aus:checked:checked ~ .aus,
-#halb:checked:checked ~ .halb,
-#voll:checked:checked ~ .voll,
 #E0:checked:checked ~ .E0,
 #E20:checked:checked ~ .E20,
 #E40:checked:checked ~ .E40,
 #E60:checked:checked ~ .E60,
 #E80:checked:checked ~ .E80,
 #E100:checked:checked ~ .E100{
-  border-color: #44c767;
-  background: #44c767;
+  border-color: #2E64FE;
+  background: #2E64FE;
 }
-#auto:checked:checked ~ .auto .dot,
-#aus:checked:checked ~ .aus .dot,
-#halb:checked:checked ~ .halb .dot,
-#voll:checked:checked ~ .voll .dot,
 #E0:checked:checked ~ .E0 .dot,
 #E20:checked:checked ~ .E20 .dot,
 #E40:checked:checked ~ .E40 .dot,
@@ -153,10 +143,6 @@ input[type="radio"]{
 #E100:checked:checked ~ .E100 .dot{
   background: #000;
 }
-#auto:checked:checked ~ .auto .dot::before,
-#aus:checked:checked ~ .aus .dot::before,
-#halb:checked:checked ~ .halb .dot::before,
-#voll:checked:checked ~ .voll .dot::before,
 #E0:checked:checked ~ .E0 .dot::before,
 #E20:checked:checked ~ .E20 .dot::before,
 #E40:checked:checked ~ .E40 .dot::before,
@@ -176,10 +162,6 @@ input[type="radio"]{
   font-size:150%;
   color: #000000;
 }
-#auto:checked:checked ~ .auto span,
-#aus:checked:checked ~ .aus span,
-#halb:checked:checked ~ .halb span,
-#voll:checked:checked ~ .voll span,
 #E0:checked:checked ~ .E0 span,
 #E20:checked:checked ~ .E20 span,
 #E40:checked:checked ~ .E40 span,
@@ -195,63 +177,13 @@ input[type="radio"]{
  <body>
   <div class="container">
    <br />
-  <div align="center"><button type="button" id="import_data" class="speichern">PV Planung ==&#62;&#62; speichern</button></div>
+  <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>
    <br />
 
 <?php
 include "config.php";
-$Prognose = json_decode(file_get_contents($PrognoseFile), true);
-$EV_Reservierung = json_decode(file_get_contents($ReservierungsFile), true);
+$Akku_EntLadung = json_decode(file_get_contents($EntLadeSteuerFile), true);
 
-//$ManuelleLadeSteuerung_check = array('auto', 'aus', 'halb', 'voll');
-$ManuelleLadeSteuerung_check = array(
-    "auto" => "",
-    "aus" => "",
-    "halb" => "",
-    "voll" => "",
-);
-
-if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0) $ManuelleLadeSteuerung_check['auto'] = 'checked';
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.000001) $ManuelleLadeSteuerung_check['aus'] = 'checked';
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.0005) $ManuelleLadeSteuerung_check['halb'] = 'checked';
-if ($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == 0.001) $ManuelleLadeSteuerung_check['voll'] = 'checked';
-} else {
-$ManuelleLadeSteuerung_check['auto'] = 'checked';
-}
-
-?>
-
-<center>
-<div class="wrapper">
-<div class="beschriftung" title="Ladung des Hausakkus mit einem Anteil der konfigurierten Maximallagung 
-                  (Auto=% nach Prognose, AUS=0%, HALB=50%, VOLL=100%)">
-<nobr>Hausakkuladung&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</nobr>
-</div>
- <input type="radio" name="hausakkuladung" id="auto" value="0" <?php echo $ManuelleLadeSteuerung_check['auto'] ?>>
- <input type="radio" name="hausakkuladung" id="aus" value="0.000001" <?php echo $ManuelleLadeSteuerung_check['aus'] ?> >
- <input type="radio" name="hausakkuladung" id="halb" value="0.0005" <?php echo $ManuelleLadeSteuerung_check['halb'] ?> >
- <input type="radio" name="hausakkuladung" id="voll" value="0.001" <?php echo $ManuelleLadeSteuerung_check['voll'] ?> >
-   <label for="auto" class="option auto">
-     <div class="dot"></div>
-      <span>&nbsp;AUTO</span>
-      </label>
-   <label for="aus" class="option aus">
-     <div class="dot"></div>
-      <span>&nbsp;AUS</span>
-      </label>
-   <label for="halb" class="option halb">
-     <div class="dot"></div>
-      <span>&nbsp;HALB</span>
-   </label>
-   <label for="voll" class="option voll">
-     <div class="dot"></div>
-      <span>&nbsp;VOLL</span>
-   </label>
-</div>
-</center>
-
-<?php
 //$ManuelleENTLadeSteuerung_check = array('E0', 'E20', 'E40', 'E60', 'E80', 'E100');
 $ManuelleENTLadeSteuerung_check = array(
     "E0" => "",
@@ -315,10 +247,11 @@ $ManuelleENTLadeSteuerung_check['E100'] = 'checked';
    <div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>Prognose(KW)</th><th>Rest</th><th>$Res_Feld1</th><th>$Res_Feld2</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze</th></tr>";
 echo "\n";
 
 // Variablen definieren
+$Stunden = array("01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00","24:00");
 $Prognosewert_Sum = 0;
 $Rest_KW_Sum = 0;
 $Res_Feld1_Watt_Sum = 0;
@@ -330,16 +263,10 @@ $Res_Feld2_Watt = 0;
 // Variablen definieren ENDE
 
 
-foreach($Prognose['result']['watts'] AS $date => $Watt) {
+foreach($Akku_EntLadung AS $date => $Watt) {
 
-// Summenbildung
-$Prognosewert_Sum = number_format($Prognosewert_Sum + $Prognosewert,1);
-$Rest_KW_Sum = number_format($Rest_KW_Sum + (float) $Rest_KW,1);
-$Res_Feld1_Watt_Sum = number_format($Res_Feld1_Watt_Sum + (float) $Res_Feld1_Watt,1);
-$Res_Feld2_Watt_Sum = number_format($Res_Feld2_Watt_Sum + (float) $Res_Feld2_Watt,1);
-
-if (isset($EV_Reservierung[$date]['Res_Feld1'])){
-    $Res_Feld1_wert = (float) $EV_Reservierung[$date]['Res_Feld1'];
+if (isset($Akku_EntLadung[$date]['Res_Feld1'])){
+    $Res_Feld1_wert = (float) $Akku_EntLadung[$date]['Res_Feld1'];
 } else {
     $Res_Feld1_wert = 0;
 }
@@ -350,6 +277,7 @@ $Res_Feld1_Watt = number_format($Res_Feld1_wert, 1);
 $Res_Feld1_Watt = "" ;
 }
 
+/*
 if (isset($EV_Reservierung[$date]['Res_Feld2'])){
     $Res_Feld2_wert = (float) $EV_Reservierung[$date]['Res_Feld2'];
 } else {
@@ -362,6 +290,7 @@ $Res_Feld2_Watt = "" ;
 }
 $Prognosewert =number_format($Watt/1000*$Faktor_PVLeistung_Prognose, 1);
 $Rest_KW = number_format($Prognosewert - (float) $Res_Feld2_Watt - (float) $Res_Feld1_Watt, 1);
+*/
 
 // Hintergrund heute bzw. morgen 
 $Tag_akt_Schl = substr($date,0,10);
@@ -378,6 +307,7 @@ $Hintergrund_Rest = '#ff9090';
 // Prognose in % von $PV_Leistung_KWp
 $ProgProzent = $Prognosewert / $PV_Leistung_KWp * 100;
 
+/*
 // Ausgabe der Summen
 if (isset($Tag_vor_Schl) and $Tag_akt_Schl != $Tag_vor_Schl) {
 echo "<tr bgcolor=#C1C0C0><td>Summen: </td><td style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</td><td>$Prognosewert_Sum</td><td>$Rest_KW_Sum</td><td>$Res_Feld1_Watt_Sum</td><td>$Res_Feld2_Watt_Sum</td></tr>";
@@ -386,31 +316,32 @@ $Rest_KW_Sum = 0;
 $Res_Feld1_Watt_Sum = 0;
 $Res_Feld2_Watt_Sum = 0;
 }
+*/
 
 $Tag_vor_Schl = $Tag_akt_Schl;
 
 echo '<tr><td style="white-space: nowrap;" bgcolor='.$Hintergrund_Tag.' class="Tag_Zeit_lesbar" contenteditable="false">';
-echo date('d.m. H:i',strtotime($date));
+echo $date;
 echo '<td style="white-space: nowrap; display:none" class="Tag_Zeit" contenteditable="false">';
 echo $date;
-echo '</td><td style="background: linear-gradient(90deg,  #ff5733 '.$ProgProzent.'%, '.$Hintergrund_Tag.' 0%)" class="Prognose" contenteditable="false">';
-echo $Prognosewert;
-echo '</td><td bgcolor='.$Hintergrund_Rest.' class="Rest" contenteditable="false">';
-echo $Rest_KW;
+//echo '</td><td style="background: linear-gradient(90deg,  #ff5733 '.$ProgProzent.'%, '.$Hintergrund_Tag.' 0%)" class="Prognose" contenteditable="false">';
+//echo $Prognosewert;
+//echo '</td><td bgcolor='.$Hintergrund_Rest.' class="Rest" contenteditable="false">';
+//echo $Rest_KW;
 echo '</td><td bgcolor='.$Hintergrund_Tag.' class="Res_Feld1" contenteditable="true">';
 echo $Res_Feld1_Watt;
-echo '</td><td bgcolor='.$Hintergrund_Tag.' class="Res_Feld2" contenteditable="true">';
-echo $Res_Feld2_Watt;
+//echo '</td><td bgcolor='.$Hintergrund_Tag.' class="Res_Feld2" contenteditable="true">';
+//echo $Res_Feld2_Watt;
 echo "</td></tr>\n";
 
 } //foreach($Prognose....
 
-echo "<tr bgcolor=#C1C0C0><td>Summen: </td><td style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</td><td>$Prognosewert_Sum</td><td>$Rest_KW_Sum</td><td>$Res_Feld1_Watt_Sum</td><td>$Res_Feld2_Watt_Sum</td></tr>";
+//echo "<tr bgcolor=#C1C0C0><td>Summen: </td><td style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</td><td>$Prognosewert_Sum</td><td>$Rest_KW_Sum</td><td>$Res_Feld1_Watt_Sum</td><td>$Res_Feld2_Watt_Sum</td></tr>";
 echo "</tbody></table>\n";
 ?>
    <br />
   </div>
-  <div align="center"><button type="button" id="import_data" class="speichern">PV Planung ==&#62;&#62; speichern</button></div>
+  <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>
  </body>
 </html>
 
@@ -421,28 +352,12 @@ $(document).ready(function(){
  $(document).on('click', '#import_data', function(){
   var Tag_Zeit = [];
   var Res_Feld1 = [];
-  var Res_Feld2 = [];
   $('.Tag_Zeit').each(function(){
    Tag_Zeit.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
    Res_Feld1.push($(this).text());
   });
-  $('.Res_Feld2').each(function(){
-   Res_Feld2.push($(this).text());
-  });
-  const js = document.querySelectorAll('input[name="hausakkuladung"]');
-  for(var i=0; i < js.length; i++){
-        if(js[i].checked == true){
-            js_value = js[i].value;
-        }
-    }
-  if (js != "") {
-  Tag_Zeit.push("ManuelleSteuerung");
-  Res_Feld1.push(js_value);
-  Res_Feld2.push(0);
-  //alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
-  }
   const je = document.querySelectorAll('input[name="hausakkuentladung"]');
   for(var i=0; i < je.length; i++){
         if(je[i].checked == true){
@@ -452,14 +367,13 @@ $(document).ready(function(){
   if (je != "") {
   Tag_Zeit.push("ManuelleEntladesteuerung");
   Res_Feld1.push(je_value);
-  Res_Feld2.push(0);
-  //alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
+  alert (Tag_Zeit + "\n" + Res_Feld1 );
   }
 
   $.ajax({
-   url:"speichern.php",
+   url:"entlade_speichern.php",
    method:"post",
-   data:{Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
+   data:{Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1},
    success:function(data)
    {
     location.reload();

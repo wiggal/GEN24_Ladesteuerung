@@ -151,3 +151,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 diff_git_PI.sh
+Watt_Reservierung.json
+html/EV_Reservierung.json
+html/Akku_EntLadeSteuerFile.json
