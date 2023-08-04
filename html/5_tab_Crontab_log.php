@@ -18,7 +18,11 @@ input { font-size: 100%; }
 include "config.php";
 $path_parts = pathinfo($PrognoseFile);
 $file = $path_parts['dirname'].'/Crontab.log';
-$myfile = fopen($file, "r") or die("Kann Datei nicht öffnen!");
+if(!file_exists($file)) {
+  die("Datei ". $file ." ist nicht vorhanden!");
+} else {
+  $myfile = fopen($file, "r");
+}
 $Ausgabe = 0;
 $datum = date("Y-m-d", time());
 

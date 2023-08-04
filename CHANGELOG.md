@@ -1,4 +1,18 @@
-﻿[0.9.4] – 2023-08-03
+﻿[0.9.5] – 2023-09-03
+
+Neuprogrammierung der Entladesteuerung
+
+# ACHTUNG bitte in config.ini anpassen!!!
+Änderung in config.ini
+- Block "[Entladung]" eingeführt und Variablen aus Block "[Reservierung]" entfernt
+
+Änderungen in SymoGen24Controller2.py
+- Umfangreiche Änderungen im Bereich "E N T L A D E S T E U E R U N G"
+
+Neuen Tab "html/2_tab_EntladeSteuerung.php" zur Entladesteuerung eingeführt
+
+
+[0.9.4] – 2023-08-03
 
 Änderung in 1_tab_Reservierung.php
 - Manuelle Entladesteuerung in Prozent für den Hausakku eingebaut
