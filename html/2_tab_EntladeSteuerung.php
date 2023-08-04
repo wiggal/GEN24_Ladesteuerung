@@ -209,7 +209,7 @@ $ManuelleSteuerung_check['E100'] = 'checked';
 <center>
 <div class="wrapper">
 <div class="beschriftung" title="Entladung des Hausakkus in Prozent">
-<nobr>Entladesteuerung %</nobr>
+<nobr>Fest Entladegrenze %</nobr>
 </div>
  <input type="radio" name="hausakkuentladung" id="E0" value="0" <?php echo $ManuelleSteuerung_check['E0'] ?>>
  <input type="radio" name="hausakkuentladung" id="E20" value="0.02" <?php echo $ManuelleSteuerung_check['E20'] ?> >
@@ -247,7 +247,7 @@ $ManuelleSteuerung_check['E100'] = 'checked';
    <div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze (KW)</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Grenze Akkuentladung (KW)</th></tr>";
 echo "\n";
 
 // Variablen definieren

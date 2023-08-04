@@ -519,6 +519,7 @@ if __name__ == '__main__':
                         if (Neu_BatteryMaxDischargePercent != BatteryMaxDischargePercent):
                             if len(argv) > 1 and (argv[1] == "schreiben"):
                                 valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
+                                bereits_geschrieben = 1
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:

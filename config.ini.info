@@ -145,23 +145,16 @@ PV_Reservierung_AUS_EIN = 0
 PV_ReservieungsDatei=Watt_Reservierung.json
 # Hier kann die PV-Reserierung (z.B. für ein E-Auto nachmittags) eingeschatet werden (1=ein, 0=aus)
 # Zur Reservierung muss eine Datei  "Watt_Reservierung.json" vorhanden sein, und geplegt werden.
-# Ich verwende dazu ein PHP Program auf dem RaspberryPi
+# Ich verwende dazu ein PHP Program auf dem RaspberryPi (html/1_tab_LadeSteuerung.php)
 PV_Reservierung_steuern = 1
 
+[Entladung]
+# Konfigdatei für die Entladesteuerung
+# Auch diese "Akku_EntLadeSteuerFile.json" wird durch ein PHP_Skript erzeugt (html/2_tab_EntladeSteuerung.php)
+Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
 # Batterieentladung ein- bzw. ausschalten (1=ein)
 # funktioniert nur wenn PV_Reservierung_steuern = 1, da die Werte der Reservierung benoetigt werden
 Batterieentlandung_steuern = 1
-# Drei Faktoren muessen gleichzeitig eintreten, damit die Batterieentladung auf Minimum geschaltet wird.
-# 1. Batterieladestand in % darf nicht über "BisLadestandEIN" sein (z.B. 80%)
-# Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 85% ein 80% aus)
-BisLadestandEIN = 80
-# 2. Reservierte Leistung zur aktuellen Stunde ist über "AbReservierungEIN" Watt (z.B. 2000W)
-AbReservierungEIN = 2000
-# 3. Verbrauch im Haus ist größer als 90% der reservierten Leistung
-
-# Hier die Werten für maximale und minimale Batterieentladung in Prozent
-MaxEntladung = 100
-EntladungAus = 0
 
 
 
