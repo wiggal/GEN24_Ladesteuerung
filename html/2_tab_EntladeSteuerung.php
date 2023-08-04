@@ -209,7 +209,7 @@ $ManuelleSteuerung_check['E100'] = 'checked';
 <center>
 <div class="wrapper">
 <div class="beschriftung" title="Entladung des Hausakkus in Prozent">
-<nobr>Fest Entladegrenze %</nobr>
+<nobr>Feste Entladegrenze %</nobr>
 </div>
  <input type="radio" name="hausakkuentladung" id="E0" value="0" <?php echo $ManuelleSteuerung_check['E0'] ?>>
  <input type="radio" name="hausakkuentladung" id="E20" value="0.02" <?php echo $ManuelleSteuerung_check['E20'] ?> >

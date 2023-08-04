@@ -5,59 +5,72 @@
 	<title></title>
 	<meta name="generator" content="LibreOffice 6.4.7.2 (Linux)"/>
 	<meta name="created" content="2022-12-30T11:00:09.213743133"/>
-	<meta name="changed" content="2022-12-30T12:29:09.764038976"/>
+	<meta name="changed" content="2023-08-04T17:05:58.628863866"/>
 	<style type="text/css">
 		@page { size: 21cm 29.7cm; margin: 2cm }
 		p { margin-bottom: 0.25cm; background: transparent; line-height: 115%; background: transparent }
 		a:link { color: #000080; so-language: zxx; text-decoration: underline }
 		a:visited { color: #800000; so-language: zxx; text-decoration: underline }
-
-        ul {
-  text-align: center;
-  list-style: inside;
-        }
 	</style>
 </head>
 <body lang="de-DE" link="#000080" vlink="#800000" dir="ltr"><p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
-<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b>PV Planung</b></font></font></p>
+<br/>
+<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b><span style="background: #44c767">TAB</span>
+--&gt; LadeSteuerung</b></font></font></p>
 <p align="center"><br/>
 <br/>
 
 </p>
-<p align="center">Unter &quot;Hausakkuladung&quot; kann ausgewählt
-werden, wie die Batterieladung erfolgen soll:
+<p align="center">Unter &quot;Ladegrenze&quot; kann ausgewählt
+werden, wie die Hausakkuladung erfolgen soll: 
 </p>
-<ul>
-    <li>„AUTO“ = Automatische Ladesteuerung nach Prognose
-    <li>„AUS“&nbsp;&nbsp;&nbsp;&nbsp;= Batterieladung wird ausgeschaltet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <li>„HALB“ = Batterieladung erfolgt mit halber Leistung&nbsp;&nbsp;&nbsp;&nbsp;
-    <li>„VOLL“ = Batterieladung erfolgt mit voller Leistung&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</ul>
-<br/>
-
-<p align="center">Unter &quot;Entladesteuerung&quot; kann die maximale Entladeleistung in Prozent fest eingestellt werden.
-</p>
-<ul>
-    <li>maximale Entladeleistung in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent
-</ul>
-<br/>
-
-</p>
-<p align="center" style="text-decoration: none">Automatisches Abschalten der Entladung des Hausakkus</p>
-<p align="center">Die Entladung wird unter folgenden Kriterien abgeschaltet (Einstellung in config.ini).</p>
-<ul>
-<li>Akkuladestatus in Prozent ist kleiner als BisLadestandEIN aus config.ini
-<li>Reservierte Leistung zur aktuellen Stunde ist größer als AbReservierungEIN aus config.ini
-<li>Verbrauch im Haus ist größer als 90% der reservierten Leistung
-<br/>
-</ul>
-<br/>
-<p align="center">In den Spalten <b>vier</b> und <b>fünf</b> der Prognosetabelle können PV-Leistungen in KW zur Reservierung eingetragen werden. </p>
-<p align="center">Die Leistungsreservierung wird dann bei der Ladungsplanung des Hausakkus berücksichtigt,<br/>
-bzw. als Kriterium für die Abschaltung der Akkuentladung verwendet.<br/>
-(der Hausakku wird dadurch früher vollgeladen).</p>
+<center>
+	<p style="margin-bottom: 0cm">„AUTO“ = Automatische
+	Ladesteuerung nach Prognose 
+	</p>
+	<p style="margin-bottom: 0cm">„AUS“&nbsp;&nbsp;&nbsp;&nbsp;=
+	Batterieladung wird ausgeschaltet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</p>
+	<p style="margin-bottom: 0cm">„HALB“ = Batterieladung
+	erfolgt mit halber Leistung&nbsp;&nbsp;&nbsp;&nbsp; 
+	</p>
+	<p>„VOLL“ = Batterieladung erfolgt mit voller Leistung&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</p>
+</center>
+<p align="center">In der Prognosetabelle können in den Spalten <b>vier</b>
+und <b>fünf</b> PV-Leistungen in KW zur Reservierung eingetragen
+werden. <br/>
+Die Leistungsreservierung wird dann bei der
+Ladungsplanung des Hausakkus berücksichtigt.</p>
+<br/><br/>
+<p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
+<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b><span style="background: #2E64FE">TAB</span>
+--&gt; EntladeSteuerung</b></font></font></p>
 <p align="center"><br/>
 <br/>
 
+</p>
+<p align="center">Unter &quot;Feste Entladegrenze &quot; kann die
+maximale Entladeleistung in den Schritten 0, 20, 40, 60, 80 oder 100
+Prozent fest eingestellt werden.</p>
+<p align="center">In der Entladetabelle können Leistungen in KW
+eingetragen werden, die nicht aus dem Hausakku entnommen werden
+sollen. Steigt in der Stunde der Verbrauch über den eingetragenen
+Wert, wird die Entladegrenze des Akkus so gesetzt, dass der
+eingetragene Wert nicht aus dem Akku entnommen wird.</p>
+<p align="center">Beispiel: Eintrag in Tabelle um 02:00 11.0KW.
+Steigt nun durch den Beginn der E-Autoladung der Hausverbrauch auf
+11,6KW, wird die Entladebegrenzung auf 0.6KW (aufgerundet auf 100
+volle Watt) gesetzt.</p>
+<p align="center">ACHTUNG: Die automatische Entladebegrenzung
+überschreibt die &quot;Feste Entladegrenze &quot;.</p>
+<p align="center"><br/>
+<br/>
+
+</p>
+<p align="center"><br/>
+<br/>
+
+</p>
 </body>
 </html>

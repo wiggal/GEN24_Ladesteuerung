@@ -201,7 +201,7 @@ $ManuelleSteuerung_check['auto'] = 'checked';
 <div class="wrapper">
 <div class="beschiftung" title="Ladung des Hausakkus mit einem Anteil der konfigurierten Maximallagung 
                   (Auto=% nach Prognose, AUS=0%, HALB=50%, VOLL=100%)">
-<nobr>Hausakkuladung</nobr>
+<nobr>Ladegrenze</nobr>
 </div>
  <input type="radio" name="hausakkuladung" id="auto" value="0" <?php echo $ManuelleSteuerung_check['auto'] ?>>
  <input type="radio" name="hausakkuladung" id="aus" value="0.000001" <?php echo $ManuelleSteuerung_check['aus'] ?> >
