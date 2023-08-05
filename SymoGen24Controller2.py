@@ -22,7 +22,7 @@ def loadWeatherData(config):
             with open(config['env']['filePathWeatherData']) as json_file:
                 data = json.load(json_file)
         except:
-                print('Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!')
+                print("Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!")
                 exit()
         return data
 
@@ -32,7 +32,7 @@ def loadPVReservierung(file):
             with open(file) as json_file:
                 reservierungdata = json.load(json_file)
         except:
-                print('Reservieungsdatei fehlt, bitte erzeugen oder Reservierung abschalten !!')
+                print(file , " fehlt, bitte erzeugen oder Option abschalten !!")
                 exit()
         return reservierungdata
 
@@ -103,11 +103,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             else:
                 Pro_Uebersch = 0
 
-            # Ab hier Ausgabe zum Vergleich mit der Tabelle Prognosewerte_Vergleichtabelle.ods
-            #if i == Akt_Std:
-            #    print("ACHTUNG: Im vorletzte Block sind die richtigen Werte zum Vergleich mit der Tabelle Prognosewerte_Vergleichtabelle.ods!!")
-            #print("Std, Akt_Minute, Prognose, Pro_Uebersch:", i, Akt_Minute, int(Prognose), int(Pro_Uebersch))
-
             i  += 1
 
 
@@ -121,7 +116,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # zu jeder Minute den genauen Zwischenwert mit den beiden Stundenprognosen rechnen
         Pro_Akt = int((Pro_Akt1 * (60 - Akt_Minute) + Pro_Akt2 * Akt_Minute) / 60)
         if ( Pro_Akt< 0): Pro_Akt = 0
-        # print("Std, Pro_Akt1, Pro_Akt2, Pro_Akt: ", LadewertStd, Pro_Akt1, Pro_Akt2, Pro_Akt)
 
         # Nun den Aktuellen Ladewert rechnen 
 
@@ -225,7 +219,6 @@ if __name__ == '__main__':
                         reservierungdata = loadPVReservierung(config['Reservierung']['PV_ReservieungsDatei'])
 
                     gen24 = SymoGen24Connector.SymoGen24(config['gen24']['hostNameOrIp'], config['gen24']['port'], auto)
-                    # print(data)
 
                     if gen24.read_data('Battery_Status') == 1:
                         print(datetime.now())
@@ -481,14 +474,19 @@ if __name__ == '__main__':
     
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
+                    # Variablen 'Entladung' aus config.ini lesen
                     Batterieentlandung_steuern = eval(config['Entladung']['Batterieentlandung_steuern'])
+                    WREntladeSchreibGrenze_Watt = eval(config['Entladung']['WREntladeSchreibGrenze_Watt'])
+
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = 100
                         print("######### E N T L A D E S T E U E R U N G #########\n")
+
+                        # SPO hier noch pruefen od Datei existiert
+                        # EntladeSteuerungFile lesen
                         entladesteurungsdata = loadPVReservierung(config['Entladung']['Akku_EntladeSteuerungsFile'])
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
-                            print("Manuelle Entladesteuerung: ", entladesteurungsdata.get('ManuelleEntladesteuerung'), "%")
                             MaxEntladung = entladesteurungsdata.get('ManuelleEntladesteuerung')
 
                         GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
@@ -499,20 +497,25 @@ if __name__ == '__main__':
                         else:
                             KeineAkkuleistung = 0
 
-                        ## Werte zum Überprüfen ausgeben
-                        print("Batteriestatus in Prozent: ", BattStatusProz, "%")
-                        print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
-                        print("Keine Akkuleistung: ", KeineAkkuleistung)
-                        print("Batterieentladegrenze: ", BatteryMaxDischargePercent, "%")
-                        print()
-
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
-                        # Schaltverzögerung berechnen und anbringen.
-                        # SPO Entladung_Daempfung = 5 - BatteryMaxDischargePercent/100*5
                         if (GesamtverbrauchHaus > KeineAkkuleistung and KeineAkkuleistung > 0):
                             Neu_BatteryMaxDischargePercent = int((GesamtverbrauchHaus - KeineAkkuleistung)/BattganzeLadeKapazWatt*100)
                         else:
                             Neu_BatteryMaxDischargePercent = MaxEntladung
+
+                        # SPO Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
+                        WREntladeSchreibGrenze_Prozent = int(WREntladeSchreibGrenze_Watt / BattganzeLadeKapazWatt * 100 + 1)
+                        if (abs(Neu_BatteryMaxDischargePercent - BatteryMaxDischargePercent) < WREntladeSchreibGrenze_Prozent):
+                            Neu_BatteryMaxDischargePercent = BatteryMaxDischargePercent
+
+                        ## Werte zum Überprüfen ausgeben
+                        print("Manuelle Entladesteuerung: ", entladesteurungsdata.get('ManuelleEntladesteuerung'), "%")
+                        print("Batteriestatus in Prozent: ", BattStatusProz, "%")
+                        print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
+                        print("Keine Akkuleistung: ", KeineAkkuleistung)
+                        print("Batterieentladegrenze ALT: ", BatteryMaxDischargePercent, "%")
+                        print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischargePercent, "%")
+                        print()
 
                         Schreib_Ausgabe = ""
 
@@ -525,7 +528,7 @@ if __name__ == '__main__':
                             else:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladung wurde NICHT " + str(Neu_BatteryMaxDischargePercent) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte der Batterieentladung ("+ str(Neu_BatteryMaxDischargePercent) + "%) sind identisch, NICHTS zu schreiben!!\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Unterschied Alte und Neue Werte der Batterieentladung kleiner ("+ str(WREntladeSchreibGrenze_Watt) + "W), NICHTS zu schreiben!!\n"
 
                         if print_level == 1:
                             print(Schreib_Ausgabe)
@@ -552,7 +555,7 @@ if __name__ == '__main__':
                                 if bereits_geschrieben == 0 or akt_Fallback_time != Fallback_Sekunden:
                                     if len(argv) > 1 and (argv[1] == "schreiben"):
                                         fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', Fallback_Sekunden)
-                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback geschrieben.\n"
+                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback " + str(Fallback_Sekunden) + " geschrieben.\n"
                                     else:
                                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
                                 else:
