@@ -38,9 +38,9 @@ werden, wie die Hausakkuladung erfolgen soll:
 		</p>
 </center>
 <p align="center">In der Prognosetabelle können in den Spalten <b>vier</b>
-und <b>fünf</b> PV-Leistungen in KW zur Reservierung eingetragen
+und <b>fünf</b><br> PV-Leistungen in KW zur Reservierung eingetragen
 werden. <br/>
-Die Leistungsreservierung wird dann bei der
+Die Leistungsreservierung wird dann bei der<br>
 Ladungsplanung des Hausakkus berücksichtigt.</p>
 <br/><br/>
 <p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
@@ -51,17 +51,21 @@ Ladungsplanung des Hausakkus berücksichtigt.</p>
 
 </p>
 <p align="center">Unter &quot;Feste Entladegrenze &quot; kann die
-maximale Entladeleistung in den Schritten 0, 20, 40, 60, 80 oder 100
+maximale Entladeleistung <br>in den Schritten 0, 20, 40, 60, 80 oder 100
 Prozent fest eingestellt werden.</p>
-<p align="center">In der Entladetabelle können Leistungen in KW
-eingetragen werden, die nicht aus dem Hausakku entnommen werden
-sollen. Steigt in der Stunde der Verbrauch über den eingetragenen
-Wert, wird die Entladegrenze des Akkus so gesetzt, dass der
-eingetragene Wert nicht aus dem Akku entnommen wird.</p>
-<p align="center">Beispiel: Eintrag in Tabelle um 02:00 11.0KW.
-Steigt nun durch den Beginn der E-Autoladung der Hausverbrauch auf
-11,6KW, wird die Entladebegrenzung auf 0.6KW (aufgerundet auf 100
-volle Watt) gesetzt.</p>
+<p align="center">In der Entladetabelle können Leistungen in KW eingetragen werden,<br> 
+die nicht aus dem Hausakku entnommen werden sollen.<br>
+Steigt in der Stunde der Verbrauch über den eingetragenen Wert,<br>
+wird die Entladegrenze des Akkus so gesetzt, dass der eingetragene Wert <br>
+nicht aus dem Akku entnommen wird.<br>
+Eine Schreibdämpung kann in "WREntladeSchreibGrenze_Watt" definiert werden.
+<br>
+</p>
+<p align="center">Beispiel:<br>
+Eintrag in Tabelle um 02:00 11.0KW.<br>
+Steigt nun durch den Beginn der E-Autoladung der Hausverbrauch<br>
+um 02:10 auf 11.6KW, wird die Entladebegrenzung auf 0.6KW gesetzt,<br>
+wenn "WREntladeSchreibGrenze_Watt" überschritten wird.</p>
 <p align="center">ACHTUNG: Die automatische Entladebegrenzung
 überschreibt die &quot;Feste Entladegrenze &quot;.</p>
 <p align="center"><br/>

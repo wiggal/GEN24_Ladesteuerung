@@ -155,7 +155,8 @@ Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
 # Batterieentladung ein- bzw. ausschalten (1=ein)
 # funktioniert nur wenn PV_Reservierung_steuern = 1, da die Werte der Reservierung benoetigt werden
 Batterieentlandung_steuern = 1
-
+# Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben
+WREntladeSchreibGrenze_Watt = 200
 
 
 ############################################################
