@@ -480,7 +480,6 @@ if __name__ == '__main__':
 
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = 100
-                        print("######### E N T L A D E S T E U E R U N G #########\n")
 
                         # SPO hier noch pruefen od Datei existiert
                         # EntladeSteuerungFile lesen
@@ -509,13 +508,15 @@ if __name__ == '__main__':
                             Neu_BatteryMaxDischargePercent = BatteryMaxDischargePercent
 
                         ## Werte zum Überprüfen ausgeben
-                        print("Manuelle Entladesteuerung: ", entladesteurungsdata.get('ManuelleEntladesteuerung'), "%")
-                        print("Batteriestatus in Prozent: ", BattStatusProz, "%")
-                        print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
-                        print("Keine Akkuleistung: ", KeineAkkuleistung)
-                        print("Batterieentladegrenze ALT: ", BatteryMaxDischargePercent, "%")
-                        print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischargePercent, "%")
-                        print()
+                        if print_level == 1:
+                            print("######### E N T L A D E S T E U E R U N G #########\n")
+                            print("Manuelle Entladesteuerung: ", entladesteurungsdata.get('ManuelleEntladesteuerung'), "%")
+                            print("Batteriestatus in Prozent: ", BattStatusProz, "%")
+                            print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
+                            print("Keine Akkuleistung: ", KeineAkkuleistung)
+                            print("Batterieentladegrenze ALT: ", BatteryMaxDischargePercent, "%")
+                            print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischargePercent, "%")
+                            print()
 
                         Schreib_Ausgabe = ""
 
@@ -576,7 +577,8 @@ if __name__ == '__main__':
                         if print_level == 1:
                             print(Fallback_Schreib_Ausgabe)
                     # FALLBACK ENDE
-                    print("************* ENDE: ", datetime.now(),"************* \n")
+                    if print_level == 1:
+                        print("************* ENDE: ", datetime.now(),"************* \n")
 
 
             finally:
