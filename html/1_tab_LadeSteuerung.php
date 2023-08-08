@@ -340,10 +340,10 @@ $(document).ready(function(){
    Tag_Zeit.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
-   Res_Feld1.push($(this).text());
+   Res_Feld1.push($(this).text().replace(",", "."));
   });
   $('.Res_Feld2').each(function(){
-   Res_Feld2.push($(this).text());
+   Res_Feld2.push($(this).text().replace(",", "."));
   });
   const js = document.querySelectorAll('input[name="hausakkuladung"]');
   for(var i=0; i < js.length; i++){

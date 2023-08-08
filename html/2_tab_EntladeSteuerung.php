@@ -315,10 +315,10 @@ $(document).ready(function(){
    Tag_Zeit.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
-   Res_Feld1.push($(this).text());
+   Res_Feld1.push($(this).text().replace(",", "."));
   });
   $('.Res_Feld2').each(function(){
-   Res_Feld2.push($(this).text());
+   Res_Feld2.push($(this).text().replace(",", "."));
   });
   je_value = 0.1;
   const je = document.querySelectorAll('input[name="hausakkuentladung"]');
@@ -331,7 +331,7 @@ $(document).ready(function(){
   Tag_Zeit.push("ManuelleEntladesteuerung");
   Res_Feld1.push(je_value);
   Res_Feld2.push(0);
-  //alert (Tag_Zeit + "\n" + Res_Feld1 );
+  //alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
   }
 
   $.ajax({
