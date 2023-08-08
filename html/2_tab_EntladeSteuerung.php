@@ -34,7 +34,7 @@
   font-size: 200%;
   font-weight: normal;
   text-align: center;
-  padding: .2em 1em;
+  padding: .2em .2em;
   }
 
   th, caption {
@@ -194,13 +194,13 @@ $ManuelleSteuerung_check = array(
     "E100" => "",
 );
 
-if (isset($Akku_EntLadung['ManuelleEntladesteuerung'])) {
-if ($Akku_EntLadung['ManuelleEntladesteuerung'] == 0) $ManuelleSteuerung_check['E0'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.02) $ManuelleSteuerung_check['E20'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.04) $ManuelleSteuerung_check['E40'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.06) $ManuelleSteuerung_check['E60'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.08) $ManuelleSteuerung_check['E80'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']/1000 == 0.1) $ManuelleSteuerung_check['E100'] = 'checked';
+if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0) $ManuelleSteuerung_check['E0'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.02) $ManuelleSteuerung_check['E20'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.04) $ManuelleSteuerung_check['E40'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.06) $ManuelleSteuerung_check['E60'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.08) $ManuelleSteuerung_check['E80'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.1) $ManuelleSteuerung_check['E100'] = 'checked';
 } else {
 $ManuelleSteuerung_check['E100'] = 'checked';
 }
@@ -247,7 +247,7 @@ $ManuelleSteuerung_check['E100'] = 'checked';
    <div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Grenze Akkuentladung (KW)</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze Entladung(KW)</th><th>Feste Entladegrenze(KW)</th></tr>";
 echo "\n";
 
 // Variablen definieren
@@ -261,16 +261,26 @@ foreach($Akku_EntLadung AS $date => $Watt) {
 
 if ($date == 'ManuelleEntladesteuerung') break;
 
-if (isset($Akku_EntLadung[$date])){
-    $Res_Feld1_wert = (float) $Akku_EntLadung[$date]/1000;
+if (isset($Watt['Res_Feld1']) and $Watt['Res_Feld1'] <> ""){
+    $Res_Feld1_wert = (float) $Watt['Res_Feld1']/1000;
 } else {
     $Res_Feld1_wert = 0;
 }
-
 if ($Res_Feld1_wert <> 0) {
 $Res_Feld1_Watt = number_format($Res_Feld1_wert, 1);
 } else  { 
 $Res_Feld1_Watt = "" ;
+}
+
+if (isset($Watt['Res_Feld2']) and $Watt['Res_Feld2'] <> ""){
+    $Res_Feld2_wert = (float) $Watt['Res_Feld2']/1000;
+} else {
+    $Res_Feld2_wert = 0;
+}
+if ($Res_Feld2_wert <> 0) {
+$Res_Feld2_Watt = number_format($Res_Feld2_wert, 1);
+} else  { 
+$Res_Feld2_Watt = "" ;
 }
 
 echo '<tr><td style="white-space: nowrap;" bgcolor=#F1F3F4 class="Tag_Zeit_lesbar" contenteditable="false">';
@@ -279,6 +289,8 @@ echo '<td style="white-space: nowrap; display:none" class="Tag_Zeit" contentedit
 echo $date;
 echo '</td><td bgcolor=#F1F3F4 class="Res_Feld1" contenteditable="true">';
 echo $Res_Feld1_Watt;
+echo '</td><td bgcolor=#F1F3F4 class="Res_Feld2" contenteditable="true">';
+echo $Res_Feld2_Watt;
 echo "</td></tr>\n";
 
 } //foreach($Prognose....
@@ -298,12 +310,17 @@ $(document).ready(function(){
  $(document).on('click', '#import_data', function(){
   var Tag_Zeit = [];
   var Res_Feld1 = [];
+  var Res_Feld2 = [];
   $('.Tag_Zeit').each(function(){
    Tag_Zeit.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
    Res_Feld1.push($(this).text());
   });
+  $('.Res_Feld2').each(function(){
+   Res_Feld2.push($(this).text());
+  });
+  je_value = 0.1;
   const je = document.querySelectorAll('input[name="hausakkuentladung"]');
   for(var i=0; i < je.length; i++){
         if(je[i].checked == true){
@@ -313,13 +330,14 @@ $(document).ready(function(){
   if (je != "") {
   Tag_Zeit.push("ManuelleEntladesteuerung");
   Res_Feld1.push(je_value);
-  // alert (Tag_Zeit + "\n" + Res_Feld1 );
+  Res_Feld2.push(0);
+  //alert (Tag_Zeit + "\n" + Res_Feld1 );
   }
 
   $.ajax({
    url:"entlade_speichern.php",
    method:"post",
-   data:{Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1},
+   data:{Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
    success:function(data)
    {
     location.reload();

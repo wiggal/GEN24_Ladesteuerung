@@ -481,7 +481,6 @@ if __name__ == '__main__':
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = 100
 
-                        # SPO hier noch pruefen od Datei existiert
                         # EntladeSteuerungFile lesen
                         entladesteurungsdata = loadPVReservierung(config['Entladung']['Akku_EntladeSteuerungsFile'])
                         # Manuellen Entladewert lesen
@@ -502,7 +501,7 @@ if __name__ == '__main__':
                         else:
                             Neu_BatteryMaxDischargePercent = MaxEntladung
 
-                        # SPO Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
+                        # Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
                         WREntladeSchreibGrenze_Prozent = int(WREntladeSchreibGrenze_Watt / BattganzeLadeKapazWatt * 100 + 1)
                         if (abs(Neu_BatteryMaxDischargePercent - BatteryMaxDischargePercent) < WREntladeSchreibGrenze_Prozent):
                             Neu_BatteryMaxDischargePercent = BatteryMaxDischargePercent

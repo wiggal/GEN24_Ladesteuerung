@@ -2,8 +2,6 @@
 
 include "config.php";
 
-//import.php
-
 $EV = array();
 $Tag_Zeit = $_POST["Tag_Zeit"];
 $Feld1 = $_POST['Res_Feld1'];
