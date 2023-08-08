@@ -11,6 +11,7 @@ if(isset($_POST["Tag_Zeit"]))
 {
  for($count = 0; $count < count($Tag_Zeit); $count++)
  {
+ //print_r($Tag_Zeit[$count);
  $EV[$Tag_Zeit[$count]]['Res_Feld1']=(float) $Feld1[$count]*1000;
  $EV[$Tag_Zeit[$count]]['Res_Feld2']=(float) $Feld2[$count]*1000;
  }

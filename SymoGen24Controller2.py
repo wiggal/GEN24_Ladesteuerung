@@ -485,22 +485,37 @@ if __name__ == '__main__':
                         entladesteurungsdata = loadPVReservierung(config['Entladung']['Akku_EntladeSteuerungsFile'])
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
-                            MaxEntladung = entladesteurungsdata.get('ManuelleEntladesteuerung')
+                            MaxEntladung = entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']
+                            #print("DEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>")
+                            #print("DEBUG MaxEntladung = entladesteurungsdata:", MaxEntladung)
 
                         GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
                         aktStd = datetime.strftime(now, "%H:00")
 
-                        if (entladesteurungsdata.get(aktStd)):
-                            KeineAkkuleistung = entladesteurungsdata[aktStd]
+                        # Verbrauchsgrenze Entladung lesen
+                        if (entladesteurungsdata[aktStd].get('Res_Feld1')):
+                            VerbrauchsgrenzeEntladung = entladesteurungsdata[aktStd]['Res_Feld1']
                         else:
-                            KeineAkkuleistung = 0
+                            VerbrauchsgrenzeEntladung = 0
+
+                        #print("DEBUG VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung)
+                        # Feste Entladegrenze lesen
+                        if (entladesteurungsdata[aktStd].get('Res_Feld2')):
+                            FesteEntladegrenze = entladesteurungsdata[aktStd]['Res_Feld2']
+                        else:
+                            FesteEntladegrenze = 0
+
+                        #print("DEBUG FesteEntladegrenze: ", FesteEntladegrenze)
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
-                        if (GesamtverbrauchHaus > KeineAkkuleistung and KeineAkkuleistung > 0):
-                            Neu_BatteryMaxDischargePercent = int((GesamtverbrauchHaus - KeineAkkuleistung)/BattganzeLadeKapazWatt*100)
+                        if (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
+                            Neu_BatteryMaxDischargePercent = int((GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)/BattganzeLadeKapazWatt*100)
+                        elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze > 0):
+                            Neu_BatteryMaxDischargePercent = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
                         else:
                             Neu_BatteryMaxDischargePercent = MaxEntladung
 
+                        #print("DEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>")
                         # Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
                         WREntladeSchreibGrenze_Prozent = int(WREntladeSchreibGrenze_Watt / BattganzeLadeKapazWatt * 100 + 1)
                         if (abs(Neu_BatteryMaxDischargePercent - BatteryMaxDischargePercent) < WREntladeSchreibGrenze_Prozent):
@@ -509,10 +524,10 @@ if __name__ == '__main__':
                         ## Werte zum Überprüfen ausgeben
                         if print_level == 1:
                             print("######### E N T L A D E S T E U E R U N G #########\n")
-                            print("Manuelle Entladesteuerung: ", entladesteurungsdata.get('ManuelleEntladesteuerung'), "%")
+                            print("Manuelle Entladesteuerung: ", entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'], "%")
                             print("Batteriestatus in Prozent: ", BattStatusProz, "%")
-                            print("Gesamtverbrauch Haus: ", GesamtverbrauchHaus)
-                            print("Keine Akkuleistung: ", KeineAkkuleistung)
+                            print("GesamtverbrauchHaus:       ", GesamtverbrauchHaus, "W")
+                            print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
                             print("Batterieentladegrenze ALT: ", BatteryMaxDischargePercent, "%")
                             print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischargePercent, "%")
                             print()
