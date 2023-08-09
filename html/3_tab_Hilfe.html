@@ -2,21 +2,23 @@
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title></title>
-	<meta name="generator" content="LibreOffice 6.4.7.2 (Linux)"/>
-	<meta name="created" content="2022-12-30T11:00:09.213743133"/>
-	<meta name="changed" content="2023-08-04T17:05:58.628863866"/>
+	<title>Hilfe Ent/Ladesteuerung</title>
 	<style type="text/css">
-		@page { size: 21cm 29.7cm; margin: 2cm }
-		p { margin-bottom: 0.25cm; background: transparent; line-height: 115%; background: transparent }
-		a:link { color: #000080; so-language: zxx; text-decoration: underline }
-		a:visited { color: #800000; so-language: zxx; text-decoration: underline }
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+          padding: 10px;
+        }   
+        @media (max-width: 1080px) {
+            th, td {
+              font-size: 2.2em;
+            }
+        }
 	</style>
 </head>
-<body lang="de-DE" link="#000080" vlink="#800000" dir="ltr"><p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
+<body lang="de-DE" ><p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
 <br/>
-<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b><span style="background: #44c767">TAB</span>
---&gt; LadeSteuerung</b></font></font></p>
+<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b><span style="background: #44c767">TAB</span>--&gt; LadeSteuerung</b></font></font></p>
 <p align="center"><br/>
 <br/>
 
@@ -53,17 +55,18 @@ Ladungsplanung des Hausakkus berücksichtigt.</p>
 <p align="center">Unter &quot;Feste Entladegrenze &quot; kann die
 maximale Entladeleistung <br>in den Schritten 0, 20, 40, 60, 80 oder 100
 Prozent fest eingestellt werden.</p>
-<p align="center">In der Entladetabelle können unter "Verbrauchsgrenze Entladung(KW)"<br> 
-Leistungen in KW eingetragen werden.<br> 
-Steigt in der betreffenden Stunde der Verbrauch über den eingetragenen Wert,<br>
-wird folgende Entladegrenze für den Akkus gesetzt:<br> 
+<p align="center">In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.<br> 
+Folgende Möglichkeiten zur Steuerung sind möglich:<br>
 <br>
-1.) Ist nur unter "Verbrauchsgrenze Entladung(KW)" ein Wert eingetragen,<br> 
-wird die Entladung auf den Verbrauch minus den Wert begrenzt.<br>
-<br>
-2.) Ist auch unter "Verbrauchsgrenze Entladung(KW)" ein wert eingetragen,<br>
-wird die Entladung auf diesen Wert begrenzt.<br>
-<br>
+<table>
+<tr> <th>Verbrauchsgrenze</th> <th>Feste Grenze</th> <th>Auswirkung</th> </tr>
+<tr> <td></td> <td></td> <td>Ladegrenze = "Feste Entladegrenze %"</td> </tr>
+<tr> <td></td> <td>0.8</td> <td>Ladegrenze = 0.8KW</td> </tr>
+<tr> <td>8.5</td> <td></td> <td>Wenn Verbrauch > 8.5KW, Ladegrenze = Verbrauch - 8.5KW</td> </tr>
+<tr> <td>8.5</td> <td>0.8</td> <td>Wenn Verbrauch > 8.5KW, Ladegrenze = 0.8KW</td> </tr>
+</table>
+
+<br><br>
 Eine Schreibdämpung kann in "WREntladeSchreibGrenze_Watt" definiert werden.
 <br>
 <p align="center">ACHTUNG: Die automatische Entladebegrenzung

@@ -208,6 +208,7 @@ if __name__ == '__main__':
             auto = False
             try:            
                     newPercent = None
+                    DEBUG_Ausgabe= "DEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
     
                     ###############################
     
@@ -409,7 +410,7 @@ if __name__ == '__main__':
 
                 
 
-                    if print_level == 1:
+                    if print_level >= 1:
                         try:
                             print("************* BEGINN: ", datetime.now(),"************* ")
                             print("\n######### L A D E S T E U E R U N G #########\n")
@@ -469,7 +470,7 @@ if __name__ == '__main__':
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
 
-                    if print_level == 1:
+                    if print_level >= 1:
                         print(Schreib_Ausgabe)
     
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
@@ -486,8 +487,10 @@ if __name__ == '__main__':
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
                             MaxEntladung = entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']
-                            #print("DEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>")
-                            #print("DEBUG MaxEntladung = entladesteurungsdata:", MaxEntladung)
+                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
+                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADUNG >>>>>>>>>>>>>"
+                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
+                            DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
 
                         GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
                         aktStd = datetime.strftime(now, "%H:00")
@@ -498,31 +501,38 @@ if __name__ == '__main__':
                         else:
                             VerbrauchsgrenzeEntladung = 0
 
-                        #print("DEBUG VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung)
+                        DEBUG_Ausgabe+="\nDEBUG VerbrauchsgrenzeEntladung: " + str(VerbrauchsgrenzeEntladung)
                         # Feste Entladegrenze lesen
                         if (entladesteurungsdata[aktStd].get('Res_Feld2')):
                             FesteEntladegrenze = entladesteurungsdata[aktStd]['Res_Feld2']
                         else:
                             FesteEntladegrenze = 0
 
-                        #print("DEBUG FesteEntladegrenze: ", FesteEntladegrenze)
+                        DEBUG_Ausgabe+="\nDEBUG FesteEntladegrenze: " + str(FesteEntladegrenze)
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
+                        # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
                         if (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
                             Neu_BatteryMaxDischargePercent = int((GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)/BattganzeLadeKapazWatt*100)
+                        # Verbrauchsgrenze == 2000 && Feste Grenze == 500 
                         elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze > 0):
+                            Neu_BatteryMaxDischargePercent = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
+                        # Verbrauchsgrenze == 0 (leer) && Feste Grenze == 500
+                        elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze > 0):
                             Neu_BatteryMaxDischargePercent = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
                         else:
                             Neu_BatteryMaxDischargePercent = MaxEntladung
 
-                        #print("DEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>")
+                        DEBUG_Ausgabe+="\nDEBUG Batterieentladegrenze NEU: " + str(Neu_BatteryMaxDischargePercent) + "%"
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
+
                         # Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
                         WREntladeSchreibGrenze_Prozent = int(WREntladeSchreibGrenze_Watt / BattganzeLadeKapazWatt * 100 + 1)
                         if (abs(Neu_BatteryMaxDischargePercent - BatteryMaxDischargePercent) < WREntladeSchreibGrenze_Prozent):
                             Neu_BatteryMaxDischargePercent = BatteryMaxDischargePercent
 
                         ## Werte zum Überprüfen ausgeben
-                        if print_level == 1:
+                        if print_level >= 1:
                             print("######### E N T L A D E S T E U E R U N G #########\n")
                             print("Manuelle Entladesteuerung: ", entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'], "%")
                             print("Batteriestatus in Prozent: ", BattStatusProz, "%")
@@ -545,7 +555,7 @@ if __name__ == '__main__':
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Unterschied Alte und Neue Werte der Batterieentladung kleiner ("+ str(WREntladeSchreibGrenze_Watt) + "W), NICHTS zu schreiben!!\n"
 
-                        if print_level == 1:
+                        if print_level >= 1:
                             print(Schreib_Ausgabe)
 
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
@@ -588,10 +598,13 @@ if __name__ == '__main__':
                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "InOutWRte_RvrtTms_Fallback: " + str(gen24.read_data('InOutWRte_RvrtTms_Fallback')) + "\n"
                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "StorageControlMode:    " + str(gen24.read_data('StorageControlMode')) + "\n"
 
-                        if print_level == 1:
+                        if print_level >= 1:
                             print(Fallback_Schreib_Ausgabe)
                     # FALLBACK ENDE
-                    if print_level == 1:
+                    #DEBUG ausgeben
+                    if print_level >= 2:
+                        print(DEBUG_Ausgabe)
+                    if print_level >= 1:
                         print("************* ENDE: ", datetime.now(),"************* \n")
 
 
