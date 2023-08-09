@@ -2,31 +2,35 @@
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width" />
 	<title>Hilfe Ent/Ladesteuerung</title>
 	<style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            }
         table, th, td {
           border: 1px solid black;
           border-collapse: collapse;
           padding: 10px;
         }   
-        @media (max-width: 1080px) {
+        /*
+        @media (max-width: 880px) {
             th, td {
               font-size: 2.2em;
             }
         }
+        */
 	</style>
 </head>
-<body lang="de-DE" ><p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
+<body lang="de-DE" >
+<center>
 <br/>
-<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b><span style="background: #44c767">TAB</span>--&gt; LadeSteuerung</b></font></font></p>
-<p align="center"><br/>
-<br/>
+<font style="font-size: 24pt"><b><span style="background: #44c767">TAB</span>--&gt; LadeSteuerung</b></font>
+><br/> <br/>
 
-</p>
-<p align="center">Unter &quot;Ladegrenze&quot; kann ausgewählt
+<p>Unter &quot;Ladegrenze&quot; kann ausgewählt
 werden, wie die Hausakkuladung erfolgen soll: 
 </p>
-<center>
 	<p style="margin-bottom: 0cm">„AUTO“ = Automatische
 	Ladesteuerung nach Prognose 
 	</p>
@@ -38,40 +42,38 @@ werden, wie die Hausakkuladung erfolgen soll:
 	</p>
 	<p>„VOLL“ = Batterieladung erfolgt mit voller Leistung&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		</p>
-</center>
-<p align="center">In der Prognosetabelle können in den Spalten <b>vier</b>
+<p>In der Prognosetabelle können in den Spalten <b>vier</b>
 und <b>fünf</b><br> PV-Leistungen in KW zur Reservierung eingetragen
 werden. <br/>
 Die Leistungsreservierung wird dann bei der<br>
 Ladungsplanung des Hausakkus berücksichtigt.</p>
 <br/><br/>
-<p align="center" style="margin-top: 0.42cm; margin-bottom: 0.21cm; line-height: 100%; page-break-after: avoid">
-<font face="Liberation Sans, sans-serif"><font size="6" style="font-size: 28pt"><b><span style="background: #2E64FE">TAB</span>
---&gt; EntladeSteuerung</b></font></font></p>
-<p align="center"><br/>
+<p>
+<font style="font-size: 24pt"><b><span style="background: #2E64FE">TAB</span>--&gt; EntladeSteuerung</b></font></font></p>
 <br/>
 
-</p>
-<p align="center">Unter &quot;Feste Entladegrenze &quot; kann die
+<p>Unter &quot;Feste Entladegrenze &quot; kann die
 maximale Entladeleistung <br>in den Schritten 0, 20, 40, 60, 80 oder 100
 Prozent fest eingestellt werden.</p>
-<p align="center">In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.<br> 
-Folgende Möglichkeiten zur Steuerung sind möglich:<br>
+<p>In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.<br> 
+<br>
+Je nach Eintrag in den Spalten "Verbrauchsgrenze Entladung" und "Feste Entladegrenze"<br>
+hat dies folgende Auswirkung:<br>
 <br>
 <table>
 <tr> <th>Verbrauchsgrenze</th> <th>Feste Grenze</th> <th>Auswirkung</th> </tr>
-<tr> <td></td> <td></td> <td>Ladegrenze = "Feste Entladegrenze %"</td> </tr>
-<tr> <td></td> <td>0.8</td> <td>Ladegrenze = 0.8KW</td> </tr>
-<tr> <td>8.5</td> <td></td> <td>Wenn Verbrauch > 8.5KW, Ladegrenze = Verbrauch - 8.5KW</td> </tr>
-<tr> <td>8.5</td> <td>0.8</td> <td>Wenn Verbrauch > 8.5KW, Ladegrenze = 0.8KW</td> </tr>
+<tr> <td>„leer“</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf den Wert von "Feste Entladegrenze %" gesetzt.</td> </tr>
+<tr> <td>„leer“</td> <td>0.8</td> <td>die Entladebegrenzung wird die ganze Stunde auf 0.8KW gesetzt.</td> </tr>
+<tr> <td>8.5</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf (Verbrauch - 8.5)KW gesetzt, wenn der Verbrauch 8.5KW übersteigt, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
+<tr> <td>8.5</td> <td>0.8</td> <td>die Entladebegrenzung wird auf 0.8KW gesetzt, wenn der Verbrauch 8.5KW übersteig, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
 </table>
 
 <br><br>
 Eine Schreibdämpung kann in "WREntladeSchreibGrenze_Watt" definiert werden.
 <br>
-<p align="center">ACHTUNG: Die automatische Entladebegrenzung
-überschreibt die &quot;Feste Entladegrenze &quot;.</p>
-<br/>
+<p>ACHTUNG: Die automatische Entladebegrenzung überschreibt die &quot;Feste Entladegrenze &quot;.</p>
+<br>
+</center>
 
 </body>
 </html>
