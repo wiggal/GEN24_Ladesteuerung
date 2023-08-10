@@ -100,8 +100,8 @@ BatSparFaktor = 1.2
 BatWaitFaktor = 4.0
 BatWaitFaktor_Max = 10
 
-# Ausgabe von Werten steuern, um Die Wirkung der Einstellungen prüfen zu können.
-# print_level 1=Ausgabe 0=keine Ausgabe
+# Ausgabe von Werten steuern, um Die Wirkung der Einstellungen prüfen, bzw. Fehler finden zu können.
+# print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe
 print_level = 1
 
 # Größter Batterieladewert, der im WR gesetzt werden soll, darf nicht kleiner als die 30% Kappung der PV_Leistung WKp sein.
