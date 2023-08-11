@@ -482,14 +482,13 @@ if __name__ == '__main__':
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = 100
 
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADUNG >>>>>>>>>>>>>"
+
                         # EntladeSteuerungFile lesen
                         entladesteurungsdata = loadPVReservierung(config['Entladung']['Akku_EntladeSteuerungsFile'])
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
                             MaxEntladung = entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']
-                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
-                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADUNG >>>>>>>>>>>>>"
-                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
                             DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
 
                         GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
@@ -524,7 +523,6 @@ if __name__ == '__main__':
                             Neu_BatteryMaxDischargePercent = MaxEntladung
 
                         DEBUG_Ausgabe+="\nDEBUG Batterieentladegrenze NEU: " + str(Neu_BatteryMaxDischargePercent) + "%"
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
 
                         # Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
                         WREntladeSchreibGrenze_Prozent = int(WREntladeSchreibGrenze_Watt / BattganzeLadeKapazWatt * 100 + 1)
@@ -548,6 +546,7 @@ if __name__ == '__main__':
                             if len(argv) > 1 and (argv[1] == "schreiben"):
                                 valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
                                 bereits_geschrieben = 1
+                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladegrenze schreiben: " + str(valueNew)
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
@@ -557,6 +556,8 @@ if __name__ == '__main__':
 
                         if print_level >= 1:
                             print(Schreib_Ausgabe)
+
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADUNG >>>>>>>>>>>>>"
 
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):

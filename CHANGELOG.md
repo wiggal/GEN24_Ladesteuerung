@@ -1,4 +1,4 @@
-﻿[0.9.5] – 2023-09-03
+﻿[0.9.5] – 2023-08-13
 
 Neuprogrammierung der Entladesteuerung
 
@@ -11,9 +11,10 @@ Neuerungen in SymoGen24Controller2.py
 
 Neuen Tab "html/2_tab_EntladeSteuerung.php" zur Entladesteuerung eingeführt
 
+Hilfe an die neue Entladesteuerung angepasst.
+
 Änderungen:
 - Umwandlung von Komma in Punkt in Eingabetabellen
-
 
 [0.9.4] – 2023-08-03
 
