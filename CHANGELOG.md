@@ -1,4 +1,8 @@
-﻿[0.9.5] – 2023-08-13
+﻿[0.9.6] – 2023-09-24
+
+Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf der Wechselrichters eingeführt.
+
+[0.9.5] – 2023-08-13
 
 Neuprogrammierung der Entladesteuerung
 
