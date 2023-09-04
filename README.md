@@ -106,15 +106,16 @@ sudo systemctl restart apache2 <br>
 
 Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
+Batterieladesteuerung ( TAB--> LadeSteuerung )<br>
+
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
 In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
 
 Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung <br>
 beim nächsten Aufruf von SymoGen24Controller2.py mit eingerechnet.
 
- der gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung beim nächsten Aufruf von SymoGen24Controller2.py berücksichtigt.
-Mit der gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die volle Batterieladung nach dem Sichern eingeschaltet,
-und beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
+Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die entsprechende Batterieladeleistung,
+beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
 
 BatterieENTladesteuerung ( TAB--> EntladeSteuerung )<br>
