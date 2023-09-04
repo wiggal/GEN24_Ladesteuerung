@@ -1,6 +1,6 @@
-﻿[0.9.6] – 2023-09-24
+﻿[0.9.6] – 2023-10-24
 
-Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf der Wechselrichters eingeführt.
+Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
 
 [0.9.5] – 2023-08-13
 

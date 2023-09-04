@@ -94,10 +94,12 @@ DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für Apache haben!!<br>
 Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.<br>
 Vorhandene Module:<br>
-1_tab_Reservierung.php ==>> Reservierung von großen PV-Mengen<br>
-2_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen<br>
-3_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini<br>
-4_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log<br>
+1_tab_LadeSteuerung.php    ==>> Reservierung von großen PV-Mengen und feste manuelle Ladesteuerung<br>
+2_tab_EntladeSteuerung.php ==>>  EntladeSteuerung durch Eintrag in Tabelle und feste manuelle Entladesteuerung<br>
+3_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen<br>
+4_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini<br>
+5_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log<br>
+6_tab_GEN24.php        ==>> lokaler Aufruf des GEN24<br>
 
 Apache neu starten <br>
 sudo systemctl restart apache2 <br>
@@ -115,14 +117,15 @@ Mit der gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die vol
 und beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
 
-BatterieENTladesteuerung <br>
-  Die Batterieentladesteuerung schaltet das Entladen des Hausakkus ab, wenn sehr hohe reservierte Verbräuche anliegen.<br>
-  ( Nur in Verbindung mit der "Reservierung von größeren Mengen PV Leistung" möglich )<br>
+BatterieENTladesteuerung ( TAB--> EntladeSteuerung )<br>
 
-  Zum Beispiel unter folgenden Bedingungen (Einstellungen in config.ini):<br>
+Unter "Feste Entladegrenze " kann die maximale Entladeleistung
+in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.
 
-  Akkuladestatus ist unter 80 %<br>
-UND Reservierte Leistung zur aktuellen Stunde ist über 2KW<br>
-UND Verbrauch im Haus ist größer als 90% der reservierten Leistung<br>
+In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.
+
+Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
+
+
 
 
