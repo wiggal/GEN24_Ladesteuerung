@@ -138,9 +138,9 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             LadewertGrund = "Tagesprognose / BatWaitFaktor > Batteriekapazitaet "
 
         # aktuelleBatteriePower ist beim Laden der Batterie minus
-        # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb Puffer_Einspeisegrenze addieren
+        # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
         if aktuelleEinspeisung > Einspeisegrenze:
-            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + Puffer_Einspeisegrenze)
+            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + WRSchreibGrenze_nachOben)
         else:
             EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
         # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
@@ -155,9 +155,9 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         if (aktuellerLadewert > MaxLadung):
             aktuellerLadewert = MaxLadung
 
-        # Wenn  PV-Produktion + Puffer_WR_Kapazitaet > WR_Kapazitaet 
+        # Wenn  PV-Produktion + WRSchreibGrenze_nachOben > WR_Kapazitaet 
         if aktuellePVProduktion > WR_Kapazitaet:
-            kapazitaetsueberschuss = int(aktuellePVProduktion - WR_Kapazitaet + Puffer_WR_Kapazitaet)
+            kapazitaetsueberschuss = int(aktuellePVProduktion - WR_Kapazitaet + WRSchreibGrenze_nachOben)
             if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
                 kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
             if (kapazitaetsueberschuss > aktuellerLadewert ):
@@ -227,16 +227,6 @@ if __name__ == '__main__':
                         print()
                         exit()
     
-                    # VARIABLENPRUEFUNG VERSION 9.1 
-                    if not config.has_option('Ladeberechnung', 'Puffer_Einspeisegrenze' ) \
-                    or not config.has_option('Ladeberechnung', 'PV_Leistung_Watt' ) \
-                    or not config.has_option('Ladeberechnung', 'Puffer_WR_Kapazitaet' ):
-                        print ('\nAb Version 9.1 werden in der config.ini die Variablen')
-                        print ('  Puffer_Einspeisegrenze, PV_Leistung_Watt, Puffer_WR_Kapazitaet benötigt!')
-                        print ('BITTE config.ini ergänzen! \n')
-                        exit()
-                    # ENDE VARIABLENPRUEFUNG VERSION 9.1 
-
                     # Benoetigte Variablen definieren
                     # eval = Rechenwerte aus Config in Zahlen umwandeln
                     print_level = eval(config['Ladeberechnung']['print_level'])
@@ -248,9 +238,7 @@ if __name__ == '__main__':
                     LadungAus = eval(config['Ladeberechnung']['LadungAus'])
                     Einspeisegrenze = eval(config['Ladeberechnung']['Einspeisegrenze'])
                     WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
-                    Puffer_Einspeisegrenze = eval(config['Ladeberechnung']['Puffer_Einspeisegrenze'])
                     PV_Leistung_Watt = eval(config['Ladeberechnung']['PV_Leistung_Watt'])
-                    Puffer_WR_Kapazitaet = eval(config['Ladeberechnung']['Puffer_WR_Kapazitaet'])
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
                     MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
                     WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])

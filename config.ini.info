@@ -113,12 +113,9 @@ Einspeisegrenze = 7900
 # AC Kapazität des Wechselrichters um den Überschuss in die Batterie zu laden (etwas darunter bleiben 1-2%)
 # WR_Kapazitaet: Wenn die Produktion über der AC-Leistungsgrenze (WR_Kapazitaet) ist, wird der Überschuss in die Batterie geladen.
 WR_Kapazitaet = 9900
-# Puffer für die Einspeisebegrenzung und Wechselrichterkapazität in Watt,
-# da die durch den WR abgeregelte Energiemenge nicht gemessen werden kann.
-# sollte etwar der WRSchreibGrenze_nachOben entsprechen.
-Puffer_Einspeisegrenze = 300
-Puffer_WR_Kapazitaet = 300
 
+# PV-Leistung reellen Spitzenwert, zur Abgrenzung des Überschusses über der Einspeisegrenze bzw. AC Kapazität des Wechselrichters
+PV_Leistung_Watt = 11400
 
 # Grundlast wird verwendet um den Wert "aktuellerUeberschuss" zu berechnen
 # Grundlast ist 300W + 100W Mindesteinspeisung

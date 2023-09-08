@@ -2,6 +2,10 @@
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
 
+Änderung in SymoGen24Controller2.py, config.ini, und config.ini.info
+- Puffer_Einspeisegrenze und Puffer_WR_Kapazitaet durch WRSchreibGrenze_nachOben ersetzt bzw. entfernt, da sie ohnehin annähernd gleich sein müssen.
+
+
 [0.9.5] – 2023-08-13
 
 Neuprogrammierung der Entladesteuerung
