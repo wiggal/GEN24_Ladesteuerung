@@ -208,7 +208,7 @@ if __name__ == '__main__':
             auto = False
             try:            
                     newPercent = None
-                    DEBUG_Ausgabe= "DEBUG <<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>"
+                    DEBUG_Ausgabe= "DEBUG <<<<<< WR schreiben EIN >>>>>>>"
     
                     ###############################
     
@@ -437,11 +437,14 @@ if __name__ == '__main__':
                     Push_Schreib_Ausgabe = ""
                     # Neuen Ladewert in Prozent schreiben, wenn newPercent_schreiben == 1
                     if newPercent_schreiben == 1:
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
+                        DEBUG_Ausgabe+="\nDEBUG Folgender Wert neu zu schreiben" + str(newPercent)
                         if len(argv) > 1 and (argv[1] == "schreiben"):
                             valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
                             bereits_geschrieben = 1
                             Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben: " + str(newPercent) + "\n"
                             Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
+                            DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(valueNew)
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                     else:
@@ -454,7 +457,7 @@ if __name__ == '__main__':
                             Ladelimit = gen24.write_data('StorageControlMode', 3 )
                             bereits_geschrieben = 1
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu geschrieben.\n"
-                            Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
+                            Push_Schreib_Ausgabe = Schreib_Ausgabe 
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
 

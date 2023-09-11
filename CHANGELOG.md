@@ -1,10 +1,13 @@
-﻿[0.9.6] – 2023-10-24
+﻿[0.9.6] – 2023-09-11
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
 
+# ACHTUNG bitte in config.ini anpassen!!!
 Änderung in SymoGen24Controller2.py, config.ini, und config.ini.info
 - Puffer_Einspeisegrenze und Puffer_WR_Kapazitaet durch WRSchreibGrenze_nachOben ersetzt bzw. entfernt, da sie ohnehin annähernd gleich sein müssen.
 
+- Fehlerbereinigung im Messaging (evtl. doppelte Zeile)
+- DEBUG erweitert
 
 [0.9.5] – 2023-08-13
 
