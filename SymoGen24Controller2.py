@@ -67,7 +67,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # bei BatSparFaktor == -1 maximalwert auf aktuelle Batteriekapazität beschränken
         if BatSparFaktor == 0.01:
-            tmp_MaxLadung = int(BattKapaWatt_akt / (BattVollUm - Akt_Std))
+            tmp_MaxLadung = int(BattKapaWatt_akt / (BattVollUm - Akt_Std + 0.001))
         else:
             tmp_MaxLadung = MaxLadung
 
