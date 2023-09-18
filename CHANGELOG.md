@@ -1,4 +1,18 @@
-﻿[0.9.6] – 2023-09-12
+﻿[0.9.7] – 2023-XX-XX
+
+Änderung in SymoGen24Controller2.py (noch im frühen Test)
+- Neuimplementierung der prognosebedingten Ladeberechnung unter Berücksichtignung der Variablen "BatSparFaktor".
+  Folgende Werte bewirken folgendes:
+  0: Die Berechnung erfolgt ohne zusätzliche Verschiebung in Richtung Mittag nur aufgrund der Prognose
+  0.01: Die Berechnung des Ladewertes mit folgender Formel. AktuelleBatteriekapazietät / Stunden_bis_BattVollUm
+  0.1: Die Batterieladung wird möglichst weit nach Mittag geschoben
+  bis 9: Die Batterieladung wird immer weiter in den Vormittag geschoben.
+
+- Änderung in config.ini
+  Da die Variable "BatSparFaktor" sehr großen Eenflus bekommt, wird die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" bei der nächsten Version wegfallen.
+
+
+[0.9.6] – 2023-09-12
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
 
