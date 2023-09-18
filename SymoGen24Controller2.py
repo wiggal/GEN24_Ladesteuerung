@@ -249,10 +249,6 @@ if __name__ == '__main__':
                     print_level = eval(config['Ladeberechnung']['print_level'])
                     BattVollUm = eval(config['Ladeberechnung']['BattVollUm'])
                     BatSparFaktor = eval(config['Ladeberechnung']['BatSparFaktor'])
-                    #SPO TEST
-                    if len(argv) > 1:
-                        BatSparFaktor = eval(argv[1])
-                    print("BatSparFaktor: ", BatSparFaktor)
                     BatWaitFaktor = eval(config['Ladeberechnung']['BatWaitFaktor'])
                     BatWaitFaktor_Max = eval(config['Ladeberechnung']['BatWaitFaktor_Max'])
                     MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
