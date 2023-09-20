@@ -64,12 +64,12 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         Pro_LadeKapa_Rest = 0
         Pro_Spitze = 0
         Grundlast_Sum = 0
+        tmp_MaxLadung = MaxLadung
 
         # bei BatSparFaktor == -1 maximalwert auf aktuelle Batteriekapazität beschränken
         if BatSparFaktor == 0.01:
-            tmp_MaxLadung = int(BattKapaWatt_akt / (BattVollUm - Akt_Std + 0.001))
-        else:
-            tmp_MaxLadung = MaxLadung
+            if BattVollUm > Akt_Std:
+                tmp_MaxLadung = int(BattKapaWatt_akt / (BattVollUm - Akt_Std))
 
         # in Schleife Prognosewerte bis BattVollUm durchlaufen
         while i < BattVollUm:
@@ -322,7 +322,7 @@ if __name__ == '__main__':
                             Tagessumme_Faktor = PrognoseUNDUeberschuss[7]
                         i += 100
                     # Nun habe ich die Werte und muss hier Verzweigen
-    
+
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
                     if (PV_Reservierung_steuern == 1) and (reservierungdata.get('ManuelleSteuerung')):
