@@ -169,7 +169,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
 
         # Ladeleistung auf MaxLadung begrenzen
-        if (aktuellerLadewert > tmp_MaxLadung):
+        if (aktuellerLadewert > tmp_MaxLadung) or (BatSparFaktor == 0.01):
             aktuellerLadewert = tmp_MaxLadung
 
         # Wenn  PV-Produktion + WRSchreibGrenze_nachOben > WR_Kapazitaet 
