@@ -11,6 +11,8 @@
 - Änderung in config.ini
   Da die Variable "BatSparFaktor" sehr großen Eenflus bekommt, wird die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" bei der nächsten Version wegfallen.
 
+- Watt_Reservierung.json und html/EV_Reservierung.json mit ausliefern, damit die Dateien vorhanden sind, 
+  falls im Verzeichnis nicht geschrieben werden darf.
 
 [0.9.6] – 2023-09-12
 
