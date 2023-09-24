@@ -1,15 +1,16 @@
-﻿[0.9.7] – 2023-XX-XX
+﻿[0.10.0] – 2023-XX-XX
 
 Änderung in SymoGen24Controller2.py (noch im frühen Test)
-- Neuimplementierung der prognosebedingten Ladeberechnung unter Berücksichtignung der Variablen "BatSparFaktor".
-  Folgende Werte bewirken folgendes:
-  0: Die Berechnung erfolgt ohne zusätzliche Verschiebung in Richtung Mittag nur aufgrund der Prognose
-  0.01: Die Berechnung des Ladewertes mit folgender Formel. AktuelleBatteriekapazietät / Stunden_bis_BattVollUm
-  0.1: Die Batterieladung wird möglichst weit nach Mittag geschoben
-  bis 9: Die Batterieladung wird immer weiter in den Vormittag geschoben.
+- Neuimplementierung der prognosebedingten Ladeberechnung unter Berücksichtigung der Variablen "BatSparFaktor",
+  um die Ladeverteilung auf den Tag besser steuern zu können.
+
+  Folgende Werte bewirken folgendes:<br>
+  ab 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.<br>
+  bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss<br>
+  bis 5: Die Batterieladung wird prognoseabhängig gleichmäßiger über den Tag verteilt.<br>
 
 - Änderung in config.ini
-  Da die Variable "BatSparFaktor" sehr großen Eenflus bekommt, wird die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" bei der nächsten Version wegfallen.
+  Da die Variable "BatSparFaktor" größeren Einfluss bekommt, wird die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" bei der nächsten Version wegfallen.
 
 - Watt_Reservierung.json und html/EV_Reservierung.json mit ausliefern, damit die Dateien vorhanden sind, 
   falls im Verzeichnis nicht geschrieben werden darf.
