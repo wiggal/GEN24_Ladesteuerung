@@ -15,6 +15,14 @@
 - Watt_Reservierung.json und html/EV_Reservierung.json mit ausliefern, damit die Dateien vorhanden sind, 
   falls im Verzeichnis nicht geschrieben werden darf.
 
+[0.9.6.1] – 2023-09-25
+
+Änderung in SymoGen24Controller2.py
+- Fehlerbeseitigung:<br>
+  Wurde die Ladeleistung durch die Eispeisebegrenzung hochgesetzt, und war die Schreibgrenzze nach unten kleiner
+  als die Differenz zum Prognosewert, fiel der Ladewert bei nächsten Lauf wieder auf den Prognosewert herunter.
+  Dadurch gabe es häufige Schreibzugriffe auch bei gleichmäßig schönen Wetterbedingungen.
+
 [0.9.6] – 2023-09-12
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
