@@ -87,18 +87,12 @@ FesteLadeleistung = 0
 BattVollUm = 17
 
 # Faktor um Batteriekapazität für später aufzusparen.
-# Der aus der Prognose errechnete Batterieladewert wird durch ((BattVollUm - AktuelleStunde) * BatSparFaktor) geteilt. 
+# Der aus der Prognose errechnete Batterieladewert wird durch den BatSparFaktor geteilt. 
 # Dadurch wird der Batterieladewert gedämpft und die Batteriekapazität für später Richtung Mittag aufgespart.
-# bei BatSparFaktor = 0 wird die Verschiebung zum Mittag nicht angewendet.
-BatSparFaktor = 1.2
-
-# BatWaitFaktor ist für eine exakt nach Süden ausgerichtete PV-Anlage hilfreich!
-# Der BatWaitFaktor kann von 0 bis "BatWaitFaktor_Max" gesetzt weren, je höher der Wert ist, umso später beginnt die Ladung.
-# Formel: WENN (TagesPrognoseGesamt - Grundlast_Summe) / (BatWaitFaktor_Max - BatWaitFaktor + 1) größer BattKapaWatt_akt dann wird mit der Ladung gewartet
-# Dadurch verschiebt sich der Ladebeginn je nach Faktor und Wetterprognose nach hinten.
-# bei Wert 0 wird der BatWaitFaktor NICHT angewendet!!!
-BatWaitFaktor = 4.0
-BatWaitFaktor_Max = 10
+# bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss
+# von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.
+# je größer als 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.
+BatSparFaktor = 1.0
 
 # Ausgabe von Werten steuern, um Die Wirkung der Einstellungen prüfen, bzw. Fehler finden zu können.
 # print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe
