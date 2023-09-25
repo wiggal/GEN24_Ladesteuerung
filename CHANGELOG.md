@@ -7,7 +7,7 @@
   Folgende Werte bewirken folgendes:<br>
   bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss<br>
   von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.<br>
-  von 1 bis 5: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.<br>
+  größer 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.<br>
 
 - Änderung in config.ini
   Da die Variable "BatSparFaktor" größeren Einfluss bekommt, wird die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" bei der nächsten Version wegfallen.
