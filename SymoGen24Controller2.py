@@ -139,8 +139,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # aktuelleBatteriePower ist beim Laden der Batterie minus
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
-        if aktuelleEinspeisung > Einspeisegrenze:
-            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + WRSchreibGrenze_nachOben)
+        if aktuelleEinspeisung - aktuelleBatteriePower > Einspeisegrenze:
+            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + (WRSchreibGrenze_nachOben * 1.05))
         else:
             EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
         # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
