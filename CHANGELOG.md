@@ -1,12 +1,4 @@
-﻿[0.9.6.1] – 2023-09-25
-
-Änderung in SymoGen24Controller2.py
-- Fehlerbeseitigung:<br>
-  Wurde die Ladeleistung durch die Eispeisebegrenzung hochgesetzt, und war die Schreibgrenzze nach unten kleiner
-  als die Differenz zum Prognosewert, fiel der Ladewert bei nächsten Lauf wieder auf den Prognosewert herunter.
-  Dadurch gabe es häufige Schreibzugriffe auch bei gleichmäßig schönen Wetterbedingungen.
-
-[0.9.6] – 2023-09-12
+[0.9.6] – 2023-09-11
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
 

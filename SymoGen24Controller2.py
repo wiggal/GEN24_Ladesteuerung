@@ -139,7 +139,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # aktuelleBatteriePower ist beim Laden der Batterie minus
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
-        if aktuelleEinspeisung - aktuelleBatteriePower > Einspeisegrenze:
+        if aktuelleEinspeisung > Einspeisegrenze:
             EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + (WRSchreibGrenze_nachOben * 1.05))
         else:
             EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
@@ -208,7 +208,7 @@ if __name__ == '__main__':
             auto = False
             try:            
                     newPercent = None
-                    DEBUG_Ausgabe= "\nDEBUG <<<<<< WR schreiben EIN >>>>>>>"
+                    DEBUG_Ausgabe= "DEBUG <<<<<< WR schreiben EIN >>>>>>>"
     
                     ###############################
     
@@ -438,7 +438,7 @@ if __name__ == '__main__':
                     # Neuen Ladewert in Prozent schreiben, wenn newPercent_schreiben == 1
                     if newPercent_schreiben == 1:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
-                        DEBUG_Ausgabe+="\nDEBUG Folgender Ladewert neu zum Schreiben: " + str(newPercent)
+                        DEBUG_Ausgabe+="\nDEBUG Folgender Wert neu zu schreiben" + str(newPercent)
                         if len(argv) > 1 and (argv[1] == "schreiben"):
                             valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
                             bereits_geschrieben = 1
@@ -454,12 +454,10 @@ if __name__ == '__main__':
                     # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
                     if gen24.read_data('StorageControlMode') != 3:
                         if len(argv) > 1 and (argv[1] == "schreiben"):
-                            DEBUG_Ausgabe += "\nDEBUG StorageControlMode 3 schreiben! "
                             Ladelimit = gen24.write_data('StorageControlMode', 3 )
                             bereits_geschrieben = 1
-                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode 3 neu geschrieben.\n"
-                            Push_Schreib_Ausgabe += "StorageControlMode 3 neu geschrieben.\n"
-                            DEBUG_Ausgabe+="\nDEBUG Meldung bei StorageControlMode schreiben: " + str(valueNew)
+                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu geschrieben.\n"
+                            Push_Schreib_Ausgabe = Schreib_Ausgabe 
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
 
@@ -567,7 +565,6 @@ if __name__ == '__main__':
                         akt_Fallback_time = gen24.read_data('InOutWRte_RvrtTms_Fallback')
                         if Fallback_on == 2:
                             Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback ist eingeschaltet.\n"
-                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<< FALLBACK >>>>>>>>>>>>>"
                             Akt_Zeit_Rest = int(datetime.strftime(now, "%H%M")) % (Fallback_Zeitabstand_Std*100)
                             Fallback_Sekunden = int((Fallback_Zeitabstand_Std * 3600) + (Cronjob_Minutenabstand * 60 * 0.9))
                             # Zur vollen Fallbackstunde wenn noch kein Schreibzugriff war Fallback schreiben
@@ -576,7 +573,6 @@ if __name__ == '__main__':
                                     if len(argv) > 1 and (argv[1] == "schreiben"):
                                         fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', Fallback_Sekunden)
                                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback " + str(Fallback_Sekunden) + " geschrieben.\n"
-                                        DEBUG_Ausgabe+="\nDEBUG Meldung FALLBACK schreiben: " + str(fallback_msg)
                                     else:
                                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
                                 else:
@@ -588,13 +584,11 @@ if __name__ == '__main__':
                                 if len(argv) > 1 and (argv[1] == "schreiben"):
                                     fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', 0)
                                     Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung geschrieben.\n"
-                                    DEBUG_Ausgabe+="\nDEBUG Meldung FALLBACK Deaktivierung schreiben: " + str(fallback_msg)
                                 else:
                                     Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
 
                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "InOutWRte_RvrtTms_Fallback: " + str(gen24.read_data('InOutWRte_RvrtTms_Fallback')) + "\n"
                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "StorageControlMode:    " + str(gen24.read_data('StorageControlMode')) + "\n"
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE FALLBACK >>>>>>>>>>>>>"
 
                         if print_level >= 1:
                             print(Fallback_Schreib_Ausgabe)
