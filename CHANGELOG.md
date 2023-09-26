@@ -10,18 +10,12 @@
   größer 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.<br>
 
 - Änderung in config.ini
-  Da die Variable "BatSparFaktor" größeren Einfluss bekommt, wird die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" bei der nächsten Version wegfallen.
+  Da die Variable "BatSparFaktor" größeren Einfluss bekommt, werden die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" nicht mehr benötigt und wurden entfernt
+
+- Änderungen in Ladewerte_Vergleichtabelle.ods eingearbeitet.
 
 - Watt_Reservierung.json und html/EV_Reservierung.json mit ausliefern, damit die Dateien vorhanden sind, 
   falls im Verzeichnis nicht geschrieben werden darf.
-
-[0.9.6.1] – 2023-09-25
-
-Änderung in SymoGen24Controller2.py
-- Fehlerbeseitigung:<br>
-  Wurde die Ladeleistung durch die Eispeisebegrenzung hochgesetzt, und war die Schreibgrenzze nach unten kleiner
-  als die Differenz zum Prognosewert, fiel der Ladewert bei nächsten Lauf wieder auf den Prognosewert herunter.
-  Dadurch gabe es häufige Schreibzugriffe auch bei gleichmäßig schönen Wetterbedingungen.
 
 [0.9.6] – 2023-09-12
 
