@@ -195,7 +195,7 @@ if __name__ == '__main__':
             auto = False
             try:            
                     newPercent = None
-                    DEBUG_Ausgabe= "\nDEBUG <<<<<< WR schreiben EIN >>>>>>>"
+                    DEBUG_Ausgabe= "\nDEBUG <<<<<< E I N >>>>>>>\n"
     
                     ###############################
     
@@ -266,7 +266,8 @@ if __name__ == '__main__':
 
                     # WRSchreibGrenze_nachUnten ab 90% prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz - 90 > 0 ):
-                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 10))
+                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 5))
+                        DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachUnten: " + str(WRSchreibGrenze_nachUnten) +"\n"
 
                     # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
                     # die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
@@ -286,7 +287,9 @@ if __name__ == '__main__':
                         TagesPrognoseUeberschuss_voll = PrognoseUNDUeberschuss[6]
                         i += 100
                     # Nun habe ich die Werte und muss hier Verzweigen
-                    print("TagesPrognoseUeberschuss, TagesPrognoseUeberschuss_voll, aktuellerLadewert: ", TagesPrognoseUeberschuss, TagesPrognoseUeberschuss_voll, aktuellerLadewert)
+                    DEBUG_Ausgabe += "TagesPrognoseUeberschuss: " + str(TagesPrognoseUeberschuss)
+                    DEBUG_Ausgabe += ", TagesPrognoseUeberschuss_voll: " + str(TagesPrognoseUeberschuss_voll)
+                    DEBUG_Ausgabe += ", aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
 
                     # BatterieLuecke prozentual verteilen, 
                     # Wenn PrognoseAbzugswert == Grundlast, oder aktuellerLadewert > 0
@@ -296,8 +299,8 @@ if __name__ == '__main__':
                     # Ladeleistung auf MaxLadung begrenzen
                     if (aktuellerLadewert > MaxLadung):
                         aktuellerLadewert = MaxLadung
-                    print(datetime.strftime(now, "%D %H:%M"),"(",BatSparFaktor, ") Prognoseladewert: ", aktuellerLadewert, " => Batteriekapazität: ", BattKapaWatt_akt, "BatterieLuecke: ", BatterieLuecke, "Abzug: ", PrognoseAbzugswert)
-                    print("WRSchreibGrenze_nachUnten: ", WRSchreibGrenze_nachUnten)
+                    DEBUG_Ausgabe += datetime.strftime(now, "%D %H:%M") + "( " + str(BatSparFaktor) + ") Prognoseladewert: " + str(aktuellerLadewert)
+                    DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) + ", BatterieLuecke: " + str(BatterieLuecke) + ", Abzug: " + str(PrognoseAbzugswert) + "\n"
     
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
