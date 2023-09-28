@@ -6,8 +6,9 @@
 Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen,
 und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.
 
-Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
-Herzlichen Dank an "godfuture"
+Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden. 
+z.B.:
+![Screenshot](pics/Ladewertverteilung.png)
 
 Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv <br>
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
@@ -129,6 +130,7 @@ In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung e
 
 Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
 
-
-
+======================================================
+Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
+Herzlichen Dank an "godfuture"
 
