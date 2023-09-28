@@ -1,8 +1,7 @@
 # GEN24_Ladesteuerung 
 (getestet unter Python 3.8 und 3.9)
 
-![Screenshot](pics/Ladesteuerung.png)
-![Screenshot](pics/Entladesteuerung.png)
+![Screenshot](pics/Steuerungstabellen.png)
 
 Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen,
 und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.
