@@ -17,6 +17,9 @@
 - Watt_Reservierung.json und html/EV_Reservierung.json mit ausliefern, damit die Dateien vorhanden sind, 
   falls im Verzeichnis nicht geschrieben werden darf.
 
+- Fehlerbereinigung:
+  Entladesteueung lief um 00:xx Uhr auf einen Fehler beseitigt (neue Akku_EntLadeSteuerFile.json)
+
 [0.9.6] – 2023-09-12
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
