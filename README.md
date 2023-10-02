@@ -73,8 +73,8 @@ Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.s
 
 #####################################################################
 
-Modul zur Reservierung von größeren Mengen PV-Leistung <br>
-======================================================= <br>
+Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung<br>
+==================================================================================================== <br>
 (z.B. E-Autos)
 
 Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus. <br>
@@ -109,7 +109,9 @@ sudo systemctl restart apache2 <br>
 
 Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
+![Screenshot](pics/Ladesteuerung.png)
 Batterieladesteuerung ( TAB--> LadeSteuerung )<br>
+==============================================<br>
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
 In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
@@ -121,7 +123,9 @@ Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die e
 beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
 
+![Screenshot](pics/Entladesteuerung.png)
 BatterieENTladesteuerung ( TAB--> EntladeSteuerung )<br>
+==============================================<br>
 
 Unter "Feste Entladegrenze " kann die maximale Entladeleistung
 in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.
