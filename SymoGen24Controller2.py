@@ -63,6 +63,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         Pro_Ertrag_Tag = 0
         Pro_LadeKapa_Rest = 0
         Grundlast_Sum = 0
+        Pro_Uebersch_vorher = 0
+        DEBUG_Ausgabe_Schleife = "\nDEBUG <<<<<< Meldungen aus Schleife >>>>>>>\n"
         # um Divison durch Null zu verhindern kleinsten Wert setzen
         global BatSparFaktor
         if BatSparFaktor < 0.1:
@@ -90,8 +92,23 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             if Prognose > 0:
                 Grundlast_Sum += Grundlast_tmp
 
+            if Pro_Uebersch < 0:
+                Pro_Uebersch = 0
+
             if Pro_Uebersch > MaxLadung:
                 Pro_Uebersch = MaxLadung
+
+            #SPO ENT
+            Pro_Uebersch_org = int(Pro_Uebersch)
+            # Wenn Prognose niedrieger und nicht unter WRSchreibGrenze_nachUnten alte Prognose belassen
+            if (Pro_Uebersch < Pro_Uebersch_vorher) and (Pro_Uebersch > Pro_Uebersch_vorher - WRSchreibGrenze_nachUnten):
+                Pro_Uebersch = Pro_Uebersch_vorher
+                # Wenn nicht mehr genügend überschuss vorhanden ist
+                if Pro_Uebersch > (Prognose - Grundlast):
+                    Pro_Uebersch = (Prognose - Grundlast)
+            Pro_Uebersch_vorher = Pro_Uebersch
+            DEBUG_Ausgabe_Schleife += "## Std., Prognose, Pro_Uebersch_org, Pro_Uebersch " + str(i) + " " + str(int(Prognose)) + " " + str(int(Pro_Uebersch_org)) + " " + str(int(Pro_Uebersch)) +"\n"
+            #SPO ENT
 
             if Pro_Uebersch_voll > MaxLadung:
                 Pro_Uebersch_voll = MaxLadung
@@ -156,7 +173,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             aktuellerLadewert = LadungAus
 
 
-        return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Akt, LadewertGrund, int(Pro_Uebersch_Tag_voll)
+        return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), aktuellerLadewert, Grundlast_Sum, Pro_Akt, LadewertGrund, int(Pro_Uebersch_Tag_voll), DEBUG_Ausgabe_Schleife
 
 def setLadewert(fun_Ladewert):
         if fun_Ladewert > MaxLadung:
@@ -287,6 +304,8 @@ if __name__ == '__main__':
                         TagesPrognoseUeberschuss_voll = PrognoseUNDUeberschuss[6]
                         i += 100
                     # Nun habe ich die Werte und muss hier Verzweigen
+                    DEBUG_Ausgabe += PrognoseUNDUeberschuss[7]
+                    DEBUG_Ausgabe += "\n"
                     DEBUG_Ausgabe += "TagesPrognoseUeberschuss: " + str(TagesPrognoseUeberschuss)
                     DEBUG_Ausgabe += ", TagesPrognoseUeberschuss_voll: " + str(TagesPrognoseUeberschuss_voll)
                     DEBUG_Ausgabe += ", aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
@@ -299,7 +318,7 @@ if __name__ == '__main__':
                     # Ladeleistung auf MaxLadung begrenzen
                     if (aktuellerLadewert > MaxLadung):
                         aktuellerLadewert = MaxLadung
-                    DEBUG_Ausgabe += datetime.strftime(now, "%D %H:%M") + "( " + str(BatSparFaktor) + ") Prognoseladewert: " + str(aktuellerLadewert)
+                    DEBUG_Ausgabe += datetime.strftime(now, "%D %H:%M") + " ( " + str(BatSparFaktor) + ") Prognoseladewert: " + str(aktuellerLadewert)
                     DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) + ", BatterieLuecke: " + str(BatterieLuecke) + ", Abzug: " + str(PrognoseAbzugswert) + "\n"
     
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
@@ -482,14 +501,14 @@ if __name__ == '__main__':
                         aktStd = datetime.strftime(now, "%H:00")
 
                         # Verbrauchsgrenze Entladung lesen
-                        if (entladesteurungsdata[aktStd].get('Res_Feld1')):
+                        if (entladesteurungsdata.get('aktStd')):
                             VerbrauchsgrenzeEntladung = entladesteurungsdata[aktStd]['Res_Feld1']
                         else:
                             VerbrauchsgrenzeEntladung = 0
 
                         DEBUG_Ausgabe+="\nDEBUG VerbrauchsgrenzeEntladung: " + str(VerbrauchsgrenzeEntladung)
                         # Feste Entladegrenze lesen
-                        if (entladesteurungsdata[aktStd].get('Res_Feld2')):
+                        if (entladesteurungsdata.get('aktStd')):
                             FesteEntladegrenze = entladesteurungsdata[aktStd]['Res_Feld2']
                         else:
                             FesteEntladegrenze = 0
