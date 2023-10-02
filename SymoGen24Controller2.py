@@ -100,12 +100,16 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
             #SPO ENT
             Pro_Uebersch_org = int(Pro_Uebersch)
-            # Wenn Prognose niedrieger und nicht unter WRSchreibGrenze_nachUnten alte Prognose belassen
+            # Wenn Prognose höher und nicht über WRSchreibGrenze_nachOben alte Prognose belassen
+            if (Pro_Uebersch > Pro_Uebersch_vorher) and (Pro_Uebersch < Pro_Uebersch_vorher + WRSchreibGrenze_nachOben):
+                Pro_Uebersch = Pro_Uebersch_vorher
+            # Wenn Prognose niedriger und nicht unter WRSchreibGrenze_nachUnten alte Prognose belassen
             if (Pro_Uebersch < Pro_Uebersch_vorher) and (Pro_Uebersch > Pro_Uebersch_vorher - WRSchreibGrenze_nachUnten):
                 Pro_Uebersch = Pro_Uebersch_vorher
                 # Wenn nicht mehr genügend überschuss vorhanden ist
                 if Pro_Uebersch > (Prognose - Grundlast):
                     Pro_Uebersch = (Prognose - Grundlast)
+
             Pro_Uebersch_vorher = Pro_Uebersch
             DEBUG_Ausgabe_Schleife += "## Std., Prognose, Pro_Uebersch_org, Pro_Uebersch " + str(i) + " " + str(int(Prognose)) + " " + str(int(Pro_Uebersch_org)) + " " + str(int(Pro_Uebersch)) +"\n"
             #SPO ENT
