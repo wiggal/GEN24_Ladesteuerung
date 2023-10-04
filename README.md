@@ -1,11 +1,14 @@
 # GEN24_Ladesteuerung 
 (getestet unter Python 3.8 und 3.9)
 
+![Screenshot](pics/Steuerungstabellen.png)
+
 Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen,
 und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.
 
-Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
-Herzlichen Dank an "godfuture"
+Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden. 
+z.B.:
+![Screenshot](pics/Ladewertverteilung.png)
 
 Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv <br>
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
@@ -70,8 +73,8 @@ Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.s
 
 #####################################################################
 
-Modul zur Reservierung von größeren Mengen PV-Leistung <br>
-======================================================= <br>
+Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung<br>
+==================================================================================================== <br>
 (z.B. E-Autos)
 
 Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus. <br>
@@ -106,7 +109,9 @@ sudo systemctl restart apache2 <br>
 
 Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
+![Screenshot](pics/Ladesteuerung.png)
 Batterieladesteuerung ( TAB--> LadeSteuerung )<br>
+==============================================<br>
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
 In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
@@ -118,7 +123,9 @@ Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die e
 beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
 
+![Screenshot](pics/Entladesteuerung.png)
 BatterieENTladesteuerung ( TAB--> EntladeSteuerung )<br>
+==============================================<br>
 
 Unter "Feste Entladegrenze " kann die maximale Entladeleistung
 in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.
@@ -127,6 +134,7 @@ In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung e
 
 Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
 
-
-
+======================================================
+Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
+Herzlichen Dank an "godfuture"
 
