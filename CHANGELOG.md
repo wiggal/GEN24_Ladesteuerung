@@ -1,4 +1,26 @@
-[0.9.6] – 2023-09-11
+[0.10.0] – 2023-10-04
+
+Änderung in SymoGen24Controller2.py (noch im frühen Test)
+- Neuimplementierung der prognosebedingten Ladeberechnung unter Berücksichtigung der Variablen "BatSparFaktor",
+  um die Ladeverteilung auf den Tag besser steuern zu können.
+
+  Folgende Werte bewirken folgendes:<br>
+  bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss<br>
+  von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.<br>
+  größer 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.<br>
+
+- Änderung in config.ini
+  Da die Variable "BatSparFaktor" größeren Einfluss bekommt, werden die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" nicht mehr benötigt und wurden entfernt
+
+- Änderungen in Ladewerte_Vergleichtabelle.ods eingearbeitet.
+
+- Watt_Reservierung.json und html/EV_Reservierung.json mit ausliefern, damit die Dateien vorhanden sind, 
+  falls im Verzeichnis nicht geschrieben werden darf.
+
+- Fehlerbereinigung:
+  Entladesteueung lief um 00:xx Uhr auf einen Fehler beseitigt (neue Akku_EntLadeSteuerFile.json)
+
+[0.9.6] – 2023-09-12
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
 
