@@ -4,7 +4,8 @@
 ![Screenshot](pics/Steuerungstabellen.png)
 
 Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen,
-und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.
+und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.<br>
+Entladesteuerung, um die Entladung der Batterie bei großen Verbräuchen zu steuern.<br>
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden. 
 z.B.:
@@ -28,9 +29,10 @@ sudo pip install ping3 <br>
 
 
 Die Startskripte können per Cronjobs gestartet werden. <br>
-Als Erstes muss ein start_WeatherData.. aufgerufen werden, damit Prognosedaten in weatherData.json vorhanden sind!!!
+Als Erstes muss start_WeatherDataProvider2.sh oder start_Solarprognose_WeatherData.py.sh aufgerufen werden,<br>
+damit Prognosedaten in weatherData.json vorhanden sind!!!
 
-Beispiele Crontabeintraege ("DIR" durch dein Insttallationverzeichnis ersetzen) <br>
+Beispiele Crontabeinträge ("DIR" durch dein Insttallationverzeichnis ersetzen) <br>
 Ausführrechte für die start_...sh skripte setzen nicht vergessen (chmod +x start_*)
 
 */5 05-20 * * * /DIR/start_LoggingSymoGen24.sh <br>
@@ -44,7 +46,7 @@ Ausführrechte für die start_...sh skripte setzen nicht vergessen (chmod +x sta
 WeatherDataProvider2.py
 
 holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json <br>
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2 Std)
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen (bei mir alle 2 Std)
 
 Solarprognose_WeatherData.py 
 
@@ -55,12 +57,13 @@ Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei m
 
 SymoGen24Connector.py
 
-Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung Zum Wechselrichter (GENR24 Plus) her.
+Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
 
 
 SymoGen24Controller2.py
 
 berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
+Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.<br>
 Mit dem Parameter "schreiben" aufgerufen (was in der start_SymoGen24Controller2.sh geschieht) schreibt er die Ladewerte auf den Wechselrichter <br>
 falls Änderungen außerhalb der gesetzten Grenzen sind.
 
@@ -117,11 +120,13 @@ Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.jso
 In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
 
 Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung <br>
-beim nächsten Aufruf von SymoGen24Controller2.py mit eingerechnet.
+beim nächsten Aufruf von SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
 Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die entsprechende Batterieladeleistung,
 beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
+
+Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
 
 ![Screenshot](pics/Entladesteuerung.png)
 BatterieENTladesteuerung ( TAB--> EntladeSteuerung )<br>

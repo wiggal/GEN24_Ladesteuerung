@@ -153,7 +153,7 @@ input[type="radio"]{
   font-size:130%;
   color: #808080;
 }
-.wrapper .beschiftung{
+.wrapper .beschriftung{
   font-family:Arial;
   font-size:150%;
   color: #000000;
@@ -199,8 +199,8 @@ $ManuelleSteuerung_check['auto'] = 'checked';
 
 <center>
 <div class="wrapper">
-<div class="beschiftung" title="Ladung des Hausakkus mit einem Anteil der konfigurierten Maximallagung 
-                  (Auto=% nach Prognose, AUS=0%, HALB=50%, VOLL=100%)">
+<div class="beschriftung" title='Ladung des Hausakkus mit einem Anteil der konfigurierten "MaxLadung" 
+                  (Auto= nach Prognose, AUS=0%, HALB=50%, VOLL=100%)'>
 <nobr>Ladegrenze</nobr>
 </div>
  <input type="radio" name="hausakkuladung" id="auto" value="0" <?php echo $ManuelleSteuerung_check['auto'] ?>>
