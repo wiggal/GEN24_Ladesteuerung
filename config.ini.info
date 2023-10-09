@@ -114,6 +114,11 @@ PV_Leistung_Watt = 11400
 # Grundlast wird verwendet um den Wert "aktuellerUeberschuss" zu berechnen
 # Grundlast ist 300W + 100W Mindesteinspeisung
 Grundlast = 500
+# Da an bestimmten Wochentagen (z.B. Wochenende) die Grundlast höher höher sein kann, kann sie hier
+# für jeden Wochentag unterschiedlich gesetzt werden. Die Variable Grundlast muss dafür "0" sein.
+# Grundlast nach Wochentag wird gesetzt, wenn Grundlast == 0
+# Wochentage  = Mo,  Die, Mi,  Do,  Fr,  Sa,   So
+Grundlast_WoT = 900, 900, 900, 900, 900, 1200, 1900
 
 # Schaltverzögerung
 # Ab welchem Unterschied in Watt soll der neue Ladewert auf dem Wechselrichter geschrieben werden

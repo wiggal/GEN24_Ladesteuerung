@@ -5,6 +5,14 @@
 - Beschreibungen in der README angepasst
 - Prognosekalkulationstabelle "Ladewerte_Vergleichtabelle.ods" angepasst
 
+- Die Werte "WRSchreibGrenze_nachUnten" und "WRSchreibGrenze_nachOben" werden ab 90% Batterieladung mit (1+(Ladestand%-90%)/5) multipliziert, 
+  dadurch soll das hoch- und runterschalten der Batterieladung am Ende des Tages besser verhindert werden.
+
+# ACHTUNG bitte evtl. in config.ini anpassen!!!
+- Neue Variable "Grundlast_WoT" in config.ini
+  Da an bestimmten Wochentagen (z.B. Wochenende) die Grundlast höher sein kann, kann sie hier für jeden Wochentag unterschiedlich gesetzt werden.
+  Voraussetzung damit die Grundlast_WoT für den aktuellen Tag gesetzt wird, die Variable "Grundlast" muß "0" sein.
+
 [0.10.0] – 2023-10-04
 
 Änderung in SymoGen24Controller2.py (noch im frühen Test)

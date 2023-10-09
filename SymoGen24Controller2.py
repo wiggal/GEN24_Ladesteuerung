@@ -244,6 +244,15 @@ if __name__ == '__main__':
                     WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
                     PV_Leistung_Watt = eval(config['Ladeberechnung']['PV_Leistung_Watt'])
                     Grundlast = eval(config['Ladeberechnung']['Grundlast'])
+                    # Grundlast je Wochentag, wenn Grundlast == 0
+                    if (Grundlast == 0):
+                        try:
+                            Grundlast_WoT = config['Ladeberechnung']['Grundlast_WoT']
+                            Grundlast_WoT_Array = Grundlast_WoT.split(',')
+                            Grundlast = eval(Grundlast_WoT_Array[datetime.today().weekday()])
+                        except:
+                            print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
+                            Grundlast = 0
                     MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
                     WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
                     WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
@@ -287,6 +296,8 @@ if __name__ == '__main__':
                     if ( BattStatusProz - 90 > 0 ):
                         WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 5))
                         DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachUnten: " + str(WRSchreibGrenze_nachUnten) +"\n"
+                        WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 5))
+                        DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
                     # die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
