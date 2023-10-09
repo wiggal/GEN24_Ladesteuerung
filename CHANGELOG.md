@@ -13,9 +13,12 @@
   Da an bestimmten Wochentagen (z.B. Wochenende) die Grundlast höher sein kann, kann sie hier für jeden Wochentag unterschiedlich gesetzt werden.
   Voraussetzung damit die Grundlast_WoT für den aktuellen Tag gesetzt wird, die Variable "Grundlast" muß "0" sein.
 
+Änderung in SymoGen24Controller2.py und Solarprognose_WeatherData.py
+- Alle Zahlenwerte beim Lesen aus der config.ini prüfen ob wirklich Zahlen definiert sind.
+
 [0.10.0] – 2023-10-04
 
-Änderung in SymoGen24Controller2.py (noch im frühen Test)
+Änderung in SymoGen24Controller2.py
 - Neuimplementierung der prognosebedingten Ladeberechnung unter Berücksichtigung der Variablen "BatSparFaktor",
   um die Ladeverteilung auf den Tag besser steuern zu können.
 
