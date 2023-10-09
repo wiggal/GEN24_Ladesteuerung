@@ -50,16 +50,25 @@ def storeWeatherData(config, data, now):
     
 if __name__ == '__main__':
     config = loadConfig()
-    # Hier die Variablen eintragen
+    # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
+    config_eval_vars = [
+                            ['id','solarprognose','id'],
+                            ['KW_Faktor','solarprognose','KW_Faktor'],
+                            ['dataAgeMaxInMinutes','solarprognose','dataAgeMaxInMinutes'],
+                            ['WaitSec','solarprognose','WaitSec'],
+                        ]
+    for i in config_eval_vars:
+         try:
+             exec("%s = %s" % (i[0],eval(config[i[1]][i[2]])))
+         except:
+             print("ERROR: die Variable " + i[0] + " wurde nicht als Zahl definiert!")
+             exit()
+
     weatherfile = config['solarprognose']['weatherfile']
     accesstoken = config['solarprognose']['accesstoken']
     item = config['solarprognose']['item']
-    id = eval(config['solarprognose']['id'])
     type = config['solarprognose']['type']
-    KW_Faktor = eval(config['solarprognose']['KW_Faktor'])
     algorithm = config['solarprognose']['algorithm']
-    dataAgeMaxInMinutes = eval(config['solarprognose']['dataAgeMaxInMinutes'])
-    WaitSec = eval(config['solarprognose']['WaitSec'])
 
     time.sleep(WaitSec)
     

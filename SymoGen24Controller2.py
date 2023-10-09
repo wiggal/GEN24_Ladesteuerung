@@ -220,11 +220,6 @@ if __name__ == '__main__':
     
                     data = loadWeatherData(config)
 
-                    # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
-                    PV_Reservierung_steuern = eval(config['Reservierung']['PV_Reservierung_steuern'])
-                    if  PV_Reservierung_steuern == 1:
-                        reservierungdata = loadPVReservierung(config['Reservierung']['PV_ReservieungsDatei'])
-
                     gen24 = SymoGen24Connector.SymoGen24(config['gen24']['hostNameOrIp'], config['gen24']['port'], auto)
 
                     if gen24.read_data('Battery_Status') == 1:
@@ -233,17 +228,37 @@ if __name__ == '__main__':
                         print()
                         exit()
     
-                    # Benoetigte Variablen definieren
+                    # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
                     # eval = Rechenwerte aus Config in Zahlen umwandeln
-                    print_level = eval(config['Ladeberechnung']['print_level'])
-                    BattVollUm = eval(config['Ladeberechnung']['BattVollUm'])
-                    BatSparFaktor = eval(config['Ladeberechnung']['BatSparFaktor'])
-                    MaxLadung = eval(config['Ladeberechnung']['MaxLadung'])
-                    LadungAus = eval(config['Ladeberechnung']['LadungAus'])
-                    Einspeisegrenze = eval(config['Ladeberechnung']['Einspeisegrenze'])
-                    WR_Kapazitaet = eval(config['Ladeberechnung']['WR_Kapazitaet'])
-                    PV_Leistung_Watt = eval(config['Ladeberechnung']['PV_Leistung_Watt'])
-                    Grundlast = eval(config['Ladeberechnung']['Grundlast'])
+                    config_eval_vars = [
+                                        ['print_level','Ladeberechnung','print_level'],
+                                        ['BattVollUm','Ladeberechnung','BattVollUm'],
+                                        ['BatSparFaktor','Ladeberechnung','BatSparFaktor'],
+                                        ['MaxLadung','Ladeberechnung','MaxLadung'],
+                                        ['LadungAus','Ladeberechnung','LadungAus'],
+                                        ['Einspeisegrenze','Ladeberechnung','Einspeisegrenze'],
+                                        ['WR_Kapazitaet','Ladeberechnung','WR_Kapazitaet'],
+                                        ['PV_Leistung_Watt','Ladeberechnung','PV_Leistung_Watt'],
+                                        ['Grundlast','Ladeberechnung','Grundlast'],
+                                        ['MindBattLad','Ladeberechnung','MindBattLad'],
+                                        ['WRSchreibGrenze_nachOben','Ladeberechnung','WRSchreibGrenze_nachOben'],
+                                        ['WRSchreibGrenze_nachUnten','Ladeberechnung','WRSchreibGrenze_nachUnten'],
+                                        ['FesteLadeleistung','Ladeberechnung','FesteLadeleistung'],
+                                        ['Fallback_on','Fallback','Fallback_on'],
+                                        ['Cronjob_Minutenabstand','Fallback','Cronjob_Minutenabstand'],
+                                        ['Fallback_Zeitabstand_Std','Fallback','Fallback_Zeitabstand_Std'],
+                                        ['Push_Message_EIN','messaging','Push_Message_EIN'],
+                                        ['PV_Reservierung_steuern','Reservierung','PV_Reservierung_steuern'],
+                                        ['Batterieentlandung_steuern','Entladung','Batterieentlandung_steuern'],
+                                        ['WREntladeSchreibGrenze_Watt','Entladung','WREntladeSchreibGrenze_Watt'],
+                                       ]
+                    for i in config_eval_vars:
+                        try:
+                            exec("%s = %s" % (i[0],eval(config[i[1]][i[2]])))
+                        except:
+                            print("ERROR: die Variable " + i[0] + " wurde nicht als Zahl definiert!")
+                            exit()
+
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
@@ -253,13 +268,9 @@ if __name__ == '__main__':
                         except:
                             print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
                             Grundlast = 0
-                    MindBattLad = eval(config['Ladeberechnung']['MindBattLad'])
-                    WRSchreibGrenze_nachOben = eval(config['Ladeberechnung']['WRSchreibGrenze_nachOben'])
-                    WRSchreibGrenze_nachUnten = eval(config['Ladeberechnung']['WRSchreibGrenze_nachUnten'])
-                    FesteLadeleistung = eval(config['Ladeberechnung']['FesteLadeleistung'])
-                    Fallback_on = eval(config['Fallback']['Fallback_on'])
-                    Cronjob_Minutenabstand = eval(config['Fallback']['Cronjob_Minutenabstand'])
-                    Fallback_Zeitabstand_Std = eval(config['Fallback']['Fallback_Zeitabstand_Std'])
+
+
+                    # Benoetigte Variablen vom GEN24 lesen und definieren
                     BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattganzeKapazWatt = (gen24.read_data('Battery_capa')) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattStatusProz = gen24.read_data('Battery_SoC')/100
@@ -268,8 +279,10 @@ if __name__ == '__main__':
                     aktuellePVProduktion = int(gen24.get_mppt_power())
                     aktuelleBatteriePower = int(gen24.get_batterie_power())
                     BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
-                    Push_Message_EIN = eval(config['messaging']['Push_Message_EIN'])
-                    Push_Message_Url = config['messaging']['Push_Message_Url']
+
+                    # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
+                    if  PV_Reservierung_steuern == 1:
+                        reservierungdata = loadPVReservierung(config['Reservierung']['PV_ReservieungsDatei'])
 
                     # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
                     newPercent_schreiben = 0
@@ -494,10 +507,6 @@ if __name__ == '__main__':
     
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
-                    # Variablen 'Entladung' aus config.ini lesen
-                    Batterieentlandung_steuern = eval(config['Entladung']['Batterieentlandung_steuern'])
-                    WREntladeSchreibGrenze_Watt = eval(config['Entladung']['WREntladeSchreibGrenze_Watt'])
-
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = 100
 
@@ -580,6 +589,7 @@ if __name__ == '__main__':
 
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
+                        Push_Message_Url = config['messaging']['Push_Message_Url']
                         apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
                         print("PushMeldung an ", Push_Message_Url, " gesendet.")
 
