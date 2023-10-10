@@ -40,8 +40,8 @@ def loadLatestWeatherData():
         dict_watts['result']['watts'][key_neu] = int(value[1]*1000*KW_Faktor)
     return(dict_watts, json_data1)
 
-def storeWeatherData(config, data, now):
-    outFilePath = weatherfile
+def storeWeatherData(wetterfile, data, now):
+    outFilePath = wetterfile
     out_file = open(outFilePath, "w")
     format = "%Y-%m-%d %H:%M:%S"
     data.update({'messageCreated': datetime.strftime(now, format)})
