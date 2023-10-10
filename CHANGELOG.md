@@ -1,4 +1,4 @@
-[0.10.1] – 2023-10-XX
+[0.10.1] – 2023-10-10
 
 - html/1_tab_LadeSteuerung.php: Schreibfehler in Mouseover beseitigt
 - html/3_tab_Hilfe.html: Beschreibung LadeSteuerung präzisiert
