@@ -8,6 +8,8 @@ import time
 from pathlib import Path
 from datetime import datetime
 
+exit ()
+
 def loadConfig():
     config = configparser.ConfigParser()
     try:
@@ -29,12 +31,8 @@ def loadWeatherData(weatherfile):
 def loadLatestWeatherData():
     url = 'https://api.solcast.com.au/rooftop_sites/{}/forecasts?format=json&api_key={}'.format(resource_id, api_key)
     # Hier wieder ABHOLEN EIN
-    # SPO zum TEST 1,2 auskommenieren und 3,4 einkommentieren
     apiResponse = requests.get(url, timeout=12.50)
     json_data1 = dict(json.loads(apiResponse.text))
-    #with open('solcast.json') as json_file:
-    #    json_data1 = json.load(json_file)
-    # SPO TEST ENDE
     format = "%Y-%m-%d %H:%M:%S"
     dict_watts = {}
     dict_watts['result'] = {}
