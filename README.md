@@ -29,10 +29,10 @@ sudo pip install ping3 <br>
 
 **_NEU ab Version 0.10.2_**<br>
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs gestartet werden. <br>
-Als Erstes muss start_WeatherDataProvider2.sh oder start_Solarprognose_WeatherData.py.sh aufgerufen werden,<br>
-damit Prognosedaten in weatherData.json vorhanden sind!!!
+Als Erstes muss ein Prognoseskript aufgerufen werden, damit Prognosedaten in 
+der Datei weatherData.json vorhanden sind!!!
 
-Beispiele Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen) <br>
+Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen) <br>
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)
 
 */5 05-20 * * * /DIR/start_PythonScript.sh LoggingSymoGen24.py<br>
