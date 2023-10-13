@@ -254,9 +254,9 @@ if __name__ == '__main__':
                                        ]
                     for i in config_eval_vars:
                         try:
-                            exec("%s = %s" % (i[0],eval(config[i[1]][i[2]])))
+                            locals()[i[0]] = eval(config[i[1]][i[2]])
                         except:
-                            print("ERROR: die Variable " + i[0] + " wurde nicht als Zahl definiert!")
+                            print("ERROR: die Variable [" + i[1] + "][" + i[2] + "] wurde nicht als Zahl definiert!")
                             exit()
 
                     # Grundlast je Wochentag, wenn Grundlast == 0
@@ -283,6 +283,7 @@ if __name__ == '__main__':
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     if  PV_Reservierung_steuern == 1:
                         reservierungdata = loadPVReservierung(config['Reservierung']['PV_ReservieungsDatei'])
+
 
                     # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
                     newPercent_schreiben = 0

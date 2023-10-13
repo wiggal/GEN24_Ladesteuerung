@@ -31,11 +31,11 @@ az=0
 kwp=11.4
 # Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
 # bei mir 1000 da nur Backup für solarprognose, solange der Abruf bei solarprognose funktioniert, wird von forecast.solar nicht angefordert.
-# ansonsten sollte sie irgendwo bei 70 Minuten sein, um alle 2 Stunden anfordern zu können.
+# ansonsten sollte sie irgendwo bei 100 Minuten sein, um alle 2 Stunden anfordern zu können.
 dataAgeMaxInMinutes=1000
 
-# Hier die Werte für ein PV-Feld mit andere Ausrichtung wie oben beschrieben eingeben.
 [forecast.solar2]
+# Hier die Werte für ein PV-Feld mit andere Ausrichtung wie oben beschrieben eingeben.
 lat=11.111
 lon=6.666
 dec=22
@@ -54,11 +54,29 @@ item = inverter
 id = 1111
 type = hourly
 # Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
-dataAgeMaxInMinutes = 70
+dataAgeMaxInMinutes = 100
 # Sekunden des sleep = Vorgabe von solarprognose.de
 WaitSec = 21
 # mögliche Werte des Prognosealgorithmus mosmix|own-v1|clearsky
 algorithm=own-v1
+# falls die Anlagengröße in KWp nicht mit der Größe in Solarprognose übereinstimmt (z.B. Erweiterung)
+KW_Faktor = 1.00
+
+# Hier die Werte eintragen, wenn die Prognose mit Solcast_WeatherData.py von https://api.solcast.com.au geholt werden soll
+[solcast.com]
+# Name der Datei mit den Wetterprognosewerten
+weatherfile = weatherData.json
+# Hier Api Key von toolkit.solcast.com.au/account/api-key
+api_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# Hier Resource Id von toolkit.solcast.com.au
+resource_id = xxxx-xxxx-xxxx-xxxx
+# Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
+dataAgeMaxInMinutes = 100
+# Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +2.
+Zeitzone = +2
+# falls die Anlagengröße in KWp nicht mit der Größe in solcast.com übereinstimmt (z.B. Erweiterung)
+KW_Faktor = 1.00
+
 
 [gen24]
 # IP des Wechselrichters

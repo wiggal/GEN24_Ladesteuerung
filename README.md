@@ -27,40 +27,50 @@ sudo pip install NumPy==v1.23.1 <br>
 sudo pip install requests <br>
 sudo pip install ping3 <br>
 
-
-Die Startskripte können per Cronjobs gestartet werden. <br>
+**_NEU ab Version 0.10.2_**<br>
+Mit start_PythonScript.sh können Pythonskripte per Cronjobs gestartet werden. <br>
 Als Erstes muss start_WeatherDataProvider2.sh oder start_Solarprognose_WeatherData.py.sh aufgerufen werden,<br>
 damit Prognosedaten in weatherData.json vorhanden sind!!!
 
-Beispiele Crontabeinträge ("DIR" durch dein Insttallationverzeichnis ersetzen) <br>
-Ausführrechte für die start_...sh skripte setzen nicht vergessen (chmod +x start_*)
+Beispiele Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen) <br>
+Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)
 
-*/5 05-20 * * * /DIR/start_LoggingSymoGen24.sh <br>
-*/5 04-20 * * * /DIR/start_SymoGen24Controller2.sh <br>
-33 6,8,10,12,14,16 * * * /DIR/start_WeatherDataProvider2.sh <br>
-8 5,10,15,19 * * * /DIR/start_Solarprognose_WeatherData.py.sh #Minuten und Sekunden (config.ini) anpassen <br>
+*/5 05-20 * * * /DIR/start_PythonScript.sh LoggingSymoGen24.py<br>
+*/5 06-16 * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben<br>
+33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py<br>
+8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py<br>
+1 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py<br>
+**_ENDE NEU_**
 
 #Crontab.log jeden Montag abräumen <br>
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
 
-WeatherDataProvider2.py
+### WeatherDataProvider2.py
 
 holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json <br>
 Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen (bei mir alle 2 Std)
 
-Solarprognose_WeatherData.py 
+### Solarprognose_WeatherData.py 
 
-Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich, <br>
+Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich,
 hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben. <br>
-Holt die Sonnenstundenprognosen von solarprognose.de und schreibt sie in weatherData.json <br>
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 3 Std) <br>
+Holt die Sonnenstundenprognosen von solarprognose.de und schreibt sie in weatherData.json.
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2 Std) <br>
 
-SymoGen24Connector.py
+**_NEU ab Version 0.10.2_**<br>
+### Solcast_WeatherData.py
+
+Kann auch alternativ zu WeatherDataProvider2.py benutzt werden, es ist ein "Home User" Account auf solcast.com erforderlich.<br>
+Holt die Sonnenstundenprognosen von toolkit.solcast.com.au und schreibt sie in weatherData.json.
+Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag). <br>
+**_ENDE NEU_**
+
+### SymoGen24Connector.py
 
 Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
 
 
-SymoGen24Controller2.py
+### SymoGen24Controller2.py
 
 berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
 Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.<br>
@@ -68,7 +78,7 @@ Mit dem Parameter "schreiben" aufgerufen (was in der start_SymoGen24Controller2.
 falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 
-LoggingSymoGen24.py (optional)
+### LoggingSymoGen24.py (optional)
 
 schreibt folgende Werte in die Log.csv zur Auswertung der Ergebnisse mit z.B. libreoffice Calc, in folgendem Format:
 Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.solar,Aktuelle Ladegrenze,Batteriestand in Prozent
@@ -76,12 +86,11 @@ Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.s
 
 #####################################################################
 
-Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung<br>
-==================================================================================================== <br>
+## Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung
 (z.B. E-Autos)
 
 Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus. <br>
-Konfiguration muss in der "config.php" angepasst werden.<br>
+Konfiguration muss eventuell in der "config.php" angepasst werden.<br>
 
 Nur zum testen kann der PHPeigene Webserver benutzt werden. Einfach unter /DIR/html/ folgendes aufrufen:<br>
 php -S 0.0.0.0:7777 <br>
@@ -113,8 +122,7 @@ sudo systemctl restart apache2 <br>
 Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
 ![Screenshot](pics/Ladesteuerung.png)
-Batterieladesteuerung ( TAB--> LadeSteuerung )<br>
-==============================================<br>
+### Batterieladesteuerung ( TAB--> LadeSteuerung )
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
 In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
@@ -129,8 +137,7 @@ Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Op
 Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
 
 ![Screenshot](pics/Entladesteuerung.png)
-BatterieENTladesteuerung ( TAB--> EntladeSteuerung )<br>
-==============================================<br>
+### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
 
 Unter "Feste Entladegrenze " kann die maximale Entladeleistung
 in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.

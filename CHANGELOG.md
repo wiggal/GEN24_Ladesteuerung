@@ -1,3 +1,20 @@
+[0.10.2] – 2023-10-15
+
+- in html/config.php relative Pfade eingeführt, dadurch müssen sie nicht mehr angepasst werden.
+
+Neue Prognoseabfrage von solcast.com erstellt. Kann mit Solcast_WeatherData.py abgerufen werden.<br>
+Hierfür ist ein neuer Block "[solcast.com]" in der config.ini nötig. Crontabeintrag siehe README.<br>
+Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, 
+da pro Lauf zwei Zugriffe erforderlich sind und insgesamt nur 10 pro Tag möglich sind. <br>
+
+- Alle Pythonskripte werden ab jetzt mit "start_PythonScript.sh skriptname" in der "crontab" gestartet
+### ACHTUNG bitte Crontabeinträge anpassen!!!
+  z.B.: 
+  */5 06-16 * * * /home/GEN24/start_PythonScript.sh SymoGen24Controller2.py schreiben
+  1 6,8,11,13,15 * * * /home/GEN24/start_PythonScript.sh Solcast_WeatherData.py
+
+Alte start_skripte fallen mit der nächsten Version weg!!!
+
 [0.10.1] – 2023-10-10
 
 - html/1_tab_LadeSteuerung.php: Schreibfehler in Mouseover beseitigt
@@ -8,7 +25,7 @@
 - Die Werte "WRSchreibGrenze_nachUnten" und "WRSchreibGrenze_nachOben" werden ab 90% Batterieladung mit (1+(Ladestand%-90%)/5) multipliziert, 
   dadurch soll das hoch- und runterschalten der Batterieladung am Ende des Tages besser verhindert werden.
 
-# ACHTUNG bitte evtl. in config.ini anpassen!!!
+### ACHTUNG bitte evtl. in config.ini anpassen!!!
 - Neue Variable "Grundlast_WoT" in config.ini
   Da an bestimmten Wochentagen (z.B. Wochenende) die Grundlast höher sein kann, kann sie hier für jeden Wochentag unterschiedlich gesetzt werden.
   Voraussetzung damit die Grundlast_WoT für den aktuellen Tag gesetzt wird, die Variable "Grundlast" muß "0" sein.
@@ -27,7 +44,7 @@
   von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.<br>
   größer 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.<br>
 
-# ACHTUNG bitte in config.ini anpassen!!!
+### ACHTUNG bitte in config.ini anpassen!!!
 - Änderung in config.ini
   Da die Variable "BatSparFaktor" größeren Einfluss bekommt, werden die Variablen "BatWaitFaktor" und "BatWaitFaktor_Max" nicht mehr benötigt und wurden entfernt
 
@@ -43,7 +60,7 @@
 
 Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingeführt.
 
-# ACHTUNG bitte in config.ini anpassen!!!
+### ACHTUNG bitte in config.ini anpassen!!!
 Änderung in SymoGen24Controller2.py, config.ini, und config.ini.info
 - Puffer_Einspeisegrenze und Puffer_WR_Kapazitaet durch WRSchreibGrenze_nachOben ersetzt bzw. entfernt, da sie ohnehin annähernd gleich sein müssen.
 
@@ -54,7 +71,7 @@ Neuen Tab "html/6_tab_GEN24.php" zum lokalen Aufruf des Wechselrichters eingefü
 
 Neuprogrammierung der Entladesteuerung
 
-# ACHTUNG bitte in config.ini anpassen!!!
+### ACHTUNG bitte in config.ini anpassen!!!
 Neuerungen in config.ini
 - Block "[Entladung]" eingeführt und Variablen aus Block "[Reservierung]" entfernt
 
@@ -81,7 +98,7 @@ Hilfe an die neue Entladesteuerung angepasst.
   dadurch soll das hoch und runter schalten der Batterieladung besser verhindert werden.
 - Lesen der manuellen Entladesteuerung eingebaut
 
-# ACHTUNG bitte in config.ini anpassen!!!
+### ACHTUNG bitte in config.ini anpassen!!!
 Änderung in config.ini und config.ini.info
 - Variable "BatterieVoll" entfernt.
 
@@ -108,7 +125,7 @@ Hilfe an die neue Entladesteuerung angepasst.
 
 [0.9.1] – 2023-06-04
 
-# ACHTUNG bitte in config.ini anpassen!!!
+### ACHTUNG bitte in config.ini anpassen!!!
 Änderung in config.ini
 - Folgende neue Variablen eingeführt, um die Leistung, die der WR abregelt, besser zu steuern.<br>
   Zeile 76 bis 79: <br>

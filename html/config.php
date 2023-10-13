@@ -1,9 +1,9 @@
 <?php
 // Hier die Variablen für die PV-Reservierung definieren
-$PrognoseFile = "/home/GEN24/weatherData.json";
+$PrognoseFile = "../weatherData.json";
 $ReservierungsFile = "EV_Reservierung.json";
-$WattReservierungsFile = "/home/GEN24/Watt_Reservierung.json";
-$EntLadeSteuerFile = "/home/GEN24/Akku_EntLadeSteuerFile.json";
+$WattReservierungsFile = "../Watt_Reservierung.json";
+$EntLadeSteuerFile = "../Akku_EntLadeSteuerFile.json";
 $PV_Leistung_KWp = 11.4;
 $Faktor_PVLeistung_Prognose = 1.00;
 $Res_Feld1 = "VW.ID3";
