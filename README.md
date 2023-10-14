@@ -11,7 +11,7 @@ Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „B
 z.B.:
 ![Screenshot](pics/Ladewertverteilung.png)
 
-## Installationshinweise:
+## :floppy_disk: Installationshinweise:
 Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv <br>
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
@@ -46,12 +46,12 @@ Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chm
 #Crontab.log jeden Montag abräumen <br>
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
 
-### WeatherDataProvider2.py
+### :sun_behind_rain_cloud: WeatherDataProvider2.py
 
 holt die Leistungsprognose von forecast.solar und schreibt sie in weatherData.json <br>
 Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen (bei mir alle 2-3 Std)
 
-### Solarprognose_WeatherData.py 
+### :sun_behind_rain_cloud: Solarprognose_WeatherData.py 
 
 Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich,
 hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben. <br>
@@ -59,27 +59,25 @@ Holt die Leistungsprognose von solarprognose.de und schreibt sie in weatherData.
 Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2-3 Std) <br>
 
 **_NEU ab Version 0.10.2_**<br>
-### Solcast_WeatherData.py
+### :sun_behind_rain_cloud: Solcast_WeatherData.py
 
 Kann auch alternativ zu WeatherDataProvider2.py benutzt werden, es ist ein "Home User" Account auf solcast.com erforderlich.<br>
 Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json.
 Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag). <br>
 **_ENDE NEU_**
 
-### SymoGen24Connector.py
-
-Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
-
-
-### SymoGen24Controller2.py
+### :chart_with_upwards_trend: SymoGen24Controller2.py
 
 berechnet den aktuell besten Ladewert aufgrund der Werte in weatherData.json, den Akkustand und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
 Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.<br>
 Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte auf den Wechselrichter <br>
 falls Änderungen außerhalb der gesetzten Grenzen sind.
 
+### SymoGen24Connector.py
 
-### LoggingSymoGen24.py (optional)
+Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
+
+### :bar_chart: LoggingSymoGen24.py (optional)
 
 schreibt folgende Werte in die Log.csv zur Auswertung der Ergebnisse mit z.B. libreoffice Calc, in folgendem Format:
 Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.solar,Aktuelle Ladegrenze,Batteriestand in Prozent
@@ -149,7 +147,7 @@ In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung e
 
 Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
 
-======================================================
+======================================================<br>
 Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
 Herzlichen Dank an "godfuture"
 
