@@ -1,16 +1,17 @@
-# GEN24_Ladesteuerung 
+# :sunny: GEN24_Ladesteuerung :battery:
 (getestet unter Python 3.8 und 3.9)
 
 ![Screenshot](pics/Steuerungstabellen.png)
 
-Ladesteuerung für  Fronius Symo GEN24 Plus um die 70% Kappung zu umgehen,
-und Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.<br>
-Entladesteuerung, um die Entladung der Batterie bei großen Verbräuchen zu steuern.<br>
+- Ladesteuerung für  Fronius Symo GEN24 Plus um die Einspeisebegrenzung (bei mir 70%) zu umgehen,
+und die Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.<br>
+- Entladesteuerung, um die Entladung der Batterie bei großen Verbräuchen zu steuern.<br>
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden. 
 z.B.:
 ![Screenshot](pics/Ladewertverteilung.png)
 
+## Installationshinweise:
 Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv <br>
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
@@ -28,7 +29,7 @@ sudo pip install requests <br>
 sudo pip install ping3 <br>
 
 **_NEU ab Version 0.10.2_**<br>
-Mit start_PythonScript.sh können Pythonskripte per Cronjobs gestartet werden. <br>
+Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden. <br>
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit Prognosedaten in 
 der Datei weatherData.json vorhanden sind!!!
 
@@ -47,21 +48,21 @@ Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chm
 
 ### WeatherDataProvider2.py
 
-holt die Sonnenstundenprognosen von forecast.solar und schreibt sie in weatherData.json <br>
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen (bei mir alle 2 Std)
+holt die Leistungsprognose von forecast.solar und schreibt sie in weatherData.json <br>
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen (bei mir alle 2-3 Std)
 
 ### Solarprognose_WeatherData.py 
 
 Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich,
 hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben. <br>
-Holt die Sonnenstundenprognosen von solarprognose.de und schreibt sie in weatherData.json.
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2 Std) <br>
+Holt die Leistungsprognose von solarprognose.de und schreibt sie in weatherData.json.
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2-3 Std) <br>
 
 **_NEU ab Version 0.10.2_**<br>
 ### Solcast_WeatherData.py
 
 Kann auch alternativ zu WeatherDataProvider2.py benutzt werden, es ist ein "Home User" Account auf solcast.com erforderlich.<br>
-Holt die Sonnenstundenprognosen von toolkit.solcast.com.au und schreibt sie in weatherData.json.
+Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json.
 Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag). <br>
 **_ENDE NEU_**
 
@@ -72,9 +73,9 @@ Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechse
 
 ### SymoGen24Controller2.py
 
-berechnet die aktuell besten Ladewerte aufgrund der Werte in weatherData.json und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
+berechnet den aktuell besten Ladewert aufgrund der Werte in weatherData.json, den Akkustand und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
 Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.<br>
-Mit dem Parameter "schreiben" aufgerufen (was in der start_SymoGen24Controller2.sh geschieht) schreibt er die Ladewerte auf den Wechselrichter <br>
+Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte auf den Wechselrichter <br>
 falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 
@@ -92,7 +93,7 @@ Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.s
 Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus. <br>
 Konfiguration muss eventuell in der "config.php" angepasst werden.<br>
 
-Nur zum testen kann der PHPeigene Webserver benutzt werden. Einfach unter /DIR/html/ folgendes aufrufen:<br>
+Nur zum testen kann der PHPeigene Webserver benutzt werden. Einfach unter /DIR/html/ folgendes starten:<br>
 php -S 0.0.0.0:7777 <br>
 Und im Browser localhost:7777 aufrufen.<br>
 
@@ -106,9 +107,13 @@ In /etc/apache2/apache2.conf  <br>
 In /etc/apache2/sites-available/000-default.conf <br>
 DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
 
+Apache neu starten <br>
+sudo systemctl restart apache2 <br>
+Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
+
 ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für Apache haben!!<br>
-Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.<br>
-Vorhandene Module:<br>
+
+Vorhandene Skripts:<br>
 1_tab_LadeSteuerung.php    ==>> Reservierung von großen PV-Mengen und feste manuelle Ladesteuerung<br>
 2_tab_EntladeSteuerung.php ==>>  EntladeSteuerung durch Eintrag in Tabelle und feste manuelle Entladesteuerung<br>
 3_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen<br>
@@ -116,10 +121,8 @@ Vorhandene Module:<br>
 5_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log<br>
 6_tab_GEN24.php        ==>> lokaler Aufruf des GEN24<br>
 
-Apache neu starten <br>
-sudo systemctl restart apache2 <br>
+Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.<br>
 
-Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
 ![Screenshot](pics/Ladesteuerung.png)
 ### Batterieladesteuerung ( TAB--> LadeSteuerung )
