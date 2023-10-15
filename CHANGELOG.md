@@ -2,6 +2,8 @@
 
 - Alte start_skripte  gelöscht
 
+Änderung in html/4_tab_Crontab_log.php
+- Anzeigen der "config.ini" ähnlich der Editierseite dargestellt und dadurch lesbarer.
 
 **[0.10.2] – 2023-10-15**
 

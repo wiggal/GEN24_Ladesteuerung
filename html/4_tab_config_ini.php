@@ -24,6 +24,9 @@ th {
   text-align: left;
   background-color: #CCFFCC;
 }
+input:read-only {
+  background-color: #fadbd8;
+}
 button {
   font-size: 1.3em;
   background-color: #4CAF50;
@@ -55,6 +58,42 @@ button { font-size: 3.0em; }
 <?php
 # <h1>config.ini</h1>
 include "config.php";
+
+function config_lesen( $file, $readonly )
+{
+    $myfile = fopen($file, "r") or die("Kann Datei ".$file." nicht öffnen!");
+    $Zeilencounter = 0;
+    while(!feof($myfile)) {
+        $Zeile = fgets($myfile);
+        $Zeilencounter++;
+
+        # Suche nach Kommentarzeilen
+        if ((strpos($Zeile, '#') !== false) AND (strpos($Zeile, '#') < 2)) {
+            $Zeile = rtrim($Zeile);
+            echo '<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
+        } else {
+            # Hier die Configblöcke suchen []
+            if ((strpos($Zeile, '[') !== false) AND (strpos($Zeile, '[') < 1)) {
+                $Zeile = rtrim($Zeile);
+                echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\'" >'.$Zeile.'</th></tr>'."\n";
+            } else {
+                # Hier die Variablenbelegung suchen
+                if ((strpos($Zeile, '=') !== false)) {
+                    $Zeilenteil = explode("=", $Zeile);
+                    $Zeilenteil[0] = ltrim(rtrim($Zeilenteil[0]));
+                    $Zeilenteil[1] = ltrim(rtrim($Zeilenteil[1]));
+                    echo '<tr><td><input type="hidden" name="Zeile['.$Zeilencounter.'][0]" value=\''.$Zeilenteil[0].' = \'>'.$Zeilenteil[0].'</td>'."\n";
+                    echo '<td><input type="text" name="Zeile['.$Zeilencounter.'][1]" value="'.$Zeilenteil[1].'" '.$readonly.'></td></tr>'."\n";
+                } else {
+                    #hier noch die Leerzeilen behandeln
+                    $Zeile = rtrim($Zeile);
+                    echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
+                }
+            }
+        }
+    }
+}
+
 $path_parts = pathinfo($PrognoseFile);
 $file = $path_parts['dirname'].'/config.ini';
 
@@ -68,18 +107,18 @@ switch ($case) {
     case '':
 # AUSGEBEN DER config.ini
 
+echo '<b>"config.ini" hier nur lesbar! <br>Zum editieren Button klicken!</b>';
+echo '<br><br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="case" value="editieren">'."\n";
 echo '<button type="submit">config.ini editieren</button>';
 echo '</form>'."\n";
 echo '<br>';
+echo '<table>';
 
-$myfile = fopen($file, "r") or die("Kann Datei ".$file." nicht öffnen!");
-$config_ini = file_get_contents($file);
-echo '<nobr>';
-echo nl2br($config_ini);
-fclose($myfile);
+config_lesen($file, 'readonly');
 
+echo '</table>';
     break;
 
     case 'editieren':
@@ -116,37 +155,7 @@ if ($_POST["password"] == $passwd_configedit) {
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<table>';
 
-$myfile = fopen($file, "r") or die("Kann Datei ".$file." nicht öffnen!");
-$Zeilencounter = 0;
-while(!feof($myfile)) {
-    $Zeile = fgets($myfile);
-    $Zeilencounter++;
-
-    # Suche nach Kommentarzeilen
-    if ((strpos($Zeile, '#') !== false) AND (strpos($Zeile, '#') < 2)) {
-        $Zeile = rtrim($Zeile);
-        echo '<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
-    } else {
-        # Hier die Configblöcke suchen []
-        if ((strpos($Zeile, '[') !== false) AND (strpos($Zeile, '[') < 1)) {
-            $Zeile = rtrim($Zeile);
-            echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\'" >'.$Zeile.'</th></tr>'."\n";
-        } else {
-            # Hier die Variablenbelegung suchen
-            if ((strpos($Zeile, '=') !== false)) {
-                $Zeilenteil = explode("=", $Zeile);
-                $Zeilenteil[0] = ltrim(rtrim($Zeilenteil[0]));
-                $Zeilenteil[1] = ltrim(rtrim($Zeilenteil[1]));
-                echo '<tr><td><input type="hidden" name="Zeile['.$Zeilencounter.'][0]" value=\''.$Zeilenteil[0].' = \'>'.$Zeilenteil[0].'</td>'."\n";
-                echo '<td><input type="text" name="Zeile['.$Zeilencounter.'][1]" value=\''.$Zeilenteil[1].'\'></td></tr>'."\n";
-            } else {
-                #hier noch die Leerzeilen behandeln
-                $Zeile = rtrim($Zeile);
-                echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
-            }
-        }
-    }
-}
+config_lesen($file, '');
 
 echo '</table>';
 echo '<br>';
