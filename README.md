@@ -1,4 +1,4 @@
-# :sunny: GEN24_Ladesteuerung :battery:
+## :sunny: GEN24_Ladesteuerung :battery:
 (getestet unter Python 3.8 und 3.9)
 
 ![Screenshot](pics/Steuerungstabellen.png)
