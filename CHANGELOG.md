@@ -1,3 +1,8 @@
+**[0.10.3] – 2023-10-XX**
+
+- Alte start_skripte  gelöscht
+
+
 **[0.10.2] – 2023-10-15**
 
 - in html/config.php relative Pfade eingeführt, dadurch müssen sie nicht mehr angepasst werden.
