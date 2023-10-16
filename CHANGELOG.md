@@ -5,6 +5,9 @@
 Änderung in html/4_tab_Crontab_log.php
 - Anzeigen der "config.ini" ähnlich der Editierseite dargestellt und dadurch lesbarer.
 
+Änderung in Solcast_WeatherData.py
+- Fix: Wenn solcast.com nicht erreichbar fällt skript auf die Nase.
+
 **[0.10.2] – 2023-10-15**
 
 - in html/config.php relative Pfade eingeführt, dadurch müssen sie nicht mehr angepasst werden.
