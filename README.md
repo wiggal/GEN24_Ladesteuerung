@@ -135,7 +135,7 @@ Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die e
 beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
 
-Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
+Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
 ![Screenshot](pics/Entladesteuerung.png)
 ### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
@@ -145,7 +145,7 @@ in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.
 
 In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.
 
-Weitere Erklärungen stehen in der Hilfe (3_tab_Hilfe.html)
+Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
 ======================================================<br>
 Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
