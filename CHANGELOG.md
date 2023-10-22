@@ -8,6 +8,9 @@
 Änderung in Solcast_WeatherData.py
 - Fix: Wenn solcast.com nicht erreichbar fällt skript auf die Nase.
 
+Änderung in SymoGen24Controller2.py
+- Alle Zahlenwerte beim Lesen aus der config.ini prüfen. 
+
 **[0.10.2] – 2023-10-15**
 
 - in html/config.php relative Pfade eingeführt, dadurch müssen sie nicht mehr angepasst werden.

@@ -41,7 +41,7 @@ def loadLatestWeatherData():
         try:
             url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id, datenloop, api_key)
             # Hier wieder ABHOLEN EIN
-            apiResponse = requests.get(url, timeout=12.50)
+            apiResponse = requests.get(url, timeout=15.50)
             json_data1 = dict(json.loads(apiResponse.text))
     
             try:
