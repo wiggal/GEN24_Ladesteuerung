@@ -16,10 +16,10 @@ def loadConfig(conf_file):
                 exit()
         return config
 
-def loadWeatherData(config):
+def loadWeatherData(weatherfile):
         data = None
         try:
-            with open(config['env']['filePathWeatherData']) as json_file:
+            with open(weatherfile) as json_file:
                 data = json.load(json_file)
         except:
                 print("Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!")
@@ -203,12 +203,30 @@ def setLadewert(fun_Ladewert):
 
         return(newPercent, newPercent_schreiben)
 
+def getVarConf(block, var, Type):
+        # Variablen aus config lesen und auf Zahlen prüfen
+        try:
+            if(Type == 'eval'):
+               error_type = "als Zahl "
+               return_var = eval(config[block][var])
+            else:
+               error_type = ""
+               return_var = str(config[block][var])
+
+        except:
+             print("ERROR: die Variable [" + block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
+             exit(0)
+        return(return_var)
+
+
 if __name__ == '__main__':
         config = loadConfig('config.ini')
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
-        if ping(config['gen24']['hostNameOrIp']):
+        host_ip = getVarConf('gen24','hostNameOrIp', 'str')
+        host_port = getVarConf('gen24','port', 'str')
+        if ping(host_ip):
             # Nur ausführen, wenn WR erreichbar
             gen24 = None
             auto = False
@@ -218,9 +236,10 @@ if __name__ == '__main__':
     
                     ###############################
     
-                    data = loadWeatherData(config)
+                    weatherfile = getVarConf('env','filePathWeatherData','str')
+                    data = loadWeatherData(weatherfile)
 
-                    gen24 = SymoGen24Connector.SymoGen24(config['gen24']['hostNameOrIp'], config['gen24']['port'], auto)
+                    gen24 = SymoGen24Connector.SymoGen24(host_ip, host_port, auto)
 
                     if gen24.read_data('Battery_Status') == 1:
                         print(datetime.now())
@@ -229,40 +248,31 @@ if __name__ == '__main__':
                         exit()
     
                     # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
-                    # eval = Rechenwerte aus Config in Zahlen umwandeln
-                    config_eval_vars = [
-                                        ['print_level','Ladeberechnung','print_level'],
-                                        ['BattVollUm','Ladeberechnung','BattVollUm'],
-                                        ['BatSparFaktor','Ladeberechnung','BatSparFaktor'],
-                                        ['MaxLadung','Ladeberechnung','MaxLadung'],
-                                        ['LadungAus','Ladeberechnung','LadungAus'],
-                                        ['Einspeisegrenze','Ladeberechnung','Einspeisegrenze'],
-                                        ['WR_Kapazitaet','Ladeberechnung','WR_Kapazitaet'],
-                                        ['PV_Leistung_Watt','Ladeberechnung','PV_Leistung_Watt'],
-                                        ['Grundlast','Ladeberechnung','Grundlast'],
-                                        ['MindBattLad','Ladeberechnung','MindBattLad'],
-                                        ['WRSchreibGrenze_nachOben','Ladeberechnung','WRSchreibGrenze_nachOben'],
-                                        ['WRSchreibGrenze_nachUnten','Ladeberechnung','WRSchreibGrenze_nachUnten'],
-                                        ['FesteLadeleistung','Ladeberechnung','FesteLadeleistung'],
-                                        ['Fallback_on','Fallback','Fallback_on'],
-                                        ['Cronjob_Minutenabstand','Fallback','Cronjob_Minutenabstand'],
-                                        ['Fallback_Zeitabstand_Std','Fallback','Fallback_Zeitabstand_Std'],
-                                        ['Push_Message_EIN','messaging','Push_Message_EIN'],
-                                        ['PV_Reservierung_steuern','Reservierung','PV_Reservierung_steuern'],
-                                        ['Batterieentlandung_steuern','Entladung','Batterieentlandung_steuern'],
-                                        ['WREntladeSchreibGrenze_Watt','Entladung','WREntladeSchreibGrenze_Watt'],
-                                       ]
-                    for i in config_eval_vars:
-                        try:
-                            locals()[i[0]] = eval(config[i[1]][i[2]])
-                        except:
-                            print("ERROR: die Variable [" + i[1] + "][" + i[2] + "] wurde nicht als Zahl definiert!")
-                            exit()
-
+                    print_level = getVarConf('Ladeberechnung','print_level','eval')
+                    BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
+                    BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
+                    MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
+                    LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')
+                    Einspeisegrenze = getVarConf('Ladeberechnung','Einspeisegrenze','eval')
+                    WR_Kapazitaet = getVarConf('Ladeberechnung','WR_Kapazitaet','eval')
+                    PV_Leistung_Watt = getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
+                    Grundlast = getVarConf('Ladeberechnung','Grundlast','eval')
+                    MindBattLad = getVarConf('Ladeberechnung','MindBattLad','eval')
+                    WRSchreibGrenze_nachOben = getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
+                    WRSchreibGrenze_nachUnten = getVarConf('Ladeberechnung','WRSchreibGrenze_nachUnten','eval')
+                    FesteLadeleistung = getVarConf('Ladeberechnung','FesteLadeleistung','eval')
+                    Fallback_on = getVarConf('Fallback','Fallback_on','eval')
+                    Cronjob_Minutenabstand = getVarConf('Fallback','Cronjob_Minutenabstand','eval')
+                    Fallback_Zeitabstand_Std = getVarConf('Fallback','Fallback_Zeitabstand_Std','eval')
+                    Push_Message_EIN = getVarConf('messaging','Push_Message_EIN','eval')
+                    PV_Reservierung_steuern = getVarConf('Reservierung','PV_Reservierung_steuern','eval')
+                    Batterieentlandung_steuern = getVarConf('Entladung','Batterieentlandung_steuern','eval')
+                    WREntladeSchreibGrenze_Watt = getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
+                                       
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
-                            Grundlast_WoT = config['Ladeberechnung']['Grundlast_WoT']
+                            Grundlast_WoT = getVarConf('Ladeberechnung','Grundlast_WoT','str')
                             Grundlast_WoT_Array = Grundlast_WoT.split(',')
                             Grundlast = eval(Grundlast_WoT_Array[datetime.today().weekday()])
                         except:
@@ -282,8 +292,8 @@ if __name__ == '__main__':
 
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     if  PV_Reservierung_steuern == 1:
-                        reservierungdata = loadPVReservierung(config['Reservierung']['PV_ReservieungsDatei'])
-
+                        Reservierungsdatei = getVarConf('Reservierung','PV_ReservieungsDatei','str')
+                        reservierungdata = loadPVReservierung(Reservierungsdatei)
 
                     # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
                     newPercent_schreiben = 0
@@ -514,7 +524,8 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADUNG >>>>>>>>>>>>>"
 
                         # EntladeSteuerungFile lesen
-                        entladesteurungsdata = loadPVReservierung(config['Entladung']['Akku_EntladeSteuerungsFile'])
+                        EntladeSteuerungFile = getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
+                        entladesteurungsdata = loadPVReservierung(EntladeSteuerungFile)
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
                             MaxEntladung = entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']
@@ -590,7 +601,7 @@ if __name__ == '__main__':
 
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
-                        Push_Message_Url = config['messaging']['Push_Message_Url']
+                        Push_Message_Url = getVarConf('messaging','Push_Message_Url','str')
                         apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
                         print("PushMeldung an ", Push_Message_Url, " gesendet.")
 
