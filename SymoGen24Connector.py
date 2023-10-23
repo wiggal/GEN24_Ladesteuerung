@@ -10,16 +10,7 @@ from pyModbusTCP import utils
 from datetime import datetime
 import configparser
 import numpy as np
-
-def loadConfig():
-    config = configparser.ConfigParser()
-    try:
-            config.read('config.ini')
-    except:
-            print('config file not found.')
-            exit()
-    return config
-
+from functions import loadConfig, getVarConf
 
 class SymoGen24:
     def __init__(self, ipaddr, port, auto=True):
@@ -234,8 +225,10 @@ class SymoGen24:
 # Test program
 if __name__ == "__main__":
     
-    config = loadConfig()
-    gen24 = SymoGen24(config['gen24']['hostNameOrIp'], config['gen24']['port'])
+    config = loadConfig('config.ini')
+    host_ip = getVarConf('gen24','hostNameOrIp', 'str')
+    host_port = getVarConf('gen24','port', 'str')
+    gen24 = SymoGen24(host_ip, host_port)
 
     # print("MPPT-Zeit: ", datetime.now())
     # Sunspec ID (should be 113)
