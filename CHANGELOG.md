@@ -13,7 +13,7 @@
 
 Neue Datei functions.py
 - Häufig genutzte Funktionen in die Datei "functions.py" ausgelagert.
-  Angepasst in SymoGen24Connector.py, SymoGen24Controller2.py, WeatherDataProvider2.py, Solarprognose_WeatherData.py und 
+  Angepasst in SymoGen24Connector.py, SymoGen24Controller2.py, WeatherDataProvider2.py, Solarprognose_WeatherData.py und Solcast_WeatherData.py
 
 **[0.10.2] – 2023-10-15**
 

@@ -23,7 +23,7 @@ def loadLatestWeatherData():
 
 if __name__ == '__main__':
     config = loadConfig('config.ini')
-    # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
+    # Benoetigte Variablen aus config.ini definieren und prüfen
     id = getVarConf('solarprognose', 'id', 'eval')
     KW_Faktor = getVarConf('solarprognose', 'KW_Faktor', 'eval')
     dataAgeMaxInMinutes = getVarConf('solarprognose', 'dataAgeMaxInMinutes', 'eval')

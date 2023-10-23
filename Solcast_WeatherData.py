@@ -1,31 +1,12 @@
-from datetime import datetime, timedelta
 import requests
 import json
-import configparser
 import os.path
 import pytz
 import time
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
+from functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 
-def loadConfig():
-    config = configparser.ConfigParser()
-    try:
-        config.read('config.ini')
-    except:
-        print('config file not found.')
-        exit()
-    return config
-
-def loadWeatherData(weatherfile):
-    data = None
-    weatherfile = Path(weatherfile)
-    if weatherfile.is_file():
-        with open(weatherfile) as json_file:
-            data = json.load(json_file)
-    
-    return data
-    
 def loadLatestWeatherData():
     # Varablen definieren
     format = "%Y-%m-%d %H:%M:%S"
@@ -80,42 +61,16 @@ def loadLatestWeatherData():
     dict_watts['result']['watts'] = dict(sorted(dict_watts['result']['watts'].items()))
     return(dict_watts, json_data1)
 
-def storeWeatherData(wetterfile, data, now):
-    outFilePath = wetterfile
-    out_file = open(outFilePath, "w")
-    format = "%Y-%m-%d %H:%M:%S"
-    data.update({'messageCreated': datetime.strftime(now, format)})
-    json.dump(data, out_file, indent = 6)
-    out_file.close()
-    
 if __name__ == '__main__':
-    config = loadConfig()
-    # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
-    config_eval_vars = [
-                            ['dataAgeMaxInMinutes','solcast.com','dataAgeMaxInMinutes'],
-                            ['Zeitzone','solcast.com','Zeitzone'],
-                            ['KW_Faktor','solcast.com','KW_Faktor'],
-                        ]
-    for i in config_eval_vars:
-         try:
-             locals()[i[0]] = eval(config[i[1]][i[2]])
-         except:
-             print("ERROR: die Variable [" + i[1] + "][" + i[2] + "] wurde nicht als Zahl definiert!")
-             exit()
-
-    # Restliche Variablen aus config.ini prüfen ob vorhanden und definieren
-    config_str_vars = [
-                            ['weatherfile','solcast.com','weatherfile'],
-                            ['api_key','solcast.com','api_key'],
-                            ['resource_id','solcast.com','resource_id'],
-                        ]
-    for i in config_str_vars:
-         try:
-             locals()[i[0]] = str(config[i[1]][i[2]])
-         except:
-             print("ERROR: die Variable [" + i[1] + "][" + i[2] + "] wurde in der config.ini NICHT definiert!")
-             exit()
-
+    config = loadConfig('config.ini')
+    # Benoetigte Variablen aus config.ini definieren und prüfen
+    dataAgeMaxInMinutes = getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
+    Zeitzone = getVarConf('solcast.com', 'Zeitzone', 'eval')
+    KW_Faktor = getVarConf('solcast.com', 'KW_Faktor', 'eval')
+    weatherfile = getVarConf('solcast.com', 'weatherfile', 'str')
+    api_key = getVarConf('solcast.com', 'api_key', 'str')
+    resource_id = getVarConf('solcast.com', 'resource_id', 'str')
+    
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
