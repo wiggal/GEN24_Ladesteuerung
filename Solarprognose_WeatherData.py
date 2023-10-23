@@ -1,31 +1,12 @@
-from datetime import datetime, timedelta
 import requests
 import json
-import configparser
 import os.path
 import pytz
 import time
 from pathlib import Path
 from datetime import datetime
+from functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 
-def loadConfig():
-    config = configparser.ConfigParser()
-    try:
-        config.read('config.ini')
-    except:
-        print('config file not found.')
-        exit()
-    return config
-
-def loadWeatherData(weatherfile):
-    data = None
-    weatherfile = Path(weatherfile)
-    if weatherfile.is_file():
-        with open(weatherfile) as json_file:
-            data = json.load(json_file)
-    
-    return data
-    
 def loadLatestWeatherData():
     url = 'http://www.solarprognose.de/web/solarprediction/api/v1?access-token={}&item={}&id={}&type={}&algorithm={}'.format(accesstoken, item, id, type, algorithm)
     # Hier wieder ABHOLEN EIN
@@ -40,35 +21,18 @@ def loadLatestWeatherData():
         dict_watts['result']['watts'][key_neu] = int(value[1]*1000*KW_Faktor)
     return(dict_watts, json_data1)
 
-def storeWeatherData(wetterfile, data, now):
-    outFilePath = wetterfile
-    out_file = open(outFilePath, "w")
-    format = "%Y-%m-%d %H:%M:%S"
-    data.update({'messageCreated': datetime.strftime(now, format)})
-    json.dump(data, out_file, indent = 6)
-    out_file.close()
-    
 if __name__ == '__main__':
-    config = loadConfig()
+    config = loadConfig('config.ini')
     # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
-    config_eval_vars = [
-                            ['id','solarprognose','id'],
-                            ['KW_Faktor','solarprognose','KW_Faktor'],
-                            ['dataAgeMaxInMinutes','solarprognose','dataAgeMaxInMinutes'],
-                            ['WaitSec','solarprognose','WaitSec'],
-                        ]
-    for i in config_eval_vars:
-         try:
-             exec("%s = %s" % (i[0],eval(config[i[1]][i[2]])))
-         except:
-             print("ERROR: die Variable " + i[0] + " wurde nicht als Zahl definiert!")
-             exit()
-
-    weatherfile = config['solarprognose']['weatherfile']
-    accesstoken = config['solarprognose']['accesstoken']
-    item = config['solarprognose']['item']
-    type = config['solarprognose']['type']
-    algorithm = config['solarprognose']['algorithm']
+    id = getVarConf('solarprognose', 'id', 'eval')
+    KW_Faktor = getVarConf('solarprognose', 'KW_Faktor', 'eval')
+    dataAgeMaxInMinutes = getVarConf('solarprognose', 'dataAgeMaxInMinutes', 'eval')
+    WaitSec = getVarConf('solarprognose', 'WaitSec', 'eval')
+    weatherfile = getVarConf('solarprognose', 'weatherfile', 'str')
+    accesstoken = getVarConf('solarprognose', 'accesstoken', 'str')
+    item = getVarConf('solarprognose', 'item', 'str')
+    type = getVarConf('solarprognose', 'type', 'str')
+    algorithm = getVarConf('solarprognose', 'algorithm', 'str')
 
     time.sleep(WaitSec)
     

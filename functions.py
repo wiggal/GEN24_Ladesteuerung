@@ -25,6 +25,18 @@ def loadWeatherData(weatherfile):
                 exit()
         return data
 
+def storeWeatherData(wetterfile, data, now):
+    try:
+        out_file = open(wetterfile, "w")
+        format = "%Y-%m-%d %H:%M:%S"
+        data.update({'messageCreated': datetime.strftime(now, format)})
+        json.dump(data, out_file, indent = 6)
+        out_file.close()
+    except:
+        print("ERROR: Die Weterdatei " + wetterfile + " konnte NICHT geschrieben werden!")
+        exit(0)
+    return()
+
 def loadPVReservierung(file):
         reservierungdata = None
         try:
@@ -48,17 +60,5 @@ def getVarConf(block, var, Type):
             print("ERROR: die Variable [" + block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
             exit(0)
         return return_var
-
-def storeWeatherData(wetterfile, data, now):
-    try:
-        out_file = open(wetterfile, "w")
-        format = "%Y-%m-%d %H:%M:%S"
-        data.update({'messageCreated': datetime.strftime(now, format)})
-        json.dump(data, out_file, indent = 6)
-        out_file.close()
-    except:
-        print("ERROR: Die Weterdatei " + wetterfile + " konnte NICHT geschrieben werden!")
-        exit(0)
-    return()
 
 
