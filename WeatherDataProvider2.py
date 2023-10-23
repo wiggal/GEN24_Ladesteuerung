@@ -1,37 +1,17 @@
 from datetime import datetime, timedelta
-#from dateutil import parser
 import requests
 import json
-import configparser
 import os.path
 import pytz
 from pathlib import Path
+from functions import loadConfig, loadWeatherData, getVarConf
 
-def loadConfig():
-    config = configparser.ConfigParser()
-    try:
-        config.read('config.ini')
-    except:
-        print('config file not found.')
-        exit()
-    return config
-    
-def loadWeatherData(config):
-    data = None
-    weatherfile = Path(config['env']['filePathWeatherData'])
-    if weatherfile.is_file():
-        with open(config['env']['filePathWeatherData']) as json_file:
-            data = json.load(json_file)
-    
-    return data
-    
 def loadLatestWeatherData(config):
     lat = config['forecast.solar']['lat']
     lon = config['forecast.solar']['lon']
     dec = config['forecast.solar']['dec']
     az = config['forecast.solar']['az']
     kwp = config['forecast.solar']['kwp']
-    #apiKey = config['forecast.solar']['api_key']
     
     url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
     try:
@@ -76,19 +56,16 @@ def storeWeatherData(config, data, now):
     out_file.close()
     
 if __name__ == '__main__':
-    config = loadConfig()
-    # db = pickledb.load(config['env']['filePathConfigDb'], True)
+    config = loadConfig('config.ini')
     
-    #tzConfig = pytz.timezone(config['env']['timezone'])    
-    dataAgeMaxInMinutes = float(config['forecast.solar']['dataAgeMaxInMinutes'])
+    dataAgeMaxInMinutes = getVarConf('forecast.solar','dataAgeMaxInMinutes','eval')
     
-    #print(f'Timezone: {tzConfig}')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
-    data = loadWeatherData(config)
-    #print(data['message'])
+    weatherfile = getVarConf('env','filePathWeatherData','str')
+    data = loadWeatherData(weatherfile)
     dataIsExpired = True
     if (data):
         dateCreated = None
