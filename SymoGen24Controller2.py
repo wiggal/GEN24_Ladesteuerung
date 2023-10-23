@@ -6,35 +6,7 @@ import requests
 import SymoGen24Connector
 from ping3 import ping
 from sys import argv
-
-def loadConfig(conf_file):
-        config = configparser.ConfigParser()
-        try:
-                config.read_file(open('config.ini'))
-                config.read(conf_file)
-        except:
-                exit()
-        return config
-
-def loadWeatherData(weatherfile):
-        data = None
-        try:
-            with open(weatherfile) as json_file:
-                data = json.load(json_file)
-        except:
-                print("Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!")
-                exit()
-        return data
-
-def loadPVReservierung(file):
-        reservierungdata = None
-        try:
-            with open(file) as json_file:
-                reservierungdata = json.load(json_file)
-        except:
-                print(file , " fehlt, bitte erzeugen oder Option abschalten !!")
-                exit()
-        return reservierungdata
+from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf
 
 def getPrognose(Stunde):
         if data['result']['watts'].get(Stunde):
@@ -202,22 +174,6 @@ def setLadewert(fun_Ladewert):
             newPercent_schreiben = 1
 
         return(newPercent, newPercent_schreiben)
-
-def getVarConf(block, var, Type):
-        # Variablen aus config lesen und auf Zahlen prüfen
-        try:
-            if(Type == 'eval'):
-               error_type = "als Zahl "
-               return_var = eval(config[block][var])
-            else:
-               error_type = ""
-               return_var = str(config[block][var])
-
-        except:
-             print("ERROR: die Variable [" + block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
-             exit(0)
-        return(return_var)
-
 
 if __name__ == '__main__':
         config = loadConfig('config.ini')

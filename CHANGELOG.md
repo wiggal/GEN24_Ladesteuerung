@@ -11,6 +11,10 @@
 Änderung in SymoGen24Controller2.py
 - Alle Zahlenwerte beim Lesen aus der config.ini prüfen. 
 
+Neue Datei functions.py
+- Häufig genutzte Funktionen in die Datei "functions.py" ausgelagert.
+  Angepasst in SymoGen24Connector.py, SymoGen24Controller2.py
+
 **[0.10.2] – 2023-10-15**
 
 - in html/config.php relative Pfade eingeführt, dadurch müssen sie nicht mehr angepasst werden.
