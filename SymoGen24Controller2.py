@@ -1,5 +1,3 @@
-import json
-import configparser
 from datetime import datetime, timedelta
 import pytz
 import requests

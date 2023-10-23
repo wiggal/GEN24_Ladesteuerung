@@ -8,7 +8,6 @@ if (pyModbusTCP.__version__ != '0.1.10'):
 from pyModbusTCP.client import ModbusClient
 from pyModbusTCP import utils
 from datetime import datetime
-import configparser
 import numpy as np
 from functions import loadConfig, getVarConf
 
