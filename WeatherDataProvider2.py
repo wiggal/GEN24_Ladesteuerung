@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import requests
 import json
 import os.path
 import pytz
 from pathlib import Path
-from functions import loadConfig, loadWeatherData, getVarConf
+from functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 
 def loadLatestWeatherData(config):
     lat = config['forecast.solar']['lat']
@@ -46,15 +46,6 @@ def loadLatestWeatherData(config):
         return("False")
         
     
-
-def storeWeatherData(config, data, now):
-    outFilePath = config['env']['filePathWeatherData']
-    out_file = open(outFilePath, "w")
-    format = "%Y-%m-%d %H:%M:%S"
-    data.update({'messageCreated': datetime.strftime(now, format)})
-    json.dump(data, out_file, indent = 6)
-    out_file.close()
-    
 if __name__ == '__main__':
     config = loadConfig('config.ini')
     
@@ -81,6 +72,11 @@ if __name__ == '__main__':
 
     if (dataIsExpired):
         data = loadLatestWeatherData(config)
-        if not data == "False":
-            storeWeatherData(config, data, now)
+        if data['result'] !=  None:
+            if not data == "False":
+                storeWeatherData(weatherfile, data, now)
+        else:
+            print("Fehler bei Datenanforderung api.forecast.solar:")
+            print(data)
+
     
