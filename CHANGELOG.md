@@ -1,6 +1,6 @@
-**[0.10.3] – 2023-10-XX**
+**[0.10.3] – 2023-10-24**
 
-- Alte start_skripte  gelöscht
+- Alte start_skripte gelöscht
 
 Änderung in html/4_tab_Crontab_log.php
 - Anzeigen der "config.ini" ähnlich der Editierseite dargestellt und dadurch lesbarer.
@@ -8,11 +8,9 @@
 Änderung in Solcast_WeatherData.py
 - Fix: Wenn solcast.com nicht erreichbar fällt skript auf die Nase.
 
-Änderung in SymoGen24Controller2.py
-- Alle Zahlenwerte beim Lesen aus der config.ini prüfen. 
-
 Neue Datei functions.py
 - Häufig genutzte Funktionen in die Datei "functions.py" ausgelagert.
+  Neue Funktion um alle Variablen beim Lesen aus der config.ini zu prüfen. 
   Angepasst in SymoGen24Connector.py, SymoGen24Controller2.py, WeatherDataProvider2.py, Solarprognose_WeatherData.py und Solcast_WeatherData.py
 
 **[0.10.2] – 2023-10-15**
