@@ -4,7 +4,7 @@ import requests
 import SymoGen24Connector
 from ping3 import ping
 from sys import argv
-from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf
+from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, write_csv
 
 def getPrognose(Stunde):
         if data['result']['watts'].get(Stunde):
@@ -243,6 +243,7 @@ if __name__ == '__main__':
                     aktuellePVProduktion = int(gen24.get_mppt_power())
                     aktuelleBatteriePower = int(gen24.get_batterie_power())
                     BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
+                    GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     if  PV_Reservierung_steuern == 1:
@@ -415,6 +416,7 @@ if __name__ == '__main__':
                             print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
                             print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
+                            print("GesamtverbrauchHaus/Watt:   ", GesamtverbrauchHaus)
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
@@ -485,7 +487,6 @@ if __name__ == '__main__':
                             MaxEntladung = entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']
                             DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
 
-                        GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
                         aktStd = datetime.strftime(now, "%H:00")
 
                         # Verbrauchsgrenze Entladung lesen
@@ -601,6 +602,14 @@ if __name__ == '__main__':
                         if print_level >= 1:
                             print(Fallback_Schreib_Ausgabe)
                     # FALLBACK ENDE
+
+                    ### LOGGING, Schreibt mit den übergebenen Daten eine CSV_Datei
+                    Logging_ein = getVarConf('Logging','Logging_ein','eval')
+                    if Logging_ein == 1:
+                        Logging_file = getVarConf('Logging','Logging_file','str')
+                        write_csv(Logging_file, aktuelleBatteriePower, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+
+
                     #DEBUG ausgeben
                     if print_level >= 2:
                         print(DEBUG_Ausgabe)

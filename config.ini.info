@@ -172,6 +172,18 @@ Batterieentlandung_steuern = 1
 # Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben
 WREntladeSchreibGrenze_Watt = 200
 
+# Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
+[messaging]
+# Hier Daten für Pushmessage auf Handy
+# Push_Message_EIN (1=EIN/0=AUS)
+Push_Message_EIN = 1
+Push_Message_Url = https://ntfy.sh/hoizmooPV
+
+[Logging]
+# durch Logging ein werden die Werte in eine CSV Datei zur Auswertung geschrieben (1=ein, 0=aus)
+Logging_ein = 1
+Logging_file = PV_Daten.csv
+
 
 ############################################################
 # Ab hier kann die Fallbackfunktion des WR aktiviert werden.
