@@ -76,10 +76,12 @@ falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
 
+**_NEU ab Version 0.10.4_**<br>
 ### :bar_chart: Logging (optional)
 
 Erfolgt nun beim Aufruf von SymoGen24Controller2.py, wenn in der "config.ini" Logging_ein = 1.
 Das Logging schreibt Werte in "Logging_file" zur Auswertung der Ergebnisse mit z.B. libreoffice Calc.
+**_ENDE NEU_**
 
 
 #####################################################################
