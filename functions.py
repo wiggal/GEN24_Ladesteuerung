@@ -61,4 +61,23 @@ def getVarConf(block, var, Type):
             exit(0)
         return return_var
 
+## CSV-Logfile schreiben
+from pathlib import Path
+from csv import writer
+def write_csv(csv_file, aktuelleBatteriePower, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz):
+    # Kopf schreiben, wenn Datei nicht extistiert
+    csv_file = Path(csv_file)
+    if not csv_file.is_file():
+        with open(csv_file, 'w', newline='') as student_file:
+            writer_head = writer(student_file)
+            writer_head.writerow(["Zeit","Ladung Akku","Verbrauch","Einspeisung","Produktion","Prognose","Batteriestand %"])
+            student_file.close()
 
+    Zeit = datetime.strftime(datetime.now(), "%m-%d %H:%M")
+    list_data=[Zeit, aktuelleBatteriePower, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz]
+    with open(csv_file, 'a', newline='') as student_file:
+        writer_data = writer(student_file)
+        writer_data.writerow(list_data)
+        student_file.close()
+
+    return()

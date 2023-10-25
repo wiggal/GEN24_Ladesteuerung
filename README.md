@@ -36,7 +36,6 @@ der Datei weatherData.json vorhanden sind!!!
 Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen) <br>
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)
 
-*/5 05-20 * * * /DIR/start_PythonScript.sh LoggingSymoGen24.py<br>
 */5 06-16 * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben<br>
 33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py<br>
 8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py<br>
@@ -77,10 +76,10 @@ falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
 
-### :bar_chart: LoggingSymoGen24.py (optional)
+### :bar_chart: Logging (optional)
 
-schreibt folgende Werte in die Log.csv zur Auswertung der Ergebnisse mit z.B. libreoffice Calc, in folgendem Format:
-Zeit,Ladung Akku,Verbrauch Haus,Leistung ins Netz,Produktion,Prognose forecast.solar,Aktuelle Ladegrenze,Batteriestand in Prozent
+Erfolgt nun beim Aufruf von SymoGen24Controller2.py, wenn in der "config.ini" Logging_ein = 1.
+Das Logging schreibt Werte in "Logging_file" zur Auswertung der Ergebnisse mit z.B. libreoffice Calc.
 
 
 #####################################################################
