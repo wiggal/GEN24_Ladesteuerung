@@ -4,7 +4,7 @@ import requests
 import SymoGen24Connector
 from ping3 import ping
 from sys import argv
-from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, write_csv
+from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, write_csv, save_SQLite
 
 def getPrognose(Stunde):
         if data['result']['watts'].get(Stunde):
@@ -603,11 +603,19 @@ if __name__ == '__main__':
                             print(Fallback_Schreib_Ausgabe)
                     # FALLBACK ENDE
 
-                    ### LOGGING, Schreibt mit den übergebenen Daten eine CSV_Datei
+                    ### LOGGING, Schreibt mit den übergebenen Daten eine CSV- oder SQlite-Datei
                     Logging_ein = getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
-                        Logging_file = getVarConf('Logging','Logging_file','str')
-                        write_csv(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+                        Logging_type = getVarConf('Logging','Logging_type','str')
+                        Logging_file = getVarConf('Logging','Logging_file','str') + "." + Logging_type
+
+                        if Logging_type == 'csv':
+                            write_csv(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+                        elif Logging_type == 'sqlite':
+                            save_SQLite(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+                        else:
+                            print('ERROR: Kein güliges Format für Logging in "config.ini" bei Variable "Logging_type"!!')
+
 
 
                     #DEBUG ausgeben
