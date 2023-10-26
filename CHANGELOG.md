@@ -1,8 +1,8 @@
-**[0.10.4] – 2023-10-XX**
+**[0.10.4] – 2023-10-26**
 
 Änderung in SymoGen24Controller2.py, config.ini und functions.py
 - Logging als "csv" oder "sqlite" eingebaut
-- LoggingSymoGen24.py wird entfernt
+- LoggingSymoGen24.py ist überflüssig und wird entfernt
 
 **[0.10.3] – 2023-10-24**
 
