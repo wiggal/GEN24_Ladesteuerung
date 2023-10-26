@@ -21,7 +21,7 @@ def loadWeatherData(weatherfile):
             with open(weatherfile) as json_file:
                 data = json.load(json_file)
         except:
-                print("Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!")
+                print("ERROR: Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!")
                 exit()
         return data
 
@@ -43,7 +43,7 @@ def loadPVReservierung(file):
             with open(file) as json_file:
                 reservierungdata = json.load(json_file)
         except:
-                print(file , " fehlt, bitte erzeugen oder Option abschalten !!")
+                print("ERROR: Reservierungsdatei fehlt, bitte erzeugen oder Option abschalten !!")
                 exit()
         return reservierungdata
 
@@ -81,3 +81,42 @@ def write_csv(csv_file, aktuelleBatteriePower, GesamtverbrauchHaus, aktuelleEins
         student_file.close()
 
     return()
+
+import sqlite3
+
+# Daten in SQLite_DB speichern
+def save_SQLite(database, BatteriePower, Gesamtverbrauch, Einspeisung, PVProduktion, Vorhersage, BattStatus):
+    verbindung = sqlite3.connect(database)
+    zeiger = verbindung.cursor()
+
+    Zeitpunkt = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
+
+    # Datenbanktabelle anlegen, wenn sie nicht existiert
+    sql_anweisung = """
+    CREATE TABLE IF NOT EXISTS pv_daten (
+    Zeitpunkt DATETIME,
+    BatteriePower SMALLINT,
+    Gesamtverbrauch SMALLINT,
+    Einspeisung SMALLINT,
+    PVProduktion SMALLINT,
+    Vorhersage SMALLINT,
+    BattStatus FLOAT
+    );"""
+    zeiger.execute(sql_anweisung)
+
+    # Daten in DB schreiben
+    zeiger.execute("""
+                INSERT INTO pv_daten
+                       VALUES (?,?,?,?,?,?,?)
+               """,
+              (Zeitpunkt, BatteriePower, Gesamtverbrauch, Einspeisung, PVProduktion, Vorhersage, BattStatus)
+              )
+
+    zeiger.execute(sql_anweisung)
+
+    verbindung.commit()
+    verbindung.close()
+
+    return ()
+
+
