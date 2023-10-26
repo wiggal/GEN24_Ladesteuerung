@@ -607,7 +607,7 @@ if __name__ == '__main__':
                     Logging_ein = getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
                         Logging_file = getVarConf('Logging','Logging_file','str')
-                        write_csv(Logging_file, aktuelleBatteriePower, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+                        write_csv(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
 
 
                     #DEBUG ausgeben
