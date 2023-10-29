@@ -75,7 +75,7 @@ function config_lesen( $file, $readonly )
             # Hier die Configblöcke suchen []
             if ((strpos($Zeile, '[') !== false) AND (strpos($Zeile, '[') < 1)) {
                 $Zeile = rtrim($Zeile);
-                echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\'" >'.$Zeile.'</th></tr>'."\n";
+                echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</th></tr>'."\n";
             } else {
                 # Hier die Variablenbelegung suchen
                 if ((strpos($Zeile, '=') !== false)) {

@@ -3,7 +3,7 @@
 NEU: 7_tab_Diagram.php (noch Prototyp)
 Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
 
-Erforderlich php-sqlite3:
+Erforderlich php-sqlite3:<br>
 `sudo apt install php-sqlite3`
 
 **[0.10.5] – 2023-10-29**
