@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <style>
@@ -34,7 +35,7 @@ switch ($case) {
     echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
     echo '<input type="hidden" name="case" value="filter">'."\n";
     echo '<input type="input" name="suchstring" value="geschrieben" size="10">'."\n";
-    echo '<button type="submit"> >>filtern<< </button>';
+    echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
     echo '</form>'."\n";
     echo '<br>';
 

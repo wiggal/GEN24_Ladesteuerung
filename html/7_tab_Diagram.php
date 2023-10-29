@@ -14,7 +14,7 @@
     </head>
     <body>
 <div class="container">
-  <canvas id="PVDaten" </canvas>
+  <canvas> id="PVDaten" </canvas>
 </div>
 
 
