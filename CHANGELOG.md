@@ -6,6 +6,11 @@ Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
 Erforderlich php-sqlite3:
 `sudo apt install php-sqlite3`
 
+**[0.10.5] – 2023-10-29**
+
+Änderung in Solcast_WeatherData.py und config.ini
+- Zeitzone in config.ini auf +1 geändert, und in Solcast_WeatherData.py auf automatische Sommer-, Winterzeitumstellung geändert.
+
 **[0.10.4] – 2023-10-26**
 
 Änderung in SymoGen24Controller2.py, config.ini und functions.py
