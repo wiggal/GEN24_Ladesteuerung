@@ -1,3 +1,11 @@
+**[0.11.0] – 2023-11-XX**
+
+NEU: 7_tab_Diagram.php (noch Prototyp)
+Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
+
+Erforderlich php-sqlite3:
+`sudo apt install php-sqlite3`
+
 **[0.10.4] – 2023-10-26**
 
 Änderung in SymoGen24Controller2.py, config.ini und functions.py
