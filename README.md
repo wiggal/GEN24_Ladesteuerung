@@ -100,6 +100,9 @@ Webserver Apache z.B.:
 
 Installation: <br>
 sudo apt install apache2 php <br>
+**_NEU ab Version 0.11.0_**
+sudo apt install php-sqlite3
+**_ENDE NEU_**
 In /etc/apache2/apache2.conf  <br>
 <Directory /srv/> durch <Directory /DIR/html/> ersetzen!<br>
 
