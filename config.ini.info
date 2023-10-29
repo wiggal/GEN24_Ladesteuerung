@@ -72,8 +72,8 @@ api_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 resource_id = xxxx-xxxx-xxxx-xxxx
 # Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
 dataAgeMaxInMinutes = 100
-# Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +2.
-Zeitzone = +2
+# Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch.
+Zeitzone = +1
 # falls die Anlagengröße in KWp nicht mit der Größe in solcast.com übereinstimmt (z.B. Erweiterung)
 KW_Faktor = 1.00
 

@@ -15,6 +15,7 @@ def loadLatestWeatherData():
     dict_watts['result']['watts'] = {}
     heute = datetime.strftime(now, "%Y-%m-%d")
     morgen = datetime.strftime(now + timedelta(days=1), "%Y-%m-%d")
+    sommerzeit = time.localtime().tm_isdst
 
     #die Daten müssen 2x abgerufen werden forecasts (Zukunft) und estimated_actuals (aktuell und Vergangenheit 
     for datenloop in ["estimated_actuals","forecasts"]:
@@ -36,7 +37,7 @@ def loadLatestWeatherData():
                     for wetterwerte in json_data1[datenloop]:
                         key_neu_1 = (wetterwerte['period_end'][:19]).replace('T',' ',1)
                         if ('00:00' in key_neu_1 and (heute in key_neu_1 or morgen in key_neu_1)):
-                            key_neu = datetime.strftime(datetime.strptime(key_neu_1, format) + timedelta(hours=Zeitzone), format)
+                            key_neu = datetime.strftime(datetime.strptime(key_neu_1, format) + timedelta(hours=Zeitzone+sommerzeit), format)
                             #hier Werte mit NULLEN weg
                             if (wetterwerte['pv_estimate'] == 0):
                                 if (Puffer[1] == 0):
