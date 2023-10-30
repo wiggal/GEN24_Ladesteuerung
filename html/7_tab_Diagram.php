@@ -14,7 +14,7 @@
     </head>
     <body>
 <div class="container">
-  <canvas> id="PVDaten" </canvas>
+  <canvas id="PVDaten" </canvas>
 </div>
 
 
@@ -111,14 +111,13 @@ new Chart("PVDaten", {
           callback: function(val, index) {
             // nur halbe Stunden in der X-Beschriftung ausgeben
             return index % 6 === 0 ? this.getLabelForValue(val) : '';
-          },
-          stacked: true,
+          }
         }
-        },
+      },
       y: {
         type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
         position: 'left',
-        stacked: true,
+        stacked: true
       },
       y2: {
         type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
