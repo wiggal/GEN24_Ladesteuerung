@@ -17,7 +17,7 @@ und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren <br>
 (getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
-
+```
 sudo apt install python3 <br>
 sudo apt install python3-pip <br>
 sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig <br>
@@ -27,8 +27,7 @@ sudo pip install xmltodict <br>
 sudo pip install NumPy==v1.23.1 <br>
 sudo pip install requests <br>
 sudo pip install ping3 <br>
-
-**_NEU ab Version 0.10.2_**<br>
+```
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden. <br>
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit Prognosedaten in 
 der Datei weatherData.json vorhanden sind!!!
@@ -36,14 +35,14 @@ der Datei weatherData.json vorhanden sind!!!
 Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen) <br>
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)
 
+```
 */5 06-16 * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben<br>
 33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py<br>
 8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py<br>
 1 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py<br>
-**_ENDE NEU_**
-
 #Crontab.log jeden Montag abräumen <br>
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
+```
 
 ### :sun_behind_rain_cloud: WeatherDataProvider2.py
 
@@ -57,13 +56,11 @@ hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben. <br>
 Holt die Leistungsprognose von solarprognose.de und schreibt sie in weatherData.json.
 Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2-3 Std) <br>
 
-**_NEU ab Version 0.10.2_**
 ### :sun_behind_rain_cloud: Solcast_WeatherData.py
 
 Kann auch alternativ zu WeatherDataProvider2.py benutzt werden, es ist ein "Home User" Account auf solcast.com erforderlich.<br>
 Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json.
 Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag). <br>
-**_ENDE NEU_**
 
 ### :chart_with_upwards_trend: SymoGen24Controller2.py
 
@@ -99,9 +96,11 @@ Und im Browser localhost:7777 aufrufen.<br>
 Webserver Apache z.B.:
 
 Installation: <br>
-sudo apt install apache2 php <br>
 **_NEU ab Version 0.11.0_**<br>
+```
+sudo apt install apache2 php <br>
 sudo apt install php-sqlite3<br>
+```
 **_ENDE NEU_**<br>
 In /etc/apache2/apache2.conf  <br>
 <Directory /srv/> durch <Directory /DIR/html/> ersetzen!<br>
