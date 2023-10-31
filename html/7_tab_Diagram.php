@@ -25,7 +25,7 @@ $Tag_davor = date("Y-m-d",(strtotime("-1 day", strtotime($DiaTag))));
 $Tag_danach = date("Y-m-d",(strtotime("+1 day", strtotime($DiaTag))));
 
 # Schalter zum Blättern usw.
-echo '<table><tr><td>';
+echo '<table border="0" ><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaTag" value="'.$Tag_davor.'">'."\n";
 echo '<button type="submit"> &lt;&lt;'.$Tag_davor.' </button>';
@@ -91,7 +91,8 @@ $trenner = ",";
 
 ?>
 <div class="container">
-  <canvas id="PVDaten" </canvas>
+  <!--<canvas id="PVDaten" style="border: 1px dotted red; height:99vh; width:98vw"></canvas>-->
+  <canvas id="PVDaten" style="height:99vh; width:98vw"></canvas>
 </div>
 <script>
 new Chart("PVDaten", {
@@ -128,7 +129,7 @@ new Chart("PVDaten", {
         },
       plugins: {
         title: {
-            display: true,
+            display: false,
             //text: (ctx) => 'Tooltip position mode: ' + ctx.chart.options.plugins.tooltip.position,
         }
       },
