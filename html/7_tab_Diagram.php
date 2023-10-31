@@ -4,7 +4,7 @@
     <script src="chart.js"></script>
     <style>
     html, body {
-        height: 100%;
+        height: 98%;
         margin: 0px;
     }
     .container {
@@ -13,14 +13,39 @@
 </style>
     </head>
     <body>
-<div class="container">
-  <canvas id="PVDaten" </canvas>
-</div>
 
 
 <?php
 include "config.php";
+# Diagrammtag festlegen
 $heute = date("Y-m-d");
+$DiaTag = $heute;
+if (isset($_POST["DiaTag"])) $DiaTag = $_POST["DiaTag"];
+$Tag_davor = date("Y-m-d",(strtotime("-1 day", strtotime($DiaTag))));
+$Tag_danach = date("Y-m-d",(strtotime("+1 day", strtotime($DiaTag))));
+
+# Schalter zum Blättern usw.
+echo '<table><tr><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$Tag_davor.'">'."\n";
+echo '<button type="submit"> &lt;&lt;'.$Tag_davor.' </button>';
+echo '</form>'."\n";
+
+echo '</td><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$heute.'">'."\n";
+echo '<button type="submit"> &gt;&gt; heute &lt;&lt;  </button>';
+echo '</form>'."\n";
+
+echo '</td><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$Tag_danach.'">'."\n";
+echo '<button type="submit"> '.$Tag_danach.'&gt;&gt; </button>';
+echo '</form>'."\n";
+
+echo '</td></tr></table>';
+
+
 # $heute = "2023-10-28"; #TEST
 $db = new SQLite3($SQLite_file);
 $SQL = "select Zeitpunkt,
@@ -30,7 +55,7 @@ $SQL = "select Zeitpunkt,
         END AS Direktverbrauch,
         BatteriePower, Einspeisung, Gesamtverbrauch, Vorhersage, BattStatus
 from pv_daten
-where Zeitpunkt LIKE '".$heute."%'";
+where Zeitpunkt LIKE '".$DiaTag."%'";
 
 $results = $db->query($SQL);
 
@@ -65,6 +90,9 @@ $trenner = ",";
 }
 
 ?>
+<div class="container">
+  <canvas id="PVDaten" </canvas>
+</div>
 <script>
 new Chart("PVDaten", {
     type: 'line',
@@ -130,5 +158,6 @@ new Chart("PVDaten", {
     },
   });
 </script>
+
     </body>
 </html>
