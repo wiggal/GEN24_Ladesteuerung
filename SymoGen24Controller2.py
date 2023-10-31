@@ -461,7 +461,7 @@ if __name__ == '__main__':
                     if gen24.read_data('StorageControlMode') != 3:
                         if len(argv) > 1 and (argv[1] == "schreiben"):
                             DEBUG_Ausgabe += "\nDEBUG StorageControlMode 3 schreiben! "
-                            Ladelimit = gen24.write_data('StorageControlMode', 3 )
+                            valueNew = gen24.write_data('StorageControlMode', 3 )
                             bereits_geschrieben = 1
                             Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode 3 neu geschrieben.\n"
                             Push_Schreib_Ausgabe += "StorageControlMode 3 neu geschrieben.\n"
