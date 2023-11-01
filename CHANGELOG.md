@@ -1,5 +1,8 @@
 **[0.11.0] – 2023-11-XX**
 
+Änderung in html/index.php:
+- Navigation ohne Javascript und mehr resonsive
+
 NEU: 7_tab_Diagram.php (noch Prototyp)
 Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
 
