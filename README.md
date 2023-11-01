@@ -112,7 +112,10 @@ Apache neu starten <br>
 sudo systemctl restart apache2 <br>
 Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
-ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für Apache haben!!<br>
+ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für den Webserver Apache haben!!<br>
+Vorschlag:<br>
+Den Apachewebserver unter demselben USER laufen lassen, unter dem man arbeitet bzw.auch die Crojobs laufen.
+In der Datei `/etc/apache2/envvars` die Variablen `APACHE_RUN_USER` und `APACHE_RUN_GROUP` anpassen.<br>
 
 Vorhandene Skripts:<br>
 1_tab_LadeSteuerung.php    ==>> Reservierung von großen PV-Mengen und feste manuelle Ladesteuerung<br>
