@@ -325,8 +325,6 @@ echo "</tbody></table>\n";
    <br />
   </div>
   <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>
- </body>
-</html>
 
 <script>
 
@@ -370,3 +368,5 @@ $(document).ready(function(){
  });
 });
 </script>
+ </body>
+</html>

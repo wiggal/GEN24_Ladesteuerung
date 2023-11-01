@@ -300,8 +300,7 @@ echo "</tbody></table>\n";
    <br />
   </div>
   <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>
- </body>
-</html>
+  </div>
 
 <script>
 
@@ -346,3 +345,5 @@ $(document).ready(function(){
  });
 });
 </script>
+ </body>
+</html>
