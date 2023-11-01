@@ -18,15 +18,15 @@ und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren <br>
 (getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
 ```
-sudo apt install python3 <br>
-sudo apt install python3-pip <br>
-sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig <br>
-sudo pip install pickledb <br>
-sudo pip install pytz <br>
-sudo pip install xmltodict <br>
-sudo pip install NumPy==v1.23.1 <br>
-sudo pip install requests <br>
-sudo pip install ping3 <br>
+sudo apt install python3
+sudo apt install python3-pip
+sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig
+sudo pip install pickledb
+sudo pip install pytz
+sudo pip install xmltodict
+sudo pip install NumPy==v1.23.1
+sudo pip install requests
+sudo pip install ping3
 ```
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden. <br>
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit Prognosedaten in 
@@ -36,12 +36,12 @@ Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetz
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)
 
 ```
-*/5 06-16 * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben<br>
-33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py<br>
-8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py<br>
-1 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py<br>
-#Crontab.log jeden Montag abräumen <br>
-0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg <br>
+*/5 06-16 * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
+33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
+8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
+1 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
+#Crontab.log jeden Montag abräumen
+0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
 ```
 
 ### :sun_behind_rain_cloud: WeatherDataProvider2.py
@@ -98,8 +98,8 @@ Webserver Apache z.B.:
 Installation: <br>
 **_NEU ab Version 0.11.0_**<br>
 ```
-sudo apt install apache2 php <br>
-sudo apt install php-sqlite3<br>
+sudo apt install apache2 php
+sudo apt install php-sqlite3
 ```
 **_ENDE NEU_**<br>
 In /etc/apache2/apache2.conf  <br>
