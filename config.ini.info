@@ -9,8 +9,6 @@
 # Name der Datei mit den Wetterprognosewerten
 [env]
 filePathWeatherData=weatherData.json
-PV_ReservieungsDatei=Watt_Reservierung.json
-
 
 # Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen
 # und die Werte für das zweite PV-Feld unter [forecast.solar2] eintragen
@@ -30,9 +28,9 @@ az=0
 # Leistung der Modulfelder
 kwp=11.4
 # Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
-# bei mir 1000 da nur Backup für solarprognose, solange der Abruf bei solarprognose funktioniert, wird von forecast.solar nicht angefordert.
+# bei mir 10000 da nur Backup für solarprognose, solange der Abruf bei solarprognose funktioniert, wird von forecast.solar nicht angefordert.
 # ansonsten sollte sie irgendwo bei 100 Minuten sein, um alle 2 Stunden anfordern zu können.
-dataAgeMaxInMinutes=1000
+dataAgeMaxInMinutes=10000
 
 [forecast.solar2]
 # Hier die Werte für ein PV-Feld mit andere Ausrichtung wie oben beschrieben eingeben.
@@ -54,7 +52,7 @@ item = inverter
 id = 1111
 type = hourly
 # Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
-dataAgeMaxInMinutes = 100
+dataAgeMaxInMinutes = 10000
 # Sekunden des sleep = Vorgabe von solarprognose.de
 WaitSec = 21
 # mögliche Werte des Prognosealgorithmus mosmix|own-v1|clearsky
@@ -143,16 +141,15 @@ Grundlast_WoT = 900, 900, 900, 900, 900, 1200, 1900
 # Damit nicht zu häufig Schreibvorgänge auf dem Wechselrichter erfolgen, sollte der Wert WRSchreibGrenze_nachUnten größer gesetzt werden
 # Damit wird nicht jede kleine Schwankung nach unten auf den WR geschrieben, 
 # und abends geht die Produktion zurück und der Ladewert geht sowieso nach oben.
-WRSchreibGrenze_nachOben = 350
-WRSchreibGrenze_nachUnten = 1289
+WRSchreibGrenze_nachOben = 550
+WRSchreibGrenze_nachUnten = 1700
 
 # Liegt der Batteriestatus unter MindBattLad in % wird voll geladen.
 # Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 25% ein 20% aus)
+# Die 5% werden angewendet, wenn die Batterie von unten her aufgeladen wird.
 MindBattLad = 20
 # Wenn keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt (z.B. 0 oder 10 )
 LadungAus = 0
-PV_Reservierung_AUS_EIN = 0
-
 
 [Reservierung]
 # Reservierungsdateiname
@@ -166,7 +163,7 @@ PV_Reservierung_steuern = 1
 # Konfigdatei für die Entladesteuerung
 # Auch diese "Akku_EntLadeSteuerFile.json" wird durch ein PHP_Skript erzeugt (html/2_tab_EntladeSteuerung.php)
 Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
-# Batterieentladung ein- bzw. ausschalten (1=ein)
+# Batterieentladung ein- bzw. ausschalten (1=ein/0=aus)
 # funktioniert nur wenn PV_Reservierung_steuern = 1, da die Werte der Reservierung benoetigt werden
 Batterieentlandung_steuern = 1
 # Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben
@@ -180,9 +177,14 @@ Push_Message_EIN = 1
 Push_Message_Url = https://ntfy.sh/hoizmooPV
 
 [Logging]
-# durch Logging ein werden die Werte in eine CSV Datei zur Auswertung geschrieben (1=ein, 0=aus)
+# durch Logging ein werden die Werte in eine CSV oder SQLite Datei zur Auswertung geschrieben (1=ein, 0=aus)
+# ist Logging_type = sqlite eingestellt, wird daraus ein Diagramm erstellt.
 Logging_ein = 1
-Logging_file = PV_Daten.csv
+# Dateiname der Loggingdatei, als Endung wird Logging_type angehängt.
+Logging_file = PV_Daten
+# Logging_type ist "csv" oder "sqlite"
+Logging_type = sqlite
+
 
 
 ############################################################
