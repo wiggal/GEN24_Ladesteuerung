@@ -12,6 +12,10 @@ Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
 Erforderlich php-sqlite3:  
 `sudo apt install php-sqlite3`
 
+geändert: Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProvider2.py  
+- Meldung eingefügt, wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen sind.
+
+
 **[0.10.5] – 2023-10-29**
 
 Änderung in Solcast_WeatherData.py und config.ini
