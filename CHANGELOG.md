@@ -9,7 +9,7 @@ Der Prototype 7_tab_Diagram.php ist aktuell noch ausgebledet, kann aber bei Beda
 NEU: 7_tab_Diagram.php (noch Prototyp)
 Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
 
-Erforderlich php-sqlite3:<br>
+Erforderlich php-sqlite3:  
 `sudo apt install php-sqlite3`
 
 **[0.10.5] – 2023-10-29**
@@ -45,10 +45,10 @@ Neue Datei functions.py
 
 - in html/config.php relative Pfade eingeführt, dadurch müssen sie nicht mehr angepasst werden.
 
-Neue Prognoseabfrage von solcast.com erstellt. Kann mit Solcast_WeatherData.py abgerufen werden.<br>
-Hierfür ist ein neuer Block "[solcast.com]" in der config.ini nötig. Crontabeintrag siehe README.<br>
+Neue Prognoseabfrage von solcast.com erstellt. Kann mit Solcast_WeatherData.py abgerufen werden.  
+Hierfür ist ein neuer Block "[solcast.com]" in der config.ini nötig. Crontabeintrag siehe README.  
 Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, 
-da pro Lauf zwei Zugriffe erforderlich sind und insgesamt nur 10 pro Tag möglich sind. <br>
+da pro Lauf zwei Zugriffe erforderlich sind und insgesamt nur 10 pro Tag möglich sind.   
 
 - Alle Pythonskripte werden ab jetzt mit "start_PythonScript.sh skriptname" in der "crontab" gestartet
 ### ACHTUNG bitte Crontabeinträge anpassen!!!
@@ -82,10 +82,10 @@ Alte start_skripte fallen mit der nächsten Version weg!!!
 - Neuimplementierung der prognosebedingten Ladeberechnung unter Berücksichtigung der Variablen "BatSparFaktor",
   um die Ladeverteilung auf den Tag besser steuern zu können.
 
-  Folgende Werte bewirken folgendes:<br>
-  bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss<br>
-  von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.<br>
-  größer 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.<br>
+  Folgende Werte bewirken folgendes:  
+  bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss  
+  von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.  
+  größer 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.  
 
 ### ACHTUNG bitte in config.ini anpassen!!!
 - Änderung in config.ini
@@ -170,11 +170,11 @@ Hilfe an die neue Entladesteuerung angepasst.
 
 ### ACHTUNG bitte in config.ini anpassen!!!
 Änderung in config.ini
-- Folgende neue Variablen eingeführt, um die Leistung, die der WR abregelt, besser zu steuern.<br>
-  Zeile 76 bis 79: <br>
-  Puffer_Einspeisegrenze<br>
-  PV_Leistung_Watt <br>
-  Puffer_WR_Kapazitaet<br>
+- Folgende neue Variablen eingeführt, um die Leistung, die der WR abregelt, besser zu steuern.  
+  Zeile 76 bis 79:   
+  Puffer_Einspeisegrenze  
+  PV_Leistung_Watt   
+  Puffer_WR_Kapazitaet  
   
 Änderung in SymoGen24Controller2.py
 
