@@ -78,32 +78,23 @@ body {
 <div class="tabs">
 
 <?php
-#$class_tab='<div class="tab">'."\n";
+include "config.php";
 $class_link='';
-$files = scandir( './' );
 # Breite der Tabs in % rechnen
-$anzahl_tabs =0;
-foreach ($files as $value) {
-    if (strstr($value, '_tab_')){
-        $anzahl_tabs += 1;
-    }
-}
+$anzahl_tabs = array_count_values(array_column($TAB_config, 'sichtbar'))['ein'];
 $Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs);
-foreach ($files as $value) {
-    if (strstr($value, '_tab_')){
-        $linktext_a1=explode("_tab_", $value);
-        $linktext_a2=explode(".", $linktext_a1[1]);
-        if($linktext_a1[0] == '1') {
+$class_tab = '';
+
+foreach ($TAB_config as $files) {
+    if ($files['sichtbar'] == 'ein' and file_exists($files['file'])){
+        if($files['checked'] == 'ja') {
             $id_default = ' checked="checked"';
         } else {
             $id_default = '';
         }
-        $a2_anzahl = count($linktext_a2)-1;
-        if ($linktext_a2[$a2_anzahl] == 'php' OR $linktext_a2[$a2_anzahl] == 'html') {
-            $class_tab .= '<input type="radio" name="tabs" id="'.$linktext_a2[0].'"'.$id_default.'>'."\n";
-            $class_tab .= '<label style="width: '.$Tab_Proz.'vw;" for="'.$linktext_a2[0].'">'.$linktext_a2[0].'</label>'."\n";
-            $class_tab .= '<div class="tab"><iframe src="'.$value.'" style="border:none;" height="100%" width="100%"></iframe></div>'."\n";
-        }
+            $class_tab .= '<input type="radio" name="tabs" id="'.$files['name'].'"'.$id_default.'>'."\n";
+            $class_tab .= '<label style="width: '.$Tab_Proz.'vw;" for="'.$files['name'].'">'.$files['name'].'</label>'."\n";
+            $class_tab .= '<div class="tab"><iframe src="'.$files['file'].'" style="border:none;" height="100%" width="100%"></iframe></div>'."\n";
     }
 }
 $class_tab .= '</div>';

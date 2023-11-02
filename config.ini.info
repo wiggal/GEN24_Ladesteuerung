@@ -148,7 +148,7 @@ WRSchreibGrenze_nachUnten = 1700
 # Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 25% ein 20% aus)
 # Die 5% werden angewendet, wenn die Batterie von unten her aufgeladen wird.
 MindBattLad = 20
-# Wenn keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt (z.B. 0 oder 10 )
+# Wenn nach Prognoseberechnung keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt.
 LadungAus = 0
 
 [Reservierung]
