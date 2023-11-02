@@ -1,7 +1,10 @@
 **[0.11.0] – 2023-11-XX**
 
-Änderung in html/index.php:
-- Navigation ohne Javascript und mehr resonsive
+Änderung in html/index.php:  
+- Navigation ohne Javascript und mehr resonsive  
+- **html/config.php**  
+Die NavigationsTAB werden nun in dem Array `$TAB_config` konfiguriert (Tabname, Dateiname, Startauswahl, Sichtbarkeit)  
+Der Prototype 7_tab_Diagram.php ist aktuell noch ausgebledet, kann aber bei Bedarf eingebledet werden.  
 
 NEU: 7_tab_Diagram.php (noch Prototyp)
 Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
