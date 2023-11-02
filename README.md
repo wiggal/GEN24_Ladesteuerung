@@ -4,18 +4,18 @@
 ![Screenshot](pics/Steuerungstabellen.png)
 
 - Ladesteuerung für  Fronius Symo GEN24 Plus um die Einspeisebegrenzung (bei mir 70%) zu umgehen,
-und die Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.<br>
-- Entladesteuerung, um die Entladung der Batterie bei großen Verbräuchen zu steuern.<br>
+und die Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.  
+- Entladesteuerung, um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 
-Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden. 
-z.B.:
+Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
+Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Screenshot](pics/Ladewertverteilung.png)
 
-## :floppy_disk: Installationshinweise:
-Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv <br>
+## :floppy_disk: Installationshinweise: [(siehe auch)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv  
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
-Folgende Installationen sind nötig, damit die Pythonskripte funktionieren <br>
+Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
 (getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
 ```
 sudo apt install python3
@@ -28,11 +28,10 @@ sudo pip install NumPy==v1.23.1
 sudo pip install requests
 sudo pip install ping3
 ```
-Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden. <br>
-Als Erstes muss ein Prognoseskript aufgerufen werden, damit Prognosedaten in 
-der Datei weatherData.json vorhanden sind!!!
+Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log".  
+Als Erstes muss ein Prognoseskript aufgerufen werden, damit neue Prognosedaten in der Datei weatherData.json vorhanden sind!  
 
-Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen) <br>
+Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen)  
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)
 
 ```
@@ -46,27 +45,27 @@ Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chm
 
 ### :sun_behind_rain_cloud: WeatherDataProvider2.py
 
-holt die Leistungsprognose von forecast.solar und schreibt sie in weatherData.json <br>
+holt die Leistungsprognose von forecast.solar und schreibt sie in weatherData.json  
 Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen (bei mir alle 2-3 Std)
 
 ### :sun_behind_rain_cloud: Solarprognose_WeatherData.py 
 
 Kann alternativ zu WeatherDataProvider2.py benutzt werden, ist etwas genauer, es ist aber ein Account erforderlich,
-hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben. <br>
+hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben.  
 Holt die Leistungsprognose von solarprognose.de und schreibt sie in weatherData.json.
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2-3 Std) <br>
+Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2-3 Std)  
 
 ### :sun_behind_rain_cloud: Solcast_WeatherData.py
 
-Kann auch alternativ zu WeatherDataProvider2.py benutzt werden, es ist ein "Home User" Account auf solcast.com erforderlich.<br>
+Kann auch alternativ zu WeatherDataProvider2.py benutzt werden, es ist ein "Home User" Account auf solcast.com erforderlich.  
 Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json.
-Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag). <br>
+Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag).  
 
 ### :chart_with_upwards_trend: SymoGen24Controller2.py
 
 berechnet den aktuell besten Ladewert aufgrund der Werte in weatherData.json, den Akkustand und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
-Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.<br>
-Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte auf den Wechselrichter <br>
+Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.  
+Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte auf den Wechselrichter  
 falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 ### SymoGen24Connector.py
@@ -77,7 +76,7 @@ Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechse
 ### :bar_chart: Logging (optional)
 
 Erfolgt nun beim Aufruf von SymoGen24Controller2.py, wenn in der "config.ini" Logging_ein = 1.
-Das Logging schreibt Werte ins"Logging_file", im csv- oder sqlite-Format.<br>
+Das Logging schreibt Werte ins"Logging_file", im csv- oder sqlite-Format.  
 **_ENDE NEU_**
 
 
@@ -86,60 +85,60 @@ Das Logging schreibt Werte ins"Logging_file", im csv- oder sqlite-Format.<br>
 ## Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung
 (z.B. E-Autos)
 
-Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus. <br>
-Konfiguration muss eventuell in der "config.php" angepasst werden.<br>
+Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus.  
+Konfiguration muss eventuell in der "config.php" angepasst werden.  
 
-Nur zum testen kann der PHPeigene Webserver benutzt werden. Einfach unter /DIR/html/ folgendes starten:<br>
-php -S 0.0.0.0:7777 <br>
-Und im Browser localhost:7777 aufrufen.<br>
+Nur zum testen kann der PHPeigene Webserver benutzt werden. Einfach unter /DIR/html/ folgendes starten:  
+php -S 0.0.0.0:7777  
+Und im Browser localhost:7777 aufrufen.  
 
 Webserver Apache z.B.:
 
-Installation: <br>
-**_NEU ab Version 0.11.0_**<br>
+### :floppy_disk: Installationshinweise: [(siehe auch)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+**_NEU ab Version 0.11.0_**  
 ```
 sudo apt install apache2 php
 sudo apt install php-sqlite3
 ```
-**_ENDE NEU_**<br>
-In /etc/apache2/apache2.conf  <br>
-<Directory /srv/> durch <Directory /DIR/html/> ersetzen!<br>
+**_ENDE NEU_**  
+In /etc/apache2/apache2.conf   
+<Directory /srv/> durch <Directory /DIR/html/> ersetzen!  
 
-In /etc/apache2/sites-available/000-default.conf <br>
-DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen<br>
+In /etc/apache2/sites-available/000-default.conf  
+DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen  
 
-Apache neu starten <br>
-sudo systemctl restart apache2 <br>
+Apache neu starten  
+sudo systemctl restart apache2  
 Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
-ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für den Webserver Apache haben!!<br>
-Vorschlag:<br>
+ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für den Webserver Apache haben!!  
+Vorschlag:  
 Den Apachewebserver unter demselben USER laufen lassen, unter dem man arbeitet bzw.auch die Crojobs laufen.
-In der Datei `/etc/apache2/envvars` die Variablen `APACHE_RUN_USER` und `APACHE_RUN_GROUP` anpassen.<br>
+In der Datei `/etc/apache2/envvars` die Variablen `APACHE_RUN_USER` und `APACHE_RUN_GROUP` anpassen.  
 
-Vorhandene Skripts:<br>
-1_tab_LadeSteuerung.php    ==>> Reservierung von großen PV-Mengen und feste manuelle Ladesteuerung<br>
-2_tab_EntladeSteuerung.php ==>>  EntladeSteuerung durch Eintrag in Tabelle und feste manuelle Entladesteuerung<br>
-3_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen<br>
-4_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini<br>
-5_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log<br>
-6_tab_GEN24.php        ==>> lokaler Aufruf des GEN24<br>
+Vorhandene Skripts:  
+1_tab_LadeSteuerung.php    ==>> Reservierung von großen PV-Mengen und feste manuelle Ladesteuerung  
+2_tab_EntladeSteuerung.php ==>>  EntladeSteuerung durch Eintrag in Tabelle und feste manuelle Entladesteuerung  
+3_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen  
+4_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini  
+5_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log  
+6_tab_GEN24.php        ==>> lokaler Aufruf des GEN24  
 
-Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.<br>
+Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.  
 
 
 ![Screenshot](pics/Ladesteuerung.png)
 ### Batterieladesteuerung ( TAB--> LadeSteuerung )
 
-Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben. <br>
-In der html/config.php müssen die Dateipfade und Variablen angepasst werden.  <br>
+Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben.  
+In der html/config.php müssen die Dateipfade und Variablen angepasst werden.   
 
-Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung <br>
+Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung  
 beim nächsten Aufruf von SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
 Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die entsprechende Batterieladeleistung,
-beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben. <br>
-Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.<br>
+beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben.  
+Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.  
 
 Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
@@ -153,7 +152,7 @@ In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung e
 
 Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
-======================================================<br>
-Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt. <br>
+======================================================  
+Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.  
 Herzlichen Dank an "godfuture"
 
