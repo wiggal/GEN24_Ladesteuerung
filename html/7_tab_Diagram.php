@@ -10,6 +10,14 @@
     .container {
         height: 100%;
     }
+    .navi {
+    cursor:pointer;
+    color:#000000;
+    font-family:Arial;
+    font-size:150%;
+    padding:6px 11px;
+  }
+
 </style>
     </head>
     <body>
@@ -28,22 +36,22 @@ $Tag_danach = date("Y-m-d",(strtotime("+1 day", strtotime($DiaTag))));
 echo '<table border="0" ><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaTag" value="'.$Tag_davor.'">'."\n";
-echo '<button type="submit"> &lt;&lt;'.$Tag_davor.' </button>';
+echo '<button type="submit" class="navi"> &lt;&lt;'.$Tag_davor.' </button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaTag" value="'.$heute.'">'."\n";
-echo '<button type="submit"> &gt;&gt; heute &lt;&lt;  </button>';
+echo '<button type="submit" class="navi"> &gt;&gt; heute &lt;&lt;  </button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaTag" value="'.$Tag_danach.'">'."\n";
-echo '<button type="submit"> '.$Tag_danach.'&gt;&gt; </button>';
+echo '<button type="submit" class="navi"> '.$Tag_danach.'&gt;&gt; </button>';
 echo '</form>'."\n";
 
-echo '</td></tr></table>';
+echo '</td></tr></table><br>';
 
 
 # $heute = "2023-10-28"; #TEST
@@ -92,7 +100,7 @@ $trenner = ",";
 ?>
 <div class="container">
   <!--<canvas id="PVDaten" style="border: 1px dotted red; height:99vh; width:98vw"></canvas>-->
-  <canvas id="PVDaten" style="height:99vh; width:98vw"></canvas>
+  <canvas id="PVDaten" style="height:95vh; width:98vw"></canvas>
 </div>
 <script>
 new Chart("PVDaten", {
@@ -131,7 +139,7 @@ new Chart("PVDaten", {
         title: {
             display: false,
             //text: (ctx) => 'Tooltip position mode: ' + ctx.chart.options.plugins.tooltip.position,
-        }
+        },
       },
     scales: {
       x: {
@@ -140,20 +148,33 @@ new Chart("PVDaten", {
           callback: function(val, index) {
             // nur halbe Stunden in der X-Beschriftung ausgeben
             return index % 6 === 0 ? this.getLabelForValue(val) : '';
-          }
+          },
+          font: {
+             size: 20,
+           }
         }
       },
       y: {
         type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
         position: 'left',
-        stacked: true
+        stacked: true,
+        ticks: {
+           font: {
+             size: 20,
+           }
+        }
       },
       y2: {
         type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
         position: 'right',
         reverse: false,
         min: 0,
-        max: 100
+        max: 100,
+        ticks: {
+           font: {
+             size: 20,
+           }
+        }
       },
     }
     },
