@@ -15,6 +15,9 @@ Erforderlich php-sqlite3:
 geändert: Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProvider2.py  
 - Meldung eingefügt, wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen sind.
 
+Änderung in SymoGen24Controller2.py
+- Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde
+
 
 **[0.10.5] – 2023-10-29**
 

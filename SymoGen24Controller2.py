@@ -604,17 +604,26 @@ if __name__ == '__main__':
                     # FALLBACK ENDE
 
                     ### LOGGING, Schreibt mit den übergebenen Daten eine CSV- oder SQlite-Datei
+                    ## nur wenn "schreiben" übergeben worden ist
                     Logging_ein = getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
-                        Logging_type = getVarConf('Logging','Logging_type','str')
-                        Logging_file = getVarConf('Logging','Logging_file','str') + "." + Logging_type
+                        Logging_Schreib_Ausgabe = ""
+                        if len(argv) > 1 and (argv[1] == "schreiben"):
+                            Logging_type = getVarConf('Logging','Logging_type','str')
+                            Logging_file = getVarConf('Logging','Logging_file','str') + "." + Logging_type
 
-                        if Logging_type == 'csv':
-                            write_csv(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
-                        elif Logging_type == 'sqlite':
-                            save_SQLite(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+                            if Logging_type == 'csv':
+                                write_csv(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+                            elif Logging_type == 'sqlite':
+                                save_SQLite(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
+                            else:
+                                Logging_Schreib_Ausgabe = 'ERROR: Kein güliges Format für Logging in "config.ini" bei Variable "Logging_type"!!'
                         else:
-                            print('ERROR: Kein güliges Format für Logging in "config.ini" bei Variable "Logging_type"!!')
+                            Logging_Schreib_Ausgabe = "Logging wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n" 
+
+                        if print_level >= 1:
+                            print(Logging_Schreib_Ausgabe)
+                    # FALLBACK ENDE
 
 
 
