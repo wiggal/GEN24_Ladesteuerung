@@ -24,6 +24,9 @@ geändert: Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProv
 - In dem Block können die Wintermonate und zugehörige Werte definiert werden.
   Diese überschreiben die Werte im Block [Ladeberechnung], bei einen definierten Wintermoonat.
 
+Änderung in html/1_tab_LadeSteuerung.php
+- Am Ende Zeitpunkt der Prognose ausgeben
+
 
 **[0.10.5] – 2023-10-29**
 
