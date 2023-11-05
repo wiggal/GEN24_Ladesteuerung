@@ -50,9 +50,9 @@ if __name__ == '__main__':
         if (dateCreated):
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
-            print('Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
-            print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
+                print('Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
+                print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
                 dataIsExpired = False
 
     if (dataIsExpired):
