@@ -75,16 +75,20 @@ body {
 </style>
 </head>
 <body>
-<div class="tabs">
 
 <?php
 include "config.php";
+if (!isset($TAB_config) OR !is_array($TAB_config)) {
+    echo '</br><center>ACHTUNG: Die Variable "TAB_config" ist in der config.php nicht (richtig) gesetzt!!</center></body></html>';
+    exit();
+}
 $class_link='';
 # Breite der Tabs in % rechnen
 $anzahl_tabs = array_count_values(array_column($TAB_config, 'sichtbar'))['ein'];
 $Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs);
 $class_tab = '';
 
+echo '<div class="tabs">';
 foreach ($TAB_config as $files) {
     if ($files['sichtbar'] == 'ein' and file_exists($files['file'])){
         if($files['checked'] == 'ja') {

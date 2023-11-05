@@ -3,6 +3,8 @@
 Änderung in html/index.php:  
 - Navigation ohne Javascript und mehr resonsive  
 - **html/config.php**  
+### ACHTUNG bitte html/config.php anpassen!!!
+
 Die NavigationsTAB werden nun in dem Array `$TAB_config` konfiguriert (Tabname, Dateiname, Startauswahl, Sichtbarkeit)  
 Der Prototype 7_tab_Diagram.php ist aktuell noch ausgebledet, kann aber bei Bedarf eingebledet werden.  
 
@@ -19,7 +21,7 @@ geändert: Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProv
 - Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde
 
 **NEU Winterkonfiguration 
-### ACHTUNG bitte evtl. in config.ini anpassen!!!
+### ACHTUNG bitte config.ini anpassen!!!
 - neuer Block [Winter_Ladeberechnung]
 - In dem Block können die Wintermonate und zugehörige Werte definiert werden.
   Diese überschreiben die Werte im Block [Ladeberechnung], bei einen definierten Wintermoonat.
