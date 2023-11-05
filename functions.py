@@ -48,6 +48,19 @@ def loadPVReservierung(file):
         return reservierungdata
 
 def getVarConf(block, var, Type):
+        # Hier pruefen ob Wintermonat und dann Variable aus Wintermonat lesen
+        # nur ausführen, wenn nciht nach Wintermonate gefragt wird, sonst ENDLOSSCHLEIFE
+        if (block != 'Winter_Ladeberechnung' and var != 'Wintermonate'):
+            # Zusatz_configs lesen
+            aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
+            Wintermonate = getVarConf('Winter_Ladeberechnung','Wintermonate','str')
+            Wintermonate = Wintermonate.replace(" ", "")
+            Wintermonate = Wintermonate.split(",")
+            if ( aktueller_Monat in Wintermonate ):
+                if ( var in config['Winter_Ladeberechnung'] ):
+                    block = 'Winter_Ladeberechnung'
+
+
         # Variablen aus config lesen und auf Zahlen prüfen
         try:
             if(Type == 'eval'):

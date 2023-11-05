@@ -18,6 +18,12 @@ geändert: Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProv
 Änderung in SymoGen24Controller2.py
 - Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde
 
+**NEU Winterkonfiguration 
+### ACHTUNG bitte evtl. in config.ini anpassen!!!
+- neuer Block [Winter_Ladeberechnung]
+- In dem Block können die Wintermonate und zugehörige Werte definiert werden.
+  Diese überschreiben die Werte im Block [Ladeberechnung], bei einen definierten Wintermoonat.
+
 
 **[0.10.5] – 2023-10-29**
 
