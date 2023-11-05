@@ -326,6 +326,7 @@ echo "</tbody></table>\n";
   </div>
   <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>
 
+<?php echo "</br>Prognose vom $Prognose[messageCreated]"; ?> 
 <script>
 
 $(document).ready(function(){
