@@ -1,163 +1,163 @@
-####################################################
-# Erläuterungen zu den Einstellungen der config.ini
-####################################################
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Erläuterungen zu den Einstellungen der config.ini
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-####################################################
-# Parameter für die Batterieladesteuerung
-####################################################
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Parameter für die Batterieladesteuerung
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-# Name der Datei mit den Wetterprognosewerten
+; Name der Datei mit den Wetterprognosewerten
 [env]
 filePathWeatherData=weatherData.json
 
-# Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen
-# und die Werte für das zweite PV-Feld unter [forecast.solar2] eintragen
+; Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen
+; und die Werte für das zweite PV-Feld unter [forecast.solar2] eintragen
 [pv.strings]
 anzahl=1
 
 [forecast.solar]
-# PV Standpunkt ermitteln z.B. unter https://www.solarserver.de/photovoltaik-leistungsprognose-fuer-mehrere-tage/
-# Breitengrad des PV Standpunktes
+; PV Standpunkt ermitteln z.B. unter https://www.solarserver.de/photovoltaik-leistungsprognose-fuer-mehrere-tage/
+; Breitengrad des PV Standpunktes
 lat=44.444
-# Längengrad des PV Standpunktes
+; Längengrad des PV Standpunktes
 lon=11.111
-# Dachneigung bzw. Neigung der PV-Module
+; Dachneigung bzw. Neigung der PV-Module
 dec=30
-# Ausrichtung der Modulfelder (z.B. 0 ist genau nach Süden ausgerichtet)
+; Ausrichtung der Modulfelder (z.B. 0 ist genau nach Süden ausgerichtet)
 az=0
-# Leistung der Modulfelder
+; Leistung der Modulfelder
 kwp=11.4
-# Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
-# bei mir 1000 da nur Backup für solarprognose, solange der Abruf bei solarprognose funktioniert, wird von forecast.solar nicht angefordert.
-# ansonsten sollte sie irgendwo bei 100 Minuten sein, um alle 2 Stunden anfordern zu können.
+; Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
+; bei mir 1000 da nur Backup für solarprognose, solange der Abruf bei solarprognose funktioniert, wird von forecast.solar nicht angefordert.
+; ansonsten sollte sie irgendwo bei 100 Minuten sein, um alle 2 Stunden anfordern zu können.
 dataAgeMaxInMinutes = 1000
 
 [forecast.solar2]
-# Hier die Werte für ein PV-Feld mit andere Ausrichtung wie oben beschrieben eingeben.
+; Hier die Werte für ein PV-Feld mit andere Ausrichtung wie oben beschrieben eingeben.
 lat=11.111
 lon=6.666
 dec=22
 az=135
 kwp=4.44
 
-# Hier die Werte eintragen, wenn die Prognose mit Solarprognose_WeatherData.py von http://www.solarprognose.de geholt werden soll
-# Dazu ist eine Registrierung auf http://www.solarprognose.de erforderlich!
+; Hier die Werte eintragen, wenn die Prognose mit Solarprognose_WeatherData.py von http://www.solarprognose.de geholt werden soll
+; Dazu ist eine Registrierung auf http://www.solarprognose.de erforderlich!
 [solarprognose]
-# Name der Datei mit den Wetterprognosewerten
+; Name der Datei mit den Wetterprognosewerten
 weatherfile = weatherData.json
-# Zugriffsschlüssel (ACCESS_TOKEN) von solarprognose.de
+; Zugriffsschlüssel (ACCESS_TOKEN) von solarprognose.de
 accesstoken = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-# alle Werte von solarprognose.de
+; alle Werte von solarprognose.de
 item = inverter
 id = 1111
 type = hourly
-# Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
+; Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
 dataAgeMaxInMinutes = 1000
-# Sekunden des sleep = Vorgabe von solarprognose.de
+; Sekunden des sleep = Vorgabe von solarprognose.de
 WaitSec = 21
-# mögliche Werte des Prognosealgorithmus mosmix|own-v1|clearsky
+; mögliche Werte des Prognosealgorithmus mosmix|own-v1|clearsky
 algorithm=own-v1
-# falls die Anlagengröße in KWp nicht mit der Größe in Solarprognose übereinstimmt (z.B. Erweiterung)
+; falls die Anlagengröße in KWp nicht mit der Größe in Solarprognose übereinstimmt (z.B. Erweiterung)
 KW_Faktor = 1.00
 
-# Hier die Werte eintragen, wenn die Prognose mit Solcast_WeatherData.py von https://api.solcast.com.au geholt werden soll
+; Hier die Werte eintragen, wenn die Prognose mit Solcast_WeatherData.py von https://api.solcast.com.au geholt werden soll
 [solcast.com]
-# Name der Datei mit den Wetterprognosewerten
+; Name der Datei mit den Wetterprognosewerten
 weatherfile = weatherData.json
-# Hier Api Key von toolkit.solcast.com.au/account/api-key
+; Hier Api Key von toolkit.solcast.com.au/account/api-key
 api_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-# Hier Resource Id von toolkit.solcast.com.au
+; Hier Resource Id von toolkit.solcast.com.au
 resource_id = xxxx-xxxx-xxxx-xxxx
-# Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
+; Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
 dataAgeMaxInMinutes = 1000
-# Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch.
+; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch.
 Zeitzone = +1
-# falls die Anlagengröße in KWp nicht mit der Größe in solcast.com übereinstimmt (z.B. Erweiterung)
+; falls die Anlagengröße in KWp nicht mit der Größe in solcast.com übereinstimmt (z.B. Erweiterung)
 KW_Faktor = 1.00
 
 
 [gen24]
-# IP des Wechselrichters
+; IP des Wechselrichters
 hostNameOrIp=192.168.178.50
-# Modbusport des Wechselrichters
+; Modbusport des Wechselrichters
 port=502
 
-################################################################################
-# Ab hier müssen die Werte zur Ladesteuerung auf die PV-Anlage angepasst werden!
-################################################################################
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Ab hier müssen die Werte zur Ladesteuerung auf die PV-Anlage angepasst werden!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-# Allgemeines:
-# Die Ladeleistung wird bei jedem Programmlauf (z.B. alle 5 Minuten) ,
-# mit folgenden AKTUELLEN Werten neu berechnet:
-# Batteriekapazität, Prognosewert, Einspeisewert, Produktion ...
+; Allgemeines:
+; Die Ladeleistung wird bei jedem Programmlauf (z.B. alle 5 Minuten) ,
+; mit folgenden AKTUELLEN Werten neu berechnet:
+; Batteriekapazität, Prognosewert, Einspeisewert, Produktion ...
 
 [Ladeberechnung]
-# Wenn die Variable "FesteLadeleistung" ungleich "0" Watt ist, 
-# wird der Wert fest als Ladeleistung geschrieben unabhängig der WRSchreibGrenzen, 
-# ausser der WR steht bereits genau diesem Wert.
+; Wenn die Variable "FesteLadeleistung" ungleich "0" Watt ist, 
+; wird der Wert fest als Ladeleistung geschrieben unabhängig der WRSchreibGrenzen, 
+; ausser der WR steht bereits genau diesem Wert.
 FesteLadeleistung = 0
 
-# Bis zu welcher Stunde die Batterie durch die Prognoseberechnungen voll sein soll. 
-# Der Zeitpunkt wird häufig nicht genau zutreffen, da durch Verbrauch, Überschusseinspeisungen 
-# oder durch die WRSchreibGrenzen die Ladenmengen beeinflusst werden.
+; Bis zu welcher Stunde die Batterie durch die Prognoseberechnungen voll sein soll. 
+; Der Zeitpunkt wird häufig nicht genau zutreffen, da durch Verbrauch, Überschusseinspeisungen 
+; oder durch die WRSchreibGrenzen die Ladenmengen beeinflusst werden.
 BattVollUm = 17
 
-# Faktor um Batteriekapazität für später aufzusparen.
-# Der aus der Prognose errechnete Batterieladewert wird durch den BatSparFaktor geteilt. 
-# Dadurch wird der Batterieladewert gedämpft und die Batteriekapazität für später Richtung Mittag aufgespart.
-# bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss
-# von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.
-# je größer als 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.
+; Faktor um Batteriekapazität für später aufzusparen.
+; Der aus der Prognose errechnete Batterieladewert wird durch den BatSparFaktor geteilt. 
+; Dadurch wird der Batterieladewert gedämpft und die Batteriekapazität für später Richtung Mittag aufgespart.
+; bei 1: Keine Verschiebung, Verteilung rein nach Prognoseüberschuss
+; von 1 bis 0.1: Die Batterieladung wird prognoseabhängig immer weiter zum Zeitunkt in "BattVollUm" verschoben.
+; je größer als 1: Die Batterieladung wird prognoseabhängig immer gleichmäßiger über den Tag verteilt.
 BatSparFaktor = 1.0
 
-# Ausgabe von Werten steuern, um Die Wirkung der Einstellungen prüfen, bzw. Fehler finden zu können.
-# print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe
+; Ausgabe von Werten steuern, um Die Wirkung der Einstellungen prüfen, bzw. Fehler finden zu können.
+; print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe
 print_level = 1
 
-# Größter Batterieladewert, der im WR gesetzt werden soll, darf nicht kleiner als die 30% Kappung der PV_Leistung WKp sein.
-# Um die Batterie schonend zu laden sollte er auch nicht zu hoch sein.
+; Größter Batterieladewert, der im WR gesetzt werden soll, darf nicht kleiner als die 30% Kappung der PV_Leistung WKp sein.
+; Um die Batterie schonend zu laden sollte er auch nicht zu hoch sein.
 MaxLadung = 3000
 
-# die Einspeisegrenze sollte etwas unterhalb der wirklichen Grenze liegen (1-2%).
+; die Einspeisegrenze sollte etwas unterhalb der wirklichen Grenze liegen (1-2%).
 Einspeisegrenze = 7900
-# AC Kapazität des Wechselrichters um den Überschuss in die Batterie zu laden (etwas darunter bleiben 1-2%)
-# WR_Kapazitaet: Wenn die Produktion über der AC-Leistungsgrenze (WR_Kapazitaet) ist, wird der Überschuss in die Batterie geladen.
+; AC Kapazität des Wechselrichters um den Überschuss in die Batterie zu laden (etwas darunter bleiben 1-2%)
+; WR_Kapazitaet: Wenn die Produktion über der AC-Leistungsgrenze (WR_Kapazitaet) ist, wird der Überschuss in die Batterie geladen.
 WR_Kapazitaet = 9900
 
-# PV-Leistung reellen Spitzenwert, zur Abgrenzung des Überschusses über der Einspeisegrenze bzw. AC Kapazität des Wechselrichters
+; PV-Leistung reellen Spitzenwert, zur Abgrenzung des Überschusses über der Einspeisegrenze bzw. AC Kapazität des Wechselrichters
 PV_Leistung_Watt = 11400
 
-# Grundlast wird verwendet um den Wert "aktuellerUeberschuss" zu berechnen
-# Grundlast ist 300W + 100W Mindesteinspeisung
+; Grundlast wird verwendet um den Wert "aktuellerUeberschuss" zu berechnen
+; Grundlast ist 300W + 100W Mindesteinspeisung
 Grundlast = 500
-# Da an bestimmten Wochentagen (z.B. Wochenende) die Grundlast höher höher sein kann, kann sie hier
-# für jeden Wochentag unterschiedlich gesetzt werden. Die Variable Grundlast muss dafür "0" sein.
-# Grundlast nach Wochentag wird gesetzt, wenn Grundlast == 0
-# Wochentage  = Mo,  Die, Mi,  Do,  Fr,  Sa,   So
+; Da an bestimmten Wochentagen (z.B. Wochenende) die Grundlast höher höher sein kann, kann sie hier
+; für jeden Wochentag unterschiedlich gesetzt werden. Die Variable Grundlast muss dafür "0" sein.
+; Grundlast nach Wochentag wird gesetzt, wenn Grundlast == 0
+; Wochentage  = Mo,  Die, Mi,  Do,  Fr,  Sa,   So
 Grundlast_WoT = 900, 900, 900, 900, 900, 1200, 1900
 
-# Schaltverzögerung
-# Ab welchem Unterschied in Watt soll der neue Ladewert auf dem Wechselrichter geschrieben werden
-# Damit nicht zu häufig Schreibvorgänge auf dem Wechselrichter erfolgen, sollte der Wert WRSchreibGrenze_nachUnten größer gesetzt werden
-# Damit wird nicht jede kleine Schwankung nach unten auf den WR geschrieben, 
-# und abends geht die Produktion zurück und der Ladewert geht sowieso nach oben.
+; Schaltverzögerung
+; Ab welchem Unterschied in Watt soll der neue Ladewert auf dem Wechselrichter geschrieben werden
+; Damit nicht zu häufig Schreibvorgänge auf dem Wechselrichter erfolgen, sollte der Wert WRSchreibGrenze_nachUnten größer gesetzt werden
+; Damit wird nicht jede kleine Schwankung nach unten auf den WR geschrieben, 
+; und abends geht die Produktion zurück und der Ladewert geht sowieso nach oben.
 WRSchreibGrenze_nachOben = 550
 WRSchreibGrenze_nachUnten = 1700
 
-# Liegt der Batteriestatus unter MindBattLad in % wird voll geladen.
-# Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 25% ein 20% aus)
-# Die 5% werden angewendet, wenn die Batterie von unten her aufgeladen wird.
+; Liegt der Batteriestatus unter MindBattLad in % wird voll geladen.
+; Eine 5% Schaltverzögerung verhindert ein häufiges hin und her schalten (z.B. 25% ein 20% aus)
+; Die 5% werden angewendet, wenn die Batterie von unten her aufgeladen wird.
 MindBattLad = 20
-# Wenn nach Prognoseberechnung keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt.
+; Wenn nach Prognoseberechnung keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt.
 LadungAus = 0
 
-# Hier kann eine abweichende Konfiguration für die Wintermonate konfiguriert werden
+; Hier kann eine abweichende Konfiguration für die Wintermonate konfiguriert werden
 [Winter_Ladeberechnung]
-# in der Variablen "Wintermonate" werden die Wintermonate als Zahlen definiert
-# in den Wintermonaten werden die Standardwerte aus dem Block [Ladeberechnung] durch die Nachfolgenden ersetzt
+; in der Variablen "Wintermonate" werden die Wintermonate als Zahlen definiert
+; in den Wintermonaten werden die Standardwerte aus dem Block [Ladeberechnung] durch die Nachfolgenden ersetzt
 Wintermonate = 11, 12, 1, 2
-# hier Werte für die Wintermonate angeben
-# die Liste ist nicht abschließend und kann erweitert werden
+; hier Werte für die Wintermonate angeben
+; die Liste ist nicht abschließend und kann erweitert werden
 BattVollUm = 14
 BatSparFaktor = 5.0
 MaxLadung = 5000
@@ -167,51 +167,51 @@ MindBattLad = 60
 
 
 [Reservierung]
-# Reservierungsdateiname
+; Reservierungsdateiname
 PV_ReservieungsDatei=Watt_Reservierung.json
-# Hier kann die PV-Reserierung (z.B. für ein E-Auto nachmittags) eingeschatet werden (1=ein, 0=aus)
-# Zur Reservierung muss eine Datei  "Watt_Reservierung.json" vorhanden sein, und geplegt werden.
-# Ich verwende dazu ein PHP Program auf dem RaspberryPi (html/1_tab_LadeSteuerung.php)
+; Hier kann die PV-Reserierung (z.B. für ein E-Auto nachmittags) eingeschatet werden (1=ein, 0=aus)
+; Zur Reservierung muss eine Datei  "Watt_Reservierung.json" vorhanden sein, und geplegt werden.
+; Ich verwende dazu ein PHP Program auf dem RaspberryPi (html/1_tab_LadeSteuerung.php)
 PV_Reservierung_steuern = 1
 
 [Entladung]
-# Konfigdatei für die Entladesteuerung
-# Auch diese "Akku_EntLadeSteuerFile.json" wird durch ein PHP_Skript erzeugt (html/2_tab_EntladeSteuerung.php)
+; Konfigdatei für die Entladesteuerung
+; Auch diese "Akku_EntLadeSteuerFile.json" wird durch ein PHP_Skript erzeugt (html/2_tab_EntladeSteuerung.php)
 Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
-# Batterieentladung ein- bzw. ausschalten (1=ein/0=aus)
-# funktioniert nur wenn PV_Reservierung_steuern = 1, da die Werte der Reservierung benoetigt werden
+; Batterieentladung ein- bzw. ausschalten (1=ein/0=aus)
+; funktioniert nur wenn PV_Reservierung_steuern = 1, da die Werte der Reservierung benoetigt werden
 Batterieentlandung_steuern = 1
-# Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben
+; Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben
 WREntladeSchreibGrenze_Watt = 200
 
-# Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
+; Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
 [messaging]
-# Hier Daten für Pushmessage auf Handy
-# Push_Message_EIN (1=EIN/0=AUS)
+; Hier Daten für Pushmessage auf Handy
+; Push_Message_EIN (1=EIN/0=AUS)
 Push_Message_EIN = 1
 Push_Message_Url = https://ntfy.sh/hoizmooPV
 
 [Logging]
-# durch Logging ein werden die Werte in eine CSV oder SQLite Datei zur Auswertung geschrieben (1=ein, 0=aus)
-# ist Logging_type = sqlite eingestellt, wird daraus ein Diagramm erstellt.
+; durch Logging ein werden die Werte in eine CSV oder SQLite Datei zur Auswertung geschrieben (1=ein, 0=aus)
+; ist Logging_type = sqlite eingestellt, wird daraus ein Diagramm erstellt.
 Logging_ein = 1
-# Dateiname der Loggingdatei, als Endung wird Logging_type angehängt.
+; Dateiname der Loggingdatei, als Endung wird Logging_type angehängt.
 Logging_file = PV_Daten
-# Logging_type ist "csv" oder "sqlite"
+; Logging_type ist "csv" oder "sqlite"
 Logging_type = sqlite
 
 
 
-############################################################
-# Ab hier kann die Fallbackfunktion des WR aktiviert werden.
-############################################################
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Ab hier kann die Fallbackfunktion des WR aktiviert werden.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 [Fallback]
-# Fallback_on = 0 Programmfunktion ganz ausgeschaltet, KEINE Prüfung ob eine Fallbackzeit geschrieben ist
-# Fallback_on = 1 ausgeschaltet, Prüfung ob eine Fallbackzeit geschrieben ist, evtl. auf 0 setzen
-# Fallback_on = 2 eingeschaltet
-# War Fallback bereits aktiv erst mit Fallback_on = 1 Fallbackzeit auf 0 setzen lassen und dann auf Fallback_on = 0 gehen
+; Fallback_on = 0 Programmfunktion ganz ausgeschaltet, KEINE Prüfung ob eine Fallbackzeit geschrieben ist
+; Fallback_on = 1 ausgeschaltet, Prüfung ob eine Fallbackzeit geschrieben ist, evtl. auf 0 setzen
+; Fallback_on = 2 eingeschaltet
+; War Fallback bereits aktiv erst mit Fallback_on = 1 Fallbackzeit auf 0 setzen lassen und dann auf Fallback_on = 0 gehen
 Fallback_on = 0
-# Fallbackzeit = (Fallback_Zeitabstand_Std * 3600 + Cronjob_Minutenabstand *60 *0.9)
+; Fallbackzeit = (Fallback_Zeitabstand_Std * 3600 + Cronjob_Minutenabstand *60 *0.9)
 Fallback_Zeitabstand_Std = 5
 Cronjob_Minutenabstand = 5
