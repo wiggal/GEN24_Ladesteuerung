@@ -25,6 +25,14 @@
 
 <?php
 include "config.php";
+# Prüfen ob SQLite Voraussetzungen vorhanden sind
+$SQLite_file = "../" . $python_config['Logging']['Logging_file'] . "." . $python_config['Logging']['Logging_type'];
+if (!file_exists($SQLite_file)) {
+    echo "\nSQLitedatei $filename existiert nicht, keine Grafik verfügbar!";
+    echo "</body></html>";
+    exit();
+}
+
 # Diagrammtag festlegen
 $heute = date("Y-m-d");
 $DiaTag = $heute;
@@ -54,7 +62,6 @@ echo '</form>'."\n";
 echo '</td></tr></table><br>';
 
 
-# $heute = "2023-10-28"; #TEST
 $db = new SQLite3($SQLite_file);
 $SQL = "select Zeitpunkt,
        CASE WHEN Gesamtverbrauch < 0 THEN 0
@@ -99,8 +106,7 @@ $trenner = ",";
 
 ?>
 <div class="container">
-  <!--<canvas id="PVDaten" style="border: 1px dotted red; height:99vh; width:98vw"></canvas>-->
-  <canvas id="PVDaten" style="height:95vh; width:98vw"></canvas>
+  <canvas id="PVDaten" style="height:90vh; width:98vw"></canvas>
 </div>
 <script>
 new Chart("PVDaten", {
