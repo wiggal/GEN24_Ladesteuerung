@@ -151,6 +151,21 @@ MindBattLad = 20
 # Wenn nach Prognoseberechnung keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt.
 LadungAus = 0
 
+# Hier kann eine abweichende Konfiguration für die Wintermonate konfiguriert werden
+[Winter_Ladeberechnung]
+# in der Variablen "Wintermonate" werden die Wintermonate als Zahlen definiert
+# in den Wintermonaten werden die Standardwerte aus dem Block [Ladeberechnung] durch die Nachfolgenden ersetzt
+Wintermonate = 11, 12, 1, 2
+# hier Werte für die Wintermonate angeben
+# die Liste ist nicht abschließend und kann erweitert werden
+BattVollUm = 14
+BatSparFaktor = 5.0
+MaxLadung = 5000
+WRSchreibGrenze_nachOben = 700
+WRSchreibGrenze_nachUnten = 1900
+MindBattLad = 60
+
+
 [Reservierung]
 # Reservierungsdateiname
 PV_ReservieungsDatei=Watt_Reservierung.json
