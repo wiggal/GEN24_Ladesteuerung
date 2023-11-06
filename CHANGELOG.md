@@ -1,37 +1,37 @@
 **[0.11.0] – 2023-11-XX**
 
 Änderung in html/index.php:  
-- Navigation ohne Javascript und mehr resonsive  
-- **html/config.php**  
-### ACHTUNG bitte html/config.php anpassen!!!
+- Navigation ohne Javascript und mehr responsive  
 
-Die NavigationsTAB werden nun in dem Array `$TAB_config` konfiguriert (Tabname, Dateiname, Startauswahl, Sichtbarkeit)  
-Der Prototype 7_tab_Diagram.php ist aktuell noch ausgebledet, kann aber bei Bedarf eingebledet werden.  
+#### ACHTUNG bitte html/config.php anpassen!!!
+Änderung in html/config.php  
+Die NavigationsTAB werden nun in dem Array `$TAB_config` konfiguriert (Tabname, Dateiname, Startauswahl, ein/aus-blenden)  
+Die config.ini aus dem Pythonverzeichnis wir gelesen um auf die Variablen zugreifen zu können.  
+Variable $SQLite_file  entfernt, sie wird nun aus der config.ini ermittelt
 
-NEU: 7_tab_Diagram.php (noch Prototyp)
+**NEU:** 7_tab_Diagram.php (noch Prototyp)
 Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
-
-Änderung in html/1_tab_LadeSteuerung.php
-- Am Ende Zeitpunkt der Prognose ausgeben
-
 Erforderlich php-sqlite3:  
 `sudo apt install php-sqlite3`
 
-geändert: Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProvider2.py  
-- Meldung eingefügt, wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen sind.
+Änderung in html/1_tab_LadeSteuerung.php
+- Am Ende der Seite den Anforderungszeitpunkt der Prognose ausgeben
 
-Änderung in SymoGen24Controller2.py
-- Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde
+Änderung in Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProvider2.py  
+- Meldung eingefügt, wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen sind und keine Prognose angefordert wird.  
 
-### ACHTUNG umfangreiche Änserungen in config.ini, bitte anpassen!!!
-**NEU Winterkonfiguration 
-- neuer Block [Winter_Ladeberechnung]
-- In dem Block können die Wintermonate und zugehörige Werte definiert werden.
-  Diese überschreiben die Werte im Block [Ladeberechnung], bei einen definierten Wintermoonat.
+Änderung in SymoGen24Controller2.py  
+- Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde  
 
-** Kommentare in config.ini von "#" auf ";" umgestellt!!
-- die Kommentierung musste von "#" auf ";" umgestellt werden, um die Datei in PHP parsen zu können.
-  Dadurch kann man einfach in PHP auf die config.ini von Python zugreifen
+### ACHTUNG umfangreiche Änserungen in config.ini, bitte anpassen!!!  
+**NEU Winterkonfiguration  
+- neuer Block [Winter_Ladeberechnung]  
+- In dem Block können die Wintermonate und zugehörige Werte definiert werden.  
+  Diese überschreiben die Werte im Block [Ladeberechnung], bei einen definierten Wintermoonat.  
+
+** Kommentare in config.ini von "#" auf ";" umgestellt!!  
+- die Kommentierung musste von "#" auf ";" umgestellt werden, um die Datei in PHP parsen zu können.  
+  Dadurch kann man einfach in PHP auf die config.ini von Python zugreifen  
 
 **[0.10.5] – 2023-10-29**
 
