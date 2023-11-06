@@ -11,6 +11,9 @@ Der Prototype 7_tab_Diagram.php ist aktuell noch ausgebledet, kann aber bei Beda
 NEU: 7_tab_Diagram.php (noch Prototyp)
 Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
 
+Änderung in html/1_tab_LadeSteuerung.php
+- Am Ende Zeitpunkt der Prognose ausgeben
+
 Erforderlich php-sqlite3:  
 `sudo apt install php-sqlite3`
 
@@ -20,15 +23,15 @@ geändert: Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProv
 Änderung in SymoGen24Controller2.py
 - Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde
 
+### ACHTUNG umfangreiche Änserungen in config.ini, bitte anpassen!!!
 **NEU Winterkonfiguration 
-### ACHTUNG bitte config.ini anpassen!!!
 - neuer Block [Winter_Ladeberechnung]
 - In dem Block können die Wintermonate und zugehörige Werte definiert werden.
   Diese überschreiben die Werte im Block [Ladeberechnung], bei einen definierten Wintermoonat.
 
-Änderung in html/1_tab_LadeSteuerung.php
-- Am Ende Zeitpunkt der Prognose ausgeben
-
+** Kommentare in config.ini von "#" auf ";" umgestellt!!
+- die Kommentierung musste von "#" auf ";" umgestellt werden, um die Datei in PHP parsen zu können.
+  Dadurch kann man einfach in PHP auf die config.ini von Python zugreifen
 
 **[0.10.5] – 2023-10-29**
 

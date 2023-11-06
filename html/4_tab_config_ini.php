@@ -68,7 +68,7 @@ function config_lesen( $file, $readonly )
         $Zeilencounter++;
 
         # Suche nach Kommentarzeilen
-        if ((strpos($Zeile, '#') !== false) AND (strpos($Zeile, '#') < 2)) {
+        if ((strpos($Zeile, ';') !== false) AND (strpos($Zeile, ';') < 2)) {
             $Zeile = rtrim($Zeile);
             echo '<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
         } else {
