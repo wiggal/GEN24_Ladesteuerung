@@ -23,11 +23,13 @@ Erforderlich php-sqlite3:
 Änderung in SymoGen24Controller2.py  
 - Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde  
 
-### ACHTUNG umfangreiche Änserungen in config.ini, bitte anpassen!!!  
-**NEU Winterkonfiguration  
-- neuer Block [Winter_Ladeberechnung]  
-- In dem Block können die Wintermonate und zugehörige Werte definiert werden.  
-  Diese überschreiben die Werte im Block [Ladeberechnung], bei einen definierten Wintermoonat.  
+### ACHTUNG umfangreiche Änderungen in config.ini, bitte anpassen!!!  
+**NEU Zusatzkonfigurationen möglich (z.B. für Wintermonate usw.)
+- neue Blöcke [Winter]  und [Uebergang]
+- neu Variable Zusatz_Ladebloecke im Block [Ladeberechnung]
+- In den Blöcken [Winter]  und [Uebergang] zusätzliche Werte für bestimmte Monate definiert werden,  
+  diese überschreiben die Werte im Block [Ladeberechnung], im den entsprechenden Monaten.
+  Es können auch noch mehrere Blöcke definiert werden.
 
 ** Kommentare in config.ini von "#" auf ";" umgestellt!!  
 - die Kommentierung musste von "#" auf ";" umgestellt werden, um die Datei in PHP parsen zu können.  

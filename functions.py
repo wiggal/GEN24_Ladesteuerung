@@ -47,30 +47,34 @@ def loadPVReservierung(file):
                 exit()
         return reservierungdata
 
-def getVarConf(block, var, Type):
-        # Hier pruefen ob Wintermonat und dann Variable aus Wintermonat lesen
-        # nur ausführen, wenn nciht nach Wintermonate gefragt wird, sonst ENDLOSSCHLEIFE
-        if (block != 'Winter_Ladeberechnung' and var != 'Wintermonate'):
-            # Zusatz_configs lesen
-            aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
-            Wintermonate = getVarConf('Winter_Ladeberechnung','Wintermonate','str')
-            Wintermonate = Wintermonate.replace(" ", "")
-            Wintermonate = Wintermonate.split(",")
-            if ( aktueller_Monat in Wintermonate ):
-                if ( var in config['Winter_Ladeberechnung'] ):
-                    block = 'Winter_Ladeberechnung'
-
+def getVarConf(var_block, var, Type):
+        aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
+        # Für alle Varaiblen aus dem Block [Ladeberechnung] lesen welche Zusatz_Ladebloecke vorhanden sind
+        # ausgenommen die Variable Zusatz_Ladebloecke, wegen Endlosschleife
+        if (var_block == 'Ladeberechnung') and not (var_block == 'Ladeberechnung' and var == 'Zusatz_Ladebloecke'):
+            Bloecke = getVarConf('Ladeberechnung','Zusatz_Ladebloecke','str')
+            Bloecke = Bloecke.replace(" ", "")
+            Bloecke = Bloecke.split(",")
+            for Block in Bloecke:
+                # Hier pruefen ob Monat in Ersatzblock vorkommt und dann Ersatzblockvariable lesen!!
+                # Zusatz_configs lesen
+                Ersatzmonate = getVarConf( Block ,'Monate','str')
+                Ersatzmonate = Ersatzmonate.replace(" ", "")
+                Ersatzmonate = Ersatzmonate.split(",")
+                if ( aktueller_Monat in Ersatzmonate ):
+                    if ( var in config[ Block ] ):
+                        var_block = Block
 
         # Variablen aus config lesen und auf Zahlen prüfen
         try:
             if(Type == 'eval'):
                 error_type = "als Zahl "
-                return_var = eval(config[block][var])
+                return_var = eval(config[var_block][var])
             else:
                 error_type = ""
-                return_var = str(config[block][var])
+                return_var = str(config[var_block][var])
         except:
-            print("ERROR: die Variable [" + block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
+            print("ERROR: die Variable [" + var_block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
             exit(0)
         return return_var
 

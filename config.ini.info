@@ -151,19 +151,27 @@ MindBattLad = 20
 ; Wenn nach Prognoseberechnung keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt.
 LadungAus = 0
 
-; Hier kann eine abweichende Konfiguration für die Wintermonate konfiguriert werden
-[Winter_Ladeberechnung]
-; in der Variablen "Wintermonate" werden die Wintermonate als Zahlen definiert
-; in den Wintermonaten werden die Standardwerte aus dem Block [Ladeberechnung] durch die Nachfolgenden ersetzt
-Wintermonate = 11, 12, 1, 2
-; hier Werte für die Wintermonate angeben
+; hier muessen die Namen der zusätzlichen Konfigurationen definiert werden.
+Zusatz_Ladebloecke = Winter, Uebergang
+
+[Winter]
+; Hier kann eine abweichende Konfiguration für bestimmte Monate konfiguriert werden
+; in den angegebenen Monaten werden die Standardwerte aus dem Block [Ladeberechnung] durch die Nachfolgenden ersetzt
+; Monate ist ein Schlüssel und muss im Block vorhanden sein
+Monate = 11, 12, 1, 2
+; hier Werte für den Zusatz_Ladeblock angeben
 ; die Liste ist nicht abschließend und kann erweitert werden
 BattVollUm = 14
 BatSparFaktor = 5.0
 MaxLadung = 5000
 WRSchreibGrenze_nachOben = 700
-WRSchreibGrenze_nachUnten = 1900
-MindBattLad = 60
+WRSchreibGrenze_nachUnten = 1600
+MindBattLad = 50
+
+[Uebergang]
+Monate =  9, 10, 3, 4
+BattVollUm = 15
+BatSparFaktor = 3.0
 
 
 [Reservierung]
