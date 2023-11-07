@@ -1,39 +1,44 @@
-**[0.11.0] – 2023-11-XX**
+**[0.11.0] – 2023-11-07**
+
+## ACHTUNG diese Version beinhaltet umfangreiche Änderungen in den config-Dateien!!!  
+**Bitte CHANGELOG.md genau lesen und alle Anpassungen in den config-Dateien durchführen**  
+**Oder: eigene Anpassungen in die mitgelieferten config-Dateien übernehen!**   
 
 Änderung in html/index.php:  
 - Navigation ohne Javascript und mehr responsive  
 
-#### ACHTUNG bitte html/config.php anpassen!!!
+#### ACHTUNG bitte html/config.php anpassen!!!  
 Änderung in html/config.php  
-Die NavigationsTAB werden nun in dem Array `$TAB_config` konfiguriert (Tabname, Dateiname, Startauswahl, ein/aus-blenden)  
+Die NavigationsTABs werden nun in dem Array `$TAB_config` konfiguriert (Tabname, Dateiname, Startauswahl, ein/aus-blenden)  
 Die config.ini aus dem Pythonverzeichnis wir gelesen um auf die Variablen zugreifen zu können.  
-Variable $SQLite_file  entfernt, sie wird nun aus der config.ini ermittelt
+Variable $SQLite_file  entfernt, sie wird nun aus der config.ini ermittelt  
 
-**NEU:** 7_tab_Diagram.php (noch Prototyp)
-Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.
+**NEU:** 7_tab_Diagram.php (noch Prototyp)  
+Damit werden die Daten aus der SQLite Datei graphisch aufbereitet.  
 Erforderlich php-sqlite3:  
-`sudo apt install php-sqlite3`
+`sudo apt install php-sqlite3`  
 
-Änderung in html/1_tab_LadeSteuerung.php
-- Am Ende der Seite den Anforderungszeitpunkt der Prognose ausgeben
+Änderung in html/1_tab_LadeSteuerung.php  
+- Am Ende der Seite wird der Anforderungszeitpunkt der Prognose ausgeben.  
 
 Änderung in Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProvider2.py  
-- Meldung eingefügt, wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen sind und keine Prognose angefordert wird.  
+- Meldung eingefügt, wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen sind,  
+  und deshalb keine Prognose angefordert wird.  
 
 Änderung in SymoGen24Controller2.py  
-- Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde  
+- Logging wird nur geschrieben, wenn der Parameter "schreiben" übergeben wurde.  
 
 ### ACHTUNG umfangreiche Änderungen in config.ini, bitte anpassen!!!  
-**NEU Zusatzkonfigurationen möglich (z.B. für Wintermonate usw.)
-- neue Blöcke [Winter]  und [Uebergang]
-- neu Variable Zusatz_Ladebloecke im Block [Ladeberechnung]
-- In den Blöcken [Winter]  und [Uebergang] zusätzliche Werte für bestimmte Monate definiert werden,  
-  diese überschreiben die Werte im Block [Ladeberechnung], im den entsprechenden Monaten.
-  Es können auch noch mehrere Blöcke definiert werden.
+**NEU Zusatzkonfigurationen für die Ladeberechnung möglich (z.B. für Wintermonate usw.)  
+- neu Variable `Zusatz_Ladebloecke` im Block `[Ladeberechnung]`  
+- neue Blöcke `[Winter]`  und `[Uebergang]`  
+- In den Blöcken `[Winter]`  und `[Uebergang]` zusätzliche Werte für bestimmte Monate definiert werden,  
+  diese überschreiben die Werte im Block `[Ladeberechnung]`, im den entsprechenden Monaten.  
+  Es können auch noch mehrere Blöcke definiert werden.  
 
 ** Kommentare in config.ini von "#" auf ";" umgestellt!!  
 - die Kommentierung musste von "#" auf ";" umgestellt werden, um die Datei in PHP parsen zu können.  
-  Dadurch kann man einfach in PHP auf die config.ini von Python zugreifen  
+  Dadurch kann man einfach in PHP auf die config.ini von Python zugreifen.  
 
 **[0.10.5] – 2023-10-29**
 
