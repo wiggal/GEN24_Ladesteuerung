@@ -11,7 +11,6 @@ $Faktor_PVLeistung_Prognose = 1.00;
 $Res_Feld1 = "EV_1";
 $Res_Feld2 = "EV_2";
 $passwd_configedit = "0815";
-$SQLite_file = "../PV_Daten.sqlite";
 $TAB_config = array (
                 array ( 'name' => 'LadeStrg','file' => '1_tab_LadeSteuerung.php','checked' => 'ja','sichtbar' => 'ein'),
                 array ( 'name' => 'ENTLadeStrg', 'file' => '2_tab_EntladeSteuerung.php','checked' => 'nein','sichtbar' => 'ein'),
