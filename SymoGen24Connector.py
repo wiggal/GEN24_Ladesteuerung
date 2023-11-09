@@ -207,7 +207,11 @@ class SymoGen24:
 
     def get_mppt_power(self):
         mpppt_1_power = self.read_data('MPPT_1_DC_Power')
+        if mpppt_1_power == 65535:
+            mpppt_1_power = 0
         mpppt_2_power = self.read_data('MPPT_2_DC_Power')
+        if mpppt_2_power == 65535:
+            mpppt_2_power = 0
         power_scale_tmp = np.float64(np.int16(self.read_data('MPPT_Power_Scale_Factor')))
         return int((mpppt_1_power + mpppt_2_power) * (10 ** power_scale_tmp))
 
@@ -257,7 +261,7 @@ if __name__ == "__main__":
     print("Meter_Power_Scale_Factor", gen24.read_data("Meter_Power_Scale_Factor"))
     # print("Meter_Power_Total", gen24.read_data("Meter_Power_Total"))
     
-    # print("PV_Produktion ", gen24.get_mppt_power())
+    print("PV_Produktion ", gen24.get_mppt_power())
     # print("Meter_Power ", gen24.get_meter_power())
     print("Batterie_Power ", gen24.get_batterie_power())
     # PV_Produktion = gen24.get_mppt_power()
