@@ -490,19 +490,19 @@ if __name__ == '__main__':
                         aktStd = datetime.strftime(now, "%H:00")
 
                         # Verbrauchsgrenze Entladung lesen
-                        if (entladesteurungsdata.get('aktStd')):
+                        if (entladesteurungsdata.get(aktStd)):
                             VerbrauchsgrenzeEntladung = entladesteurungsdata[aktStd]['Res_Feld1']
                         else:
                             VerbrauchsgrenzeEntladung = 0
 
-                        DEBUG_Ausgabe+="\nDEBUG VerbrauchsgrenzeEntladung: " + str(VerbrauchsgrenzeEntladung)
+                        DEBUG_Ausgabe+="\nDEBUG VerbrauchsgrenzeEntladung aus Spalte 1: " + str(VerbrauchsgrenzeEntladung)
                         # Feste Entladegrenze lesen
-                        if (entladesteurungsdata.get('aktStd')):
+                        if (entladesteurungsdata.get(aktStd)):
                             FesteEntladegrenze = entladesteurungsdata[aktStd]['Res_Feld2']
                         else:
                             FesteEntladegrenze = 0
 
-                        DEBUG_Ausgabe+="\nDEBUG FesteEntladegrenze: " + str(FesteEntladegrenze)
+                        DEBUG_Ausgabe+="\nDEBUG FesteEntladegrenze aus Spalte 2: " + str(FesteEntladegrenze)
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
