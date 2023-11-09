@@ -4,6 +4,10 @@
 - FIXED: Wenn nur ein MPPT angeschlossen ist, wurde der Wert für die PV-Produktion stark verfälscht.  
   Siehe Diskusion https://github.com/wiggal/GEN24_Ladesteuerung/discussions/35  
 
+Änderung in SymoGen24Controller2.py  
+- FIXED: Die Einträge in der Tabelle "EntladeSteuerung" wurden nicht berücksichtigt.
+  Minimalwert bei Einträgen in die Tabelle "EntladeSteuerung" ist 0,1(KW = 100Watt). Hilfe ergänzt
+
 **[0.11.0] – 2023-11-07**
 
 ## ACHTUNG diese Version beinhaltet umfangreiche Änderungen in den config-Dateien!!!  
