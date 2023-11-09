@@ -1,3 +1,9 @@
+**[0.11.1] – 2023-11-11*
+
+Änderung in SymoGen24Connector.py
+- FIXED: Wenn nur ein MPPT angeschlossen ist, wurde der Wert für die PV-Produktion stark verfälscht.  
+  Siehe Diskusion https://github.com/wiggal/GEN24_Ladesteuerung/discussions/35  
+
 **[0.11.0] – 2023-11-07**
 
 ## ACHTUNG diese Version beinhaltet umfangreiche Änderungen in den config-Dateien!!!  
