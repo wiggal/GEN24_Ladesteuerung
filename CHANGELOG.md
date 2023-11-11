@@ -1,4 +1,4 @@
-**[0.11.1] – 2023-11-11*
+**[0.11.1] – 2023-11-11**
 
 Änderung in SymoGen24Connector.py
 - FIXED: Wenn nur ein MPPT angeschlossen ist, wurde der Wert für die PV-Produktion stark verfälscht.  
