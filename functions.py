@@ -78,31 +78,9 @@ def getVarConf(var_block, var, Type):
             exit(0)
         return return_var
 
-## CSV-Logfile schreiben
-from pathlib import Path
-from csv import writer
-def write_csv(csv_file, aktuelleBatteriePower, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz):
-    # Kopf schreiben, wenn Datei nicht extistiert
-    csv_file = Path(csv_file)
-    if not csv_file.is_file():
-        with open(csv_file, 'w', newline='') as student_file:
-            writer_head = writer(student_file)
-            writer_head.writerow(["Zeit","Ladung Akku","Verbrauch","Einspeisung","Produktion","Prognose","Batteriestand %"])
-            student_file.close()
-
-    Zeit = datetime.strftime(datetime.now(), "%m-%d %H:%M")
-    list_data=[Zeit, aktuelleBatteriePower, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz]
-    with open(csv_file, 'a', newline='') as student_file:
-        writer_data = writer(student_file)
-        writer_data.writerow(list_data)
-        student_file.close()
-
-    return()
-
 import sqlite3
-
-# Daten in SQLite_DB speichern
-def save_SQLite(database, BatteriePower, Gesamtverbrauch, Einspeisung, PVProduktion, Vorhersage, BattStatus):
+# Daten in SQLite_DB speichern (lifetime Zählerständer)
+def save_SQLite(database, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus):
     verbindung = sqlite3.connect(database)
     zeiger = verbindung.cursor()
 
@@ -112,10 +90,12 @@ def save_SQLite(database, BatteriePower, Gesamtverbrauch, Einspeisung, PVProdukt
     sql_anweisung = """
     CREATE TABLE IF NOT EXISTS pv_daten (
     Zeitpunkt DATETIME,
-    BatteriePower SMALLINT,
-    Gesamtverbrauch SMALLINT,
-    Einspeisung SMALLINT,
-    PVProduktion SMALLINT,
+    AC_Produktion INT,
+    DC_Produktion INT,
+    Netzverbrauch INT,
+    Einspeisung INT,
+    Batterie_IN INT,
+    Batterie_OUT INT,
     Vorhersage SMALLINT,
     BattStatus FLOAT
     );"""
@@ -124,9 +104,9 @@ def save_SQLite(database, BatteriePower, Gesamtverbrauch, Einspeisung, PVProdukt
     # Daten in DB schreiben
     zeiger.execute("""
                 INSERT INTO pv_daten
-                       VALUES (?,?,?,?,?,?,?)
+                       VALUES (?,?,?,?,?,?,?,?,?)
                """,
-              (Zeitpunkt, BatteriePower, Gesamtverbrauch, Einspeisung, PVProduktion, Vorhersage, BattStatus)
+              (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus)
               )
 
     zeiger.execute(sql_anweisung)
