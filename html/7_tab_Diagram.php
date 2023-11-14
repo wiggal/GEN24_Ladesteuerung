@@ -26,7 +26,7 @@
 <?php
 include "config.php";
 # Prüfen ob SQLite Voraussetzungen vorhanden sind
-$SQLite_file = "../" . $python_config['Logging']['Logging_file'] . "." . $python_config['Logging']['Logging_type'];
+$SQLite_file = "../" . $python_config['Logging']['Logging_file'];
 if (!file_exists($SQLite_file)) {
     echo "\nSQLitedatei $filename existiert nicht, keine Grafik verfügbar!";
     echo "</body></html>";
@@ -61,16 +61,26 @@ echo '</form>'."\n";
 
 echo '</td></tr></table><br>';
 
-
 $db = new SQLite3($SQLite_file);
-$SQL = "select Zeitpunkt,
-       CASE WHEN Gesamtverbrauch < 0 THEN 0
-            WHEN PVProduktion > Gesamtverbrauch THEN Gesamtverbrauch
-            ELSE PVProduktion
-        END AS Direktverbrauch,
-        BatteriePower, Einspeisung, Gesamtverbrauch, Vorhersage, BattStatus
-from pv_daten
-where Zeitpunkt LIKE '".$DiaTag."%'";
+$SQL = "WITH Alle_PVDaten AS (
+		select	Zeitpunkt,
+		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
+		((AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
+		((Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) + (AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
+		(Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
+		((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS BatteriePower,
+		Vorhersage,
+		BattStatus
+from pv_daten where Zeitpunkt LIKE '".$DiaTag."%')
+SELECT Zeitpunkt,
+	Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
+	Gesamtverbrauch*60/Zeitabstand AS Gesamtverbrauch,
+	Einspeisung*60/Zeitabstand AS Einspeisung,
+	BatteriePower*60/Zeitabstand AS BatteriePower,
+	Vorhersage,
+	BattStatus
+FROM Alle_PVDaten
+Where Zeitabstand > 4";
 
 $results = $db->query($SQL);
 
@@ -85,20 +95,28 @@ $optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true'
 $trenner = "";
 $labels = "";
 $daten = array();
+$firstrow = true;
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-    $first = true;
-    foreach($row as $x => $val) {
-      if ( $first ){
-        # Datum zuschneiden und nur ganze Stungen ausgeben
-        $label_element = substr($val, 11, -3);
-        $labels = $labels.$trenner.'"'.$label_element.'"';
-        $first = false;
-      } else {
-        if (!isset($daten[$x])) $daten[$x] = "";
-        if ($x == 'Gesamtverbrauch' and $val < 0) $val = 0;
-        if ($x == 'BatteriePower' and $val < 0) $val = 0;
-        if ($x == 'Einspeisung' and $val < 0) $val = 0;
-        $daten[$x] = $daten[$x] .$trenner.$val;
+    # Bei erster Zeile git es keine Differenz
+    if ( $firstrow ) {
+        $firstrow = false;
+        continue;
+    } else {
+        $first = true;
+        foreach($row as $x => $val) {
+        if ( $first ){
+            # Datum zuschneiden 
+            $label_element = substr($val, 11, -3);
+            $labels = $labels.$trenner.'"'.$label_element.'"';
+            $first = false;
+        } else {
+            if (!isset($daten[$x])) $daten[$x] = "";
+            if ($x == 'Gesamtverbrauch' and $val < 0) $val = 0;
+            if ($x == 'BatteriePower' and $val < 0) $val = 0;
+            if ($x == 'Einspeisung' and $val < 0) $val = 0;
+            if ($x == 'Direktverbrauch' and $val < 0) $val = 0;
+            $daten[$x] = $daten[$x] .$trenner.$val;
+            }
         }
     }
 $trenner = ",";
@@ -150,11 +168,14 @@ new Chart("PVDaten", {
     scales: {
       x: {
         ticks: {
+          /*
+          // Hier nur jede 6te Beschriftung ausgeben
           // For a category axis, the val is the index so the lookup via getLabelForValue is needed
           callback: function(val, index) {
             // nur halbe Stunden in der X-Beschriftung ausgeben
             return index % 6 === 0 ? this.getLabelForValue(val) : '';
           },
+          */
           font: {
              size: 20,
            }

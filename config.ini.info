@@ -200,14 +200,11 @@ Push_Message_EIN = 1
 Push_Message_Url = https://ntfy.sh/hoizmooPV
 
 [Logging]
-; durch Logging ein werden die Werte in eine CSV oder SQLite Datei zur Auswertung geschrieben (1=ein, 0=aus)
-; ist Logging_type = sqlite eingestellt, wird daraus ein Diagramm erstellt.
+; durch Logging ein werden die Werte in eine SQLite Datei zur Auswertung geschrieben (1=ein, 0=aus)
+; aus der SQLite Datei werden Diagramme in html/7_tab_Diagram.php erstellt.
 Logging_ein = 1
-; Dateiname der Loggingdatei, als Endung wird Logging_type angehängt.
-Logging_file = PV_Daten
-; Logging_type ist "csv" oder "sqlite"
-Logging_type = sqlite
-
+; volständiger Dateiname der SQLite Datei
+Logging_file = PV_Daten.sqlite
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

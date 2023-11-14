@@ -4,7 +4,7 @@ import requests
 import SymoGen24Connector
 from ping3 import ping
 from sys import argv
-from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, write_csv, save_SQLite
+from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 
 def getPrognose(Stunde):
         if data['result']['watts'].get(Stunde):
@@ -527,7 +527,7 @@ if __name__ == '__main__':
                         ## Werte zum Überprüfen ausgeben
                         if print_level >= 1:
                             print("######### E N T L A D E S T E U E R U N G #########\n")
-                            print("Manuelle Entladesteuerung: ", entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'], "%")
+                            print("Feste Entladegrenze:       ", entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'], "%")
                             print("Batteriestatus in Prozent: ", BattStatusProz, "%")
                             print("GesamtverbrauchHaus:       ", GesamtverbrauchHaus, "W")
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
@@ -609,21 +609,17 @@ if __name__ == '__main__':
                     if Logging_ein == 1:
                         Logging_Schreib_Ausgabe = ""
                         if len(argv) > 1 and (argv[1] == "schreiben"):
-                            Logging_type = getVarConf('Logging','Logging_type','str')
-                            Logging_file = getVarConf('Logging','Logging_file','str') + "." + Logging_type
-
-                            if Logging_type == 'csv':
-                                write_csv(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
-                            elif Logging_type == 'sqlite':
-                                save_SQLite(Logging_file, aktuelleBatteriePower * -1, GesamtverbrauchHaus, aktuelleEinspeisung, aktuellePVProduktion, aktuelleVorhersage, BattStatusProz)
-                            else:
-                                Logging_Schreib_Ausgabe = 'ERROR: Kein güliges Format für Logging in "config.ini" bei Variable "Logging_type"!!'
+                            Logging_file = getVarConf('Logging','Logging_file','str')
+                            API_Werte = gen24.get_API()
+                            # In die DB werden die liftime Verbrauchszählerstände gespeichert
+                            save_SQLite(Logging_file, API_Werte['AC_Produktion'], API_Werte['DC_Produktion'], API_Werte['Netzverbrauch'], API_Werte['Einspeisung'], API_Werte['Batterie_IN'], API_Werte['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
+                            Logging_Schreib_Ausgabe = 'Daten wurden in die SQLite-Datei geschrieben!'
                         else:
                             Logging_Schreib_Ausgabe = "Logging wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n" 
 
                         if print_level >= 1:
                             print(Logging_Schreib_Ausgabe)
-                    # FALLBACK ENDE
+                    # LOGGING ENDE
 
 
 

@@ -1,7 +1,15 @@
 **[0.12.0] – 2023-XX-XX**
 
 ## ACHTUNG: Umfangreiche Änderungen im Logging
-siehe Branch Logging_neu
+
+Logging erfolgt nun mit dem "lifetime Zählerständen" aus der API: /components/readable  
+**Bitte evtl. alte SQLite-Datei löschen  
+
+Das Logging in eine CSV_Datei fällt weg.  
+
+### ACHTUNG Änderung in der config.ini im Block [Logging]
+- Variable Logging_file erhält vollständigen Namen
+- Variable Logging_type entfernt 
 
 **[0.11.1] – 2023-11-11**
 
