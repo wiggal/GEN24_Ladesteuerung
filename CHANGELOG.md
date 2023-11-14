@@ -1,3 +1,8 @@
+**[0.12.0] – 2023-XX-XX**
+
+## ACHTUNG: Umfangreiche Änderungen im Logging
+siehe Branch Logging_neu
+
 **[0.11.1] – 2023-11-11**
 
 Änderung in SymoGen24Connector.py
