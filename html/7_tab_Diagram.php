@@ -14,8 +14,17 @@
     cursor:pointer;
     color:#000000;
     font-family:Arial;
-    font-size:150%;
+    font-size: 150%;
     padding:6px 11px;
+  }
+  table {
+  width: 95%;
+  border: 1px solid;
+  position: absolute;
+  }
+  td {
+  white-space: nowrap;
+  font-family: Arial;
   }
 
 </style>
@@ -40,8 +49,18 @@ if (isset($_POST["DiaTag"])) $DiaTag = $_POST["DiaTag"];
 $Tag_davor = date("Y-m-d",(strtotime("-1 day", strtotime($DiaTag))));
 $Tag_danach = date("Y-m-d",(strtotime("+1 day", strtotime($DiaTag))));
 
+$db = new SQLite3($SQLite_file);
+# AC Produktion 
+$SQL = "SELECT 
+        MAX(AC_Produktion)- MIN(AC_Produktion) + 
+        MAX(Batterie_IN) - min(Batterie_IN) + 
+        MIN (Batterie_OUT) - MAX (Batterie_OUT)
+        AS AC_Produktion
+from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
+$AC_Produktion = $db->querySingle($SQL);
+
 # Schalter zum Blättern usw.
-echo '<table border="0" ><tr><td>';
+echo '<table><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaTag" value="'.$Tag_davor.'">'."\n";
 echo '<button type="submit" class="navi"> &lt;&lt;'.$Tag_davor.' </button>';
@@ -59,9 +78,11 @@ echo '<input type="hidden" name="DiaTag" value="'.$Tag_danach.'">'."\n";
 echo '<button type="submit" class="navi"> '.$Tag_danach.'&gt;&gt; </button>';
 echo '</form>'."\n";
 
+echo '</td><td style="text-align:right; width: 100%; font-size: 170%">';
+echo "$AC_Produktion KWh(AC)";
+
 echo '</td></tr></table><br>';
 
-$db = new SQLite3($SQLite_file);
 $SQL = "WITH Alle_PVDaten AS (
 		select	Zeitpunkt,
 		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
@@ -95,13 +116,7 @@ $optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true'
 $trenner = "";
 $labels = "";
 $daten = array();
-$firstrow = true;
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-    # Bei erster Zeile git es keine Differenz
-    if ( $firstrow ) {
-        $firstrow = false;
-        continue;
-    } else {
         $first = true;
         foreach($row as $x => $val) {
         if ( $first ){
@@ -118,13 +133,12 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
             $daten[$x] = $daten[$x] .$trenner.$val;
             }
         }
-    }
 $trenner = ",";
 }
-
+$db->close();
 ?>
 <div class="container">
-  <canvas id="PVDaten" style="height:90vh; width:98vw"></canvas>
+  <canvas id="PVDaten" style="height:100vh; width:100vw"></canvas>
 </div>
 <script>
 new Chart("PVDaten", {
@@ -161,7 +175,7 @@ new Chart("PVDaten", {
         },
       plugins: {
         title: {
-            display: false,
+            display: true,
             //text: (ctx) => 'Tooltip position mode: ' + ctx.chart.options.plugins.tooltip.position,
         },
       },
