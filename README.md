@@ -72,11 +72,12 @@ falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
 
-**_NEU ab Version 0.10.4_**
+**_NEU ab Version 0.11.2_**
 ### :bar_chart: Logging (optional)
 
 Erfolgt nun beim Aufruf von SymoGen24Controller2.py, wenn in der "config.ini" Logging_ein = 1.
-Das Logging schreibt Werte ins"Logging_file", im csv- oder sqlite-Format.  
+Das Logging schreibt Werte in das "Logging_file" im sqlite-Format.  
+Aus der SQLite-Datei werden dann in html/7_tab_Diagram.php Diagramme erzeugt.
 **_ENDE NEU_**
 
 
@@ -123,6 +124,7 @@ Vorhandene Skripts:
 4_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini  
 5_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log  
 6_tab_GEN24.php        ==>> lokaler Aufruf des GEN24  
+7_tab_Diagram.php      ==>> Diagramme über Produktion und Verbrauch  
 
 Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.  
 
