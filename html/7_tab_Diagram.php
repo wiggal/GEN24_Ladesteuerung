@@ -113,6 +113,7 @@ $AC_Produktion = round($db->querySingle($SQL)/1000, 1);
 # Schalter aufrufen
 schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, 'red');
 
+# ProduktionsSQL
 $SQL = "WITH Alle_PVDaten AS (
 		select	Zeitpunkt,
 		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
@@ -169,9 +170,68 @@ $trenner = ",";
 
     case 'Verbrauch':
 
-# Schalter aufrufen
-schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, 'green');
+# AC Verbrauch
+$SQL = "SELECT 
+        MAX(Netzverbrauch)- MIN(Netzverbrauch) + 
+        MAX(AC_Produktion) - min(AC_Produktion) + 
+        MIN (Einspeisung) - MAX (Einspeisung)
+        AS AC_Produktion
+from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
+$AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
+# Schalter aufrufen
+schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Verbrauch, 'green');
+
+# VerbrauchSQL
+$SQL = "WITH Alle_PVDaten AS (
+		select	Zeitpunkt,
+		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
+        ((AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
+		(Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzverbrauch,
+		(AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) AS Produktion,
+		((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
+		BattStatus
+from pv_daten where Zeitpunkt LIKE '".$DiaTag."%')
+SELECT Zeitpunkt,
+	Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
+	Produktion*60/Zeitabstand AS Produktion,
+	Netzverbrauch*60/Zeitabstand AS Netzverbrauch,
+	VonBatterie*60/Zeitabstand AS VonBatterie,
+	BattStatus
+FROM Alle_PVDaten
+Where Zeitabstand > 4";
+
+$results = $db->query($SQL);
+
+$optionen = array();
+$optionen['Produktion']=['Farbe'=>'rgba(255,215,0,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
+$optionen['BattStatus']=['Farbe'=>'rgba(34,139,34,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
+$optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '3', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
+$optionen['VonBatterie'] = ['Farbe' => 'rgba(50,205,50,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '2', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
+$optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
+
+$trenner = "";
+$labels = "";
+$daten = array();
+while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        $first = true;
+        foreach($row as $x => $val) {
+        if ( $first ){
+            # Datum zuschneiden 
+            $label_element = substr($val, 11, -3);
+            $labels = $labels.$trenner.'"'.$label_element.'"';
+            $first = false;
+        } else {
+            if (!isset($daten[$x])) $daten[$x] = "";
+            if ($x == 'Produktion' and $val < 0) $val = 0;
+            if ($x == 'VonBatterie' and $val < 0) $val = 0;
+            if ($x == 'Netzverbrauch' and $val < 0) $val = 0;
+            if ($x == 'Direktverbrauch' and $val < 0) $val = 0;
+            $daten[$x] = $daten[$x] .$trenner.$val;
+            }
+        }
+$trenner = ",";
+}
     break; # ENDE case Verbrauch
     
 } # ENDE switch
