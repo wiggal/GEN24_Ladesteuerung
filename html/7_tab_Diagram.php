@@ -319,6 +319,18 @@ new Chart("PVDaten", {
       },
     }
     },
+  // Funktion: durch klicken auf Legende, Elemente ausblenden 
+  function(e, legendItem, legend) {
+    const index = legendItem.datasetIndex;
+    const ci = legend.chart;
+    if (ci.isDatasetVisible(index)) {
+        ci.hide(index);
+        legendItem.hidden = true;
+    } else {
+        ci.show(index);
+        legendItem.hidden = false;
+    }
+},
   });
 </script>
 
