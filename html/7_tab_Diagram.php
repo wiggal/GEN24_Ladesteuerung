@@ -42,6 +42,46 @@ if (!file_exists($SQLite_file)) {
     exit();
 }
 
+function schalter_ausgeben ( $case, $nextcase , $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, $buttoncolor)
+{
+
+# Schalter zum Blättern usw.
+echo '<table><tr><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$Tag_davor.'">'."\n";
+echo '<input type="hidden" name="case" value="'.$case.'">'."\n";
+echo '<button type="submit" class="navi"> &nbsp;&lt;&lt;&nbsp;</button>';
+echo '</form>'."\n";
+
+echo '</td><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$heute.'">'."\n";
+echo '<input type="hidden" name="case" value="'.$case.'">'."\n";
+echo '<button type="submit" class="navi"> '.$DiaTag.' </button>';
+echo '</form>'."\n";
+
+echo '</td><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$Tag_danach.'">'."\n";
+echo '<input type="hidden" name="case" value="'.$case.'">'."\n";
+echo '<button type="submit" class="navi"> &nbsp;&gt;&gt;&nbsp; </button>';
+echo '</form>'."\n";
+
+echo '</td><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$DiaTag.'">'."\n";
+echo '<input type="hidden" name="case" value="'.$nextcase.'">'."\n";
+echo '<button type="submit" class="navi" style="background-color:'.$buttoncolor.'"> '.$nextcase.'&gt;&gt; </button>';
+echo '</form>'."\n";
+
+
+echo '</td><td style="text-align:right; width: 100%; font-size: 170%">';
+echo "$AC_Produktion KWh(AC)";
+
+echo '</td></tr></table><br>';
+}
+
+
 # Diagrammtag festlegen
 $heute = date("Y-m-d");
 $DiaTag = $heute;
@@ -49,7 +89,18 @@ if (isset($_POST["DiaTag"])) $DiaTag = $_POST["DiaTag"];
 $Tag_davor = date("Y-m-d",(strtotime("-1 day", strtotime($DiaTag))));
 $Tag_danach = date("Y-m-d",(strtotime("+1 day", strtotime($DiaTag))));
 
+
+# case = Verbrauch oder Produktion
+$case = 'Produktion';
+if (isset($_POST["case"])) $case = $_POST["case"];
+
+
 $db = new SQLite3($SQLite_file);
+
+# switch Verbrauch oder Produktion
+switch ($case) {
+    case 'Produktion':
+
 # AC Produktion 
 $SQL = "SELECT 
         MAX(AC_Produktion)- MIN(AC_Produktion) + 
@@ -57,31 +108,10 @@ $SQL = "SELECT
         MIN (Batterie_OUT) - MAX (Batterie_OUT)
         AS AC_Produktion
 from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
-$AC_Produktion = $db->querySingle($SQL);
+$AC_Produktion = round($db->querySingle($SQL)/1000, 1);
 
-# Schalter zum Blättern usw.
-echo '<table><tr><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaTag" value="'.$Tag_davor.'">'."\n";
-echo '<button type="submit" class="navi"> &lt;&lt;'.$Tag_davor.' </button>';
-echo '</form>'."\n";
-
-echo '</td><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaTag" value="'.$heute.'">'."\n";
-echo '<button type="submit" class="navi"> &gt;&gt; heute &lt;&lt;  </button>';
-echo '</form>'."\n";
-
-echo '</td><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaTag" value="'.$Tag_danach.'">'."\n";
-echo '<button type="submit" class="navi"> '.$Tag_danach.'&gt;&gt; </button>';
-echo '</form>'."\n";
-
-echo '</td><td style="text-align:right; width: 100%; font-size: 170%">';
-echo "$AC_Produktion KWh(AC)";
-
-echo '</td></tr></table><br>';
+# Schalter aufrufen
+schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, 'red');
 
 $SQL = "WITH Alle_PVDaten AS (
 		select	Zeitpunkt,
@@ -135,6 +165,16 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
         }
 $trenner = ",";
 }
+    break; # ENDE case Produktion
+
+    case 'Verbrauch':
+
+# Schalter aufrufen
+schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, 'green');
+
+    break; # ENDE case Verbrauch
+    
+} # ENDE switch
 $db->close();
 ?>
 <div class="container">
