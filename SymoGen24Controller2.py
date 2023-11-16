@@ -608,14 +608,14 @@ if __name__ == '__main__':
                     Logging_ein = getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
                         Logging_Schreib_Ausgabe = ""
-                        if len(argv) > 1 and (argv[1] == "schreiben"):
+                        if len(argv) > 1 and (argv[1] == "schreiben" or argv[1] == "logging"):
                             Logging_file = getVarConf('Logging','Logging_file','str')
                             API_Werte = gen24.get_API()
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
                             save_SQLite(Logging_file, API_Werte['AC_Produktion'], API_Werte['DC_Produktion'], API_Werte['Netzverbrauch'], API_Werte['Einspeisung'], API_Werte['Batterie_IN'], API_Werte['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
-                            Logging_Schreib_Ausgabe = 'Daten wurden in die SQLite-Datei geschrieben!'
+                            Logging_Schreib_Ausgabe = 'Daten wurden in die SQLite-Datei gespeichert!'
                         else:
-                            Logging_Schreib_Ausgabe = "Logging wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n" 
+                            Logging_Schreib_Ausgabe = "Logging wurde NICHT gespeichert, da NICHT \"logging\" oder \"schreiben\" übergeben wurde:\n" 
 
                         if print_level >= 1:
                             print(Logging_Schreib_Ausgabe)
