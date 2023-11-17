@@ -1,7 +1,7 @@
 ## :sunny: GEN24_Ladesteuerung :battery:
 (getestet unter Python 3.8 und 3.9)
 
-![Screenshot](pics/Steuerungstabellen.png)
+![Tabelle Lade- bzw. Entladesteuerung](pics/Steuerungstabellen.png)
 
 - Ladesteuerung für  Fronius Symo GEN24 Plus um die Einspeisebegrenzung (bei mir 70%) zu umgehen,
 und die Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.  
@@ -9,7 +9,7 @@ und die Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie z
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
 Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
-![Screenshot](pics/Ladewertverteilung.png)
+![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
 ## :floppy_disk: Installationshinweise: [(siehe auch)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv  
@@ -79,6 +79,7 @@ Wenn in der "config.ini" Logging_ein = 1 gesetzt ist, werden die Werte im "Loggi
 Beim Aufruf von `SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
 Beim Aufruf von `SymoGen24Controller2.py logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
 Aus der SQLite-Datei werden dann in html/7_tab_Diagram.php Diagramme erzeugt.  
+![Grafik zur Tagesproduktion](pics/Tagesproduktion.png)
 **_ENDE NEU_**
 
 
@@ -130,7 +131,7 @@ Vorhandene Skripts:
 Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.  
 
 
-![Screenshot](pics/Ladesteuerung.png)
+![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 ### Batterieladesteuerung ( TAB--> LadeSteuerung )
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben.  
@@ -145,7 +146,7 @@ Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Op
 
 Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
-![Screenshot](pics/Entladesteuerung.png)
+![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
 ### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
 
 Unter "Feste Entladegrenze " kann die maximale Entladeleistung
