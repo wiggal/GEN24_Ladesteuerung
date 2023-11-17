@@ -42,7 +42,7 @@ if (!file_exists($SQLite_file)) {
     exit();
 }
 
-function schalter_ausgeben ( $case, $nextcase , $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, $buttoncolor)
+function schalter_ausgeben ( $case, $nextcase , $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, $buttoncolor, $mengencolor)
 {
 
 # Schalter zum Blättern usw.
@@ -74,9 +74,24 @@ echo '<input type="hidden" name="case" value="'.$nextcase.'">'."\n";
 echo '<button type="submit" class="navi" style="background-color:'.$buttoncolor.'"> '.$nextcase.'&gt;&gt; </button>';
 echo '</form>'."\n";
 
+# Hier noch die Zweiträume einbinden
+/*
+echo '</td><td>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="DiaTag" value="'.$DiaTag.'">'."\n";
+echo '<input type="hidden" name="case" value="'.$nextcase.'">'."\n";
+echo '<select name="top5">';
+echo '<option>Tag</option>';
+echo '<option>Monat</option>';
+echo '<option>Jahr</option>';
+echo '<option>gesamt</option>';
+echo '</select>';
+echo '</form>'."\n";
+*/
 
 echo '</td><td style="text-align:right; width: 100%; font-size: 170%">';
-echo "$AC_Produktion KWh(AC)";
+echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$mengencolor.'">';
+echo "&nbsp;$AC_Produktion KWh&nbsp;";
 
 echo '</td></tr></table><br>';
 }
@@ -103,36 +118,36 @@ switch ($case) {
 
 # AC Produktion 
 $SQL = "SELECT 
-        MAX(AC_Produktion)- MIN(AC_Produktion) + 
-        MAX(Batterie_IN) - min(Batterie_IN) + 
-        MIN (Batterie_OUT) - MAX (Batterie_OUT)
-        AS AC_Produktion
+        MAX(DC_Produktion)- MIN(DC_Produktion)
+        AS DC_Produktion
 from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
-$AC_Produktion = round($db->querySingle($SQL)/1000, 1);
+$DC_Produktion = round($db->querySingle($SQL)/1000, 1);
 
 # Schalter aufrufen
-schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, 'red');
+schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $DC_Produktion, 'red', 'rgb(50,205,50)');
 
 # ProduktionsSQL
+# Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
 $SQL = "WITH Alle_PVDaten AS (
-		select	Zeitpunkt,
-		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
-		((AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
-		((Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) + (AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
-		(Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
-		((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS BatteriePower,
-		Vorhersage,
-		BattStatus
+        select  Zeitpunkt,
+        ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
+        ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
+        ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))
+			+ (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
+        (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
+        ((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS BatteriePower,
+        Vorhersage,
+        BattStatus
 from pv_daten where Zeitpunkt LIKE '".$DiaTag."%')
 SELECT Zeitpunkt,
-	Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
-	Gesamtverbrauch*60/Zeitabstand AS Gesamtverbrauch,
-	Einspeisung*60/Zeitabstand AS Einspeisung,
-	BatteriePower*60/Zeitabstand AS BatteriePower,
-	Vorhersage,
-	BattStatus
+    Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
+    Gesamtverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Gesamtverbrauch,
+    Einspeisung*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Einspeisung,
+    BatteriePower*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS BatteriePower,
+    Vorhersage,
+    BattStatus
 FROM Alle_PVDaten
-Where Zeitabstand > 4";
+Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 
 $results = $db->query($SQL);
 
@@ -150,6 +165,10 @@ $daten = array();
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
         $first = true;
         foreach($row as $x => $val) {
+        # Auf 10 Watt runden
+        if ($x != 'BattStatus' and $x != 'Vorhersage') {
+            $val = (round($val/10))*10;
+        }
         if ( $first ){
             # Datum zuschneiden 
             $label_element = substr($val, 11, -3);
@@ -180,26 +199,28 @@ from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Schalter aufrufen
-schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Verbrauch, 'green');
+schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Verbrauch, 'rgb(50,205,50)', 'red');
 
 # VerbrauchSQL
+# Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
 $SQL = "WITH Alle_PVDaten AS (
-		select	Zeitpunkt,
-		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
+        select  Zeitpunkt,
+        ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
+		((Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) + (AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
         ((AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
-		(Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzverbrauch,
-		(AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) AS Produktion,
-		((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
-		BattStatus
+        (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzverbrauch,
+        (DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) AS Produktion,
+        ((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
+        BattStatus
 from pv_daten where Zeitpunkt LIKE '".$DiaTag."%')
 SELECT Zeitpunkt,
-	Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
-	Produktion*60/Zeitabstand AS Produktion,
-	Netzverbrauch*60/Zeitabstand AS Netzverbrauch,
-	VonBatterie*60/Zeitabstand AS VonBatterie,
-	BattStatus
+    Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
+    Produktion*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Produktion,
+    Netzverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Netzverbrauch,
+    VonBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS VonBatterie,
+    BattStatus
 FROM Alle_PVDaten
-Where Zeitabstand > 4";
+Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 
 $results = $db->query($SQL);
 
@@ -216,6 +237,10 @@ $daten = array();
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
         $first = true;
         foreach($row as $x => $val) {
+        # Auf 10 Watt runden
+        if ($x != 'BattStatus') {
+            $val = (round($val/10))*10;
+        }
         if ( $first ){
             # Datum zuschneiden 
             $label_element = substr($val, 11, -3);
