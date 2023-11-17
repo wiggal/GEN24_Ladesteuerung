@@ -303,7 +303,11 @@ new Chart("PVDaten", {
             display: true,
             //text: (ctx) => 'Tooltip position mode: ' + ctx.chart.options.plugins.tooltip.position,
         },
-      },
+                tooltip: {
+        titleFont: { size: 25 },
+        bodyFont: { size: 25 },
+      }
+    },
     scales: {
       x: {
         ticks: {
