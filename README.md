@@ -72,11 +72,12 @@ falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
 
-**_NEU ab Version 0.11.2_**
+**_NEU ab Version 0.12.0_**
 ### :bar_chart: Logging (optional)
 
-Erfolgt nun beim Aufruf von SymoGen24Controller2.py, wenn in der "config.ini" Logging_ein = 1.
-Das Logging schreibt Werte in das "Logging_file" im sqlite-Format.  
+Wenn in der "config.ini" Logging_ein = 1 gesetzt ist, werden die Werte im "Logging_file" im sqlite-Format gespeichert.  
+Beim Aufruf von `SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
+Beim Aufruf von `SymoGen24Controller2.py logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
 Aus der SQLite-Datei werden dann in html/7_tab_Diagram.php Diagramme erzeugt.
 **_ENDE NEU_**
 
@@ -96,7 +97,7 @@ Und im Browser localhost:7777 aufrufen.
 Webserver Apache z.B.:
 
 ### :floppy_disk: Installationshinweise: [(siehe auch)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
-**_NEU ab Version 0.11.0_**  
+**_NEU ab Version 0.12.0_**  
 ```
 sudo apt install apache2 php
 sudo apt install php-sqlite3

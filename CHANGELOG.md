@@ -7,6 +7,10 @@ Logging erfolgt nun mit dem "lifetime Zählerständen" aus der API: /components/
 
 Das Logging in eine CSV_Datei fällt weg.  
 
+Änderung in SymoGen24Controller2.py
+- Das Scribt kann nun auch mit dem Parameter "logging" aufgerufen werden, dann regelt die Ladesteuerung den WR nicht.  
+  Es werden nur werte gelesen und in die SQLite Datei zur Auswertung geschrieben.
+
 ### ACHTUNG Änderung in der config.ini im Block [Logging]
 - Variable Logging_file erhält vollständigen Namen
 - Variable Logging_type entfernt 
