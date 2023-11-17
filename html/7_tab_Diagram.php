@@ -124,7 +124,7 @@ from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
 $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
 
 # Schalter aufrufen
-schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $DC_Produktion, 'red', 'rgb(50,205,50)');
+schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $DC_Produktion, 'red', 'rgb(34,139,34)');
 
 # ProduktionsSQL
 # Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
@@ -152,9 +152,9 @@ Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 $results = $db->query($SQL);
 
 $optionen = array();
-$optionen['Gesamtverbrauch']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
+$optionen['Gesamtverbrauch']=['Farbe'=>'rgba(255,0,0,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
 $optionen['Vorhersage']=['Farbe'=>'rgba(255,140,05,1)','fill'=>'false','stack'=>'2','linewidth'=>'2','order'=>'0','borderDash'=>'[15,8]','yAxisID'=>'y'];
-$optionen['BattStatus']=['Farbe'=>'rgba(34,139,34,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
+$optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
 $optionen['Einspeisung'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '3', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['InBatterie'] = ['Farbe' => 'rgba(50,205,50,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '2', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
@@ -199,7 +199,7 @@ from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Schalter aufrufen
-schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Verbrauch, 'rgb(50,205,50)', 'red');
+schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Verbrauch, 'rgb(34,139,34)', 'red');
 
 # VerbrauchSQL
 # Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
@@ -225,8 +225,8 @@ Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 $results = $db->query($SQL);
 
 $optionen = array();
-$optionen['Produktion']=['Farbe'=>'rgba(255,215,0,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
-$optionen['BattStatus']=['Farbe'=>'rgba(34,139,34,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
+$optionen['Produktion']=['Farbe'=>'rgba(34,139,34,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
+$optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
 $optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '3', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['VonBatterie'] = ['Farbe' => 'rgba(50,205,50,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '2', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
