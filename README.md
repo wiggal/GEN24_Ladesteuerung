@@ -79,6 +79,7 @@ Wenn in der "config.ini" Logging_ein = 1 gesetzt ist, werden die Werte im "Loggi
 Beim Aufruf von `SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
 Beim Aufruf von `SymoGen24Controller2.py logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
 Aus der SQLite-Datei werden dann in html/7_tab_Diagram.php Diagramme erzeugt.  
+Hier z.B. die Grafik zur Tagesproduktion:  
 ![Grafik zur Tagesproduktion](pics/Tagesproduktion.png)
 **_ENDE NEU_**
 
