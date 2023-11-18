@@ -96,6 +96,35 @@ echo "&nbsp;$AC_Produktion KWh&nbsp;";
 echo '</td></tr></table><br>';
 }
 
+function diagrammdaten ( $results, $DB_Werte)
+{
+$trenner = "";
+$labels = "";
+$daten = array();
+while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        $first = true;
+        foreach($row as $x => $val) {
+        if ( $first ){
+            # Datum zuschneiden 
+            $label_element = substr($val, 11, -3);
+            $labels = $labels.$trenner.'"'.$label_element.'"';
+            $first = false;
+        } else {
+            if (!isset($daten[$x])) $daten[$x] = "";
+            # keine Minuswerte und auf 10 Watt runden
+            foreach ($DB_Werte as $i) {
+                if ($x == $i) { 
+                    $val = (round($val/10))*10;
+                    if ($val < 0) $val = 0;
+                }
+            }
+            $daten[$x] = $daten[$x] .$trenner.$val;
+            }
+        }
+$trenner = ",";
+}
+return array($daten, $labels);
+}
 
 # Diagrammtag festlegen
 $heute = date("Y-m-d");
@@ -123,7 +152,7 @@ $SQL = "SELECT
 from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
 $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
 
-# Schalter aufrufen
+# Funtkion Schalter aufrufen
 schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $DC_Produktion, 'red', 'rgb(34,139,34)');
 
 # ProduktionsSQL
@@ -151,6 +180,10 @@ Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 
 $results = $db->query($SQL);
 
+# Funktion diagrammdaten
+$DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Direktverbrauch');
+list($daten, $labels) = diagrammdaten($results, $DB_Werte);
+
 $optionen = array();
 $optionen['Gesamtverbrauch']=['Farbe'=>'rgba(255,0,0,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
 $optionen['Vorhersage']=['Farbe'=>'rgba(255,140,05,1)','fill'=>'false','stack'=>'2','linewidth'=>'2','order'=>'0','borderDash'=>'[15,8]','yAxisID'=>'y'];
@@ -159,32 +192,6 @@ $optionen['Einspeisung'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true', 
 $optionen['InBatterie'] = ['Farbe' => 'rgba(50,205,50,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '2', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 
-$trenner = "";
-$labels = "";
-$daten = array();
-while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-        $first = true;
-        foreach($row as $x => $val) {
-        if ( $first ){
-            # Datum zuschneiden 
-            $label_element = substr($val, 11, -3);
-            $labels = $labels.$trenner.'"'.$label_element.'"';
-            $first = false;
-        } else {
-            if (!isset($daten[$x])) $daten[$x] = "";
-            # keine Minuswerte und auf 10 Watt runden
-            $DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Direktverbrauch');
-            foreach ($DB_Werte as $i) {
-                if ($x == $i) { 
-                    $val = (round($val/10))*10;
-                    if ($val < 0) $val = 0;
-                }
-            }
-            $daten[$x] = $daten[$x] .$trenner.$val;
-            }
-        }
-$trenner = ",";
-}
     break; # ENDE case Produktion
 
     case 'Verbrauch':
@@ -224,6 +231,10 @@ Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 
 $results = $db->query($SQL);
 
+# Funktion diagrammdaten
+$DB_Werte = array('Produktion', 'Netzverbrauch', 'VonBatterie', 'Direktverbrauch');
+list($daten, $labels) = diagrammdaten($results, $DB_Werte);
+
 $optionen = array();
 $optionen['Produktion']=['Farbe'=>'rgba(34,139,34,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
 $optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
@@ -231,32 +242,6 @@ $optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true'
 $optionen['VonBatterie'] = ['Farbe' => 'rgba(50,205,50,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '2', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 
-$trenner = "";
-$labels = "";
-$daten = array();
-while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-        $first = true;
-        foreach($row as $x => $val) {
-        if ( $first ){
-            # Datum zuschneiden 
-            $label_element = substr($val, 11, -3);
-            $labels = $labels.$trenner.'"'.$label_element.'"';
-            $first = false;
-        } else {
-            if (!isset($daten[$x])) $daten[$x] = "";
-            # keine Minuswerte und auf 10 Watt runden
-            $DB_Werte = array('Produktion', 'Netzverbrauch', 'VonBatterie', 'Direktverbrauch');
-            foreach ($DB_Werte as $i) {
-                if ($x == $i) { 
-                    $val = (round($val/10))*10;
-                    if ($val < 0) $val = 0;
-                }
-            }
-            $daten[$x] = $daten[$x] .$trenner.$val;
-            }
-        }
-$trenner = ",";
-}
     break; # ENDE case Verbrauch
     
 } # ENDE switch
