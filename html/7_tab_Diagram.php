@@ -288,10 +288,29 @@ new Chart("PVDaten", {
             display: true,
             //text: (ctx) => 'Tooltip position mode: ' + ctx.chart.options.plugins.tooltip.position,
         },
-                tooltip: {
-        titleFont: { size: 25 },
-        bodyFont: { size: 25 },
-      }
+        legend: {
+             position: 'top',
+             labels: {
+                 font: {
+                   size: 20,
+                 }
+            }
+        },
+        tooltip: {
+            titleFont: { size: 20 },
+            bodyFont: { size: 20 },
+            // Einheitt beim Tooltip hinzufügen
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    let unit = ' W';
+                    if ( label == 'BattStatus' ) {
+                        unit = ' %';
+                    }
+                    return label + ' ' + context.parsed.y + unit;
+                }
+            }
+        }
     },
     scales: {
       x: {
