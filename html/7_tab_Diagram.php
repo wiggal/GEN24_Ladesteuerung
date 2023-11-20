@@ -42,7 +42,8 @@ if (!file_exists($SQLite_file)) {
     exit();
 }
 
-function schalter_ausgeben ( $case, $nextcase , $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, $buttoncolor, $mengencolor)
+## BEGIN FUNCTIONS
+function schalter_ausgeben ( $case, $nextcase , $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Produktion, $buttoncolor, $mengencolor, $button_vor_on, $button_back_on)
 {
 
 # Schalter zum Blättern usw.
@@ -50,7 +51,7 @@ echo '<table><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaTag" value="'.$Tag_davor.'">'."\n";
 echo '<input type="hidden" name="case" value="'.$case.'">'."\n";
-echo '<button type="submit" class="navi"> &nbsp;&lt;&lt;&nbsp;</button>';
+echo '<button type="submit" class="navi" '.$button_back_on.'> &nbsp;&lt;&lt;&nbsp;</button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
@@ -64,7 +65,7 @@ echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaTag" value="'.$Tag_danach.'">'."\n";
 echo '<input type="hidden" name="case" value="'.$case.'">'."\n";
-echo '<button type="submit" class="navi"> &nbsp;&gt;&gt;&nbsp; </button>';
+echo '<button type="submit" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
@@ -125,6 +126,10 @@ $trenner = ",";
 }
 return array($daten, $labels);
 }
+## END FUNCTIONS
+
+# Datenbankverbindung herstellen
+$db = new SQLite3($SQLite_file);
 
 # Diagrammtag festlegen
 $heute = date("Y-m-d");
@@ -132,14 +137,17 @@ $DiaTag = $heute;
 if (isset($_POST["DiaTag"])) $DiaTag = $_POST["DiaTag"];
 $Tag_davor = date("Y-m-d",(strtotime("-1 day", strtotime($DiaTag))));
 $Tag_danach = date("Y-m-d",(strtotime("+1 day", strtotime($DiaTag))));
-
+# Schalter für morgen deaktivieren
+$button_vor_on = '';
+if ($DiaTag == $heute) $button_vor_on = 'disabled';
+# Schalter für Tag out of DB  deaktivieren
+$button_back_on = '';
+$DBersterTag = (explode(" ",$db->querySingle('SELECT MIN(Zeitpunkt) from pv_daten')));
+if ($DiaTag == $DBersterTag[0]) $button_back_on = 'disabled';
 
 # case = Verbrauch oder Produktion
 $case = 'Produktion';
 if (isset($_POST["case"])) $case = $_POST["case"];
-
-
-$db = new SQLite3($SQLite_file);
 
 # switch Verbrauch oder Produktion
 switch ($case) {
@@ -153,7 +161,7 @@ from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
 $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
 
 # Funtkion Schalter aufrufen
-schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $DC_Produktion, 'red', 'rgb(34,139,34)');
+schalter_ausgeben('Produktion', 'Verbrauch', $heute, $DiaTag, $Tag_davor, $Tag_danach, $DC_Produktion, 'red', 'rgb(34,139,34)', $button_vor_on, $button_back_on);
 
 # ProduktionsSQL
 # Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
@@ -206,7 +214,7 @@ from pv_daten where Zeitpunkt LIKE '".$DiaTag."%'";
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Schalter aufrufen
-schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Verbrauch, 'rgb(34,139,34)', 'red');
+schalter_ausgeben('Verbrauch', 'Produktion', $heute, $DiaTag, $Tag_davor, $Tag_danach, $AC_Verbrauch, 'rgb(34,139,34)', 'red', $button_vor_on, $button_back_on);
 
 # VerbrauchSQL
 # Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
