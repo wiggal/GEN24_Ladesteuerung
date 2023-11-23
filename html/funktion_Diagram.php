@@ -1,8 +1,14 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ( $energietype, $nextenergietype , $heute, $morgen, $DiaDatenVon, $DiaDatenBis, $VOR_DiaDatenVon, $VOR_DiaDatenBis, $NACH_DiaDatenVon, $NACH_DiaDatenBis, $Produktion, $buttoncolor, $mengencolor, $button_vor_on, $button_back_on)
+function schalter_ausgeben ( $energietype, $nextenergietype , $DiaDatenVon, $DiaDatenBis, $Produktion, $buttoncolor, $mengencolor, $button_vor_on, $button_back_on)
 {
+
+#print_r ($GLOBALS['_POST']['energietype']);
+$VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime("-1 day", strtotime($DiaDatenVon))));
+$VOR_DiaDatenBis = date("Y-m-d 00:00",(strtotime("-1 day", strtotime($DiaDatenBis))));
+$NACH_DiaDatenVon = date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenVon))));
+$NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenBis))));
 
 $schaltername = explode(" ", $DiaDatenVon);
 # Schalter zum Blättern usw.
@@ -11,14 +17,18 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$VOR_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$VOR_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$energietype.'">'."\n";
+echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
 echo '<button type="submit" class="navi" '.$button_back_on.'> &nbsp;&lt;&lt;&nbsp;</button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaDatenVon" value="'.$heute.'">'."\n";
-echo '<input type="hidden" name="DiaDatenBis" value="'.$morgen.'">'."\n";
+echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
+echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$energietype.'">'."\n";
+echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
 echo '<button type="submit" class="navi"> '.$schaltername[0].' </button>';
 echo '</form>'."\n";
 
@@ -27,6 +37,8 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$NACH_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$NACH_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$energietype.'">'."\n";
+echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
 echo '<button type="submit" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
 echo '</form>'."\n";
 
@@ -35,6 +47,8 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$nextenergietype.'">'."\n";
+echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
 echo '<button type="submit" class="navi" style="background-color:'.$buttoncolor.'"> '.$nextenergietype.'&gt;&gt; </button>';
 echo '</form>'."\n";
 
@@ -50,17 +64,25 @@ echo "&nbsp;$Produktion KWh&nbsp;";
 echo '</td></tr></table><br>';
 } #END function schalter_ausgeben 
 
-function diagrammdaten ( $results, $DB_Werte)
+function diagrammdaten ( $results, $DB_Werte, $EnergieEinheit, $XScaleEinheit )
 {
 $trenner = "";
 $labels = "";
 $daten = array();
+$cut_von = 11;
+$cut_anzahl = 5;
+switch ($XScaleEinheit) {
+    case 'tag': $cut_von = 11; $cut_anzahl = 5; break;  # Stunde ausgeben
+    case 'monat': $cut_von = 8; $cut_anzahl = 2; break; # Tag ausgeben
+    case 'jahr': $cut_von = 5; $cut_anzahl = 2; break;  # Monat ausgeben
+}
+    
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
         $first = true;
         foreach($row as $x => $val) {
         if ( $first ){
             # Datum zuschneiden 
-            $label_element = substr($val, 11, -3);
+            $label_element = substr($val, $cut_von, $cut_anzahl);
             $labels = $labels.$trenner.'"'.$label_element.'"';
             $first = false;
         } else {
@@ -72,7 +94,7 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
                     if ($val < 0) $val = 0;
                 }
             }
-            $daten[$x] = $daten[$x] .$trenner.$val;
+            $daten[$x] = $daten[$x] .$trenner.$val/$EnergieEinheit;
             }
         }
 $trenner = ",";
@@ -118,7 +140,7 @@ Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 return $SQL;
     break; # ENDE case 'Produktion_Line'
 
-    case 'SUM_AC_Produktion':
+    case 'SUM_AC_Verbrauch':
 # AC Verbrauch
 $SQL = "SELECT 
         MAX(Netzverbrauch)- MIN(Netzverbrauch) + 
@@ -127,7 +149,7 @@ $SQL = "SELECT
         AS AC_Produktion
 from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'";
 return $SQL;
-    break; # ENDE case 'SUM_AC_Produktion'
+    break; # ENDE case 'SUM_AC_Verbrauch'
 
     case 'Verbrauch_Line':
 # Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
@@ -170,6 +192,18 @@ group by STRFTIME('".$groupSTR."', Zeitpunkt)";
 #group by STRFTIME('%Y-%m-%d', Zeitpunkt)";
 return $SQL;
     break; # ENDE case 'Produktion_bar'
+
+    case 'Verbrauch_bar':
+$SQL = "select Zeitpunkt, 
+	(max(AC_Produktion - Einspeisung - Batterie_OUT) - min(AC_Produktion - Einspeisung - Batterie_OUT)) AS Direktverbrauch,
+	(max(Batterie_OUT) - min(Batterie_OUT)) as VonBatterie,
+	(max(Netzverbrauch) - min(Netzverbrauch)) as Netzverbrauch
+from pv_daten
+where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+group by STRFTIME('".$groupSTR."', Zeitpunkt)";
+#group by STRFTIME('%Y-%m-%d', Zeitpunkt)";
+return $SQL;
+    break; # ENDE case 'Verbrauch_bar'
 
 } # ENDE switch
 } # END function getSQL
@@ -306,17 +340,14 @@ window.onload = function() { zeitsetzer(1); };
 </div>
 <b>Noch nicht umgesetzt:</b><br>
 - Blättern in den Zeitreihen<br>
-- Balkendiagramme<br>
 ";
 } # END function Optionenausgabe
 
-function Diagram_ausgabe($Diatype, $labels, $daten, $optionen)
+function Diagram_ausgabe($Diatype, $labels, $daten, $optionen, $EnergieEinheit)
 {
-switch ($Diatype) {
-    case 'Diagram_Line':
 echo " <script>
 new Chart('PVDaten', {
-    type: 'line',
+    type: '". $Diatype ."',
     data: {
       labels: [". $labels ."],
       datasets: [{";
@@ -361,11 +392,11 @@ echo "    }]
         tooltip: {
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
-            // Einheitt beim Tooltip hinzufügen
+            // Einheit beim Tooltip hinzufügen
             callbacks: {
                 label: function(context) {
                     let label = context.dataset.label || '';
-                    let unit = ' W';
+                    let unit = ' ". $EnergieEinheit ."';
                     if ( label == 'BattStatus' ) {
                         unit = ' %';
                     }
@@ -428,8 +459,6 @@ echo "    }]
 },
   });
 </script>";
-    break; # ENDE case 'Produktion_Line'
-} # ENDE switch
 }  # END function Diagram_ausgabe
 ?>
 
