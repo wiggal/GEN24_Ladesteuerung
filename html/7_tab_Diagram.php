@@ -52,7 +52,7 @@ include "config.php";
 include "funktion_Diagram.php";
 
 # ENTW 
-# print_r($_POST);
+#print_r($_POST);
 
 # Prüfen ob SQLite Voraussetzungen vorhanden sind
 $SQLite_file = "../" . $python_config['Logging']['Logging_file'];
@@ -60,7 +60,12 @@ if (!file_exists($SQLite_file)) {
     echo "\nSQLitedatei $filename existiert nicht, keine Grafik verfügbar!";
     echo "</body></html>";
     exit();
-    }
+}
+
+# Variablendefinitionen
+$labels = '';
+$daten = array();
+$optionen = '';
 
 # Datenbankverbindung herstellen
 $db = new SQLite3($SQLite_file);
@@ -77,68 +82,81 @@ $VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime("-1 day", strtotime($DiaDatenVo
 $VOR_DiaDatenBis = date("Y-m-d 00:00",(strtotime("-1 day", strtotime($DiaDatenBis))));
 $NACH_DiaDatenVon = date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenVon))));
 $NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenBis))));
+
 # Schalter für morgen deaktivieren
 $button_vor_on = '';
+$button_back_on = '';
+/* NOCH ENTW
 if ($DiaTag == $heute) $button_vor_on = 'disabled';
 # Schalter für Tag out of DB  deaktivieren
 $button_back_on = '';
 $DBersterTag = (explode(" ",$db->querySingle('SELECT MIN(Zeitpunkt) from pv_daten')));
 if ($DiaTag == $DBersterTag[0]) $button_back_on = 'disabled';
+*/
 
 # energietype = Verbrauch oder Produktion
 $energietype = 'Produktion';
 if (isset($_POST["energietype"])) $energietype = $_POST["energietype"];
 
+# diagramtype = line oder bar
+$diagramtype = 'line';
+if (isset($_POST["diagramtype"])) $diagramtype = $_POST["diagramtype"];
+
+# Diagrammtype Auswahl
+if ($diagramtype == 'line') {
 # switch Verbrauch oder Produktion
 switch ($energietype) {
-    case 'Produktion':
+   case 'Produktion':
 
-# AC Produktion 
-$SQL = getSQL('SUM_DC_Produktion', $DiaDatenVon, $DiaDatenBis);
-$DC_Produktion = round($db->querySingle($SQL)/1000, 1);
-
-# Funktion Schalter aufrufen
-schalter_ausgeben('Produktion', 'Verbrauch', $heute, $morgen, $DiaDatenVon, $DiaDatenBis, $VOR_DiaDatenVon, $VOR_DiaDatenBis, $NACH_DiaDatenVon, $NACH_DiaDatenBis, $DC_Produktion, 'rgb(255,158,158)', 'rgb(0,255,127)', $button_vor_on, $button_back_on);
-
-# ProduktionsSQL und Daten holen
-$SQL = getSQL('Produktion_Line', $DiaDatenVon, $DiaDatenBis);
-$results = $db->query($SQL);
-
-# Diagrammdaten und Optionen holen
-$DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Direktverbrauch');
-list($daten, $labels) = diagrammdaten($results, $DB_Werte);
-$optionen = Dia_Options('Produktion_Line');
+        # AC Produktion 
+        $SQL = getSQL('SUM_DC_Produktion', $DiaDatenVon, $DiaDatenBis);
+        $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
+        
+        # Funktion Schalter aufrufen
+        schalter_ausgeben('Produktion', 'Verbrauch', $heute, $morgen, $DiaDatenVon, $DiaDatenBis, $VOR_DiaDatenVon, $VOR_DiaDatenBis, 
+            $NACH_DiaDatenVon, $NACH_DiaDatenBis, $DC_Produktion, 'rgb(255,158,158)', 'rgb(0,255,127)', $button_vor_on, $button_back_on);
+    
+        # ProduktionsSQL und Daten holen
+        $SQL = getSQL('Produktion_Line', $DiaDatenVon, $DiaDatenBis);
+        $results = $db->query($SQL);
+    
+        # Diagrammdaten und Optionen holen
+        $DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Direktverbrauch');
+        list($daten, $labels) = diagrammdaten($results, $DB_Werte);
+        $optionen = Dia_Options('Produktion_Line');
 
     break; # ENDE case Produktion
 
     case 'Verbrauch':
 
-# AC Verbrauch
-$SQL = getSQL('SUM_AC_Produktion', $DiaDatenVon, $DiaDatenBis);
-$AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
+        # AC Verbrauch
+        $SQL = getSQL('SUM_AC_Produktion', $DiaDatenVon, $DiaDatenBis);
+        $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
+    
+        # Schalter aufrufen
+        schalter_ausgeben('Verbrauch', 'Produktion', $heute, $morgen, $DiaDatenVon, $DiaDatenBis, $VOR_DiaDatenVon, $VOR_DiaDatenBis, 
+            $NACH_DiaDatenVon, $NACH_DiaDatenBis, $AC_Verbrauch, 'rgb(0,255,127)', 'rgb(255,158,158)', $button_vor_on, $button_back_on);
 
-# Schalter aufrufen
-schalter_ausgeben('Verbrauch', 'Produktion', $heute, $morgen, $DiaDatenVon, $DiaDatenBis, $VOR_DiaDatenVon, $VOR_DiaDatenBis, $NACH_DiaDatenVon, $NACH_DiaDatenBis, $AC_Verbrauch, 'rgb(0,255,127)', 'rgb(255,158,158)', $button_vor_on, $button_back_on);
+        # VerbrauchSQL und Daten holen
+        $SQL = getSQL('Verbrauch_Line', $DiaDatenVon, $DiaDatenBis);
+        $results = $db->query($SQL);
 
-# VerbrauchSQL und Daten holen
-$SQL = getSQL('Verbrauch_Line', $DiaDatenVon, $DiaDatenBis);
-$results = $db->query($SQL);
-
-# Diagrammdaten und Optionen holen
-$DB_Werte = array('Produktion', 'Netzverbrauch', 'VonBatterie', 'Direktverbrauch');
-list($daten, $labels) = diagrammdaten($results, $DB_Werte);
-$optionen = Dia_Options('Verbrauch_Line');
+        # Diagrammdaten und Optionen holen
+        $DB_Werte = array('Produktion', 'Netzverbrauch', 'VonBatterie', 'Direktverbrauch');
+        list($daten, $labels) = diagrammdaten($results, $DB_Werte);
+        $optionen = Dia_Options('Verbrauch_Line');
 
     break; # ENDE case Verbrauch
     
 } # ENDE switch
+} # END if ($diagramtype == 'line')
 
 $db->close();
 
+# Wenn Optionen dann keine Chartausgabe
 if ($energietype == 'option') {
 Optionenausgabe();
 } else {
-# Wenn Optionen dann kein Chart
 echo "<div class='container'>
   <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
 </div>";

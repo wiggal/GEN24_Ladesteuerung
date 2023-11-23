@@ -32,14 +32,14 @@ echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaTag" value="'.$DiaTag.'">'."\n";
+echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
+echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$nextenergietype.'">'."\n";
 echo '<button type="submit" class="navi" style="background-color:'.$buttoncolor.'"> '.$nextenergietype.'&gt;&gt; </button>';
 echo '</form>'."\n";
 
 echo '</td><td style="text-align:center; width: 100%;">';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaTag" value="'.$Tag_danach.'">'."\n";
 echo '<input type="hidden" name="energietype" value="option">'."\n";
 echo '<button type="submit" class="navi" > Optionen </button>';
 echo '</form>'."\n";
@@ -151,6 +151,26 @@ FROM Alle_PVDaten
 Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
 return $SQL;
     break; # ENDE case 'Verbrauch_Line'
+
+} # ENDE switch
+} # END function getSQL
+
+function getSQL_bar($SQLType, $DiaDatenVon, $DiaDatenBis, $groupSTR)
+{
+# SQL nach $SQLType wählen
+switch ($SQLType) {
+    case 'Produktion_bar':
+$SQL = "select Zeitpunkt, 
+	(max(DC_Produktion - Einspeisung - Batterie_IN) - min(DC_Produktion - Einspeisung - Batterie_IN)) AS Direktverbrauch,
+	(max(Batterie_IN) - min(Batterie_IN)) as InBatterie,
+	(max(Einspeisung) - min(Einspeisung)) as Einspeisung
+from pv_daten
+where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+group by STRFTIME('".$groupSTR."', Zeitpunkt)";
+#group by STRFTIME('%Y-%m-%d', Zeitpunkt)";
+return $SQL;
+    break; # ENDE case 'Produktion_bar'
+
 } # ENDE switch
 } # END function getSQL
 
