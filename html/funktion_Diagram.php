@@ -1,35 +1,48 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ( $energietype, $nextenergietype , $DiaDatenVon, $DiaDatenBis, $Produktion, $buttoncolor, $mengencolor, $button_vor_on, $button_back_on)
+function schalter_ausgeben ( $diagramtype, $Zeitraum, $energietype, $nextenergietype , $DiaDatenVon, $DiaDatenBis, $Produktion, $buttoncolor, $mengencolor)
 {
 
-#print_r ($GLOBALS['_POST']['energietype']);
-$VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime("-1 day", strtotime($DiaDatenVon))));
-$VOR_DiaDatenBis = date("Y-m-d 00:00",(strtotime("-1 day", strtotime($DiaDatenBis))));
-$NACH_DiaDatenVon = date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenVon))));
-$NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenBis))));
+# Abstand von bis ermitteln
+$zeitdifferenz = strtotime($DiaDatenBis) - strtotime($DiaDatenVon);
+$VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime($DiaDatenVon)-$zeitdifferenz));
+$VOR_DiaDatenBis = $DiaDatenVon;
+$NACH_DiaDatenVon = $DiaDatenBis;
+$NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime($DiaDatenBis)+$zeitdifferenz));
 
-$schaltername = explode(" ", $DiaDatenVon);
+# Schalter am Anfang und am Ende deaktivieren
+$button_vor_on = '';
+$heute = date("Y-m-d H:i");
+if (strtotime($DiaDatenBis) >= strtotime($heute)) $button_vor_on = 'disabled';
+# Schalter für Tag out of DB  deaktivieren
+$button_back_on = '';
+$DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from pv_daten');
+if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) $button_back_on = 'disabled';
+
 # Schalter zum Blättern usw.
 echo '<table><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$VOR_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$VOR_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$energietype.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
-echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
+echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
+echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
+echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<button type="submit" class="navi" '.$button_back_on.'> &nbsp;&lt;&lt;&nbsp;</button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
-echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
+echo '<input type="hidden" name="DiaDatenVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
+echo '<input type="hidden" name="DiaDatenBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$energietype.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
-echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
-echo '<button type="submit" class="navi"> '.$schaltername[0].' </button>';
+echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
+echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
+echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
+echo '<button type="submit" class="navi"> aktuell </button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
@@ -37,8 +50,10 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$NACH_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$NACH_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$energietype.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
-echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
+echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
+echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
+echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<button type="submit" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
 echo '</form>'."\n";
 
@@ -47,8 +62,10 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="energietype" value="'.$nextenergietype.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$GLOBALS['_POST']['diagramtype'].'">'."\n";
-echo '<input type="hidden" name="Zeitraum" value="'.$GLOBALS['_POST']['Zeitraum'].'">'."\n";
+echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
+echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
+echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<button type="submit" class="navi" style="background-color:'.$buttoncolor.'"> '.$nextenergietype.'&gt;&gt; </button>';
 echo '</form>'."\n";
 
@@ -72,9 +89,10 @@ $daten = array();
 $cut_von = 11;
 $cut_anzahl = 5;
 switch ($XScaleEinheit) {
-    case 'tag': $cut_von = 11; $cut_anzahl = 5; break;  # Stunde ausgeben
-    case 'monat': $cut_von = 8; $cut_anzahl = 2; break; # Tag ausgeben
-    case 'jahr': $cut_von = 5; $cut_anzahl = 2; break;  # Monat ausgeben
+    case 'stunden': $cut_von = 11; $cut_anzahl = 5; break;  # Stunde ausgeben
+    case 'tage': $cut_von = 8; $cut_anzahl = 2; break; # Tag ausgeben
+    case 'monate': $cut_von = 5; $cut_anzahl = 2; break;  # Monat ausgeben
+    case 'jahre': $cut_von = 0; $cut_anzahl = 4; break;  # Monat ausgeben
 }
     
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
@@ -259,13 +277,13 @@ let year_bis = date.getFullYear();
 let hours = '0';
 let minutes_html = '0' - date.getTimezoneOffset();
 
-// 1 = Tag
+// 1 = stunden
 if (offset == 1) {
   day_bis  = day_bis + 1;
   document.getElementsByName('diagramtype')[0].checked = true;
 }
 
-// 2 = Monat
+// 2 = tage
 if (offset == 2) {
   day_von  = 1;
   day_bis  = 1;
@@ -273,12 +291,23 @@ if (offset == 2) {
   document.getElementsByName('diagramtype')[1].checked = true;
 }
 
-// 3 = Monat
+// 3 = monate
 if (offset == 3) {
   day_von  = 1;
   day_bis  = 1;
   month_von = 1;
   month_bis = 1;
+  year_bis = year_bis + 1;
+  document.getElementsByName('diagramtype')[1].checked = true;
+}
+
+// 4 = jahre
+if (offset == 4) {
+  day_von  = 1;
+  day_bis  = 1;
+  month_von = 1;
+  month_bis = 1;
+  year_von = 2000;
   year_bis = year_bis + 1;
   document.getElementsByName('diagramtype')[1].checked = true;
 }
@@ -325,12 +354,15 @@ window.onload = function() { zeitsetzer(1); };
   <input class='date' type='datetime-local' name='DiaDatenVon' id='DiaDatenVon' value='' /><br><br>
   <label class='optionwahl' >Bis:&nbsp;&nbsp;&nbsp;</label>
   <input class='date' type='datetime-local' name='DiaDatenBis' id='DiaDatenBis' value='' /><br><br>
-  <input type='radio' id='tag' name='Zeitraum' value='tag' onclick='zeitsetzer(1)' checked>
-  <label class='optionwahl' for='tag'>Tag&nbsp;&nbsp;&nbsp;&nbsp;</label>
-  <input type='radio' id='monat' name='Zeitraum' value='monat' onclick='zeitsetzer(2)'>
-  <label class='optionwahl' for='monat'>Monat</label>
-  <input type='radio' id='jahr' name='Zeitraum' value='jahr' onclick='zeitsetzer(3)'>
-  <label class='optionwahl' for='jahr'>Jahr</label>
+
+  <input type='radio' id='stunden' name='Zeitraum' value='stunden' onclick='zeitsetzer(1)' checked>
+  <label class='optionwahl' for='stunden'>Stunden&nbsp;&nbsp;&nbsp;&nbsp;</label>
+  <input type='radio' id='tage' name='Zeitraum' value='tage' onclick='zeitsetzer(2)'>
+  <label class='optionwahl' for='tage'>Tage</label>
+  <input type='radio' id='monate' name='Zeitraum' value='monate' onclick='zeitsetzer(3)'>
+  <label class='optionwahl' for='monate'>Monate</label>
+  <input type='radio' id='jahre' name='Zeitraum' value='jahre' onclick='zeitsetzer(4)'>
+  <label class='optionwahl' for='jahre'>Jahre</label>
   </div>
   </fieldset>
 
@@ -338,12 +370,10 @@ window.onload = function() { zeitsetzer(1); };
 <button type='submit' class='navi' > Diagramm aufrufen</button>
 </form>
 </div>
-<b>Noch nicht umgesetzt:</b><br>
-- Blättern in den Zeitreihen<br>
 ";
 } # END function Optionenausgabe
 
-function Diagram_ausgabe($Diatype, $labels, $daten, $optionen, $EnergieEinheit)
+function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit)
 {
 echo " <script>
 new Chart('PVDaten', {
@@ -408,18 +438,17 @@ echo "    }]
     scales: {
       x: {
         ticks: {
-          /*
-          // Hier nur jede 6te Beschriftung ausgeben
-          // For a category axis, the val is the index so the lookup via getLabelForValue is needed
-          callback: function(val, index) {
-            // nur halbe Stunden in der X-Beschriftung ausgeben
-            return index % 6 === 0 ? this.getLabelForValue(val) : '';
-          },
-          */
           font: {
              size: 20,
            }
-        }
+        },
+        title: {
+          display: true,
+          text: '". $Footer ."',
+          font: {
+             size: 20,
+           },
+        },
       },
       y: {
         type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
