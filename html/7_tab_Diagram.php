@@ -87,7 +87,7 @@ if (!empty($_POST["energietype"])) $energietype = $_POST["energietype"];
 $diagramtype = 'line';
 if (!empty($_POST["diagramtype"])) $diagramtype = $_POST["diagramtype"];
 
-# Zeitraum = Tag, Monat, Jahr
+# Zeitraum = hours, day, mounth, year
 $Zeitraum = 'stunden';
 if (!empty($_POST["Zeitraum"])) $Zeitraum = $_POST["Zeitraum"];
 
@@ -100,19 +100,23 @@ switch ($Zeitraum) {
     case 'jahre': $groupSTR = '%Y'; break;
 }
 
-$Footer_groupSTR = substr($groupSTR, 0, -3);
+# Datenbankverbindung herstellen
+$db = new SQLite3($SQLite_file);
+$DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from pv_daten');
+
+$Footer_groupSTR = str_replace(" ","\T",$groupSTR);
 $Footer_DiaDatenVon = date_format(date_create($DiaDatenVon), str_replace("%","",$Footer_groupSTR));
-$Footer_DiaDatenBis = date_format(date_create($DiaDatenBis), str_replace("%","",$Footer_groupSTR));
+# Eine Minute von DiaDatenBis abziehen
+$Footer_DiaDatenBis = date_format(date_add(date_create($DiaDatenBis), date_interval_create_from_date_string("-1 minutes")), str_replace("%","",$Footer_groupSTR));
+
 if ( $Footer_DiaDatenBis != '' ) $Footer = $Footer_DiaDatenVon . ' bis '.$Footer_DiaDatenBis;
 
 # END _POST_VAR auslesen
-
+# Erstes Jahr aus DB, wenn alle Jahre dargestellt werden sollen
+$DBersterTag_Jahr = date_format(date_create($DBersterTag), 'Y');
 if ($energietype == 'option') {
-    Optionenausgabe();
+    Optionenausgabe($DBersterTag_Jahr);
 } else {
-
-# Datenbankverbindung herstellen
-$db = new SQLite3($SQLite_file);
 
 # Diagrammtype Auswahl
 if ($diagramtype == 'line') {
@@ -125,7 +129,7 @@ switch ($energietype) {
         $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
         
         # Funktion Schalter aufrufen
-        schalter_ausgeben($diagramtype, $Zeitraum, 'Produktion', 'Verbrauch', $DiaDatenVon, $DiaDatenBis, $DC_Produktion, 'rgb(255,158,158)', 'rgb(0,255,127)');
+        schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, 'Produktion', 'Verbrauch', $DiaDatenVon, $DiaDatenBis, $DC_Produktion, 'rgb(255,158,158)', 'rgb(0,255,127)');
     
         # ProduktionsSQL und Daten holen
         $SQL = getSQL('Produktion_Line', $DiaDatenVon, $DiaDatenBis);
@@ -145,7 +149,7 @@ switch ($energietype) {
         $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
     
         # Schalter aufrufen
-        schalter_ausgeben($diagramtype, $Zeitraum, 'Verbrauch', 'Produktion', $DiaDatenVon, $DiaDatenBis, $AC_Verbrauch, 'rgb(0,255,127)', 'rgb(255,158,158)');
+        schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, 'Verbrauch', 'Produktion', $DiaDatenVon, $DiaDatenBis, $AC_Verbrauch, 'rgb(0,255,127)', 'rgb(255,158,158)');
 
         # VerbrauchSQL und Daten holen
         $SQL = getSQL('Verbrauch_Line', $DiaDatenVon, $DiaDatenBis);
@@ -173,7 +177,7 @@ switch ($energietype) {
         $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
         
         # Funktion Schalter aufrufen
-        schalter_ausgeben($diagramtype, $Zeitraum, 'Produktion', 'Verbrauch', $DiaDatenVon, $DiaDatenBis, $DC_Produktion, 'rgb(255,158,158)', 'rgb(0,255,127)');
+        schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, 'Produktion', 'Verbrauch', $DiaDatenVon, $DiaDatenBis, $DC_Produktion, 'rgb(255,158,158)', 'rgb(0,255,127)');
     
         $SQL = getSQL_bar('Produktion_bar', $DiaDatenVon, $DiaDatenBis, $groupSTR);
         $results = $db->query($SQL);
@@ -192,7 +196,7 @@ switch ($energietype) {
         $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
         
         # Funktion Schalter aufrufen
-        schalter_ausgeben($diagramtype, $Zeitraum, 'Verbrauch', 'Produktion', $DiaDatenVon, $DiaDatenBis, $AC_Verbrauch, 'rgb(0,255,127)', 'rgb(255,158,158)');
+        schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, 'Verbrauch', 'Produktion', $DiaDatenVon, $DiaDatenBis, $AC_Verbrauch, 'rgb(0,255,127)', 'rgb(255,158,158)');
     
         # ProduktionsSQL und Daten holen
         $groupSTR = '%Y-%m-%d';
