@@ -1,7 +1,7 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ( $diagramtype, $Zeitraum, $energietype, $nextenergietype , $DiaDatenVon, $DiaDatenBis, $Produktion, $buttoncolor, $mengencolor)
+function schalter_ausgeben ($DBersterTag, $diagramtype, $Zeitraum, $energietype, $nextenergietype , $DiaDatenVon, $DiaDatenBis, $Produktion, $buttoncolor, $mengencolor)
 {
 
 # Abstand von bis ermitteln
@@ -17,7 +17,6 @@ $heute = date("Y-m-d H:i");
 if (strtotime($DiaDatenBis) >= strtotime($heute)) $button_vor_on = 'disabled';
 # Schalter für Tag out of DB  deaktivieren
 $button_back_on = '';
-$DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from pv_daten');
 if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) $button_back_on = 'disabled';
 
 # Schalter zum Blättern usw.
@@ -254,7 +253,7 @@ return $optionen;
 
 
 
-function Optionenausgabe()
+function Optionenausgabe($DBersterTag_Jahr)
 {
 # HTML-Seite mit Ptionsauswahl ausgeben
 echo "
@@ -307,7 +306,7 @@ if (offset == 4) {
   day_bis  = 1;
   month_von = 1;
   month_bis = 1;
-  year_von = 2000;
+  year_von = $DBersterTag_Jahr;
   year_bis = year_bis + 1;
   document.getElementsByName('diagramtype')[1].checked = true;
 }
