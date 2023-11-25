@@ -1,3 +1,8 @@
+**[0.12.1] – 2023-11-25**
+
+Änderungen in html/7_tab_Diagram.php und html/funktion_Diagram.php
+- Balkendiagramme, Optionsauswahl usw. hinzugefügt.
+
 **[0.12.0] – 2023-11-18**
 
 ## ACHTUNG: Umfangreiche Änderungen im Logging
