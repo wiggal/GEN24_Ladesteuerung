@@ -104,7 +104,8 @@ switch ($Zeitraum) {
 $db = new SQLite3($SQLite_file);
 $DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from pv_daten');
 
-$Footer_groupSTR = str_replace(" ","\T",$groupSTR);
+#$Footer_groupSTR = str_replace(" ","\T",$groupSTR);
+$Footer_groupSTR = str_replace(" %H","",$groupSTR);
 $Footer_DiaDatenVon = date_format(date_create($DiaDatenVon), str_replace("%","",$Footer_groupSTR));
 # Eine Minute von DiaDatenBis abziehen
 $Footer_DiaDatenBis = date_format(date_add(date_create($DiaDatenBis), date_interval_create_from_date_string("-1 minutes")), str_replace("%","",$Footer_groupSTR));

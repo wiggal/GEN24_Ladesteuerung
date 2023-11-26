@@ -312,9 +312,9 @@ if (offset == 4) {
 }
 
 
-let von = year_von + '-' + ('0'+month_von).substr(-2) + '-' + ('0'+day_von).substr(-2) + 'T00:00:00';
+let von = year_von + '-' + ('0'+month_von).substr(-2) + '-' + ('0'+day_von).substr(-2);
 //alert(von);
-let bis = year_bis + '-' + ('0'+month_bis).substr(-2)+ '-' + ('0'+day_bis).substr(-2) + 'T00:00:00';
+let bis = year_bis + '-' + ('0'+month_bis).substr(-2)+ '-' + ('0'+day_bis).substr(-2);
 //alert(bis);
 document.getElementById('DiaDatenVon').value = von;
 document.getElementById('DiaDatenBis').value = bis;
@@ -350,9 +350,9 @@ window.onload = function() { zeitsetzer(1); };
   <legend class='optionwahl'>Zeitraum:</legend>
   <div style='text-align: left'>
   <label class='optionwahl' >Von:&nbsp;</label>
-  <input class='date' type='datetime-local' name='DiaDatenVon' id='DiaDatenVon' value='' /><br><br>
+  <input class='date' type='date' name='DiaDatenVon' id='DiaDatenVon' value='' /><br><br>
   <label class='optionwahl' >Bis:&nbsp;&nbsp;&nbsp;</label>
-  <input class='date' type='datetime-local' name='DiaDatenBis' id='DiaDatenBis' value='' /><br><br>
+  <input class='date' type='date' name='DiaDatenBis' id='DiaDatenBis' value='' /><br><br>
 
   <input type='radio' id='stunden' name='Zeitraum' value='stunden' onclick='zeitsetzer(1)' checked>
   <label class='optionwahl' for='stunden'>Stunden&nbsp;&nbsp;&nbsp;&nbsp;</label>
