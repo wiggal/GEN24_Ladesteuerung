@@ -1,3 +1,6 @@
+**[0.12.2] – 2023-XX-XX**
+ 
+
 **[0.12.1] – 2023-11-25**
 
 Änderungen in html/7_tab_Diagram.php und html/funktion_Diagram.php
