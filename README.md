@@ -32,10 +32,12 @@ Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell 
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit neue Prognosedaten in der Datei weatherData.json vorhanden sind!  
 
 Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen)  
-Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)
+Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)  
+**_NEU ab Version 0.12.0_** SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging. **_ENDE NEU_**  
+(Häufigerer Aufruf nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!)  
 
 ```
-*/5 06-16 * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
+*/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
 33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
 8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
 1 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
