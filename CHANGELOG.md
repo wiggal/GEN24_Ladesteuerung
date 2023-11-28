@@ -1,5 +1,8 @@
 **[0.12.2] – 2023-XX-XX**
  
+Änderungen in html/7_tab_Diagram.php und html/funktion_Diagram.php
+- Footer: Element "bis ..." weglassen wen von und bis gleich.
+- Tooltip: Summenbildung hinzugefügt
 
 **[0.12.1] – 2023-11-25**
 

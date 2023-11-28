@@ -421,6 +421,7 @@ echo "    }]
         tooltip: {
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
+            footerFont: { size: 20 },
             // Einheit beim Tooltip hinzufügen
             callbacks: {
                 label: function(context) {
@@ -430,9 +431,16 @@ echo "    }]
                         unit = ' %';
                     }
                     return label + ' ' + context.parsed.y + unit;
-                }
+                },
+                footer: function(context) {
+                    var total = 0;
+                    for (var i = (context.length - 3); i < context.length; i++){
+                    total += context[i].raw;
+                    }
+                    return 'Summe: ' + total.toFixed(2) + ' ". $EnergieEinheit ."';
+                    }
             }
-        }
+      }
     },
     scales: {
       x: {
