@@ -110,7 +110,11 @@ $Footer_DiaDatenVon = date_format(date_create($DiaDatenVon), str_replace("%","",
 # Eine Minute von DiaDatenBis abziehen
 $Footer_DiaDatenBis = date_format(date_add(date_create($DiaDatenBis), date_interval_create_from_date_string("-1 minutes")), str_replace("%","",$Footer_groupSTR));
 
-if ( $Footer_DiaDatenBis != '' ) $Footer = $Footer_DiaDatenVon . ' bis '.$Footer_DiaDatenBis;
+if ( $Footer_DiaDatenBis != '' and $Footer_DiaDatenVon != $Footer_DiaDatenBis ) {
+    $Footer = $Footer_DiaDatenVon . ' bis '.$Footer_DiaDatenBis;
+} else {
+    $Footer = $Footer_DiaDatenVon;
+}
 
 # END _POST_VAR auslesen
 # Erstes Jahr aus DB, wenn alle Jahre dargestellt werden sollen
