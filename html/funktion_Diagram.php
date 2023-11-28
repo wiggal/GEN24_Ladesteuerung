@@ -374,6 +374,8 @@ window.onload = function() { zeitsetzer(1); };
 
 function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit)
 {
+$Nachkommastellen = 2;
+if ($EnergieEinheit == 'W') $Nachkommastellen = 0;
 echo " <script>
 new Chart('PVDaten', {
     type: '". $Diatype ."',
@@ -437,7 +439,7 @@ echo "    }]
                     for (var i = (context.length - 3); i < context.length; i++){
                     total += context[i].raw;
                     }
-                    return 'Summe: ' + total.toFixed(2) + ' ". $EnergieEinheit ."';
+                    return 'Summe: ' + total.toFixed(". $Nachkommastellen .") + ' ". $EnergieEinheit ."';
                     }
             }
       }
