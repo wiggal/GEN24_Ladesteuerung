@@ -1,4 +1,4 @@
-**[0.12.2] – 2023-12-XX**
+**[0.12.2] – 2023-12-28**
  
 Screenshots aktualisiert und Readme angepasst
 

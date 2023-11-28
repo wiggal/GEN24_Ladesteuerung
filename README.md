@@ -1,7 +1,8 @@
 ## :sunny: GEN24_Ladesteuerung :battery:
 (getestet unter Python 3.8 und 3.9)  
-- [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieladesteuerung--tab---ladesteuerung-) für  Fronius Symo GEN24 Plus um die Einspeisebegrenzung (bei mir 70%) zu umgehen,
-und die Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.  
+- Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
+und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Batterie zu laden.  
+Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#bar_chart-logging-optional) und grafische Darstellung von Produktion und Verbrauch.  
 
@@ -100,7 +101,7 @@ Und im Browser localhost:7777 aufrufen.
 
 Webserver Apache z.B.:
 
-### :floppy_disk: Installationshinweise: [(siehe auch)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+### :floppy_disk: Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 **_NEU ab Version 0.12.0_**  
 ```
 sudo apt install apache2 php
