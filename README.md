@@ -1,17 +1,15 @@
 ## :sunny: GEN24_Ladesteuerung :battery:
-(getestet unter Python 3.8 und 3.9)
-
-![Tabelle Lade- bzw. Entladesteuerung](pics/Steuerungstabellen.png)
-
-- Ladesteuerung für  Fronius Symo GEN24 Plus um die Einspeisebegrenzung (bei mir 70%) zu umgehen,
+(getestet unter Python 3.8 und 3.9)  
+- [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieladesteuerung--tab---ladesteuerung-) für  Fronius Symo GEN24 Plus um die Einspeisebegrenzung (bei mir 70%) zu umgehen,
 und die Produktion über der AC-Ausgangsleistung des WR als DC in die Batterie zu laden.  
-- Entladesteuerung, um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
+- [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
+- [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#bar_chart-logging-optional) und grafische Darstellung von Produktion und Verbrauch.  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
 Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
-## :floppy_disk: Installationshinweise: [(siehe auch)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+## :floppy_disk: Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv  
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
@@ -136,8 +134,8 @@ Vorhandene Skripts:
 Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.  
 
 
-![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 ### Batterieladesteuerung ( TAB--> LadeSteuerung )
+![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben.  
 In der html/config.php müssen die Dateipfade und Variablen angepasst werden.   
@@ -151,8 +149,8 @@ Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Op
 
 Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
-![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
 ### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
+![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
 
 Unter "Feste Entladegrenze " kann die maximale Entladeleistung
 in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.
@@ -161,7 +159,7 @@ In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung e
 
 Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
-======================================================  
+=======================================================  
 Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.  
 Herzlichen Dank an "godfuture"
 
