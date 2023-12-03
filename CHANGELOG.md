@@ -1,4 +1,15 @@
-**[0.12.2] – 2023-12-28**
+**[0.12.3] – 2023-12-04**
+
+Änderungen in html/funktion_Diagram.php
+- FIX: Datumsübergänge Monat und Jahr in Optionen
+
+Änderungen in functions.py
+- Zusatz_Ladebloecke können nun abgeschaltet werden, bisher lief das Programm ohne Zusatz_Ladebloecke auf einen Fehler.
+  Folgende Variablenbelegung schaltet die Zusatz_Ladebloecke ab:
+  Zusatz_Ladebloecke = aus
+
+
+**[0.12.2] – 2023-11-28**
  
 Screenshots aktualisiert und Readme angepasst
 

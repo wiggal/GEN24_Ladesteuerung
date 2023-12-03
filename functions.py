@@ -53,17 +53,18 @@ def getVarConf(var_block, var, Type):
         # ausgenommen die Variable Zusatz_Ladebloecke, wegen Endlosschleife
         if (var_block == 'Ladeberechnung') and not (var_block == 'Ladeberechnung' and var == 'Zusatz_Ladebloecke'):
             Bloecke = getVarConf('Ladeberechnung','Zusatz_Ladebloecke','str')
-            Bloecke = Bloecke.replace(" ", "")
-            Bloecke = Bloecke.split(",")
-            for Block in Bloecke:
-                # Hier pruefen ob Monat in Ersatzblock vorkommt und dann Ersatzblockvariable lesen!!
-                # Zusatz_configs lesen
-                Ersatzmonate = getVarConf( Block ,'Monate','str')
-                Ersatzmonate = Ersatzmonate.replace(" ", "")
-                Ersatzmonate = Ersatzmonate.split(",")
-                if ( aktueller_Monat in Ersatzmonate ):
-                    if ( var in config[ Block ] ):
-                        var_block = Block
+            if ( Bloecke != 'aus' ):
+                Bloecke = Bloecke.replace(" ", "")
+                Bloecke = Bloecke.split(",")
+                for Block in Bloecke:
+                    # Hier pruefen ob Monat in Ersatzblock vorkommt und dann Ersatzblockvariable lesen!!
+                    # Zusatz_configs lesen
+                    Ersatzmonate = getVarConf( Block ,'Monate','str')
+                    Ersatzmonate = Ersatzmonate.replace(" ", "")
+                    Ersatzmonate = Ersatzmonate.split(",")
+                    if ( aktueller_Monat in Ersatzmonate ):
+                        if ( var in config[ Block ] ):
+                            var_block = Block
 
         # Variablen aus config lesen und auf Zahlen prüfen
         try:
