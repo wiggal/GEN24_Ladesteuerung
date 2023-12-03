@@ -152,6 +152,8 @@ MindBattLad = 20
 LadungAus = 0
 
 ; hier muessen die Namen der zusätzlichen Konfigurationen definiert werden.
+; mit Zusatz_Ladebloecke = aus können die zusätzlichen Konfigurationen abgeschaltet werden
+; Zusatz_Ladebloecke = aus
 Zusatz_Ladebloecke = Winter, Uebergang
 
 [Winter]
