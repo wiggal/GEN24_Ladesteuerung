@@ -270,33 +270,38 @@ const date = new Date();
 let day_von = date.getDate();
 let day_bis = date.getDate();
 let month_von = date.getMonth() + 1;
-let month_bis = date.getMonth() + 1;
 let year_von = date.getFullYear();
-let year_bis = date.getFullYear();
 let hours = '0';
 let minutes_html = '0' - date.getTimezoneOffset();
 
 // 1 = stunden
 if (offset == 1) {
-  day_bis  = day_bis + 1;
+  date.setDate(date.getDate() + 1);
+  day_bis = date.getDate();
+  month_bis = date.getMonth() + 1;
+  year_bis = date.getFullYear();
   document.getElementsByName('diagramtype')[0].checked = true;
+  document.getElementsByName('Zeitraum')[0].checked = true;
 }
 
 // 2 = tage
 if (offset == 2) {
+  date.setMonth(date.getMonth() + 1);
   day_von  = 1;
   day_bis  = 1;
-  month_bis = month_bis + 1;
+  month_bis = date.getMonth() + 1;
+  year_bis = date.getFullYear();
   document.getElementsByName('diagramtype')[1].checked = true;
 }
 
 // 3 = monate
 if (offset == 3) {
+  date.setFullYear(date.getFullYear() + 1);
   day_von  = 1;
   day_bis  = 1;
   month_von = 1;
   month_bis = 1;
-  year_bis = year_bis + 1;
+  year_bis = date.getFullYear();
   document.getElementsByName('diagramtype')[1].checked = true;
 }
 
@@ -313,9 +318,7 @@ if (offset == 4) {
 
 
 let von = year_von + '-' + ('0'+month_von).substr(-2) + '-' + ('0'+day_von).substr(-2);
-//alert(von);
 let bis = year_bis + '-' + ('0'+month_bis).substr(-2)+ '-' + ('0'+day_bis).substr(-2);
-//alert(bis);
 document.getElementById('DiaDatenVon').value = von;
 document.getElementById('DiaDatenBis').value = bis;
 }
