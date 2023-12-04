@@ -146,10 +146,13 @@ $SQL = "WITH Alle_PVDaten AS (
         BattStatus
 from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
 SELECT Zeitpunkt,
-    Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
+	(CASE WHEN Direktverbrauch < 0 THEN 0 ELSE  Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt)
+		- JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) as Direktverbrauch,
     Gesamtverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Gesamtverbrauch,
     Einspeisung*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Einspeisung,
-    InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS InBatterie,
+    (CASE WHEN Direktverbrauch < 0 THEN InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)
+		+  Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440 *1.02)
+		ELSE InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) AS InBatterie,
     Vorhersage,
     BattStatus
 FROM Alle_PVDaten
@@ -199,26 +202,31 @@ function getSQL_bar($SQLType, $DiaDatenVon, $DiaDatenBis, $groupSTR)
 # SQL nach $SQLType wählen
 switch ($SQLType) {
     case 'Produktion_bar':
-$SQL = "select Zeitpunkt, 
-	(max(DC_Produktion - Einspeisung - Batterie_IN) - min(DC_Produktion - Einspeisung - Batterie_IN)) AS Direktverbrauch,
+# Darstellung bei Batterieladung aus Netz = 0
+$SQL = "WITH Alle_PVDaten AS (
+select Zeitpunkt, 
+	(max(DC_Produktion) - min(DC_Produktion)) - (max(Einspeisung) - min(Einspeisung)) - (max(Batterie_IN) - min(Batterie_IN)) AS Direktverbrauch,
 	(max(Batterie_IN) - min(Batterie_IN)) as InBatterie,
 	(max(Einspeisung) - min(Einspeisung)) as Einspeisung
 from pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-group by STRFTIME('".$groupSTR."', Zeitpunkt)";
-#group by STRFTIME('%Y-%m-%d', Zeitpunkt)";
+group by STRFTIME('".$groupSTR."', Zeitpunkt))
+SELECT Zeitpunkt,
+	(CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch END) as Direktverbrauch,
+	(CASE WHEN Direktverbrauch < 0 THEN InBatterie + (Direktverbrauch * 1.01) ELSE InBatterie END) as InBatterie,
+	Einspeisung
+FROM Alle_PVDaten";
 return $SQL;
     break; # ENDE case 'Produktion_bar'
 
     case 'Verbrauch_bar':
 $SQL = "select Zeitpunkt, 
-	(max(AC_Produktion - Einspeisung - Batterie_OUT) - min(AC_Produktion - Einspeisung - Batterie_OUT)) AS Direktverbrauch,
+    (max(AC_Produktion) - min(AC_Produktion)) - (max(Einspeisung) - min(Einspeisung)) - (max(Batterie_OUT) - min(Batterie_OUT)) AS Direktverbrauch,
 	(max(Batterie_OUT) - min(Batterie_OUT)) as VonBatterie,
 	(max(Netzverbrauch) - min(Netzverbrauch)) as Netzverbrauch
 from pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
 group by STRFTIME('".$groupSTR."', Zeitpunkt)";
-#group by STRFTIME('%Y-%m-%d', Zeitpunkt)";
 return $SQL;
     break; # ENDE case 'Verbrauch_bar'
 
