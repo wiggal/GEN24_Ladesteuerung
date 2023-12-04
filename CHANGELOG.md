@@ -1,4 +1,4 @@
-**[0.12.3] – 2023-12-04**
+**[0.12.3] – 2023-12-05**
 
 Änderungen in html/funktion_Diagram.php
 - FIX: Datumsübergänge Monat und Jahr in Optionen
@@ -8,6 +8,10 @@
   Folgende Variablenbelegung schaltet die Zusatz_Ladebloecke ab:
   Zusatz_Ladebloecke = aus
 
+- FIX: Darstellung falsch, wenn der Akku aus dem Netz geladen wird.
+
+Änderungen in html/3_tab_Hilfe.html
+- Versionsnummer eingefügt
 
 **[0.12.2] – 2023-11-28**
  
