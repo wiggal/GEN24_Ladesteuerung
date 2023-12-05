@@ -4,9 +4,9 @@
 - FIX: Datumsübergänge Monat und Jahr in Optionen
 
 Änderungen in functions.py
-- Zusatz_Ladebloecke können nun abgeschaltet werden, bisher lief das Programm ohne Zusatz_Ladebloecke auf einen Fehler.
-  Folgende Variablenbelegung schaltet die Zusatz_Ladebloecke ab:
-  Zusatz_Ladebloecke = aus
+- Zusatz_Ladebloecke können nun abgeschaltet werden, bisher lief das Programm ohne Zusatz_Ladebloecke auf einen Fehler.  
+  Folgende Variablenbelegung schaltet die Zusatz_Ladebloecke ab:  
+  Zusatz_Ladebloecke = aus  
 
 - FIX: Darstellung falsch, wenn der Akku aus dem Netz geladen wird.
 
