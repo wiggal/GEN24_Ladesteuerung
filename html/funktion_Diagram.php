@@ -176,17 +176,19 @@ return $SQL;
 $SQL = "WITH Alle_PVDaten AS (
         select  Zeitpunkt,
         ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
-		((Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) + (AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
+        ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))
+			+ (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
         ((AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
-        (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzverbrauch,
+        (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzbezug,
         (DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) AS Produktion,
         ((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
         BattStatus
 from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
 SELECT Zeitpunkt,
     Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
+    Gesamtverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Gesamtverbrauch,
     Produktion*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Produktion,
-    Netzverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Netzverbrauch,
+    Netzbezug*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Netzbezug,
     VonBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS VonBatterie,
     BattStatus
 FROM Alle_PVDaten
@@ -223,7 +225,7 @@ return $SQL;
 $SQL = "select Zeitpunkt, 
     (max(AC_Produktion) - min(AC_Produktion)) - (max(Einspeisung) - min(Einspeisung)) - (max(Batterie_OUT) - min(Batterie_OUT)) AS Direktverbrauch,
 	(max(Batterie_OUT) - min(Batterie_OUT)) as VonBatterie,
-	(max(Netzverbrauch) - min(Netzverbrauch)) as Netzverbrauch
+	(max(Netzverbrauch) - min(Netzverbrauch)) as Netzbezug
 from pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
 group by STRFTIME('".$groupSTR."', Zeitpunkt)";
@@ -249,9 +251,10 @@ return $optionen;
 
     case 'Verbrauch_Line':
 $optionen = array();
+$optionen['Gesamtverbrauch']=['Farbe'=>'rgba(255,0,0,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
 $optionen['Produktion']=['Farbe'=>'rgba(34,139,34,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
 $optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
-$optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '3', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
+$optionen['Netzbezug'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '3', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['VonBatterie'] = ['Farbe' => 'rgba(50,205,50,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '2', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 $optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
 return $optionen;
