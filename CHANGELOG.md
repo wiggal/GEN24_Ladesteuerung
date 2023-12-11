@@ -1,3 +1,18 @@
+**[0.12.4] – 2023-12-XX**
+
+Änderungen in html/funktion_Diagram.php
+-  Batterieladung vom Netz im Liniendiagramm darstellen
+-  FIX: Falscher Eigenverbrauch bei Balkendiagramm Verbrauch
+
+html/funktion_Diagram.php umbenannt in html/7_funktion_Diagram.php
+
+NEU (Prototype): 
+html/8_tab_Diagram.php
+html/7_funktion_Diagram.php
+
+Diagramm Aufbereitung nach EnergieQuelle und EnergieZiel,
+um Laden aus dem Netz un Einspeisen aus Batterie besser abbilden zu können.
+ 
 **[0.12.3] – 2023-12-05**
 
 Änderungen in html/funktion_Diagram.php

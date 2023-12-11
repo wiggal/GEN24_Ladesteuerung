@@ -19,5 +19,6 @@ $TAB_config = array (
                 array ( 'name' => 'Logfile','file' => '5_tab_Crontab_log.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'GEN24','file' => '6_tab_GEN24.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'Diagramm','file' => '7_tab_Diagram.php','checked' => 'nein','sichtbar' => 'ein'),
+                array ( 'name' => 'Diagramm2','file' => '8_tab_Diagram.php','checked' => 'nein','sichtbar' => 'ein'),
             );
 ?>
