@@ -108,7 +108,7 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
             foreach ($DB_Werte as $i) {
                 if ($x == $i) { 
                     $val = (round($val/10))*10;
-                    #if ($val < 10 and $val > -100) $val = 0;
+                    # if ($val < 10 and $val > -100) $val = 0;
                     if ($val < 0) $val = 0;
                 }
             }

@@ -49,7 +49,7 @@
 
 <?php
 include "config.php";
-include "funktion_Diagram.php";
+include "7_funktion_Diagram.php";
 
 # ENTW 
 #print_r($_POST);
