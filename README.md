@@ -1,4 +1,5 @@
-## :sunny: GEN24_Ladesteuerung :battery:
+
+## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
 und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Batterie zu laden.  
@@ -10,7 +11,7 @@ Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „B
 Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
-## :floppy_disk: Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+## 💾 Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv  
 und auf "int + SF" gestellt ist, sonst passen die Register nicht.
 
