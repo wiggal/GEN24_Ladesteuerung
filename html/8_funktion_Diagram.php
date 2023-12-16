@@ -343,30 +343,9 @@ window.onload = function() { zeitsetzer(1); };
 function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit)
 {
 $Nachkommastellen = 2;
-$Y2_Achse = '';
-if ($Diatype == 'line'){
-$Y2_Achse = "
-      y2: {
-        type: 'linear',
-        position: 'right',
-        min: 0,
-        max: 100,
-        grid: {
-            drawOnChartArea: false
-        },
-        ticks: {
-           stepSize: 20,
-           font: {
-             size: 20,
-           },
-           callback: function(value, index, values) {
-              return value + ` %`;
-           }
-        }
-      },
-";
-}
 if ($EnergieEinheit == 'W') $Nachkommastellen = 0;
+$Y1_stepSize = 100;
+if ($EnergieEinheit == 'KW') $Y1_stepSize = 10;
 echo " <script>
 new Chart('PVDaten', {
     type: '". $Diatype ."',
@@ -455,13 +434,31 @@ echo "    }]
         position: 'left',
         stacked: true,
         ticks: {
-           stepSize: 1000,
+           stepSize: '". $Y1_stepSize ."',
            font: {
              size: 20,
            }
         }
       },
-    ". $Y2_Achse ."
+      y2: {
+        type: 'linear',
+        display: 'auto',
+        position: 'right',
+        min: -100,
+        max: 100,
+        grid: {
+            drawOnChartArea: false
+        },
+        ticks: {
+           stepSize: 20,
+           font: {
+             size: 20,
+           },
+           callback: function(value, index, values) {
+              return value >= 0 ? value + ' %' : '';
+           }
+        }
+      },
     }
     },
   // Funktion: durch klicken auf Legende, Elemente ausblenden 
