@@ -11,7 +11,7 @@ html/8_tab_Diagram.php
 html/7_funktion_Diagram.php
 
 Diagramm Aufbereitung nach EnergieQuelle und EnergieZiel,
-um Laden aus dem Netz un Einspeisen aus Batterie besser abbilden zu können.
+um Laden aus dem Netz und Einspeisen aus Batterie besser abbilden zu können.
  
 **[0.12.3] – 2023-12-05**
 
