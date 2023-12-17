@@ -444,7 +444,11 @@ echo "    }]
         type: 'linear',
         display: 'auto',
         position: 'right',
-        min: -100,
+        min: (context) => {
+            //console.log((context.chart.scales.y.start / context.chart.scales.y.max * 100))
+            //console.log(context.chart.scales.y)
+            return (context.chart.scales.y.min / context.chart.scales.y.max * 100)
+        },
         max: 100,
         grid: {
             drawOnChartArea: false
@@ -461,18 +465,6 @@ echo "    }]
       },
     }
     },
-  // Funktion: durch klicken auf Legende, Elemente ausblenden 
-  function(e, legendItem, legend) {
-    const index = legendItem.datasetIndex;
-    const ci = legend.chart;
-    if (ci.isDatasetVisible(index)) {
-        ci.hide(index);
-        legendItem.hidden = true;
-    } else {
-        ci.show(index);
-        legendItem.hidden = false;
-    }
-},
   });
 </script>";
 }  # END function Diagram_ausgabe
