@@ -152,14 +152,14 @@ from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
 	SELECT Zeitpunkt,
     DC_Produktion*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)  AS Produktion,
 	Netzbezug*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)      AS Netzbezug,
-    (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) AS Direktverbrauch,
+    Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
 	VonBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)     AS VonBatterie,
     InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)      AS InBatterie,
 	Einspeisung*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)     AS Einspeisung,
 	Vorhersage,
     BattStatus
 FROM Alle_PVDaten
-Where Zeitabstand > 4 )
+Where Zeitabstand > 4 AND Direktverbrauch >= 0)
 select Zeitpunkt,
 		Produktion * -1 AS Produktion,
 		Netzbezug * -1 AS Netzbezug,
@@ -214,16 +214,16 @@ return $SQL;
 function Dia_Options()
 {
 $optionen = array();
-$optionen['Gesamtverbrauch']=['Farbe'=>'rgba(255,0,0,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y'];
-$optionen['Vorhersage']=['Farbe'=>'rgba(255,140,05,1)','fill'=>'false','stack'=>'2','linewidth'=>'2','order'=>'0','borderDash'=>'[15,8]','yAxisID'=>'y'];
-$optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2'];
-$optionen['Direktverbrauch'] = ['Farbe' => 'rgba(255,215,0,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
-$optionen['VonBatterie'] = ['Farbe' => 'rgba(45,180,45,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '2', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
-$optionen['InBatterie'] = ['Farbe' => 'rgba(60,215,60,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '3', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
-$optionen['Einspeisung'] = ['Farbe' => 'rgba(110,110,110,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '4', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
-$optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '5', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
-$optionen['Produktion']=['Farbe'=>'rgba(255,200,0,1)','fill'=>'true','stack'=>'0','linewidth'=>'2','order'=>'1','borderDash'=>'[0,0]','yAxisID'=>'y'];
-$optionen['Netzbezug'] = ['Farbe' => 'rgba(110,110,110,1)', 'fill' => 'true', 'stack' => '0', 'linewidth' => '0', 'order' => '1', 'borderDash' => '[0, 0]', 'yAxisID' => 'y'];
+$optionen['Gesamtverbrauch']=['Farbe'=>'rgba(255,0,0,1)',      'fill'=>'false', 'stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['Vorhersage']=     ['Farbe'=>'rgba(255,140,05,1)',   'fill'=>'false', 'stack'=>'2','linewidth'=>'2','order'=>'0','borderDash'=>'[15,8]','yAxisID'=>'y'];
+$optionen['BattStatus']=     ['Farbe'=>'rgba(72,118,255,1)',   'fill'=>'false', 'stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y2'];
+$optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'5','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['Einspeisung'] =   ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['InBatterie'] =    ['Farbe' => 'rgba(60,215,60,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['Direktverbrauch']=['Farbe' => 'rgba(255,215,0,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'1','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['Produktion']=     ['Farbe'=>'rgba(255,200,0,1)',    'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'6','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['Netzbezug'] =     ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'7','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
 return $optionen;
 }  # END function Dia_Options
 
@@ -394,22 +394,43 @@ echo "    }]
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
             footerFont: { size: 20 },
+            /*
+            itemSort: function(a, b) {
+                return b.raw - a.raw;
+            },
+            */
             // Einheit beim Tooltip hinzufügen
             callbacks: {
                 label: function(context) {
                     let label = context.dataset.label || '';
                     let unit = ' ". $EnergieEinheit ."';
+                    let wert = Math.abs(context.parsed.y);
                     if ( label == 'BattStatus' ) {
                         unit = ' %';
                     }
-                    return label + ' ' + context.parsed.y + unit;
+                    return label + ' ' + wert.toFixed(". $Nachkommastellen .") + unit;
+                    // return label + ' ' + context.parsed.y + unit;
                 },
                 footer: function(context) {
-                    var total = 0;
-                    for (var i = (context.length - 3); i < context.length; i++){
-                    total += context[i].raw;
+                    var total_Q = 0;
+                    var total_Z = 0;
+                    for (var i = 0; i < context.length; i++){
+                    switch (context[i].dataset.label) {
+                        case 'Produktion':
+                        case 'Netzbezug':
+                            total_Q += context[i].raw;
+                        break;
+                        case 'Direktverbrauch':
+                        case 'InBatterie':
+                        case 'Einspeisung':
+                        case 'Netzverbrauch':
+                            total_Z += context[i].raw;
+                        break;
                     }
-                    return 'Summe: ' + total.toFixed(". $Nachkommastellen .") + ' ". $EnergieEinheit ."';
+                    //console.log(context[i].dataset.label);
+                    }
+                    return 'Ziel: ' + Math.abs(total_Z.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."' + 
+                    '\\nQuelle: ' + Math.abs(total_Q.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."';
                     }
             }
       }
