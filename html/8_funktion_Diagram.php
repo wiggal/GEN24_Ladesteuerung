@@ -111,7 +111,7 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
                 if ($x == $i) { 
                     $val = (round($val/10))*10;
                     # if ($val < 10 and $val > -100) $val = 0;
-                    if ($val < 0) $val = 0;
+                    #if ($val < 0) $val = 0;
                 }
             }
             $daten[$x] = $daten[$x] .$trenner.$val/$EnergieEinheit;
@@ -153,13 +153,25 @@ from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
     DC_Produktion*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)  AS Produktion,
 	Netzbezug*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)      AS Netzbezug,
     Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
+    -- (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) AS Direktverbrauch,
 	VonBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)     AS VonBatterie,
     InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)      AS InBatterie,
 	Einspeisung*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)     AS Einspeisung,
 	Vorhersage,
     BattStatus
 FROM Alle_PVDaten
-Where Zeitabstand > 4 AND Direktverbrauch >= 0)
+Where Zeitabstand > 4)
+ , Alle_PVDaten3 AS (
+	SELECT Zeitpunkt,
+    Produktion,
+	Netzbezug,
+    (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch END) AS Direktverbrauch,
+	VonBatterie,
+    InBatterie,
+	(CASE WHEN Direktverbrauch < 0 THEN Einspeisung + Direktverbrauch ELSE Einspeisung END) AS Einspeisung,
+	Vorhersage,
+    BattStatus
+FROM Alle_PVDaten2)
 select Zeitpunkt,
 		Produktion * -1 AS Produktion,
 		Netzbezug * -1 AS Netzbezug,
@@ -171,7 +183,7 @@ select Zeitpunkt,
 		Produktion + Netzbezug - Einspeisung + VonBatterie - InBatterie AS Gesamtverbrauch,
 		Vorhersage,
 		BattStatus
-FROM Alle_PVDaten2";
+FROM Alle_PVDaten3";
 return $SQL;
     break; # ENDE case 'line'
 
@@ -394,11 +406,6 @@ echo "    }]
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
             footerFont: { size: 20 },
-            /*
-            itemSort: function(a, b) {
-                return b.raw - a.raw;
-            },
-            */
             // Einheit beim Tooltip hinzufügen
             callbacks: {
                 label: function(context) {
@@ -409,7 +416,6 @@ echo "    }]
                         unit = ' %';
                     }
                     return label + ' ' + wert.toFixed(". $Nachkommastellen .") + unit;
-                    // return label + ' ' + context.parsed.y + unit;
                 },
                 footer: function(context) {
                     var total_Q = 0;
@@ -422,15 +428,15 @@ echo "    }]
                         break;
                         case 'Direktverbrauch':
                         case 'InBatterie':
+                        case 'VonBatterie':
                         case 'Einspeisung':
                         case 'Netzverbrauch':
                             total_Z += context[i].raw;
                         break;
                     }
-                    //console.log(context[i].dataset.label);
                     }
-                    return 'Ziel: ' + Math.abs(total_Z.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."' + 
-                    '\\nQuelle: ' + Math.abs(total_Q.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."';
+                    return 'Ziel: ' + Math.abs(total_Z.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."'
+                     + '\\nQuelle: ' + Math.abs(total_Q.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."';
                     }
             }
       }
