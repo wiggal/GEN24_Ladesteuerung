@@ -406,40 +406,47 @@ echo "    }]
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
             footerFont: { size: 20 },
-            // Einheit beim Tooltip hinzufügen
             callbacks: {
-                label: function(context) {
-                    let label = context.dataset.label || '';
-                    let unit = ' ". $EnergieEinheit ."';
-                    let wert = Math.abs(context.parsed.y);
-                    if ( label == 'BattStatus' ) {
-                        unit = ' %';
-                    }
-                    return label + ' ' + wert.toFixed(". $Nachkommastellen .") + unit;
-                },
-                footer: function(context) {
-                    var total_Q = 0;
-                    var total_Z = 0;
-                    for (var i = 0; i < context.length; i++){
-                    switch (context[i].dataset.label) {
+                  label: function(context) {
+                    let total_Q = 0;
+                    let total_Z = 0;
+                    for (var i = 0; i < context.chart.tooltip.dataPoints.length; i++){
+                    switch (context.chart.tooltip.dataPoints[i].dataset.label) {
                         case 'Produktion':
                         case 'Netzbezug':
-                            total_Q += context[i].raw;
+                            total_Q += context.chart.tooltip.dataPoints[i].raw;
                         break;
                         case 'Direktverbrauch':
                         case 'InBatterie':
                         case 'VonBatterie':
                         case 'Einspeisung':
                         case 'Netzverbrauch':
-                            total_Z += context[i].raw;
+                            total_Z += context.chart.tooltip.dataPoints[i].raw;
                         break;
                     }
+                    };
+                    // return value in tooltip
+                    const labelName = context.dataset.label;
+                    const labelValue = context.parsed.y;
+                    const line1 = labelName + ' ' + Math.abs(labelValue.toFixed(". $Nachkommastellen ."))  + ' ". $EnergieEinheit ."';
+                    arrayLines = [ line1 ];
+                    const line2 = '==============';
+                    const line4 = ' ';
+                    if (labelName == 'BattStatus') {
+                    arrayLines = [ line1, line4 ];
                     }
-                    return 'Ziel: ' + Math.abs(total_Z.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."'
-                     + '\\nQuelle: ' + Math.abs(total_Q.toFixed(". $Nachkommastellen .")) + ' ". $EnergieEinheit ."';
+                    if (labelName == 'Netzverbrauch') {
+                        line3 = 'Ziel: ' + Math.abs(total_Z.toFixed(". $Nachkommastellen ."))  + ' ". $EnergieEinheit ."';
+                        arrayLines = [ line1, line2, line3, line4 ];
                     }
-            }
-      }
+                    if (labelName == 'Netzbezug') {
+                        line3 = 'Quelle: ' + Math.abs(total_Q.toFixed(". $Nachkommastellen ."))  + ' ". $EnergieEinheit ."';
+                        arrayLines = [ line1, line2, line3 ];
+                    }
+                    return arrayLines;
+                }
+            } // Ende callbacks:
+        }
     },
     scales: {
       x: {
@@ -472,8 +479,6 @@ echo "    }]
         display: 'auto',
         position: 'right',
         min: (context) => {
-            //console.log((context.chart.scales.y.start / context.chart.scales.y.max * 100))
-            //console.log(context.chart.scales.y)
             return (context.chart.scales.y.min / context.chart.scales.y.max * 100)
         },
         max: 100,
