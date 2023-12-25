@@ -1,4 +1,4 @@
-**[0.12.4] – 2023-12-XX**
+**[0.12.4] – 2023-12-25**
 
 Änderungen in html/funktion_Diagram.php
 -  Batterieladung vom Netz im Liniendiagramm darstellen
@@ -6,9 +6,9 @@
 
 html/funktion_Diagram.php umbenannt in html/7_funktion_Diagram.php
 
-NEU (Prototype): 
+NEU: 
 html/8_tab_Diagram.php
-html/7_funktion_Diagram.php
+html/8_funktion_Diagram.php
 
 Diagramm Aufbereitung nach EnergieQuelle und EnergieZiel,
 um Laden aus dem Netz und Einspeisen aus Batterie besser abbilden zu können.
