@@ -1,3 +1,15 @@
+**[0.12.5] – 2023-12-XX**
+
+#### ACHTUNG bitte html/config.php anpassen!!!  
+Änderung in html/config.php  
+
+- Umbenennung der Diagramregister:
+  Diagramm  -->> PV-Bilanz = Produktions- und Vergrauchsbilanz
+  Diagramm2 -->> QZ-Bilanz = Quellen- und Zielbilanz
+
+FIX: html/8_funktion_Diagram.php 
+     Einheit für BattStatus auf "%" geändert
+
 **[0.12.4] – 2023-12-25**
 
 Änderungen in html/funktion_Diagram.php
