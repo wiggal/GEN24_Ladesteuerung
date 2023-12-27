@@ -428,7 +428,11 @@ echo "    }]
                     // return value in tooltip
                     const labelName = context.dataset.label;
                     const labelValue = context.parsed.y;
-                    const line1 = labelName + ' ' + Math.abs(labelValue.toFixed(". $Nachkommastellen ."))  + ' ". $EnergieEinheit ."';
+                    let unit = ' ". $EnergieEinheit ."';
+                    if ( labelName == 'BattStatus' ) {
+                        unit = ' %';
+                    }
+                    const line1 = labelName + ' ' + Math.abs(labelValue.toFixed(". $Nachkommastellen ."))  + ' ' + unit;
                     arrayLines = [ line1 ];
                     const line2 = '==============';
                     const line4 = ' ';
@@ -436,11 +440,11 @@ echo "    }]
                     arrayLines = [ line1, line4 ];
                     }
                     if (labelName == 'Netzverbrauch') {
-                        line3 = 'Ziel: ' + Math.abs(total_Z.toFixed(". $Nachkommastellen ."))  + ' ". $EnergieEinheit ."';
+                        line3 = 'Ziel: ' + Math.abs(total_Z.toFixed(". $Nachkommastellen ."))  + ' ' + unit;
                         arrayLines = [ line1, line2, line3, line4 ];
                     }
                     if (labelName == 'Netzbezug') {
-                        line3 = 'Quelle: ' + Math.abs(total_Q.toFixed(". $Nachkommastellen ."))  + ' ". $EnergieEinheit ."';
+                        line3 = 'Quelle: ' + Math.abs(total_Q.toFixed(". $Nachkommastellen ."))  + ' ' + unit;
                         arrayLines = [ line1, line2, line3 ];
                     }
                     return arrayLines;
