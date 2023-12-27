@@ -3,8 +3,8 @@
 #### ACHTUNG bitte html/config.php anpassen!!!  
 Änderung in html/config.php  
 
-- Umbenennung der Diagramregister:
-  Diagramm  -->> PV-Bilanz = Produktions- und Vergrauchsbilanz
+- Umbenennung der Diagrammregister:
+  Diagramm  -->> PV-Bilanz = Produktions- und Verbrauchsbilanz
   Diagramm2 -->> QZ-Bilanz = Quellen- und Zielbilanz
 
 FIX: html/8_funktion_Diagram.php 
