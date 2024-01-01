@@ -1,4 +1,4 @@
-**[0.12.5] – 2023-12-XX**
+**[0.12.5] – 2024-01-01**
 
 #### ACHTUNG bitte html/config.php anpassen!!!  
 Änderung in html/config.php  
