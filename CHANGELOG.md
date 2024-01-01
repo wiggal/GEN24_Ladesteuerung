@@ -10,6 +10,11 @@
 FIX: html/8_funktion_Diagram.php 
      Einheit für BattStatus auf "%" geändert
 
+#### ACHTUNG Änderung in der config.ini in den Zusatz_Ladebloecke
+FIX: in der config.ini müssen die Monate der in den Zusatz_Ladebloecken immer  
+     **zweistellig** sein (z.B.: 01, 02 )
+
+
 **[0.12.4] – 2023-12-25**
 
 Änderungen in html/funktion_Diagram.php
