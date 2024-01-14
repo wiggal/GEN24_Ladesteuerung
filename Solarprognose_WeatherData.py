@@ -10,7 +10,7 @@ from functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 def loadLatestWeatherData():
     url = 'http://www.solarprognose.de/web/solarprediction/api/v1?access-token={}&item={}&id={}&type={}&algorithm={}'.format(accesstoken, item, id, type, algorithm)
     # Hier wieder ABHOLEN EIN
-    apiResponse = requests.get(url, timeout=12.50)
+    apiResponse = requests.get(url, timeout=52.50)
     json_data1 = dict(json.loads(apiResponse.text))
     dict_watts = {}
     dict_watts['result'] = {}
@@ -51,8 +51,10 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print('solarprognose.de: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
-                print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
+                print_level = getVarConf('Ladeberechnung','print_level','eval')
+                if ( print_level != 0 ):
+                    print('solarprognose.de: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
+                    print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
                 dataIsExpired = False
 
     if (dataIsExpired):
