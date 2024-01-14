@@ -15,7 +15,7 @@ def loadLatestWeatherData(config):
     
     url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
     try:
-        apiResponse = requests.get(url, timeout=12.50)
+        apiResponse = requests.get(url, timeout=52.50)
         json_data1 = dict(json.loads(apiResponse.text))
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
         if config['pv.strings']['anzahl'] == '2':
@@ -28,7 +28,7 @@ def loadLatestWeatherData(config):
             kwp = config['forecast.solar2']['kwp']
 
             url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
-            apiResponse2 = requests.get(url, timeout=12.50)
+            apiResponse2 = requests.get(url, timeout=52.50)
             json_data2 = dict(json.loads(apiResponse2.text))
 		
             for key, value in json_data1.get('result',{}).get('watts',{}).items():
@@ -51,7 +51,6 @@ if __name__ == '__main__':
     
     dataAgeMaxInMinutes = getVarConf('forecast.solar','dataAgeMaxInMinutes','eval')
     
-    
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
@@ -67,8 +66,10 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print('forecast.solar: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
-                print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
+                print_level = getVarConf('Ladeberechnung','print_level','eval')
+                if ( print_level != 0 ):
+                    print('forecast.solar: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
+                    print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
                 dataIsExpired = False
 
     if (dataIsExpired):

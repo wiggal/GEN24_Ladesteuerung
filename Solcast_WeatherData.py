@@ -23,7 +23,7 @@ def loadLatestWeatherData():
         try:
             url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id, datenloop, api_key)
             # Hier wieder ABHOLEN EIN
-            apiResponse = requests.get(url, timeout=15.50)
+            apiResponse = requests.get(url, timeout=55.50)
             json_data1 = dict(json.loads(apiResponse.text))
     
             try:
@@ -87,8 +87,10 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print('solcast.com: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
-                print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
+                print_level = getVarConf('Ladeberechnung','print_level','eval')
+                if ( print_level != 0 ):
+                    print('solcast.com: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
+                    print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
                 dataIsExpired = False
 
     if (dataIsExpired):
