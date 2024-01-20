@@ -1,9 +1,9 @@
-**[0.12.6] – 2024-01-XX**
+**[0.12.6] – 2024-01-20**
 
 Änderung in Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProvider2.py  
-- Meldung eingefügt, wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen ist
+- Meldung wenn die definierten "dataAgeMaxInMinutes" noch nicht abgelaufen ist
   nur ausgeben, wenn "print_level" ungleich 0
-- timeout bei http_request verlängert, da Solcast teilweise zu langsam
+- timeout bei http_request verlängert, da Solcast teilweise sehr langsam antwortet.
 
 **[0.12.5] – 2024-01-01**
 
