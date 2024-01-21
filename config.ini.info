@@ -186,7 +186,7 @@ PV_ReservieungsDatei=Watt_Reservierung.json
 PV_Reservierung_steuern = 1
 
 [Entladung]
-; Konfigdatei für die Entladesteuerung
+; Konfigdaten für die Entladesteuerung
 ; Auch diese "Akku_EntLadeSteuerFile.json" wird durch ein PHP_Skript erzeugt (html/2_tab_EntladeSteuerung.php)
 Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
 ; Batterieentladung ein- bzw. ausschalten (1=ein/0=aus)
@@ -194,6 +194,14 @@ Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
 Batterieentlandung_steuern = 1
 ; Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben
 WREntladeSchreibGrenze_Watt = 200
+; Entladung des Akku auf bestimmten Prozentsatz begrenzen
+; damit kann die Entlagegrenze des Akkus in Abhängigkeit der Prognose für morgen gesetzt werden.
+EntlageGrenze_steuern = 1
+; PrognoseGenze in KWh
+; Ist die Prognose für morgen kleiner als "ProgGrenzeMorgen", wird "EntlageGrenze_Min" gesetzt, ansonsten "EntlageGrenze_Max"
+ProgGrenzeMorgen = 10
+EntlageGrenze_Min = 0
+EntlageGrenze_Max = 30
 
 ; Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
 [messaging]

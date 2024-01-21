@@ -173,6 +173,16 @@ def setLadewert(fun_Ladewert):
 
         return(newPercent, newPercent_schreiben)
 
+def getPrognoseMorgen():
+    i = 0
+    Prognose_Summe = 0
+    while i < 24:
+        Std_morgen = datetime.strftime(now + timedelta(days=1), "%Y-%m-%d")+" "+ str('%0.2d' %(i)) +":00:00"
+        Prognose_Summe += getPrognose(Std_morgen)
+        i  += 1
+    return(Prognose_Summe)
+    
+
 if __name__ == '__main__':
         config = loadConfig('config.ini')
         now = datetime.now()
@@ -222,6 +232,7 @@ if __name__ == '__main__':
                     PV_Reservierung_steuern = getVarConf('Reservierung','PV_Reservierung_steuern','eval')
                     Batterieentlandung_steuern = getVarConf('Entladung','Batterieentlandung_steuern','eval')
                     WREntladeSchreibGrenze_Watt = getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
+                    EntlageGrenze_steuern = getVarConf('Entladung','EntlageGrenze_steuern','eval')
                                        
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
@@ -477,7 +488,7 @@ if __name__ == '__main__':
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = 100
 
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADUNG >>>>>>>>>>>>>"
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
 
                         # EntladeSteuerungFile lesen
                         EntladeSteuerungFile = getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
@@ -541,7 +552,7 @@ if __name__ == '__main__':
                             if len(argv) > 1 and (argv[1] == "schreiben"):
                                 valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
                                 bereits_geschrieben = 1
-                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladegrenze schreiben: " + str(valueNew)
+                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladewert schreiben: " + str(valueNew)
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
@@ -552,7 +563,46 @@ if __name__ == '__main__':
                         if print_level >= 1:
                             print(Schreib_Ausgabe)
 
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADUNG >>>>>>>>>>>>>"
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADESTEUERUNG >>>>>>>>>>>>>"
+
+                    ######## E N T L A D E B E G R E N Z U N G ab hier wenn eingeschaltet!
+                    if  EntlageGrenze_steuern == 1:
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
+
+                        MaxEntladung = 100
+                        ProgGrenzeMorgen = getVarConf('Entladung','ProgGrenzeMorgen','eval')
+                        EntlageGrenze_Min = getVarConf('Entladung','EntlageGrenze_Min','eval')
+                        EntlageGrenze_Max = getVarConf('Entladung','EntlageGrenze_Max','eval')
+                        PrognoseMorgen = getPrognoseMorgen()/1000
+                        Battery_MinRsvPct = int(gen24.read_data('Battery_MinRsvPct')/100)
+                        Neu_Battery_MinRsvPct = EntlageGrenze_Min
+                        if (PrognoseMorgen < ProgGrenzeMorgen):
+                            Neu_Battery_MinRsvPct = EntlageGrenze_Max
+                        if print_level >= 1:
+                            print("######### E N T L A D E B E G R E N Z U N G #########\n")
+                            print("Prognose Morgen: ", PrognoseMorgen, "KW")
+                            print("Batteriereserve: ", Battery_MinRsvPct, "%")
+                            print("Neu_Batteriereserve: ", Neu_Battery_MinRsvPct, "%")
+                            print()
+
+                        Schreib_Ausgabe = ""
+
+                        if (Neu_Battery_MinRsvPct != Battery_MinRsvPct):
+                            if len(argv) > 1 and (argv[1] == "schreiben"):
+                                valueNew = gen24.write_data('Battery_MinRsvPct', Neu_Battery_MinRsvPct * 100)
+                                bereits_geschrieben = 1
+                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladegrenze schreiben: " + str(valueNew)
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladebegrenzung: " + str(Neu_Battery_MinRsvPct) + "%\n"
+                                Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
+                            else:
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladebegrenzung wurde NICHT " + str(Neu_Battery_MinRsvPct) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                        else:
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung hat sich nicht verändert, NICHTS zu schreiben!!\n"
+
+                        if print_level >= 1:
+                            print(Schreib_Ausgabe)
+
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
 
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):

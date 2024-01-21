@@ -68,6 +68,7 @@ class SymoGen24:
                 "Battery_DC_Power_in" : [40315, "uint16", 1],
                 "Battery_DC_Power_out" : [40335, "uint16", 1],
                 "Battery_SunspecID" : [40344, "uint16", 1],
+                "Battery_MinRsvPct" : [40351, "uint16", 1],
                 "Battery_SoC" : [40352, "uint16", 1],
                 "Battery_Status" : [40355, "uint16", 1],
                 "BatteryChargeRate" : [40346, "uint16", 1],                
