@@ -1,3 +1,13 @@
+**[0.13.0] – 2024-01-XX**
+
+Neue Funktion: Batteriereservekapazität mit Prognose von morgen anpassen.
+
+#### ACHTUNG Änderung in der config.inii: Zusätzliche Parameter im Block [Entladung] 
+- EntlageGrenze_steuern, ProgGrenzeMorgen, EntlageGrenze_Min, EntlageGrenze_Max
+
+Änderung auch in SymoGen24Controller2.py, SymoGen24Connector.py
+
+
 **[0.12.6] – 2024-01-20**
 
 Änderung in Solarprognose_WeatherData.py, Solcast_WeatherData.py, WeatherDataProvider2.py  
