@@ -200,6 +200,7 @@ EntlageGrenze_steuern = 1
 ; PrognoseGenze in KWh
 ; Ist die Prognose für morgen kleiner als "ProgGrenzeMorgen", wird "EntlageGrenze_Min" gesetzt, ansonsten "EntlageGrenze_Max"
 ProgGrenzeMorgen = 10
+; Entladegrenzen in Prozent (%)
 EntlageGrenze_Min = 0
 EntlageGrenze_Max = 30
 

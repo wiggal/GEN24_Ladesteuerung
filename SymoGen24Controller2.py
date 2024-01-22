@@ -576,7 +576,7 @@ if __name__ == '__main__':
                         PrognoseMorgen = getPrognoseMorgen()/1000
                         Battery_MinRsvPct = int(gen24.read_data('Battery_MinRsvPct')/100)
                         Neu_Battery_MinRsvPct = EntlageGrenze_Min
-                        if (PrognoseMorgen < ProgGrenzeMorgen):
+                        if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
                             Neu_Battery_MinRsvPct = EntlageGrenze_Max
                         if print_level >= 1:
                             print("######### E N T L A D E B E G R E N Z U N G #########\n")
