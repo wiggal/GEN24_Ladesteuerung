@@ -150,13 +150,12 @@ $SQL = "WITH Alle_PVDaten AS (
 from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
  , Alle_PVDaten2 AS (
 	SELECT Zeitpunkt,
-    DC_Produktion*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)  AS Produktion,
-	Netzbezug*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)      AS Netzbezug,
-    Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
-    -- (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) AS Direktverbrauch,
-	VonBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)     AS VonBatterie,
-    InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)      AS InBatterie,
-	Einspeisung*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)     AS Einspeisung,
+    DC_Produktion*60/ Zeitabstand  AS Produktion,
+	Netzbezug*60/ Zeitabstand      AS Netzbezug,
+    Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
+	VonBatterie*60/ Zeitabstand    AS VonBatterie,
+    InBatterie*60/ Zeitabstand     AS InBatterie,
+	Einspeisung*60/ Zeitabstand    AS Einspeisung,
 	Vorhersage,
     BattStatus
 FROM Alle_PVDaten
