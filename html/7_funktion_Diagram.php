@@ -134,8 +134,12 @@ return $SQL;
     break; # ENDE case 'SUM_DC_Produktion'
 
     case 'Produktion_Line':
-# Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
 $SQL = "WITH Alle_PVDaten AS (
+        select *
+        from pv_daten
+        where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+        group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 5 )
+, Alle_PVDaten1 AS (
         select  Zeitpunkt,
         ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
         ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
@@ -145,7 +149,7 @@ $SQL = "WITH Alle_PVDaten AS (
         ((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS InBatterie,
         Vorhersage,
         BattStatus
-from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
+from Alle_PVDaten)
 SELECT Zeitpunkt,
 	(CASE WHEN Direktverbrauch < 0 THEN 0 ELSE  Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt)
 		- JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) as Direktverbrauch,
@@ -156,8 +160,7 @@ SELECT Zeitpunkt,
 		ELSE InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) AS InBatterie,
     Vorhersage,
     BattStatus
-FROM Alle_PVDaten
-Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
+FROM Alle_PVDaten1";
 return $SQL;
     break; # ENDE case 'Produktion_Line'
 
@@ -174,7 +177,12 @@ return $SQL;
 
     case 'Verbrauch_Line':
 # Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
-$SQL = "WITH Alle_PVDaten AS (
+$SQL = " WITH Alle_PVDaten AS (
+select *
+from pv_daten
+where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 5 )
+, Alle_PVDaten1 AS (
         select  Zeitpunkt,
         ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
         ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))
@@ -184,7 +192,7 @@ $SQL = "WITH Alle_PVDaten AS (
         (DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) AS Produktion,
         ((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
         BattStatus
-from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
+from Alle_PVDaten)
 SELECT Zeitpunkt,
     Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
     Gesamtverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Gesamtverbrauch,
@@ -192,8 +200,7 @@ SELECT Zeitpunkt,
     Netzbezug*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Netzbezug,
     VonBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS VonBatterie,
     BattStatus
-FROM Alle_PVDaten
-Where Zeitabstand > 4 AND Gesamtverbrauch > 1";
+FROM Alle_PVDaten1";
 return $SQL;
     break; # ENDE case 'Verbrauch_Line'
 
