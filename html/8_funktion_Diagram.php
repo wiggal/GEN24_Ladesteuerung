@@ -494,7 +494,7 @@ echo "    }]
              size: 20,
            },
            callback: function(value, index, values) {
-              return value >= 0 ? value + ' %' : '';
+              return value >= 0 ? Math.round(value) + ' %' : '';
            }
         }
       },
