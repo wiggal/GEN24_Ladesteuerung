@@ -136,7 +136,13 @@ return $SQL;
     break; # ENDE case 'SUM_DC_Produktion'
 
     case 'line':
-$SQL = "WITH Alle_PVDaten AS (
+$SQL = "
+WITH Alle_PVDaten AS (
+select *
+from pv_daten
+where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 5 )
+, Alle_PVDaten1 AS (
         select  Zeitpunkt,
 		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
 		(DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) AS DC_Produktion,
@@ -147,7 +153,7 @@ $SQL = "WITH Alle_PVDaten AS (
         (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
         Vorhersage,
         BattStatus
-from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
+from Alle_PVDaten)
  , Alle_PVDaten2 AS (
 	SELECT Zeitpunkt,
     DC_Produktion*60/ Zeitabstand  AS Produktion,
@@ -158,8 +164,7 @@ from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."')
 	Einspeisung*60/ Zeitabstand    AS Einspeisung,
 	Vorhersage,
     BattStatus
-FROM Alle_PVDaten
-Where Zeitabstand > 4)
+FROM Alle_PVDaten1)
  , Alle_PVDaten3 AS (
 	SELECT Zeitpunkt,
     Produktion,
