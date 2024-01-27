@@ -161,7 +161,7 @@ switch ($energietype) {
         $results = $db->query($SQL);
 
         # Diagrammdaten und Optionen holen
-        $DB_Werte = array('Produktion', 'Netzbezug', 'VonBatterie', 'Direktverbrauch');
+        $DB_Werte = array('Gesamtverbrauch', 'Produktion', 'Netzbezug', 'VonBatterie', 'Direktverbrauch');
         list($daten, $labels) = diagrammdaten($results, $DB_Werte, '1', $Zeitraum);
         $optionen = Dia_Options('Verbrauch_Line');
 

@@ -151,13 +151,10 @@ $SQL = "WITH Alle_PVDaten AS (
         BattStatus
 from Alle_PVDaten)
 SELECT Zeitpunkt,
-	(CASE WHEN Direktverbrauch < 0 THEN 0 ELSE  Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt)
-		- JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) as Direktverbrauch,
-    Gesamtverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Gesamtverbrauch,
-    Einspeisung*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Einspeisung,
-    (CASE WHEN Direktverbrauch < 0 THEN InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440)
-		+  Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440 *1.02)
-		ELSE InBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) END) AS InBatterie,
+	(CASE WHEN Direktverbrauch < 0 THEN 0 ELSE  Direktverbrauch*60/Zeitabstand END) as Direktverbrauch,
+    Gesamtverbrauch*60/Zeitabstand AS Gesamtverbrauch,
+    Einspeisung*60/Zeitabstand AS Einspeisung,
+    (CASE WHEN Direktverbrauch < 0 THEN InBatterie*60/Zeitabstand + Direktverbrauch*60/Zeitabstand *1.02 ELSE InBatterie*60/Zeitabstand END) AS InBatterie,
     Vorhersage,
     BattStatus
 FROM Alle_PVDaten1";
@@ -176,7 +173,6 @@ return $SQL;
     break; # ENDE case 'SUM_AC_Verbrauch'
 
     case 'Verbrauch_Line':
-# Aussieben der manchmal entstehenden Minuswerte im Verbrauch durch "AND Gesamtverbrauch > 1"
 $SQL = " WITH Alle_PVDaten AS (
 select *
 from pv_daten
@@ -194,11 +190,11 @@ group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 5 )
         BattStatus
 from Alle_PVDaten)
 SELECT Zeitpunkt,
-    Direktverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Direktverbrauch,
-    Gesamtverbrauch*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Gesamtverbrauch,
-    Produktion*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Produktion,
-    Netzbezug*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Netzbezug,
-    VonBatterie*60/ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS VonBatterie,
+    Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
+    Gesamtverbrauch*60/Zeitabstand AS Gesamtverbrauch,
+    Produktion*60/Zeitabstand AS Produktion,
+    Netzbezug*60/Zeitabstand AS Netzbezug,
+    VonBatterie*60/Zeitabstand AS VonBatterie,
     BattStatus
 FROM Alle_PVDaten1";
 return $SQL;
