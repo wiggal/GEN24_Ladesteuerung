@@ -138,23 +138,24 @@ $SQL = "WITH Alle_PVDaten AS (
         select *
         from pv_daten
         where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-        group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 5 )
+        group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 10 )
 , Alle_PVDaten1 AS (
         select  Zeitpunkt,
         ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
         ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
         ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))
-			+ (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
+		 	+ (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
+        -- ((AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
         (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
-        ((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS InBatterie,
+        ((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS InBatterie,
         Vorhersage,
         BattStatus
 from Alle_PVDaten)
 SELECT Zeitpunkt,
-	(CASE WHEN Direktverbrauch < 0 THEN 0 ELSE  Direktverbrauch*60/Zeitabstand END) as Direktverbrauch,
+	Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
     Gesamtverbrauch*60/Zeitabstand AS Gesamtverbrauch,
     Einspeisung*60/Zeitabstand AS Einspeisung,
-    (CASE WHEN Direktverbrauch < 0 THEN InBatterie*60/Zeitabstand + Direktverbrauch*60/Zeitabstand *1.02 ELSE InBatterie*60/Zeitabstand END) AS InBatterie,
+    InBatterie*60/Zeitabstand AS InBatterie,
     Vorhersage,
     BattStatus
 FROM Alle_PVDaten1";
@@ -177,21 +178,22 @@ $SQL = " WITH Alle_PVDaten AS (
 select *
 from pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 5 )
+group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 10)
 , Alle_PVDaten1 AS (
         select  Zeitpunkt,
         ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
-        ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))
-			+ (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
+        -- ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) + (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))
+		-- 	+ (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Gesamtverbrauch,
         ((AC_Produktion - LAG(AC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
         (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzbezug,
         (DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) AS Produktion,
-        ((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
+        -- ((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
+        ((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
         BattStatus
 from Alle_PVDaten)
 SELECT Zeitpunkt,
     Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
-    Gesamtverbrauch*60/Zeitabstand AS Gesamtverbrauch,
+    -- Gesamtverbrauch*60/Zeitabstand AS Gesamtverbrauch,
     Produktion*60/Zeitabstand AS Produktion,
     Netzbezug*60/Zeitabstand AS Netzbezug,
     VonBatterie*60/Zeitabstand AS VonBatterie,
