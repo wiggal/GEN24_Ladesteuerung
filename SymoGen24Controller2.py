@@ -459,7 +459,7 @@ if __name__ == '__main__':
                         if len(argv) > 1 and (argv[1] == "schreiben"):
                             valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
                             bereits_geschrieben = 1
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben: " + str(newPercent) + "\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Am WR geschrieben: " + str(newPercent / 100) + "% = " + str(aktuellerLadewert) + "W\n"
                             Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
                             DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(valueNew)
                         else:
@@ -608,7 +608,7 @@ if __name__ == '__main__':
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
                         Push_Message_Url = getVarConf('messaging','Push_Message_Url','str')
                         apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
-                        print("PushMeldung an ", Push_Message_Url, " gesendet.")
+                        print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
 
                     ######## PV Reservierung ENDE
