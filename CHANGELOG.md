@@ -1,4 +1,4 @@
-**[0.13.0] – 2024-01-XX**
+**[0.13.0] – 2024-02-04**
 
 Neue Funktion: Batteriereservekapazität mit Prognose von morgen anpassen.
 
