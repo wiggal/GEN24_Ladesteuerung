@@ -18,12 +18,12 @@ def loadLatestWeatherData():
     sommerzeit = time.localtime().tm_isdst
 
     #die Daten müssen 2x abgerufen werden forecasts (Zukunft) und estimated_actuals (aktuell und Vergangenheit 
-    for datenloop in ["estimated_actuals","forecasts"]:
+    for datenloop in ["forecasts","estimated_actuals"]:
 
         try:
             url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id, datenloop, api_key)
             # Hier wieder ABHOLEN EIN
-            apiResponse = requests.get(url, timeout=55.50)
+            apiResponse = requests.get(url, timeout=99.50)
             json_data1 = dict(json.loads(apiResponse.text))
     
             try:

@@ -6,7 +6,11 @@ Neue Funktion: Batteriereservekapazität mit Prognose von morgen anpassen.
 - EntlageGrenze_steuern, ProgGrenzeMorgen, EntlageGrenze_Min, EntlageGrenze_Max
 
 Änderung auch in SymoGen24Controller2.py, SymoGen24Connector.py
+- Batteriereservekapazität Anpassung eingebaut
+- PushMeldung angepasst 
 
+Anpassungen in Solcast_WeatherData.py
+- zuerst Vorhersage abrufen und dann die Vergangenheit, da Vergangenheit nicht für Berechnung nötig
 
 **[0.12.6] – 2024-01-20**
 
