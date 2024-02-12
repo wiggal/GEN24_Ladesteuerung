@@ -1,3 +1,8 @@
+**[0.13.1] – 2024-02-XX**
+
+Änderung in 8_funktion_Diagram.php
+-  Diagram Sortierungen angepasst
+
 **[0.13.0] – 2024-02-04**
 
 Neue Funktion: Batteriereservekapazität mit Prognose von morgen anpassen.
