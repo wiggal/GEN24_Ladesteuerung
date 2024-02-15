@@ -111,7 +111,7 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
                 if ($x == $i) { 
                     $val = (round($val/10))*10;
                     # if ($val < 10 and $val > -100) $val = 0;
-                    #if ($val < 0) $val = 0;
+                    if ($val < 0) $val = 0;
                 }
             }
             $daten[$x] = $daten[$x] .$trenner.$val/$EnergieEinheit;
@@ -141,7 +141,7 @@ WITH Alle_PVDaten AS (
 select *
 from pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 5 )
+group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 10 )
 , Alle_PVDaten1 AS (
         select  Zeitpunkt,
 		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
@@ -165,17 +165,6 @@ from Alle_PVDaten)
 	Vorhersage,
     BattStatus
 FROM Alle_PVDaten1)
- , Alle_PVDaten3 AS (
-	SELECT Zeitpunkt,
-    Produktion,
-	Netzbezug,
-    (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch END) AS Direktverbrauch,
-	VonBatterie,
-    InBatterie,
-	(CASE WHEN Direktverbrauch < 0 THEN Einspeisung + Direktverbrauch ELSE Einspeisung END) AS Einspeisung,
-	Vorhersage,
-    BattStatus
-FROM Alle_PVDaten2)
 select Zeitpunkt,
 		Produktion * -1 AS Produktion,
 		Netzbezug * -1 AS Netzbezug,
@@ -187,7 +176,7 @@ select Zeitpunkt,
 		Produktion + Netzbezug - Einspeisung + VonBatterie - InBatterie AS Gesamtverbrauch,
 		Vorhersage,
 		BattStatus
-FROM Alle_PVDaten3";
+FROM Alle_PVDaten2";
 return $SQL;
     break; # ENDE case 'line'
 
