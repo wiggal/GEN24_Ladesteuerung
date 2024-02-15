@@ -2,6 +2,7 @@
 
 Änderung in 8_funktion_Diagram.php
 -  Diagram Sortierungen angepasst
+-  Diagram Ausreisser minimieren (Ausgabe nur alle 10 Minuten)
 
 **[0.13.0] – 2024-02-04**
 
