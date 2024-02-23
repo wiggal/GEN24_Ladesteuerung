@@ -33,7 +33,7 @@ Als Erstes muss ein Prognoseskript aufgerufen werden, damit neue Prognosedaten i
 
 Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen)  
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)  
-**_NEU ab Version 0.12.0_** SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging. **_ENDE NEU_**  
+SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging.  
 (Häufigerer Aufruf nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!)  
 
 ```
@@ -74,7 +74,6 @@ falls Änderungen außerhalb der gesetzten Grenzen sind.
 
 Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
 
-**_NEU ab Version 0.12.0_**
 ### :bar_chart: Logging (optional)
 
 Wenn in der "config.ini" Logging_ein = 1 gesetzt ist, werden die Werte im "Logging_file" im sqlite-Format gespeichert.  
@@ -85,8 +84,10 @@ Hier z.B. das Liniendiagramm zur Tagesproduktion:
 ![Grafik zur Tagesproduktion](pics/Tagesproduktion.png)
 oder das Balkendiagramm zum Tagesverbrauch:  
 ![Grafik zur Tagesproduktion](pics/Tagesverbrauch.png)
-**_ENDE NEU_**
 
+html/8_tab_Diagram.php erzeugt ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin).  
+Dadurch soll z.B. ein Laden der Batterie aus dem Netz ersichtlich bzw. gezählt werden.  
+![Grafik zur Tagesproduktion](pics/QZ_Tag.png)
 
 #####################################################################
 
