@@ -104,12 +104,10 @@ Und im Browser localhost:7777 aufrufen.
 Webserver Apache z.B.:
 
 ### :floppy_disk: Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
-**_NEU ab Version 0.12.0_**  
 ```
 sudo apt install apache2 php
 sudo apt install php-sqlite3
 ```
-**_ENDE NEU_**  
 In /etc/apache2/apache2.conf   
 <Directory /srv/> durch <Directory /DIR/html/> ersetzen!  
 
