@@ -139,7 +139,7 @@ Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 
 Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben.  
-In der html/config.php müssen die Dateipfade und Variablen angepasst werden.   
+In der html/config.php könneni die Variablen angepasst werden (z.B. $PV_Leistung_KWp) .   
 
 Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung  
 beim nächsten Aufruf von SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
