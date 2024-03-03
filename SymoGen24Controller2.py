@@ -415,6 +415,8 @@ if __name__ == '__main__':
 
                 
 
+                    aktuellerLadewert = int(aktuellerLadewert)
+
                     if print_level >= 1:
                         try:
                             print("************* BEGINN: ", datetime.now(),"************* ")
