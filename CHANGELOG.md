@@ -1,8 +1,13 @@
-**[0.13.1] – 2024-02-XX**
+**[0.13.1] – 2024-03-XX**
 
 Änderung in 8_funktion_Diagram.php
 -  Diagram Sortierungen angepasst
 -  Diagram Ausreisser minimieren (Ausgabe nur alle 10 Minuten)
+
+Änderung auch in SymoGen24Controller2.py
+- Ladewert wird nachts um 0:00 auf 0 gesetzt, da die Prognose hier 0 Watt ist.
+  Neuen Ladewert nicht mehr schreiben, wenn Prognose 0 Watt beträgt.
+
 
 **[0.13.0] – 2024-02-04**
 
