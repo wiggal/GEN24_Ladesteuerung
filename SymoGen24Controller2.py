@@ -413,8 +413,13 @@ if __name__ == '__main__':
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
 
-                
+                    # Wenn die Prognose 0 Watt ist, nicht schreiben, 
+                    # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!
+                    if aktuelleVorhersage == 0:
+                        newPercent_schreiben = 0
+                        LadewertGrund = "Prognose ist 0 Watt, deshalb nicht schreiben!"
 
+                    # Auf ganze Watt runden
                     aktuellerLadewert = int(aktuellerLadewert)
 
                     if print_level >= 1:
