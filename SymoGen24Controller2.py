@@ -119,12 +119,16 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + (WRSchreibGrenze_nachOben * 1.05))
         else:
             EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
+
         # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
         if EinspeisegrenzUeberschuss > PV_Leistung_Watt - Einspeisegrenze:
             EinspeisegrenzUeberschuss = PV_Leistung_Watt - Einspeisegrenze
 
+        global Akkupflege
         if EinspeisegrenzUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
             aktuellerLadewert = int(EinspeisegrenzUeberschuss)
+            # Akkupflege deaktivieren, da Einspeisegrenze vorrangig
+            Akkupflege = 0
             LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
 
         # Ladeleistung auf MaxLadung begrenzen
@@ -137,6 +141,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
                 kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
             if (kapazitaetsueberschuss > aktuellerLadewert ):
+                # Akkupflege deaktivieren, da Einspeisegrenze vorrangig
+                Akkupflege = 0
                 aktuellerLadewert = kapazitaetsueberschuss
                 LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
 
@@ -217,6 +223,7 @@ if __name__ == '__main__':
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
                     LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')
+                    Akkupflege = getVarConf('Ladeberechnung','Akkupflege','eval')
                     Einspeisegrenze = getVarConf('Ladeberechnung','Einspeisegrenze','eval')
                     WR_Kapazitaet = getVarConf('Ladeberechnung','WR_Kapazitaet','eval')
                     PV_Leistung_Watt = getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
@@ -403,7 +410,7 @@ if __name__ == '__main__':
                                 else:
                                     # volle Ladung ;-)
                                     aktuellerLadewert = MaxLadung
-                                    DATA = setLadewert(MaxLadung)
+                                    DATA = setLadewert(aktuellerLadewert)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "PrognoseAbzugswert kleiner Grundlast und Schreibgrenze"
@@ -412,6 +419,22 @@ if __name__ == '__main__':
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
+
+                    # Wenn Akkupflege = 1 ab 80% Batterieladung mit Ladewert runter fahren
+                    if Akkupflege == 1:
+                        if BattStatusProz > 80:
+                            Ladefaktor = 0.2
+                        if BattStatusProz > 90:
+                            Ladefaktor = 0.1
+                        if BattStatusProz > 80 and BattStatusProz < 100:
+                            AkkupflegeLadewert = (BattganzeKapazWatt * Ladefaktor) 
+                            if AkkupflegeLadewert < aktuellerLadewert:
+                                aktuellerLadewert = AkkupflegeLadewert
+                                DATA = setLadewert(aktuellerLadewert)
+                                newPercent = DATA[0]
+                                newPercent_schreiben = DATA[1]
+                                LadewertGrund = "Akkupflege: Ladestand > 80%"
+
 
                     # Wenn die Prognose 0 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!

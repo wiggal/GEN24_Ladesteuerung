@@ -8,12 +8,18 @@
 - Ladewert wird nachts um 0:00 auf 0 gesetzt, da die Prognose hier 0 Watt ist.
   Neuen Ladewert nicht mehr schreiben, wenn Prognose 0 Watt beträgt.
 
+Neue Funktion: Akkupflege 
+#### ACHTUNG Änderung in der config.ini: Variable Akkupflege eingefügt
+
+Änderung auch in SymoGen24Controller2.py
+- ist die Variable "Akkupflege = 1" wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen,
+  ausser die Einspeisebegrenzung bzw. die AC-Leistung des Wechselrichters wird überschritten. 
 
 **[0.13.0] – 2024-02-04**
 
 Neue Funktion: Batteriereservekapazität mit Prognose von morgen anpassen.
 
-#### ACHTUNG Änderung in der config.inii: Zusätzliche Parameter im Block [Entladung] 
+#### ACHTUNG Änderung in der config.ini: Zusätzliche Parameter im Block [Entladung] 
 - EntlageGrenze_steuern, ProgGrenzeMorgen, EntlageGrenze_Min, EntlageGrenze_Max
 
 Änderung auch in SymoGen24Controller2.py, SymoGen24Connector.py
