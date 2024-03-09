@@ -6,6 +6,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#bar_chart-logging-optional) und grafische Darstellung von Produktion und Verbrauch.  
+- Batteriepflege: Um eine LFP-Akku wieder zu regenerieren, wird die Ladeleistung ab 80% beschränkt.  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
 Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
