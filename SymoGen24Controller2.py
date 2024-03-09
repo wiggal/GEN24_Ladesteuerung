@@ -141,7 +141,7 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
                 kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
             if (kapazitaetsueberschuss > aktuellerLadewert ):
-                # Akkupflege deaktivieren, da Einspeisegrenze vorrangig
+                # Akkupflege deaktivieren, da WR_Kapazitaet (AC) vorrangig
                 Akkupflege = 0
                 aktuellerLadewert = kapazitaetsueberschuss
                 LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
@@ -428,7 +428,7 @@ if __name__ == '__main__':
                             Ladefaktor = 0.1
                         if BattStatusProz > 80 and BattStatusProz < 100:
                             AkkupflegeLadewert = (BattganzeKapazWatt * Ladefaktor) 
-                            if AkkupflegeLadewert < aktuellerLadewert:
+                            if AkkupflegeLadewert < aktuellerLadewert and AkkupflegeLadewert > aktuellePVProduktion - Grundlast:
                                 aktuellerLadewert = AkkupflegeLadewert
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
