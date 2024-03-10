@@ -290,7 +290,7 @@ if __name__ == '__main__':
                     LadewertGrund = ""
 
                     # WRSchreibGrenze_nachUnten ab 90% prozentual erhöhen (ersetzen von BatterieVoll!!)
-                    if ( BattStatusProz - 90 > 0 ):
+                    if ( BattStatusProz > 90 ):
                         WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 5))
                         DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachUnten: " + str(WRSchreibGrenze_nachUnten) +"\n"
                         WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 5))
@@ -424,16 +424,19 @@ if __name__ == '__main__':
                     if Akkupflege == 1:
                         if BattStatusProz > 80:
                             Ladefaktor = 0.2
+                            AkkuPflegeGrund = '80%, Ladewert = 0.2C'
                         if BattStatusProz > 90:
                             Ladefaktor = 0.1
+                            AkkuPflegeGrund = '90%, Ladewert = 0.1C'
                         if BattStatusProz > 80 and BattStatusProz < 100:
                             AkkupflegeLadewert = (BattganzeKapazWatt * Ladefaktor) 
-                            if AkkupflegeLadewert < aktuellerLadewert and AkkupflegeLadewert > aktuellePVProduktion - Grundlast:
+                            # Um des setzen der Akkupflege zu verhindern, wenn der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
+                            if AkkupflegeLadewert + 10 < aktuellerLadewert and aktuelleVorhersage > AkkupflegeLadewert / 1.2:
                                 aktuellerLadewert = AkkupflegeLadewert
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
-                                LadewertGrund = "Akkupflege: Ladestand > 80%"
+                                LadewertGrund = "Akkupflege: Ladestand > " + AkkuPflegeGrund
 
 
                     # Wenn die Prognose 0 Watt ist, nicht schreiben, 
