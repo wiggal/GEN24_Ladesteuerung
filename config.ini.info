@@ -151,9 +151,10 @@ MindBattLad = 20
 ; Wenn nach Prognoseberechnung keine Ladung nötig, wird der Ladewert auf den Wert "LadungAus" in Watt gesetzt.
 LadungAus = 0
 
-; Akkupflege (1=ein, 0=aus) dadurch wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen
-; ACHTUNG: Eine Überscheitung der Eispeisegrenze bzw. AC-Leistun des WR sett die Akkupflege aus!
-Akkupflege = 0
+; Akkuschonung (1=ein, 0=aus) dadurch wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen
+; und BattVollUm wird um eine Stunde vor verlegt, da am Schluss nicht mehr so stark geladen wird.
+; ACHTUNG: Eine Überscheitung der Eispeisegrenze bzw. AC-Leistun des WR setzt die Akkuschonung aus!
+Akkuschonung = 0
 
 ; hier muessen die Namen der zusätzlichen Konfigurationen definiert werden.
 ; mit Zusatz_Ladebloecke = aus können die zusätzlichen Konfigurationen abgeschaltet werden

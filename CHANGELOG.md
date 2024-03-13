@@ -7,12 +7,13 @@
 Änderung auch in SymoGen24Controller2.py  
 - Fix: Ladewert wird nachts um 0:00 auf 0 gesetzt, da die Prognose hier 0 Watt ist.  
   Neuen Ladewert nicht mehr schreiben, wenn Prognose 0 Watt beträgt.  
+- Gleitender Mittelwert für Prognose eingeführt, um starke Sprünge in den Prognosen zu glätten.
 
-Neue Funktion: Akkupflege  
-#### ACHTUNG Änderung in der config.ini: Variable Akkupflege eingefügt  
+Neue Funktion: Akkuschonung  
+#### ACHTUNG Änderung in der config.ini: Variable Akkuschonung eingefügt  
   
 Änderung auch in SymoGen24Controller2.py  
-- ist die Variable "Akkupflege = 1" wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen,  
+- ist die Variable "Akkuschonung = 1" wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen,  
   ausser die Einspeisebegrenzung bzw. die AC-Leistung des Wechselrichters wird überschritten.   
 
 **[0.13.0] – 2024-02-04**

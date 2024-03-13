@@ -22,7 +22,8 @@ def getPrognose(Stunde):
 
 def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion ):
 
-        # alle Prognodewerte zwischen aktueller Stunde und 22:00 lesen
+        global BatSparFaktor, Akkuschonung
+        # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
         format_Tag = "%Y-%m-%d"
         # aktuelle Stunde und aktuelle Minute
         Akt_Std = int(datetime.strftime(now, "%H"))
@@ -36,7 +37,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         Pro_Uebersch_vorher = 0
         DEBUG_Ausgabe_Schleife = "\nDEBUG <<<<<< Meldungen aus Schleife >>>>>>>\n"
         # um Divison durch Null zu verhindern kleinsten Wert setzen
-        global BatSparFaktor
         if BatSparFaktor < 0.1:
             BatSparFaktor = 0.1
 
@@ -96,20 +96,23 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # Hier noch den aktuellen Ladewert der Schleife ermitteln und im return mitgeben
         # Prognose nur bis BattVollUm berechnen
-        LadewertStd = datetime.strftime(now, format_aktStd)
-        LadewertStd_naechste = datetime.strftime(now + timedelta(minutes = (60)), format_aktStd)
-        Pro_Akt1 = (getPrognose(LadewertStd))
-        Pro_Akt2 = (getPrognose(LadewertStd_naechste))
+        LadewertStd1 = datetime.strftime(now, format_aktStd)
+        LadewertStd2 = datetime.strftime(now + timedelta(minutes = (60)), format_aktStd)
+        LadewertStd3 = datetime.strftime(now + timedelta(minutes = (120)), format_aktStd)
+        Pro_Akt1 = (getPrognose(LadewertStd1))
+        Pro_Akt2 = (getPrognose(LadewertStd2))
+        Pro_Akt3 = (getPrognose(LadewertStd3))
 
-        # zu jeder Minute den genauen Zwischenwert mit den beiden Stundenprognosen rechnen
-        # wenn Letzte Stunde vor BatterieVollUm dann nicht Prognose von nächster Stund addieren!!
-        Pro_Akt = int((Pro_Akt1 * (60 - Akt_Minute) + Pro_Akt2 * Akt_Minute) / 60)
+        # Gleitender Mittelwert der nächsten zwei Stunden auf Minuten genau berechnen, zu Vermeidung von Sprüngen
+        # Pro_Akt = int((Pro_Akt1 * (60 - Akt_Minute) + Pro_Akt2 * Akt_Minute) / 60)
+        Pro_Akt = int((((Pro_Akt1 * (60 - Akt_Minute) + Pro_Akt3 * Akt_Minute) / 60) + Pro_Akt2) /2)
         if ( Pro_Akt< 0): Pro_Akt = 0
 
         # Nun den Aktuellen Ladewert rechnen 
         # Batterieladewert mit allen Einfluessen aus der Prognose rechnen
         aktuellerLadewert = int((Pro_Akt - AbzugWatt)/BatSparFaktor)
         LadewertGrund = "Prognoseberechnung / BatSparFaktor"
+        print("Pro_Akt1, Pro_Akt2, Pro_Akt3, Pro_Akt, aktuellerLadewert", Pro_Akt1, Pro_Akt2, Pro_Akt3, Pro_Akt, aktuellerLadewert)
 
         if aktuellerLadewert < 0: aktuellerLadewert = 0
 
@@ -124,11 +127,10 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         if EinspeisegrenzUeberschuss > PV_Leistung_Watt - Einspeisegrenze:
             EinspeisegrenzUeberschuss = PV_Leistung_Watt - Einspeisegrenze
 
-        global Akkupflege
         if EinspeisegrenzUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
             aktuellerLadewert = int(EinspeisegrenzUeberschuss)
-            # Akkupflege deaktivieren, da Einspeisegrenze vorrangig
-            Akkupflege = 0
+            # Akkuschonung deaktivieren, da Einspeisegrenze vorrangig
+            Akkuschonung = 0
             LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
 
         # Ladeleistung auf MaxLadung begrenzen
@@ -141,8 +143,8 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
                 kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
             if (kapazitaetsueberschuss > aktuellerLadewert ):
-                # Akkupflege deaktivieren, da WR_Kapazitaet (AC) vorrangig
-                Akkupflege = 0
+                # Akkuschonung deaktivieren, da WR_Kapazitaet (AC) vorrangig
+                Akkuschonung = 0
                 aktuellerLadewert = kapazitaetsueberschuss
                 LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
 
@@ -223,7 +225,7 @@ if __name__ == '__main__':
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
                     LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')
-                    Akkupflege = getVarConf('Ladeberechnung','Akkupflege','eval')
+                    Akkuschonung = getVarConf('Ladeberechnung','Akkuschonung','eval')
                     Einspeisegrenze = getVarConf('Ladeberechnung','Einspeisegrenze','eval')
                     WR_Kapazitaet = getVarConf('Ladeberechnung','WR_Kapazitaet','eval')
                     PV_Leistung_Watt = getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
@@ -241,6 +243,10 @@ if __name__ == '__main__':
                     WREntladeSchreibGrenze_Watt = getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
                     EntlageGrenze_steuern = getVarConf('Entladung','EntlageGrenze_steuern','eval')
                                        
+                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
+                    if Akkuschonung == 1:
+                        BattVollUm = BattVollUm - 1
+
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
@@ -291,9 +297,9 @@ if __name__ == '__main__':
 
                     # WRSchreibGrenze_nachUnten ab 90% prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz > 90 ):
-                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 5))
+                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 7))
                         DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachUnten: " + str(WRSchreibGrenze_nachUnten) +"\n"
-                        WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 5))
+                        WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 7))
                         DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
@@ -420,23 +426,24 @@ if __name__ == '__main__':
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
 
-                    # Wenn Akkupflege = 1 ab 80% Batterieladung mit Ladewert runter fahren
-                    if Akkupflege == 1:
+                    # Wenn Akkuschonung = 1 ab 80% Batterieladung mit Ladewert runter fahren
+                    if Akkuschonung == 1:
                         if BattStatusProz > 80:
                             Ladefaktor = 0.2
-                            AkkuPflegeGrund = '80%, Ladewert = 0.2C'
+                            AkkuSchonGrund = '80%, Ladewert = 0.2C'
                         if BattStatusProz > 90:
                             Ladefaktor = 0.1
-                            AkkuPflegeGrund = '90%, Ladewert = 0.1C'
-                        if BattStatusProz > 80 and BattStatusProz < 100:
-                            AkkupflegeLadewert = (BattganzeKapazWatt * Ladefaktor) 
-                            # Um des setzen der Akkupflege zu verhindern, wenn der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
-                            if AkkupflegeLadewert + 10 < aktuellerLadewert and aktuelleVorhersage > AkkupflegeLadewert / 1.2:
-                                aktuellerLadewert = AkkupflegeLadewert
+                            AkkuSchonGrund = '90%, Ladewert = 0.1C'
+                        # if BattStatusProz > 80 and BattStatusProz < 100:
+                        if BattStatusProz > 80:
+                            AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor) 
+                            # Um des setzen der Akkuschonung zu verhindern, wenn der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
+                            if AkkuschonungLadewert + 10 < aktuellerLadewert and aktuelleVorhersage > AkkuschonungLadewert / 1.2:
+                                aktuellerLadewert = AkkuschonungLadewert
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
-                                LadewertGrund = "Akkupflege: Ladestand > " + AkkuPflegeGrund
+                                LadewertGrund = "Akkuschonung: Ladestand > " + AkkuSchonGrund
 
 
                     # Wenn die Prognose 0 Watt ist, nicht schreiben, 
@@ -479,7 +486,9 @@ if __name__ == '__main__':
                             print()
 
 
-
+                    DEBUG_Ausgabe+="\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
+                    DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachUnten:  " + str(WRSchreibGrenze_nachUnten) + "W"
+                    DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W"
                     ### AB HIER SCHARF wenn Argument "schreiben" übergeben
 
                     bereits_geschrieben = 0
