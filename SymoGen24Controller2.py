@@ -112,7 +112,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # Batterieladewert mit allen Einfluessen aus der Prognose rechnen
         aktuellerLadewert = int((Pro_Akt - AbzugWatt)/BatSparFaktor)
         LadewertGrund = "Prognoseberechnung / BatSparFaktor"
-        print("Pro_Akt1, Pro_Akt2, Pro_Akt3, Pro_Akt, aktuellerLadewert", Pro_Akt1, Pro_Akt2, Pro_Akt3, Pro_Akt, aktuellerLadewert)
 
         if aktuellerLadewert < 0: aktuellerLadewert = 0
 
@@ -440,6 +439,8 @@ if __name__ == '__main__':
                             # Um des setzen der Akkuschonung zu verhindern, wenn der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
                             if AkkuschonungLadewert + 10 < aktuellerLadewert and aktuelleVorhersage > AkkuschonungLadewert / 1.2:
                                 aktuellerLadewert = AkkuschonungLadewert
+                                WRSchreibGrenze_nachUnten = WRSchreibGrenze_nachUnten / 5
+                                WRSchreibGrenze_nachOben = WRSchreibGrenze_nachOben / 5
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
