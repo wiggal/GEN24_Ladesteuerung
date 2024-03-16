@@ -153,7 +153,7 @@ LadungAus = 0
 
 ; Akkuschonung (1=ein, 0=aus) dadurch wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen
 ; und BattVollUm wird um eine Stunde vor verlegt, da am Schluss nicht mehr so stark geladen wird.
-; ACHTUNG: Eine Überscheitung der Eispeisegrenze bzw. AC-Leistun des WR setzt die Akkuschonung aus!
+; ACHTUNG: Eine Überschreitung der Einspeisegrenze bzw. AC-Leistung des WR setzt die Akkuschonung aus!
 Akkuschonung = 0
 
 ; hier muessen die Namen der zusätzlichen Konfigurationen definiert werden.
@@ -200,14 +200,14 @@ Batterieentlandung_steuern = 1
 ; Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben
 WREntladeSchreibGrenze_Watt = 200
 ; Entladung des Akku auf bestimmten Prozentsatz begrenzen
-; damit kann die Entlagegrenze des Akkus in Abhängigkeit der Prognose für morgen gesetzt werden.
-EntlageGrenze_steuern = 1
+; damit kann die Entladegrenze des Akkus in Abhängigkeit der Prognose für morgen gesetzt werden.
+EntladeGrenze_steuern = 1
 ; PrognoseGenze in KWh
-; Ist die Prognose für morgen kleiner als "ProgGrenzeMorgen", wird "EntlageGrenze_Min" gesetzt, ansonsten "EntlageGrenze_Max"
+; Ist die Prognose für morgen kleiner als "ProgGrenzeMorgen", wird "EntladeGrenze_Min" gesetzt, ansonsten "EntladeGrenze_Max"
 ProgGrenzeMorgen = 10
 ; Entladegrenzen in Prozent (%)
-EntlageGrenze_Min = 0
-EntlageGrenze_Max = 30
+EntladeGrenze_Min = 0
+EntladeGrenze_Max = 30
 
 ; Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
 [messaging]
