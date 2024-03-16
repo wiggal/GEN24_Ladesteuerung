@@ -437,7 +437,7 @@ if __name__ == '__main__':
                         if BattStatusProz > 80:
                             AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor) 
                             # Um des setzen der Akkuschonung zu verhindern, wenn der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
-                            if AkkuschonungLadewert + 10 < aktuellerLadewert and aktuelleVorhersage > AkkuschonungLadewert / 1.2:
+                            if AkkuschonungLadewert + 10 < aktuellerLadewert and aktuelleVorhersage > AkkuschonungLadewert / 2:
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = WRSchreibGrenze_nachUnten / 5
                                 WRSchreibGrenze_nachOben = WRSchreibGrenze_nachOben / 5
