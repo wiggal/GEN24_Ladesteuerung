@@ -240,7 +240,7 @@ if __name__ == '__main__':
                     PV_Reservierung_steuern = getVarConf('Reservierung','PV_Reservierung_steuern','eval')
                     Batterieentlandung_steuern = getVarConf('Entladung','Batterieentlandung_steuern','eval')
                     WREntladeSchreibGrenze_Watt = getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
-                    EntlageGrenze_steuern = getVarConf('Entladung','EntlageGrenze_steuern','eval')
+                    EntladeGrenze_steuern = getVarConf('Entladung','EntladeGrenze_steuern','eval')
                                        
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
                     if Akkuschonung == 1:
@@ -609,18 +609,18 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADESTEUERUNG >>>>>>>>>>>>>"
 
                     ######## E N T L A D E B E G R E N Z U N G ab hier wenn eingeschaltet!
-                    if  EntlageGrenze_steuern == 1:
+                    if  EntladeGrenze_steuern == 1:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
 
                         MaxEntladung = 100
                         ProgGrenzeMorgen = getVarConf('Entladung','ProgGrenzeMorgen','eval')
-                        EntlageGrenze_Min = getVarConf('Entladung','EntlageGrenze_Min','eval')
-                        EntlageGrenze_Max = getVarConf('Entladung','EntlageGrenze_Max','eval')
+                        EntladeGrenze_Min = getVarConf('Entladung','EntladeGrenze_Min','eval')
+                        EntladeGrenze_Max = getVarConf('Entladung','EntladeGrenze_Max','eval')
                         PrognoseMorgen = getPrognoseMorgen()/1000
                         Battery_MinRsvPct = int(gen24.read_data('Battery_MinRsvPct')/100)
-                        Neu_Battery_MinRsvPct = EntlageGrenze_Min
+                        Neu_Battery_MinRsvPct = EntladeGrenze_Min
                         if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
-                            Neu_Battery_MinRsvPct = EntlageGrenze_Max
+                            Neu_Battery_MinRsvPct = EntladeGrenze_Max
                         if print_level >= 1:
                             print("######### E N T L A D E B E G R E N Z U N G #########\n")
                             print("Prognose Morgen: ", PrognoseMorgen, "KW")

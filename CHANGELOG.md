@@ -1,4 +1,4 @@
-**[0.13.1] – 2024-03-XX**
+**[0.13.1] – 2024-03-17**
 
 Änderung in 8_funktion_Diagram.php
 -  Diagram Sortierungen angepasst  
@@ -9,9 +9,13 @@
   Neuen Ladewert nicht mehr schreiben, wenn Prognose 0 Watt beträgt.  
 - Gleitender Mittelwert für Prognose eingeführt, um starke Sprünge in den Prognosen zu glätten.
 
+#### ACHTUNG Änderung in der config.ini:  Tippfehler in Variablen beseitigt  
+  EntlageGrenze_steuern ==> EntladeGrenze_steuern  
+  EntlageGrenze_Min     ==> EntladeGrenze_Min  
+  EntlageGrenze_Max     ==> EntladeGrenze_Max  
+
 Neue Funktion: Akkuschonung  
 #### ACHTUNG Änderung in der config.ini: Variable Akkuschonung eingefügt  
-  
 Änderung auch in SymoGen24Controller2.py  
 - ist die Variable "Akkuschonung = 1" wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen,  
   ausser die Einspeisebegrenzung bzw. die AC-Leistung des Wechselrichters wird überschritten.   
