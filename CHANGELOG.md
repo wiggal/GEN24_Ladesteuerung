@@ -1,3 +1,8 @@
+**[0.13.2] – 2024-XX-XX**
+
+Änderung auch in SymoGen24Controller2.py
+- die Akkuschonung wird jetzt immer ausgeführt, wenn die Variable "Akkuschonung = 1" ist. 
+
 **[0.13.1] – 2024-03-17**
 
 Änderung in 8_funktion_Diagram.php
