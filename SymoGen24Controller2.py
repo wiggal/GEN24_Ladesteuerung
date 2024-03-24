@@ -22,7 +22,7 @@ def getPrognose(Stunde):
 
 def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion ):
 
-        global BatSparFaktor, Akkuschonung
+        global BatSparFaktor
         # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
         format_Tag = "%Y-%m-%d"
         # aktuelle Stunde und aktuelle Minute
@@ -128,8 +128,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         if EinspeisegrenzUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
             aktuellerLadewert = int(EinspeisegrenzUeberschuss)
-            # Akkuschonung deaktivieren, da Einspeisegrenze vorrangig
-            Akkuschonung = 0
             LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
 
         # Ladeleistung auf MaxLadung begrenzen
@@ -142,8 +140,6 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
             if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
                 kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
             if (kapazitaetsueberschuss > aktuellerLadewert ):
-                # Akkuschonung deaktivieren, da WR_Kapazitaet (AC) vorrangig
-                Akkuschonung = 0
                 aktuellerLadewert = kapazitaetsueberschuss
                 LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
 
@@ -296,9 +292,9 @@ if __name__ == '__main__':
 
                     # WRSchreibGrenze_nachUnten ab 90% prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz > 90 ):
-                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 7))
+                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 5))
                         DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachUnten: " + str(WRSchreibGrenze_nachUnten) +"\n"
-                        WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 7))
+                        WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 5))
                         DEBUG_Ausgabe += "## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
@@ -321,7 +317,7 @@ if __name__ == '__main__':
                     # Nun habe ich die Werte und muss hier Verzweigen
                     DEBUG_Ausgabe += PrognoseUNDUeberschuss[7]
                     DEBUG_Ausgabe += "\n"
-                    DEBUG_Ausgabe += "TagesPrognoseUeberschuss: " + str(TagesPrognoseUeberschuss)
+                    DEBUG_Ausgabe += "DEBUG TagesPrognoseUeberschuss: " + str(TagesPrognoseUeberschuss)
                     DEBUG_Ausgabe += ", TagesPrognoseUeberschuss_voll: " + str(TagesPrognoseUeberschuss_voll)
                     DEBUG_Ausgabe += ", aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
 
@@ -333,7 +329,7 @@ if __name__ == '__main__':
                     # Ladeleistung auf MaxLadung begrenzen
                     if (aktuellerLadewert > MaxLadung):
                         aktuellerLadewert = MaxLadung
-                    DEBUG_Ausgabe += datetime.strftime(now, "%D %H:%M") + " ( " + str(BatSparFaktor) + ") Prognoseladewert: " + str(aktuellerLadewert)
+                    DEBUG_Ausgabe += "DEBUG " + datetime.strftime(now, "%D %H:%M") + " ( " + str(BatSparFaktor) + ") Prognoseladewert: " + str(aktuellerLadewert)
                     DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) + ", BatterieLuecke: " + str(BatterieLuecke) + ", Abzug: " + str(PrognoseAbzugswert) + "\n"
     
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
@@ -436,11 +432,13 @@ if __name__ == '__main__':
                         # if BattStatusProz > 80 and BattStatusProz < 100:
                         if BattStatusProz > 80:
                             AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor) 
+                            DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
+                            DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
                             # Um des setzen der Akkuschonung zu verhindern, wenn der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
-                            if AkkuschonungLadewert + 10 < aktuellerLadewert and aktuelleVorhersage > AkkuschonungLadewert / 2:
+                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuelleVorhersage * 2 > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
-                                WRSchreibGrenze_nachUnten = WRSchreibGrenze_nachUnten / 5
-                                WRSchreibGrenze_nachOben = WRSchreibGrenze_nachOben / 5
+                                WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
+                                WRSchreibGrenze_nachOben = aktuellerLadewert / 5
                                 DATA = setLadewert(aktuellerLadewert)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
