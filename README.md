@@ -38,7 +38,7 @@ SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging.
 (Häufigerer Aufruf nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!)  
 
 ```
-*/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
+1-56/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
 33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
 8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
 1 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
