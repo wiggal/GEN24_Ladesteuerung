@@ -11,7 +11,7 @@
 filePathWeatherData=weatherData.json
 
 ; Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen
-; und die Werte für das zweite PV-Feld unter [forecast.solar2] eintragen
+; und die Werte unter [forecast.solar2] und/oder [solcast.com2] eintragen
 [pv.strings]
 anzahl=1
 
@@ -75,6 +75,9 @@ Zeitzone = +1
 ; falls die Anlagengröße in KWp nicht mit der Größe in solcast.com übereinstimmt (z.B. Erweiterung)
 KW_Faktor = 1.00
 
+[solcast.com2]
+resource_id = xxxx-xxxx-xxxx-xxxx
+KW_Faktor = 1.00
 
 [gen24]
 ; IP des Wechselrichters
