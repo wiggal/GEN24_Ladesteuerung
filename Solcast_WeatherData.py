@@ -17,8 +17,13 @@ def loadLatestWeatherData():
     morgen = datetime.strftime(now + timedelta(days=1), "%Y-%m-%d")
     sommerzeit = time.localtime().tm_isdst
 
+    Abfragebereich = ['forecasts', 'estimated_actuals']
+    # Wenn no_history == 1 nur forecasts abrufen
+    if no_history == 1:
+        Abfragebereich = ['forecasts']
+
     #die Daten müssen 2x abgerufen werden forecasts (Zukunft) und estimated_actuals (aktuell und Vergangenheit 
-    for datenloop in ["forecasts","estimated_actuals"]:
+    for datenloop in Abfragebereich:
 
         try:
             url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id, datenloop, api_key)
@@ -88,6 +93,22 @@ def loadLatestWeatherData():
             json_data1 = error
 
     
+    # Wenn no_history == 1 historische Daten aus weatherData.json holen
+    if no_history == 1:
+        try:
+            with open(weatherfile, 'r') as datei:
+                json_data_old = json.load(datei)
+                #print(json_data_old)
+
+            for wetterwerte_old in json_data_old['result']['watts']:
+                if heute in wetterwerte_old and wetterwerte_old not in dict_watts['result']['watts']:
+                    dict_watts['result']['watts'][wetterwerte_old] = int(json_data_old['result']['watts'][wetterwerte_old])
+                    #print (wetterwerte_old)
+        except:
+            print("Fehler beim Lesen von ", weatherfile)
+
+
+
     #solcast_2.json Nun wieder nach Datum und Stunden sortieren
     dict_watts['result']['watts'] = dict(sorted(dict_watts['result']['watts'].items()))
     return(dict_watts, json_data1)
@@ -98,6 +119,7 @@ if __name__ == '__main__':
     Strings = getVarConf('pv.strings', 'anzahl', 'eval')
     dataAgeMaxInMinutes = getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
     Zeitzone = getVarConf('solcast.com', 'Zeitzone', 'eval')
+    no_history = getVarConf('solcast.com', 'no_history', 'eval')
     KW_Faktor = getVarConf('solcast.com2', 'KW_Faktor', 'eval')
     KW_Faktor2 = getVarConf('solcast.com', 'KW_Faktor', 'eval')
     weatherfile = getVarConf('solcast.com', 'weatherfile', 'str')

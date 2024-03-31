@@ -74,6 +74,10 @@ dataAgeMaxInMinutes = 1000
 Zeitzone = +1
 ; falls die Anlagengröße in KWp nicht mit der Größe in solcast.com übereinstimmt (z.B. Erweiterung)
 KW_Faktor = 1.00
+; Wenn no_history = 1 dann werden von solcast.com keine historischen Daten geholt, sondern aus weatherData.json
+; dadurch hat man bei einer Ausrichtung 10 und bei zwei Ausrichtungen 5 Abfragen
+no_history = 1
+
 
 [solcast.com2]
 resource_id = xxxx-xxxx-xxxx-xxxx
