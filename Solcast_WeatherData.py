@@ -25,7 +25,12 @@ def loadLatestWeatherData():
             # Hier wieder ABHOLEN EIN
             apiResponse = requests.get(url, timeout=99.50)
             json_data1 = dict(json.loads(apiResponse.text))
-    
+            
+            if Strings == 2:
+                url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id2, datenloop, api_key)
+                apiResponse2 = requests.get(url, timeout=99.50)
+                json_data2 = dict(json.loads(apiResponse2.text))
+                
             try:
                 # wenn zuviele Zugriffe
                 istda = json_data1['response_status']['error_code']
@@ -54,6 +59,31 @@ def loadLatestWeatherData():
                                 dict_watts['result']['watts'][key_neu] = int(wetterwerte['pv_estimate']*1000*KW_Faktor)
                 except:
                     continue
+                
+                if Strings == 2:
+                    Puffer = ['2000-01-01',5]
+                    try:
+                        for wetterwerte in json_data2[datenloop]:
+                            key_neu_1 = (wetterwerte['period_end'][:19]).replace('T',' ',1)
+                            if ('00:00' in key_neu_1 and (heute in key_neu_1 or morgen in key_neu_1)):
+                                key_neu = datetime.strftime(datetime.strptime(key_neu_1, format) + timedelta(hours=Zeitzone+sommerzeit), format)
+                                #hier Werte mit NULLEN weg
+                                if (wetterwerte['pv_estimate'] == 0):
+                                    if (Puffer[1] == 0):
+                                        Puffer = [key_neu, int(wetterwerte['pv_estimate']*1000*KW_Faktor2)]
+                                        continue
+                                    else:
+                                        Puffer = [key_neu, int(wetterwerte['pv_estimate']*1000*KW_Faktor2)]
+                                        dict_watts['result']['watts'][key_neu] = dict_watts['result']['watts'][key_neu] + int(wetterwerte['pv_estimate']*1000*KW_Faktor2)
+                                        continue
+                                else:
+                                    if (Puffer[1] == 0):
+                                        dict_watts['result']['watts'][Puffer[0]] = Puffer[1]
+                                    Puffer = [key_neu, int(wetterwerte['pv_estimate']*1000*KW_Faktor2)]
+                                    dict_watts['result']['watts'][key_neu] = dict_watts['result']['watts'][key_neu] + int(wetterwerte['pv_estimate']*1000*KW_Faktor2)
+                    except:
+                        continue
+                
         except requests.exceptions.RequestException as error:
             json_data1 = error
 
@@ -65,12 +95,15 @@ def loadLatestWeatherData():
 if __name__ == '__main__':
     config = loadConfig('config.ini')
     # Benoetigte Variablen aus config.ini definieren und prüfen
+    Strings = getVarConf('pv.strings', 'anzahl', 'eval')
     dataAgeMaxInMinutes = getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
     Zeitzone = getVarConf('solcast.com', 'Zeitzone', 'eval')
-    KW_Faktor = getVarConf('solcast.com', 'KW_Faktor', 'eval')
+    KW_Faktor = getVarConf('solcast.com2', 'KW_Faktor', 'eval')
+    KW_Faktor2 = getVarConf('solcast.com', 'KW_Faktor', 'eval')
     weatherfile = getVarConf('solcast.com', 'weatherfile', 'str')
     api_key = getVarConf('solcast.com', 'api_key', 'str')
     resource_id = getVarConf('solcast.com', 'resource_id', 'str')
+    resource_id2 = getVarConf('solcast.com2', 'resource_id', 'str')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
