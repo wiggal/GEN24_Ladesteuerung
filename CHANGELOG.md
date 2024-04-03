@@ -1,7 +1,20 @@
 **[0.13.2] – 2024-XX-XX**
 
-Änderung auch in SymoGen24Controller2.py
+Änderung in SymoGen24Controller2.py
 - die Akkuschonung wird jetzt immer ausgeführt, wenn die Variable "Akkuschonung = 1" ist. 
+
+Änderung in Solcast_WeatherData.py
+- hier kann nun auch eine zweite Ausrichtung, die in solcast.com mir 1km Entfernung 
+  konfiguriert werden kann, abgerufen werden. 
+  [pv.strings] anzahl auf 2 setzen.
+
+- damit die freien 10 Abrufe nicht zu schnell verbraucht werden, 
+  kann auf das Abrufen der Historie durch no_history = 1 abgestellt werden.
+  Die Historie und die aktuelle Stunde werden dann aus der weatherData.json übernommen.
+
+#### ACHTUNG Änderung in der config.ini:
+- Im Block [solcast.com] wurde "no_history = 0" hinzugefügt
+- ein neuer Block [solcast.com2] wurde hizugefügt.
 
 **[0.13.1] – 2024-03-17**
 
