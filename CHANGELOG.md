@@ -9,7 +9,7 @@
   [pv.strings] anzahl auf 2 setzen.
 
 - damit die freien 10 Abrufe nicht zu schnell verbraucht werden, 
-  kann auf das Abrufen der Historie durch no_history = 1 abgestellt werden.
+  kann das Abrufen der Historie durch no_history = 1 abgestellt werden.
   Die Historie und die aktuelle Stunde werden dann aus der weatherData.json übernommen.
 
 #### ACHTUNG Änderung in der config.ini:
