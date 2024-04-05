@@ -12,6 +12,9 @@
   kann das Abrufen der Historie durch no_history = 1 abgestellt werden.
   Die Historie und die aktuelle Stunde werden dann aus der weatherData.json übernommen.
 
+Änderung in functions.py  
+- Beim lesen der Variablen, bei zahlen Komma in Punkt umwandeln, falls in der config.ini ein Komma steht.
+
 #### ACHTUNG Änderung in der config.ini:
 - Im Block [solcast.com] wurde "no_history = 0" hinzugefügt
 - ein neuer Block [solcast.com2] wurde hizugefügt.

@@ -70,7 +70,7 @@ def getVarConf(var_block, var, Type):
         try:
             if(Type == 'eval'):
                 error_type = "als Zahl "
-                return_var = eval(config[var_block][var])
+                return_var = eval(config[var_block][var].replace(',', '.'))
             else:
                 error_type = ""
                 return_var = str(config[var_block][var])
