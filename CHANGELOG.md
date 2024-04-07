@@ -1,7 +1,8 @@
-**[0.13.2] – 2024-XX-XX**
+**[0.13.2] – 2024-04-07**
 
 Änderung in SymoGen24Controller2.py
 - die Akkuschonung wird jetzt immer ausgeführt, wenn die Variable "Akkuschonung = 1" ist. 
+- Ladekurve durch Mittelung mit vorherigem Ladewert glätten
 
 Änderung in Solcast_WeatherData.py
 - hier kann nun auch eine zweite Ausrichtung, die in solcast.com mir 1km Entfernung 
@@ -13,7 +14,7 @@
   Die Historie und die aktuelle Stunde werden dann aus der weatherData.json übernommen.
 
 Änderung in functions.py  
-- Beim lesen der Variablen, bei zahlen Komma in Punkt umwandeln, falls in der config.ini ein Komma steht.
+- Beim lesen der Variablen, bei Zahlen Komma in Punkt umwandeln, falls in der config.ini ein Komma steht.
 
 #### ACHTUNG Änderung in der config.ini:
 - Im Block [solcast.com] wurde "no_history = 0" hinzugefügt
