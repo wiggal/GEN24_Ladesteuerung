@@ -111,6 +111,9 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
         # Nun den Aktuellen Ladewert rechnen 
         # Batterieladewert mit allen Einfluessen aus der Prognose rechnen
         aktuellerLadewert = int((Pro_Akt - AbzugWatt)/BatSparFaktor)
+        #Hier durch Mittelung mit vorherigem Ladewert glätten
+        if alterLadewert > 0 and alterLadewert + 10 < MaxLadung:
+            aktuellerLadewert = int((alterLadewert + aktuellerLadewert)/2)
         LadewertGrund = "Prognoseberechnung / BatSparFaktor"
 
         if aktuellerLadewert < 0: aktuellerLadewert = 0
