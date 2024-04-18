@@ -139,9 +139,11 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # Wenn  PV-Produktion > WR_Kapazitaet (AC)
         if aktuellePVProduktion > WR_Kapazitaet:
-            kapazitaetsueberschuss = int(aktuellePVProduktion - WR_Kapazitaet + WRSchreibGrenze_nachOben)
+            kapazitaetsueberschuss = int(aktuellePVProduktion - WR_Kapazitaet )
             if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
                 kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
+            if (kapazitaetsueberschuss > alterLadewert + 100 and kapazitaetsueberschuss < alterLadewert + WRSchreibGrenze_nachOben):
+                kapazitaetsueberschuss = alterLadewert + WRSchreibGrenze_nachOben + 10
             if (kapazitaetsueberschuss > aktuellerLadewert ):
                 aktuellerLadewert = kapazitaetsueberschuss
                 LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
@@ -324,11 +326,13 @@ if __name__ == '__main__':
                     DEBUG_Ausgabe += ", TagesPrognoseUeberschuss_voll: " + str(TagesPrognoseUeberschuss_voll)
                     DEBUG_Ausgabe += ", aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
 
-                    # BatterieLuecke prozentual verteilen, 
+                    # BatterieLuecke prozentual verteilen, wenn Ladewert durch Prognoseberechnung gesetzt 
                     # Wenn PrognoseAbzugswert == Grundlast, oder aktuellerLadewert > 0
                     BatterieLuecke = BattKapaWatt_akt - TagesPrognoseUeberschuss
-                    if (aktuellerLadewert > 0 ) or (PrognoseAbzugswert <= Grundlast):
-                        aktuellerLadewert = int(aktuellerLadewert + (BatterieLuecke /(BattVollUm-(int(datetime.strftime(now, "%H"))+int(datetime.strftime(now, "%M"))/60)+0.001)))
+                    if LadewertGrund == "Prognoseberechnung / BatSparFaktor":
+                        if (aktuellerLadewert > 0 ) or (PrognoseAbzugswert <= Grundlast):
+                            aktuellerLadewert = int(aktuellerLadewert + (BatterieLuecke /(BattVollUm-(int(datetime.strftime(now, "%H"))+int(datetime.strftime(now, "%M"))/60)+0.001)))
+
                     # Ladeleistung auf MaxLadung begrenzen
                     if (aktuellerLadewert > MaxLadung):
                         aktuellerLadewert = MaxLadung
@@ -426,19 +430,30 @@ if __name__ == '__main__':
 
                     # Wenn Akkuschonung = 1 ab 80% Batterieladung mit Ladewert runter fahren
                     if Akkuschonung == 1:
+                        Ladefaktor = 1
+                        BattStatusProz_Grenze = 100
                         if BattStatusProz > 80:
                             Ladefaktor = 0.2
                             AkkuSchonGrund = '80%, Ladewert = 0.2C'
+                            BattStatusProz_Grenze = 80
                         if BattStatusProz > 90:
                             Ladefaktor = 0.1
                             AkkuSchonGrund = '90%, Ladewert = 0.1C'
-                        # if BattStatusProz > 80 and BattStatusProz < 100:
-                        if BattStatusProz > 80:
-                            AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor) 
+                            BattStatusProz_Grenze = 90
+                        # Bei Akkuschonung Schaltverzögerung (hysterese) einbauen, wenn Ladewert ist bereits der Akkuschonwert (+/- 3%) BattStatusProz_Grenze 5% runter
+                        AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor)
+                        if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
+                            BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
+
+                        if BattStatusProz > BattStatusProz_Grenze:
+                            DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
+                            DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
+                            DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
+                            DEBUG_Ausgabe += "\nDEBUG aktuelleVorhersage - (Grundlast /2) > AkkuschonungLadewert? " + str(aktuelleVorhersage - (Grundlast /2))
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
                             DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
-                            # Um des setzen der Akkuschonung zu verhindern, wenn der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
-                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuelleVorhersage * 2 > AkkuschonungLadewert:
+                            # Um des setzen der Akkuschonung zu verhindern, wenn zu wenig PV Energie kommt oder der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
+                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuelleVorhersage - (Grundlast /2) > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
@@ -446,7 +461,6 @@ if __name__ == '__main__':
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Akkuschonung: Ladestand > " + AkkuSchonGrund
-
 
                     # Wenn die Prognose 0 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!
@@ -698,7 +712,7 @@ if __name__ == '__main__':
                     # FALLBACK ENDE
 
                     ### LOGGING, Schreibt mit den übergebenen Daten eine CSV- oder SQlite-Datei
-                    ## nur wenn "schreiben" übergeben worden ist
+                    ## nur wenn "schreiben" oder "logging" übergeben worden ist
                     Logging_ein = getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
                         Logging_Schreib_Ausgabe = ""
