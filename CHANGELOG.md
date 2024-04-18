@@ -1,3 +1,11 @@
+**[0.13.3] – 2024-XX-XX**
+
+Änderung in SymoGen24Controller2.py
+- Bei Akkuschonung Schaltverzögerung (hysterese) eingebaut
+- Bei zu geringer Prognose Akkuschonung nicht ausführen
+  aktuelleVorhersage - (Grundlast /2) > AkkuschonungLadewert
+
+
 **[0.13.2] – 2024-04-07**
 
 Änderung in SymoGen24Controller2.py
