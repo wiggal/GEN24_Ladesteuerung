@@ -5,6 +5,9 @@
 - Bei zu geringer Prognose Akkuschonung nicht ausführen
   aktuelleVorhersage - (Grundlast /2) > AkkuschonungLadewert
 
+## Berechnung der Ladewerte durch die Prognose neu konzipiert:
+- aktuell nur zum testen in der Datei neu_SymoGen24Controller2.py
+  Der Quellcode soll dadurch einfacher und übersichtlicher werden.
 
 **[0.13.2] – 2024-04-07**
 
