@@ -68,10 +68,11 @@ def getRestTagesPrognoseUeberschuss():
             i += 1
 
         if Stunden_sum < 1: Stunden_sum = 1
-        AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt * BatSparFaktor) / Stunden_sum)
+        #SPO AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt * BatSparFaktor) / Stunden_sum)
+        AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt) / Stunden_sum)
         if (AbzugsWatt < 0):
             AbzugsWatt = 0
-        Pro_Uebersch_Tag = Pro_Ertrag_Tag - (Pro_Ertrag_Tag - BattKapaWatt_akt)
+        Pro_Uebersch_Tag = BattKapaWatt_akt
         DEBUG_Ausgabe += "DEBUG ##Ergebnis## AbzugsWatt: " + str(round(AbzugsWatt, 2)) + ",  Pro_Uebersch_Tag: " + str(round(Pro_Uebersch_Tag, 2)) + ", Stunden_sum: "  + str(round(Stunden_sum, 2)) + "\n"
 
         return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), AbzugsWatt, Grundlast_Sum
@@ -102,12 +103,12 @@ def getAktuellenLadewert( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion )
             DEBUG_Ausgabe += "\nDEBUG  " + str(Std) + " Pro_Akt_tmp: " + str(round(Pro_Akt_tmp,2)) + " Prognose_gesamt: " + str(round(Pro_Akt,2)) + "\n"
             loop += 1
             i += 1
-        Pro_Akt = int(Pro_Akt / Spreizung / 2)
+        Pro_Akt = int(Pro_Akt / Spreizung / 2 )
 
         # Nun den Aktuellen Ladewert rechnen 
         # Batterieladewert mit allen Einfluessen aus der Prognose rechnen
         # aktuellerLadewert = int((Pro_Akt - AbzugWatt)/BatSparFaktor)
-        aktuellerLadewert = int(Pro_Akt - AbzugWatt)
+        aktuellerLadewert = int((Pro_Akt - AbzugWatt) * BatSparFaktor)
         aktuellerLadewert = getLadewertinGrenzen(aktuellerLadewert)
 
         LadewertGrund = "Prognoseberechnung / BatSparFaktor"
@@ -225,7 +226,6 @@ if __name__ == '__main__':
     
                     # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
                     print_level = getVarConf('Ladeberechnung','print_level','eval')
-                    print_level = 2  #SPO
                     BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
@@ -386,6 +386,7 @@ if __name__ == '__main__':
                                     newPercent_schreiben = DATA[1]
                                     # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
                                     if newPercent_schreiben == 0:
+                                        newPercent = oldPercent
                                         LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt (Unterschied weniger als Schreibgrenze)"
                                 else:
                                     # volle Ladung ;-)
