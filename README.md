@@ -39,9 +39,9 @@ SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging.
 
 ```
 1-56/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
-33 5,8,10,12,14,19 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
-8 5,7,9,11,13,15,17 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
-1 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
+33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
+8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
+0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
 #Crontab.log jeden Montag abräumen
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
 ```
