@@ -8,13 +8,13 @@ from functions import loadConfig, loadWeatherData, loadPVReservierung, getVarCon
 
 def getPrognose(Stunde):
         if data['result']['watts'].get(Stunde):
-            data_tmp = data['result']['watts'][Stunde]
+            data_fun = data['result']['watts'][Stunde]
             # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
             if ( PV_Reservierung_steuern == 1 and reservierungdata.get(Stunde)):
-                data_tmp = data['result']['watts'][Stunde] - reservierungdata[Stunde]
+                data_fun = data['result']['watts'][Stunde] - reservierungdata[Stunde]
                 # Minuswerte verhindern
-                if ( data_tmp< 0): data_tmp = 0
-            getPrognose = data_tmp
+                if ( data_fun< 0): data_fun = 0
+            getPrognose = data_fun
         else:
             getPrognose = 0
         return getPrognose
@@ -42,35 +42,44 @@ def getRestTagesPrognoseUeberschuss():
         Grundlast_Sum = 0
         Prognose_array = list()
         Stunden_sum = 0.0001
+        Zwangs_Ueberschuss = 0
         DEBUG_Ausgabe += "\nDEBUG *************** Berechnung Abzugswert: \n"
 
         # in Schleife Prognosewerte bis BattVollUm durchlaufen
         while i < BattVollUm:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
             Prognose = getPrognose(Std)
-            Grundlast_tmp = Grundlast
-            Stunden_tmp = 1
+            Grundlast_fun = Grundlast
+            Einspeisegrenze_fun = Einspeisegrenze
+            Stunden_fun = 1
 
             # wenn nicht zur vollen Stunde, Wert anteilsmaessig
-            Grundlast_tmp = Grundlast
+            Grundlast_fun = Grundlast
             if i == Akt_Std:
                 Prognose = (Prognose / 60 * (60 - Akt_Minute))
-                Grundlast_tmp = int((Grundlast / 60 * (60 - Akt_Minute)))
-                Stunden_tmp = 1/60*Akt_Minute
-                Stunden_tmp = (60-Akt_Minute)/60
+                Grundlast_fun = int((Grundlast / 60 * (60 - Akt_Minute)))
+                Einspeisegrenze_fun = int((Einspeisegrenze / 60 * (60 - Akt_Minute)))
+                Stunden_fun = (60-Akt_Minute)/60
 
             Prognose_array.append(Prognose)
             Pro_Ertrag_Tag += Prognose
 
-            Stunden_sum += Stunden_tmp
+            # Alles über Einspeisegrenze bzw WR_Kapazitaet von BattKapaWatt_akt abziehen,
+            # da dies nicht für die Prognoseberechnung zur Verfügung steht.
+            Zwangs_Ueberschuss_fun = (Prognose - Einspeisegrenze_fun - Grundlast_fun)
+            if ( Prognose - WR_Kapazitaet > Zwangs_Ueberschuss_fun ): Zwangs_Ueberschuss_fun = Prognose - WR_Kapazitaet
+            if ( Zwangs_Ueberschuss_fun > 0): Zwangs_Ueberschuss += Zwangs_Ueberschuss_fun
+
+            Stunden_sum += Stunden_fun
 
             DEBUG_Ausgabe += "DEBUG ##Schleife## Stunden_sum: " + str(round(Stunden_sum, 3)) + ", Prognose: " + str(round(Prognose,2)) + ", Pro_Ertrag_Tag: " + str(round(Pro_Ertrag_Tag,2)) + "\n"
-            Grundlast_Sum += Grundlast_tmp
+            Grundlast_Sum += Grundlast_fun
 
             i += 1
 
+        BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ueberschuss
         if Stunden_sum < 1: Stunden_sum = 1
-        AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt) / Stunden_sum)
+        AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
 
         # hier noch die Ladewerte über MaxLadung ermitteln und Überschuss von AbzugsWatt abziehen
         # damit wird bei niedrigen Prognosen mehr geladen, da bei hohen nicht über MaxLadung geladen werden kann
@@ -82,12 +91,12 @@ def getRestTagesPrognoseUeberschuss():
             else:
                 Schleifenzaehler += 1
         if (Pro_Uberschuss > 0 and Schleifenzaehler > 0):
-            AbzugsWatt = AbzugsWatt - Pro_Uberschuss / Schleifenzaehler
+            AbzugsWatt = int(AbzugsWatt - Pro_Uberschuss / Schleifenzaehler)
 
         if (AbzugsWatt < 0):
             AbzugsWatt = 0
 
-        Pro_Uebersch_Tag = BattKapaWatt_akt
+        Pro_Uebersch_Tag = BattKapaWatt_akt_fun
         DEBUG_Ausgabe += "DEBUG ##Ergebnis## AbzugsWatt: " + str(round(AbzugsWatt, 2)) + ",  Pro_Uebersch_Tag: " + str(round(Pro_Uebersch_Tag, 2)) + ", Stunden_sum: "  + str(round(Stunden_sum, 2)) + "\n"
 
         return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), AbzugsWatt, Grundlast_Sum
@@ -105,16 +114,16 @@ def getAktuellenLadewert( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion )
         while i <= Akt_Std + Spreizung:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
             Prognose = getPrognose(Std)
-            Pro_Akt_tmp = Prognose
+            Pro_Akt_fun = Prognose
             DEBUG_Ausgabe += "\nDEBUG *************** Ladewertmittel LOOP: " + str(loop)
             if loop == 0:
-                Pro_Akt_tmp = Prognose * (60 - Akt_Minute) / 60
-                DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_tmp: " + str(round(Pro_Akt_tmp,2)) + " REST_Akt_Minute: " + str(round(((60 - Akt_Minute) / 60),3))
+                Pro_Akt_fun = Prognose * (60 - Akt_Minute) / 60
+                DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " REST_Akt_Minute: " + str(round(((60 - Akt_Minute) / 60),3))
             if loop == Spreizung * 2:
-                Pro_Akt_tmp = Prognose * (Akt_Minute) / 60
-                DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_tmp: " + str(round(Pro_Akt_tmp,2)) + " Akt_Minute: " + str(round(((Akt_Minute) / 60),3))
-            Pro_Akt += Pro_Akt_tmp
-            DEBUG_Ausgabe += "\nDEBUG  " + str(Std) + " Pro_Akt_tmp: " + str(round(Pro_Akt_tmp,2)) + " Prognose_gesamt: " + str(round(Pro_Akt,2)) + "\n"
+                Pro_Akt_fun = Prognose * (Akt_Minute) / 60
+                DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Akt_Minute: " + str(round(((Akt_Minute) / 60),3))
+            Pro_Akt += Pro_Akt_fun
+            DEBUG_Ausgabe += "\nDEBUG  " + str(Std) + " Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Prognose_gesamt: " + str(round(Pro_Akt,2)) + "\n"
             loop += 1
             i += 1
         Pro_Akt = int(Pro_Akt / Spreizung / 2 )
