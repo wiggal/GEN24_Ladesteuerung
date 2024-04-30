@@ -120,22 +120,23 @@ def getRestTagesPrognoseUeberschuss( AbzugWatt, aktuelleEinspeisung, aktuellePVP
 
         # Erklärung: aktuelleBatteriePower ist beim Laden der Batterie minus
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
-        if aktuelleEinspeisung > Einspeisegrenze:
-            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + (WRSchreibGrenze_nachOben * 1.05))
-        else:
-            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze)
+        # aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze #aktuelle Ladung kann zufällig kleiner als die Ladegrenze sein.
+        if aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze:
+            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung + alterLadewert - Einspeisegrenze + (WRSchreibGrenze_nachOben + 5))
 
-        # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
-        if EinspeisegrenzUeberschuss > PV_Leistung_Watt - Einspeisegrenze:
-            EinspeisegrenzUeberschuss = PV_Leistung_Watt - Einspeisegrenze
+            # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
+            if EinspeisegrenzUeberschuss > PV_Leistung_Watt - Einspeisegrenze:
+                EinspeisegrenzUeberschuss = PV_Leistung_Watt - Einspeisegrenze
 
-        if EinspeisegrenzUeberschuss > aktuellerLadewert and (BattganzeLadeKapazWatt * oldPercent/10000) <= (MaxLadung + 100):
-            aktuellerLadewert = int(EinspeisegrenzUeberschuss)
-            LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
+            # Ladeleistung auf MaxLadung begrenzen
+            if (aktuellerLadewert > MaxLadung):
+                aktuellerLadewert = MaxLadung
 
-        # Ladeleistung auf MaxLadung begrenzen
-        if (aktuellerLadewert > MaxLadung):
-            aktuellerLadewert = MaxLadung
+            if EinspeisegrenzUeberschuss > aktuellerLadewert and alterLadewert <= (MaxLadung + 100):
+                DEBUG_Ausgabe_Schleife += "\nDEBUG EinspeisegrenzUeberschuss: " + str(EinspeisegrenzUeberschuss) + " aktuellerLadewert: " + str(aktuellerLadewert) + " alterLadewert: " + str(alterLadewert)
+                aktuellerLadewert = int(EinspeisegrenzUeberschuss)
+                LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
+
 
         # Wenn  PV-Produktion > WR_Kapazitaet (AC)
         if aktuellePVProduktion > WR_Kapazitaet:
