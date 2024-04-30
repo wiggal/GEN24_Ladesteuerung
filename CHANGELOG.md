@@ -1,4 +1,4 @@
-**[0.13.3] – 2024-XX-XX**
+**[0.13.3] – 2024-04-30**
 
 Änderung in SymoGen24Controller2.py
 - Bei Akkuschonung Schaltverzögerung (hysterese) eingebaut
