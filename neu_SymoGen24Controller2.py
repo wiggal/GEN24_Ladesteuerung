@@ -69,6 +69,7 @@ def getRestTagesPrognoseUeberschuss():
             Zwangs_Ueberschuss_fun = (Prognose - Einspeisegrenze_fun - Grundlast_fun)
             if ( Prognose - WR_Kapazitaet > Zwangs_Ueberschuss_fun ): Zwangs_Ueberschuss_fun = Prognose - WR_Kapazitaet
             if ( Zwangs_Ueberschuss_fun > 0): Zwangs_Ueberschuss += Zwangs_Ueberschuss_fun
+            # WIGGAL print("Zwangs_Ueberschuss, Prognose, Einspeisegrenze: ", Zwangs_Ueberschuss_fun, Prognose, Einspeisegrenze, Grundlast)
 
             Stunden_sum += Stunden_fun
 
@@ -77,6 +78,7 @@ def getRestTagesPrognoseUeberschuss():
 
             i += 1
 
+        # WIGGAL print("Zwangs_Ueberschuss: ", Zwangs_Ueberschuss)
         BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ueberschuss
         if Stunden_sum < 1: Stunden_sum = 1
         AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
@@ -143,10 +145,11 @@ def getAktuellenLadewert( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion )
 
         ### Einspeisegrenze ANFANG
 
-        # Erklärung: aktuelleBatteriePower ist beim Laden der Batterie minus
+        # Hinweis: aktuelleBatteriePower ist beim Laden der Batterie minus
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
-        if aktuelleEinspeisung > Einspeisegrenze:
-            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung - aktuelleBatteriePower - Einspeisegrenze + (WRSchreibGrenze_nachOben + 5))
+        # aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze #aktuelle Ladung kann zufällig kleiner als die Ladegrenze sein.
+        if aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze:
+            EinspeisegrenzUeberschuss = int(aktuelleEinspeisung + alterLadewert - Einspeisegrenze + (WRSchreibGrenze_nachOben + 5))
 
             # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
             if EinspeisegrenzUeberschuss > PV_Leistung_Watt - Einspeisegrenze:
