@@ -1,3 +1,13 @@
+**[0.14.0] – 2024-XX-XX**
+
+**NEU Konzeptionierung der Ladewertberechnung nach Prognose:**
+Umfangreiche Änderung in SymoGen24Controller2.py
+- genauere Berechnung der Ladedewerte aus den Prognosen.
+  Vermeidung von Sprüngen in der Prognosenberechnung
+
+Ladewerte_Vergleichtabelle.ods entfernt, da nicht mehr aktuell und nötig
+
+
 **[0.13.3] – 2024-04-30**
 
 Änderung in SymoGen24Controller2.py
