@@ -129,10 +129,11 @@ echo '<button type="submit">Zurück zu config.ini lesen</button>';
 echo '</form>'."\n";
 echo '<br><br>';
 
-echo '<span style="color:red"><b>ACHTUNG!!</b></span><br>Sicherungskopie der config.ini erstellen.<br>';
+echo '<span style="color:red"><b>ACHTUNG!!</b></span><br>evtl. Sicherungskopie der config.ini erstellen.<br>';
 
 echo '<br><br>';
 echo 'Kennwort um config.ini zu editieren:<br>';
+echo '(Kennwortänderung in html/config.php)<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="case" value="editieren_passwd">'."\n";
 echo '<input type="password" name="password" size="10">'."\n";
