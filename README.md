@@ -39,6 +39,7 @@ SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging.
 
 ```
 1-56/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
+# ACHTUNG: nur den Wetterdienst eintragen, den ihr verwenden wollt.
 33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
 0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
