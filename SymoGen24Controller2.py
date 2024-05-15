@@ -146,7 +146,7 @@ def getAktuellenLadewert( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion )
         # Hinweis: aktuelleBatteriePower ist beim Laden der Batterie minus
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
         # aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze #aktuelle Ladung kann zufällig kleiner als die Ladegrenze sein.
-        if aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze:
+        if (aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze) and aktuelleEinspeisung < aktuellePVProduktion:
             EinspeisegrenzUeberschuss = int(aktuelleEinspeisung + alterLadewert - Einspeisegrenze + (WRSchreibGrenze_nachOben + 5))
 
             # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
@@ -333,8 +333,7 @@ if __name__ == '__main__':
                         WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 5))
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
-                    # Abzugswert sollte nicht kleiner Grundlast sein, sonnst wird PV-Leistung zur Ladung der Batterie berechnet,
-                    # BAUST die durch die Grundlast im Haus verbraucht wird. => Batterie wird nicht voll
+                    # Prognoseberechnung mit Funktion getRestTagesPrognoseUeberschuss
                     PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss()
                     TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
