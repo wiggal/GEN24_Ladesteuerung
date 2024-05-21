@@ -172,7 +172,7 @@ def getAktuellenLadewert( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion )
         # Wenn  PV-Produktion > WR_Kapazitaet (AC)
         if aktuellePVProduktion > WR_Kapazitaet:
             kapazitaetsueberschuss = int(aktuellePVProduktion - WR_Kapazitaet )
-            # WIGG if (kapazitaetsueberschuss > alterLadewert * 1.1):
+            #if (kapazitaetsueberschuss > alterLadewert * 1.1):
             if (kapazitaetsueberschuss > alterLadewert):
                 if (kapazitaetsueberschuss < alterLadewert + WRSchreibGrenze_nachOben):
                     kapazitaetsueberschuss = alterLadewert + WRSchreibGrenze_nachOben + 10
@@ -480,11 +480,11 @@ if __name__ == '__main__':
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Akkuschonung: Ladestand > " + AkkuSchonGrund
 
-                    # Wenn die Prognose 0 Watt ist, nicht schreiben, 
+                    # Wenn die aktuellePVProduktion < 10 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!
-                    if aktuelleVorhersage == 0:
+                    if aktuellePVProduktion < 10:
                         newPercent_schreiben = 0
-                        LadewertGrund = "Prognose ist 0 Watt, deshalb nicht schreiben!"
+                        LadewertGrund = "Nicht schreiben, da PVProduktion < 10 Watt!"
 
                     # Auf ganze Watt runden
                     aktuellerLadewert = int(aktuellerLadewert)
