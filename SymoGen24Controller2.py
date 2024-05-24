@@ -80,6 +80,7 @@ def getRestTagesPrognoseUeberschuss():
         BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ueberschuss
         if Stunden_sum < 1: Stunden_sum = 1
         AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
+        DEBUG_Ausgabe += "DEBUG #### AbzugsWatt incl. MaxLadung Überschuss: " + str(round(AbzugsWatt, 2)) + "\n"
 
         # hier noch die Ladewerte über MaxLadung ermitteln und Überschuss von AbzugsWatt abziehen
         # damit wird bei niedrigen Prognosen mehr geladen, da bei hohen nicht über MaxLadung geladen werden kann
@@ -87,8 +88,7 @@ def getRestTagesPrognoseUeberschuss():
         Schleifenzaehler = 0
         for Prognose_einzel in Prognose_array:
             if (Prognose_einzel - AbzugsWatt > MaxLadung): 
-                Pro_Uberschuss = Prognose_einzel - AbzugsWatt - MaxLadung
-            else:
+                Pro_Uberschuss += Prognose_einzel - AbzugsWatt - MaxLadung
                 Schleifenzaehler += 1
         if (Pro_Uberschuss > 0 and Schleifenzaehler > 0):
             AbzugsWatt = int(AbzugsWatt - Pro_Uberschuss / Schleifenzaehler)
@@ -144,6 +144,7 @@ def getAktuellenLadewert( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion )
         ### Einspeisegrenze ANFANG
 
         # Hinweis: aktuelleBatteriePower ist beim Laden der Batterie minus
+        # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
         # Durch Trägheit des WR wird vereinzelt die Einspeisung durch gleichzeitigen Netzbezug größer als die Produktion, dann nicht anwenden
         if (aktuelleEinspeisung - aktuelleBatteriePower > Einspeisegrenze) and aktuelleEinspeisung < aktuellePVProduktion:
