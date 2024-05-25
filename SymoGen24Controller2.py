@@ -145,7 +145,6 @@ def getAktuellenLadewert( AbzugWatt, aktuelleEinspeisung, aktuellePVProduktion )
 
         # Hinweis: aktuelleBatteriePower ist beim Laden der Batterie minus
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
-        # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
         # Durch Trägheit des WR wird vereinzelt die Einspeisung durch gleichzeitigen Netzbezug größer als die Produktion, dann nicht anwenden
         if (aktuelleEinspeisung - aktuelleBatteriePower > Einspeisegrenze) and aktuelleEinspeisung < aktuellePVProduktion:
             if (aktuelleEinspeisung - aktuelleBatteriePower - alterLadewert > Einspeisegrenze):

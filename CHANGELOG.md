@@ -1,4 +1,4 @@
-**[0.14.0] – 2024-05-XX**
+**[0.14.0] – 2024-05-25**
 
 **NEU Konzeptionierung der Ladewertberechnung nach Prognose:**
 Umfangreiche Änderung in SymoGen24Controller2.py
