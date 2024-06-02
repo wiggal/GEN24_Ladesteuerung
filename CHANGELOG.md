@@ -1,3 +1,13 @@
+**[0.14.1] – 2024-XX-XX**
+
+#### ACHTUNG Änderung in der config.ini:
+- neue Variable 'GrenzwertGroestePrognose'
+
+Da bei niedrigen Prognosen oft die Ladesteuerung ein bisschen untersteuert,
+wird nun mit MaxLadung geladen, wenn die größte Prognose unter dem Wert
+in 'GrenzwertGroestePrognose' liegt.
+
+
 **[0.14.0] – 2024-05-25**
 
 **NEU Konzeptionierung der Ladewertberechnung nach Prognose:**
