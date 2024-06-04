@@ -1,3 +1,11 @@
+**[0.20.0] – 2024-XX-XX**
+
+#### Mit diesem Branch soll die Batteriesteuerung per HTTP über die Wechselrichteroberfläche erfolgen.  
+Dies hat den Vorteil, dass die Leistung über der Einspeisegrenze automatisch in den Akku fließt,  
+dadurch genauer gesteuert wird und damit der Platz im Akku besser ausgenutzt werden kann.  
+
+- Neues Verzeichnis HTTP mit allen zugehörigen Files 
+
 **[0.14.1] – 2024-XX-XX**
 
 #### ACHTUNG Änderung in der config.ini:
