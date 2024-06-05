@@ -9,7 +9,7 @@ from pyModbusTCP.client import ModbusClient
 from pyModbusTCP import utils
 from datetime import datetime
 import numpy as np
-from functions import loadConfig, getVarConf
+from FUNCTIONS.functions import loadConfig, getVarConf
 
 class SymoGen24:
     def __init__(self, ipaddr, port, auto=True):

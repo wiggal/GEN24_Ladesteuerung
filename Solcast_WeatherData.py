@@ -5,7 +5,7 @@ import pytz
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
-from functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
+from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 
 def loadLatestWeatherData():
     # Varablen definieren

@@ -6,7 +6,11 @@ import configparser
 def loadConfig(conf_file):
         # Damit die Variable config auch in der Funktion "getVarConf" vorhanden ist (global config)
         global config
-        config = configparser.ConfigParser()
+        # Damit kann man auch meherer configs nacheinander lesen
+        try:
+            config
+        except NameError:
+            config = configparser.ConfigParser()
         try:
                 config.read_file(open(conf_file))
                 config.read(conf_file)

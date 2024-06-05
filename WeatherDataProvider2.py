@@ -4,7 +4,7 @@ import json
 import os.path
 import pytz
 from pathlib import Path
-from functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
+from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 
 def loadLatestWeatherData(config):
     lat = config['forecast.solar']['lat']
