@@ -5,7 +5,7 @@ import pytz
 import time
 from pathlib import Path
 from datetime import datetime
-from functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
+from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 
 def loadLatestWeatherData():
     url = 'http://www.solarprognose.de/web/solarprediction/api/v1?access-token={}&item={}&id={}&type={}&algorithm={}'.format(accesstoken, item, id, type, algorithm)

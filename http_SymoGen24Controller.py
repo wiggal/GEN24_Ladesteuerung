@@ -279,6 +279,8 @@ if __name__ == '__main__':
                     Batterieentlandung_steuern = getVarConf('Entladung','Batterieentlandung_steuern','eval')
                     WREntladeSchreibGrenze_Watt = getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
                     EntladeGrenze_steuern = getVarConf('Entladung','EntladeGrenze_steuern','eval')
+                    user = getVarConf('gen24','user','str')
+                    password = getVarConf('gen24','password','str')
 
                     # um Divison durch Null zu verhindern kleinsten Wert setzen
                     if BatSparFaktor < 0.1:
