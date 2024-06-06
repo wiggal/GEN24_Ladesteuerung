@@ -177,8 +177,9 @@ def getPrognoseLadewert( AbzugWatt ):
         return  aktuellerLadewert, Pro_Akt, LadewertGrund
 
 
-def getEinspeiseGrenzeLadewert( aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, LadewertGrund, alterLadewert ):
+def getEinspeiseGrenzeLadewert( aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt):
         ### Einspeisegrenze ANFANG
+        global DEBUG_Ausgabe
         # Hinweis: aktuelleBatteriePower ist beim Laden der Batterie minus
         # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
         # Durch Trägheit des WR wird vereinzelt die Einspeisung durch gleichzeitigen Netzbezug größer als die Produktion, dann nicht anwenden
@@ -203,7 +204,7 @@ def getEinspeiseGrenzeLadewert( aktuellerLadewert, aktuelleEinspeisung, aktuelle
         ### Einspeisegrenze ENDE
         return  aktuellerLadewert, LadewertGrund
 
-def getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert ):
+def getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt):
         ### AC_Kapazitaet WR ANFANG
         # Wenn  PV-Produktion > WR_Kapazitaet (AC)
         if aktuellePVProduktion > WR_Kapazitaet:
