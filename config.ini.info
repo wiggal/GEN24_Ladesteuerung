@@ -88,6 +88,10 @@ KW_Faktor = 1.00
 hostNameOrIp=192.168.178.50
 ; Modbusport des Wechselrichters
 port=502
+; user und password für den Zugriff auf die WR-Oberfläche nötig
+; damit man Werte im Batteriemanagement usw. setzen kann.
+user = 'customer'
+password = 'XXXXXXXX'
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Ab hier müssen die Werte zur Ladesteuerung auf die PV-Anlage angepasst werden!
