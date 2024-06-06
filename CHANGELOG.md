@@ -4,7 +4,15 @@
 Dies hat den Vorteil, dass die Leistung über der Einspeisegrenze automatisch in den Akku fließt,  
 dadurch genauer gesteuert wird und damit der Platz im Akku besser ausgenutzt werden kann.  
 
+Dies bedingte umfangreiche Änderungen, hier einige:
+- Alle Funktionsdateien nach FUNCTIONS/ verschoben
+- Funktionen zur Ermittlung des Ladewertes in FUNCTIONS/fun_Ladewert.py ausgelagert
+
 - Neues Verzeichnis HTTP mit allen zugehörigen Files 
+
+#### ACHTUNG Änderung in der config.ini:
+- neue Variablen 'user'und 'password' in [gen24]  
+
 
 **[0.14.1] – 2024-XX-XX**
 
