@@ -145,10 +145,11 @@ if __name__ == '__main__':
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     aktuelleVorhersage = AktuellenLadewert_Array[1]
                     LadewertGrund = AktuellenLadewert_Array[2]
-                    AktuellenLadewert_Array = getEinspeiseGrenzeLadewert( aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, LadewertGrund, alterLadewert )
+                    AktuellenLadewert_Array = getEinspeiseGrenzeLadewert( aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, \
+                                            LadewertGrund, alterLadewert, PV_Leistung_Watt)
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     LadewertGrund = AktuellenLadewert_Array[1]
-                    AktuellenLadewert_Array = getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert )
+                    AktuellenLadewert_Array = getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     LadewertGrund = AktuellenLadewert_Array[1]
 
@@ -318,8 +319,6 @@ if __name__ == '__main__':
                             print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
                             print("Neuer Ladewert/Prozent:     ", newPercent/100,"%")
                             print("newPercent_schreiben:       ", newPercent_schreiben)
-                            # dataBatteryStats = gen24.read_section('StorageDevice')
-                            # print(f'Battery Stats: {dataBatteryStats}') 
                             print()
                         except Exception as e:
                             print()
