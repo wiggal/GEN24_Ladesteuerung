@@ -10,12 +10,12 @@ from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung,
 def globalfrommain(g_now, g_DEBUG_Ausgabe, g_BattVollUm, g_data, g_PV_Reservierung_steuern,\
         g_reservierungdata, g_Grundlast, g_Einspeisegrenze, g_WR_Kapazitaet, g_BattKapaWatt_akt, \
         g_MaxLadung, g_BatSparFaktor, g_PrognoseAbzugswert, g_aktuelleBatteriePower, g_BattganzeLadeKapazWatt, \
-        g_LadungAus, g_oldPercent, g_WRSchreibGrenze_nachOben, g_WRSchreibGrenze_nachUnten):
+        g_LadungAus, g_oldPercent):
 
         global now, DEBUG_Ausgabe, BattVollUm, data, PV_Reservierung_steuern, \
         reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
         MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
-        LadungAus, oldPercent, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten
+        LadungAus, oldPercent
 
         now = g_now
         DEBUG_Ausgabe = g_DEBUG_Ausgabe
@@ -34,8 +34,6 @@ def globalfrommain(g_now, g_DEBUG_Ausgabe, g_BattVollUm, g_data, g_PV_Reservieru
         BattganzeLadeKapazWatt = g_BattganzeLadeKapazWatt
         LadungAus = g_LadungAus
         oldPercent = g_oldPercent
-        WRSchreibGrenze_nachOben = g_WRSchreibGrenze_nachOben
-        WRSchreibGrenze_nachUnten = g_WRSchreibGrenze_nachUnten
 
 
 def getPrognose(Stunde):
@@ -222,7 +220,7 @@ def getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund, 
         ### AC_Kapazitaet WR ENDE
         return  aktuellerLadewert, LadewertGrund
 
-def setLadewert(fun_Ladewert):
+def setLadewert(fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten):
         fun_Ladewert = getLadewertinGrenzen(fun_Ladewert)
 
         newPercent = (int(fun_Ladewert/BattganzeLadeKapazWatt*10000))
