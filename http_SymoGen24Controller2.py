@@ -4,10 +4,12 @@ import requests
 import FUNCTIONS.SymoGen24Connector
 from ping3 import ping
 from sys import argv
+import json
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 from FUNCTIONS.fun_Ladewert import getPrognose, getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
         getPrognoseMorgen, globalfrommain, getEinspeiseGrenzeLadewert, getAC_KapaLadewert
-from FUNCTIONS.fun_API import get_API
+from FUNCTIONS.fun_API import get_API, get_API_aktuell
+from FUNCTIONS.fun_http import get_time_of_use, send_request
 
 
 if __name__ == '__main__':
@@ -17,6 +19,8 @@ if __name__ == '__main__':
 
         host_ip = getVarConf('gen24','hostNameOrIp', 'str')
         host_port = getVarConf('gen24','port', 'str')
+        user = getVarConf('gen24','user', 'str')
+        password = getVarConf('gen24','password', 'str')
         if ping(host_ip):
             # Nur ausführen, wenn WR erreichbar
             gen24 = None
@@ -30,13 +34,6 @@ if __name__ == '__main__':
                     weatherfile = getVarConf('env','filePathWeatherData','str')
                     data = loadWeatherData(weatherfile)
 
-                    gen24 = FUNCTIONS.SymoGen24Connector.SymoGen24(host_ip, host_port, auto)
-
-                    if gen24.read_data('Battery_Status') == 1:
-                        print(datetime.now())
-                        print("Batterie ist Offline keine Steuerung möglich!!! ")
-                        print()
-                        exit()
     
                     # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
                     print_level = getVarConf('Ladeberechnung','print_level','eval')
@@ -81,27 +78,53 @@ if __name__ == '__main__':
                             print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
                             Grundlast = 0
 
-
-                    # Benoetigte Variablen vom GEN24 lesen und definieren
-                    BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattganzeKapazWatt = (gen24.read_data('Battery_capa')) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattStatusProz = gen24.read_data('Battery_SoC')/100
-                    BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeKapazWatt)
-                    aktuelleEinspeisung = int(gen24.get_meter_power() * -1)
-                    aktuellePVProduktion = int(gen24.get_mppt_power())
-                    aktuelleBatteriePower = int(gen24.get_batterie_power())
-                    BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
+                    API_aktuell = get_API_aktuell()
+                    BattganzeLadeKapazWatt = (API_aktuell['BattganzeLadeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeKapazWatt = (API_aktuell['BattganzeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattStatusProz = API_aktuell['BattStatusProz']
+                    BattKapaWatt_akt = API_aktuell['BattKapaWatt_akt']
+                    aktuelleEinspeisung = API_aktuell['aktuelleEinspeisung']
+                    aktuellePVProduktion = API_aktuell['aktuellePVProduktion']
+                    aktuelleBatteriePower = API_aktuell['aktuelleBatteriePower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
+
+                    alterLadewert = 0
+                    result = get_time_of_use(user, password)
+                    for element in result:
+                        if element['Active'] == True:
+                            alterLadewert = element['Power']
+
+                    oldPercent = int(alterLadewert/BattganzeLadeKapazWatt*10000)
+
+                    """
+                    print("### API ### BattganzeLadeKapazWatt: ", BattganzeLadeKapazWatt)
+                    print("### API ### BattganzeKapazWatt: ", BattganzeKapazWatt)
+                    print("### API ### BattStatusProz: ", BattStatusProz)
+                    print("### API ### BattKapaWatt_akt: ", BattKapaWatt_akt)
+                    print("### API ### aktuelleEinspeisung: ", aktuelleEinspeisung)
+                    print("### API ### aktuellePVProduktion: ", aktuellePVProduktion)
+                    print("### API ### aktuelleBatteriePower: ", aktuelleBatteriePower)
+                    print("### API ### alterLadewert: ", alterLadewert)
+                    print("### API ### oldPercent: ", oldPercent)
+                    """
+
+                    # NOCH RECHNEN WIGG
+                    print("**********  ZEILE 147: hier noch den Batteriestatus aus der API ermitteln***********")
+                    # Battery_Status = gen24.read_data('Battery_Status')
+                    Battery_Status = 2
+                    if (Battery_Status == 1):
+                        print(datetime.now())
+                        print("Batterie ist Offline keine Steuerung möglich!!! ")
+                        print()
+                        exit()
 
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     if  PV_Reservierung_steuern == 1:
                         Reservierungsdatei = getVarConf('Reservierung','PV_ReservieungsDatei','str')
                         reservierungdata = loadPVReservierung(Reservierungsdatei)
 
-                    # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
+                    # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     newPercent_schreiben = 0
-                    oldPercent = gen24.read_data('BatteryMaxChargePercent')
-                    alterLadewert = int(oldPercent*BattganzeLadeKapazWatt/10000)
     
                     format_aktStd = "%Y-%m-%d %H:00:00"
     
@@ -145,10 +168,7 @@ if __name__ == '__main__':
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     aktuelleVorhersage = AktuellenLadewert_Array[1]
                     LadewertGrund = AktuellenLadewert_Array[2]
-                    AktuellenLadewert_Array = getEinspeiseGrenzeLadewert( aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, LadewertGrund )
-                    aktuellerLadewert = AktuellenLadewert_Array[0]
-                    LadewertGrund = AktuellenLadewert_Array[1]
-                    AktuellenLadewert_Array = getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund )
+                    AktuellenLadewert_Array = getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     LadewertGrund = AktuellenLadewert_Array[1]
 
@@ -334,44 +354,34 @@ if __name__ == '__main__':
                     bereits_geschrieben = 0
                     Schreib_Ausgabe = ""
                     Push_Schreib_Ausgabe = ""
-                    # Neuen Ladewert in Prozent schreiben, wenn newPercent_schreiben == 1
+                    # Neuen Ladewert als HTTP_Request schreiben, wenn newPercent_schreiben == 1
                     if newPercent_schreiben == 1:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
                         DEBUG_Ausgabe+="\nDEBUG Folgender Ladewert neu zum Schreiben: " + str(newPercent)
                         if len(argv) > 1 and (argv[1] == "schreiben"):
-                            valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
+                            response = send_request('/config/timeofuse', method='POST', \
+                            payload='{"timeofuse":[{"Active":true,"Power":' + str(aktuellerLadewert) + \
+                            ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}]}')
                             bereits_geschrieben = 1
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Am WR geschrieben: " + str(newPercent / 100) + "% = " + str(aktuellerLadewert) + "W\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX am WR per HTTP geschrieben: " + str(aktuellerLadewert) + "W\n"
                             Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
-                            DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(valueNew)
+                            DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                     else:
                         Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS zu schreiben!!\n"
 
-                    """
-                    # Ladungsspeichersteuerungsmodus aktivieren wenn nicht aktiv
-                    # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
-                    if gen24.read_data('StorageControlMode') != 3:
-                        if len(argv) > 1 and (argv[1] == "schreiben"):
-                            DEBUG_Ausgabe += "\nDEBUG StorageControlMode 3 schreiben! "
-                            valueNew = gen24.write_data('StorageControlMode', 3 )
-                            bereits_geschrieben = 1
-                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode 3 neu geschrieben.\n"
-                            Push_Schreib_Ausgabe += "StorageControlMode 3 neu geschrieben.\n"
-                            DEBUG_Ausgabe+="\nDEBUG Meldung bei StorageControlMode schreiben: " + str(valueNew)
-                        else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
-
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
     
+                    """
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = 100
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
+                        BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
 
                         # EntladeSteuerungFile lesen
                         EntladeSteuerungFile = getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
@@ -486,15 +496,16 @@ if __name__ == '__main__':
                             print(Schreib_Ausgabe)
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
+                    ######## PV Reservierung ENDE
 
+                    """
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
                         Push_Message_Url = getVarConf('messaging','Push_Message_Url','str')
                         apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
                         print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
-
-                    ######## PV Reservierung ENDE
+                    """
 
 
                     # FALLBACK des Wechselrichters bei Ausfall der Steuerung
