@@ -130,7 +130,7 @@ if __name__ == '__main__':
                     globalfrommain(now, DEBUG_Ausgabe, BattVollUm, data, PV_Reservierung_steuern, \
                     reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
                     MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
-                    LadungAus, oldPercent, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                    LadungAus, oldPercent)
 
                     # Prognoseberechnung mit Funktion getRestTagesPrognoseUeberschuss
                     PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss()
@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                     if FesteLadeleistung > 0:
-                        DATA = setLadewert(FesteLadeleistung)
+                        DATA = setLadewert(FesteLadeleistung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                         aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
                         if newPercent == oldPercent:
@@ -182,7 +182,7 @@ if __name__ == '__main__':
                     # Hier Volle Ladung, wenn Stunde aus BattVollUm erreicht ist!
                     elif (int(datetime.strftime(now, "%H")) >= int(BattVollUm)):
                          aktuellerLadewert = MaxLadung
-                         DATA = setLadewert(aktuellerLadewert)
+                         DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                          newPercent = DATA[0]
                          newPercent_schreiben = DATA[1]
                          LadewertGrund = "Stunde aus BattVollUm erreicht!!"
@@ -196,7 +196,7 @@ if __name__ == '__main__':
                         if ((BattStatusProz < MindBattLad)):
                             # volle Ladung ;-)
                             aktuellerLadewert = MaxLadung
-                            DATA = setLadewert(MaxLadung)
+                            DATA = setLadewert(MaxLadung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                             newPercent = DATA[0]
                             newPercent_schreiben = DATA[1]
                             LadewertGrund = "BattStatusProz < MindBattLad"
@@ -208,7 +208,7 @@ if __name__ == '__main__':
                                 if BattKapaWatt_akt + Grundlast_Summe - TagesPrognoseGesamt < WRSchreibGrenze_nachOben:
                                     # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
                                     WRSchreibGrenze_nachUnten = 100000
-                                    DATA = setLadewert(aktuellerLadewert)
+                                    DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
@@ -218,7 +218,7 @@ if __name__ == '__main__':
                                 else:
                                     # volle Ladung ;-)
                                     aktuellerLadewert = MaxLadung
-                                    DATA = setLadewert(MaxLadung)
+                                    DATA = setLadewert(MaxLadung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
@@ -229,7 +229,7 @@ if __name__ == '__main__':
                                 if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben:
                                     # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
                                     WRSchreibGrenze_nachUnten = 100000
-                                    DATA = setLadewert(aktuellerLadewert)
+                                    DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
@@ -238,20 +238,20 @@ if __name__ == '__main__':
                                 else:
                                     # volle Ladung ;-)
                                     aktuellerLadewert = MaxLadung
-                                    DATA = setLadewert(aktuellerLadewert)
+                                    DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "PrognoseAbzugswert kleiner Grundlast und Schreibgrenze"
 
                             else: 
-                                DATA = setLadewert(aktuellerLadewert)
+                                DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
 
                         # Wenn größter Prognosewert je Stunde ist kleiner als GrenzwertGroestePrognose volle Ladung
                         if GrenzwertGroestePrognose > GroestePrognose:
                             aktuellerLadewert = MaxLadung
-                            DATA = setLadewert(aktuellerLadewert)
+                            DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                             newPercent = DATA[0]
                             newPercent_schreiben = DATA[1]
                             LadewertGrund = "Größter Prognosewert " + str(GroestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
@@ -285,7 +285,7 @@ if __name__ == '__main__':
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
-                                DATA = setLadewert(aktuellerLadewert)
+                                DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Akkuschonung: Ladestand > " + AkkuSchonGrund
