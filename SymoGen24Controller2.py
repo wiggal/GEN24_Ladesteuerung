@@ -31,7 +31,7 @@ if __name__ == '__main__':
                     data = loadWeatherData(weatherfile)
 
                     gen24 = FUNCTIONS.SymoGen24Connector.SymoGen24(host_ip, host_port, auto)
-
+                    
                     if gen24.read_data('Battery_Status') == 1:
                         print(datetime.now())
                         print("Batterie ist Offline keine Steuerung möglich!!! ")
@@ -126,7 +126,6 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # Hier Variablen an die Module  FUNCTIONS.fun_Ladewert übergeben
-                    # SPO
                     globalfrommain(now, DEBUG_Ausgabe, BattVollUm, data, PV_Reservierung_steuern, \
                     reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
                     MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
@@ -301,8 +300,8 @@ if __name__ == '__main__':
 
                     if print_level >= 1:
                         try:
-                            print("************* BEGINN: ", datetime.now(),"************* ")
-                            print("\n######### L A D E S T E U E R U N G #########\n")
+                            print("******* BEGINN: ", datetime.now(),"******* ")
+                            print("\n## MODBUS LADESTEUERUNG ###\n")
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("RestTagesPrognose:          ", TagesPrognoseGesamt)
                             print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)

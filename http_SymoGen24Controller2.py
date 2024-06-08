@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
 import requests
-import FUNCTIONS.SymoGen24Connector
 from ping3 import ping
 from sys import argv
 import json
@@ -23,8 +22,6 @@ if __name__ == '__main__':
         password = getVarConf('gen24','password', 'str')
         if ping(host_ip):
             # Nur ausführen, wenn WR erreichbar
-            gen24 = None
-            auto = False
             try:            
                     newPercent = None
                     DEBUG_Ausgabe= "\nDEBUG <<<<<< E I N >>>>>>>\n\n"
@@ -79,6 +76,14 @@ if __name__ == '__main__':
                             Grundlast = 0
 
                     API_aktuell = get_API_aktuell()
+                    Battery_Status = API_aktuell['BAT_MODE']
+                    # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
+                    # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
+                    if (Battery_Status == 2):
+                        print(datetime.now())
+                        print("Batterie ist Offline keine Steuerung möglich!!! ")
+                        print()
+                        exit()
                     BattganzeLadeKapazWatt = (API_aktuell['BattganzeLadeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattganzeKapazWatt = (API_aktuell['BattganzeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
                     BattStatusProz = API_aktuell['BattStatusProz']
@@ -95,28 +100,6 @@ if __name__ == '__main__':
                             alterLadewert = element['Power']
 
                     oldPercent = int(alterLadewert/BattganzeLadeKapazWatt*10000)
-
-                    """
-                    print("### API ### BattganzeLadeKapazWatt: ", BattganzeLadeKapazWatt)
-                    print("### API ### BattganzeKapazWatt: ", BattganzeKapazWatt)
-                    print("### API ### BattStatusProz: ", BattStatusProz)
-                    print("### API ### BattKapaWatt_akt: ", BattKapaWatt_akt)
-                    print("### API ### aktuelleEinspeisung: ", aktuelleEinspeisung)
-                    print("### API ### aktuellePVProduktion: ", aktuellePVProduktion)
-                    print("### API ### aktuelleBatteriePower: ", aktuelleBatteriePower)
-                    print("### API ### alterLadewert: ", alterLadewert)
-                    print("### API ### oldPercent: ", oldPercent)
-                    """
-
-                    # NOCH RECHNEN WIGG
-                    print("**********  ZEILE 147: hier noch den Batteriestatus aus der API ermitteln***********")
-                    # Battery_Status = gen24.read_data('Battery_Status')
-                    Battery_Status = 2
-                    if (Battery_Status == 1):
-                        print(datetime.now())
-                        print("Batterie ist Offline keine Steuerung möglich!!! ")
-                        print()
-                        exit()
 
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     if  PV_Reservierung_steuern == 1:
@@ -149,7 +132,6 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # Hier Variablen an die Module  FUNCTIONS.fun_Ladewert übergeben
-                    # SPO
                     globalfrommain(now, DEBUG_Ausgabe, BattVollUm, data, PV_Reservierung_steuern, \
                     reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
                     MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
@@ -320,8 +302,8 @@ if __name__ == '__main__':
 
                     if print_level >= 1:
                         try:
-                            print("************* BEGINN: ", datetime.now(),"************* ")
-                            print("\n######### L A D E S T E U E R U N G #########\n")
+                            print("******* BEGINN: ", datetime.now(),"******* ")
+                            print("\n## HTTP-LADESTEUERUNG ##\n")
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("RestTagesPrognose:          ", TagesPrognoseGesamt)
                             print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
@@ -576,9 +558,8 @@ if __name__ == '__main__':
                         print("************* ENDE: ", datetime.now(),"************* \n")
 
 
-            finally:
-                    if (gen24 and not auto):
-                            gen24.modbus.close()
+            except:
+                print("Es ist ein Fehler aufgetreten!!!")
 
 
         else:
