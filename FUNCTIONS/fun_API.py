@@ -10,15 +10,19 @@ def get_API_aktuell():
     text = url.text
     data = json.loads(text)
     API_aktuell = {}
-    attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
-    API_aktuell['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
-    API_aktuell['BattganzeKapazWatt'] = attributes_nameplate['capacity_wh']
-    API_aktuell['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
-    API_aktuell['BattKapaWatt_akt'] = int((100 - API_aktuell['BattStatusProz'])/100 * API_aktuell['BattganzeKapazWatt']) 
-    API_aktuell['aktuelleEinspeisung'] = int(data['Body']['Data']['16711680']['channels']['SMARTMETER_POWERAPPARENT_MEAN_SUM_F64'])
-    API_aktuell['aktuellePVProduktion'] = int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
-    API_aktuell['aktuelleBatteriePower'] = int(data['Body']['Data']['262144']['channels']['BAT_POWERACTIVE_F64'])
-    API_aktuell['BatteryMaxDischargePercent'] = ''
+    # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
+    # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
+    API_aktuell['BAT_MODE'] = data['Body']['Data']['393216']['channels']['BAT_MODE_ENFORCED_U16'] 
+    if API_aktuell['BAT_MODE'] != 2:
+        attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
+        API_aktuell['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
+        API_aktuell['BattganzeKapazWatt'] = attributes_nameplate['capacity_wh']
+        API_aktuell['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
+        API_aktuell['BattKapaWatt_akt'] = int((100 - API_aktuell['BattStatusProz'])/100 * API_aktuell['BattganzeKapazWatt']) 
+        API_aktuell['aktuelleEinspeisung'] = int(data['Body']['Data']['16711680']['channels']['SMARTMETER_POWERAPPARENT_MEAN_SUM_F64'])
+        API_aktuell['aktuellePVProduktion'] = int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
+        API_aktuell['aktuelleBatteriePower'] = int(data['Body']['Data']['262144']['channels']['BAT_POWERACTIVE_F64'])
+        API_aktuell['BatteryMaxDischargePercent'] = ''
     return(API_aktuell)
 
 # API fürs Logging
