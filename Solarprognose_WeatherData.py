@@ -10,7 +10,11 @@ from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, g
 def loadLatestWeatherData():
     url = 'http://www.solarprognose.de/web/solarprediction/api/v1?access-token={}&item={}&id={}&type={}&algorithm={}'.format(accesstoken, item, id, type, algorithm)
     # Hier wieder ABHOLEN EIN
-    apiResponse = requests.get(url, timeout=52.50)
+    try:
+        apiResponse = requests.get(url, timeout=99)
+    except requests.exceptions.Timeout:
+        print("### ERROR:  Timeout von www.solarprognose.de")
+        exit()
     json_data1 = dict(json.loads(apiResponse.text))
     dict_watts = {}
     dict_watts['result'] = {}

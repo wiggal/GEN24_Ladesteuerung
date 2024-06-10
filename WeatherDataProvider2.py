@@ -13,9 +13,13 @@ def loadLatestWeatherData(config):
     az = config['forecast.solar']['az']
     kwp = config['forecast.solar']['kwp']
     
-    url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
     try:
-        apiResponse = requests.get(url, timeout=52.50)
+        url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
+        try:
+            apiResponse = requests.get(url, timeout=52.50)
+        except requests.exceptions.Timeout:
+            print("### ERROR:  Timeout von api.forecast.solar")
+            exit()
         json_data1 = dict(json.loads(apiResponse.text))
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
         if config['pv.strings']['anzahl'] == '2':
@@ -43,7 +47,7 @@ def loadLatestWeatherData(config):
             json_data1['result']['watt_hours']=dict_watt_hours
         return(json_data1)
     except:
-        return("False")
+        exit()
         
     
 if __name__ == '__main__':
