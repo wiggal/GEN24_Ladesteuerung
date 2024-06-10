@@ -1,11 +1,15 @@
 
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
+![new](pics/new.png)  
+[:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) Ladewerte **per HTTP-Request** in das Batteriemanagement schreiben.  
+![new](pics/new2.png)  
+
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
 und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Batterie zu laden.  
-Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
-- [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
-- [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/tree/main#bar_chart-logging-optional) und grafische Darstellung von Produktion und Verbrauch.  
+Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
+- [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
+- [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging-optional) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um eine LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt.  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
@@ -67,14 +71,20 @@ Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf 
 
 ### :chart_with_upwards_trend: SymoGen24Controller2.py
 
-berechnet den aktuell besten Ladewert aufgrund der Werte in weatherData.json, den Akkustand und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
+berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json, dem Akkustand und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
 Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.  
-Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte auf den Wechselrichter  
-falls Änderungen außerhalb der gesetzten Grenzen sind.
+Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte **per Modbus** auf den Wechselrichter, 
+falls die Änderung über der gesetzten Grenze ist.
 
-### SymoGen24Connector.py
+### FUNCTIONS/SymoGen24Connector.py
+Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung **per Modbus** zum Wechselrichter (GEN24 Plus) her.
 
-Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung zum Wechselrichter (GEN24 Plus) her.
+### :chart_with_downwards_trend: http_SymoGen24Controller2.py
+
+berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json und dem Akkustand und gibt sie aus. 
+Ist die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt. 
+Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte **per HTTP-Request** 
+in das Batteriemanagement des Wechselrichter, falls die Änderung über der gesetzten Grenze ist.
 
 ### :bar_chart: Logging (optional)
 
