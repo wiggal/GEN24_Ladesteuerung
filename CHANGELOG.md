@@ -1,4 +1,4 @@
-**[0.20.0] – 2024-06-11**
+**[0.20.1] – 2024-06-11**
 
 #### Ab dieser Version kann die Batteriesteuerung auch per HTTP über die Wechselrichteroberfläche erfolgen.  
 Dies hat den Vorteil, dass die Leistung über der Einspeisegrenze automatisch in den Akku fließt,  
@@ -20,6 +20,9 @@ Da bei niedrigen Prognosen oft die Ladesteuerung ein bisschen untersteuert,
 wird nun mit MaxLadung geladen, wenn die größte Prognose des Tages unter 
 dem Wert in 'GrenzwertGroestePrognose' liegt.
 
+Fehlerbereinigungen:  
+FIX: fest codierte IP_Adresse in FUNCTIONS/fun_http.py beseitigt  
+FIX: reservierungdata is not defined  
 
 **[0.14.0] – 2024-05-25**
 
