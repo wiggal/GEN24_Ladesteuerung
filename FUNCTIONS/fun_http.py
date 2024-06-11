@@ -39,10 +39,11 @@ def get_nonce(response):
         auth_dict[key] = value
     return auth_dict['nonce']
 
-def get_time_of_use(g_user, g_password):
-    global user, password
+def get_time_of_use(g_self_address, g_user, g_password):
+    global user, password, self_address
     user = g_user
     password = g_password
+    self_address = g_self_address
     response= send_request('/config/timeofuse',auth=True)
     if not response:
         return None
@@ -52,12 +53,11 @@ def get_time_of_use(g_user, g_password):
     return result
 
 
-def send_request( path, method='GET',payload="", params=None, headers={}, auth=False):
+def send_request(path, method='GET',payload="", params=None, headers={}, auth=False):
     global DEBUG_Ausgabe_fun_http
     DEBUG_Ausgabe_fun_http = ''
     cnonce = '7d5190133564493d953a7193d9d120a2'
     nonce = 0
-    self_address = '192.168.178.50'
     params=None
     auth=True
 
