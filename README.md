@@ -18,7 +18,7 @@ Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
 ## 💾 Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
-Bei Verwendung von **SymoGen24Controller2.py** ist voraussetzung, dass "Slave als Modbus TCP" am GEN24 aktiv 
+Bei Verwendung von **SymoGen24Controller2.py** ist Voraussetzung, dass "Slave als Modbus TCP" am GEN24 aktiv 
 und auf "int + SF" gestellt ist.  
 Bei Verwendung von **http_SymoGen24Controller2.py** wird Modbus nicht benötigt.
 
@@ -35,12 +35,12 @@ sudo pip install NumPy==v1.23.1
 sudo pip install requests
 sudo pip install ping3
 ```
-Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log".  
+Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit neue Prognosedaten in der Datei weatherData.json vorhanden sind!  
 
-Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen)  
+Beispiele für Crontabeinträge ("DIR" durch dein Installationsverzeichnis ersetzen)  
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)  
-SymoGen24Controller2.py bzw. http_SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging.  
+SymoGen24Controller2.py bzw. http_SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging (nur wenn Logging gewünscht). 
 (Häufigerer Aufruf nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!)  
 
 ```
@@ -81,7 +81,7 @@ Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf 
 
 ### :chart_with_upwards_trend: SymoGen24Controller2.py
 
-berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json, dem Akkustand und der tatsächlichen Einspeisung bzw Produktion und gibt sie aus.
+berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json, dem Akkustand und der tatsächlichen Einspeisung bzw. Produktion und gibt sie aus.
 Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.  
 Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte **per Modbus** auf den Wechselrichter, 
 falls die Änderung über der gesetzten Grenze ist.
@@ -97,11 +97,14 @@ Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Co
 in das Batteriemanagement des Wechselrichter, falls die Änderung über der gesetzten Grenze ist.
 Die **Einspeisung** muss hier nicht berücksichtigt werden, da dies das Batteriemanagement selbst regelt (auch über der definierten Ladegrenze!)
 
-### :bar_chart: Logging (optional)
+## Hinweise ab hier nur für GUI erforderlich (optional):
+Die prognosebasierte Ladesteuerung funktioniert auch ohne GUI (Apache).  
+
+### :bar_chart: Logging
 
 Wenn in der "config.ini" Logging_ein = 1 gesetzt ist, werden die Werte im "Logging_file" im sqlite-Format gespeichert.  
-Beim Aufruf von `SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
-Beim Aufruf von `SymoGen24Controller2.py logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
+Beim Aufruf von `SymoGen24Controller2.py schreiben` oder `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
+Beim Aufruf mit dem Parameter ` logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
 Aus der SQLite-Datei werden dann in html/7_tab_Diagram.php Diagramme erzeugt.  
 Hier z.B. das Liniendiagramm zur Tagesproduktion:  
 ![Grafik zur Tagesproduktion](pics/Tagesproduktion.png)
@@ -143,7 +146,7 @@ Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
 
 ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für den Webserver Apache haben!!  
 Vorschlag:  
-Den Apachewebserver unter demselben USER laufen lassen, unter dem man arbeitet bzw.auch die Crojobs laufen.
+Den Apachewebserver unter demselben USER laufen lassen, unter dem man arbeitet bzw. auch die Crojobs laufen.
 In der Datei `/etc/apache2/envvars` die Variablen `APACHE_RUN_USER` und `APACHE_RUN_GROUP` anpassen.  
 
 Vorhandene Skripts:  

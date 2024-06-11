@@ -1,22 +1,21 @@
-**[0.20.0] – 2024-XX-XX**
+**[0.20.0] – 2024-06-11**
 
-#### Mit diesem Branch soll die Batteriesteuerung per HTTP über die Wechselrichteroberfläche erfolgen.  
+#### Ab dieser Version kann die Batteriesteuerung auch per HTTP über die Wechselrichteroberfläche erfolgen.  
 Dies hat den Vorteil, dass die Leistung über der Einspeisegrenze automatisch in den Akku fließt,  
 dadurch genauer gesteuert wird und damit der Platz im Akku besser ausgenutzt werden kann.  
+Ausserdem sind weniger Schreibvorgänge am WR erforderlich.
 
 Dies bedingte umfangreiche Änderungen, hier einige:
 - Alle Funktionsdateien nach FUNCTIONS/ verschoben
 - Funktionen zur Ermittlung des Ladewertes in FUNCTIONS/fun_Ladewert.py ausgelagert
 
-- Neues Verzeichnis HTTP mit allen zugehörigen Files 
-
 #### ACHTUNG Änderung in der config.ini:
 - neue Variable 'GrenzwertGroestePrognose' in [Ladeberechnung]
-- neue Variablen 'user'und 'password' in [gen24]  
+- neue Variablen 'user'und 'password' in [gen24]  (Zugangsdaten zum WR)
 
 Da bei niedrigen Prognosen oft die Ladesteuerung ein bisschen untersteuert,
-wird nun mit MaxLadung geladen, wenn die größte Prognose unter dem Wert
-in 'GrenzwertGroestePrognose' liegt.
+wird nun mit MaxLadung geladen, wenn die größte Prognose des Tages unter 
+dem Wert in 'GrenzwertGroestePrognose' liegt.
 
 
 **[0.14.0] – 2024-05-25**
