@@ -5,13 +5,16 @@ Dies hat den Vorteil, dass die Leistung über der Einspeisegrenze automatisch in
 dadurch genauer gesteuert wird und damit der Platz im Akku besser ausgenutzt werden kann.  
 Ausserdem sind weniger Schreibvorgänge am WR erforderlich.
 
-Dies bedingte umfangreiche Änderungen, hier einige:
+Dies bedingt umfangreiche Änderungen, hier einige:
 - Alle Funktionsdateien nach FUNCTIONS/ verschoben
 - Funktionen zur Ermittlung des Ladewertes in FUNCTIONS/fun_Ladewert.py ausgelagert
 
 #### ACHTUNG Änderung in der config.ini:
 - neue Variable 'GrenzwertGroestePrognose' in [Ladeberechnung]
 - neue Variablen 'user'und 'password' in [gen24]  (Zugangsdaten zum WR)
+
+**Zur Umstellung von Modbus zu HTTP-Request bitte Modbussteuerung deaktivieren:**
+- Am WR Modbus ausschalten und speichern, wenn andere Anwendungen Modbus brauchen wieder einschalten.
 
 Da bei niedrigen Prognosen oft die Ladesteuerung ein bisschen untersteuert,
 wird nun mit MaxLadung geladen, wenn die größte Prognose des Tages unter 
