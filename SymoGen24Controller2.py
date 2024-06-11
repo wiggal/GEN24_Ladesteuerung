@@ -93,6 +93,7 @@ if __name__ == '__main__':
                     BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
+                    reservierungdata = {}
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     if  PV_Reservierung_steuern == 1:
                         Reservierungsdatei = getVarConf('Reservierung','PV_ReservieungsDatei','str')

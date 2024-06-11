@@ -102,6 +102,7 @@ if __name__ == '__main__':
                     oldPercent = int(alterLadewert/BattganzeLadeKapazWatt*10000)
 
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
+                    reservierungdata = {}
                     if  PV_Reservierung_steuern == 1:
                         Reservierungsdatei = getVarConf('Reservierung','PV_ReservieungsDatei','str')
                         reservierungdata = loadPVReservierung(Reservierungsdatei)
