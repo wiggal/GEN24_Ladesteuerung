@@ -2,6 +2,7 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
+Ab Version: **0.20.0**  
 [:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) Ladewerte **per HTTP-Request** in das Batteriemanagement schreiben.  
 ![new](pics/new2.png)  
 
@@ -17,8 +18,9 @@ Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
 ## 💾 Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
-Voraussetzung ist, dass "Slave als Modbus TCP" am GEN24 aktiv  
-und auf "int + SF" gestellt ist, sonst passen die Register nicht.
+Bei Verwendung von **SymoGen24Controller2.py** ist voraussetzung, dass "Slave als Modbus TCP" am GEN24 aktiv 
+und auf "int + SF" gestellt ist.  
+Bei Verwendung von **http_SymoGen24Controller2.py** wird Modbus nicht benötigt.
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
 (getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
@@ -38,16 +40,24 @@ Als Erstes muss ein Prognoseskript aufgerufen werden, damit neue Prognosedaten i
 
 Beispiele für Crontabeinträge ("DIR" durch dein Installationverzeichnis ersetzen)  
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)  
-SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging.  
+SymoGen24Controller2.py bzw. http_SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging.  
 (Häufigerer Aufruf nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!)  
 
 ```
 1-56/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
-# ACHTUNG: nur den Wetterdienst eintragen, den ihr verwenden wollt.
+```
+**ODER!!**
+```
+1-56/5 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
+```
+**ACHTUNG:** nur den Wetterdienst eintragen, den ihr verwenden wollt.
+```
 33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
 0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
-#Crontab.log jeden Montag abräumen
+```
+**Crontab.log jeden Montag abräumen**
+```
 0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
 ```
 
@@ -85,6 +95,7 @@ berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.
 Ist die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt. 
 Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte **per HTTP-Request** 
 in das Batteriemanagement des Wechselrichter, falls die Änderung über der gesetzten Grenze ist.
+Die **Einspeisung** muss hier nicht berücksichtigt werden, da dies das Batteriemanagement selbst regelt (auch über der definierten Ladegrenze!)
 
 ### :bar_chart: Logging (optional)
 
