@@ -94,7 +94,7 @@ if __name__ == '__main__':
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     alterLadewert = 0
-                    result = get_time_of_use(user, password)
+                    result = get_time_of_use(host_ip, user, password)
                     for element in result:
                         if element['Active'] == True:
                             alterLadewert = element['Power']
