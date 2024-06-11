@@ -558,7 +558,7 @@ if __name__ == '__main__':
                         print("************* ENDE: ", datetime.now(),"************* \n")
 
 
-            except:
+            except OSError:
                 print("Es ist ein Fehler aufgetreten!!!")
 
 
