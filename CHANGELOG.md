@@ -11,13 +11,8 @@ Dies bedingte umfangreiche Änderungen, hier einige:
 - Neues Verzeichnis HTTP mit allen zugehörigen Files 
 
 #### ACHTUNG Änderung in der config.ini:
+- neue Variable 'GrenzwertGroestePrognose' in [Ladeberechnung]
 - neue Variablen 'user'und 'password' in [gen24]  
-
-
-**[0.14.1] – 2024-XX-XX**
-
-#### ACHTUNG Änderung in der config.ini:
-- neue Variable 'GrenzwertGroestePrognose'
 
 Da bei niedrigen Prognosen oft die Ladesteuerung ein bisschen untersteuert,
 wird nun mit MaxLadung geladen, wenn die größte Prognose unter dem Wert
