@@ -98,7 +98,7 @@ in das Batteriemanagement des Wechselrichter, falls die Änderung über der gese
 Die **Einspeisung** muss hier nicht berücksichtigt werden, da dies das Batteriemanagement selbst regelt (auch über der definierten Ladegrenze!)
 
 ## Hinweise ab hier nur für GUI erforderlich (optional):
-Die prognosebasierte Ladesteuerung funktioniert auch ohne GUI (Apache).  
+Die prognosebasierte Ladesteuerung funktioniert auch ohne GUI (Webserver).  
 
 ### :bar_chart: Logging
 
@@ -123,9 +123,15 @@ Dadurch soll z.B. ein Laden der Batterie aus dem Netz ersichtlich bzw. gezählt 
 Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus.  
 Konfiguration muss eventuell in der "config.php" angepasst werden.  
 
-Nur zum testen kann der PHPeigene Webserver benutzt werden. Einfach unter /DIR/html/ folgendes starten:  
-php -S 0.0.0.0:7777  
-Und im Browser localhost:7777 aufrufen.  
+Nur zum testen kann der PHPeigene Webserver benutzt werden (PHP muss installiert sein, siehe unten). Einfach unter /DIR/html/ folgendes starten:  
+```
+php -S 0.0.0.0:7777 
+
+# oder damit der Webserver im Hintergrund weiterläuft
+
+nohup php -S 0.0.0.0:7777 &
+```
+Und im Browser localhost:7777 bzw. raspberrypi:7777 aufrufen.  
 
 Webserver Apache z.B.:
 
