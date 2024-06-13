@@ -1,3 +1,7 @@
+**[0.20.2] – 2024-06-13**
+
+FIX: NameError: name 'WRSchreibGrenze_nachOben' is not defined
+
 **[0.20.1] – 2024-06-11**
 
 #### Ab dieser Version kann die Batteriesteuerung auch per HTTP über die Wechselrichteroberfläche erfolgen.  

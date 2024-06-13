@@ -145,11 +145,11 @@ if __name__ == '__main__':
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     aktuelleVorhersage = AktuellenLadewert_Array[1]
                     LadewertGrund = AktuellenLadewert_Array[2]
-                    AktuellenLadewert_Array = getEinspeiseGrenzeLadewert( aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, \
+                    AktuellenLadewert_Array = getEinspeiseGrenzeLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, \
                                             LadewertGrund, alterLadewert, PV_Leistung_Watt)
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     LadewertGrund = AktuellenLadewert_Array[1]
-                    AktuellenLadewert_Array = getAC_KapaLadewert( aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
+                    AktuellenLadewert_Array = getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     LadewertGrund = AktuellenLadewert_Array[1]
 
