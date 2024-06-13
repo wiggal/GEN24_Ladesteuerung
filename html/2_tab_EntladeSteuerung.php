@@ -49,9 +49,9 @@
   */
 
   .speichern {
-	background-color:#2E64FE;
+	background-color:#58ACFA;
 	border-radius:28px;
-	border:1px solid #18ab29;
+	border:1px solid #58ACFA;
 	display:inline-block;
 	cursor:pointer;
 	color:#000000;
@@ -59,10 +59,10 @@
 	font-size:200%;
 	padding:16px 31px;
 	text-decoration:none;
-	text-shadow:0px 1px 0px #2f6627;
+	text-shadow:0px 1px 0px #58ACFA;
   }
   .speichern:hover {
-	background-color:#58ACFA;
+	background-color:#2E64FE;
   }
   .speichern:active {
 	position:relative;
@@ -117,7 +117,7 @@
   left: 4px;
   width: 12px;
   height: 12px;
-  background: #2E64FE;
+  background: #58ACFA;
   border-radius: 50%;
   opacity: 0;
   transform: scale(1.5);
@@ -132,8 +132,8 @@ input[type="radio"]{
 #E60:checked:checked ~ .E60,
 #E80:checked:checked ~ .E80,
 #E100:checked:checked ~ .E100{
-  border-color: #2E64FE;
-  background: #2E64FE;
+  border-color: #58ACFA;
+  background: #58ACFA;
 }
 #E0:checked:checked ~ .E0 .dot,
 #E20:checked:checked ~ .E20 .dot,
