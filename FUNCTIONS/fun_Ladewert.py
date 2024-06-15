@@ -254,4 +254,20 @@ def getPrognoseMorgen():
         i  += 1
     return(Prognose_Summe)
     
-
+def getParameter(argv):
+    Parameter = ""
+    if len(argv) > 1 :
+        Parameter = argv[1]
+    # Prog_Steuerung.json lesen
+    Prog_Steuer_code_tmp = loadPVReservierung('Prog_Steuerung.json')
+    Prog_Steuer_code = int(Prog_Steuer_code_tmp['Steuerung'])
+    print("Prog_Steuer_code: ", Prog_Steuer_code)
+    if Prog_Steuer_code == 1:
+        Parameter = 'exit'
+    if Prog_Steuer_code == 2:
+        Parameter = 'analyse'
+    if Prog_Steuer_code == 3:
+        Parameter = 'logging'
+    if Prog_Steuer_code == 4:
+        Parameter = 'schreiben'
+    return(Parameter)
