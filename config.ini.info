@@ -6,9 +6,13 @@
 ; Parameter für die Batterieladesteuerung
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Name der Datei mit den Wetterprognosewerten
 [env]
+; Name der Datei mit den Wetterprognosewerten
 filePathWeatherData=weatherData.json
+; durch Einfacher_PHP_Webserver = 1 wird durch start_PythonScript.sh der einfache PHP_Webserver auf Port 2424 gestartet
+; wenn Apache Webserver läuft Einfacher_PHP_Webserver = 0 setzen
+Einfacher_PHP_Webserver = 0
+
 
 ; Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen
 ; und die Werte unter [forecast.solar2] und/oder [solcast.com2] eintragen
