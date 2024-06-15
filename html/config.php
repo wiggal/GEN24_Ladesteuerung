@@ -20,5 +20,6 @@ $TAB_config = array (
                 array ( 'name' => 'GEN24','file' => '6_tab_GEN24.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'PV-Bilanz','file' => '7_tab_Diagram.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'QZ-Bilanz','file' => '8_tab_Diagram.php','checked' => 'nein','sichtbar' => 'ein'),
+                array ( 'name' => 'Settings','file' => '9_tab_settigs.php','checked' => 'nein','sichtbar' => 'ein'),
             );
 ?>
