@@ -21,7 +21,7 @@ def loadLatestWeatherData(config):
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
         json_data1 = dict(json.loads(apiResponse.text))
-        #print(json_data1)
+        #print(json_data1, "\n")
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
         # Koordinaten müssen gleich sein, wegen zeitgleichem Sonnenauf- bzw. untergang 
         if config['pv.strings']['anzahl'] == '2':
@@ -38,17 +38,19 @@ def loadLatestWeatherData(config):
                 print("### ERROR:  Timeout von api.forecast.solar")
                 exit()
             json_data2 = dict(json.loads(apiResponse2.text))
-            #print(json_data2)
+            #print(json_data2, "\n")
 		
-            if isinstance(json_data1['result'], dict):
+            if isinstance(json_data1['result'], dict) and isinstance(json_data2['result'], dict):
                 for key, value in json_data1.get('result',{}).get('watts',{}).items():
                     dict_watts[key]=value
                 for key, value in json_data2.get('result',{}).get('watts',{}).items():
-                    dict_watts[key]=dict_watts[key]+value
+                    if( key in dict_watts):
+                        dict_watts[key]=dict_watts[key]+value
                 for key, value in json_data1.get('result',{}).get('watt_hours',{}).items():
                     dict_watt_hours[key]=value
                 for key, value in json_data2.get('result',{}).get('watt_hours',{}).items():
-                    dict_watt_hours[key]=dict_watt_hours[key]+value
+                    if( key in dict_watt_hours):
+                        dict_watt_hours[key]=dict_watt_hours[key]+value
                 json_data1['result']['watts']=dict_watts
                 json_data1['result']['watt_hours']=dict_watt_hours
         return(json_data1)
