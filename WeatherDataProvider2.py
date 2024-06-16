@@ -21,32 +21,38 @@ def loadLatestWeatherData(config):
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
         json_data1 = dict(json.loads(apiResponse.text))
+        #print(json_data1)
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
+        # Koordinaten müssen gleich sein, wegen zeitgleichem Sonnenauf- bzw. untergang 
         if config['pv.strings']['anzahl'] == '2':
             dict_watts = {}
             dict_watt_hours = {}
-            lat = config['forecast.solar2']['lat']
-            lon = config['forecast.solar2']['lon']
             dec = config['forecast.solar2']['dec']
             az = config['forecast.solar2']['az']
             kwp = config['forecast.solar2']['kwp']
 
             url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
-            apiResponse2 = requests.get(url, timeout=52.50)
+            try:
+                apiResponse2 = requests.get(url, timeout=52.50)
+            except requests.exceptions.Timeout:
+                print("### ERROR:  Timeout von api.forecast.solar")
+                exit()
             json_data2 = dict(json.loads(apiResponse2.text))
+            #print(json_data2)
 		
-            for key, value in json_data1.get('result',{}).get('watts',{}).items():
-                dict_watts[key]=value
-            for key, value in json_data2.get('result',{}).get('watts',{}).items():
-                dict_watts[key]=dict_watts[key]+value
-            for key, value in json_data1.get('result',{}).get('watt_hours',{}).items():
-                dict_watt_hours[key]=value
-            for key, value in json_data2.get('result',{}).get('watt_hours',{}).items():
-                dict_watt_hours[key]=dict_watt_hours[key]+value
-            json_data1['result']['watts']=dict_watts
-            json_data1['result']['watt_hours']=dict_watt_hours
+            if isinstance(json_data1['result'], dict):
+                for key, value in json_data1.get('result',{}).get('watts',{}).items():
+                    dict_watts[key]=value
+                for key, value in json_data2.get('result',{}).get('watts',{}).items():
+                    dict_watts[key]=dict_watts[key]+value
+                for key, value in json_data1.get('result',{}).get('watt_hours',{}).items():
+                    dict_watt_hours[key]=value
+                for key, value in json_data2.get('result',{}).get('watt_hours',{}).items():
+                    dict_watt_hours[key]=dict_watt_hours[key]+value
+                json_data1['result']['watts']=dict_watts
+                json_data1['result']['watt_hours']=dict_watt_hours
         return(json_data1)
-    except:
+    except OSError:
         exit()
         
     
@@ -78,7 +84,7 @@ if __name__ == '__main__':
 
     if (dataIsExpired):
         data = loadLatestWeatherData(config)
-        if data['result'] !=  None:
+        if isinstance(data['result'], dict):
             if not data == "False":
                 storeWeatherData(weatherfile, data, now)
         else:

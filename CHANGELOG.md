@@ -1,4 +1,4 @@
-**[0.20.3] – 2024-06-16**
+**[0.20.3] – 2024-06-17**
 
 **NEU** Automatischer Start des eingebauten PHP-Webservers:  
 
@@ -18,6 +18,13 @@ Durch die Optionen auf dem Tab, können die SymoGen24Controller-Skripte gesteuer
   - Analyse in Crontab.loga  -->> die Skripte berechnen die Ladewerte geben die Ergebnisse nur aus.
   - NUR Logging              -->> die Skripte führen nur das Logging für die Diagramme durch
   - WR-Steuerung und Logging -->> die Skripte schreiben die Ladesteuerung auf den WR und machen das Logging
+
+Änderung in WeatherDataProvider2.py
+- da es Probleme gibt, wenn zwischen  [forecast.solar] und  [forecast.solar2] verschiedene Koordinaten verwendet werden,
+  werden nun nur noch die Werte `lat` und `lon` aus [forecast.solar] verwendet.
+
+#### ACHTUNG Änderung in der config.ini:
+- `lat` und `lon` aus dem Block [forecast.solar2] entfernt.
 
 **[0.20.2] – 2024-06-13**
 
