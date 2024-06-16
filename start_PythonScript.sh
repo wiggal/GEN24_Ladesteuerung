@@ -4,7 +4,7 @@ GEN24_Pfad_tmp=`dirname $0`
 GEN24_Pfad=`realpath $GEN24_Pfad_tmp`
 GEN24_html_Pfad=${GEN24_Pfad}"/html"
 
-Einfacher_PHP_Webserver=2
+Einfacher_PHP_Webserver=""
 # Variable Einfacher_PHP_Webserver aus config.ini bestimmen
 eval `grep "^Einfacher_PHP_Webserver" ${GEN24_Pfad}/config.ini|sed 's# ##g'`
 
@@ -14,7 +14,7 @@ then
     cd $GEN24_html_Pfad
     if [ `ps -ef|grep "0.0.0.0:2424"|grep -v grep|wc -l` == 0 ]
     then
-        nohup /usr/bin/php -S 0.0.0.0:2424 &
+        nohup /usr/bin/php -S 0.0.0.0:2424 2>> /dev/null &
         echo -e `date` " PHP-Webserver gestartet! \n" >> ${GEN24_Pfad}/Crontab.log
     fi
 fi

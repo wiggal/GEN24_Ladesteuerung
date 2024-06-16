@@ -256,18 +256,23 @@ def getPrognoseMorgen():
     
 def getParameter(argv):
     Parameter = ""
+    Meldung = ""
     if len(argv) > 1 :
         Parameter = argv[1]
     # Prog_Steuerung.json lesen
     Prog_Steuer_code_tmp = loadPVReservierung('Prog_Steuerung.json')
     Prog_Steuer_code = int(Prog_Steuer_code_tmp['Steuerung'])
-    print("Prog_Steuer_code: ", Prog_Steuer_code)
+    # print("Prog_Steuer_code: ", Prog_Steuer_code)
     if Prog_Steuer_code == 1:
+        Meldung = "AUS"
         Parameter = 'exit'
     if Prog_Steuer_code == 2:
+        Meldung = "Analyse in Crontab.log"
         Parameter = 'analyse'
     if Prog_Steuer_code == 3:
+        Meldung = "NUR Logging"
         Parameter = 'logging'
     if Prog_Steuer_code == 4:
+        Meldung = "WR-Steuerung und Logging"
         Parameter = 'schreiben'
-    return(Parameter)
+    return(Parameter, Meldung)
