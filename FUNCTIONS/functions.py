@@ -37,7 +37,7 @@ def storeWeatherData(wetterfile, data, now):
         json.dump(data, out_file, indent = 6)
         out_file.close()
     except:
-        print("ERROR: Die Weterdatei " + wetterfile + " konnte NICHT geschrieben werden!")
+        print("ERROR: Die Wetterdatei " + wetterfile + " konnte NICHT geschrieben werden!")
         exit(0)
     return()
 

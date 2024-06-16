@@ -6,7 +6,7 @@ from ping3 import ping
 from sys import argv
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 from FUNCTIONS.fun_Ladewert import getPrognose, getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
-        getPrognoseMorgen, globalfrommain, getEinspeiseGrenzeLadewert, getAC_KapaLadewert
+        getPrognoseMorgen, globalfrommain, getEinspeiseGrenzeLadewert, getAC_KapaLadewert, getParameter
 from FUNCTIONS.fun_API import get_API
 
 
@@ -14,6 +14,19 @@ if __name__ == '__main__':
         config = loadConfig('config.ini')
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
+
+        # GUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
+        print_level = getVarConf('Ladeberechnung','print_level','eval')
+        Parameter = getParameter(argv)
+        if len(argv) > 1:
+            argv[1] = Parameter[0]
+        else:
+            argv.append(Parameter[0])
+        if(Parameter[1] != "" and print_level >= 1):
+            print(now, "Parameteränderung durch GUI-Settings: ", Parameter[1])
+            if(Parameter[1] == "AUS"):
+                exit()
+                
 
         host_ip = getVarConf('gen24','hostNameOrIp', 'str')
         host_port = getVarConf('gen24','port', 'str')
@@ -39,7 +52,6 @@ if __name__ == '__main__':
                         exit()
     
                     # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
-                    print_level = getVarConf('Ladeberechnung','print_level','eval')
                     BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')

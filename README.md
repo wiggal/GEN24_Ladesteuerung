@@ -97,8 +97,19 @@ Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Co
 in das Batteriemanagement des Wechselrichter, falls die Änderung über der gesetzten Grenze ist.
 Die **Einspeisung** muss hier nicht berücksichtigt werden, da dies das Batteriemanagement selbst regelt (auch über der definierten Ladegrenze!)
 
-## Hinweise ab hier nur für GUI erforderlich (optional):
-Die prognosebasierte Ladesteuerung funktioniert auch ohne GUI (Webserver).  
+## Webserver Installation (GUI):  
+Nicht zwingend erforderlich, die prognosebasierte Ladesteuerung funktioniert auch ohne GUI (Webserver)  
+
+**PHP installieren:**
+```
+sudo apt update && sudo apt upgrade
+sudo apt install php php-sqlite3
+```
+Wenn PHP installiert ist, kann durch die Variable `Einfacher_PHP_Webserver = 1` in der config.ini beim ersten Start von  `start_PythonScript.sh` automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Prot:2424 erreichbar (z.B.: raspberrypi:2424). Ab Version 0.20.3
+
+
+**_Alternativ kann auch der Webserver Apache installiert werden:_**  
+[(siehe Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 
 ### :bar_chart: Logging
 
@@ -115,57 +126,7 @@ html/8_tab_Diagram.php erzeugt ein Diagramm nach Quelle (wo kommt die Energie he
 Dadurch soll z.B. ein Laden der Batterie aus dem Netz ersichtlich bzw. gezählt werden.  
 ![Grafik zur Tagesproduktion](pics/QZ_Tag.png)
 
-#####################################################################
-
-## Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung
-(z.B. E-Autos)
-
-Das Modul ist in PHP programmiert und setzt einen entsprechend konfigurierten Webserver (z.B. Apache, ) voraus.  
-Konfiguration muss eventuell in der "config.php" angepasst werden.  
-
-Nur zum testen kann der PHPeigene Webserver benutzt werden (PHP muss installiert sein, siehe unten). Einfach unter /DIR/html/ folgendes starten:  
-```
-php -S 0.0.0.0:7777 
-
-# oder damit der Webserver im Hintergrund weiterläuft
-
-nohup php -S 0.0.0.0:7777 &
-```
-Und im Browser localhost:7777 bzw. raspberrypi:7777 aufrufen.  
-
-Webserver Apache z.B.:
-
-### :floppy_disk: Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
-```
-sudo apt install apache2 php
-sudo apt install php-sqlite3
-```
-In /etc/apache2/apache2.conf   
-<Directory /srv/> durch <Directory /DIR/html/> ersetzen!  
-
-In /etc/apache2/sites-available/000-default.conf  
-DocumentRoot /var/www/html durch DocumentRoot /DIR/html/ ersetzen  
-
-Apache neu starten  
-sudo systemctl restart apache2  
-Reservierung im Browser aufrufen (= IP oder localen Namen des RasberryPi).
-
-ACHTUNG!! /DIR/ und /DIR/html/ muss Schreibrechte für den Webserver Apache haben!!  
-Vorschlag:  
-Den Apachewebserver unter demselben USER laufen lassen, unter dem man arbeitet bzw. auch die Crojobs laufen.
-In der Datei `/etc/apache2/envvars` die Variablen `APACHE_RUN_USER` und `APACHE_RUN_GROUP` anpassen.  
-
-Vorhandene Skripts:  
-1_tab_LadeSteuerung.php    ==>> Reservierung von großen PV-Mengen und feste manuelle Ladesteuerung  
-2_tab_EntladeSteuerung.php ==>>  EntladeSteuerung durch Eintrag in Tabelle und feste manuelle Entladesteuerung  
-3_tab_Hilfe.html       ==>> Hile zu Reservierung von großen PV-Mengen  
-4_tab_config_ini.php   ==>> Anzeigen und Editieren der config.ini  
-5_tab_Crontab_log.php  ==>> Anzeigen der Logdatei Crontab.log  
-6_tab_GEN24.php        ==>> lokaler Aufruf des GEN24  
-7_tab_Diagram.php      ==>> Diagramme über Produktion und Verbrauch  
-
-Mit der Namenskonvention [1-9]_tab_xxxxxxx.[php|html] können eigene Skripts als "Tab" eingebunden werden.  
-
+## Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
 
 ### Batterieladesteuerung ( TAB--> LadeSteuerung )
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
@@ -193,6 +154,5 @@ In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung e
 Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
 
 =======================================================  
-Das Programm wurde auf Grundlage von https://github.com/godfuture/SymoGen24Weather erstellt.  
-Herzlichen Dank an "godfuture"
+
 

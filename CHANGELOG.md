@@ -1,18 +1,25 @@
 **[0.20.3] – 2024-XX-XX**
 
+**NEU** Automatischer Start des eingebauten PHP-Webservers:  
+
 #### ACHTUNG Änderung in der config.ini:
 - neue Variable 'Einfacher_PHP_Webserver' in [env]
 Durch setzen Einfacher_PHP_Webserver = 1 wird durch start_PythonScript.sh der einfache PHP_Webserver auf Port 2424 gestartet.  
 Damit die Apachekonfiguration nicht gemacht werden, dies vereinfacht die Installation.
 Erreichbacr ist die Oberfläche dann mit name_oder_IP:2424
 
-**NEU:** html/9_tab_settigs.php
-- Durch die Optionen auf dem Tab, können die SymoGen24Controller-Skripte gesteuert werden:  
-  - unverändert lassen       -->> die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (iz.B.: loggin, schreiben)  
-  - AUS                      -->> die Skripte werden ohne egliche Funktion beendet  
-  - Analyse in Crontab.loga  -->> die Skripte berechnen die Ladewerte geben die Ergebnisse nur aus.  
-  - NUR Logging              -->> die Skripte führen nur das Logging für die Diagramme durch   
-  - WR-Steuerung und Logging -->> die Skripte schreiben die Ladesteuerung auf den WR und machen das Logging  
+**NEU:** html/9_tab_settigs.php  
+
+
+Durch die Optionen auf dem Tab, können die SymoGen24Controller-Skripte gesteuert werden:
+(Damit kann die Steuerung auch kurz mal abgeschaltet werden, ohne das Logging zu unterbrechen usw.)
+
+  - unverändert lassen       -->> die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (z.B.: loggin, schreiben)
+  - AUS                      -->> die Skripte werden ohne egliche Funktion beendet
+  - Analyse in Crontab.loga  -->> die Skripte berechnen die Ladewerte geben die Ergebnisse nur aus.
+  - NUR Logging              -->> die Skripte führen nur das Logging für die Diagramme durch
+  - WR-Steuerung und Logging -->> die Skripte schreiben die Ladesteuerung auf den WR und machen das Logging
+
 Damit kann die Steuerung auch mal abgeschaltet werden, ohne das Logging zu unterbrechen usw.
 
 **[0.20.2] – 2024-06-13**
