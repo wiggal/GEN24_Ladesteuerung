@@ -94,7 +94,8 @@ hostNameOrIp=192.168.178.50
 port=502
 ; user und password für den Zugriff auf die WR-Oberfläche nötig
 ; damit man Werte im Batteriemanagement usw. setzen kann.
-user = 'customer'
+user = customer
+; Das Kennwort muss in einfache Hochkommas gesetzt werden, wegen evtl. Sonderzeichen
 password = 'XXXXXXXX'
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
