@@ -34,6 +34,8 @@ if __name__ == '__main__':
         host_port = getVarConf('gen24','port', 'str')
         user = getVarConf('gen24','user', 'str')
         password = getVarConf('gen24','password', 'str')
+        # Hier Hochkommas am Anfang und am Ende enternen
+        password = password[1:-1]
         if ping(host_ip):
             # Nur ausführen, wenn WR erreichbar
             try:            
