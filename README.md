@@ -2,7 +2,7 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
-Ab Version: **0.20.0**  
+Ab Version: **0.20**  
 [:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) Ladewerte **per HTTP-Request** in das Batteriemanagement schreiben.  
 ![new](pics/new2.png)  
 
@@ -105,7 +105,7 @@ Nicht zwingend erforderlich, die prognosebasierte Ladesteuerung funktioniert auc
 sudo apt update && sudo apt upgrade
 sudo apt install php php-sqlite3
 ```
-Wenn PHP installiert ist, kann durch die Variable `Einfacher_PHP_Webserver = 1` in der config.ini beim ersten Start von  `start_PythonScript.sh` automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Prot:2424 erreichbar (z.B.: raspberrypi:2424). Ab Version 0.20.3
+Wenn PHP installiert ist, kann durch die Variable `Einfacher_PHP_Webserver = 1` in der config.ini beim ersten Start von  `start_PythonScript.sh` automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Prot:2424 erreichbar (z.B.: raspberrypi:2424). **Ab Version 0.21**
 
 
 **_Alternativ kann auch der Webserver Apache installiert werden:_**  
