@@ -1,4 +1,4 @@
-**[0.20.3] – 2024-06-17**
+**[0.21.0] – 2024-06-17**
 
 **NEU** Automatischer Start des eingebauten PHP-Webservers:  
 
