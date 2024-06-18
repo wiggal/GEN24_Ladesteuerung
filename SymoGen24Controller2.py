@@ -18,13 +18,15 @@ if __name__ == '__main__':
         # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
         print_level = getVarConf('Ladeberechnung','print_level','eval')
         Parameter = getParameter(argv)
+        Ausgabe_Parameter = ''
         if len(argv) > 1:
             argv[1] = Parameter[0]
         else:
             argv.append(Parameter[0])
         if(Parameter[1] != "" and print_level >= 1):
-            print(now, "Parameteränderung durch WebUI-Settings: ", Parameter[1])
+            Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
             if(Parameter[1] == "AUS"):
+                print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
                 exit()
                 
 
@@ -318,7 +320,8 @@ if __name__ == '__main__':
                     if print_level >= 1:
                         try:
                             print("******* BEGINN: ", datetime.now(),"******* ")
-                            print("\n## MODBUS LADESTEUERUNG ###\n")
+                            print("\n## MODBUS LADESTEUERUNG ###")
+                            if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("RestTagesPrognose:          ", TagesPrognoseGesamt)
                             print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
