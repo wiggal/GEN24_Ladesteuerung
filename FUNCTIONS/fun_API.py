@@ -1,11 +1,11 @@
-from FUNCTIONS.functions import loadConfig
+from FUNCTIONS.functions import loadConfig, getVarConf
 import requests
 import json
 
 # API für die aktuellen Werte zur Berechnung , bei http Zugriff ohne Modbus
 def get_API_aktuell():
-    config = loadConfig('config.ini')
-    gen24url = "http://"+config['gen24']['hostNameOrIp']+"/components/readable"
+    IP = getVarConf('gen24','hostNameOrIp','str')
+    gen24url = "http://"+IP+"/components/readable"
     url = requests.get(gen24url)
     text = url.text
     data = json.loads(text)
@@ -23,12 +23,28 @@ def get_API_aktuell():
         API_aktuell['aktuellePVProduktion'] = int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
         API_aktuell['aktuelleBatteriePower'] = int(data['Body']['Data']['262144']['channels']['BAT_POWERACTIVE_F64'])
         API_aktuell['BatteryMaxDischargePercent'] = ''
+
+    # Daten von weiteren GEN24 lesen
+    IP_weitere_Gen24 = getVarConf('gen24','IP_weitere_Gen24','str')
+    if(IP_weitere_Gen24 != 'no'):
+        IP_weitere_Gen24 = IP_weitere_Gen24.replace(" ", "")
+        IP_weitere_Gen24 = IP_weitere_Gen24.split(",")
+        for weitereIP in IP_weitere_Gen24:
+            try:
+                gen24url = "http://"+weitereIP+"/components/readable"
+                url = requests.get(gen24url)
+                text = url.text
+                data = json.loads(text)
+                API_aktuell['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
+            except:
+                print("API von WR ", weitereIP, " nicht erreichbar")
+
     return(API_aktuell)
 
 # API fürs Logging
 def get_API():
-    config = loadConfig('config.ini')
-    gen24url = "http://"+config['gen24']['hostNameOrIp']+"/components/readable"
+    IP = getVarConf('gen24','hostNameOrIp','str')
+    gen24url = "http://"+IP+"/components/readable"
     url = requests.get(gen24url)
     text = url.text
     data = json.loads(text)
@@ -39,6 +55,22 @@ def get_API():
     API['Batterie_OUT'] =   int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
     API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
     API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
+
+    # Daten von weiteren GEN24 lesen
+    IP_weitere_Gen24 = getVarConf('gen24','IP_weitere_Gen24','str')
+    if(IP_weitere_Gen24 != 'no'):
+        IP_weitere_Gen24 = IP_weitere_Gen24.replace(" ", "")
+        IP_weitere_Gen24 = IP_weitere_Gen24.split(",")
+        for weitereIP in IP_weitere_Gen24:
+            try:
+                gen24url = "http://"+weitereIP+"/components/readable"
+                url = requests.get(gen24url)
+                text = url.text
+                data = json.loads(text)
+                API['AC_Produktion'] +=  int(data['Body']['Data']['327680']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_U64']/3600)
+                API['DC_Produktion'] += int((data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+            except:
+                print("API von WR ", weitereIP, " nicht erreichbar")
     return(API)
 
         
