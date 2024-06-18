@@ -7,7 +7,7 @@ import json
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 from FUNCTIONS.fun_Ladewert import getPrognose, getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
         getPrognoseMorgen, globalfrommain, getAC_KapaLadewert, getParameter
-from FUNCTIONS.fun_API import get_API, get_API_aktuell
+from FUNCTIONS.fun_API import get_API
 from FUNCTIONS.fun_http import get_time_of_use, send_request
 
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         format = "%Y-%m-%d %H:%M:%S"
 
 
-        # GUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
+        # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
         print_level = getVarConf('Ladeberechnung','print_level','eval')
         Parameter = getParameter(argv)
         if len(argv) > 1:
@@ -25,7 +25,7 @@ if __name__ == '__main__':
         else:
             argv.append(Parameter[0])
         if(Parameter[1] != "" and print_level >= 1):
-            print(now, "Parameteränderung durch GUI-Settings: ", Parameter[1])
+            print(now, "Parameteränderung durch WebUI-Settings: ", Parameter[1])
             if(Parameter[1] == "AUS"):
                 exit()
 
@@ -90,8 +90,8 @@ if __name__ == '__main__':
                             print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
                             Grundlast = 0
 
-                    API_aktuell = get_API_aktuell()
-                    Battery_Status = API_aktuell['BAT_MODE']
+                    API = get_API()
+                    Battery_Status = API['BAT_MODE']
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
                     if (Battery_Status == 2):
@@ -99,13 +99,13 @@ if __name__ == '__main__':
                         print("Batterie ist Offline keine Steuerung möglich!!! ")
                         print()
                         exit()
-                    BattganzeLadeKapazWatt = (API_aktuell['BattganzeLadeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattganzeKapazWatt = (API_aktuell['BattganzeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattStatusProz = API_aktuell['BattStatusProz']
-                    BattKapaWatt_akt = API_aktuell['BattKapaWatt_akt']
-                    aktuelleEinspeisung = API_aktuell['aktuelleEinspeisung']
-                    aktuellePVProduktion = API_aktuell['aktuellePVProduktion']
-                    aktuelleBatteriePower = API_aktuell['aktuelleBatteriePower']
+                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeKapazWatt = (API['BattganzeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattStatusProz = API['BattStatusProz']
+                    BattKapaWatt_akt = API['BattKapaWatt_akt']
+                    aktuelleEinspeisung = API['aktuelleEinspeisung']
+                    aktuellePVProduktion = API['aktuellePVProduktion']
+                    aktuelleBatteriePower = API['aktuelleBatteriePower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     alterLadewert = 0
@@ -553,10 +553,9 @@ if __name__ == '__main__':
                         Logging_Schreib_Ausgabe = ""
                         if len(argv) > 1 and (argv[1] == "schreiben" or argv[1] == "logging"):
                             Logging_file = getVarConf('Logging','Logging_file','str')
-                            API_Werte = get_API()
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
-                            save_SQLite(Logging_file, API_Werte['AC_Produktion'], API_Werte['DC_Produktion'], API_Werte['Netzverbrauch'], API_Werte['Einspeisung'], \
-                            API_Werte['Batterie_IN'], API_Werte['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
+                            save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
+                            API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
                             Logging_Schreib_Ausgabe = 'Daten wurden in die SQLite-Datei gespeichert!'
                         else:
                             Logging_Schreib_Ausgabe = "Logging wurde NICHT gespeichert, da NICHT \"logging\" oder \"schreiben\" übergeben wurde:\n" 
