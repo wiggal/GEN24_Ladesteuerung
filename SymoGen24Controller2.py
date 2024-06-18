@@ -15,7 +15,7 @@ if __name__ == '__main__':
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
-        # GUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
+        # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
         print_level = getVarConf('Ladeberechnung','print_level','eval')
         Parameter = getParameter(argv)
         if len(argv) > 1:
@@ -23,7 +23,7 @@ if __name__ == '__main__':
         else:
             argv.append(Parameter[0])
         if(Parameter[1] != "" and print_level >= 1):
-            print(now, "Parameteränderung durch GUI-Settings: ", Parameter[1])
+            print(now, "Parameteränderung durch WebUI-Settings: ", Parameter[1])
             if(Parameter[1] == "AUS"):
                 exit()
                 
@@ -95,15 +95,19 @@ if __name__ == '__main__':
 
 
                     # Benoetigte Variablen vom GEN24 lesen und definieren
-                    BattganzeLadeKapazWatt = (gen24.read_data('BatteryChargeRate')) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattganzeKapazWatt = (gen24.read_data('Battery_capa')) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattStatusProz = gen24.read_data('Battery_SoC')/100
-                    BattKapaWatt_akt = int((1 - BattStatusProz/100) * BattganzeKapazWatt)
-                    aktuelleEinspeisung = int(gen24.get_meter_power() * -1)
-                    aktuellePVProduktion = int(gen24.get_mppt_power())
-                    aktuelleBatteriePower = int(gen24.get_batterie_power())
-                    BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
+                    # Hier nun über API
+                    API = get_API()
+                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeKapazWatt = (API['BattganzeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattStatusProz = API['BattStatusProz']
+                    BattKapaWatt_akt = API['BattKapaWatt_akt']
+                    aktuelleEinspeisung = API['aktuelleEinspeisung']
+                    aktuellePVProduktion = API['aktuellePVProduktion']
+                    aktuelleBatteriePower = API['aktuelleBatteriePower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
+
+                    # Aktuelle Entladewert von Modbus holen
+                    BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
 
                     reservierungdata = {}
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
@@ -555,10 +559,9 @@ if __name__ == '__main__':
                         Logging_Schreib_Ausgabe = ""
                         if len(argv) > 1 and (argv[1] == "schreiben" or argv[1] == "logging"):
                             Logging_file = getVarConf('Logging','Logging_file','str')
-                            API_Werte = get_API()
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
-                            save_SQLite(Logging_file, API_Werte['AC_Produktion'], API_Werte['DC_Produktion'], API_Werte['Netzverbrauch'], API_Werte['Einspeisung'], \
-                            API_Werte['Batterie_IN'], API_Werte['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
+                            save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
+                            API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
                             Logging_Schreib_Ausgabe = 'Daten wurden in die SQLite-Datei gespeichert!'
                         else:
                             Logging_Schreib_Ausgabe = "Logging wurde NICHT gespeichert, da NICHT \"logging\" oder \"schreiben\" übergeben wurde:\n" 
