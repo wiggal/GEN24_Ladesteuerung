@@ -97,15 +97,15 @@ Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Co
 in das Batteriemanagement des Wechselrichter, falls die Änderung über der gesetzten Grenze ist.
 Die **Einspeisung** muss hier nicht berücksichtigt werden, da dies das Batteriemanagement selbst regelt (auch über der definierten Ladegrenze!)
 
-## Webserver Installation (GUI):  
-Nicht zwingend erforderlich, die prognosebasierte Ladesteuerung funktioniert auch ohne GUI (Webserver)  
+## Webserver Installation (WebUI):  
+Nicht zwingend erforderlich, die prognosebasierte Ladesteuerung funktioniert auch ohne WebUI (Webserver)  
 
 **PHP installieren:**
 ```
 sudo apt update && sudo apt upgrade
 sudo apt install php php-sqlite3
 ```
-Wenn PHP installiert ist, kann durch die Variable `Einfacher_PHP_Webserver = 1` in der config.ini beim ersten Start von  `start_PythonScript.sh` automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Prot:2424 erreichbar (z.B.: raspberrypi:2424). **Ab Version 0.21**
+Wenn PHP installiert ist, kann durch die Variable `Einfacher_PHP_Webserver = 1` in der config.ini beim ersten Start von  `start_PythonScript.sh` automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port:2424 erreichbar (z.B.: raspberrypi:2424). **Ab Version 0.21**
 
 
 **_Alternativ kann auch der Webserver Apache installiert werden:_**  

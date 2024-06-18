@@ -89,7 +89,10 @@ KW_Faktor = 1.00
 
 [gen24]
 ; IP des Wechselrichters
-hostNameOrIp=192.168.178.50
+hostNameOrIp=XXX.XXX.XXX.XX
+; hier können die IPs weiterer GEN24, durch Komma getrennt, stehen, no = kein weiterer GEN24
+; z.B. XXX.XXX.XXX.XX  für einen oder XXX.XXX.XXX.XX, XXX.XXX.XXX.XX für zwei
+IP_weitere_Gen24 = no
 ; Modbusport des Wechselrichters
 port=502
 ; user und password für den Zugriff auf die WR-Oberfläche nötig

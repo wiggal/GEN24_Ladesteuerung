@@ -1,3 +1,11 @@
+**[0.21.1] – 2024-XX-XX**
+
+**NEU** es können ehrere GEN24 eingebunden werden
+Dadurch wird die Produktion mehrerer GEN24 aufaddiert
+
+#### ACHTUNG Änderung in der config.ini:
+- neue Variablen 'IP_weitere_Gen24' in [gen24] 
+
 **[0.21.0] – 2024-06-17**
 
 **NEU** Automatischer Start des eingebauten PHP-Webservers:  
@@ -6,7 +14,7 @@
 - neue Variable 'Einfacher_PHP_Webserver' in [env]
 Durch setzen Einfacher_PHP_Webserver = 1 wird durch start_PythonScript.sh der einfache PHP_Webserver auf Port 2424 gestartet.  
 Damit die Apachekonfiguration nicht gemacht werden, dies vereinfacht die Installation.
-Erreichbacr ist die Oberfläche dann mit name_oder_IP:2424
+Erreichbar ist die Oberfläche dann mit name_oder_IP:2424
 
 **NEU:** html/9_tab_settigs.php  
 
