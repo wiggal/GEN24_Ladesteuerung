@@ -5,7 +5,7 @@ import FUNCTIONS.SymoGen24Connector
 from ping3 import ping
 from sys import argv
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
-from FUNCTIONS.fun_Ladewert import getPrognose, getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
+from FUNCTIONS.fun_Ladewert import getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
         getPrognoseMorgen, globalfrommain, getEinspeiseGrenzeLadewert, getAC_KapaLadewert, getParameter
 from FUNCTIONS.fun_API import get_API
 
@@ -167,6 +167,7 @@ if __name__ == '__main__':
                                             LadewertGrund, alterLadewert, PV_Leistung_Watt)
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     LadewertGrund = AktuellenLadewert_Array[1]
+                    DEBUG_Ausgabe = AktuellenLadewert_Array[2]
                     AktuellenLadewert_Array = getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     LadewertGrund = AktuellenLadewert_Array[1]

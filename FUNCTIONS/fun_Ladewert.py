@@ -39,7 +39,10 @@ def globalfrommain(g_now, g_DEBUG_Ausgabe, g_BattVollUm, g_data, g_PV_Reservieru
 def getPrognose(Stunde):
         if data['result']['watts'].get(Stunde):
             data_fun = data['result']['watts'][Stunde]
+            # Prognose ohne Abzug der Reservierung fürs Logging
+            getPrognose_Logging = data['result']['watts'][Stunde]
             # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
+            # NUR für berechnung Ladewert, nicht fürs Logging
             if ( PV_Reservierung_steuern == 1 and reservierungdata.get(Stunde)):
                 data_fun = data['result']['watts'][Stunde] - reservierungdata[Stunde]
                 # Minuswerte verhindern
@@ -47,7 +50,8 @@ def getPrognose(Stunde):
             getPrognose = data_fun
         else:
             getPrognose = 0
-        return getPrognose
+            getPrognose_Logging = 0
+        return getPrognose, getPrognose_Logging
 
 def getLadewertinGrenzen(Ladewert):
         # aktuellerLadewert zwischen 0 und MaxLadung halten
@@ -79,7 +83,7 @@ def getRestTagesPrognoseUeberschuss():
         # in Schleife Prognosewerte bis BattVollUm durchlaufen
         while i < BattVollUm:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
-            Prognose = getPrognose(Std)
+            Prognose = getPrognose(Std)[0]
             if groestePrognose < Prognose:
                 groestePrognose = Prognose
             Grundlast_fun = Grundlast
@@ -142,23 +146,30 @@ def getPrognoseLadewert( AbzugWatt ):
         Akt_Std = int(datetime.strftime(now, "%H"))
         Akt_Minute = int(datetime.strftime(now, "%M"))
         Pro_Akt = 0
+        Pro_Akt_Log = 0
         i = Akt_Std - Spreizung
         loop = 0
         while i <= Akt_Std + Spreizung:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
-            Prognose = getPrognose(Std)
+            Prognose = getPrognose(Std)[0]
+            Prognose_Log = getPrognose(Std)[1]
+            Pro_Akt_fun_Log = Prognose_Log
             Pro_Akt_fun = Prognose
             DEBUG_Ausgabe += "\nDEBUG *************** Ladewertmittel LOOP: " + str(loop)
             if loop == 0:
+                Pro_Akt_fun_Log = Prognose_Log * (60 - Akt_Minute) / 60
                 Pro_Akt_fun = Prognose * (60 - Akt_Minute) / 60
                 DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " REST_Akt_Minute: " + str(round(((60 - Akt_Minute) / 60),3))
             if loop == Spreizung * 2:
+                Pro_Akt_fun_Log = Prognose_Log * (Akt_Minute) / 60
                 Pro_Akt_fun = Prognose * (Akt_Minute) / 60
                 DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Akt_Minute: " + str(round(((Akt_Minute) / 60),3))
+            Pro_Akt_Log += Pro_Akt_fun_Log
             Pro_Akt += Pro_Akt_fun
             DEBUG_Ausgabe += "\nDEBUG  " + str(Std) + " Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Prognose_gesamt: " + str(round(Pro_Akt,2)) + "\n"
             loop += 1
             i += 1
+        Pro_Akt_Log = int(Pro_Akt_Log / Spreizung / 2 )
         Pro_Akt = int(Pro_Akt / Spreizung / 2 )
 
         # Nun den Aktuellen Ladewert rechnen 
@@ -168,11 +179,11 @@ def getPrognoseLadewert( AbzugWatt ):
 
         LadewertGrund = "Prognoseberechnung / BatSparFaktor"
 
-        DEBUG_Ausgabe += "\nDEBUG " + datetime.strftime(now, "%D %H:%M") + " Aktuelle Prognose: " + str(Pro_Akt) + " BatSparFaktor: " + str(BatSparFaktor) + " aktueller Ladewert: " + str(aktuellerLadewert)
+        DEBUG_Ausgabe += "\nDEBUG " + datetime.strftime(now, "%D %H:%M") + " Aktuelle Prognose - Reservierung: " + str(Pro_Akt) + " BatSparFaktor: " + str(BatSparFaktor) + " aktueller Ladewert: " + str(aktuellerLadewert)
         DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) + ", Abzug: " + str(PrognoseAbzugswert)
 
         ### Prognose ENDE
-        return  aktuellerLadewert, Pro_Akt, LadewertGrund
+        return  aktuellerLadewert, Pro_Akt_Log, LadewertGrund, DEBUG_Ausgabe
 
 
 def getEinspeiseGrenzeLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt):
@@ -200,7 +211,7 @@ def getEinspeiseGrenzeLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktu
 
         aktuellerLadewert = getLadewertinGrenzen(aktuellerLadewert)
         ### Einspeisegrenze ENDE
-        return  aktuellerLadewert, LadewertGrund
+        return  aktuellerLadewert, LadewertGrund, DEBUG_Ausgabe
 
 def getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt):
         ### AC_Kapazitaet WR ANFANG
