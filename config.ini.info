@@ -111,6 +111,7 @@ password = 'XXXXXXXX'
 ; Batteriekapazität, Prognosewert, Einspeisewert, Produktion ...
 
 [Ladeberechnung]
+; HTTP und MODBUS
 ; Wenn die Variable "FesteLadeleistung" ungleich "0" Watt ist, 
 ; wird der Wert fest als Ladeleistung geschrieben unabhängig der WRSchreibGrenzen, 
 ; ausser der WR steht bereits genau diesem Wert.
@@ -205,6 +206,7 @@ BatSparFaktor = 3.0
 
 
 [Reservierung]
+; Nur MODBUS
 ; Reservierungsdateiname
 PV_ReservieungsDatei=Watt_Reservierung.json
 ; Hier kann die PV-Reserierung (z.B. für ein E-Auto nachmittags) eingeschatet werden (1=ein, 0=aus)
@@ -213,6 +215,7 @@ PV_ReservieungsDatei=Watt_Reservierung.json
 PV_Reservierung_steuern = 1
 
 [Entladung]
+; Nur MODBUS
 ; Konfigdaten für die Entladesteuerung
 ; Auch diese "Akku_EntLadeSteuerFile.json" wird durch ein PHP_Skript erzeugt (html/2_tab_EntladeSteuerung.php)
 Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
@@ -233,12 +236,14 @@ EntladeGrenze_Max = 30
 
 ; Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
 [messaging]
+; HTTP und MODBUS
 ; Hier Daten für Pushmessage auf Handy
 ; Push_Message_EIN (1=EIN/0=AUS)
 Push_Message_EIN = 1
 Push_Message_Url = https://ntfy.sh/hoizmooPV
 
 [Logging]
+; HTTP und MODBUS
 ; durch Logging ein werden die Werte in eine SQLite Datei zur Auswertung geschrieben (1=ein, 0=aus)
 ; aus der SQLite Datei werden Diagramme in html/7_tab_Diagram.php erstellt.
 Logging_ein = 1
@@ -251,6 +256,7 @@ Logging_file = PV_Daten.sqlite
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 [Fallback]
+; Nur MODBUS
 ; Fallback_on = 0 Programmfunktion ganz ausgeschaltet, KEINE Prüfung ob eine Fallbackzeit geschrieben ist
 ; Fallback_on = 1 ausgeschaltet, Prüfung ob eine Fallbackzeit geschrieben ist, evtl. auf 0 setzen
 ; Fallback_on = 2 eingeschaltet
