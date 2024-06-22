@@ -3,6 +3,8 @@
 **NEU** es können ehrere GEN24 eingebunden werden
 Dadurch wird die Produktion mehrerer GEN24 aufaddiert
 
+FIX Batterieentladebegrenzung: TypeError: unsupported operand type
+
 #### ACHTUNG Änderung in der config.ini:
 - neue Variablen 'IP_weitere_Gen24' in [gen24] 
 

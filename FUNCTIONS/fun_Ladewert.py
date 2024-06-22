@@ -261,7 +261,7 @@ def getPrognoseMorgen():
     Prognose_Summe = 0
     while i < 24:
         Std_morgen = datetime.strftime(now + timedelta(days=1), "%Y-%m-%d")+" "+ str('%0.2d' %(i)) +":00:00"
-        Prognose_Summe += getPrognose(Std_morgen)
+        Prognose_Summe += getPrognose(Std_morgen)[0]
         i  += 1
     return(Prognose_Summe)
     

@@ -469,7 +469,7 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADESTEUERUNG >>>>>>>>>>>>>"
 
                     ######## E N T L A D E B E G R E N Z U N G ab hier wenn eingeschaltet!
-                    if  EntladeGrenze_steuern == 1:
+                    if  EntladeGrenze_steuern == 1 and aktuellePVProduktion < 10:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
 
                         MaxEntladung = 100
