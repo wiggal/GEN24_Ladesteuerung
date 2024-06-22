@@ -259,11 +259,19 @@ def setLadewert(fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnte
 def getPrognoseMorgen():
     i = 0
     Prognose_Summe = 0
+    Ende_Nacht_Std = 0
     while i < 24:
-        Std_morgen = datetime.strftime(now + timedelta(days=1), "%Y-%m-%d")+" "+ str('%0.2d' %(i)) +":00:00"
+        # ab aktueller Stunde die nächsten 24 Stunden aufaddieren, da ab 24 Uhr sonst keine Morgenprognose
+        Std_morgen = datetime.strftime(now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
         Prognose_Summe += getPrognose(Std_morgen)[0]
+        # Wenn Prognosesumme > 50W, dann beginnt die Produktion am nächsten TAG,
+        # da erst Abends gestartet wird (Produktion < 10W)
+        if Prognose_Summe > 50 and Ende_Nacht_Std == 0:
+            Ende_Nacht_Std = Std_morgen
+            print("Ende_Nacht_Std: ", Ende_Nacht_Std)
+        print("Prognose_Summe: ", Std_morgen, Prognose_Summe)
         i  += 1
-    return(Prognose_Summe)
+    return(Prognose_Summe, Ende_Nacht_Std)
     
 def getParameter(argv):
     Parameter = ""
