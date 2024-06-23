@@ -1,15 +1,14 @@
 **[0.21.1] – 2024-06-23**
 
-**NEU** es können ehrere GEN24 eingebunden werden
-Dadurch wird die Produktion mehrerer GEN24 aufaddiert
+**NEU** es können mehrere GEN24 eingebunden werden  
+Dadurch wird die Produktion mehrerer GEN24 aufaddiert  
 
-FIX Batterieentladebegrenzung: TypeError: unsupported operand type
+#### ACHTUNG Änderung in der config.ini:  
+- neue Variablen 'IP_weitere_Gen24' in [gen24]   
 
-#### ACHTUNG Änderung in der config.ini:
-- neue Variablen 'IP_weitere_Gen24' in [gen24] 
-
-FIX: DEBUG-Meldungen aus Funktionen ausgeben
-FIX: bei Prognosen im Diagramm wurden die Reservierungen abgezogen
+FIX Batterieentladebegrenzung: TypeError: unsupported operand type  
+FIX: DEBUG-Meldungen aus Funktionen ausgeben  
+FIX: bei Prognosen im Diagramm wurden die Reservierungen abgezogen  
 
 **[0.21.0] – 2024-06-17**
 
