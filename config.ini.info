@@ -215,7 +215,7 @@ PV_ReservieungsDatei=Watt_Reservierung.json
 PV_Reservierung_steuern = 1
 
 [Entladung]
-; Nur MODBUS
+; HTTP und MODBUS
 ; Konfigdaten für die Entladesteuerung
 ; Auch diese "Akku_EntLadeSteuerFile.json" wird durch ein PHP_Skript erzeugt (html/2_tab_EntladeSteuerung.php)
 Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json

@@ -111,9 +111,9 @@ if __name__ == '__main__':
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     alterLadewert = 0
-                    result = get_time_of_use(host_ip, user, password)
-                    for element in result:
-                        if element['Active'] == True:
+                    result_get_time_of_use = get_time_of_use(host_ip, user, password)
+                    for element in result_get_time_of_use:
+                        if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
                             alterLadewert = element['Power']
 
                     oldPercent = int(alterLadewert/BattganzeLadeKapazWatt*10000)
@@ -351,46 +351,29 @@ if __name__ == '__main__':
                     DEBUG_Ausgabe+="\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachUnten:  " + str(WRSchreibGrenze_nachUnten) + "W"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W"
-                    ### AB HIER SCHARF wenn Argument "schreiben" übergeben
+                    
 
-                    bereits_geschrieben = 0
-                    Schreib_Ausgabe = ""
-                    Push_Schreib_Ausgabe = ""
-                    # Neuen Ladewert als HTTP_Request schreiben, wenn newPercent_schreiben == 1
-                    if newPercent_schreiben == 1:
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
-                        DEBUG_Ausgabe+="\nDEBUG Folgender Ladewert neu zum Schreiben: " + str(newPercent)
-                        if len(argv) > 1 and (argv[1] == "schreiben"):
-                            response = send_request('/config/timeofuse', method='POST', \
-                            payload='{"timeofuse":[{"Active":true,"Power":' + str(aktuellerLadewert) + \
-                            ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}]}')
-                            bereits_geschrieben = 1
-                            Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX am WR per HTTP geschrieben: " + str(aktuellerLadewert) + "W\n"
-                            Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
-                            DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
-                        else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
-                    else:
-                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS zu schreiben!!\n"
-
-                    if print_level >= 1:
-                        print(Schreib_Ausgabe)
-    
-                    """
+                    ######## IN  WR Batteriemanagement schreiben, später gemeinsam
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
+                    BatteryMaxDischarge = BattganzeLadeKapazWatt
+                    Neu_BatteryMaxDischarge = BattganzeLadeKapazWatt
+
                     if  Batterieentlandung_steuern == 1:
-                        MaxEntladung = 100
+                        MaxEntladung = BattganzeLadeKapazWatt
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
-                        BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
+                        #BatteryMaxDischarge = 1000  # Hier get WIGG get_time_of_use
+                        for element in result_get_time_of_use:
+                            if element['Active'] == True and element['ScheduleType'] == 'DISCHARGE_MAX':
+                                BatteryMaxDischarge = element['Power']
 
                         # EntladeSteuerungFile lesen
                         EntladeSteuerungFile = getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
                         entladesteurungsdata = loadPVReservierung(EntladeSteuerungFile)
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
-                            MaxEntladung = entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']
+                            MaxEntladung = int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100)
                             DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
 
                         aktStd = datetime.strftime(now, "%H:00")
@@ -413,142 +396,80 @@ if __name__ == '__main__':
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
                         if (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
-                            Neu_BatteryMaxDischargePercent = int((GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)/BattganzeLadeKapazWatt*100)
+                            # % Neu_BatteryMaxDischarge = int((GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)/BattganzeLadeKapazWatt*100)
+                            Neu_BatteryMaxDischarge = int(GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 500 
                         elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze > 0):
-                            Neu_BatteryMaxDischargePercent = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
+                            # % Neu_BatteryMaxDischarge = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
+                            Neu_BatteryMaxDischarge = int(FesteEntladegrenze)
                         # Verbrauchsgrenze == 0 (leer) && Feste Grenze == 500
                         elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze > 0):
-                            Neu_BatteryMaxDischargePercent = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
+                            # % Neu_BatteryMaxDischarge = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
+                            Neu_BatteryMaxDischarge = int(FesteEntladegrenze)
                         else:
-                            Neu_BatteryMaxDischargePercent = MaxEntladung
+                            Neu_BatteryMaxDischarge = MaxEntladung
 
-                        DEBUG_Ausgabe+="\nDEBUG Batterieentladegrenze NEU: " + str(Neu_BatteryMaxDischargePercent) + "%"
+                        DEBUG_Ausgabe+="\nDEBUG Batterieentladegrenze NEU: " + str(Neu_BatteryMaxDischarge) + "%"
 
                         # Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
                         WREntladeSchreibGrenze_Prozent = int(WREntladeSchreibGrenze_Watt / BattganzeLadeKapazWatt * 100 + 1)
-                        if (abs(Neu_BatteryMaxDischargePercent - BatteryMaxDischargePercent) < WREntladeSchreibGrenze_Prozent):
-                            Neu_BatteryMaxDischargePercent = BatteryMaxDischargePercent
+                        if (abs(Neu_BatteryMaxDischarge - BatteryMaxDischarge) < WREntladeSchreibGrenze_Prozent):
+                            Neu_BatteryMaxDischarge = BatteryMaxDischarge
 
                         ## Werte zum Überprüfen ausgeben
                         if print_level >= 1:
                             print("######### E N T L A D E S T E U E R U N G #########\n")
-                            print("Feste Entladegrenze:       ", entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'], "%")
+                            print("Feste Entladegrenze:       ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100), "W")
                             print("Batteriestatus in Prozent: ", BattStatusProz, "%")
                             print("GesamtverbrauchHaus:       ", GesamtverbrauchHaus, "W")
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
-                            print("Batterieentladegrenze ALT: ", BatteryMaxDischargePercent, "%")
-                            print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischargePercent, "%")
+                            print("Batterieentladegrenze ALT: ", BatteryMaxDischarge, "W")
+                            print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischarge, "W")
                             print()
-
-                        Schreib_Ausgabe = ""
-
-                        if (Neu_BatteryMaxDischargePercent != BatteryMaxDischargePercent):
-                            if len(argv) > 1 and (argv[1] == "schreiben"):
-                                valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
-                                bereits_geschrieben = 1
-                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladewert schreiben: " + str(valueNew)
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n"
-                                Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
-                            else:
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladung wurde NICHT " + str(Neu_BatteryMaxDischargePercent) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
-                        else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Unterschied Alte und Neue Werte der Batterieentladung kleiner ("+ str(WREntladeSchreibGrenze_Watt) + "W), NICHTS zu schreiben!!\n"
-
-                        if print_level >= 1:
-                            print(Schreib_Ausgabe)
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADESTEUERUNG >>>>>>>>>>>>>"
 
-                    ######## E N T L A D E B E G R E N Z U N G ab hier wenn eingeschaltet!
-                    if  EntladeGrenze_steuern == 1:
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
 
-                        MaxEntladung = 100
-                        ProgGrenzeMorgen = getVarConf('Entladung','ProgGrenzeMorgen','eval')
-                        EntladeGrenze_Min = getVarConf('Entladung','EntladeGrenze_Min','eval')
-                        EntladeGrenze_Max = getVarConf('Entladung','EntladeGrenze_Max','eval')
-                        PrognoseMorgen = getPrognoseMorgen()/1000
-                        Battery_MinRsvPct = int(gen24.read_data('Battery_MinRsvPct')/100)
-                        Neu_Battery_MinRsvPct = EntladeGrenze_Min
-                        if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
-                            Neu_Battery_MinRsvPct = EntladeGrenze_Max
-                        if print_level >= 1:
-                            print("######### E N T L A D E B E G R E N Z U N G #########\n")
-                            print("Prognose Morgen: ", PrognoseMorgen, "KW")
-                            print("Batteriereserve: ", Battery_MinRsvPct, "%")
-                            print("Neu_Batteriereserve: ", Neu_Battery_MinRsvPct, "%")
-                            print()
+                    ### AB HIER SCHARF wenn Argument "schreiben" übergeben
+                    ######## Ladeleistung und Entladeleistung in WR Batteriemanagement schreiben 
 
-                        Schreib_Ausgabe = ""
-
-                        if (Neu_Battery_MinRsvPct != Battery_MinRsvPct):
-                            if len(argv) > 1 and (argv[1] == "schreiben"):
-                                valueNew = gen24.write_data('Battery_MinRsvPct', Neu_Battery_MinRsvPct * 100)
-                                bereits_geschrieben = 1
-                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladegrenze schreiben: " + str(valueNew)
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladebegrenzung: " + str(Neu_Battery_MinRsvPct) + "%\n"
-                                Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
-                            else:
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladebegrenzung wurde NICHT " + str(Neu_Battery_MinRsvPct) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                    bereits_geschrieben = 0
+                    Schreib_Ausgabe = ""
+                    Push_Schreib_Ausgabe = ""
+                    # Neuen Ladewert als HTTP_Request schreiben, wenn newPercent_schreiben == 1 
+                    if newPercent_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge:
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
+                        DEBUG_Ausgabe+="\nDEBUG Folgender MAX_Ladewert neu zum Schreiben: " + str(aktuellerLadewert)
+                        DEBUG_Ausgabe+="\nDEBUG Folgender MAX_ENT_Ladewert neu zum Schreiben: " + str(Neu_BatteryMaxDischarge)
+                        if len(argv) > 1 and (argv[1] == "schreiben"):
+                            response = send_request('/config/timeofuse', method='POST', \
+                            payload='{"timeofuse":[{"Active":true,"Power":' + str(aktuellerLadewert) + \
+                            ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}, \
+                            {"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
+                            ',"ScheduleType":"DISCHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}]}')
+                            bereits_geschrieben = 1
+                            if newPercent_schreiben == 1:
+                                Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX per HTTP geschrieben: " + str(aktuellerLadewert) + "W\n"
+                            if Neu_BatteryMaxDischarge != BatteryMaxDischarge:
+                                Schreib_Ausgabe = Schreib_Ausgabe + "DISCHARGE_MAX per HTTP geschrieben: " + str(Neu_BatteryMaxDischarge) + "W\n"
+                            Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
+                            DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung hat sich nicht verändert, NICHTS zu schreiben!!\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                    else:
+                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS zu schreiben!!\n"
 
-                        if print_level >= 1:
-                            print(Schreib_Ausgabe)
+                    if print_level >= 1:
+                        print(Schreib_Ausgabe)
 
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
-                    ######## PV Reservierung ENDE
-
-                    """
+                    ######## WR Batteriemanagement ENDE
+    
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
                         Push_Message_Url = getVarConf('messaging','Push_Message_Url','str')
                         apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
                         print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
-                    """
-
-
-                    # FALLBACK des Wechselrichters bei Ausfall der Steuerung
-                    if Fallback_on != 0:
-                        Fallback_Schreib_Ausgabe = ""
-                        akt_Fallback_time = gen24.read_data('InOutWRte_RvrtTms_Fallback')
-                        if Fallback_on == 2:
-                            Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback ist eingeschaltet.\n"
-                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<< FALLBACK >>>>>>>>>>>>>"
-                            Akt_Zeit_Rest = int(datetime.strftime(now, "%H%M")) % (Fallback_Zeitabstand_Std*100)
-                            Fallback_Sekunden = int((Fallback_Zeitabstand_Std * 3600) + (Cronjob_Minutenabstand * 60 * 0.9))
-                            # Zur vollen Fallbackstunde wenn noch kein Schreibzugriff war Fallback schreiben
-                            if Akt_Zeit_Rest == 0 or akt_Fallback_time != Fallback_Sekunden:
-                                if bereits_geschrieben == 0 or akt_Fallback_time != Fallback_Sekunden:
-                                    if len(argv) > 1 and (argv[1] == "schreiben"):
-                                        fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', Fallback_Sekunden)
-                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback " + str(Fallback_Sekunden) + " geschrieben.\n"
-                                        DEBUG_Ausgabe+="\nDEBUG Meldung FALLBACK schreiben: " + str(fallback_msg)
-                                    else:
-                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
-                                else:
-                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da bereits auf den WR geschrieben wurde.\n"
-
-                        else:
-                            Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback ist NICHT eingeschaltet.\n"
-                            if akt_Fallback_time != 0:
-                                if len(argv) > 1 and (argv[1] == "schreiben"):
-                                    fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', 0)
-                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung geschrieben.\n"
-                                    DEBUG_Ausgabe+="\nDEBUG Meldung FALLBACK Deaktivierung schreiben: " + str(fallback_msg)
-                                else:
-                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
-
-                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "InOutWRte_RvrtTms_Fallback: " + str(gen24.read_data('InOutWRte_RvrtTms_Fallback')) + "\n"
-                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "StorageControlMode:    " + str(gen24.read_data('StorageControlMode')) + "\n"
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE FALLBACK >>>>>>>>>>>>>"
-
-                        if print_level >= 1:
-                            print(Fallback_Schreib_Ausgabe)
-                    # FALLBACK ENDE
-                    """
 
                     ### LOGGING, Schreibt mit den übergebenen Daten eine CSV- oder SQlite-Datei
                     ## nur wenn "schreiben" oder "logging" übergeben worden ist
