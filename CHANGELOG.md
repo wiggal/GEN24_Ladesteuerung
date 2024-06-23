@@ -1,3 +1,8 @@
+**[0.21.2] – 2024-XX-XX**
+
+Änderung in http_SymoGen24Controller2.py
+- Entladesteuerung eingebaut
+
 **[0.21.1] – 2024-06-23**
 
 **NEU** es können mehrere GEN24 eingebunden werden  
