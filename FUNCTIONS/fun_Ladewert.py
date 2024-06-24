@@ -214,21 +214,14 @@ def getEinspeiseGrenzeLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktu
         return  aktuellerLadewert, LadewertGrund, DEBUG_Ausgabe
 
 def getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt):
-        ### AC_Kapazitaet WR ANFANG
-        # Wenn  PV-Produktion > WR_Kapazitaet (AC)
-        if aktuellePVProduktion > WR_Kapazitaet:
-            kapazitaetsueberschuss = int(aktuellePVProduktion - WR_Kapazitaet )
-            if (kapazitaetsueberschuss > alterLadewert):
-                if (kapazitaetsueberschuss < alterLadewert + WRSchreibGrenze_nachOben):
-                    kapazitaetsueberschuss = alterLadewert + WRSchreibGrenze_nachOben + 10
-                    # Damit der kapazitaetsueberschuss durch die Addition der WRSchreibGrenze_nachOben nicht grösser als die PV_Leistung_Watt wird.
-                    if kapazitaetsueberschuss > PV_Leistung_Watt - WR_Kapazitaet:
-                        kapazitaetsueberschuss = PV_Leistung_Watt - WR_Kapazitaet
+        # Wenn  PV-Produktion + aktuelleBatteriePower (in Akku = minus!!)> WR_Kapazitaet (AC)
+        if aktuellePVProduktion + 100 > WR_Kapazitaet + alterLadewert:
+            kapazitaetsueberschuss = alterLadewert + WRSchreibGrenze_nachOben + 10
+            if (WR_Kapazitaet + 100 < aktuellePVProduktion + aktuelleBatteriePower):
                 aktuellerLadewert = kapazitaetsueberschuss
                 LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
-
+        # Ansonsten übergebene Werte wieder zurück
         aktuellerLadewert = getLadewertinGrenzen(aktuellerLadewert)
-        ### AC_Kapazitaet WR ENDE
         return  aktuellerLadewert, LadewertGrund
 
 def setLadewert(fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten):
