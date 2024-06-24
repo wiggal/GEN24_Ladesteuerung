@@ -356,14 +356,13 @@ if __name__ == '__main__':
                     ######## IN  WR Batteriemanagement schreiben, später gemeinsam
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
-                    BatteryMaxDischarge = BattganzeLadeKapazWatt
-                    Neu_BatteryMaxDischarge = BattganzeLadeKapazWatt
+                    BatteryMaxDischarge = 0
+                    Neu_BatteryMaxDischarge = 0
 
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = BattganzeLadeKapazWatt
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
-                        #BatteryMaxDischarge = 1000  # Hier get WIGG get_time_of_use
                         for element in result_get_time_of_use:
                             if element['Active'] == True and element['ScheduleType'] == 'DISCHARGE_MAX':
                                 BatteryMaxDischarge = element['Power']
@@ -396,15 +395,12 @@ if __name__ == '__main__':
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
                         if (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
-                            # % Neu_BatteryMaxDischarge = int((GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)/BattganzeLadeKapazWatt*100)
                             Neu_BatteryMaxDischarge = int(GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 500 
                         elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze > 0):
-                            # % Neu_BatteryMaxDischarge = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
                             Neu_BatteryMaxDischarge = int(FesteEntladegrenze)
                         # Verbrauchsgrenze == 0 (leer) && Feste Grenze == 500
                         elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze > 0):
-                            # % Neu_BatteryMaxDischarge = int(FesteEntladegrenze/BattganzeLadeKapazWatt*100)
                             Neu_BatteryMaxDischarge = int(FesteEntladegrenze)
                         else:
                             Neu_BatteryMaxDischarge = MaxEntladung
@@ -442,11 +438,12 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG Folgender MAX_Ladewert neu zum Schreiben: " + str(aktuellerLadewert)
                         DEBUG_Ausgabe+="\nDEBUG Folgender MAX_ENT_Ladewert neu zum Schreiben: " + str(Neu_BatteryMaxDischarge)
                         if len(argv) > 1 and (argv[1] == "schreiben"):
-                            response = send_request('/config/timeofuse', method='POST', \
-                            payload='{"timeofuse":[{"Active":true,"Power":' + str(aktuellerLadewert) + \
-                            ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}, \
-                            {"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
-                            ',"ScheduleType":"DISCHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}]}')
+                            payload_text = '{"Active":true,"Power":' + str(aktuellerLadewert) + \
+                            ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
+                            if  Batterieentlandung_steuern == 1:
+                                payload_text += ',{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
+                                ',"ScheduleType":"DISCHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
+                            response = send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
                             bereits_geschrieben = 1
                             if newPercent_schreiben == 1:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX per HTTP geschrieben: " + str(aktuellerLadewert) + "W\n"
