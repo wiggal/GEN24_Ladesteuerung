@@ -3,7 +3,11 @@
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
 Ab Version: **0.20**  
-[:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) Ladewerte **per HTTP-Request** in das Batteriemanagement schreiben.  
+[:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) Maximalen Ladewert **per HTTP-Request** in das Batteriemanagement schreiben.  
+Ab Version: **0.21.1**  
+Zur Ermittlung der gesamten Produktion können auch mehrere GEN24 eingebunden werden.  
+Ab Version: **0.21.2**  
+Bei aktivierter EntladeSteuerung auch den maximalen Ladewert **per HTTP-Request** in das Batteriemanagement schreiben.  
 ![new](pics/new2.png)  
 
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
@@ -36,19 +40,20 @@ sudo pip install requests
 sudo pip install ping3
 ```
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
-Als Erstes muss ein Prognoseskript aufgerufen werden, damit neue Prognosedaten in der Datei weatherData.json vorhanden sind!  
+Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der Datei weatherData.json vorhanden sind!  
 
-Beispiele für Crontabeinträge ("DIR" durch dein Installationsverzeichnis ersetzen)  
-Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh)  
-SymoGen24Controller2.py bzw. http_SymoGen24Controller2.py durchgehend alle 5 Minuten starten wegen Logging (nur wenn Logging gewünscht). 
-(Häufigerer Aufruf nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!)  
+Beispiele für Crontabeinträge ("DIR" durch dein Installationsverzeichnis ersetzen).  
+Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh).  
+SymoGen24Controller2.py bzw. http_SymoGen24Controller2.py durchgehend (wegen Logging) alle 5/10 Minuten starten  
+(Häufigerer Aufruf für Logging nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!).  
+Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hiert auch ein Aufruf alle 10 Minuten (1-59/10).  
 
 ```
-1-56/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
+1-59/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
 ```
 **ODER!!**
 ```
-1-56/5 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
+1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
 **ACHTUNG:** nur den Wetterdienst eintragen, den ihr verwenden wollt.
 ```
