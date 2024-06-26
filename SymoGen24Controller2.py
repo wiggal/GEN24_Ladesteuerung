@@ -26,6 +26,13 @@ if __name__ == '__main__':
         if(Parameter[1] != "" and print_level >= 1):
             Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
             if(Parameter[1] == "AUS"):
+                # Ladungsspeichersteuerungsmodus deaktivieren 
+                host_ip = getVarConf('gen24','hostNameOrIp', 'str')
+                host_port = getVarConf('gen24','port', 'str')
+                gen24 = FUNCTIONS.SymoGen24Connector.SymoGen24(host_ip, host_port, False)
+                if gen24.read_data('StorageControlMode') != 0:
+                    valueNew = gen24.write_data('StorageControlMode', 0 )
+                    print("StorageControlMode 0 neu geschrieben.")
                 print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
                 exit()
                 
