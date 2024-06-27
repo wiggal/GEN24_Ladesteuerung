@@ -15,7 +15,6 @@ $passwd_configedit = "0815";
 $TAB_config = array (
                 array ( 'name' => 'LadeStrg','file' => '1_tab_LadeSteuerung.php','checked' => 'ja','sichtbar' => 'ein'),
                 array ( 'name' => 'ENTLadeStrg', 'file' => '2_tab_EntladeSteuerung.php','checked' => 'nein','sichtbar' => 'ein'),
-                array ( 'name' => 'Hilfe','file' => '3_tab_Hilfe.html','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'config','file' => '4_tab_config_ini.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'Logfile','file' => '5_tab_Crontab_log.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'GEN24','file' => '6_tab_GEN24.php','checked' => 'nein','sichtbar' => 'ein'),

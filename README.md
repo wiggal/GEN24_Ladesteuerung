@@ -46,7 +46,7 @@ Beispiele für Crontabeinträge ("DIR" durch dein Installationsverzeichnis erset
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh).  
 SymoGen24Controller2.py bzw. http_SymoGen24Controller2.py durchgehend (wegen Logging) alle 5/10 Minuten starten  
 (Häufigerer Aufruf für Logging nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!).  
-Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hiert auch ein Aufruf alle 10 Minuten (1-59/10).  
+Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch ein Aufruf alle 10 Minuten (1-59/10).  
 
 ```
 1-59/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
