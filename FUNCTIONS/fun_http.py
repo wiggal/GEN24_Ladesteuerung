@@ -41,16 +41,29 @@ def get_nonce(response):
 
 def get_time_of_use(g_self_address, g_user, g_password):
     global user, password, self_address
-    user = g_user
+    user = g_user.lower()
     password = g_password
     self_address = g_self_address
     response= send_request('/config/timeofuse',auth=True)
     if not response:
         return None
 
-    result=json.loads(response.text)['timeofuse']
-    #print(DEBUG_Ausgabe_fun_http)
+    result = json.loads(response.text)['timeofuse']
     return result
+
+def get_eigenv_opt(g_self_address, g_user, g_password):
+    global user, password, self_address
+    user = g_user.lower()
+    password = g_password
+    self_address = g_self_address
+    response = send_request('/config/batteries',auth=True)
+    if not response:
+        return None
+
+    HYB_EM_POWER = json.loads(response.text)['HYB_EM_POWER']
+    # wenn HYB_EM_MODE = 0, Eigenverbrauchs-Optimierung = Automatisch
+    HYB_EM_MODE = json.loads(response.text)['HYB_EM_MODE']
+    return HYB_EM_POWER, HYB_EM_MODE
 
 
 def send_request(path, method='GET',payload="", params=None, headers={}, auth=False):
