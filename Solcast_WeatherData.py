@@ -30,19 +30,19 @@ def loadLatestWeatherData():
             # Hier wieder ABHOLEN EIN
             try:
                 apiResponse = requests.get(url, timeout=99.50)
+                json_data1 = dict(json.loads(apiResponse.text))
             except requests.exceptions.Timeout:
                 print("### ERROR:  Timeout von api.solcast.com.au")
                 exit()
-            json_data1 = dict(json.loads(apiResponse.text))
             
             if Strings == 2:
                 url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id2, datenloop, api_key)
                 try:
                     apiResponse2 = requests.get(url, timeout=99.50)
+                    json_data2 = dict(json.loads(apiResponse2.text))
                 except requests.exceptions.Timeout:
                     print("### ERROR:  Timeout von api.solcast.com.au")
                     exit()
-                json_data2 = dict(json.loads(apiResponse2.text))
                 
             try:
                 # wenn zuviele Zugriffe

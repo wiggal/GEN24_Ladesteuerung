@@ -132,9 +132,12 @@ input[type="radio"]{
  </head>
 
  <body>
+ <div align="right"> <a href="9_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
    <br />
-   <div class=help><p><b>ACHTUNG:</b> Diese Einstellungen überschreiben teilweise den Aufrufparameter (z.B. vom Cronjob)!</p></div>
+   <div class=help><p>
+   <b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim Punkt 'unverändert lassen', die Aufrufparameter (z.B. vom Cronjob)!
+   </p></div>
    <br />
   </div>
 
@@ -183,7 +186,7 @@ Ladesteuerung:<br>
       </label>
    <label for="analyse" class="option analyse">
      <div class="dot"></div>
-      <span>&nbsp;Analyse in Crontab.log</span>
+      <span>&nbsp;NUR Analyse in Crontab.log</span>
       </label>
    <label for="logging" class="option logging">
      <div class="dot"></div>
