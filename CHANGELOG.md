@@ -1,7 +1,21 @@
-**[0.21.2] – 2024-XX-XX**
+**[0.21.2] – 2024-06-30**
 
 Änderung in http_SymoGen24Controller2.py
 - Entladesteuerung eingebaut
+
+Änderung in FUNCTIONS/fun_API.py
+- FUNCTIONS/fun_API.py API_Schlüssel von 16711680 nach 16252928 geändert.  
+  Der Schlüssel 16711680 scheint bei manchen GEN24 zu fehlen.  
+  Vermutlich durch Firmwareupdate auf 1.32.5-1 verursacht. 
+
+Änderung in SymoGen24Controller2.py, bei Settings = AUS, wird die Modbussteuerung deaktiviert
+  - AUS         -->> die Skripte werden beendet , die bisherigen Steuerungswerte werden deaktiviert.  
+
+FIX: Fehler bei HTTP-Zugang wenn 'user' groß geschrieben
+
+#### ACHTUNG bitte html/config.php anpassen!!!  
+Zeile `array ( 'name' => 'Hilfe','file' => '3_tab_Hilfe.html...` entfernt
+html/3_tab_Hilfe.html entfernt, und die Hilfen direkt in den entsprechenden Seiten eingebunden.
 
 **[0.21.1] – 2024-06-23**
 
@@ -30,9 +44,9 @@ Erreichbar ist die Oberfläche dann mit name_oder_IP:2424
 Durch die Optionen auf dem Tab, können die SymoGen24Controller-Skripte gesteuert werden:  
 (Damit kann die Steuerung auch kurz mal abgeschaltet werden, ohne das Logging zu unterbrechen usw.)
 
-  - unverändert lassen       -->> die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (z.B.: loggin, schreiben)
-  - AUS                      -->> die Skripte werden ohne egliche Funktion beendet
-  - Analyse in Crontab.loga  -->> die Skripte berechnen die Ladewerte geben die Ergebnisse nur aus.
+  - unverändert lassen       -->> die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (z.B.: logging, schreiben)
+  - AUS                      -->> die Skripte werden ohne jegliche Funktion beendet #Änderung in 0.21.2
+  - Analyse in Crontab.log  -->> die Skripte berechnen die Ladewerte geben die Ergebnisse nur aus.
   - NUR Logging              -->> die Skripte führen nur das Logging für die Diagramme durch
   - WR-Steuerung und Logging -->> die Skripte schreiben die Ladesteuerung auf den WR und machen das Logging
 

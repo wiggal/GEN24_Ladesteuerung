@@ -175,6 +175,7 @@ input[type="radio"]{
  </head>
 
  <body>
+  <div align="right"> <a href="2_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>

@@ -227,7 +227,7 @@ WREntladeSchreibGrenze_Watt = 200
 ; Entladung des Akku auf bestimmten Prozentsatz begrenzen
 ; damit kann die Entladegrenze des Akkus in Abhängigkeit der Prognose für morgen gesetzt werden.
 EntladeGrenze_steuern = 1
-; PrognoseGenze in KWh
+; PrognoseGrenzeMorgen in KWh
 ; Ist die Prognose für morgen kleiner als "ProgGrenzeMorgen", wird "EntladeGrenze_Min" gesetzt, ansonsten "EntladeGrenze_Max"
 ProgGrenzeMorgen = 10
 ; Entladegrenzen in Prozent (%)
