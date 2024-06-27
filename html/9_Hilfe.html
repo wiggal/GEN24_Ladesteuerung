@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width" />
+	<title>Hilfe Settigs</title>
+	<style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            }
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+          padding: 10px;
+        }   
+        /*
+        @media (max-width: 880px) {
+            th, td {
+              font-size: 2.2em;
+            }
+        }
+        */
+	</style>
+</head>
+<body lang="de-DE" >
+<center>
+
+<div align="right"> <a href="9_tab_settigs.php"><b>Zurück</b></a></div>
+<br/><br/>
+
+
+<font style="font-size: 24pt"><b><span style="background: #FB5555">Settings</span></b></font>
+<br/> <br/>
+
+<p><b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim Punkt 'unverändert lassen', die Aufrufparameter (z.B. vom Cronjob)!
+<br/>
+<br/>
+<table>
+<tr> <th>Ladesteuerung</th><th>Erläuterung</th> </tr>
+<tr> <td><b>unverändert lassen </b></td>  <td>Die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (z.B.: logging, schreiben). Die Settings haben keinen Einfluss auf die Programmsteuerung</td> </tr>
+<tr> <td><b>AUS</b></td>  <td>Die Skripte werden beendet, und die bisherigen Steuerungswerte werden deaktiviert.</td> </tr>
+<tr> <td><b>NUR Analyse in Crontab.log</b></td><td>Die Skripte berechnen die Ladewerte, und geben die Ergebnisse nur in die Crontab.log aus.</td> </tr>
+<tr> <td><b>NUR Logging</b></td><td>Die Skripte führen nur das Logging für die Diagramme durch (wie mit dem Parameter 'logging').</td> </tr>
+<tr> <td><b>WR-Steuerung und Logging</b></td><td>Die Skripte schreiben die berechneten Ladewerte auf den WR und machen das Logging (wie mit dem Parameter 'schreiben').</td> </tr>
+</table>
+
+<br/><br/>
+<br/>
+</center>
+
+</body>
+</html>

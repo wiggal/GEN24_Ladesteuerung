@@ -17,6 +17,18 @@ if __name__ == '__main__':
         format = "%Y-%m-%d %H:%M:%S"
 
 
+        host_ip = getVarConf('gen24','hostNameOrIp', 'str')
+        user = getVarConf('gen24','user', 'str')
+        password = getVarConf('gen24','password', 'str')
+        # Hier Hochkommas am Anfang und am Ende enternen
+        password = password[1:-1]
+
+        alterLadewert = 0
+        result_get_time_of_use = get_time_of_use(host_ip, user, password)
+        for element in result_get_time_of_use:
+            if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
+                alterLadewert = element['Power']
+
         # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
         print_level = getVarConf('Ladeberechnung','print_level','eval')
         Parameter = getParameter(argv)
@@ -28,16 +40,13 @@ if __name__ == '__main__':
         if(Parameter[1] != "" and print_level >= 1):
             Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
             if(Parameter[1] == "AUS"):
+                # Batteriemangement zurücksetzen
+                if result_get_time_of_use != []:
+                    response = send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
+                    print("Batteriemanagementeinträge gelöscht!")
                 print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
                 exit()
 
-
-        host_ip = getVarConf('gen24','hostNameOrIp', 'str')
-        host_port = getVarConf('gen24','port', 'str')
-        user = getVarConf('gen24','user', 'str')
-        password = getVarConf('gen24','password', 'str')
-        # Hier Hochkommas am Anfang und am Ende enternen
-        password = password[1:-1]
         if ping(host_ip):
             # Nur ausführen, wenn WR erreichbar
             try:            
@@ -109,12 +118,6 @@ if __name__ == '__main__':
                     aktuellePVProduktion = API['aktuellePVProduktion']
                     aktuelleBatteriePower = API['aktuelleBatteriePower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
-
-                    alterLadewert = 0
-                    result_get_time_of_use = get_time_of_use(host_ip, user, password)
-                    for element in result_get_time_of_use:
-                        if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
-                            alterLadewert = element['Power']
 
                     oldPercent = int(alterLadewert/BattganzeLadeKapazWatt*10000)
 
