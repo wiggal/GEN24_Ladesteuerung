@@ -3,11 +3,11 @@
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
 Ab Version: **0.20**  
-[:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) Maximalen Ladewert **per HTTP-Request** in das Batteriemanagement schreiben.  
+[:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) `Maximale Ladeleistung` **per HTTP-Request** im Batteriemanagement setzen.  
 Ab Version: **0.21.1**  
 Zur Ermittlung der gesamten Produktion können auch mehrere GEN24 eingebunden werden.  
 Ab Version: **0.21.2**  
-Bei aktivierter EntladeSteuerung auch den maximalen Ladewert **per HTTP-Request** in das Batteriemanagement schreiben.  
+Bei aktivierter EntladeSteuerung auch die `Maximale Entladeleistung` **per HTTP-Request** im Batteriemanagement setzen.  
 ![new](pics/new2.png)  
 
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
