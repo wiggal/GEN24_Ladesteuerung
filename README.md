@@ -98,9 +98,9 @@ Wird von SymoGen24Controller2.py aufgerufen und stellt die Verbindung **per Modb
 
 berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json und dem Akkustand und gibt sie aus. 
 Ist die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt. 
-Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte **per HTTP-Request** 
-in das Batteriemanagement des Wechselrichter, falls die Änderung über der gesetzten Grenze ist.
-Die **Einspeisung** muss hier nicht berücksichtigt werden, da dies das Batteriemanagement selbst regelt (auch über der definierten Ladegrenze!)
+Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) setzt es die `Maximale Ladeleistung` **per HTTP-Request** 
+im Batteriemanagement des Wechselrichter, falls die Änderung über der gesetzten Grenze ist.
+Die **Einspeisebegrenzung** muss hier nicht berücksichtigt werden, da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
 ## Webserver Installation (WebUI):  
 Nicht zwingend erforderlich, die prognosebasierte Ladesteuerung funktioniert auch ohne WebUI (Webserver)  
@@ -146,7 +146,7 @@ Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die e
 beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben.  
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.  
 
-Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
 
 ### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
 ![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
@@ -156,7 +156,7 @@ in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.
 
 In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.
 
-Weitere Erklärungen stehen im Hilfetab 3_tab_Hilfe.html [Vorschau hier](pics/3_tab_Hilfe.pdf)
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
 
 =======================================================  
 
