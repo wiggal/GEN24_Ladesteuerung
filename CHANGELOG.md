@@ -8,13 +8,13 @@
   Der Schlüssel 16711680 scheint bei manchen GEN24 zu fehlen.  
   Vermutlich durch Firmwareupdate auf 1.32.5-1 verursacht. 
 
-Änderung in SymoGen24Controller2.py, bei Settings = AUS, wird die Modbussteuerung deaktiviert
+Änderung in SymoGen24Controller2.py, bei Settings = AUS, wird die Steuerung deaktiviert.  
   - AUS         -->> die Skripte werden beendet , die bisherigen Steuerungswerte werden deaktiviert.  
 
 FIX: Fehler bei HTTP-Zugang wenn 'user' groß geschrieben
 
 #### ACHTUNG bitte html/config.php anpassen!!!  
-Zeile `array ( 'name' => 'Hilfe','file' => '3_tab_Hilfe.html...` entfernt
+Zeile `array ( 'name' => 'Hilfe','file' => '3_tab_Hilfe.html...` entfernt.  
 html/3_tab_Hilfe.html entfernt, und die Hilfen direkt in den entsprechenden Seiten eingebunden.
 
 **[0.21.1] – 2024-06-23**
