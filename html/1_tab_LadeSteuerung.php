@@ -164,12 +164,17 @@ input[type="radio"]{
 #voll:checked:checked ~ .voll span{
   color: #000;
 }
+.hilfe{
+  font-family:Arial;
+  font-size:150%;
+  color: #000000;
+}
 
   </style>
  </head>
 
  <body>
-  <div align="right"> <a href="1_Hilfe.html"><b>Hilfe</b></a></div>
+  <div class="hilfe" align="right"> <a href="1_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>

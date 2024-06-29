@@ -121,10 +121,9 @@ input[type="radio"]{
 #voll:checked:checked ~ .voll span{
   color: #000;
 }
-.help{
+.hilfe{
   font-family:Arial;
   font-size:150%;
-  text-align: center;
   color: #000000;
 }
 
@@ -132,10 +131,10 @@ input[type="radio"]{
  </head>
 
  <body>
- <div align="right"> <a href="9_Hilfe.html"><b>Hilfe</b></a></div>
+ <div class="hilfe" align="right"> <a href="9_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
    <br />
-   <div class=help><p>
+   <div class="hilfe" align="center"><p>
    <b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim Punkt 'unverändert lassen', die Aufrufparameter (z.B. vom Cronjob)!
    </p></div>
    <br />
