@@ -5,6 +5,7 @@ import FUNCTIONS.SymoGen24Connector
 from ping3 import ping
 from sys import argv
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
+from FUNCTIONS.fun_http import get_eigenv_opt
 
 # Hier die Variablen aus dem Hauptprogramm übergeben und global machen
 def globalfrommain(g_now, g_DEBUG_Ausgabe, g_BattVollUm, g_data, g_PV_Reservierung_steuern,\
@@ -249,7 +250,7 @@ def setLadewert(fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnte
 
         return(newPercent, newPercent_schreiben)
 
-def getPrognoseMorgen():
+def getPrognoseMorgen(MaxEinspeisung=0):
     i = 0
     Prognose_Summe = 0
     Ende_Nacht_Std = 0
@@ -259,10 +260,8 @@ def getPrognoseMorgen():
         Prognose_Summe += getPrognose(Std_morgen)[0]
         # Wenn Prognosesumme > 50W, dann beginnt die Produktion am nächsten TAG,
         # da erst Abends gestartet wird (Produktion < 10W)
-        if Prognose_Summe > 50 and Ende_Nacht_Std == 0:
+        if Prognose_Summe > MaxEinspeisung and Ende_Nacht_Std == 0:
             Ende_Nacht_Std = Std_morgen
-            print("Ende_Nacht_Std: ", Ende_Nacht_Std)
-        print("Prognose_Summe: ", Std_morgen, Prognose_Summe)
         i  += 1
     return(Prognose_Summe, Ende_Nacht_Std)
     
@@ -288,3 +287,48 @@ def getParameter(argv):
         Meldung = "WR-Steuerung und Logging"
         Parameter = 'schreiben'
     return(Parameter, Meldung)
+
+def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung=0):
+    GrundlastNacht = getVarConf('EigenverbOptimum','GrundlastNacht','eval')
+    AkkuZielProz = getVarConf('EigenverbOptimum','AkkuZielProz','eval')
+    PrognoseGrenzeMorgen = getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
+    PrognoseMorgen_arr = getPrognoseMorgen(MaxEinspeisung)
+    PrognoseMorgen = PrognoseMorgen_arr[0]/1000
+    Ende_Nacht_Std = PrognoseMorgen_arr[1]
+    Eigen_Opt_Std_arry = get_eigenv_opt(host_ip, user, password)
+    Eigen_Opt_Std = Eigen_Opt_Std_arry[0]
+
+    if Ende_Nacht_Std == 0 : Ende_Nacht_Std = datetime.strftime(now, "%Y-%m-%d %H:%M:%S")
+    Dauer_Nacht = (datetime.strptime(Ende_Nacht_Std, '%Y-%m-%d %H:%M:%S') - (now  - timedelta(hours=1)))
+    Dauer_Nacht_Std = Dauer_Nacht.total_seconds()/3600
+    if Dauer_Nacht_Std <= 0: Dauer_Nacht_Std = 1 # sonst Divison durch Null 
+    Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
+    # Eigen_Opt_Std_neu auf 100 runden
+    Eigen_Opt_Std_neu = int(round(Akku_Rest_Watt/Dauer_Nacht_Std, -2))
+    if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
+    print ("Dauer_Nacht_Std, Akku_Rest_Watt, Eigen_Opt_genau, Eigen_Opt_Std_neu: ", round(Dauer_Nacht_Std, 2), int(Akku_Rest_Watt), int(Akku_Rest_Watt/Dauer_Nacht_Std), Eigen_Opt_Std_neu)
+    # Hier auf MaxEinspeisung begrenzen.
+    if Eigen_Opt_Std_neu > MaxEinspeisung : Eigen_Opt_Std_neu = MaxEinspeisung
+    # In der letzten Stunde vor dem Morgengrauen
+    if Dauer_Nacht_Std < 2:
+        # Die aktuelle Einspeisung nicht mehr verändern
+        Eigen_Opt_Std_neu = Eigen_Opt_Std
+        if (PrognoseMorgen < PrognoseGrenzeMorgen):
+            print("# >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages")
+            Eigen_Opt_Std_neu = (MaxEinspeisung)/2
+        elif (PrognoseMorgen < PrognoseGrenzeMorgen/2):
+            print("# >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages")
+            Eigen_Opt_Std_neu = 0
+        else:
+            print("# >>> Bei guter Prognose MaxEinspeisung während des Tages")
+            Eigen_Opt_Std_neu = MaxEinspeisung 
+    # Wenn Eigen_Opt_Std_arry[1] = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
+    if Eigen_Opt_Std_arry[1] == 0: Eigen_Opt_Std = 0
+    if (PrognoseMorgen < PrognoseGrenzeMorgen and PrognoseMorgen != 0):
+        Eigen_Opt_Std_neu = 0
+
+    # Einspeisung muss immer Minus sein!!
+    Eigen_Opt_Std_neu = abs(Eigen_Opt_Std_neu) * -1
+
+    return PrognoseMorgen, Eigen_Opt_Std, Eigen_Opt_Std_neu, Dauer_Nacht_Std
+
