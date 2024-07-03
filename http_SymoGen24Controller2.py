@@ -6,7 +6,7 @@ from sys import argv
 import json
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 from FUNCTIONS.fun_Ladewert import getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
-        getPrognoseMorgen, globalfrommain, getAC_KapaLadewert, getParameter
+        getPrognoseMorgen, globalfrommain, getAC_KapaLadewert, getParameter, getEigenverbrauchOpt
 from FUNCTIONS.fun_API import get_API
 from FUNCTIONS.fun_http import get_time_of_use, send_request
 
@@ -82,6 +82,9 @@ if __name__ == '__main__':
                     Batterieentlandung_steuern = getVarConf('Entladung','Batterieentlandung_steuern','eval')
                     WREntladeSchreibGrenze_Watt = getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
                     EntladeGrenze_steuern = getVarConf('Entladung','EntladeGrenze_steuern','eval')
+                    EigenverbOpt_steuern = getVarConf('EigenverbOptimum','EigenverbOpt_steuern','eval')
+                    MaxEinspeisung = getVarConf('EigenverbOptimum','MaxEinspeisung','eval')
+
 
                     # um Divison durch Null zu verhindern kleinsten Wert setzen
                     if BatSparFaktor < 0.1:
@@ -339,10 +342,8 @@ if __name__ == '__main__':
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
                             print("Bisheriger Ladewert/Watt:   ", alterLadewert)
-                            print("Bisheriger Ladewert/Prozent:", oldPercent/100,"%")
                             print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
-                            print("Neuer Ladewert/Prozent:     ", newPercent/100,"%")
-                            print("newPercent_schreiben:       ", newPercent_schreiben)
+                            # print("newPercent_schreiben:       ", newPercent_schreiben)
                             print()
                         except Exception as e:
                             print()
@@ -463,6 +464,41 @@ if __name__ == '__main__':
                         print(Schreib_Ausgabe)
 
                     ######## WR Batteriemanagement ENDE
+
+                    ######## Eigenverbrauchs-Optimierung  ab hier wenn eingeschaltet!
+                    if  EigenverbOpt_steuern == 1:
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>"
+                        EigenOptERG = getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung)
+                        PrognoseMorgen = EigenOptERG[0]
+                        Eigen_Opt_Std = EigenOptERG[1]
+                        Eigen_Opt_Std_neu = EigenOptERG[2]
+                        Dauer_Nacht_Std = EigenOptERG[3]
+                    if Dauer_Nacht_Std > 1:
+
+                        if print_level >= 1:
+                            print("######### Eigenverbrauchs-Optimierung #########")
+                            print("Prognose Morgen: ", PrognoseMorgen, "KW")
+                            print("Eigenverbrauchs-Optimierung ALT: ", Eigen_Opt_Std, "W")
+                            print("Eigenverbrauchs-Optimierung NEU: ", Eigen_Opt_Std_neu, "W")
+                            print()
+
+                        Opti_Schreib_Ausgabe = ""
+
+                        if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
+                            if len(argv) > 1 and (argv[1] == "schreiben"):
+                                response = send_request('/config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
+                                bereits_geschrieben = 1
+                                DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Optimierung schreiben: " + str(response)
+                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Eigenverbrauchs-Optimierung : " + str(Eigen_Opt_Std_neu) + "W\n"
+                                Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
+                            else:
+                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung NICHT " + str(Eigen_Opt_Std_neu) +"W geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                        else:
+                            Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung hat sich nicht verändert, NICHTS zu schreiben!!\n"
+
+                        if print_level >= 1:
+                            print(Opti_Schreib_Ausgabe)
+                    ######## Eigenverbrauchs-Optimierung  ENDE!!!
     
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):

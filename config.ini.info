@@ -234,10 +234,21 @@ ProgGrenzeMorgen = 10
 EntladeGrenze_Min = 0
 EntladeGrenze_Max = 30
 
-; Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
+[EigenverbOptimum]
+; Nur HTTP
+; durch das Setzen eines bestimmeten Einspeisewertes unter Eigenverbrauchs-Optimierung
+; kann über Nacht der Akku entladen und der Einschwingverbrauch reduziert werden.
+; EigenverbOpt_steuern 1 = ein, 0 = aus
+EigenverbOpt_steuern = 1
+GrundlastNacht = 300
+AkkuZielProz = 40
+MaxEinspeisung = 200
+; PrognoseGenzeMorgen in KWh
+PrognoseGrenzeMorgen = 30
+
 [messaging]
 ; HTTP und MODBUS
-; Hier Daten für Pushmessage auf Handy
+; Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
 ; Push_Message_EIN (1=EIN/0=AUS)
 Push_Message_EIN = 1
 Push_Message_Url = https://ntfy.sh/hoizmooPV

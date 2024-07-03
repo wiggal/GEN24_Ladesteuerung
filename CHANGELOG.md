@@ -1,3 +1,12 @@
+**[0.21.3] – 2024-XX-XX**
+
+**NEU** Automatisches setzen eines Einspeisewertes als `Zielwert am Einspeisepunkt` unter Eigenverbrauchs-Optimierung (nur HTTP)  
+- durch das Setzen dieses Wertes kann ein Netzbezug trotz genügend eigene Energie, der durch die Einschwingzeit verursacht wird, minimiert werden.
+- der Speicher kann je nach Prognose auf einen Zielstand entladen werden, um am nächsten Tag Kapazität zur Verfügung zu haben.
+
+#### ACHTUNG Änderung in der config.ini:  
+- neuer Block `[EigenverbOptimum]`
+
 **[0.21.2] – 2024-06-30**
 
 Änderung in http_SymoGen24Controller2.py
