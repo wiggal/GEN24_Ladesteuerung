@@ -473,31 +473,31 @@ if __name__ == '__main__':
                         Eigen_Opt_Std = EigenOptERG[1]
                         Eigen_Opt_Std_neu = EigenOptERG[2]
                         Dauer_Nacht_Std = EigenOptERG[3]
-                    if Dauer_Nacht_Std > 1:
+                        if Dauer_Nacht_Std > 1:
 
-                        if print_level >= 1:
-                            print("######### Eigenverbrauchs-Optimierung #########")
-                            print("Prognose Morgen: ", PrognoseMorgen, "KW")
-                            print("Eigenverbrauchs-Optimierung ALT: ", Eigen_Opt_Std, "W")
-                            print("Eigenverbrauchs-Optimierung NEU: ", Eigen_Opt_Std_neu, "W")
-                            print()
+                            if print_level >= 1:
+                                print("######### Eigenverbrauchs-Optimierung #########")
+                                print("Prognose Morgen: ", PrognoseMorgen, "KW")
+                                print("Eigenverbrauchs-Optimierung ALT: ", Eigen_Opt_Std, "W")
+                                print("Eigenverbrauchs-Optimierung NEU: ", Eigen_Opt_Std_neu, "W")
+                                print()
 
-                        Opti_Schreib_Ausgabe = ""
+                            Opti_Schreib_Ausgabe = ""
 
-                        if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
-                            if len(argv) > 1 and (argv[1] == "schreiben"):
-                                response = send_request('/config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
-                                bereits_geschrieben = 1
-                                DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Optimierung schreiben: " + str(response)
-                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Eigenverbrauchs-Optimierung : " + str(Eigen_Opt_Std_neu) + "W\n"
-                                Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
+                            if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
+                                if len(argv) > 1 and (argv[1] == "schreiben"):
+                                    response = send_request('/config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
+                                    bereits_geschrieben = 1
+                                    DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Optimierung schreiben: " + str(response)
+                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Eigenverbrauchs-Optimierung : " + str(Eigen_Opt_Std_neu) + "W\n"
+                                    Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
+                                else:
+                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung NICHT " + str(Eigen_Opt_Std_neu) +"W geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                             else:
-                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung NICHT " + str(Eigen_Opt_Std_neu) +"W geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
-                        else:
-                            Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung hat sich nicht verändert, NICHTS zu schreiben!!\n"
+                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung hat sich nicht verändert, NICHTS zu schreiben!!\n"
 
-                        if print_level >= 1:
-                            print(Opti_Schreib_Ausgabe)
+                            if print_level >= 1:
+                                print(Opti_Schreib_Ausgabe)
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
     
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
