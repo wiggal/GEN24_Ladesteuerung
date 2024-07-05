@@ -251,7 +251,7 @@ PrognoseGrenzeMorgen = 30
 ; Hier kann eine Pushmessage aufs Handy mit der App "ntfy" gesendet werden.
 ; Push_Message_EIN (1=EIN/0=AUS)
 Push_Message_EIN = 1
-Push_Message_Url = https://ntfy.sh/hoizmooPV
+Push_Message_Url = https://ntfy.sh/XXXXXXXXX
 
 [Logging]
 ; HTTP und MODBUS
