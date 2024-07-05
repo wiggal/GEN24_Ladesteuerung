@@ -106,8 +106,8 @@ if __name__ == '__main__':
                     # Benoetigte Variablen vom GEN24 lesen und definieren
                     # Hier nun über API
                     API = get_API()
-                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattganzeKapazWatt = (API['BattganzeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt'])
+                    BattganzeKapazWatt = (API['BattganzeKapazWatt'])
                     BattStatusProz = API['BattStatusProz']
                     BattKapaWatt_akt = API['BattKapaWatt_akt']
                     aktuelleEinspeisung = API['aktuelleEinspeisung']

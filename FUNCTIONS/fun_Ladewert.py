@@ -306,7 +306,8 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     # Eigen_Opt_Std_neu auf 100 runden
     Eigen_Opt_Std_neu = int(round(Akku_Rest_Watt/Dauer_Nacht_Std, -2))
     if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
-    print ("Dauer_Nacht_Std, Akku_Rest_Watt, Eigen_Opt_genau, Eigen_Opt_Std_neu: ", round(Dauer_Nacht_Std, 2), int(Akku_Rest_Watt), int(Akku_Rest_Watt/Dauer_Nacht_Std), Eigen_Opt_Std_neu)
+    DEBUG_Eig_opt = "Dauer_Nacht_Std: " + str(round(Dauer_Nacht_Std, 2)) + ", Akku_Rest_Watt: " + str(int(Akku_Rest_Watt)) +  \
+                ", Eigen_Opt_genau: " + str(int(Akku_Rest_Watt/Dauer_Nacht_Std)) + ", Eigen_Opt_Std_neu: " + str(Eigen_Opt_Std_neu) + "\n"
     # Hier auf MaxEinspeisung begrenzen.
     if Eigen_Opt_Std_neu > MaxEinspeisung : Eigen_Opt_Std_neu = MaxEinspeisung
     # In der letzten Stunde vor dem Morgengrauen
@@ -314,13 +315,13 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
         # Die aktuelle Einspeisung nicht mehr verändern
         Eigen_Opt_Std_neu = Eigen_Opt_Std
         if (PrognoseMorgen < PrognoseGrenzeMorgen):
-            print("# >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages")
+            DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
             Eigen_Opt_Std_neu = (MaxEinspeisung)/2
         elif (PrognoseMorgen < PrognoseGrenzeMorgen/2):
-            print("# >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages")
+            DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
             Eigen_Opt_Std_neu = 0
         else:
-            print("# >>> Bei guter Prognose MaxEinspeisung während des Tages")
+            DEBUG_Eig_opt += "# >>> Bei guter Prognose MaxEinspeisung während des Tages"
             Eigen_Opt_Std_neu = MaxEinspeisung 
     # Wenn Eigen_Opt_Std_arry[1] = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
     if Eigen_Opt_Std_arry[1] == 0: Eigen_Opt_Std = 0
@@ -330,5 +331,5 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     # Einspeisung muss immer Minus sein!!
     Eigen_Opt_Std_neu = abs(Eigen_Opt_Std_neu) * -1
 
-    return PrognoseMorgen, Eigen_Opt_Std, Eigen_Opt_Std_neu, Dauer_Nacht_Std
+    return PrognoseMorgen, Eigen_Opt_Std, Eigen_Opt_Std_neu, Dauer_Nacht_Std, DEBUG_Eig_opt
 

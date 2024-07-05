@@ -113,8 +113,8 @@ if __name__ == '__main__':
                         print("Batterie ist Offline keine Steuerung möglich!!! ")
                         print()
                         exit()
-                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
-                    BattganzeKapazWatt = (API['BattganzeKapazWatt']) + 1  # +1 damit keine Divison duch Null entstehen kann
+                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt'])
+                    BattganzeKapazWatt = (API['BattganzeKapazWatt'])
                     BattStatusProz = API['BattStatusProz']
                     BattKapaWatt_akt = API['BattKapaWatt_akt']
                     aktuelleEinspeisung = API['aktuelleEinspeisung']
@@ -481,6 +481,9 @@ if __name__ == '__main__':
                                 print("Eigenverbrauchs-Optimierung ALT: ", Eigen_Opt_Std, "W")
                                 print("Eigenverbrauchs-Optimierung NEU: ", Eigen_Opt_Std_neu, "W")
                                 print()
+                                # Nur während der ENTWICKLUNG, Anschließend DEBUG_Ausgabe+=
+                                print("\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>")
+                                print(EigenOptERG[4])
 
                             Opti_Schreib_Ausgabe = ""
 
