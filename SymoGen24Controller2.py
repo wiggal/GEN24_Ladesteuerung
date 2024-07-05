@@ -319,8 +319,13 @@ if __name__ == '__main__':
                     # Wenn die aktuellePVProduktion < 10 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!
                     if aktuellePVProduktion < 10:
-                        newPercent_schreiben = 0
-                        LadewertGrund = "Nicht schreiben, da PVProduktion < 10 Watt!"
+                        # Für die Nacht zwingend auf MaxLadung, 
+                        # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
+                        if aktuellerLadewert < MaxLadung:
+                            aktuellerLadewert = MaxLadung
+                        else:
+                            newPercent_schreiben = 0
+                            LadewertGrund = "Nicht schreiben, da PVProduktion < 10 Watt!"
 
                     # Auf ganze Watt runden
                     aktuellerLadewert = int(aktuellerLadewert)
