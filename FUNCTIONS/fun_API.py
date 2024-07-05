@@ -16,8 +16,10 @@ def get_API():
     if API['BAT_MODE'] != 2:
         # Aktuelle Werte für Prognoseberechung
         attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
+        # BattganzeKapazWatt * Akku_Zustand
+        Akku_Zustand = data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16'] / 100
+        API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'] * Akku_Zustand)
         API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
-        API['BattganzeKapazWatt'] = attributes_nameplate['capacity_wh']
         API['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
         API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
         API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERAPPARENT_MEAN_SUM_F64'])
