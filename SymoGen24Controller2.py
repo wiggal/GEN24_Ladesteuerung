@@ -321,8 +321,11 @@ if __name__ == '__main__':
                     if aktuellePVProduktion < 10:
                         # Für die Nacht zwingend auf MaxLadung, 
                         # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
-                        if alterLadewert < MaxLadung:
+                        if alterLadewert < MaxLadung -10 :
                             aktuellerLadewert = MaxLadung
+                            DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                            newPercent = DATA[0]
+                            newPercent_schreiben = DATA[1]
                             LadewertGrund = "Auf MaxLadung stellen, da PVProduktion < 10 Watt!"
                         else:
                             newPercent_schreiben = 0
