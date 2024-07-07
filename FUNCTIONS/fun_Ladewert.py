@@ -303,30 +303,38 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     Dauer_Nacht_Std = Dauer_Nacht.total_seconds()/3600
     if Dauer_Nacht_Std <= 0: Dauer_Nacht_Std = 1 # sonst Divison durch Null 
     Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
+    Eigen_Opt_Std_neu = int(Akku_Rest_Watt/Dauer_Nacht_Std)
+    # Schaltverzögerung (hysterese) 
+    if Eigen_Opt_Std < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 15
     # Eigen_Opt_Std_neu auf 100 runden
-    Eigen_Opt_Std_neu = int(round(Akku_Rest_Watt/Dauer_Nacht_Std, -2))
+    Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu, -2))
     if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
     DEBUG_Eig_opt = "Dauer_Nacht_Std: " + str(round(Dauer_Nacht_Std, 2)) + ", Akku_Rest_Watt: " + str(int(Akku_Rest_Watt)) +  \
                 ", Eigen_Opt_genau: " + str(int(Akku_Rest_Watt/Dauer_Nacht_Std)) + ", Eigen_Opt_Std_neu: " + str(Eigen_Opt_Std_neu) + "\n"
     # Hier auf MaxEinspeisung begrenzen.
     if Eigen_Opt_Std_neu > MaxEinspeisung : Eigen_Opt_Std_neu = MaxEinspeisung
-    # In der letzten Stunde vor dem Morgengrauen
+    # PrognoseGrenzeMorgen pruefen
+    if (PrognoseMorgen < PrognoseGrenzeMorgen and PrognoseMorgen != 0):
+        Eigen_Opt_Std_neu = 0
+    # In der letzten Stunde vor dem Morgengrauen, Eigen_Opt_Std für Tag stellen
     if Dauer_Nacht_Std < 2:
         # Die aktuelle Einspeisung nicht mehr verändern
         Eigen_Opt_Std_neu = Eigen_Opt_Std
         if (PrognoseMorgen < PrognoseGrenzeMorgen):
             DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
+            DEBUG_Eig_opt += "\n# >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
             Eigen_Opt_Std_neu = (MaxEinspeisung)/2
         elif (PrognoseMorgen < PrognoseGrenzeMorgen/2):
             DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+            DEBUG_Eig_opt += "\n# >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
             Eigen_Opt_Std_neu = 0
         else:
-            DEBUG_Eig_opt += "# >>> Bei guter Prognose MaxEinspeisung während des Tages"
+            DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
+            DEBUG_Eig_opt += "\n# >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
             Eigen_Opt_Std_neu = MaxEinspeisung 
+
     # Wenn Eigen_Opt_Std_arry[1] = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
     if Eigen_Opt_Std_arry[1] == 0: Eigen_Opt_Std = 0
-    if (PrognoseMorgen < PrognoseGrenzeMorgen and PrognoseMorgen != 0):
-        Eigen_Opt_Std_neu = 0
 
     # Einspeisung muss immer Minus sein!!
     Eigen_Opt_Std_neu = abs(Eigen_Opt_Std_neu) * -1
