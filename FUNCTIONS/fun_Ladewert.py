@@ -305,7 +305,7 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
     Eigen_Opt_Std_neu = int(Akku_Rest_Watt/Dauer_Nacht_Std)
     # Schaltverzögerung (hysterese) 
-    if Eigen_Opt_Std < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 15
+    if abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 20
     # Eigen_Opt_Std_neu auf 100 runden
     Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu, -2))
     if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
