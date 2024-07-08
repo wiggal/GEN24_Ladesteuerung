@@ -294,20 +294,24 @@ if __name__ == '__main__':
                             Ladefaktor = 0.1
                             AkkuSchonGrund = '90%, Ladewert = 0.1C'
                             BattStatusProz_Grenze = 90
-                        # Bei Akkuschonung Schaltverzögerung (hysterese) einbauen, wenn Ladewert ist bereits der Akkuschonwert (+/- 3%) BattStatusProz_Grenze 5% runter
+
                         AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor)
+                        Prognose_Grenze = aktuelleVorhersage - (Grundlast /2)
+                        # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3%) BattStatusProz_Grenze 5% runter
                         if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
+                            print("Hier Akkuschonung Schaltverzögerung ")
                             BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
+                            Prognose_Grenze = aktuelleVorhersage - (Grundlast /2.5)
 
                         if BattStatusProz > BattStatusProz_Grenze:
                             DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
                             DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
-                            DEBUG_Ausgabe += "\nDEBUG aktuelleVorhersage - (Grundlast /2) > AkkuschonungLadewert? " + str(aktuelleVorhersage - (Grundlast /2))
+                            DEBUG_Ausgabe += "\nDEBUG Prognose_Grenze > AkkuschonungLadewert? " + str(Prognose_Grenze)
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
                             DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
-                            # Um des setzen der Akkuschonung zu verhindern, wenn zu wenig PV Energie kommt oder der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
-                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuelleVorhersage - (Grundlast /2) > AkkuschonungLadewert:
+                            # Um das setzen der Akkuschonung zu verhindern, wenn zu wenig PV Energie kommt oder der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
+                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and Prognose_Grenze > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
