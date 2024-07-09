@@ -299,7 +299,6 @@ if __name__ == '__main__':
                         Prognose_Grenze = aktuelleVorhersage - (Grundlast /2)
                         # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3%) BattStatusProz_Grenze 5% runter
                         if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
-                            print("Hier Akkuschonung Schaltverzögerung ")
                             BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
                             Prognose_Grenze = aktuelleVorhersage - (Grundlast /2.5)
 

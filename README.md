@@ -63,7 +63,7 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 ```
 **Crontab.log jeden Montag abräumen**
 ```
-0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
+0 0 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
 ```
 
 ### :sun_behind_rain_cloud: WeatherDataProvider2.py

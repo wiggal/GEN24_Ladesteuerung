@@ -299,7 +299,6 @@ if __name__ == '__main__':
                         Prognose_Grenze = aktuelleVorhersage - (Grundlast /2)
                         # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3%) BattStatusProz_Grenze 5% runter
                         if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
-                            print("Hier Akkuschonung Schaltverzögerung ")
                             BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
                             Prognose_Grenze = aktuelleVorhersage - (Grundlast /2.5)
 
@@ -480,7 +479,6 @@ if __name__ == '__main__':
 
                     ######## Eigenverbrauchs-Optimierung  ab hier wenn eingeschaltet!
                     if  EigenverbOpt_steuern == 1:
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>"
                         EigenOptERG = getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung)
                         PrognoseMorgen = EigenOptERG[0]
                         Eigen_Opt_Std = EigenOptERG[1]
@@ -494,8 +492,7 @@ if __name__ == '__main__':
                                 print("Eigenverbrauchs-Optimierung ALT: ", Eigen_Opt_Std, "W")
                                 print("Eigenverbrauchs-Optimierung NEU: ", Eigen_Opt_Std_neu, "W")
                                 print()
-                                # Nur während der ENTWICKLUNG, Anschließend DEBUG_Ausgabe+=
-                                print("\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>")
+                                # WIGG Nur während der ENTWICKLUNG, Anschließend DEBUG_Ausgabe+=
                                 print(EigenOptERG[4])
 
                             Opti_Schreib_Ausgabe = ""
