@@ -7,6 +7,11 @@
 #### ACHTUNG Änderung in der config.ini:  
 - neuer Block `[EigenverbOptimum]`
 
+Änderung in README.md:
+- Crontab.log jeden Montag abräumen auf 0:00 Uhr verlegt.
+
+- Fehlerbereinigungen siehe commits
+
 **[0.21.2] – 2024-06-30**
 
 Änderung in http_SymoGen24Controller2.py

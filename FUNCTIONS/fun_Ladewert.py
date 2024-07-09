@@ -289,6 +289,7 @@ def getParameter(argv):
     return(Parameter, Meldung)
 
 def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung=0):
+    DEBUG_Eig_opt ="\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>\n"
     GrundlastNacht = getVarConf('EigenverbOptimum','GrundlastNacht','eval')
     AkkuZielProz = getVarConf('EigenverbOptimum','AkkuZielProz','eval')
     PrognoseGrenzeMorgen = getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
@@ -305,32 +306,32 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
     Eigen_Opt_Std_neu = int(Akku_Rest_Watt/Dauer_Nacht_Std)
     # Schaltverzögerung (hysterese) 
-    if abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 20
+    if abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 30
     # Eigen_Opt_Std_neu auf 100 runden
     Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu, -2))
     if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
-    DEBUG_Eig_opt = "Dauer_Nacht_Std: " + str(round(Dauer_Nacht_Std, 2)) + ", Akku_Rest_Watt: " + str(int(Akku_Rest_Watt)) +  \
-                ", Eigen_Opt_genau: " + str(int(Akku_Rest_Watt/Dauer_Nacht_Std)) + ", Eigen_Opt_Std_neu: " + str(Eigen_Opt_Std_neu) + "\n"
+    DEBUG_Eig_opt += "DEBUG ## Dauer_Nacht_Std: " + str(round(Dauer_Nacht_Std, 2)) + ", Akku_Rest_Watt: " + str(int(Akku_Rest_Watt)) +  \
+                "\nDEBUG ## Eigen_Opt_genau: " + str(int(Akku_Rest_Watt/Dauer_Nacht_Std)) + ", Eigen_Opt_Std_neu: " + str(Eigen_Opt_Std_neu) + "\n"
     # Hier auf MaxEinspeisung begrenzen.
     if Eigen_Opt_Std_neu > MaxEinspeisung : Eigen_Opt_Std_neu = MaxEinspeisung
     # PrognoseGrenzeMorgen pruefen
     if (PrognoseMorgen < PrognoseGrenzeMorgen and PrognoseMorgen != 0):
         Eigen_Opt_Std_neu = 0
     # In der letzten Stunde vor dem Morgengrauen, Eigen_Opt_Std für Tag stellen
-    if Dauer_Nacht_Std < 2:
+    if Dauer_Nacht_Std < 3:
         # Die aktuelle Einspeisung nicht mehr verändern
         Eigen_Opt_Std_neu = Eigen_Opt_Std
         if (PrognoseMorgen < PrognoseGrenzeMorgen):
-            DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
-            DEBUG_Eig_opt += "\n# >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+            DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
+            DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
             Eigen_Opt_Std_neu = (MaxEinspeisung)/2
         elif (PrognoseMorgen < PrognoseGrenzeMorgen/2):
-            DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
-            DEBUG_Eig_opt += "\n# >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+            DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+            DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
             Eigen_Opt_Std_neu = 0
         else:
-            DEBUG_Eig_opt += "# >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
-            DEBUG_Eig_opt += "\n# >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+            DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
+            DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
             Eigen_Opt_Std_neu = MaxEinspeisung 
 
     # Wenn Eigen_Opt_Std_arry[1] = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
