@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     BattganzeKapazWatt = (API['BattganzeKapazWatt'])
                     BattStatusProz = API['BattStatusProz']
                     BattKapaWatt_akt = API['BattKapaWatt_akt']
-                    aktuelleEinspeisung = API['aktuelleEinspeisung']
+                    aktuelleEinspeisung = API['aktuelleEinspeisung'] * -1
                     aktuellePVProduktion = API['aktuellePVProduktion']
                     aktuelleBatteriePower = API['aktuelleBatteriePower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
