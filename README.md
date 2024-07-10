@@ -8,6 +8,8 @@ Ab Version: **0.21.1**
 Zur Ermittlung der gesamten Produktion können auch mehrere GEN24 eingebunden werden.  
 Ab Version: **0.21.2**  
 Bei aktivierter EntladeSteuerung auch die `Maximale Entladeleistung` **per HTTP-Request** im Batteriemanagement setzen.  
+Ab Version: **0.21.3**  
+In der HTTP-Version kann nun im Energiemanagement, ein Einspeisezielwert der Eigenverbrauchs-Optimierung automatisch geschrieben werden.  
 ![new](pics/new2.png)  
 
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
