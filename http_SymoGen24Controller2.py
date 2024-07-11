@@ -6,7 +6,7 @@ from sys import argv
 import json
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 from FUNCTIONS.fun_Ladewert import getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
-        getPrognoseMorgen, globalfrommain, getAC_KapaLadewert, getParameter, getEigenverbrauchOpt
+        getPrognoseMorgen, globalfrommain, getParameter, getEigenverbrauchOpt
 from FUNCTIONS.fun_API import get_API
 from FUNCTIONS.fun_http import get_time_of_use, send_request
 
@@ -175,9 +175,6 @@ if __name__ == '__main__':
                     aktuelleVorhersage = AktuellenLadewert_Array[1]
                     LadewertGrund = AktuellenLadewert_Array[2]
                     DEBUG_Ausgabe = AktuellenLadewert_Array[3]
-                    AktuellenLadewert_Array = getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
-                    aktuellerLadewert = AktuellenLadewert_Array[0]
-                    LadewertGrund = AktuellenLadewert_Array[1]
 
                     # DEBUG_Ausgabe der Ladewertermittlung 
                     DEBUG_Ausgabe += "\nDEBUG TagesPrognoseUeberschuss: " + str(TagesPrognoseUeberschuss) + ", Grundlast: " + str(Grundlast)
