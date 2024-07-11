@@ -1,4 +1,4 @@
-**[0.21.3] – 2024-XX-XX**
+**[0.21.3] – 2024-07-14**
 
 **NEU** Automatisches setzen eines Einspeisewertes als `Zielwert am Einspeisepunkt` unter Eigenverbrauchs-Optimierung (nur HTTP)  
 - durch das Setzen dieses Wertes kann ein Netzbezug trotz genügend eigene Energie, der durch die Einschwingzeit verursacht wird, minimiert werden.

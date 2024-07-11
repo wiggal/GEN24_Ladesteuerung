@@ -289,7 +289,7 @@ def getParameter(argv):
     return(Parameter, Meldung)
 
 def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung=0):
-    DEBUG_Eig_opt ="\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>\n"
+    DEBUG_Eig_opt ="\n\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>\n"
     GrundlastNacht = getVarConf('EigenverbOptimum','GrundlastNacht','eval')
     AkkuZielProz = getVarConf('EigenverbOptimum','AkkuZielProz','eval')
     PrognoseGrenzeMorgen = getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
