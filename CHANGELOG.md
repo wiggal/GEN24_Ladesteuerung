@@ -7,6 +7,10 @@
 #### ACHTUNG Änderung in der config.ini:  
 - neuer Block `[EigenverbOptimum]`
 
+Änderung in http_SymoGen24Controller2.py
+- Da der GEN24 die Energie, die über der AC Kapazität des Wechselrichters liegt automatisch in den Akku speichern,
+  wurde die Begrenzung auf WR_Kapazitaet in der HTTP-Version entfernt.
+
 Änderung in README.md:
 - Crontab.log jeden Montag abräumen auf 0:00 Uhr verlegt.
 
