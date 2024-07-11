@@ -484,16 +484,15 @@ if __name__ == '__main__':
                         Eigen_Opt_Std = EigenOptERG[1]
                         Eigen_Opt_Std_neu = EigenOptERG[2]
                         Dauer_Nacht_Std = EigenOptERG[3]
-                        if Dauer_Nacht_Std > 1:
+                        DEBUG_Ausgabe += EigenOptERG[4]
 
+                        if Dauer_Nacht_Std > 1:
                             if print_level >= 1:
                                 print("######### Eigenverbrauchs-Optimierung #########")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")
                                 print("Eigenverbrauchs-Optimierung ALT: ", Eigen_Opt_Std, "W")
                                 print("Eigenverbrauchs-Optimierung NEU: ", Eigen_Opt_Std_neu, "W")
                                 print()
-                                # WIGG Nur während der ENTWICKLUNG, Anschließend DEBUG_Ausgabe+=
-                                print(EigenOptERG[4])
 
                             Opti_Schreib_Ausgabe = ""
 
