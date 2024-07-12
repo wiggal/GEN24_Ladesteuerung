@@ -143,14 +143,14 @@ def getPrognoseLadewert( AbzugWatt ):
 
         global DEBUG_Ausgabe
         format_Tag = "%Y-%m-%d"
-        Spreizung = 1
+        PrognoseGlaettung = 2
         Akt_Std = int(datetime.strftime(now, "%H"))
         Akt_Minute = int(datetime.strftime(now, "%M"))
         Pro_Akt = 0
         Pro_Akt_Log = 0
-        i = Akt_Std - Spreizung
+        i = Akt_Std - PrognoseGlaettung
         loop = 0
-        while i <= Akt_Std + Spreizung:
+        while i <= Akt_Std + PrognoseGlaettung:
             Std = datetime.strftime(now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
             Prognose = getPrognose(Std)[0]
             Prognose_Log = getPrognose(Std)[1]
@@ -161,7 +161,7 @@ def getPrognoseLadewert( AbzugWatt ):
                 Pro_Akt_fun_Log = Prognose_Log * (60 - Akt_Minute) / 60
                 Pro_Akt_fun = Prognose * (60 - Akt_Minute) / 60
                 DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " REST_Akt_Minute: " + str(round(((60 - Akt_Minute) / 60),3))
-            if loop == Spreizung * 2:
+            if loop == PrognoseGlaettung * 2:
                 Pro_Akt_fun_Log = Prognose_Log * (Akt_Minute) / 60
                 Pro_Akt_fun = Prognose * (Akt_Minute) / 60
                 DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Akt_Minute: " + str(round(((Akt_Minute) / 60),3))
@@ -170,8 +170,8 @@ def getPrognoseLadewert( AbzugWatt ):
             DEBUG_Ausgabe += "\nDEBUG  " + str(Std) + " Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Prognose_gesamt: " + str(round(Pro_Akt,2)) + "\n"
             loop += 1
             i += 1
-        Pro_Akt_Log = int(Pro_Akt_Log / Spreizung / 2 )
-        Pro_Akt = int(Pro_Akt / Spreizung / 2 )
+        Pro_Akt_Log = int(Pro_Akt_Log / PrognoseGlaettung / 2 )
+        Pro_Akt = int(Pro_Akt / PrognoseGlaettung / 2 )
 
         # Nun den Aktuellen Ladewert rechnen 
         # Batterieladewert mit allen Einfluessen aus der Prognose rechnen
