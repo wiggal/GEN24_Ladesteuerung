@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <title>PV_Planung</title>
+  <link rel="icon" type="image/png" href="GEN24Ladesteuerung.png">
 <style>
 /**
  * Tabs
