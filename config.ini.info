@@ -172,7 +172,7 @@ MindBattLad = 20
 LadungAus = 0
 ; Bei schlechtem Wetter mit niedrigen Prognosen wird die Ladung oft zu gering berechnet.
 ; Wenn größter Prognosewert je Stunde ist kleiner als GrenzwertGroestePrognose volle Ladung (= MaxLadung)
-GrenzwertGroestePrognose = 3000
+GrenzwertGroestePrognose = 500
 
 ; Akkuschonung (1=ein, 0=aus) dadurch wird der Akku zwischen 80 und 100% mit 0,2C bzw. 0,1C geladen
 ; und BattVollUm wird um eine Stunde vor verlegt, da am Schluss nicht mehr so stark geladen wird.
