@@ -143,7 +143,7 @@ def getPrognoseLadewert( AbzugWatt ):
 
         global DEBUG_Ausgabe
         format_Tag = "%Y-%m-%d"
-        PrognoseGlaettung = 2
+        PrognoseGlaettung = 1
         Akt_Std = int(datetime.strftime(now, "%H"))
         Akt_Minute = int(datetime.strftime(now, "%M"))
         Pro_Akt = 0
@@ -306,7 +306,7 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
     Eigen_Opt_Std_neu = int(Akku_Rest_Watt/Dauer_Nacht_Std)
     # Schaltverzögerung (hysterese) 
-    if abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 30
+    if abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 50
     # Eigen_Opt_Std_neu auf 100 runden
     Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu, -2))
     if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
