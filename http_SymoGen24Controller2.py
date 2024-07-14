@@ -293,21 +293,18 @@ if __name__ == '__main__':
                             BattStatusProz_Grenze = 90
 
                         AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor)
-                        Prognose_Grenze = aktuelleVorhersage - (Grundlast /2)
-                        # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3%) BattStatusProz_Grenze 5% runter
+                        # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3W) BattStatusProz_Grenze 5% runter
                         if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
                             BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
-                            Prognose_Grenze = aktuelleVorhersage - (Grundlast /2.5)
 
                         if BattStatusProz > BattStatusProz_Grenze:
                             DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
                             DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
-                            DEBUG_Ausgabe += "\nDEBUG Prognose_Grenze > AkkuschonungLadewert? " + str(Prognose_Grenze)
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
                             DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
                             # Um das setzen der Akkuschonung zu verhindern, wenn zu wenig PV Energie kommt oder der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
-                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and Prognose_Grenze > AkkuschonungLadewert:
+                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * 2 > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
@@ -482,6 +479,11 @@ if __name__ == '__main__':
                         Eigen_Opt_Std_neu = EigenOptERG[2]
                         Dauer_Nacht_Std = EigenOptERG[3]
                         DEBUG_Ausgabe += EigenOptERG[4]
+
+                        # Wenn unter tags die Prognose oder der Akkustand stark abnimmt, Einspeisewert wenn größer 0 auf 0 setzen
+                        if PrognoseAbzugswert == 0 and BattStatusProz < 80 and Dauer_Nacht_Std <= 1 and Eigen_Opt_Std_neu > 0:
+                            Dauer_Nacht_Std = 2
+                            Eigen_Opt_Std_neu = 0
 
                         if Dauer_Nacht_Std > 1:
                             if print_level >= 1:
