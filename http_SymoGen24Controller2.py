@@ -6,7 +6,7 @@ from sys import argv
 import json
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 from FUNCTIONS.fun_Ladewert import getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
-        getPrognoseMorgen, globalfrommain, getParameter, getEigenverbrauchOpt
+        getSonnenuntergang, globalfrommain, getParameter, getEigenverbrauchOpt
 from FUNCTIONS.fun_API import get_API
 from FUNCTIONS.fun_http import get_time_of_use, send_request
 
@@ -60,7 +60,6 @@ if __name__ == '__main__':
 
     
                     # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
-                    BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
                     LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')
@@ -85,15 +84,10 @@ if __name__ == '__main__':
                     EigenverbOpt_steuern = getVarConf('EigenverbOptimum','EigenverbOpt_steuern','eval')
                     MaxEinspeisung = getVarConf('EigenverbOptimum','MaxEinspeisung','eval')
 
-
                     # um Divison durch Null zu verhindern kleinsten Wert setzen
                     if BatSparFaktor < 0.1:
                         BatSparFaktor = 0.1
                                        
-                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
-                    if Akkuschonung == 1:
-                        BattVollUm = BattVollUm - 1
-
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
@@ -156,13 +150,22 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # Hier Variablen an die Module  FUNCTIONS.fun_Ladewert übergeben
-                    globalfrommain(now, DEBUG_Ausgabe, BattVollUm, data, PV_Reservierung_steuern, \
+                    globalfrommain(now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
                     reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
                     MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
                     LadungAus, oldPercent)
 
+                    # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
+                    BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
+                    if BattVollUm <= 0:
+                       BattVollUm = getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
+                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
+                    if Akkuschonung == 1:
+                        BattVollUm = BattVollUm - 1
+
+
                     # Prognoseberechnung mit Funktion getRestTagesPrognoseUeberschuss
-                    PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss()
+                    PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss(BattVollUm)
                     TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
                     PrognoseAbzugswert = PrognoseUNDUeberschuss[2]
@@ -478,14 +481,15 @@ if __name__ == '__main__':
                         Eigen_Opt_Std = EigenOptERG[1]
                         Eigen_Opt_Std_neu = EigenOptERG[2]
                         Dauer_Nacht_Std = EigenOptERG[3]
-                        DEBUG_Ausgabe += EigenOptERG[4]
+                        AkkuZielProz = EigenOptERG[4]
+                        DEBUG_Ausgabe += EigenOptERG[5]
 
                         # Wenn unter tags die Prognose oder der Akkustand stark abnimmt, Einspeisewert wenn größer 0 auf 0 setzen
                         if PrognoseAbzugswert == 0 and BattStatusProz < 80 and Dauer_Nacht_Std <= 1 and Eigen_Opt_Std_neu > 0:
                             Dauer_Nacht_Std = 2
                             Eigen_Opt_Std_neu = 0
 
-                        if Dauer_Nacht_Std > 1:
+                        if Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz:
                             if print_level >= 1:
                                 print("######### Eigenverbrauchs-Optimierung #########")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")

@@ -1,3 +1,12 @@
+**[0.21.4] – 2024-XX-XX**
+
+**NEU** BattVollUm als Delta der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.
+- Positiver Wert in BattVollUm ist Zeitpunkt wie bisher
+- Null oder negativer Wert in BattVollUm ist Differenz von der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.
+
+Änderung Eigenverbrauchs-Optimierung  
+- Tagesentladung wird nur gesetzt, wenn Akkustand höher AkkuZielProz ist
+
 **[0.21.3] – 2024-07-14**
 
 **NEU** Automatisches setzen eines Einspeisewertes als `Zielwert am Einspeisepunkt` unter Eigenverbrauchs-Optimierung (nur HTTP)  

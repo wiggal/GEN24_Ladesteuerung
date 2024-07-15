@@ -6,7 +6,7 @@ from ping3 import ping
 from sys import argv
 from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
 from FUNCTIONS.fun_Ladewert import getLadewertinGrenzen, getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
-        getPrognoseMorgen, globalfrommain, getEinspeiseGrenzeLadewert, getAC_KapaLadewert, getParameter
+        getSonnenuntergang, globalfrommain, getEinspeiseGrenzeLadewert, getAC_KapaLadewert, getParameter
 from FUNCTIONS.fun_API import get_API
 
 
@@ -61,7 +61,6 @@ if __name__ == '__main__':
                         exit()
     
                     # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
-                    BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
                     LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')
@@ -88,10 +87,6 @@ if __name__ == '__main__':
                     if BatSparFaktor < 0.1:
                         BatSparFaktor = 0.1
                                        
-                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
-                    if Akkuschonung == 1:
-                        BattVollUm = BattVollUm - 1
-
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
@@ -118,13 +113,13 @@ if __name__ == '__main__':
                     # Aktuelle Entladewert von Modbus holen
                     BatteryMaxDischargePercent = int(gen24.read_data('BatteryMaxDischargePercent')/100) 
 
-                    reservierungdata = {}
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
+                    reservierungdata = {}
                     if  PV_Reservierung_steuern == 1:
                         Reservierungsdatei = getVarConf('Reservierung','PV_ReservieungsDatei','str')
                         reservierungdata = loadPVReservierung(Reservierungsdatei)
 
-                    # 0 = nicht auf WR schreiben, 1 = schon auf WR schreiben
+                    # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     newPercent_schreiben = 0
                     oldPercent = gen24.read_data('BatteryMaxChargePercent')
                     alterLadewert = int(oldPercent*BattganzeLadeKapazWatt/10000)
@@ -146,19 +141,28 @@ if __name__ == '__main__':
 
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz > 90 ):
-                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 5))
+                        WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 7))
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachUnten: " + str(WRSchreibGrenze_nachUnten) +"\n"
-                        WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 5))
+                        WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 7))
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # Hier Variablen an die Module  FUNCTIONS.fun_Ladewert übergeben
-                    globalfrommain(now, DEBUG_Ausgabe, BattVollUm, data, PV_Reservierung_steuern, \
+                    globalfrommain(now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
                     reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
                     MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
                     LadungAus, oldPercent)
 
+                    # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
+                    BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
+                    if BattVollUm <= 0:
+                       BattVollUm = getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
+                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
+                    if Akkuschonung == 1:
+                        BattVollUm = BattVollUm - 1
+
+
                     # Prognoseberechnung mit Funktion getRestTagesPrognoseUeberschuss
-                    PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss()
+                    PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss(BattVollUm)
                     TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
                     PrognoseAbzugswert = PrognoseUNDUeberschuss[2]
@@ -170,14 +174,7 @@ if __name__ == '__main__':
                     aktuellerLadewert = AktuellenLadewert_Array[0]
                     aktuelleVorhersage = AktuellenLadewert_Array[1]
                     LadewertGrund = AktuellenLadewert_Array[2]
-                    AktuellenLadewert_Array = getEinspeiseGrenzeLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, \
-                                            LadewertGrund, alterLadewert, PV_Leistung_Watt)
-                    aktuellerLadewert = AktuellenLadewert_Array[0]
-                    LadewertGrund = AktuellenLadewert_Array[1]
-                    DEBUG_Ausgabe = AktuellenLadewert_Array[2]
-                    AktuellenLadewert_Array = getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
-                    aktuellerLadewert = AktuellenLadewert_Array[0]
-                    LadewertGrund = AktuellenLadewert_Array[1]
+                    DEBUG_Ausgabe = AktuellenLadewert_Array[3]
 
                     # DEBUG_Ausgabe der Ladewertermittlung 
                     DEBUG_Ausgabe += "\nDEBUG TagesPrognoseUeberschuss: " + str(TagesPrognoseUeberschuss) + ", Grundlast: " + str(Grundlast)

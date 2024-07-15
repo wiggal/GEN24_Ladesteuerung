@@ -55,7 +55,7 @@ button { font-size: 3.0em; }
 </head>
 <body>
 <center>
-<b>  GEN24_Ladesteuerung Version: 0.21.3 </b>
+<b>  GEN24_Ladesteuerung Version: 0.21.4 </b>
 </center>
 
 <?php

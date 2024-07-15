@@ -118,6 +118,8 @@ password = 'XXXXXXXX'
 FesteLadeleistung = 0
 
 ; Bis zu welcher Stunde die Batterie durch die Prognoseberechnungen voll sein soll. 
+; Zahlen > 0 ist Stunde  
+; Zahlen <= 0 ist Differenz zum Sonnenuntergang (= Prognosewert < 1% PV_Leistung_Watt) 
 ; Der Zeitpunkt wird häufig nicht genau zutreffen, da durch Verbrauch, Überschusseinspeisungen 
 ; oder durch die WRSchreibGrenzen die Ladenmengen beeinflusst werden.
 BattVollUm = 17
