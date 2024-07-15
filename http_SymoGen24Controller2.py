@@ -484,12 +484,12 @@ if __name__ == '__main__':
                         AkkuZielProz = EigenOptERG[4]
                         DEBUG_Ausgabe += EigenOptERG[5]
 
-                        # Wenn unter tags die Prognose oder der Akkustand stark abnimmt, Einspeisewert wenn größer 0 auf 0 setzen
-                        if PrognoseAbzugswert == 0 and BattStatusProz < 80 and Dauer_Nacht_Std <= 1 and Eigen_Opt_Std_neu > 0:
+                        # Wenn unter tags die Prognose oder der Akkustand stark abnimmt, Einspeisewert wenn größer 50 auf 50 setzen
+                        if PrognoseAbzugswert == 0 and BattStatusProz < 60 and Dauer_Nacht_Std <= 1 and Eigen_Opt_Std_neu > 50:
                             Dauer_Nacht_Std = 2
-                            Eigen_Opt_Std_neu = 0
+                            Eigen_Opt_Std_neu = 50
 
-                        if Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz:
+                        if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
                                 print("######### Eigenverbrauchs-Optimierung #########")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")

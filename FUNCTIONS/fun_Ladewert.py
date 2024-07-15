@@ -330,21 +330,30 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     if (PrognoseMorgen < PrognoseGrenzeMorgen and PrognoseMorgen != 0):
         Eigen_Opt_Std_neu = 0
     # In der letzten Stunde vor dem Morgengrauen und wenn AkkuZielProz nicht unterschritten, Eigen_Opt_Std für Tag stellen
-    if Dauer_Nacht_Std < 2 and BattStatusProz >= AkkuZielProz:
+    if Dauer_Nacht_Std < 2:
         # Die aktuelle Einspeisung nicht mehr verändern
         Eigen_Opt_Std_neu = Eigen_Opt_Std
-        if (PrognoseMorgen < PrognoseGrenzeMorgen):
-            DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
-            DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-            Eigen_Opt_Std_neu = (MaxEinspeisung)/2
-        elif (PrognoseMorgen < PrognoseGrenzeMorgen/2):
-            DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
-            DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-            Eigen_Opt_Std_neu = 0
+        if BattStatusProz > AkkuZielProz:
+            if (PrognoseMorgen < PrognoseGrenzeMorgen):
+                DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
+                DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                Eigen_Opt_Std_neu = (MaxEinspeisung)/2
+            if (PrognoseMorgen < PrognoseGrenzeMorgen/2):
+                DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+                DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                Eigen_Opt_Std_neu = 0
+            if (PrognoseMorgen >= PrognoseGrenzeMorgen):
+                DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
+                DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                Eigen_Opt_Std_neu = MaxEinspeisung 
         else:
-            DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
-            DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-            Eigen_Opt_Std_neu = MaxEinspeisung 
+            if (PrognoseMorgen < PrognoseGrenzeMorgen/2):
+                DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+                DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                Eigen_Opt_Std_neu = 0
+            else:
+                Eigen_Opt_Std_neu = 50
+                DEBUG_Eig_opt += "DEBUG ## >>> BattStatusProz: " + str(BattStatusProz) + ", ist kleiner als AkkuZielProz: " + str(AkkuZielProz) 
 
     # Wenn Eigen_Opt_Std_arry[1] = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
     if Eigen_Opt_Std_arry[1] == 0: Eigen_Opt_Std = 0
