@@ -8,19 +8,18 @@ from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung,
 from FUNCTIONS.fun_http import get_eigenv_opt
 
 # Hier die Variablen aus dem Hauptprogramm übergeben und global machen
-def globalfrommain(g_now, g_DEBUG_Ausgabe, g_BattVollUm, g_data, g_PV_Reservierung_steuern,\
+def globalfrommain(g_now, g_DEBUG_Ausgabe, g_data, g_PV_Reservierung_steuern,\
         g_reservierungdata, g_Grundlast, g_Einspeisegrenze, g_WR_Kapazitaet, g_BattKapaWatt_akt, \
         g_MaxLadung, g_BatSparFaktor, g_PrognoseAbzugswert, g_aktuelleBatteriePower, g_BattganzeLadeKapazWatt, \
         g_LadungAus, g_oldPercent):
 
-        global now, DEBUG_Ausgabe, BattVollUm, data, PV_Reservierung_steuern, \
+        global now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
         reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
         MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
         LadungAus, oldPercent
 
         now = g_now
         DEBUG_Ausgabe = g_DEBUG_Ausgabe
-        BattVollUm = g_BattVollUm
         data = g_data
         PV_Reservierung_steuern = g_PV_Reservierung_steuern
         reservierungdata = g_reservierungdata
@@ -61,7 +60,7 @@ def getLadewertinGrenzen(Ladewert):
 
         return Ladewert
 
-def getRestTagesPrognoseUeberschuss():
+def getRestTagesPrognoseUeberschuss(BattVollUm):
 
         global BatSparFaktor, DEBUG_Ausgabe
         # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
@@ -250,6 +249,19 @@ def setLadewert(fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnte
 
         return(newPercent, newPercent_schreiben)
 
+def getSonnenuntergang(PV_Leistung_Watt):
+    i = 0
+    Sonnenuntergang = 25
+    while i < 24:
+        Std_morgen = datetime.strftime(now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
+        Std_morgen_only = int(datetime.strftime(now + timedelta(hours=i), "%H"))
+        Prognose = getPrognose(Std_morgen)[0]
+        if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 100:
+            if Std_morgen_only < Sonnenuntergang:
+                Sonnenuntergang = Std_morgen_only
+        i  += 1
+    return(Sonnenuntergang)
+    
 def getPrognoseMorgen(MaxEinspeisung=0):
     i = 0
     Prognose_Summe = 0
@@ -317,8 +329,8 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     # PrognoseGrenzeMorgen pruefen
     if (PrognoseMorgen < PrognoseGrenzeMorgen and PrognoseMorgen != 0):
         Eigen_Opt_Std_neu = 0
-    # In der letzten Stunde vor dem Morgengrauen, Eigen_Opt_Std für Tag stellen
-    if Dauer_Nacht_Std < 3:
+    # In der letzten Stunde vor dem Morgengrauen und wenn AkkuZielProz nicht unterschritten, Eigen_Opt_Std für Tag stellen
+    if Dauer_Nacht_Std < 2 and BattStatusProz >= AkkuZielProz:
         # Die aktuelle Einspeisung nicht mehr verändern
         Eigen_Opt_Std_neu = Eigen_Opt_Std
         if (PrognoseMorgen < PrognoseGrenzeMorgen):
@@ -340,5 +352,5 @@ def getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapaz
     # Einspeisung muss immer Minus sein!!
     Eigen_Opt_Std_neu = abs(Eigen_Opt_Std_neu) * -1
 
-    return PrognoseMorgen, Eigen_Opt_Std, Eigen_Opt_Std_neu, Dauer_Nacht_Std, DEBUG_Eig_opt
+    return PrognoseMorgen, Eigen_Opt_Std, Eigen_Opt_Std_neu, Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt
 
