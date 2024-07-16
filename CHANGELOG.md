@@ -1,11 +1,18 @@
-**[0.21.4] – 2024-XX-XX**
+**[0.21.4] – 2024-07-21**
 
 **NEU** BattVollUm als Delta der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.
 - Positiver Wert in BattVollUm ist Zeitpunkt wie bisher
 - Null oder negativer Wert in BattVollUm ist Differenz von der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.
+- Damit verschiebt sich der Zeitpunkt BattVollUm automatisch im Winter nach vorne.
 
 Änderung Eigenverbrauchs-Optimierung  
 - Tagesentladung wird nur gesetzt, wenn Akkustand höher AkkuZielProz ist
+
+Änderung in Solarprognose_WeatherData.py
+- durch die Variable `Zeitversatz` kann die Prognose stundenweise verschoben werden.
+
+#### ACHTUNG Änderung in der config.ini:  
+- neue Variable `Zeitversatz` im Block [solarprognose]
 
 **[0.21.3] – 2024-07-14**
 
