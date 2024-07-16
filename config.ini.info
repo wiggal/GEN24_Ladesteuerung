@@ -55,6 +55,8 @@ accesstoken = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 item = inverter
 id = 1111
 type = hourly
+; der Zeitversatz verschiebt die Prognose um X Stunden nach vor (-) oder nach hinten 
+Zeitversatz = 1
 ; Nur alle dataAgeMaxInMinutes wird eine neu Prognose angefordert.
 dataAgeMaxInMinutes = 1000
 ; Sekunden des sleep = Vorgabe von solarprognose.de

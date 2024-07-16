@@ -4,7 +4,7 @@ import os.path
 import pytz
 import time
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
 
 def loadLatestWeatherData():
@@ -21,7 +21,7 @@ def loadLatestWeatherData():
     dict_watts['result']['watts'] = {}
 
     for key, value in json_data1.get('data',{}).items():
-        key_neu = str(datetime.fromtimestamp(value[0]))
+        key_neu = str(datetime.fromtimestamp(value[0]) + timedelta(hours=Zeitversatz))
         dict_watts['result']['watts'][key_neu] = int(value[1]*1000*KW_Faktor)
     return(dict_watts, json_data1)
 
@@ -36,6 +36,7 @@ if __name__ == '__main__':
     accesstoken = getVarConf('solarprognose', 'accesstoken', 'str')
     item = getVarConf('solarprognose', 'item', 'str')
     type = getVarConf('solarprognose', 'type', 'str')
+    Zeitversatz = int(getVarConf('solarprognose', 'Zeitversatz', 'eval'))
     algorithm = getVarConf('solarprognose', 'algorithm', 'str')
 
     time.sleep(WaitSec)
