@@ -340,7 +340,7 @@ if __name__ == '__main__':
                             print("\n## HTTP-LADESTEUERUNG ##")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
-                            print("RestTagesPrognose:          ", TagesPrognoseGesamt)
+                            print("TagesPrognose-BattVollUm:   ", TagesPrognoseGesamt,"-", BattVollUm)
                             print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
                             print("Grundlast_Summe für Tag:    ", Grundlast_Summe)
                             print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
