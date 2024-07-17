@@ -1,4 +1,4 @@
-**[0.21.4] – 2024-07-21**
+**[0.21.4] – 2024-07-18**
 
 **NEU** BattVollUm als Delta der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.
 - Positiver Wert in BattVollUm ist Zeitpunkt wie bisher
