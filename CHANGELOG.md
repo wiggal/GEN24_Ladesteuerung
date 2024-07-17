@@ -10,7 +10,6 @@
 
 Änderung in Solarprognose_WeatherData.py
 - durch die Variable `Zeitversatz` kann die Prognose stundenweise verschoben werden.
-
 #### ACHTUNG Änderung in der config.ini:  
 - neue Variable `Zeitversatz` im Block [solarprognose]
 
