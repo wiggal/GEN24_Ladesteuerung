@@ -160,7 +160,7 @@ if __name__ == '__main__':
                     if BattVollUm <= 0:
                        BattVollUm = getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
-                    if Akkuschonung == 1:
+                    if Akkuschonung > 0:
                         BattVollUm = BattVollUm - 1
 
 
@@ -282,8 +282,8 @@ if __name__ == '__main__':
                             newPercent_schreiben = DATA[1]
                             LadewertGrund = "Größter Prognosewert " + str(GroestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
 
-                    # Wenn Akkuschonung = 1 ab 80% Batterieladung mit Ladewert runter fahren
-                    if Akkuschonung == 1:
+                    # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren
+                    if Akkuschonung > 0:
                         Ladefaktor = 1
                         BattStatusProz_Grenze = 100
                         if BattStatusProz > 80:
@@ -291,7 +291,7 @@ if __name__ == '__main__':
                             AkkuSchonGrund = '80%, Ladewert = 0.2C'
                             BattStatusProz_Grenze = 80
                         if BattStatusProz > 90:
-                            Ladefaktor = 0.1
+                            Ladefaktor = 0.1 * Akkuschonung
                             AkkuSchonGrund = '90%, Ladewert = 0.1C'
                             BattStatusProz_Grenze = 90
 
