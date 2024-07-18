@@ -1,3 +1,16 @@
+**[0.22.0] – 2024-XX-XX**
+
+**NEU ->>** Die config.ini in Verzeichnis CONFIG verschoben und aufgeteilt:  
+- Dateinamen: default.ini, charge.ini, weather.ini  
+- Zur jeweiligen xy.ini eine xy_priv.ini lesen, die nicht verteilt wird, aber mit angepassten Daten selbst erstellt werden kann.  
+- Dadurch sollen die Updates einfacher und die Config Einstellungen übersichtlicher werden.  
+#### ACHTUNG: Umfangreiche Änderungen der Konfiguration (Docker anpassen):
+
+Änderung bei der Akkuschonung:
+- Der Wert `Akkuschonung` in der charge.ini kann nun auch auf einen Wert zwischen 0 und 1 gesietzt werden.
+  Dadurch wird der Ladewert bei einem Akkustand ab 90% um den gesetzten Faktor vermindert, 
+  z.B:: 0.1C = 1100W, Akkuschonung = 0.5, Dann ist der Ladewert 550W (= 0.1 x 0.5)
+
 **[0.21.4] – 2024-07-18**
 
 **NEU** BattVollUm als Delta der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.
