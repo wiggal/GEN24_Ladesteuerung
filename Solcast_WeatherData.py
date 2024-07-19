@@ -122,7 +122,7 @@ def loadLatestWeatherData():
     return(dict_watts, json_data1)
 
 if __name__ == '__main__':
-    config = loadConfig('config.ini')
+    config = loadConfig(['default', 'weather'])
     # Benoetigte Variablen aus config.ini definieren und prüfen
     Strings = getVarConf('pv.strings', 'anzahl', 'eval')
     dataAgeMaxInMinutes = getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
@@ -150,7 +150,7 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print_level = getVarConf('Ladeberechnung','print_level','eval')
+                print_level = getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
                     print('solcast.com: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')

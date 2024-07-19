@@ -59,14 +59,13 @@ def loadLatestWeatherData(config):
         
     
 if __name__ == '__main__':
-    config = loadConfig('config.ini')
-    
+    config = loadConfig(['default', 'weather'])
     dataAgeMaxInMinutes = getVarConf('forecast.solar','dataAgeMaxInMinutes','eval')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
-    weatherfile = getVarConf('env','filePathWeatherData','str')
+    weatherfile = getVarConf('forecast.solar','weatherfile','str')
     data = loadWeatherData(weatherfile)
     dataIsExpired = True
     if (data):
@@ -78,7 +77,7 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print_level = getVarConf('Ladeberechnung','print_level','eval')
+                print_level = getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
                     print('forecast.solar: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')

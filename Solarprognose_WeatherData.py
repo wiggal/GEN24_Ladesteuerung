@@ -26,7 +26,7 @@ def loadLatestWeatherData():
     return(dict_watts, json_data1)
 
 if __name__ == '__main__':
-    config = loadConfig('config.ini')
+    config = loadConfig(['default', 'weather'])
     # Benoetigte Variablen aus config.ini definieren und prüfen
     id = getVarConf('solarprognose', 'id', 'eval')
     KW_Faktor = getVarConf('solarprognose', 'KW_Faktor', 'eval')
@@ -56,7 +56,7 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print_level = getVarConf('Ladeberechnung','print_level','eval')
+                print_level = getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
                     print('solarprognose.de: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')

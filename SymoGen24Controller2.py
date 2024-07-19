@@ -11,12 +11,12 @@ from FUNCTIONS.fun_API import get_API
 
 
 if __name__ == '__main__':
-        config = loadConfig('config.ini')
+        config = loadConfig(['default', 'charge'])
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
         # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
-        print_level = getVarConf('Ladeberechnung','print_level','eval')
+        print_level = getVarConf('env','print_level','eval')
         Parameter = getParameter(argv)
         Ausgabe_Parameter = ''
         if len(argv) > 1:
