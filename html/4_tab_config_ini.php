@@ -42,25 +42,42 @@ td {font-size: 160%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-/*
-td:hover {
-  overflow: visible;
 }
-td { width: 50px; }
-button { font-size: 3.0em; }
-*/
-}
+.hilfe{
+    font-family:Arial;
+    font-size:150%;
+    color: #000000;
+    }
 
 </style>
 </head>
-<body>
-<center>
-<b>  GEN24_Ladesteuerung Version: 0.21.4 </b>
-</center>
 
+<body>
+  <div class="hilfe" align="right"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
+<center>
+<b>  GEN24_Ladesteuerung Version: 0.22.0 </b>
+</center>
 <?php
-# <h1>config.ini</h1>
 include "config.php";
+
+function getinifile($dir) 
+{
+	$files = '';
+	$i = 0;
+	// Read all items
+    $entry = scandir($dir);
+    foreach ($entry as $element) {
+		if ($element != '.' && $element != '..') {
+			// Filter only files mit priv.ini
+			if ((is_file($dir . '/' . $element)) and strpos($element, '_priv.ini')) {
+                $files .= "<option value=\"$dir$element\"> $element></option>";
+				$i++;
+			}
+		}
+	}
+return $files;
+}
+		
 
 function config_lesen( $file, $readonly )
 {
@@ -97,9 +114,6 @@ function config_lesen( $file, $readonly )
     }
 }
 
-$path_parts = pathinfo($PrognoseFile);
-$file = $path_parts['dirname'].'/config.ini';
-
 $case = '';
 if (isset($_POST["case"])) $case = $_POST["case"];
 $nachricht = '';
@@ -108,18 +122,34 @@ if ($nachricht != '') echo $nachricht . "<br><br>";
 
 switch ($case) {
     case '':
-# AUSGEBEN DER config.ini
+# AUSWAEHLEN  _priv.ini
 
-echo '<b>"config.ini" hier nur lesbar! <br>Zum editieren Button klicken!</b>';
+echo '<br><br><center>';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<select name="ini_file">';
+echo getinifile('../CONFIG/');
+echo '</select><br><br>';
+echo '<input type="hidden" name="case" value="lesen">'."\n";
+echo '<button type="submit">Auswahl lesen</button>';
+echo '</form>'."\n";
+echo '<br>';
+    break;
+
+
+    case 'lesen':
+# AUSGEBEN DER gewälten _priv.ini
+
+echo '<b>"'.basename($_POST["ini_file"]).'" hier nur lesbar! <br>Zum editieren Button klicken!</b>';
 echo '<br><br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="editieren">'."\n";
-echo '<button type="submit">config.ini editieren</button>';
+echo '<button type="submit">'.basename($_POST["ini_file"]).' editieren</button>';
 echo '</form>'."\n";
 echo '<br>';
 echo '<table>';
 
-config_lesen($file, 'readonly');
+config_lesen($_POST["ini_file"], 'readonly');
 
 echo '</table>';
     break;
@@ -127,17 +157,19 @@ echo '</table>';
     case 'editieren':
 # PASSWORDABFRAGE 
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
-echo '<button type="submit">Zurück zu config.ini lesen</button>';
+echo '<button type="submit">Zurück zur Dateiauswahl</button>';
 echo '</form>'."\n";
 echo '<br><br>';
 
-echo '<span style="color:red"><b>ACHTUNG!!</b></span><br>evtl. Sicherungskopie der config.ini erstellen.<br>';
+echo '<span style="color:red"><b>ACHTUNG!!</b></span><br>evtl. Sicherungskopie der '.basename($_POST["ini_file"]).' erstellen.<br>';
 
 echo '<br><br>';
-echo 'Kennwort um config.ini zu editieren:<br>';
+echo 'Kennwort um '.basename($_POST["ini_file"]).' zu editieren:<br>';
 echo '(Kennwortänderung in html/config.php)<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="editieren_passwd">'."\n";
 echo '<input type="password" name="password" size="10">'."\n";
 echo '<button type="submit">OK</button>';
@@ -147,10 +179,11 @@ echo '<br>';
     break;
 
     case 'editieren_passwd':
-# EDITIEREN DER config.ini 
+# EDITIEREN DER INI-Datei 
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
-echo '<button type="submit">Zurück zu config.ini lesen</button>';
+echo '<button type="submit">Zurück zur Dateiauswahl</button>';
 echo '</form>'."\n";
 echo '<br>';
 
@@ -159,12 +192,13 @@ if ($_POST["password"] == $passwd_configedit) {
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<table>';
 
-config_lesen($file, '');
+config_lesen($_POST["ini_file"], '');
 
 echo '</table>';
 echo '<br>';
+echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="schreiben">'."\n";
-echo '<button type="submit">config.ini neu schreiben</button>';
+echo '<button type="submit">'.basename($_POST["ini_file"]).' neu schreiben</button>';
 echo '</form>';
     } else {
     echo '<br><br> <span style="color:red"><b> Falsches Kennwort!!</b></span>';
@@ -172,7 +206,7 @@ echo '</form>';
     break;
 
     case 'schreiben':
-# SCHREIBEN DER config.ini
+# SCHREIBEN DER INI-Datei
 $write = '';
 $Zeile = $_POST["Zeile"];
 foreach($Zeile AS $zeile_key => $zeile_value) {
@@ -182,16 +216,16 @@ foreach($Zeile AS $zeile_key => $zeile_value) {
  $Zeile[$zeile_key] = rtrim($Zeile[$zeile_key]);
 }
 $write = implode("\n",$Zeile);
-if(is_writeable($file,)) {
-    $handle = fopen($file,"w");
+if(is_writeable($_POST["ini_file"],)) {
+    $handle = fopen($_POST["ini_file"],"w");
     if (fwrite($handle, $write)) {
-        $nachricht= '<span style="color:green"> '.$file.' wurde neu geschrieben!</span>';
+        $nachricht= '<span style="color:green"> '.$_POST["ini_file"].' wurde neu geschrieben!</span>';
     } else {
-        $nachricht= '<span style="color:red"> '.$file.' konnte nicht geschrieben werden!!!</span>';
+        $nachricht= '<span style="color:red"> '.$_POST["ini_file"].' konnte nicht geschrieben werden!!!</span>';
     }
     fclose($handle);
 } else {
-    $nachricht= '<span style="color:red"> '.$file.' konnte nicht geschrieben werden!!!</span>';
+    $nachricht= '<span style="color:red"> '.$_POST["ini_file"].' konnte nicht geschrieben werden!!!</span>';
 }
 
 header('location: '.$_SERVER["PHP_SELF"].'?nachricht='.$nachricht);

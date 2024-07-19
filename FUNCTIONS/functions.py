@@ -3,20 +3,28 @@ from datetime import datetime
 import json
 import configparser
 
-def loadConfig(conf_file):
+def loadConfig(conf_files):
         # Damit die Variable config auch in der Funktion "getVarConf" vorhanden ist (global config)
         global config
-        # Damit kann man auch meherer configs nacheinander lesen
         try:
             config
         except NameError:
             config = configparser.ConfigParser()
-        try:
-                config.read_file(open(conf_file))
-                config.read(conf_file)
-        except:
-                print('ERROR: config file not found.')
-                exit(0)
+        # Damit kann man auch meherer configs nacheinander lesen
+        for conf_file in conf_files:
+            c_file = 'CONFIG/'+conf_file+'.ini'
+            try:
+                    config.read_file(open(c_file))
+                    config.read(c_file)
+            except:
+                    print('ERROR: Konfigdatei ' + c_file + ' not found.')
+        for conf_file in conf_files:
+            c_file = 'CONFIG/'+conf_file+'_priv.ini'
+            try:
+                    config.read_file(open(c_file))
+                    config.read(c_file)
+            except:
+                    print('ERROR: Konfigdatei ' + c_file + ' not found.')
         return config
 
 def loadWeatherData(weatherfile):
@@ -25,8 +33,7 @@ def loadWeatherData(weatherfile):
             with open(weatherfile) as json_file:
                 data = json.load(json_file)
         except:
-                print("ERROR: Wetterdatei fehlt oder ist fehlerhaft, bitte erst Wetterdaten neu laden!!")
-                exit()
+                data = {'messageCreated': '2000-01-01 01:01:01'}
         return data
 
 def storeWeatherData(wetterfile, data, now):

@@ -4,7 +4,8 @@
 - Dateinamen: default.ini, charge.ini, weather.ini  
 - Zur jeweiligen xy.ini eine xy_priv.ini lesen, die nicht verteilt wird, aber mit angepassten Daten selbst erstellt werden kann.  
 - Dadurch sollen die Updates einfacher und die Config Einstellungen übersichtlicher werden.  
-#### ACHTUNG: Umfangreiche Änderungen der Konfiguration (Docker anpassen):
+
+#### ACHTUNG: Umfangreiche Änderungen der Konfiguration (Docker anpassen):  
 
 Änderung bei der Akkuschonung:
 - Der Wert `Akkuschonung` in der charge.ini kann nun auch auf einen Wert zwischen 0 und 1 gesietzt werden.
