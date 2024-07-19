@@ -27,6 +27,10 @@ th {
 input:read-only {
   background-color: #fadbd8;
 }
+select {
+  font-size: 1.3em;
+  background-color: #F5F5DC;
+}
 button {
   font-size: 1.3em;
   background-color: #4CAF50;
@@ -51,12 +55,12 @@ td {font-size: 160%;
 
 </style>
 </head>
-
 <body>
   <div class="hilfe" align="right"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
-<center>
+<div class="hilfe" align="center">
 <b>  GEN24_Ladesteuerung Version: 0.22.0 </b>
-</center>
+</div>
+<br>
 <?php
 include "config.php";
 
@@ -124,7 +128,7 @@ switch ($case) {
     case '':
 # AUSWAEHLEN  _priv.ini
 
-echo '<br><br><center>';
+echo '<br><center>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<select name="ini_file">';
 echo getinifile('../CONFIG/');
@@ -132,12 +136,19 @@ echo '</select><br><br>';
 echo '<input type="hidden" name="case" value="lesen">'."\n";
 echo '<button type="submit">Auswahl lesen</button>';
 echo '</form>'."\n";
-echo '<br>';
+echo '<br><br>';
     break;
 
 
     case 'lesen':
 # AUSGEBEN DER gewälten _priv.ini
+
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
+echo '<input type="hidden" name="case" value="">'."\n";
+echo '<button type="submit">Zurück zur Dateiauswahl</button>';
+echo '</form>'."\n";
+echo '<br>';
 
 echo '<b>"'.basename($_POST["ini_file"]).'" hier nur lesbar! <br>Zum editieren Button klicken!</b>';
 echo '<br><br>';
