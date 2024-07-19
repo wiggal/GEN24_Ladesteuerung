@@ -286,21 +286,25 @@ if __name__ == '__main__':
                     if Akkuschonung > 0:
                         Ladefaktor = 1
                         BattStatusProz_Grenze = 100
-                        if BattStatusProz > 80:
+                        if BattStatusProz >= 80:
                             Ladefaktor = 0.2
                             AkkuSchonGrund = '80%, Ladewert = 0.2C'
                             BattStatusProz_Grenze = 80
-                        if BattStatusProz > 90:
-                            Ladefaktor = 0.1 * Akkuschonung
+                        if BattStatusProz >= 90:
+                            Ladefaktor = 0.1
                             AkkuSchonGrund = '90%, Ladewert = 0.1C'
                             BattStatusProz_Grenze = 90
+                        if BattStatusProz >= 95:
+                            Ladefaktor = 0.1 * Akkuschonung
+                            AkkuSchonGrund = '95%, Ladewert = ' + str(Ladefaktor) + 'C'
+                            BattStatusProz_Grenze = 95
 
                         AkkuschonungLadewert = (BattganzeKapazWatt * Ladefaktor)
                         # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3W) BattStatusProz_Grenze 5% runter
                         if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
                             BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
 
-                        if BattStatusProz > BattStatusProz_Grenze:
+                        if BattStatusProz >= BattStatusProz_Grenze:
                             DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
                             DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
@@ -314,7 +318,7 @@ if __name__ == '__main__':
                                 DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
-                                LadewertGrund = "Akkuschonung: Ladestand > " + AkkuSchonGrund
+                                LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
 
                     # Wenn die aktuellePVProduktion < 10 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!

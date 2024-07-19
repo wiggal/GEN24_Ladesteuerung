@@ -8,8 +8,8 @@
 #### ACHTUNG: Umfangreiche Änderungen der Konfiguration (Docker anpassen):  
 
 Änderung bei der Akkuschonung:
-- Der Wert `Akkuschonung` in der charge.ini kann nun auch auf einen Wert zwischen 0 und 1 gesietzt werden.
-  Dadurch wird der Ladewert bei einem Akkustand ab 90% um den gesetzten Faktor vermindert, 
+- Der Wert `Akkuschonung` in der charge.ini kann nun auch auf einen Wert zwischen 0 und 1 gesetzt werden.
+  Dadurch wird der Ladewert bei einem Akkustand ab 95% um den gesetzten Faktor vermindert, 
   z.B:: 0.1C = 1100W, Akkuschonung = 0.5, Dann ist der Ladewert 550W (= 0.1 x 0.5)
 
 **[0.21.4] – 2024-07-18**
