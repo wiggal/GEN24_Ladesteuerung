@@ -202,13 +202,13 @@ if __name__ == '__main__':
                         else:
                             LadewertGrund = MaxladungDurchPV_Planung
     
-                    # Hier Volle Ladung, wenn Stunde aus BattVollUm erreicht ist!
+                    # Hier Volle Ladung, wenn BattVollUm erreicht ist!
                     elif (int(datetime.strftime(now, "%H")) >= int(BattVollUm)):
                          aktuellerLadewert = MaxLadung
                          DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                          newPercent = DATA[0]
                          newPercent_schreiben = DATA[1]
-                         LadewertGrund = "Stunde aus BattVollUm erreicht!!"
+                         LadewertGrund = "BattVollUm erreicht!!"
         
                     else:
 
@@ -385,7 +385,7 @@ if __name__ == '__main__':
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                     else:
-                        Schreib_Ausgabe = Schreib_Ausgabe + "Alte und Neue Werte unterscheiden sich weniger als die Schreibgrenzen des WR, NICHTS zu schreiben!!\n"
+                        Schreib_Ausgabe = Schreib_Ausgabe + "Änderung kleiner Schreibgrenze!\n"
 
                     # Ladungsspeichersteuerungsmodus aktivieren wenn nicht aktiv
                     # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
@@ -583,7 +583,7 @@ if __name__ == '__main__':
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
                             save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
                             API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
-                            Logging_Schreib_Ausgabe = 'Daten wurden in die SQLite-Datei gespeichert!'
+                            Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:
                             Logging_Schreib_Ausgabe = "Logging wurde NICHT gespeichert, da NICHT \"logging\" oder \"schreiben\" übergeben wurde:\n" 
 
