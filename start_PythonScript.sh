@@ -4,15 +4,16 @@ GEN24_Pfad_tmp=`dirname $0`
 GEN24_Pfad=`realpath $GEN24_Pfad_tmp`
 GEN24_html_Pfad=${GEN24_Pfad}"/html"
 
-Einfacher_PHP_Webserver=""
+Einfacher_PHP_Webserver="0"
 # Variable Einfacher_PHP_Webserver aus config.ini bestimmen
-eval `grep "^Einfacher_PHP_Webserver" ${GEN24_Pfad}/config.ini|sed 's# ##g'`
+eval `grep -s "^Einfacher_PHP_Webserver" ${GEN24_Pfad}/CONFIG/default.ini|sed 's# ##g'`
+eval `grep -s "^Einfacher_PHP_Webserver" ${GEN24_Pfad}/CONFIG/default_priv.ini|sed 's# ##g'`
 
 # PHP_webserver auf PORT 2424 starten
-if [ $Einfacher_PHP_Webserver == 1 ]
+if [[ $Einfacher_PHP_Webserver == 1 ]]
 then
     cd $GEN24_html_Pfad
-    if [ `ps -ef|grep "0.0.0.0:2424"|grep -v grep|wc -l` == 0 ]
+    if [[ `ps -ef|grep "0.0.0.0:2424"|grep -v grep|wc -l` == 0 ]]
     then
         nohup /usr/bin/php -S 0.0.0.0:2424 2>> /dev/null &
         echo -e `date` " PHP-Webserver gestartet! \n" >> ${GEN24_Pfad}/Crontab.log
@@ -20,10 +21,10 @@ then
 fi
 
 # PHP_webserver auf PORT 2424 beenden
-if [ $Einfacher_PHP_Webserver == 0 ]
+if [[ $Einfacher_PHP_Webserver == 0 ]]
 then
     cd $GEN24_html_Pfad
-    if [ `ps -ef|grep "0.0.0.0:2424"|grep -v grep|wc -l` == 1 ]
+    if [[ `ps -ef|grep "0.0.0.0:2424"|grep -v grep|wc -l` == 1 ]]
     then
         #nohup /usr/bin/php -S 0.0.0.0:2424 &
         pid=`ps -ef|grep "0.0.0.0:2424"|grep -v grep|awk '{print $2}'`
@@ -31,7 +32,7 @@ then
         echo -e `date` " PHP-Webserver beendet! \n" >> ${GEN24_Pfad}/Crontab.log
     fi
 fi
-    
+
 cd $GEN24_Pfad
 if (( $# == 0))
 then
