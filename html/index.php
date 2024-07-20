@@ -79,6 +79,9 @@ body {
 
 <?php
 include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 if (!isset($TAB_config) OR !is_array($TAB_config)) {
     echo '</br><center>ACHTUNG: Die Variable "TAB_config" ist in der config.php nicht (richtig) gesetzt!!</center></body></html>';
     exit();

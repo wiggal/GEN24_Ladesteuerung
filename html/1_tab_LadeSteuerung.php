@@ -182,6 +182,9 @@ input[type="radio"]{
 
 <?php
 include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 $Prognose = json_decode(file_get_contents($PrognoseFile), true);
 $EV_Reservierung = json_decode(file_get_contents($ReservierungsFile), true);
 

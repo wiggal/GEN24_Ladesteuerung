@@ -49,6 +49,9 @@
 
 <?php
 include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 include "7_funktion_Diagram.php";
 
 # ENTW 

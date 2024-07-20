@@ -63,6 +63,9 @@ td {font-size: 160%;
 <br>
 <?php
 include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 
 function getinifile($dir) 
 {

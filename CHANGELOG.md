@@ -5,6 +5,8 @@
 - Zur jeweiligen xy.ini eine xy_priv.ini lesen, die nicht verteilt wird, aber mit angepassten Daten selbst erstellt werden kann.  
 - Dadurch sollen die Updates einfacher und die Config Einstellungen übersichtlicher werden.  
 
+**NEU ->>** Es kann eine html/config_priv.php angelegt werden, die eigene Einstellungen enthält und nicht ausgeliefert und überschrieben wird.  
+
 #### ACHTUNG: Umfangreiche Änderungen der Konfiguration (Docker anpassen):  
 
 Änderung bei der Akkuschonung:
