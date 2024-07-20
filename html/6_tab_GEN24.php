@@ -7,7 +7,10 @@ if(file_exists("config_priv.php")){
   include "config_priv.php";
 }
 $path_parts = pathinfo($PrognoseFile);
-$file = $path_parts['dirname'].'/config.ini';
+$file = $path_parts['dirname'].'/CONFIG/default.ini';
+if(file_exists($path_parts['dirname'].'/CONFIG/default_priv.ini')){
+    $file = $path_parts['dirname'].'/CONFIG/default_priv.ini';
+}
 
 $case = '';
 if (isset($_POST["case"])) $case = $_POST["case"];
@@ -26,7 +29,6 @@ while(!feof($myfile)) {
             if ((strpos($Zeile, '=') !== false) and (strpos($Zeile, 'hostNameOrIp') !== false)) {
                 $Zeilenteil = explode("=", $Zeile);
                 $Zeilenteil[1] = ltrim(rtrim($Zeilenteil[1]));
-                # echo '<td><input type="text" name="Zeile['.$Zeilencounter.'][1]" value=\''.$Zeilenteil[1].'\'></td></tr>'."\n";
             }
 }
 header("Location: http://$Zeilenteil[1]");

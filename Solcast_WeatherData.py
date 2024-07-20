@@ -123,7 +123,7 @@ def loadLatestWeatherData():
 
 if __name__ == '__main__':
     config = loadConfig(['default', 'weather'])
-    # Benoetigte Variablen aus config.ini definieren und prüfen
+    # Benoetigte Variablen definieren und prüfen
     Strings = getVarConf('pv.strings', 'anzahl', 'eval')
     dataAgeMaxInMinutes = getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
     Zeitzone = getVarConf('solcast.com', 'Zeitzone', 'eval')

@@ -5,7 +5,7 @@ GEN24_Pfad=`realpath $GEN24_Pfad_tmp`
 GEN24_html_Pfad=${GEN24_Pfad}"/html"
 
 Einfacher_PHP_Webserver="0"
-# Variable Einfacher_PHP_Webserver aus config.ini bestimmen
+# Variable Einfacher_PHP_Webserver bestimmen
 eval `grep -s "^Einfacher_PHP_Webserver" ${GEN24_Pfad}/CONFIG/default.ini|sed 's# ##g'`
 eval `grep -s "^Einfacher_PHP_Webserver" ${GEN24_Pfad}/CONFIG/default_priv.ini|sed 's# ##g'`
 
