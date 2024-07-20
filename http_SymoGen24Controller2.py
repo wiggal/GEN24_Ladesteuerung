@@ -59,7 +59,7 @@ if __name__ == '__main__':
                     data = loadWeatherData(weatherfile)
 
     
-                    # Benoetigte Variablen aus config.ini definieren und auf Zahlen prüfen
+                    # Benoetigte Variablen definieren und auf Zahlen prüfen
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
                     LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')

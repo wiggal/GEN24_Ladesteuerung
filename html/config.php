@@ -1,5 +1,5 @@
 <?php
-// Hier die ../config.ini aus dem Pythonverzeichnis lesen
+// Hier die Pythonkonfigs lesen
 $python_config = parse_ini_file("../CONFIG/default_priv.ini", true);
 // Hier die Variablen für die PV-Reservierung definieren
 $PrognoseFile = "../weatherData.json";
