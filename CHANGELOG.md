@@ -1,13 +1,15 @@
-**[0.22.0] – 2024-XX-XX**
+**[0.22.0] – 2024-07-20**  
 
 **NEU ->>** Die config.ini in Verzeichnis CONFIG verschoben und aufgeteilt:  
 - Dateinamen: default.ini, charge.ini, weather.ini  
 - Zur jeweiligen xy.ini eine xy_priv.ini lesen, die nicht verteilt wird, aber mit angepassten Daten selbst erstellt werden kann.  
 - Dadurch sollen die Updates einfacher und die Config Einstellungen übersichtlicher werden.  
 
-**NEU ->>** Es kann eine html/config_priv.php angelegt werden, die eigene Einstellungen enthält und nicht ausgeliefert und überschrieben wird.  
+**NEU ->>** Es kann auch eine html/config_priv.php angelegt werden, die eigene Einstellungen enthält und nicht ausgeliefert und überschrieben wird.  
 
-#### ACHTUNG: Umfangreiche Änderungen der Konfiguration (Docker anpassen):  
+**NEU ->>  In den jeweiligen xy_priv.ini Dateien müssen nur die Variablen definiert werden, deren Wert gegenüber den ausgelieferten INI_Dateien geändert werden sollen!**  
+
+### ACHTUNG: Umfangreiche Änderungen der Konfiguration (Docker anpassen):  
 
 Änderung bei der Akkuschonung:
 - Der Wert `Akkuschonung` in der charge.ini kann nun auch auf einen Wert zwischen 0 und 1 gesetzt werden.
