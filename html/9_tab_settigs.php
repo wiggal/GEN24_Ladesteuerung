@@ -142,6 +142,9 @@ input[type="radio"]{
 
 <?php
 include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 $EV_Reservierung = json_decode(file_get_contents('../Prog_Steuerung.json'), true);
 
 $LadesteuerungSetting_check = array(

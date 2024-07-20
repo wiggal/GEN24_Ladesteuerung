@@ -187,6 +187,9 @@ input[type="radio"]{
 
 <?php
 include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 $Akku_EntLadung = json_decode(file_get_contents($EntLadeSteuerFile), true);
 
 //$ManuelleSteuerung_check = array('E0', 'E20', 'E40', 'E60', 'E80', 'E100');

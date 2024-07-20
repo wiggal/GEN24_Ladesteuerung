@@ -17,6 +17,9 @@ input { font-size: 100%; }
 <br><br>
 <?php
 include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 $path_parts = pathinfo($PrognoseFile);
 $file = $path_parts['dirname'].'/Crontab.log';
 if(!file_exists($file)) {
