@@ -508,12 +508,12 @@ if __name__ == '__main__':
                                     response = send_request('/config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Optimierung schreiben: " + str(response)
-                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
+                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
                                     Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
                                 else:
-                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung NICHT " + str(Eigen_Opt_Std_neu) +"W geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt. NICHT " + str(Eigen_Opt_Std_neu) +"W geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                             else:
-                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Optimierung hat sich nicht verändert, NICHTS zu schreiben!!\n"
+                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt. hat sich nicht verändert, NICHTS zu schreiben!!\n"
 
                             if print_level >= 1:
                                 print(Opti_Schreib_Ausgabe)
