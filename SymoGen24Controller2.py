@@ -337,7 +337,7 @@ if __name__ == '__main__':
 
                     if print_level >= 1:
                         try:
-                            print("******* BEGINN: ", datetime.now(),"******* ")
+                            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
                             print("\n## MODBUS LADESTEUERUNG ###")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
@@ -597,7 +597,7 @@ if __name__ == '__main__':
                     if print_level >= 2:
                         print(DEBUG_Ausgabe)
                     if print_level >= 1:
-                        print("************* ENDE: ", datetime.now(),"************* \n")
+                        print("***** ENDE: ", datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"),"*****\n")
 
 
             finally:
