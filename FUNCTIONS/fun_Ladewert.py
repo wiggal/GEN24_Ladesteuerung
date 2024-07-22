@@ -177,7 +177,7 @@ def getPrognoseLadewert( AbzugWatt ):
         aktuellerLadewert = int((Pro_Akt - AbzugWatt) * BatSparFaktor)
         aktuellerLadewert = getLadewertinGrenzen(aktuellerLadewert)
 
-        LadewertGrund = "Prognoseberechnung / BatSparFaktor"
+        LadewertGrund = "Prognoseberechnung"
 
         DEBUG_Ausgabe += "\nDEBUG " + datetime.strftime(now, "%D %H:%M") + " Aktuelle Prognose - Reservierung: " + str(Pro_Akt) + " BatSparFaktor: " + str(BatSparFaktor) + " aktueller Ladewert: " + str(aktuellerLadewert)
         DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) + ", Abzug: " + str(PrognoseAbzugswert)

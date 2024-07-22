@@ -1,3 +1,5 @@
+**[0.22.1] – 2024-XX-XX**  
+
 **[0.22.0] – 2024-07-20**  
 
 **NEU ->>** Die config.ini in Verzeichnis CONFIG verschoben und aufgeteilt:  

@@ -340,7 +340,7 @@ if __name__ == '__main__':
 
                     if print_level >= 1:
                         try:
-                            print("******* BEGINN: ", datetime.now(),"******* ")
+                            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
                             print("\n## HTTP-LADESTEUERUNG ##")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
@@ -495,10 +495,10 @@ if __name__ == '__main__':
 
                         if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
-                                print("######### Eigenverbrauchs-Optimierung #########")
+                                print("### Eigenverbrauchs-Optimierung ###")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")
-                                print("Eigenverbrauchs-Optimierung ALT: ", Eigen_Opt_Std, "W")
-                                print("Eigenverbrauchs-Optimierung NEU: ", Eigen_Opt_Std_neu, "W")
+                                print("Eigenverbrauchs-Opt. ALT: ", Eigen_Opt_Std, "W")
+                                print("Eigenverbrauchs-Opt. NEU: ", Eigen_Opt_Std_neu, "W")
                                 print()
 
                             Opti_Schreib_Ausgabe = ""
@@ -507,7 +507,7 @@ if __name__ == '__main__':
                                 if len(argv) > 1 and (argv[1] == "schreiben"):
                                     response = send_request('/config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
                                     bereits_geschrieben = 1
-                                    DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Optimierung schreiben: " + str(response)
+                                    DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
                                     Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
                                 else:
@@ -550,7 +550,7 @@ if __name__ == '__main__':
                     if print_level >= 2:
                         print(DEBUG_Ausgabe)
                     if print_level >= 1:
-                        print("************* ENDE: ", datetime.now(),"************* \n")
+                        print("***** ENDE: ", datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"),"*****\n")
 
 
             except OSError:
