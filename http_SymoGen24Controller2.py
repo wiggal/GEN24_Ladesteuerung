@@ -341,7 +341,7 @@ if __name__ == '__main__':
                     if print_level >= 1:
                         try:
                             print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
-                            print("\n## HTTP-LADESTEUERUNG ##")
+                            print("## HTTP-LADESTEUERUNG ##")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognose-BattVollUm:   ", TagesPrognoseGesamt,"-", BattVollUm)
@@ -513,7 +513,7 @@ if __name__ == '__main__':
                                 else:
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt. NICHT " + str(Eigen_Opt_Std_neu) +"W geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                             else:
-                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt. hat sich nicht verändert, NICHTS zu schreiben!!\n"
+                                Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: Keine Änderung!\n"
 
                             if print_level >= 1:
                                 print(Opti_Schreib_Ausgabe)

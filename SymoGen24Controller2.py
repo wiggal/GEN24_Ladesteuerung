@@ -338,7 +338,7 @@ if __name__ == '__main__':
                     if print_level >= 1:
                         try:
                             print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
-                            print("\n## MODBUS LADESTEUERUNG ###")
+                            print("## MODBUS LADESTEUERUNG ###")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognose-BattVollUm:   ", TagesPrognoseGesamt,"-", BattVollUm)
