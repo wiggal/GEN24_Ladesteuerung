@@ -34,11 +34,6 @@ def get_API():
         API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
         API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
 
-    gen24url = "http://"+IP+"/solar_api/v1/GetInverterInfo.cgi"
-    url = requests.get(gen24url)
-    text = url.text
-    data = json.loads(text)
-    API['GEN24_PVPower'] = data['Body']['Data']['1']['PVPower']
     # Daten von weiteren GEN24 lesen
     IP_weitere_Gen24 = getVarConf('gen24','IP_weitere_Gen24','str')
     if(IP_weitere_Gen24 != 'no'):
