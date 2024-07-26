@@ -164,20 +164,20 @@ if __name__ == '__main__':
                         BattVollUm = BattVollUm - 1
 
 
-                    # Prognoseberechnung mit Funktion getRestTagesPrognoseUeberschuss
+                    # Geamtprognose und Ladewert berechnen mit Funktion getRestTagesPrognoseUeberschuss
                     PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss(BattVollUm)
                     TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
                     PrognoseAbzugswert = PrognoseUNDUeberschuss[2]
                     Grundlast_Summe = PrognoseUNDUeberschuss[3]
                     GroestePrognose = PrognoseUNDUeberschuss[4]
+                    aktuellerLadewert = PrognoseUNDUeberschuss[5]
+                    LadewertGrund = PrognoseUNDUeberschuss[6]
 
-                    # Nun der aktuellen Ladewert mit dem ermittelten PrognoseAbzugswert bestimmen
-                    AktuellenLadewert_Array = getPrognoseLadewert( PrognoseAbzugswert )
-                    aktuellerLadewert = AktuellenLadewert_Array[0]
-                    aktuelleVorhersage = AktuellenLadewert_Array[1]
-                    LadewertGrund = AktuellenLadewert_Array[2]
-                    DEBUG_Ausgabe = AktuellenLadewert_Array[3]
+                    # Aktuelle Prognose berechnen
+                    AktuellenLadewert_Array = getPrognoseLadewert()
+                    aktuelleVorhersage = AktuellenLadewert_Array[0]
+                    DEBUG_Ausgabe = AktuellenLadewert_Array[1]
 
                     # DEBUG_Ausgabe der Ladewertermittlung 
                     DEBUG_Ausgabe += "\nDEBUG TagesPrognoseUeberschuss: " + str(TagesPrognoseUeberschuss) + ", Grundlast: " + str(Grundlast)
