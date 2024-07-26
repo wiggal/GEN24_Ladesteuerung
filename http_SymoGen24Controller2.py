@@ -114,6 +114,7 @@ if __name__ == '__main__':
                     aktuelleEinspeisung = API['aktuelleEinspeisung'] * -1
                     aktuellePVProduktion = API['aktuellePVProduktion']
                     aktuelleBatteriePower = API['aktuelleBatteriePower']
+                    GEN24_PVPower = API['GEN24_PVPower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     oldPercent = int(alterLadewert/BattganzeLadeKapazWatt*10000)
@@ -153,7 +154,7 @@ if __name__ == '__main__':
                     globalfrommain(now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
                     reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
                     MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
-                    LadungAus, oldPercent)
+                    LadungAus, oldPercent, GEN24_PVPower)
 
                     # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
                     BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')

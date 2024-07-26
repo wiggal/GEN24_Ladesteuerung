@@ -11,12 +11,12 @@ from FUNCTIONS.fun_http import get_eigenv_opt
 def globalfrommain(g_now, g_DEBUG_Ausgabe, g_data, g_PV_Reservierung_steuern,\
         g_reservierungdata, g_Grundlast, g_Einspeisegrenze, g_WR_Kapazitaet, g_BattKapaWatt_akt, \
         g_MaxLadung, g_BatSparFaktor, g_PrognoseAbzugswert, g_aktuelleBatteriePower, g_BattganzeLadeKapazWatt, \
-        g_LadungAus, g_oldPercent):
+        g_LadungAus, g_oldPercent, g_GEN24_PVPower):
 
         global now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
         reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
         MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
-        LadungAus, oldPercent
+        LadungAus, oldPercent, GEN24_PVPower
 
         now = g_now
         DEBUG_Ausgabe = g_DEBUG_Ausgabe
@@ -34,6 +34,7 @@ def globalfrommain(g_now, g_DEBUG_Ausgabe, g_data, g_PV_Reservierung_steuern,\
         BattganzeLadeKapazWatt = g_BattganzeLadeKapazWatt
         LadungAus = g_LadungAus
         oldPercent = g_oldPercent
+        GEN24_PVPower = g_GEN24_PVPower
 
 
 def getPrognose(Stunde):
@@ -42,7 +43,7 @@ def getPrognose(Stunde):
             # Prognose ohne Abzug der Reservierung fürs Logging
             getPrognose_Logging = data_fun
             # Prognose auf PVPower des GEN24 begrenzen
-            if (WR_Kapazitaet * 1.14 < data_fun): data_fun = int(WR_Kapazitaet * 1.14 )
+            if ( GEN24_PVPower < data_fun): data_fun = int(GEN24_PVPower)
             # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
             # NUR für berechnung Ladewert, nicht fürs Logging
             if ( PV_Reservierung_steuern == 1 and reservierungdata.get(Stunde)):
@@ -95,6 +96,7 @@ def getRestTagesPrognoseUeberschuss(BattVollUm):
             Grundlast_fun = Grundlast
             Einspeisegrenze_fun = Einspeisegrenze
             Prognose_fun = Prognose
+            BattKapaWatt_akt_fun = BattKapaWatt_akt
             Stunden_fun = 1
 
             # wenn nicht zur vollen Stunde, Wert anteilsmaessig
@@ -107,13 +109,14 @@ def getRestTagesPrognoseUeberschuss(BattVollUm):
             Prognose_array.append(Prognose)
             Pro_Ertrag_Tag += Prognose_all
 
+            print("Prognose_all, Prognose: ", Prognose_all, Prognose)
             # Alles über WR_Kapazitaet bzw. Einspeisegrenze von BattKapaWatt_akt abziehen,
             # da dies nicht für die Prognoseberechnung zur Verfügung steht.
             # Prognose wird in Funktion getPrognose auf WR_Kapazitaet * 1.1 begrenzt
             Zwangs_Ladung_fun = 0
-            if ( Prognose_all > WR_Kapazitaet ):
-                Zwangs_Ladung_fun = Prognose_all - WR_Kapazitaet
-            Zwangs_Ladung_fun2 = (Prognose_fun - Einspeisegrenze_fun - Grundlast_fun)
+            if ( Prognose > WR_Kapazitaet ):
+                Zwangs_Ladung_fun = Prognose - WR_Kapazitaet
+            Zwangs_Ladung_fun2 = (Prognose - Einspeisegrenze - Grundlast)
             if ( Zwangs_Ladung_fun2 > Zwangs_Ladung_fun): Zwangs_Ladung_fun = Zwangs_Ladung_fun2
 
             Zwangs_Ladung += Zwangs_Ladung_fun
@@ -125,12 +128,13 @@ def getRestTagesPrognoseUeberschuss(BattVollUm):
             i += 1
 
         BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ladung
+        if (BattKapaWatt_akt_fun < 0): BattKapaWatt_akt_fun = 0
         if Stunden_sum < 1: Stunden_sum = 1
         AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
         # WIGG
         print(">> ENTWI: Zwangs_Ladung: ", Zwangs_Ladung)
-        print(">> Neuer Ladewert * 1.0: ", BattKapaWatt_akt_fun / Stunden_sum * 1.0)
-        print(">> Neuer Ladewert * 0.3: ", BattKapaWatt_akt_fun / Stunden_sum * 0.3)
+        print(">> Neuer Ladewert * 1.0: ", int(BattKapaWatt_akt_fun / Stunden_sum * 1.0))
+        print(">> Neuer Ladewert * 0.3: ", int(BattKapaWatt_akt_fun / Stunden_sum * 0.3))
         aktuellerLadewert = int(BattKapaWatt_akt_fun / Stunden_sum * BatSparFaktor)
         LadewertGrund = "Prognoseberechnung"
         # WIGG

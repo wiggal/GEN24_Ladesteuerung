@@ -1,4 +1,7 @@
-**[0.22.1] – 2024-XX-XX**  
+**[0.23.0] – 2024-XX-XX**  
+
+**Umfangreiche Neukonzipierung der Ladewertberechnung**
+
 
 **[0.22.0] – 2024-07-20**  
 
