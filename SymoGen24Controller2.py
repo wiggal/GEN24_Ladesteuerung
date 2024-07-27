@@ -134,7 +134,7 @@ if __name__ == '__main__':
                     TagesPrognoseUeberschuss = 0
                     TagesPrognoseGesamt = 0
                     aktuellerLadewert = 0
-                    PrognoseAbzugswert = 0
+                    PrognoseUberschuss = 0
                     Grundlast_Summe = 0
                     aktuelleVorhersage = 0
                     LadewertGrund = ""
@@ -149,7 +149,7 @@ if __name__ == '__main__':
                     # Hier Variablen an die Module  FUNCTIONS.fun_Ladewert übergeben
                     globalfrommain(now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
                     reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
-                    MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
+                    MaxLadung, BatSparFaktor, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
                     LadungAus, oldPercent)
 
                     # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
@@ -165,7 +165,7 @@ if __name__ == '__main__':
                     PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss(BattVollUm)
                     TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
-                    PrognoseAbzugswert = PrognoseUNDUeberschuss[2]
+                    PrognoseUberschuss = PrognoseUNDUeberschuss[2]
                     Grundlast_Summe = PrognoseUNDUeberschuss[3]
                     GroestePrognose = PrognoseUNDUeberschuss[4]
                     aktuellerLadewert = PrognoseUNDUeberschuss[5]
@@ -246,8 +246,8 @@ if __name__ == '__main__':
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
     
-                            # PrognoseAbzugswert - 100 um Schaltverzögerung wieder nach unten zu erreichen
-                            elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) and (PrognoseAbzugswert - 100 <= Grundlast):
+                            # PrognoseUberschuss - 100 um Schaltverzögerung wieder nach unten zu erreichen
+                            elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) and (PrognoseUberschuss - 100 <= Grundlast):
                                 # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
                                 if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben:
                                     # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
@@ -257,14 +257,14 @@ if __name__ == '__main__':
                                     newPercent_schreiben = DATA[1]
                                     # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
                                     if newPercent_schreiben == 0:
-                                        LadewertGrund = "PrognoseAbzugswert nahe Grundlast (Unterschied weniger als Schreibgrenze)"
+                                        LadewertGrund = "PrognoseUberschuss nahe Grundlast (Unterschied weniger als Schreibgrenze)"
                                 else:
                                     # volle Ladung ;-)
                                     aktuellerLadewert = MaxLadung
                                     DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
-                                    LadewertGrund = "PrognoseAbzugswert kleiner Grundlast und Schreibgrenze"
+                                    LadewertGrund = "PrognoseUberschuss kleiner Grundlast und Schreibgrenze"
 
                             else: 
                                 DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
@@ -344,7 +344,7 @@ if __name__ == '__main__':
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognose-BattVollUm:   ", TagesPrognoseGesamt,"-", BattVollUm)
-                            print("PrognoseAbzugswert/Stunde:  ", PrognoseAbzugswert)
+                            print("PrognoseUberschuss/Stunde:  ", PrognoseUberschuss)
                             print("Grundlast_Summe für Tag:    ", Grundlast_Summe)
                             print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
