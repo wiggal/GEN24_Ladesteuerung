@@ -10,12 +10,12 @@ from FUNCTIONS.fun_http import get_eigenv_opt
 # Hier die Variablen aus dem Hauptprogramm übergeben und global machen
 def globalfrommain(g_now, g_DEBUG_Ausgabe, g_data, g_PV_Reservierung_steuern,\
         g_reservierungdata, g_Grundlast, g_Einspeisegrenze, g_WR_Kapazitaet, g_BattKapaWatt_akt, \
-        g_MaxLadung, g_BatSparFaktor, g_PrognoseAbzugswert, g_aktuelleBatteriePower, g_BattganzeLadeKapazWatt, \
+        g_MaxLadung, g_BatSparFaktor, g_aktuelleBatteriePower, g_BattganzeLadeKapazWatt, \
         g_LadungAus, g_oldPercent):
 
         global now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
         reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
-        MaxLadung, BatSparFaktor, PrognoseAbzugswert, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
+        MaxLadung, BatSparFaktor, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
         LadungAus, oldPercent
 
         now = g_now
@@ -29,7 +29,6 @@ def globalfrommain(g_now, g_DEBUG_Ausgabe, g_data, g_PV_Reservierung_steuern,\
         BattKapaWatt_akt = g_BattKapaWatt_akt
         MaxLadung = g_MaxLadung
         BatSparFaktor = g_BatSparFaktor
-        PrognoseAbzugswert = g_PrognoseAbzugswert
         aktuelleBatteriePower = g_aktuelleBatteriePower
         BattganzeLadeKapazWatt = g_BattganzeLadeKapazWatt
         LadungAus = g_LadungAus
@@ -106,9 +105,8 @@ def getRestTagesPrognoseUeberschuss(BattVollUm):
                 Stunden_fun = (60-Akt_Minute)/60
 
             Prognose_array.append(Prognose)
-            Pro_Ertrag_Tag += Prognose_all
+            Pro_Ertrag_Tag += Prognose_fun
 
-            print("Prognose_all, Prognose: ", Prognose_all, Prognose)
             # Alles über WR_Kapazitaet bzw. Einspeisegrenze von BattKapaWatt_akt abziehen,
             # da dies nicht für die Prognoseberechnung zur Verfügung steht.
             # Prognose wird in Funktion getPrognose auf WR_Kapazitaet * 1.1 begrenzt
@@ -129,33 +127,34 @@ def getRestTagesPrognoseUeberschuss(BattVollUm):
         BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ladung
         if (BattKapaWatt_akt_fun < 0): BattKapaWatt_akt_fun = 0
         if Stunden_sum < 1: Stunden_sum = 1
-        AbzugsWatt = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
+        Prognoserest_Stunde = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
         # WIGG
         print(">> ENTWI: Zwangs_Ladung: ", Zwangs_Ladung)
         print(">> Neuer Ladewert * 1.0: ", int(BattKapaWatt_akt_fun / Stunden_sum * 1.0))
         print(">> Neuer Ladewert * 0.3: ", int(BattKapaWatt_akt_fun / Stunden_sum * 0.3))
+        # WIGG
+
         aktuellerLadewert = int(BattKapaWatt_akt_fun / Stunden_sum * BatSparFaktor)
         aktuellerLadewert = getLadewertinGrenzen(aktuellerLadewert)
         LadewertGrund = "Prognoseberechnung"
-        # WIGG
 
-        # hier noch die Ladewerte über MaxLadung ermitteln und Überschuss von AbzugsWatt abziehen
+        # hier noch die Ladewerte über MaxLadung ermitteln und Überschuss von Prognoserest_Stunde abziehen
         # damit wird bei niedrigen Prognosen mehr geladen, da bei hohen nicht über MaxLadung geladen werden kann
         Pro_Uberschuss = 0
         Schleifenzaehler = 0
         for Prognose_einzel in Prognose_array:
-            if (Prognose_einzel - AbzugsWatt > MaxLadung): 
-                Pro_Uberschuss += Prognose_einzel - AbzugsWatt - MaxLadung
+            if (Prognose_einzel - Prognoserest_Stunde > MaxLadung): 
+                Pro_Uberschuss += Prognose_einzel - Prognoserest_Stunde - MaxLadung
                 Schleifenzaehler += 1
         if (Pro_Uberschuss > 0 and Schleifenzaehler > 0):
-            AbzugsWatt = int(AbzugsWatt - Pro_Uberschuss / Schleifenzaehler)
-        if (AbzugsWatt < 0):
-            AbzugsWatt = 0
+            Prognoserest_Stunde = int(Prognoserest_Stunde - Pro_Uberschuss / Schleifenzaehler)
+        if (Prognoserest_Stunde < 0):
+            Prognoserest_Stunde = 0
 
-        Pro_Uebersch_Tag = BattKapaWatt_akt
-        DEBUG_Ausgabe += "DEBUG ##Ergebnis## AbzugsWatt: " + str(round(aktuellerLadewert, 2)) + ",  Pro_Uebersch_Tag: " + str(round(Pro_Uebersch_Tag, 2)) + ", Stunden_sum: "  + str(round(Stunden_sum, 2)) + "\n"
+        Pro_Uebersch_Tag = Pro_Ertrag_Tag - BattKapaWatt_akt_fun - Grundlast_Sum
+        DEBUG_Ausgabe += "DEBUG ##Ergebnis## Prognoserest_Stunde: " + str(round(aktuellerLadewert, 2)) + ",  Pro_Uebersch_Tag: " + str(round(Pro_Uebersch_Tag, 2)) + ", Stunden_sum: "  + str(round(Stunden_sum, 2)) + "\n"
 
-        return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), AbzugsWatt, Grundlast_Sum, groestePrognose, aktuellerLadewert, LadewertGrund
+        return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), Prognoserest_Stunde, Grundlast_Sum, groestePrognose, aktuellerLadewert, LadewertGrund
 
 def getPrognoseLadewert():
 
@@ -193,7 +192,7 @@ def getPrognoseLadewert():
         Pro_Akt = int(Pro_Akt / PrognoseGlaettung / 2 )
 
         DEBUG_Ausgabe += "\nDEBUG " + datetime.strftime(now, "%D %H:%M") + " Aktuelle Prognose - Reservierung: " + str(Pro_Akt) + " BatSparFaktor: " + str(BatSparFaktor)
-        DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) + ", Abzug: " + str(PrognoseAbzugswert)
+        DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) 
 
         ### Prognose ENDE
         return  Pro_Akt_Log, DEBUG_Ausgabe
