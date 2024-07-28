@@ -48,16 +48,6 @@ def storeWeatherData(wetterfile, data, now):
         exit(0)
     return()
 
-def loadPVReservierung(file):
-        reservierungdata = None
-        try:
-            with open(file) as json_file:
-                reservierungdata = json.load(json_file)
-        except:
-                print("ERROR: Reservierungsdatei fehlt, bitte erzeugen oder Option abschalten !!")
-                exit()
-        return reservierungdata
-
 def getVarConf(var_block, var, Type):
         aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
         # Für alle Varaiblen aus dem Block [Ladeberechnung] lesen welche Zusatz_Ladebloecke vorhanden sind

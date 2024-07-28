@@ -3,10 +3,9 @@ import pytz
 import requests
 from ping3 import ping
 from sys import argv
-import json
-from FUNCTIONS.functions import loadConfig, loadWeatherData, loadPVReservierung, getVarConf, save_SQLite
-from FUNCTIONS.fun_Ladewert import getRestTagesPrognoseUeberschuss, getPrognoseLadewert, setLadewert, \
-        getSonnenuntergang, globalfrommain, getParameter, getEigenverbrauchOpt
+import FUNCTIONS.PrognoseLadewert
+import FUNCTIONS.Steuerdaten
+from FUNCTIONS.functions import loadConfig, loadWeatherData, getVarConf, save_SQLite
 from FUNCTIONS.fun_API import get_API
 from FUNCTIONS.fun_http import get_time_of_use, send_request
 
@@ -30,8 +29,9 @@ if __name__ == '__main__':
                 alterLadewert = element['Power']
 
         # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
+        SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
         print_level = getVarConf('env','print_level','eval')
-        Parameter = getParameter(argv)
+        Parameter = SettingsPara.getParameter(argv, 'Prog_Steuerung.json')
         Ausgabe_Parameter = ''
         if len(argv) > 1:
             argv[1] = Parameter[0]
@@ -56,13 +56,12 @@ if __name__ == '__main__':
                     ###############################
     
                     weatherfile = getVarConf('env','filePathWeatherData','str')
-                    data = loadWeatherData(weatherfile)
+                    weatherdata = loadWeatherData(weatherfile)
 
     
                     # Benoetigte Variablen definieren und auf Zahlen prüfen
                     BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
                     MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
-                    LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')
                     Akkuschonung = getVarConf('Ladeberechnung','Akkuschonung','eval')
                     Einspeisegrenze = getVarConf('Ladeberechnung','Einspeisegrenze','eval')
                     WR_Kapazitaet = getVarConf('Ladeberechnung','WR_Kapazitaet','eval')
@@ -122,7 +121,7 @@ if __name__ == '__main__':
                     reservierungdata = {}
                     if  PV_Reservierung_steuern == 1:
                         Reservierungsdatei = getVarConf('Reservierung','PV_ReservieungsDatei','str')
-                        reservierungdata = loadPVReservierung(Reservierungsdatei)
+                        reservierungdata = SettingsPara.loadPVReservierung(Reservierungsdatei)
 
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     newPercent_schreiben = 0
@@ -142,6 +141,9 @@ if __name__ == '__main__':
                     aktuelleVorhersage = 0
                     LadewertGrund = ""
 
+                    # Klasse ProgLadewert initieren
+                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata, BattKapaWatt_akt, MaxLadung, Einspeisegrenze)
+
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz > 90 ):
                         WRSchreibGrenze_nachUnten = int(WRSchreibGrenze_nachUnten * (1 + ( BattStatusProz - 90 ) / 7))
@@ -149,23 +151,17 @@ if __name__ == '__main__':
                         WRSchreibGrenze_nachOben = int(WRSchreibGrenze_nachOben * (1 + ( BattStatusProz - 90 ) / 7))
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
-                    # Hier Variablen an die Module  FUNCTIONS.fun_Ladewert übergeben
-                    globalfrommain(now, DEBUG_Ausgabe, data, PV_Reservierung_steuern, \
-                    reservierungdata, Grundlast, Einspeisegrenze, WR_Kapazitaet, BattKapaWatt_akt, \
-                    MaxLadung, BatSparFaktor, aktuelleBatteriePower, BattganzeLadeKapazWatt, \
-                    LadungAus, oldPercent)
-
                     # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
                     BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
                     if BattVollUm <= 0:
-                       BattVollUm = getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
+                       BattVollUm = progladewert.getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
                     if Akkuschonung > 0:
                         BattVollUm = BattVollUm - 1
 
 
                     # Geamtprognose und Ladewert berechnen mit Funktion getRestTagesPrognoseUeberschuss
-                    PrognoseUNDUeberschuss = getRestTagesPrognoseUeberschuss(BattVollUm)
+                    PrognoseUNDUeberschuss = progladewert.getRestTagesPrognoseUeberschuss(BattVollUm, Grundlast)
                     TagesPrognoseUeberschuss = PrognoseUNDUeberschuss[0]
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[1]
                     PrognoseUberschuss = PrognoseUNDUeberschuss[2]
@@ -175,7 +171,7 @@ if __name__ == '__main__':
                     LadewertGrund = PrognoseUNDUeberschuss[6]
 
                     # Aktuelle Prognose berechnen
-                    AktuellenLadewert_Array = getPrognoseLadewert()
+                    AktuellenLadewert_Array = progladewert.getPrognoseLadewert()
                     aktuelleVorhersage = AktuellenLadewert_Array[0]
                     DEBUG_Ausgabe = AktuellenLadewert_Array[1]
 
@@ -193,7 +189,7 @@ if __name__ == '__main__':
 
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                     if FesteLadeleistung > 0:
-                        DATA = setLadewert(FesteLadeleistung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                        DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                         aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
                         if newPercent == oldPercent:
@@ -208,7 +204,7 @@ if __name__ == '__main__':
                     # Hier Volle Ladung, wenn BattVollUm erreicht ist!
                     elif (int(datetime.strftime(now, "%H")) >= int(BattVollUm)):
                          aktuellerLadewert = MaxLadung
-                         DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                         DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                          newPercent = DATA[0]
                          newPercent_schreiben = DATA[1]
                          LadewertGrund = "BattVollUm erreicht!!"
@@ -222,7 +218,7 @@ if __name__ == '__main__':
                         if ((BattStatusProz < MindBattLad)):
                             # volle Ladung ;-)
                             aktuellerLadewert = MaxLadung
-                            DATA = setLadewert(MaxLadung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                            DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                             newPercent = DATA[0]
                             newPercent_schreiben = DATA[1]
                             LadewertGrund = "BattStatusProz < MindBattLad"
@@ -234,7 +230,7 @@ if __name__ == '__main__':
                                 if BattKapaWatt_akt + Grundlast_Summe - TagesPrognoseGesamt < WRSchreibGrenze_nachOben:
                                     # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
                                     WRSchreibGrenze_nachUnten = 100000
-                                    DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
@@ -244,7 +240,7 @@ if __name__ == '__main__':
                                 else:
                                     # volle Ladung ;-)
                                     aktuellerLadewert = MaxLadung
-                                    DATA = setLadewert(MaxLadung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
@@ -255,7 +251,7 @@ if __name__ == '__main__':
                                 if BattKapaWatt_akt - TagesPrognoseUeberschuss < WRSchreibGrenze_nachOben:
                                     # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
                                     WRSchreibGrenze_nachUnten = 100000
-                                    DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
@@ -264,20 +260,20 @@ if __name__ == '__main__':
                                 else:
                                     # volle Ladung ;-)
                                     aktuellerLadewert = MaxLadung
-                                    DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                                     newPercent = DATA[0]
                                     newPercent_schreiben = DATA[1]
                                     LadewertGrund = "PrognoseUberschuss kleiner Grundlast und Schreibgrenze"
 
                             else: 
-                                DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                                DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
 
                         # Wenn größter Prognosewert je Stunde ist kleiner als GrenzwertGroestePrognose volle Ladung
                         if GrenzwertGroestePrognose > GroestePrognose:
                             aktuellerLadewert = MaxLadung
-                            DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                            DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                             newPercent = DATA[0]
                             newPercent_schreiben = DATA[1]
                             LadewertGrund = "Größter Prognosewert " + str(GroestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
@@ -317,7 +313,7 @@ if __name__ == '__main__':
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
-                                DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                                DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                                 newPercent = DATA[0]
                                 newPercent_schreiben = DATA[1]
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
@@ -329,7 +325,7 @@ if __name__ == '__main__':
                         # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
                         if alterLadewert < MaxLadung -10 :
                             aktuellerLadewert = MaxLadung
-                            DATA = setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten)
+                            DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                             newPercent = DATA[0]
                             newPercent_schreiben = DATA[1]
                             LadewertGrund = "Auf MaxLadung stellen, da PVProduktion < 10 Watt!"
@@ -388,7 +384,7 @@ if __name__ == '__main__':
 
                         # EntladeSteuerungFile lesen
                         EntladeSteuerungFile = getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
-                        entladesteurungsdata = loadPVReservierung(EntladeSteuerungFile)
+                        entladesteurungsdata = SettingsPara.loadPVReservierung(EntladeSteuerungFile)
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
                             MaxEntladung = int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100)
@@ -482,7 +478,7 @@ if __name__ == '__main__':
 
                     ######## Eigenverbrauchs-Optimierung  ab hier wenn eingeschaltet!
                     if  EigenverbOpt_steuern == 1:
-                        EigenOptERG = getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung)
+                        EigenOptERG = progladewert.getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung)
                         PrognoseMorgen = EigenOptERG[0]
                         Eigen_Opt_Std = EigenOptERG[1]
                         Eigen_Opt_Std_neu = EigenOptERG[2]
