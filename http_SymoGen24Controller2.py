@@ -5,32 +5,35 @@ from ping3 import ping
 from sys import argv
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
-from FUNCTIONS.functions import loadConfig, loadWeatherData, getVarConf, save_SQLite
-from FUNCTIONS.fun_API import get_API
-from FUNCTIONS.fun_http import get_time_of_use, send_request
+import FUNCTIONS.functions
+import FUNCTIONS.GEN24_API
+import FUNCTIONS.SQLall
+import FUNCTIONS.httprequest
 
 
 if __name__ == '__main__':
-        config = loadConfig(['default', 'charge'])
+        basics = FUNCTIONS.functions.basics()
+        config = basics.loadConfig(['default', 'charge'])
+        request = FUNCTIONS.httprequest.request()
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
 
-        host_ip = getVarConf('gen24','hostNameOrIp', 'str')
-        user = getVarConf('gen24','user', 'str')
-        password = getVarConf('gen24','password', 'str')
+        host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
+        user = basics.getVarConf('gen24','user', 'str')
+        password = basics.getVarConf('gen24','password', 'str')
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
 
         alterLadewert = 0
-        result_get_time_of_use = get_time_of_use(host_ip, user, password)
+        result_get_time_of_use = request.get_time_of_use(host_ip, user, password)
         for element in result_get_time_of_use:
             if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
                 alterLadewert = element['Power']
 
         # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
         SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
-        print_level = getVarConf('env','print_level','eval')
+        print_level = basics.getVarConf('env','print_level','eval')
         Parameter = SettingsPara.getParameter(argv, 'Prog_Steuerung.json')
         Ausgabe_Parameter = ''
         if len(argv) > 1:
@@ -55,33 +58,33 @@ if __name__ == '__main__':
     
                     ###############################
     
-                    weatherfile = getVarConf('env','filePathWeatherData','str')
-                    weatherdata = loadWeatherData(weatherfile)
+                    weatherfile = basics.getVarConf('env','filePathWeatherData','str')
+                    weatherdata = basics.loadWeatherData(weatherfile)
 
     
                     # Benoetigte Variablen definieren und auf Zahlen prüfen
-                    BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
-                    MaxLadung = getVarConf('Ladeberechnung','MaxLadung','eval')
-                    Akkuschonung = getVarConf('Ladeberechnung','Akkuschonung','eval')
-                    Einspeisegrenze = getVarConf('Ladeberechnung','Einspeisegrenze','eval')
-                    WR_Kapazitaet = getVarConf('Ladeberechnung','WR_Kapazitaet','eval')
-                    PV_Leistung_Watt = getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
-                    Grundlast = getVarConf('Ladeberechnung','Grundlast','eval')
-                    MindBattLad = getVarConf('Ladeberechnung','MindBattLad','eval')
-                    GrenzwertGroestePrognose = getVarConf('Ladeberechnung','GrenzwertGroestePrognose','eval')
-                    WRSchreibGrenze_nachOben = getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
-                    WRSchreibGrenze_nachUnten = getVarConf('Ladeberechnung','WRSchreibGrenze_nachUnten','eval')
-                    FesteLadeleistung = getVarConf('Ladeberechnung','FesteLadeleistung','eval')
-                    Fallback_on = getVarConf('Fallback','Fallback_on','eval')
-                    Cronjob_Minutenabstand = getVarConf('Fallback','Cronjob_Minutenabstand','eval')
-                    Fallback_Zeitabstand_Std = getVarConf('Fallback','Fallback_Zeitabstand_Std','eval')
-                    Push_Message_EIN = getVarConf('messaging','Push_Message_EIN','eval')
-                    PV_Reservierung_steuern = getVarConf('Reservierung','PV_Reservierung_steuern','eval')
-                    Batterieentlandung_steuern = getVarConf('Entladung','Batterieentlandung_steuern','eval')
-                    WREntladeSchreibGrenze_Watt = getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
-                    EntladeGrenze_steuern = getVarConf('Entladung','EntladeGrenze_steuern','eval')
-                    EigenverbOpt_steuern = getVarConf('EigenverbOptimum','EigenverbOpt_steuern','eval')
-                    MaxEinspeisung = getVarConf('EigenverbOptimum','MaxEinspeisung','eval')
+                    BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
+                    MaxLadung = basics.getVarConf('Ladeberechnung','MaxLadung','eval')
+                    Akkuschonung = basics.getVarConf('Ladeberechnung','Akkuschonung','eval')
+                    Einspeisegrenze = basics.getVarConf('Ladeberechnung','Einspeisegrenze','eval')
+                    WR_Kapazitaet = basics.getVarConf('Ladeberechnung','WR_Kapazitaet','eval')
+                    PV_Leistung_Watt = basics.getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
+                    Grundlast = basics.getVarConf('Ladeberechnung','Grundlast','eval')
+                    MindBattLad = basics.getVarConf('Ladeberechnung','MindBattLad','eval')
+                    GrenzwertGroestePrognose = basics.getVarConf('Ladeberechnung','GrenzwertGroestePrognose','eval')
+                    WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
+                    WRSchreibGrenze_nachUnten = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachUnten','eval')
+                    FesteLadeleistung = basics.getVarConf('Ladeberechnung','FesteLadeleistung','eval')
+                    Fallback_on = basics.getVarConf('Fallback','Fallback_on','eval')
+                    Cronjob_Minutenabstand = basics.getVarConf('Fallback','Cronjob_Minutenabstand','eval')
+                    Fallback_Zeitabstand_Std = basics.getVarConf('Fallback','Fallback_Zeitabstand_Std','eval')
+                    Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
+                    PV_Reservierung_steuern = basics.getVarConf('Reservierung','PV_Reservierung_steuern','eval')
+                    Batterieentlandung_steuern = basics.getVarConf('Entladung','Batterieentlandung_steuern','eval')
+                    WREntladeSchreibGrenze_Watt = basics.getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
+                    EntladeGrenze_steuern = basics.getVarConf('Entladung','EntladeGrenze_steuern','eval')
+                    EigenverbOpt_steuern = basics.getVarConf('EigenverbOptimum','EigenverbOpt_steuern','eval')
+                    MaxEinspeisung = basics.getVarConf('EigenverbOptimum','MaxEinspeisung','eval')
 
                     # um Divison durch Null zu verhindern kleinsten Wert setzen
                     if BatSparFaktor < 0.1:
@@ -90,14 +93,15 @@ if __name__ == '__main__':
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
-                            Grundlast_WoT = getVarConf('Ladeberechnung','Grundlast_WoT','str')
+                            Grundlast_WoT = basics.getVarConf('Ladeberechnung','Grundlast_WoT','str')
                             Grundlast_WoT_Array = Grundlast_WoT.split(',')
                             Grundlast = eval(Grundlast_WoT_Array[datetime.today().weekday()])
                         except:
                             print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
                             Grundlast = 0
 
-                    API = get_API()
+                    api = FUNCTIONS.GEN24_API.gen24api
+                    API = api.get_API()
                     Battery_Status = API['BAT_MODE']
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
@@ -120,7 +124,7 @@ if __name__ == '__main__':
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     reservierungdata = {}
                     if  PV_Reservierung_steuern == 1:
-                        Reservierungsdatei = getVarConf('Reservierung','PV_ReservieungsDatei','str')
+                        Reservierungsdatei = basics.getVarConf('Reservierung','PV_ReservieungsDatei','str')
                         reservierungdata = SettingsPara.loadPVReservierung(Reservierungsdatei)
 
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
@@ -152,7 +156,7 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe += "DEBUG ## Batt >90% ## WRSchreibGrenze_nachOben: " + str(WRSchreibGrenze_nachOben) +"\n"
 
                     # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
-                    BattVollUm = getVarConf('Ladeberechnung','BattVollUm','eval')
+                    BattVollUm = basics.getVarConf('Ladeberechnung','BattVollUm','eval')
                     if BattVollUm <= 0:
                        BattVollUm = progladewert.getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
@@ -383,7 +387,7 @@ if __name__ == '__main__':
                                 BatteryMaxDischarge = element['Power']
 
                         # EntladeSteuerungFile lesen
-                        EntladeSteuerungFile = getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
+                        EntladeSteuerungFile = basics.getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
                         entladesteurungsdata = SettingsPara.loadPVReservierung(EntladeSteuerungFile)
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
@@ -458,7 +462,7 @@ if __name__ == '__main__':
                             if  Batterieentlandung_steuern == 1:
                                 payload_text += ',{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
                                 ',"ScheduleType":"DISCHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                            response = send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
+                            response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
                             bereits_geschrieben = 1
                             if newPercent_schreiben == 1:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
@@ -519,20 +523,21 @@ if __name__ == '__main__':
     
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
-                        Push_Message_Url = getVarConf('messaging','Push_Message_Url','str')
+                        Push_Message_Url = basics.getVarConf('messaging','Push_Message_Url','str')
                         apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
                         print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
 
                     ### LOGGING, Schreibt mit den übergebenen Daten eine CSV- oder SQlite-Datei
                     ## nur wenn "schreiben" oder "logging" übergeben worden ist
-                    Logging_ein = getVarConf('Logging','Logging_ein','eval')
+                    sqlall = FUNCTIONS.SQLall.sqlall()
+                    Logging_ein = basics.getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
                         Logging_Schreib_Ausgabe = ""
                         if len(argv) > 1 and (argv[1] == "schreiben" or argv[1] == "logging"):
-                            Logging_file = getVarConf('Logging','Logging_file','str')
+                            Logging_file = basics.getVarConf('Logging','Logging_file','str')
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
-                            save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
+                            sqlall.save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
                             API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
                             Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:

@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
-from FUNCTIONS.functions import getVarConf
-from FUNCTIONS.fun_http import get_eigenv_opt
+import FUNCTIONS.functions
+import FUNCTIONS.httprequest
+
+basics = FUNCTIONS.functions.basics()
+request = FUNCTIONS.httprequest.request()
     
 class progladewert:
     def __init__(self, data, WR_Kapazitaet, reservierungdata, BattKapaWatt_akt, MaxLadung, Einspeisegrenze):
@@ -26,7 +29,7 @@ class progladewert:
                 if (self.WR_Kapazitaet * 1.14 < data_fun): data_fun = int(self.WR_Kapazitaet * 1.14 )
                 # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
                 # NUR für berechnung Ladewert, nicht fürs Logging
-                PV_Reservierung_steuern = getVarConf('Reservierung','PV_Reservierung_steuern','eval')
+                PV_Reservierung_steuern = basics.getVarConf('Reservierung','PV_Reservierung_steuern','eval')
                 if ( PV_Reservierung_steuern == 1 and self.reservierungdata.get(Stunde)):
                     data_fun = self.data['result']['watts'][Stunde] - self.reservierungdata[Stunde]
                     # Minuswerte verhindern
@@ -109,13 +112,8 @@ class progladewert:
             if (BattKapaWatt_akt_fun < 0): BattKapaWatt_akt_fun = 0
             if Stunden_sum < 1: Stunden_sum = 1
             Prognoserest_Stunde = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
-            # WIGG
-            print(">> ENTWI: Zwangs_Ladung: ", Zwangs_Ladung)
-            print(">> Neuer Ladewert * 1.0: ", int(BattKapaWatt_akt_fun / Stunden_sum * 1.0))
-            print(">> Neuer Ladewert * 0.3: ", int(BattKapaWatt_akt_fun / Stunden_sum * 0.3))
-            # WIGG
     
-            BatSparFaktor = getVarConf('Ladeberechnung','BatSparFaktor','eval')
+            BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
             aktuellerLadewert = int(BattKapaWatt_akt_fun / Stunden_sum * BatSparFaktor)
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             LadewertGrund = "Prognoseberechnung"
@@ -220,7 +218,7 @@ class progladewert:
     def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent):
             fun_Ladewert = self.getLadewertinGrenzen(fun_Ladewert)
     
-            LadungAus = getVarConf('Ladeberechnung','LadungAus','eval')
+            LadungAus = basics.getVarConf('Ladeberechnung','LadungAus','eval')
             newPercent = (int(fun_Ladewert/BattganzeLadeKapazWatt*10000))
             if newPercent < LadungAus:
                 newPercent = LadungAus
@@ -273,13 +271,13 @@ class progladewert:
         
     def getEigenverbrauchOpt(self, host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung=0):
         DEBUG_Eig_opt ="\n\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>\n"
-        GrundlastNacht = getVarConf('EigenverbOptimum','GrundlastNacht','eval')
-        AkkuZielProz = getVarConf('EigenverbOptimum','AkkuZielProz','eval')
-        PrognoseGrenzeMorgen = getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
+        GrundlastNacht = basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
+        AkkuZielProz = basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
+        PrognoseGrenzeMorgen = basics.getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
         PrognoseMorgen_arr = self.getPrognoseMorgen(MaxEinspeisung)
         PrognoseMorgen = PrognoseMorgen_arr[0]/1000
         Ende_Nacht_Std = PrognoseMorgen_arr[1]
-        Eigen_Opt_Std_arry = get_eigenv_opt(host_ip, user, password)
+        Eigen_Opt_Std_arry = request.get_eigenv_opt(host_ip, user, password)
         Eigen_Opt_Std = Eigen_Opt_Std_arry[0]
     
         if Ende_Nacht_Std == 0 : Ende_Nacht_Std = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
