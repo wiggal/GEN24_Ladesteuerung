@@ -9,7 +9,9 @@ from pyModbusTCP.client import ModbusClient
 from pyModbusTCP import utils
 from datetime import datetime
 import numpy as np
-from FUNCTIONS.functions import loadConfig, getVarConf
+import FUNCTIONS.functions
+
+basics = FUNCTIONS.functions.basics()
 
 class SymoGen24:
     def __init__(self, ipaddr, port, auto=True):
@@ -229,9 +231,9 @@ class SymoGen24:
 # Test program
 if __name__ == "__main__":
     
-    config = loadConfig('config.ini')
-    host_ip = getVarConf('gen24','hostNameOrIp', 'str')
-    host_port = getVarConf('gen24','port', 'str')
+    config = basics.loadConfig('config.ini')
+    host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
+    host_port = basics.getVarConf('gen24','port', 'str')
     gen24 = SymoGen24(host_ip, host_port)
 
     # print("MPPT-Zeit: ", datetime.now())
