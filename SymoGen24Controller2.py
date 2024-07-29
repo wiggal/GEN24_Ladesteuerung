@@ -143,7 +143,7 @@ if __name__ == '__main__':
                     LadewertGrund = ""
 
                     # Klasse ProgLadewert initieren
-                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata, BattKapaWatt_akt, MaxLadung, Einspeisegrenze)
+                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata, BattKapaWatt_akt, MaxLadung, Einspeisegrenze, aktuelleBatteriePower)
 
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz > 90 ):
@@ -170,6 +170,17 @@ if __name__ == '__main__':
                     GroestePrognose = PrognoseUNDUeberschuss[4]
                     aktuellerLadewert = PrognoseUNDUeberschuss[5]
                     LadewertGrund = PrognoseUNDUeberschuss[6]
+                    # Einspeisebegrenzung prüfen
+                    Einspeisegrenze = progladewert.getEinspeiseGrenzeLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
+                    aktuellerLadewert = Einspeisegrenze[0]
+                    LadewertGrund = Einspeisegrenze[1]
+                    DEBUG_Ausgabe += Einspeisegrenze[2]
+                    # AC-Kapazität prüfen
+                    ACKapazitaet = progladewert.getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
+                    print(ACKapazitaet)
+                    aktuellerLadewert = ACKapazitaet[0]
+                    LadewertGrund = ACKapazitaet[1]
+
 
                     # Aktuelle Prognose berechnen
                     AktuellenLadewert_Array = progladewert.getPrognoseLadewert()
@@ -190,7 +201,7 @@ if __name__ == '__main__':
 
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                     if FesteLadeleistung > 0:
-                        DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
+                        DATA = progladewert.setLadewert(FesteLadeleistung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                         aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
                         # wegen Rundung
@@ -415,10 +426,10 @@ if __name__ == '__main__':
 
                         # EntladeSteuerungFile lesen
                         EntladeSteuerungFile = basics.getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
-                        entladesteurungsdata = loadPVReservierung(EntladeSteuerungFile)
+                        entladesteurungsdata = SettingsPara.loadPVReservierung(EntladeSteuerungFile)
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
-                            MaxEntladung = entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']
+                            MaxEntladung = int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'])
                             DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
 
                         aktStd = datetime.strftime(now, "%H:00")
