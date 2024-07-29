@@ -4,7 +4,7 @@ import json
 import os.path
 import pytz
 from pathlib import Path
-from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
+import FUNCTIONS.functions
 
 def loadLatestWeatherData(config):
     lat = config['forecast.solar']['lat']
@@ -59,14 +59,15 @@ def loadLatestWeatherData(config):
         
     
 if __name__ == '__main__':
-    config = loadConfig(['default', 'weather'])
-    dataAgeMaxInMinutes = getVarConf('forecast.solar','dataAgeMaxInMinutes','eval')
+    basics = FUNCTIONS.functions.basics()
+    config = basics.loadConfig(['default', 'weather'])
+    dataAgeMaxInMinutes = basics.getVarConf('forecast.solar','dataAgeMaxInMinutes','eval')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
-    weatherfile = getVarConf('forecast.solar','weatherfile','str')
-    data = loadWeatherData(weatherfile)
+    weatherfile = basics.getVarConf('forecast.solar','weatherfile','str')
+    data = basics.loadWeatherData(weatherfile)
     dataIsExpired = True
     if (data):
         dateCreated = None
@@ -77,7 +78,7 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print_level = getVarConf('env','print_level','eval')
+                print_level = basics.getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
                     print('forecast.solar: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
@@ -87,7 +88,7 @@ if __name__ == '__main__':
         data = loadLatestWeatherData(config)
         if isinstance(data['result'], dict):
             if not data == "False":
-                storeWeatherData(weatherfile, data, now)
+                basics.storeWeatherData(weatherfile, data, now)
         else:
             print("Fehler bei Datenanforderung api.forecast.solar:")
             print(data)

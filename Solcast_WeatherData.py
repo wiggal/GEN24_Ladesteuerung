@@ -5,7 +5,7 @@ import pytz
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
-from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
+import FUNCTIONS.functions
 
 def loadLatestWeatherData():
     # Varablen definieren
@@ -122,23 +122,24 @@ def loadLatestWeatherData():
     return(dict_watts, json_data1)
 
 if __name__ == '__main__':
-    config = loadConfig(['default', 'weather'])
+    basics = FUNCTIONS.functions.basics()
+    config = basics.loadConfig(['default', 'weather'])
     # Benoetigte Variablen definieren und prüfen
-    Strings = getVarConf('pv.strings', 'anzahl', 'eval')
-    dataAgeMaxInMinutes = getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
-    Zeitzone = getVarConf('solcast.com', 'Zeitzone', 'eval')
-    no_history = getVarConf('solcast.com', 'no_history', 'eval')
-    KW_Faktor = getVarConf('solcast.com2', 'KW_Faktor', 'eval')
-    KW_Faktor2 = getVarConf('solcast.com', 'KW_Faktor', 'eval')
-    weatherfile = getVarConf('solcast.com', 'weatherfile', 'str')
-    api_key = getVarConf('solcast.com', 'api_key', 'str')
-    resource_id = getVarConf('solcast.com', 'resource_id', 'str')
-    resource_id2 = getVarConf('solcast.com2', 'resource_id', 'str')
+    Strings = basics.getVarConf('pv.strings', 'anzahl', 'eval')
+    dataAgeMaxInMinutes = basics.getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
+    Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
+    no_history = basics.getVarConf('solcast.com', 'no_history', 'eval')
+    KW_Faktor = basics.getVarConf('solcast.com2', 'KW_Faktor', 'eval')
+    KW_Faktor2 = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
+    weatherfile = basics.getVarConf('solcast.com', 'weatherfile', 'str')
+    api_key = basics.getVarConf('solcast.com', 'api_key', 'str')
+    resource_id = basics.getVarConf('solcast.com', 'resource_id', 'str')
+    resource_id2 = basics.getVarConf('solcast.com2', 'resource_id', 'str')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
-    data = loadWeatherData(weatherfile)
+    data = basics.loadWeatherData(weatherfile)
     # print(data['messageCreated'])
     dataIsExpired = True
     if (data):
@@ -150,7 +151,7 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print_level = getVarConf('env','print_level','eval')
+                print_level = basics.getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
                     print('solcast.com: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
@@ -160,7 +161,7 @@ if __name__ == '__main__':
         data = loadLatestWeatherData()
         if(data[0]['result']['watts'] != {}):
             if not data == "False":
-                storeWeatherData(weatherfile, data[0], now)
+                basics.storeWeatherData(weatherfile, data[0], now)
         else:
             print("Fehler bei Datenanforderung api.solcast.com.au:")
             print(data[1])
