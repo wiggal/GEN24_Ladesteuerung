@@ -193,7 +193,8 @@ if __name__ == '__main__':
                         DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                         aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
-                        if newPercent == oldPercent:
+                        # wegen Rundung
+                        if abs(newPercent - oldPercent) < 3:
                             newPercent_schreiben = 0
                         else:
                             newPercent_schreiben = 1
