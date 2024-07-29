@@ -5,7 +5,7 @@ import pytz
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
-from FUNCTIONS.functions import loadConfig, loadWeatherData, storeWeatherData, getVarConf
+import FUNCTIONS.functions
 
 def loadLatestWeatherData():
     url = 'http://www.solarprognose.de/web/solarprediction/api/v1?access-token={}&item={}&id={}&type={}&algorithm={}'.format(accesstoken, item, id, type, algorithm)
@@ -26,25 +26,26 @@ def loadLatestWeatherData():
     return(dict_watts, json_data1)
 
 if __name__ == '__main__':
-    config = loadConfig(['default', 'weather'])
+    basics = FUNCTIONS.functions.basics()
+    config = basics.loadConfig(['default', 'weather'])
     # Benoetigte Variablen definieren und prüfen
-    id = getVarConf('solarprognose', 'id', 'eval')
-    KW_Faktor = getVarConf('solarprognose', 'KW_Faktor', 'eval')
-    dataAgeMaxInMinutes = getVarConf('solarprognose', 'dataAgeMaxInMinutes', 'eval')
-    WaitSec = getVarConf('solarprognose', 'WaitSec', 'eval')
-    weatherfile = getVarConf('solarprognose', 'weatherfile', 'str')
-    accesstoken = getVarConf('solarprognose', 'accesstoken', 'str')
-    item = getVarConf('solarprognose', 'item', 'str')
-    type = getVarConf('solarprognose', 'type', 'str')
-    Zeitversatz = int(getVarConf('solarprognose', 'Zeitversatz', 'eval'))
-    algorithm = getVarConf('solarprognose', 'algorithm', 'str')
+    id = basics.getVarConf('solarprognose', 'id', 'eval')
+    KW_Faktor = basics.getVarConf('solarprognose', 'KW_Faktor', 'eval')
+    dataAgeMaxInMinutes = basics.getVarConf('solarprognose', 'dataAgeMaxInMinutes', 'eval')
+    WaitSec = basics.getVarConf('solarprognose', 'WaitSec', 'eval')
+    weatherfile = basics.getVarConf('solarprognose', 'weatherfile', 'str')
+    accesstoken = basics.getVarConf('solarprognose', 'accesstoken', 'str')
+    item = basics.getVarConf('solarprognose', 'item', 'str')
+    type = basics.getVarConf('solarprognose', 'type', 'str')
+    Zeitversatz = int(basics.getVarConf('solarprognose', 'Zeitversatz', 'eval'))
+    algorithm = basics.getVarConf('solarprognose', 'algorithm', 'str')
 
     time.sleep(WaitSec)
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
-    data = loadWeatherData(weatherfile)
+    data = basics.loadWeatherData(weatherfile)
     # print(data['messageCreated'])
     dataIsExpired = True
     if (data):
@@ -56,7 +57,7 @@ if __name__ == '__main__':
             diff = now - dateCreated
             dataAgeInMinutes = diff.total_seconds() / 60
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print_level = getVarConf('env','print_level','eval')
+                print_level = basics.getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
                     print('solarprognose.de: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
@@ -66,7 +67,7 @@ if __name__ == '__main__':
         data = loadLatestWeatherData()
         if(data[0]['result']['watts'] != {}):
             if not data == "False":
-                storeWeatherData(weatherfile, data[0], now)
+                basics.storeWeatherData(weatherfile, data[0], now)
         else:
             print("Fehler bei Datenanforderung solarprognose.de:")
             print(data[1])
