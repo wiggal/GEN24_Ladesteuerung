@@ -45,7 +45,7 @@ if __name__ == '__main__':
             if(Parameter[1] == "AUS"):
                 # Batteriemangement zurücksetzen
                 if result_get_time_of_use != []:
-                    response = send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
+                    response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
                     print("Batteriemanagementeinträge gelöscht!")
                 print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
                 exit()
@@ -474,7 +474,7 @@ if __name__ == '__main__':
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                     else:
-                        Schreib_Ausgabe = Schreib_Ausgabe + "Änderung kleiner Schreibgrenze!\n"
+                        Schreib_Ausgabe = Schreib_Ausgabe + "Änderungen kleiner Schreibgrenze!\n"
 
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
