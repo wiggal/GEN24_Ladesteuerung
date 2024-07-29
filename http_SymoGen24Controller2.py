@@ -193,10 +193,11 @@ if __name__ == '__main__':
 
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
                     if FesteLadeleistung > 0:
-                        DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
+                        DATA = progladewert.setLadewert(FesteLadeleistung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                         aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
-                        if newPercent == oldPercent:
+                        # wegen Rundung
+                        if abs(newPercent - oldPercent) < 3:
                             newPercent_schreiben = 0
                         else:
                             newPercent_schreiben = 1
