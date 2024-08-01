@@ -376,7 +376,7 @@ if __name__ == '__main__':
                     ######## IN  WR Batteriemanagement schreiben, später gemeinsam
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
-                    BatteryMaxDischarge = 0
+                    BatteryMaxDischarge = BattganzeLadeKapazWatt
                     Neu_BatteryMaxDischarge = 0
 
                     if  Batterieentlandung_steuern == 1:
