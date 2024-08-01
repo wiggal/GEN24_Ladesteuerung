@@ -177,7 +177,6 @@ if __name__ == '__main__':
                     DEBUG_Ausgabe += Einspeisegrenze[2]
                     # AC-Kapazität prüfen
                     ACKapazitaet = progladewert.getAC_KapaLadewert(WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt)
-                    print(ACKapazitaet)
                     aktuellerLadewert = ACKapazitaet[0]
                     LadewertGrund = ACKapazitaet[1]
 
