@@ -1,7 +1,17 @@
-**[0.23.0] – 2024-XX-XX**  
+**[0.23.0] – 2024-08.04**  
 
 **Umfangreiche Neukonzipierung der Ladewertberechnung**
 
+Dies soll die Ladewertberechnung wieder stärker durch den `BatSparFaktor` beeinflussbar machen.  
+- Der Einfluss der Prognose auf den Ladewert wurde entfernt.  
+- Der Ladewert wird nun linear durch den Platz im Akku und der bis `BattVollUm` zur Verfügung stehenden Zeit definiert.  
+- Der linear berechnete Wert wird dann mit dem `BatSparFaktor` multipliziert.  
+
+Code aufräumen und auf Klassen umstellen.
+- Der neue Code wurde zwar getestet, aber da ich nur die HTTP-Version benutze kann es vor allem in der Modbus-Version nocht zu Fehlern kommen.  
+
+Änderung der Eigenverbrauchs-Optimierung  
+- Der Einspeisewert wirt nun auf 0 gesetzt, wenn der Akkustand unter `MindBattLad` fällt.
 
 **[0.22.0] – 2024-07-20**  
 

@@ -490,13 +490,15 @@ if __name__ == '__main__':
                         Dauer_Nacht_Std = EigenOptERG[3]
                         AkkuZielProz = EigenOptERG[4]
                         DEBUG_Ausgabe += EigenOptERG[5]
+                        aktuellePVProduktion_tmp = aktuellePVProduktion
 
-                        # Wenn unter tags die Prognose oder der Akkustand stark abnimmt, Einspeisewert wenn größer 50 auf 50 setzen
-                        if PrognoseUberschuss == 0 and BattStatusProz < 60 and Dauer_Nacht_Std <= 1 and Eigen_Opt_Std_neu > 50:
+                        # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
+                        if (BattStatusProz <= MindBattLad):
                             Dauer_Nacht_Std = 2
-                            Eigen_Opt_Std_neu = 50
+                            Eigen_Opt_Std_neu = 0
+                            aktuellePVProduktion_tmp = 0
 
-                        if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion < (Grundlast + MaxEinspeisung) * 1.5:
+                        if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
                                 print("### Eigenverbrauchs-Optimierung ###")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")

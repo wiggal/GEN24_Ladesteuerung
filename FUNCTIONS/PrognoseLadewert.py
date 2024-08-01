@@ -115,6 +115,11 @@ class progladewert:
             aktuellerLadewert = int(BattKapaWatt_akt_fun / Stunden_sum * BatSparFaktor)
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             LadewertGrund = "Prognoseberechnung"
+
+            org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
+            if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.5):
+                LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben/2"
+                aktuellerLadewert = 0
     
             # hier noch die Ladewerte über MaxLadung ermitteln und Überschuss von Prognoserest_Stunde abziehen
             # damit wird bei niedrigen Prognosen mehr geladen, da bei hohen nicht über MaxLadung geladen werden kann
