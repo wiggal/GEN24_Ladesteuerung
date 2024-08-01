@@ -377,7 +377,7 @@ if __name__ == '__main__':
                     ######## E N T L A D E S T E U E R U N G  ab hier wenn eingeschaltet!
 
                     BatteryMaxDischarge = BattganzeLadeKapazWatt
-                    Neu_BatteryMaxDischarge = 0
+                    Neu_BatteryMaxDischarge = BattganzeLadeKapazWatt
 
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = BattganzeLadeKapazWatt
