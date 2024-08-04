@@ -1,3 +1,22 @@
+**[0.24.0] – 2024-XX.XX**  
+
+**Umfangreiche Änderungen in der Steuerung des Ladeprogramms**  
+
+Alle Daten aus den Steuerungs.json Dateien ( Prog_Steuerung.json, Akku_EntLadeSteuerFile.json, Watt_Reservierung.json, html/EV_Reservierung.json ) in SQLite-Datenbankdatei CONFIG/Prog_Steuerung.sqlite ablegen. 
+
+In der html/config.php wurden folgende Einträge entfernt, bitte auch in der config_priv.php entfernen:
+- $ReservierungsFile = "EV_Reservierung.json";
+- $WattReservierungsFile = "../Watt_Reservierung.json";
+- $EntLadeSteuerFile = "../Akku_EntLadeSteuerFile.json";
+
+Änderung in CONFIG/charge.ini, bitte auch in der CONFIG/charge_priv.ini ändern:
+
+- FesteLadeleistung = -1, Ladesteuerung steht auf AUTO (0 ist ab jetzt Ladeleistung Null, -1 ist automatische Ladewertberechnung)
+
+Folgende Einträge entfernt:
+- PV_ReservieungsDatei = Watt_Reservierung.json
+- Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
+
 **[0.23.0] – 2024-08.04**  
 
 **Umfangreiche Neukonzipierung der Ladewertberechnung**
