@@ -1,3 +1,7 @@
+**[0.23.1] – 2024-08.05**  
+
+FIX: RuntimeError: Server XXXX returned 400 in der Eigenverbrauchsoptimierung.
+
 **[0.23.0] – 2024-08.04**  
 
 **Umfangreiche Neukonzipierung der Ladewertberechnung**
