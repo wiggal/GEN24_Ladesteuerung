@@ -158,7 +158,7 @@ $LadesteuerungSetting_check = array(
 if (isset($EV_Reservierung['Steuerung'])) {
 if ($EV_Reservierung['Steuerung'] == 0) $LadesteuerungSetting_check['auto'] = 'checked';
 if ($EV_Reservierung['Steuerung'] == 1) $LadesteuerungSetting_check['aus'] = 'checked';
-if ($EV_Reservierung['Steuerung'] == 2) $LadesteuerungSetting_check['logging'] = 'checked';
+if ($EV_Reservierung['Steuerung'] == 2) $LadesteuerungSetting_check['analyse'] = 'checked';
 if ($EV_Reservierung['Steuerung'] == 3) $LadesteuerungSetting_check['logging'] = 'checked';
 if ($EV_Reservierung['Steuerung'] == 4) $LadesteuerungSetting_check['voll'] = 'checked';
 } else {
@@ -211,6 +211,8 @@ Ladesteuerung:<br>
 $(document).ready(function(){
 
  $(document).on('click', '#import_data', function(){
+  var ID = [];
+  var Schluessel = [];
   var Tag_Zeit = [];
   var Res_Feld1 = [];
   var Res_Feld2 = [];
@@ -221,17 +223,22 @@ $(document).ready(function(){
         }
     }
   if (js != "") {
-  Tag_Zeit.push("Steuerung");
+  ID.push("23:09");
+  Schluessel.push("ProgrammStrg");
+  Tag_Zeit.push("23:09");
   Res_Feld1.push(js_value);
+  Res_Feld2.push(0);
   //alert (Tag_Zeit + "\n" + Res_Feld1 );
   }
 
   $.ajax({
-   url:"steuern_speichern.php",
+   url:"SQL_speichern.php",
    method:"post",
-   data:{Tag_Zeit:Tag_Zeit, Steuerung:Res_Feld1},
+   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
+   //data:{Tag_Zeit:Tag_Zeit, Steuerung:Res_Feld1},
    success:function(data)
    {
+    //alert(data);
     location.reload();
    }
   })

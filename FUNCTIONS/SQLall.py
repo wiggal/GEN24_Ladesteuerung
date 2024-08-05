@@ -1,6 +1,7 @@
 # Funktionen für die Gen24_Ladesteuerung
 from datetime import datetime
 import sqlite3
+import json
     
 class sqlall:
     def __init__(self):
@@ -42,5 +43,29 @@ class sqlall:
         verbindung.close()
     
         return ()
+
+    def getSQLsteuerdaten(self, schluessel):
+        # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
+        verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
+        zeiger = verbindung.cursor()
+        sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2 from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
+
+        zeiger.execute(sql_anweisung)
+        rows = zeiger.fetchall()
+        data = dict()
+        columns = [col[0] for col in zeiger.description]
+        for row in rows:
+            data[row[0]] = dict()
+            data[row[0]][columns[1]] = row[1]
+            data[row[0]][columns[2]] = row[2]
+        record_json = json.dumps(data, indent=2)
+        record_json = json.loads(record_json)
+
+        verbindung.commit()
+        verbindung.close()
+        return(record_json)
+
+
+
     
     

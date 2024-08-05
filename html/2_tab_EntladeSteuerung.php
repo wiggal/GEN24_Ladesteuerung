@@ -186,11 +186,9 @@ input[type="radio"]{
    <br />
 
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
-$Akku_EntLadung = json_decode(file_get_contents($EntLadeSteuerFile), true);
+include 'SQL_steuerfunctions.php';
+$Akku_EntLadung = getSteuercodes('ENTLadeStrg');
+
 
 //$ManuelleSteuerung_check = array('E0', 'E20', 'E40', 'E60', 'E80', 'E100');
 $ManuelleSteuerung_check = array(
@@ -203,12 +201,12 @@ $ManuelleSteuerung_check = array(
 );
 
 if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0) $ManuelleSteuerung_check['E0'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.02) $ManuelleSteuerung_check['E20'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.04) $ManuelleSteuerung_check['E40'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.06) $ManuelleSteuerung_check['E60'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.08) $ManuelleSteuerung_check['E80'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1']/1000 == 0.1) $ManuelleSteuerung_check['E100'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0) $ManuelleSteuerung_check['E0'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 20) $ManuelleSteuerung_check['E20'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 40) $ManuelleSteuerung_check['E40'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 60) $ManuelleSteuerung_check['E60'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 80) $ManuelleSteuerung_check['E80'] = 'checked';
+if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 100) $ManuelleSteuerung_check['E100'] = 'checked';
 } else {
 $ManuelleSteuerung_check['E100'] = 'checked';
 }
@@ -220,11 +218,11 @@ $ManuelleSteuerung_check['E100'] = 'checked';
 <nobr>Feste Entladegrenze %</nobr>
 </div>
  <input type="radio" name="hausakkuentladung" id="E0" value="0" <?php echo $ManuelleSteuerung_check['E0'] ?>>
- <input type="radio" name="hausakkuentladung" id="E20" value="0.02" <?php echo $ManuelleSteuerung_check['E20'] ?> >
- <input type="radio" name="hausakkuentladung" id="E40" value="0.04" <?php echo $ManuelleSteuerung_check['E40'] ?> >
- <input type="radio" name="hausakkuentladung" id="E60" value="0.06" <?php echo $ManuelleSteuerung_check['E60'] ?> >
- <input type="radio" name="hausakkuentladung" id="E80" value="0.08" <?php echo $ManuelleSteuerung_check['E80'] ?> >
- <input type="radio" name="hausakkuentladung" id="E100" value="0.1" <?php echo $ManuelleSteuerung_check['E100'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E20" value="20" <?php echo $ManuelleSteuerung_check['E20'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E40" value="40" <?php echo $ManuelleSteuerung_check['E40'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E60" value="60" <?php echo $ManuelleSteuerung_check['E60'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E80" value="80" <?php echo $ManuelleSteuerung_check['E80'] ?> >
+ <input type="radio" name="hausakkuentladung" id="E100" value="100" <?php echo $ManuelleSteuerung_check['E100'] ?> >
    <label for="E0" class="option E0">
      <div class="dot"></div>
       <span>&nbsp;0</span>
@@ -315,17 +313,21 @@ echo "</tbody></table>\n";
 $(document).ready(function(){
 
  $(document).on('click', '#import_data', function(){
+  var ID = [];
+  var Schluessel = [];
   var Tag_Zeit = [];
   var Res_Feld1 = [];
   var Res_Feld2 = [];
   $('.Tag_Zeit').each(function(){
+   ID.push($(this).text());
+   Schluessel.push('ENTLadeStrg');
    Tag_Zeit.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
-   Res_Feld1.push($(this).text().replace(",", "."));
+   Res_Feld1.push($(this).text().replace(",", ".")*1000);
   });
   $('.Res_Feld2').each(function(){
-   Res_Feld2.push($(this).text().replace(",", "."));
+   Res_Feld2.push($(this).text().replace(",", ".")*1000);
   });
   je_value = 0.1;
   const je = document.querySelectorAll('input[name="hausakkuentladung"]');
@@ -335,6 +337,8 @@ $(document).ready(function(){
         }
     }
   if (je != "") {
+  ID.push("23:58");
+  Schluessel.push("ENTLadeStrg");
   Tag_Zeit.push("ManuelleEntladesteuerung");
   Res_Feld1.push(je_value);
   Res_Feld2.push(0);
@@ -342,11 +346,12 @@ $(document).ready(function(){
   }
 
   $.ajax({
-   url:"entlade_speichern.php",
+   url:"SQL_speichern.php",
    method:"post",
-   data:{Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
+   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
    success:function(data)
    {
+    //alert(data);
     location.reload();
    }
   })
