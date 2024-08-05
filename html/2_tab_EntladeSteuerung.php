@@ -68,113 +68,67 @@
 	position:relative;
 	top:1px;
   }
-  form.example {
-  /*
-  width: 100%;
-  float: left;
-  border:1px dotted red;
-  box-sizing: border-box;
-  margin: 15px 0;
-  */
+
+/* LADEGRENZBOX */
+.flex-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 15px;
-}
-/* RADIOBUTTON */
-.wrapper{
-  display: inline-flex;
+  width: 80%;
+  max-width: 800px;
+  margin: auto;
   background: #fff;
   align-items: center;
-  padding: 20px 15px;
+  padding: 5px 8px;
   box-shadow: 5px 5px 30px rgba(0,0,0,0.2);
 }
-.wrapper .option{
-  background: #fff;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  margin: 0 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 0 10px;
-  border: 2px solid lightgrey;
-  transition: all 0.3s ease;
+.flex-container > div {
+  background-color: #fff;
+  margin: 5px;
+  padding: 10px;
+  font-size: 30px;
 }
-.wrapper .option .dot{
-  height: 20px;
-  width: 20px;
-  background: #d9d9d9;
-  border-radius: 50%;
-  position: relative;
+/* END LADEGRENZBOX */
+
+/* CHECKBOX */
+input[type="checkbox"] {
+   width: 30px;
+   height: 35px;
+   accent-color: #58ACFA;
 }
-.wrapper .option .dot::before{
-  position: absolute;
-  content: "";
-  top: 4px;
-  left: 4px;
-  width: 12px;
-  height: 12px;
-  background: #58ACFA;
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(1.5);
-  transition: all 0.3s ease;
-}
-input[type="radio"]{
-  display: none;
-}
-#E0:checked:checked ~ .E0,
-#E20:checked:checked ~ .E20,
-#E40:checked:checked ~ .E40,
-#E60:checked:checked ~ .E60,
-#E80:checked:checked ~ .E80,
-#E100:checked:checked ~ .E100{
-  border-color: #58ACFA;
-  background: #58ACFA;
-}
-#E0:checked:checked ~ .E0 .dot,
-#E20:checked:checked ~ .E20 .dot,
-#E40:checked:checked ~ .E40 .dot,
-#E60:checked:checked ~ .E60 .dot,
-#E80:checked:checked ~ .E80 .dot,
-#E100:checked:checked ~ .E100 .dot{
-  background: #000;
-}
-#E0:checked:checked ~ .E0 .dot::before,
-#E20:checked:checked ~ .E20 .dot::before,
-#E40:checked:checked ~ .E40 .dot::before,
-#E60:checked:checked ~ .E60 .dot::before,
-#E80:checked:checked ~ .E80 .dot::before,
-#E100:checked:checked ~ .E100 .dot::before{
-  opacity: 1;
-  transform: scale(1);
-}
-.wrapper .option span{
-  font-family:Arial;
-  font-size:130%;
-  color: #808080;
-}
-.wrapper .beschriftung{
+
+/* ENDE CHECKBOX */
+
+label.slider {
+	background-color:#58ACFA;
+	border-radius:10px;
+	border:1px solid #18ab29;
+	display:inline-block;
+	cursor:pointer;
+	color:#000000;
+	font-family:Arial;
+	font-size:100%;
+	padding:5px 10px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #2f6627;
+    flex-shrink: 0;
+  }
+input.slider {
+   width: 100%;
+   height: 35px;
+   accent-color: #58ACFA;
+  }
+
+.hilfe{
   font-family:Arial;
   font-size:150%;
   color: #000000;
 }
-#E0:checked:checked ~ .E0 span,
-#E20:checked:checked ~ .E20 span,
-#E40:checked:checked ~ .E40 span,
-#E60:checked:checked ~ .E60 span,
-#E80:checked:checked ~ .E80 span,
-#E100:checked:checked ~ .E100 span{
-  color: #000;
+.sliderbeschriftung{
+  font-family:Arial;
+  font-weight: bold;
+  font-size:120%;
+  color: #000000;
 }
-.hilfe{
-    font-family:Arial;
-    font-size:150%;
-    color: #000000;
-    }
+
   </style>
  </head>
 
@@ -189,68 +143,30 @@ input[type="radio"]{
 include 'SQL_steuerfunctions.php';
 $Akku_EntLadung = getSteuercodes('ENTLadeStrg');
 
-
-//$ManuelleSteuerung_check = array('E0', 'E20', 'E40', 'E60', 'E80', 'E100');
-$ManuelleSteuerung_check = array(
-    "E0" => "",
-    "E20" => "",
-    "E40" => "",
-    "E60" => "",
-    "E80" => "",
-    "E100" => "",
-);
-
+$DB_ManuelleEntladesteuerung_wert = 0;
 if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 0) $ManuelleSteuerung_check['E0'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 20) $ManuelleSteuerung_check['E20'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 40) $ManuelleSteuerung_check['E40'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 60) $ManuelleSteuerung_check['E60'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 80) $ManuelleSteuerung_check['E80'] = 'checked';
-if ($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'] == 100) $ManuelleSteuerung_check['E100'] = 'checked';
-} else {
-$ManuelleSteuerung_check['E100'] = 'checked';
+    $DB_ManuelleEntladesteuerung_wert = $Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'];
 }
+
 ?>
 
-<center>
-<div class="wrapper">
-<div class="beschriftung" title="Entladung des Hausakkus in Prozent der WR-Leistung">
-<nobr>Feste Entladegrenze %</nobr>
+
+<!-- SLIDER -->
+<div style='text-align: center;'>
+  <p class="sliderbeschriftung">Feste Entladegrenze:</p>
+<div class="flex-container">
+    <div>
+<label class="slider" id="sliderlabel" for="slider"><?php echo $DB_ManuelleEntladesteuerung_wert ?>%</label>
+
+    </div>
+    <div style="flex-grow: 1">
+<input class="slider" id="slider" name="hausakkuentladung" type="range" min="0" max="100" step="5" value="<?php echo $DB_ManuelleEntladesteuerung_wert ?>" oninput="sliderlabel.innerText = this.value + '%';">
+    </div>
 </div>
- <input type="radio" name="hausakkuentladung" id="E0" value="0" <?php echo $ManuelleSteuerung_check['E0'] ?>>
- <input type="radio" name="hausakkuentladung" id="E20" value="20" <?php echo $ManuelleSteuerung_check['E20'] ?> >
- <input type="radio" name="hausakkuentladung" id="E40" value="40" <?php echo $ManuelleSteuerung_check['E40'] ?> >
- <input type="radio" name="hausakkuentladung" id="E60" value="60" <?php echo $ManuelleSteuerung_check['E60'] ?> >
- <input type="radio" name="hausakkuentladung" id="E80" value="80" <?php echo $ManuelleSteuerung_check['E80'] ?> >
- <input type="radio" name="hausakkuentladung" id="E100" value="100" <?php echo $ManuelleSteuerung_check['E100'] ?> >
-   <label for="E0" class="option E0">
-     <div class="dot"></div>
-      <span>&nbsp;0</span>
-      </label>
-   <label for="E20" class="option E20">
-     <div class="dot"></div>
-      <span>&nbsp;20</span>
-      </label>
-   <label for="E40" class="option E40">
-     <div class="dot"></div>
-      <span>&nbsp;40</span>
-   </label>
-   <label for="E60" class="option E60">
-     <div class="dot"></div>
-      <span>&nbsp;60</span>
-   </label>
-   <label for="E80" class="option E80">
-     <div class="dot"></div>
-      <span>&nbsp;80</span>
-   </label>
-   <label for="E100" class="option E100">
-     <div class="dot"></div>
-      <span>&nbsp;100</span>
-   </label>
 </div>
-</center>
-   <br />
-   <div id="csv_file_data">
+<!-- ENDE SLIDER -->
+
+<br /><div id="csv_file_data">
 
 <?php
 echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze Entladung(KW)</th><th>Feste Entladegrenze(KW)</th></tr>";
@@ -331,11 +247,8 @@ $(document).ready(function(){
   });
   je_value = 0.1;
   const je = document.querySelectorAll('input[name="hausakkuentladung"]');
-  for(var i=0; i < je.length; i++){
-        if(je[i].checked == true){
-            je_value = je[i].value;
-        }
-    }
+  je_value = je[0].value;
+
   if (je != "") {
   ID.push("23:58");
   Schluessel.push("ENTLadeStrg");
