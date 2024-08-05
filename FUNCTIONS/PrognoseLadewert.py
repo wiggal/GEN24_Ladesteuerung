@@ -330,5 +330,5 @@ class progladewert:
         # Einspeisung muss immer Minus sein!!
         Eigen_Opt_Std_neu = abs(Eigen_Opt_Std_neu) * -1
     
-        return PrognoseMorgen, Eigen_Opt_Std, Eigen_Opt_Std_neu, Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt
+        return PrognoseMorgen, Eigen_Opt_Std, int(Eigen_Opt_Std_neu), Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt
     
