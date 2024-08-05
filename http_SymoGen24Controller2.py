@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
+import json
 import requests
 from ping3 import ping
 from sys import argv
@@ -15,6 +16,7 @@ if __name__ == '__main__':
         basics = FUNCTIONS.functions.basics()
         config = basics.loadConfig(['default', 'charge'])
         request = FUNCTIONS.httprequest.request()
+        sqlall = FUNCTIONS.SQLall.sqlall()
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
@@ -34,7 +36,7 @@ if __name__ == '__main__':
         # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
         SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
         print_level = basics.getVarConf('env','print_level','eval')
-        Parameter = SettingsPara.getParameter(argv, 'Prog_Steuerung.json')
+        Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
         Ausgabe_Parameter = ''
         if len(argv) > 1:
             argv[1] = Parameter[0]
@@ -124,8 +126,14 @@ if __name__ == '__main__':
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     reservierungdata = {}
                     if  PV_Reservierung_steuern == 1:
-                        Reservierungsdatei = basics.getVarConf('Reservierung','PV_ReservieungsDatei','str')
-                        reservierungdata = SettingsPara.loadPVReservierung(Reservierungsdatei)
+                        reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
+                        # Spalte 1 und 2 aufaddieren
+                        reservierungdata = dict()
+                        for key in reservierungdata_tmp:
+                            Res_Feld = 0
+                            for key2 in reservierungdata_tmp[key]:
+                                Res_Feld += reservierungdata_tmp[key][key2]
+                            reservierungdata[key] = Res_Feld
 
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     newPercent_schreiben = 0
@@ -186,13 +194,13 @@ if __name__ == '__main__':
 
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
-                    if (PV_Reservierung_steuern == 1) and (reservierungdata.get('ManuelleSteuerung')):
-                        FesteLadeleistung = MaxLadung * reservierungdata.get('ManuelleSteuerung')
-                        if (reservierungdata.get('ManuelleSteuerung') != 0):
-                            MaxladungDurchPV_Planung = "Manuelle Ladesteuerung in PV-Planung ausgewählt."
+                    ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
+                    if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
+                        FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
+                        MaxladungDurchPV_Planung = "Manuelle Ladesteuerung in PV-Planung ausgewählt."
 
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
-                    if FesteLadeleistung > 0:
+                    if FesteLadeleistung >= 0:
                         DATA = progladewert.setLadewert(FesteLadeleistung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                         aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
@@ -359,7 +367,6 @@ if __name__ == '__main__':
                             print("LadewertGrund: ", LadewertGrund)
                             print("Bisheriger Ladewert/Watt:   ", alterLadewert)
                             print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
-                            # print("newPercent_schreiben:       ", newPercent_schreiben)
                             print()
                         except Exception as e:
                             print()
@@ -387,9 +394,8 @@ if __name__ == '__main__':
                             if element['Active'] == True and element['ScheduleType'] == 'DISCHARGE_MAX':
                                 BatteryMaxDischarge = element['Power']
 
-                        # EntladeSteuerungFile lesen
-                        EntladeSteuerungFile = basics.getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
-                        entladesteurungsdata = SettingsPara.loadPVReservierung(EntladeSteuerungFile)
+                        # EntladeSteuerungdaten lesen
+                        entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
                             MaxEntladung = int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100)
