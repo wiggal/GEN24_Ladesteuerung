@@ -18,18 +18,16 @@ if __name__ == '__main__':
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
-        # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
+        # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
         SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
         print_level = basics.getVarConf('env','print_level','eval')
         Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
+        Options = Parameter[2]
+        
         Ausgabe_Parameter = ''
-        if len(argv) > 1:
-            argv[1] = Parameter[0]
-        else:
-            argv.append(Parameter[0])
         if(Parameter[1] != "" and print_level >= 1):
             Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
-            if(Parameter[1] == "AUS"):
+            if(Parameter[0] == "exit0"):
                 # Ladungsspeichersteuerungsmodus deaktivieren 
                 host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
                 host_port = basics.getVarConf('gen24','port', 'str')
@@ -37,9 +35,10 @@ if __name__ == '__main__':
                 if gen24.read_data('StorageControlMode') != 0:
                     valueNew = gen24.write_data('StorageControlMode', 0 )
                     print("StorageControlMode 0 neu geschrieben.")
+            if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
                 print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
                 exit()
-                
+                # Ende Programm
 
         host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
         host_port = basics.getVarConf('gen24','port', 'str')
@@ -125,8 +124,11 @@ if __name__ == '__main__':
                         reservierungdata = dict()
                         for key in reservierungdata_tmp:
                             Res_Feld = 0
+                            i = 0
                             for key2 in reservierungdata_tmp[key]:
-                                Res_Feld += reservierungdata_tmp[key][key2]
+                                if(i<2):
+                                    Res_Feld += reservierungdata_tmp[key][key2]
+                                i += 1
                             reservierungdata[key] = Res_Feld
 
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
@@ -231,8 +233,8 @@ if __name__ == '__main__':
                     else:
 
                         # Schaltverzögerung für MindBattLad
-                        if (alterLadewert+2 > MaxLadung):
-                            MindBattLad = MindBattLad +5
+                        if (alterLadewert + 2 > MaxLadung):
+                            MindBattLad = MindBattLad + 5
 
                         if ((BattStatusProz < MindBattLad)):
                             # volle Ladung ;-)
@@ -386,8 +388,8 @@ if __name__ == '__main__':
                     DEBUG_Ausgabe+="\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachUnten:  " + str(WRSchreibGrenze_nachUnten) + "W"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W"
-                    ### AB HIER SCHARF wenn Argument "schreiben" übergeben
 
+                    ### AB HIER SCHARF wenn Argument "schreiben" übergeben
                     bereits_geschrieben = 0
                     Schreib_Ausgabe = ""
                     Push_Schreib_Ausgabe = ""
@@ -395,21 +397,21 @@ if __name__ == '__main__':
                     if newPercent_schreiben == 1:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
                         DEBUG_Ausgabe+="\nDEBUG Folgender Ladewert neu zum Schreiben: " + str(newPercent)
-                        if len(argv) > 1 and (argv[1] == "schreiben"):
+                        if ('laden' in Options):
                             valueNew = gen24.write_data('BatteryMaxChargePercent', newPercent)
                             bereits_geschrieben = 1
                             Schreib_Ausgabe = Schreib_Ausgabe + "Am WR geschrieben: " + str(newPercent / 100) + "% = " + str(aktuellerLadewert) + "W\n"
                             Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
                             DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(valueNew)
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Ladesteuerung NICHT geschrieben, da Option \"laden\" NICHT gesetzt!\n"
                     else:
                         Schreib_Ausgabe = Schreib_Ausgabe + "Änderung kleiner Schreibgrenze!\n"
 
                     # Ladungsspeichersteuerungsmodus aktivieren wenn nicht aktiv
                     # kann durch Fallback (z.B. nachts) erfordelich sein, ohne dass Änderung an der Ladeleistung nötig ist
                     if gen24.read_data('StorageControlMode') != 3:
-                        if len(argv) > 1 and (argv[1] == "schreiben"):
+                        if (Options != []):
                             DEBUG_Ausgabe += "\nDEBUG StorageControlMode 3 schreiben! "
                             valueNew = gen24.write_data('StorageControlMode', 3 )
                             bereits_geschrieben = 1
@@ -417,7 +419,7 @@ if __name__ == '__main__':
                             Push_Schreib_Ausgabe += "StorageControlMode 3 neu geschrieben.\n"
                             DEBUG_Ausgabe+="\nDEBUG Meldung bei StorageControlMode schreiben: " + str(valueNew)
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da KEINE Option zum Schreiben gesetzt.\n"
 
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
@@ -487,14 +489,14 @@ if __name__ == '__main__':
                         Schreib_Ausgabe = ""
 
                         if (Neu_BatteryMaxDischargePercent != BatteryMaxDischargePercent):
-                            if len(argv) > 1 and (argv[1] == "schreiben"):
+                            if ('entladen' in Options):
                                 valueNew = gen24.write_data('BatteryMaxDischargePercent', Neu_BatteryMaxDischargePercent * 100)
                                 bereits_geschrieben = 1
                                 DEBUG_Ausgabe+="\nDEBUG Meldung Entladewert schreiben: " + str(valueNew)
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladung: " + str(Neu_BatteryMaxDischargePercent) + "%\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladung wurde NICHT " + str(Neu_BatteryMaxDischargePercent) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Unterschied Alte und Neue Werte der Batterieentladung kleiner ("+ str(WREntladeSchreibGrenze_Watt) + "W), NICHTS zu schreiben!!\n"
 
@@ -526,14 +528,14 @@ if __name__ == '__main__':
                         Schreib_Ausgabe = ""
 
                         if (Neu_Battery_MinRsvPct != Battery_MinRsvPct):
-                            if len(argv) > 1 and (argv[1] == "schreiben"):
+                            if ('entladen' in Options):
                                 valueNew = gen24.write_data('Battery_MinRsvPct', Neu_Battery_MinRsvPct * 100)
                                 bereits_geschrieben = 1
                                 DEBUG_Ausgabe+="\nDEBUG Meldung Entladegrenze schreiben: " + str(valueNew)
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladebegrenzung: " + str(Neu_Battery_MinRsvPct) + "%\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Für Batterieentladebegrenzung wurde NICHT " + str(Neu_Battery_MinRsvPct) +"% geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         else:
                             Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung hat sich nicht verändert, NICHTS zu schreiben!!\n"
 
@@ -564,24 +566,24 @@ if __name__ == '__main__':
                             # Zur vollen Fallbackstunde wenn noch kein Schreibzugriff war Fallback schreiben
                             if Akt_Zeit_Rest == 0 or akt_Fallback_time != Fallback_Sekunden:
                                 if bereits_geschrieben == 0 or akt_Fallback_time != Fallback_Sekunden:
-                                    if len(argv) > 1 and (argv[1] == "schreiben"):
+                                    if (Options != []):
                                         fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', Fallback_Sekunden)
                                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback " + str(Fallback_Sekunden) + " geschrieben.\n"
                                         DEBUG_Ausgabe+="\nDEBUG Meldung FALLBACK schreiben: " + str(fallback_msg)
                                     else:
-                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
+                                        Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da KEINE Option zum Schreiben gesetzt.\n"
                                 else:
                                     Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback wurde NICHT geschrieben, da bereits auf den WR geschrieben wurde.\n"
 
                         else:
                             Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback ist NICHT eingeschaltet.\n"
-                            if akt_Fallback_time != 0:
-                                if len(argv) > 1 and (argv[1] == "schreiben"):
+                            if akt_Fallback_time != 1:
+                                if (Options != []):
                                     fallback_msg = gen24.write_data('InOutWRte_RvrtTms_Fallback', 0)
                                     Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung geschrieben.\n"
                                     DEBUG_Ausgabe+="\nDEBUG Meldung FALLBACK Deaktivierung schreiben: " + str(fallback_msg)
                                 else:
-                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung NICHT geschrieben, da NICHT \"schreiben\" übergeben wurde:\n"
+                                    Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "Fallback Deaktivierung NICHT geschrieben, da KEINE Option zum Schreiben gesetzt.\n"
 
                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "InOutWRte_RvrtTms_Fallback: " + str(gen24.read_data('InOutWRte_RvrtTms_Fallback')) + "\n"
                         Fallback_Schreib_Ausgabe = Fallback_Schreib_Ausgabe + "StorageControlMode:    " + str(gen24.read_data('StorageControlMode')) + "\n"
@@ -597,14 +599,14 @@ if __name__ == '__main__':
                     Logging_ein = basics.getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
                         Logging_Schreib_Ausgabe = ""
-                        if len(argv) > 1 and (argv[1] == "schreiben" or argv[1] == "logging"):
+                        if ('logging' in Options):
                             Logging_file = basics.getVarConf('Logging','Logging_file','str')
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
                             sqlall.save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
                             API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
                             Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:
-                            Logging_Schreib_Ausgabe = "Logging wurde NICHT gespeichert, da NICHT \"logging\" oder \"schreiben\" übergeben wurde:\n" 
+                            Logging_Schreib_Ausgabe = "Logging NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n"
 
                         if print_level >= 1:
                             print(Logging_Schreib_Ausgabe)
