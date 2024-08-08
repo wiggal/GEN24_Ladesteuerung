@@ -176,15 +176,16 @@ echo "\n";
 $Rest_KW = 0;
 $Res_Feld1_Watt = 0;
 $Res_Feld2_Watt = 0;
+$Uhrzeiten = array("00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00");
 // Variablen definieren ENDE
 
 
-foreach($Akku_EntLadung AS $date => $Watt) {
+foreach($Uhrzeiten AS $date) {
 
 if ($date == 'ManuelleEntladesteuerung') break;
 
-if (isset($Watt['Res_Feld1']) and $Watt['Res_Feld1'] <> ""){
-    $Res_Feld1_wert = (float) $Watt['Res_Feld1']/1000;
+if (isset($Akku_EntLadung[$date]['Res_Feld1']) and $Akku_EntLadung[$date]['Res_Feld1'] <> ""){
+    $Res_Feld1_wert = (float) $Akku_EntLadung[$date]['Res_Feld1']/1000;
 } else {
     $Res_Feld1_wert = 0;
 }
@@ -194,8 +195,8 @@ $Res_Feld1_Watt = number_format($Res_Feld1_wert, 1);
 $Res_Feld1_Watt = "" ;
 }
 
-if (isset($Watt['Res_Feld2']) and $Watt['Res_Feld2'] <> ""){
-    $Res_Feld2_wert = (float) $Watt['Res_Feld2']/1000;
+if (isset($Akku_EntLadung[$date]['Res_Feld2']) and $Akku_EntLadung[$date]['Res_Feld2'] <> ""){
+    $Res_Feld2_wert = (float) $Akku_EntLadung[$date]['Res_Feld2']/1000;
 } else {
     $Res_Feld2_wert = 0;
 }
@@ -215,7 +216,7 @@ echo '</td><td bgcolor=#F1F3F4 class="Res_Feld2" contenteditable="true">';
 echo $Res_Feld2_Watt;
 echo "</td></tr>\n";
 
-} //foreach($Prognose....
+} //foreach($Akku_EntLadung....
 
 echo "</tbody></table>\n";
 ?>
@@ -234,9 +235,11 @@ $(document).ready(function(){
   var Tag_Zeit = [];
   var Res_Feld1 = [];
   var Res_Feld2 = [];
+  var Options = [];
   $('.Tag_Zeit').each(function(){
    ID.push($(this).text());
    Schluessel.push('ENTLadeStrg');
+   Options.push('');
    Tag_Zeit.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
@@ -255,13 +258,14 @@ $(document).ready(function(){
   Tag_Zeit.push("ManuelleEntladesteuerung");
   Res_Feld1.push(je_value);
   Res_Feld2.push(0);
+  Options.push('');
   //alert (Tag_Zeit + "\n" + Res_Feld1 + "\n" + Res_Feld2);
   }
 
   $.ajax({
    url:"SQL_speichern.php",
    method:"post",
-   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
+   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2, Options:Options},
    success:function(data)
    {
     //alert(data);

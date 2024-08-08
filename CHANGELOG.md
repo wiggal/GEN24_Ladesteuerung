@@ -17,6 +17,9 @@ Folgende Einträge entfernt:
 - PV_ReservieungsDatei = Watt_Reservierung.json
 - Akku_EntladeSteuerungsFile = Akku_EntLadeSteuerFile.json
 
+**Laden und Entladen des Akkus in Settings getrennt voneinander ein- bzw. ausschalten**
+
+
 **[0.23.1] – 2024-08.05**  
 
 FIX: RuntimeError: Server XXXX returned 400 in der Eigenverbrauchsoptimierung.

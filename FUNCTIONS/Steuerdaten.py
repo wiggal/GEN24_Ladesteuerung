@@ -27,18 +27,33 @@ class readcontroldata:
         # Prog_Steuerung.json lesen
         Prog_Steuer_code_tmp = sqlall.getSQLsteuerdaten(schluessel)
         Prog_Steuer_code = list(Prog_Steuer_code_tmp.values())[0]['Res_Feld1']
-        # print("Prog_Steuer_code: ", Prog_Steuer_code)
+        Optionen_sql = list(Prog_Steuer_code_tmp.values())[0]['Options']
+        Optionen = []
+        # Aus Optionen array erzeugen
+        for i in Optionen_sql.split(":"):
+            Optionen.append(i)
+        # Options nur bei Ladesteuerung Code 4 füllen
+        Options = []
+
+        # wenn WebUI-Settings ausgeschaltet Aufrufparameter (schreiben, logging) umsetzen
+        if Prog_Steuer_code == 0:
+            if Parameter == 'logging':
+                Options = ['logging']
+            if Parameter == 'schreiben':
+                Options = ['logging','laden','entladen','optimierung']
+        # Ab hier WebUI-Settings
         if Prog_Steuer_code == 1:
-            Meldung = "AUS"
-            Parameter = 'exit'
+            Meldung = "AUS (WR löschen)"
+            Parameter = 'exit0'
         if Prog_Steuer_code == 2:
-            Meldung = "Analyse in Crontab.log"
-            Parameter = 'analyse'
+            Meldung = "AUS (WR belassen)"
+            Parameter = 'exit1'
         if Prog_Steuer_code == 3:
-            Meldung = "NUR Logging"
+            Meldung = "Analyse in Crontab.log"
             Parameter = 'logging'
         if Prog_Steuer_code == 4:
-            Meldung = "WR-Steuerung und Logging"
+            Meldung = "Ladesteuerung:" + str(Optionen)
             Parameter = 'schreiben'
-        return(Parameter, Meldung)
+            Options = Optionen
+        return(Parameter, Meldung, Options)
     
