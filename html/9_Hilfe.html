@@ -35,12 +35,20 @@
 <br/>
 <br/>
 <table>
-<tr> <th>Ladesteuerung</th><th>Erläuterung</th> </tr>
-<tr> <td><b>unverändert lassen </b></td>  <td>Die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (z.B.: logging, schreiben). Die Settings haben keinen Einfluss auf die Programmsteuerung</td> </tr>
-<tr> <td><b>AUS</b></td>  <td>Die Skripte werden beendet, und die bisherigen Steuerungswerte werden deaktiviert.</td> </tr>
-<tr> <td><b>NUR Analyse in Crontab.log</b></td><td>Die Skripte berechnen die Ladewerte, und geben die Ergebnisse nur in die Crontab.log aus.</td> </tr>
-<tr> <td><b>NUR Logging</b></td><td>Die Skripte führen nur das Logging für die Diagramme durch (wie mit dem Parameter 'logging').</td> </tr>
-<tr> <td><b>WR-Steuerung und Logging</b></td><td>Die Skripte schreiben die berechneten Ladewerte auf den WR und machen das Logging (wie mit dem Parameter 'schreiben').</td> </tr>
+<tr style="font-size:150%" > <th colspan="2">Ladesteuerung</th><th>Erläuterung</th> </tr>
+<tr> <td colspan="2"><b>WebUI-Settings ausschalten</b></td>  <td>Die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (z.B.: logging, schreiben). Die Settings haben keinen Einfluss auf die Programmsteuerung</td> </tr>
+<tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings löschen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>gelöscht</b>.</td> </tr>
+<tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings belassen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>belassen</b>.</td> </tr>
+<tr> <td colspan="2"><b>Nur Analyse in Crontab.log</b></td><td>Die Skripte berechnen die Steuerungswerte, und schreiben sie in die Crontab.log. Am Wechselrichter wird nichts geschrieben</td> </tr>
+<tr> <td colspan="2"><b>Ladesteuerung nach folgenden Optionen:</b></td><td>Die Skripte laufen mit den nachfolgend ausgewählten Optionen.</td> </tr>
+<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td><b>Logging</b></td><td>Das Logging wird geschrieben.</td> </tr>
+<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td><b>Ladesteuerung</b></td><td>Die Ladesteuerung wird oberhalb der Schreibgrenzen geschrieben.</td> </tr>
+<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td><b>Entladesteuerung</b></td><td>Die Entladesteuerung wird oberhalb der Schreibgrenzen geschrieben.</td> </tr>
+<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td><b>Eigenverbrauchs-Optimierung</b></td><td>Die Eigenverbrauchs-Optimierung wird oberhalb der Schreibgrenzen geschrieben.</td> </tr>
 </table>
 
 <br/><br/>
