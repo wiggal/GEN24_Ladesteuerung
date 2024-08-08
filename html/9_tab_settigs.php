@@ -3,10 +3,6 @@
  <head>
   <title>Einstellungen</title>
   <script src="jquery.min.js"></script>
-    <!--
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-  //-->
   <style>
   .box
   {
@@ -38,174 +34,141 @@
 	position:relative;
 	top:1px;
   }
-/* RADIOBUTTON */
-.wrapper{
-  width: 500px;
+
+/* LADEGRENZE */
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  width: 6%;
+  min-width: 600px;
+  margin: auto;
   background: #fff;
-  align-items: center;
-  padding: 20px 15px;
+  align-items: left;
+  padding: 25px 28px;
   box-shadow: 5px 5px 30px rgba(0,0,0,0.2);
 }
-.wrapper .option{
-  background: #fff;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  margin: 0px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 10px 10px;
-  border: 2px solid lightgrey;
-  transition: all 0.3s ease;
+/* END LADEGRENZE */
+
+/* Radiobuttons */
+input[type="radio"] {
+   width: 30px;
+   height: 30px;
+   accent-color: #FB5555;
 }
-.wrapper .option .dot{
-  height: 20px;
-  width: 20px;
-  background: #d9d9d9;
-  border-radius: 50%;
-  position: relative;
+/* ENDE Radiobuttons */
+
+/* CHECKBOX */
+input[type="checkbox"] {
+   width: 30px;
+   height: 30px;
+   accent-color: #FB5555;
 }
-.wrapper .option .dot::before{
-  position: absolute;
-  content: "";
-  top: 4px;
-  left: 4px;
-  width: 12px;
-  height: 12px;
-  background: #FB5555;
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(1.5);
-  transition: all 0.3s ease;
+.auswahllabel {
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  padding: 5px 8px;
+  display: grid;
+  justify-items: left;
+  grid-template-columns: 1.5em auto;
+  grid-gap: 0.5em 0.5em;
 }
-input[type="radio"]{
-  display: none;
-}
-#auto:checked:checked ~ .auto,
-#aus:checked:checked ~ .aus,
-#analyse:checked:checked ~ .analyse,
-#logging:checked:checked ~ .logging,
-#voll:checked:checked ~ .voll{
-  border-color: #FB5555;
-  background: #FB5555;
-}
-#auto:checked:checked ~ .auto .dot,
-#aus:checked:checked ~ .aus .dot,
-#analyse:checked:checked ~ .analyse .dot,
-#logging:checked:checked ~ .logging .dot,
-#voll:checked:checked ~ .voll .dot{
-  background: #000;
-}
-#auto:checked:checked ~ .auto .dot::before,
-#aus:checked:checked ~ .aus .dot::before,
-#analyse:checked:checked ~ .analyse .dot::before,
-#logging:checked:checked ~ .logging .dot::before,
-#voll:checked:checked ~ .voll .dot::before{
-  opacity: 1;
-  transform: scale(1);
-}
-.wrapper .option span{
-  font-family:Arial;
-  font-size:130%;
-  color: #808080;
-}
-.wrapper .beschriftung{
+/* ENDE CHECKBOX */
+
+.hilfe{
   font-family:Arial;
   font-size:150%;
   color: #000000;
 }
-#auto:checked:checked ~ .auto span,
-#aus:checked:checked ~ .aus span,
-#analyse:checked:checked ~ .analyse span,
-#logging:checked:checked ~ .logging span,
-#voll:checked:checked ~ .voll span{
-  color: #000;
-}
-.hilfe{
+.containerbeschriftung{
   font-family:Arial;
-  font-size:150%;
+  font-weight: bold;
+  font-size:120%;
   color: #000000;
 }
 
   </style>
  </head>
 
- <body>
+ <body onload="disablecheckboxes()">
  <div class="hilfe" align="right"> <a href="9_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
    <br />
    <div class="hilfe" align="center"><p>
-   <b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim Punkt 'unverändert lassen', die Aufrufparameter (z.B. vom Cronjob)!
+   <b>ACHTUNG:</b> Wenn die WebUI-Settings nicht ausgeschaltet sind, 
+   <br>überschreiben sie die Aufrufparameter des Skriptes (z.B. vom Cronjob)!
    </p></div>
    <br />
   </div>
 
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
+# DB-Eintraege lesen
+include 'SQL_steuerfunctions.php';
+$EV_Reservierung = getSteuercodes('ProgrammStrg');
+
+#Radiobutton wie in DB setzen
+$Setting_radio = array();
+for ($i = 0; $i <= 4; $i++) {
+    if ($EV_Reservierung['23:09']['Res_Feld1'] == $i){
+        $Setting_radio[$i] = 'checked';
+    } else {
+        $Setting_radio[$i] = '';
+    }
 }
-$EV_Reservierung = json_decode(file_get_contents('../Prog_Steuerung.json'), true);
 
-$LadesteuerungSetting_check = array(
-    "auto" => "",
-    "aus" => "",
-    "analyse" => "",
-    "logging" => "",
-    "voll" => "",
-);
-
-if (isset($EV_Reservierung['Steuerung'])) {
-if ($EV_Reservierung['Steuerung'] == 0) $LadesteuerungSetting_check['auto'] = 'checked';
-if ($EV_Reservierung['Steuerung'] == 1) $LadesteuerungSetting_check['aus'] = 'checked';
-if ($EV_Reservierung['Steuerung'] == 2) $LadesteuerungSetting_check['analyse'] = 'checked';
-if ($EV_Reservierung['Steuerung'] == 3) $LadesteuerungSetting_check['logging'] = 'checked';
-if ($EV_Reservierung['Steuerung'] == 4) $LadesteuerungSetting_check['voll'] = 'checked';
-} else {
-$LadesteuerungSetting_check['auto'] = 'checked';
+#Checkbox wie in DB setzen
+$CheckOptionsDB = explode(":", $EV_Reservierung['23:09']['Options']);
+$CheckOptionsALL = array("logging", "laden", "entladen", "optimierung");
+$Setting_check = array();
+foreach ($CheckOptionsALL as &$option) {
+    if (in_array($option, $CheckOptionsDB)) {
+        $Setting_check[$option] = 'checked';
+    } else {
+        $Setting_check[$option] = '';
+    }
 }
 ?>
 
-<center>
-<div class="wrapper">
-<div class="beschriftung" title='Hier kann ein vom Aufruf abweichender Programmablauf gewählt werden.'>
-Ladesteuerung:<br>
-&nbsp;
-<br\>
-</div>
- <input type="radio" name="hausakkuladung" id="auto" value="0" <?php echo $LadesteuerungSetting_check['auto'] ?>>
- <input type="radio" name="hausakkuladung" id="aus" value="1" <?php echo $LadesteuerungSetting_check['aus'] ?> >
- <input type="radio" name="hausakkuladung" id="analyse" value="2" <?php echo $LadesteuerungSetting_check['analyse'] ?> >
- <input type="radio" name="hausakkuladung" id="logging" value="3" <?php echo $LadesteuerungSetting_check['logging'] ?> >
- <input type="radio" name="hausakkuladung" id="voll" value="4" <?php echo $LadesteuerungSetting_check['voll'] ?> >
-   <label for="auto" class="option auto">
-     <div class="dot"></div>
-      <span>&nbsp;unverändert lassen</span>
-      </label>
-   <label for="aus" class="option aus">
-     <div class="dot"></div>
-      <span>&nbsp;AUS</span>
-      </label>
-   <label for="analyse" class="option analyse">
-     <div class="dot"></div>
-      <span>&nbsp;NUR Analyse in Crontab.log</span>
-      </label>
-   <label for="logging" class="option logging">
-     <div class="dot"></div>
-      <span>&nbsp;NUR Logging</span>
-   </label>
-   <label for="voll" class="option voll">
-     <div class="dot"></div>
-      <span>&nbsp;WR-Steuerung und Logging</span>
-   </label>
-</div>
-</center>
-   <br />
-   <div id="csv_file_data">
-   <br />
-  </div>
-  <div align="center"><button type="button" id="import_data" class="speichern">Einstellungen ==&#62;&#62; speichern</button></div>
+<div style='text-align: center;'>
+  <p class="containerbeschriftung">Ladesteuerung:</p>
+<div class="flex-container">
+ <label class="auswahllabel" ><input type="radio" name="hausakkuladung" id="steuer0" value="0" onclick="disablecheckboxes('steuer0')" <?php echo $Setting_radio['0'] ?>>WebUI-Settings ausschalten</label>
+ <label class="auswahllabel" ><input type="radio" name="hausakkuladung" id="steuer1" value="1" onclick="disablecheckboxes('steuer1')" <?php echo $Setting_radio['1'] ?>>Ladesteuerung AUS (WR-Settings löschen)</label>
+ <label class="auswahllabel" ><input type="radio" name="hausakkuladung" id="steuer2" value="2" onclick="disablecheckboxes('steuer2')" <?php echo $Setting_radio['2'] ?>>Ladesteuerung AUS (WR-Settings belassen)</label>
+ <label class="auswahllabel" ><input type="radio" name="hausakkuladung" id="steuer3" value="3" onclick="disablecheckboxes('steuer3')" <?php echo $Setting_radio['3'] ?>>Nur Analyse in Crontab.log</label>
+ <label class="auswahllabel" ><input type="radio" name="hausakkuladung" id="steuer4" value="4" onclick="disablecheckboxes('steuer4')" <?php echo $Setting_radio['4'] ?>>Ladesteuerung nach folgenden Optionen:</label>
 
+ <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer5" value="logging" <?php echo $Setting_check['logging'] ?> >Logging</label>
+ <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer6" value="laden" <?php echo $Setting_check['laden'] ?> >Ladesteuerung</label>
+ <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer7" value="entladen" <?php echo $Setting_check['entladen'] ?> >Entladesteuerung</label>
+ <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer8" value="optimierung" <?php echo $Setting_check['optimierung'] ?> >Eigenverbrauchs-Optimierung</label>
+</div>
+</div>
+
+
+<br />
+<div align="center"><button type="button" id="import_data" class="speichern">Einstellungen ==&#62;&#62; speichern</button></div>
+
+  <script>
+function disablecheckboxes() {
+  var auswahl = document.querySelectorAll("input[name='hausakkuladung']");
+  if (auswahl[4].checked == true){
+    document.getElementById("steuer5").disabled = false;
+    document.getElementById("steuer6").disabled = false;
+    document.getElementById("steuer7").disabled = false;
+    document.getElementById("steuer8").disabled = false;
+  } else {
+    document.getElementById("steuer5").checked = false;
+    document.getElementById("steuer5").disabled = true;
+    document.getElementById("steuer6").checked = false;
+    document.getElementById("steuer6").disabled = true;
+    document.getElementById("steuer7").checked = false;
+    document.getElementById("steuer7").disabled = true;
+    document.getElementById("steuer8").checked = false;
+    document.getElementById("steuer8").disabled = true;
+  }
+}
+</script>
 <script>
 
 $(document).ready(function(){
@@ -216,25 +179,41 @@ $(document).ready(function(){
   var Tag_Zeit = [];
   var Res_Feld1 = [];
   var Res_Feld2 = [];
+  var Options = [];
+  var checkitem = "";
   const js = document.querySelectorAll('input[name="hausakkuladung"]');
   for(var i=0; i < js.length; i++){
         if(js[i].checked == true){
             js_value = js[i].value;
         }
     }
+  if (js_value == "4") {
+  // HIER OPTONEN ZUSAMMENBAUEN
+  const checkboxes = document.getElementsByName ("hausakkuladung.option");
+  var trenner = "";
+
+   checkboxes.forEach ((item) => {
+    if (item.checked === true) {
+        checkitem += trenner + item.value;
+        trenner = ":";
+    }
+   })
+  }
+
   if (js != "") {
   ID.push("23:09");
   Schluessel.push("ProgrammStrg");
   Tag_Zeit.push("23:09");
   Res_Feld1.push(js_value);
   Res_Feld2.push(0);
+  Options.push(checkitem);
   //alert (Tag_Zeit + "\n" + Res_Feld1 );
   }
 
   $.ajax({
    url:"SQL_speichern.php",
    method:"post",
-   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
+   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2, Options:Options},
    //data:{Tag_Zeit:Tag_Zeit, Steuerung:Res_Feld1},
    success:function(data)
    {

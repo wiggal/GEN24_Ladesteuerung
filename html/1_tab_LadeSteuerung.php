@@ -83,6 +83,14 @@ input[type="checkbox"] {
    height: 35px;
    accent-color: #44c767;
 }
+.checkboxlabel {
+  font-family: system-ui, sans-serif;
+  font-size: 2rem;
+  line-height: 1.4;
+  display: grid;
+  justify-items: left;
+  grid-template-columns: 1.3em auto;
+}
 
 /* ENDE CHECKBOX */
 
@@ -154,7 +162,7 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
   <p class="sliderbeschriftung">Ladegrenze:</p>
 <div class="flex-container">
     <div>
-    <label><input type="checkbox" name="hausakkuladung" value="-1" id="auto" <?php echo $DB_ManuelleSteuerung_check ?>>AUTO</label>
+    <label class="checkboxlabel" ><input type="checkbox" name="hausakkuladung" value="-1" id="auto" <?php echo $DB_ManuelleSteuerung_check ?>>AUTO</label>
     </div>
     <div>
 <label class="slider" id="sliderlabel" for="slider"><?php echo $DB_ManuelleSteuerung_wert ?>%</label>
@@ -281,6 +289,7 @@ $(document).ready(function(){
   var Tag_Zeit = [];
   var Res_Feld1 = [];
   var Res_Feld2 = [];
+  var Options = [];
   $('.Tag_Zeit').each(function(){
    var datum = new Date($(this).text());
     if (tag_old != datum.getDate()) {
@@ -290,6 +299,7 @@ $(document).ready(function(){
    var std = String(tagzahler) + "-" + (String(datum.getHours()).padStart(2, "0") + ":" + String(datum.getMinutes()).padStart(2, "0"));
    ID.push(std);
    Schluessel.push('Reservierung');
+   Options.push('');
    Tag_Zeit.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
@@ -312,13 +322,14 @@ $(document).ready(function(){
   Tag_Zeit.push("ManuelleSteuerung");
   Res_Feld1.push(js_value);
   Res_Feld2.push(0);
+  Options.push('');
   //alert(js_value);
   }
 
   $.ajax({
    url:"SQL_speichern.php",
    method:"post",
-   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2},
+   data:{ID:ID, Schluessel:Schluessel, Tag_Zeit:Tag_Zeit, Res_Feld1:Res_Feld1, Res_Feld2:Res_Feld2, Options:Options},
    success:function(data)
    {
     //alert(data);

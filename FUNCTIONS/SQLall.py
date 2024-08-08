@@ -45,12 +45,29 @@ class sqlall:
         return ()
 
     def getSQLsteuerdaten(self, schluessel):
-        # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
         verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
         zeiger = verbindung.cursor()
-        sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2 from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
 
-        zeiger.execute(sql_anweisung)
+        try:
+            # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
+            sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
+            zeiger.execute(sql_anweisung)
+        except:
+            # Datenbanktabelle anlegen, wenn sie nicht existiert
+            sql_anweisung = " CREATE TABLE IF NOT EXISTS steuercodes ( ID TEXT, Schluessel TEXT, Zeit TEXT, Res_Feld1 INT, Res_Feld2 INT, Options text);"
+            zeiger.execute(sql_anweisung)
+            sql_anweisung = 'CREATE UNIQUE INDEX IF NOT EXISTS idx_positions_title ON steuercodes (ID, Schluessel)'
+            zeiger.execute(sql_anweisung)
+            sql_anweisung = " INSERT OR IGNORE INTO steuercodes (ID, Schluessel, Zeit, Res_Feld1, Res_Feld2, Options) VALUES  ('23:09','ProgrammStrg','23:09','0','0','');"
+            zeiger.execute(sql_anweisung)
+            sql_anweisung = " INSERT OR IGNORE INTO steuercodes (ID, Schluessel, Zeit, Res_Feld1, Res_Feld2, Options) VALUES  ('23:59','Reservierung','ManuelleSteuerung','-1','0','');"
+            zeiger.execute(sql_anweisung)
+            sql_anweisung = " INSERT OR IGNORE INTO steuercodes (ID, Schluessel, Zeit, Res_Feld1, Res_Feld2, Options) VALUES  ('23:58','ENTLadeStrg','ManuelleEntladesteuerung','100','0','');"
+            zeiger.execute(sql_anweisung)
+            # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
+            sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
+            zeiger.execute(sql_anweisung)
+
         rows = zeiger.fetchall()
         data = dict()
         columns = [col[0] for col in zeiger.description]
@@ -58,6 +75,7 @@ class sqlall:
             data[row[0]] = dict()
             data[row[0]][columns[1]] = row[1]
             data[row[0]][columns[2]] = row[2]
+            data[row[0]][columns[3]] = row[3]
         record_json = json.dumps(data, indent=2)
         record_json = json.loads(record_json)
 
