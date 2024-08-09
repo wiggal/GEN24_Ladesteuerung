@@ -415,7 +415,7 @@ if __name__ == '__main__':
                             Push_Schreib_Ausgabe += "StorageControlMode 3 neu geschrieben.\n"
                             DEBUG_Ausgabe+="\nDEBUG Meldung bei StorageControlMode schreiben: " + str(valueNew)
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode neu wurde NICHT geschrieben, da KEINE Option zum Schreiben gesetzt.\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "StorageControlMode NICHT geschrieben, da KEINE Option zum Schreiben gesetzt.\n"
 
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
