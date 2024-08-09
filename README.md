@@ -151,9 +151,16 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 
 Unter "Feste Entladegrenze " kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
 
-In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.
+In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
+
+### Settings ( TAB--> Settings )
+![Tabelle zu den Settings](pics/Settings.png)
+
+Unter Settings kann das Progremm zusätzlich gesteuert werden.  
+
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.    
 
 =======================================================  
 
