@@ -135,14 +135,13 @@ Dadurch soll z.B. ein Laden der Batterie aus dem Netz ersichtlich bzw. gezählt 
 ### Batterieladesteuerung ( TAB--> LadeSteuerung )
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 
-Alle eingetragenen Reservierungen werden in die Datei /DIR/Watt_Reservierung.json geschrieben.  
-In der html/config.php können die Variablen angepasst werden (z.B. $PV_Leistung_KWp) .   
+Alle eingetragenen Reservierungen werden in die DB CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
 Ist das Modul eingeschaltet (in /DIR/config.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung  
 beim nächsten Aufruf von SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
-Mit einer gewählten Ladestufe (AUS, HALB, VOLL) unter Hausakkuladung wird die entsprechende Batterieladeleistung,
-beim nächsten Aufruf von SymoGen24Controller2.py auf den Wechselrichter geschrieben.  
+Ist nicht AUTO gewählt, erfolgte eine Batterieladung der eingestellten Prozentzahl der **maximalen Ladeleisung des GEN24**,
+beim nächsten Aufruf von http- bzw. SymoGen24Controller2.py auf den Wechselrichter geschrieben.  
 Die prognosebasierte Ladesteuerung ist dadurch deaktivieren, und kann mit der Option "AUTO" wieder aktiviert werden.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
@@ -150,8 +149,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 ### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
 ![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
 
-Unter "Feste Entladegrenze " kann die maximale Entladeleistung
-in den Schritten 0, 20, 40, 60, 80 oder 100 Prozent fest eingestellt werden.
+Unter "Feste Entladegrenze " kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
 
 In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.
 
