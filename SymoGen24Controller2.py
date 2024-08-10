@@ -300,6 +300,7 @@ if __name__ == '__main__':
                             LadewertGrund = "Größter Prognosewert " + str(GroestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
 
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren
+                    HysteProdFakt = 2
                     if Akkuschonung > 0:
                         Ladefaktor = 1
                         BattStatusProz_Grenze = 100
@@ -318,6 +319,10 @@ if __name__ == '__main__':
                             BattStatusProz_Grenze = 95
 
                         AkkuschonungLadewert = int(BattganzeKapazWatt * Ladefaktor)
+                        # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3W) BattStatusProz_Grenze 5% runter
+                        if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
+                            BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
+                            HysteProdFakt = 5
 
                         if BattStatusProz >= BattStatusProz_Grenze:
                             DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
@@ -326,7 +331,7 @@ if __name__ == '__main__':
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
                             DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
                             # Um das setzen der Akkuschonung zu verhindern, wenn zu wenig PV Energie kommt oder der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
-                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion > AkkuschonungLadewert:
+                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
