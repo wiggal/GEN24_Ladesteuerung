@@ -1,4 +1,4 @@
-**[0.24.0] – 2024-08.11**  
+**[0.24.0] – 2024-08-11**  
 
 **Umfangreiche Änderungen in der Steuerung des Ladeprogramms**  
 
@@ -19,11 +19,11 @@ Folgende Einträge entfernt:
 **Laden und Entladen des Akkus in Settings getrennt voneinander ein- bzw. ausschalten**
 
 
-**[0.23.1] – 2024-08.05**  
+**[0.23.1] – 2024-08-05**  
 
 FIX: RuntimeError: Server XXXX returned 400 in der Eigenverbrauchsoptimierung.
 
-**[0.23.0] – 2024-08.04**  
+**[0.23.0] – 2024-08-04**  
 
 **Umfangreiche Neukonzipierung der Ladewertberechnung**
 
