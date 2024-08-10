@@ -17,7 +17,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - Akkuschonung: Um eine LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt.  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
-Hier zwei Grafiken um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
+Hier eine Grafik um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
 ## 💾 Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
