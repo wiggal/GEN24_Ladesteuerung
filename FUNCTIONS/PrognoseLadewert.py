@@ -216,7 +216,8 @@ class progladewert:
             return  aktuellerLadewert, LadewertGrund
     
     def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent):
-            fun_Ladewert = self.getLadewertinGrenzen(fun_Ladewert)
+            # Wegen ManuelleSteuerung nicht begrenzen auf MaxLadewert
+            #fun_Ladewert = self.getLadewertinGrenzen(fun_Ladewert)
     
             LadungAus = basics.getVarConf('Ladeberechnung','LadungAus','eval')
             newPercent = (int(fun_Ladewert/BattganzeLadeKapazWatt*10000))
