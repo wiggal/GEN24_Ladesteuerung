@@ -1,11 +1,7 @@
 <?php
 // Hier die Pythonkonfigs lesen
 $python_config = parse_ini_file("../CONFIG/default_priv.ini", true);
-// Hier die Variablen für die PV-Reservierung definieren
 $PrognoseFile = "../weatherData.json";
-$ReservierungsFile = "EV_Reservierung.json";
-$WattReservierungsFile = "../Watt_Reservierung.json";
-$EntLadeSteuerFile = "../Akku_EntLadeSteuerFile.json";
 $PV_Leistung_KWp = 11.4;
 $Faktor_PVLeistung_Prognose = 1.00;
 $Res_Feld1 = "EV_1";

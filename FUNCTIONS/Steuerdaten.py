@@ -1,8 +1,10 @@
 # Hier die Parameter aus der WebUI Settings lesen
 import json
+import FUNCTIONS.SQLall
     
+sqlall = FUNCTIONS.SQLall.sqlall()
+
 class readcontroldata:
-    #def __init__(self, test='2'):
 
     def loadPVReservierung(self, controlfile):
         self.controlfile = controlfile
@@ -17,28 +19,41 @@ class readcontroldata:
                 exit()
         return reservierungdata
 
-    def getParameter(self, argv, controlfile):
-        self.argv = argv
-        self.controlfile = controlfile
+    def getParameter(self, argv, schluessel):
         Parameter = ""
         Meldung = ""
-        if len(self.argv) > 1 :
-            Parameter = self.argv[1]
+        if len(argv) > 1 :
+            Parameter = argv[1]
         # Prog_Steuerung.json lesen
-        Prog_Steuer_code_tmp = self.loadPVReservierung(self.controlfile)
-        Prog_Steuer_code = int(Prog_Steuer_code_tmp['Steuerung'])
-        # print("Prog_Steuer_code: ", Prog_Steuer_code)
+        Prog_Steuer_code_tmp = sqlall.getSQLsteuerdaten(schluessel)
+        Prog_Steuer_code = list(Prog_Steuer_code_tmp.values())[0]['Res_Feld1']
+        Optionen_sql = list(Prog_Steuer_code_tmp.values())[0]['Options']
+        Optionen = []
+        # Aus Optionen array erzeugen
+        for i in Optionen_sql.split(":"):
+            Optionen.append(i)
+        # Options nur bei Ladesteuerung Code 4 füllen
+        Options = []
+
+        # wenn WebUI-Settings ausgeschaltet Aufrufparameter (schreiben, logging) umsetzen
+        if Prog_Steuer_code == 0:
+            if Parameter == 'logging':
+                Options = ['logging']
+            if Parameter == 'schreiben':
+                Options = ['logging','laden','entladen','optimierung']
+        # Ab hier WebUI-Settings
         if Prog_Steuer_code == 1:
-            Meldung = "AUS"
-            Parameter = 'exit'
+            Meldung = "AUS (WR löschen)"
+            Parameter = 'exit0'
         if Prog_Steuer_code == 2:
-            Meldung = "Analyse in Crontab.log"
-            Parameter = 'analyse'
+            Meldung = "AUS (WR belassen)"
+            Parameter = 'exit1'
         if Prog_Steuer_code == 3:
-            Meldung = "NUR Logging"
+            Meldung = "Analyse in Crontab.log"
             Parameter = 'logging'
         if Prog_Steuer_code == 4:
-            Meldung = "WR-Steuerung und Logging"
+            Meldung = "Ladesteuerung:" + str(Optionen)
             Parameter = 'schreiben'
-        return(Parameter, Meldung)
+            Options = Optionen
+        return(Parameter, Meldung, Options)
     

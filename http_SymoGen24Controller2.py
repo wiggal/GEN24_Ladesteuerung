@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
+import json
 import requests
 from ping3 import ping
 from sys import argv
@@ -15,6 +16,7 @@ if __name__ == '__main__':
         basics = FUNCTIONS.functions.basics()
         config = basics.loadConfig(['default', 'charge'])
         request = FUNCTIONS.httprequest.request()
+        sqlall = FUNCTIONS.SQLall.sqlall()
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
@@ -31,24 +33,25 @@ if __name__ == '__main__':
             if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
                 alterLadewert = element['Power']
 
-        # WebUI-Parameter lesen und aus Prog_Steuerung.json bestimmen
+        # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
         SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
         print_level = basics.getVarConf('env','print_level','eval')
-        Parameter = SettingsPara.getParameter(argv, 'Prog_Steuerung.json')
+        Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
+        Options = Parameter[2]
+        
         Ausgabe_Parameter = ''
-        if len(argv) > 1:
-            argv[1] = Parameter[0]
-        else:
-            argv.append(Parameter[0])
         if(Parameter[1] != "" and print_level >= 1):
             Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
-            if(Parameter[1] == "AUS"):
+            if(Parameter[0] == "exit0"):
                 # Batteriemangement zurücksetzen
                 if result_get_time_of_use != []:
                     response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
                     print("Batteriemanagementeinträge gelöscht!")
+                # Ende Programm
+            if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
                 print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
                 exit()
+                # Ende Programm
 
         if ping(host_ip):
             # Nur ausführen, wenn WR erreichbar
@@ -124,8 +127,17 @@ if __name__ == '__main__':
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
                     reservierungdata = {}
                     if  PV_Reservierung_steuern == 1:
-                        Reservierungsdatei = basics.getVarConf('Reservierung','PV_ReservieungsDatei','str')
-                        reservierungdata = SettingsPara.loadPVReservierung(Reservierungsdatei)
+                        reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
+                        # Spalte 1 und 2 aufaddieren
+                        reservierungdata = dict()
+                        for key in reservierungdata_tmp:
+                            Res_Feld = 0
+                            i = 0
+                            for key2 in reservierungdata_tmp[key]:
+                                if(i<2):
+                                    Res_Feld += reservierungdata_tmp[key][key2]
+                                i += 1
+                            reservierungdata[key] = Res_Feld
 
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     newPercent_schreiben = 0
@@ -186,13 +198,13 @@ if __name__ == '__main__':
 
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
-                    if (PV_Reservierung_steuern == 1) and (reservierungdata.get('ManuelleSteuerung')):
-                        FesteLadeleistung = MaxLadung * reservierungdata.get('ManuelleSteuerung')
-                        if (reservierungdata.get('ManuelleSteuerung') != 0):
-                            MaxladungDurchPV_Planung = "Manuelle Ladesteuerung in PV-Planung ausgewählt."
+                    ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
+                    if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
+                        FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
+                        MaxladungDurchPV_Planung = "Manuelle Ladesteuerung in PV-Planung ausgewählt."
 
                     # Wenn die Variable "FesteLadeleistung" größer "0" ist, wird der Wert fest als Ladeleistung in Watt geschrieben einstellbare Wattzahl
-                    if FesteLadeleistung > 0:
+                    if FesteLadeleistung >= 0:
                         DATA = progladewert.setLadewert(FesteLadeleistung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
                         aktuellerLadewert = FesteLadeleistung
                         newPercent = DATA[0]
@@ -217,8 +229,8 @@ if __name__ == '__main__':
                     else:
 
                         # Schaltverzögerung für MindBattLad
-                        if (alterLadewert+2 > MaxLadung):
-                            MindBattLad = MindBattLad +5
+                        if (alterLadewert + 2 > MaxLadung):
+                            MindBattLad = MindBattLad + 5
 
                         if ((BattStatusProz < MindBattLad)):
                             # volle Ladung ;-)
@@ -288,15 +300,16 @@ if __name__ == '__main__':
                     if Akkuschonung > 0:
                         Ladefaktor = 1
                         BattStatusProz_Grenze = 100
-                        if BattStatusProz >= 80:
+                        # Schaltverzoegerung neu 
+                        if (BattStatusProz >= 78 and ( abs((BattganzeKapazWatt * 0.2) - alterLadewert) < 3 )) or BattStatusProz >= 80:
                             Ladefaktor = 0.2
                             AkkuSchonGrund = '80%, Ladewert = 0.2C'
                             BattStatusProz_Grenze = 80
-                        if BattStatusProz >= 90:
+                        if (BattStatusProz >= 88 and ( abs((BattganzeKapazWatt * 0.1) - alterLadewert) < 3 )) or BattStatusProz >= 90:
                             Ladefaktor = 0.1
                             AkkuSchonGrund = '90%, Ladewert = 0.1C'
                             BattStatusProz_Grenze = 90
-                        if BattStatusProz >= 95:
+                        if (BattStatusProz >= 94 and ( abs((BattganzeKapazWatt * 0.1* Akkuschonung) - alterLadewert) < 3 )) or BattStatusProz >= 95:
                             Ladefaktor = 0.1 * Akkuschonung
                             AkkuSchonGrund = '95%, Ladewert = ' + str(Ladefaktor) + 'C'
                             BattStatusProz_Grenze = 95
@@ -359,7 +372,6 @@ if __name__ == '__main__':
                             print("LadewertGrund: ", LadewertGrund)
                             print("Bisheriger Ladewert/Watt:   ", alterLadewert)
                             print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
-                            # print("newPercent_schreiben:       ", newPercent_schreiben)
                             print()
                         except Exception as e:
                             print()
@@ -387,9 +399,8 @@ if __name__ == '__main__':
                             if element['Active'] == True and element['ScheduleType'] == 'DISCHARGE_MAX':
                                 BatteryMaxDischarge = element['Power']
 
-                        # EntladeSteuerungFile lesen
-                        EntladeSteuerungFile = basics.getVarConf('Entladung','Akku_EntladeSteuerungsFile','str')
-                        entladesteurungsdata = SettingsPara.loadPVReservierung(EntladeSteuerungFile)
+                        # EntladeSteuerungdaten lesen
+                        entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
                             MaxEntladung = int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100)
@@ -457,22 +468,29 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
                         DEBUG_Ausgabe+="\nDEBUG Folgender MAX_Ladewert neu zum Schreiben: " + str(aktuellerLadewert)
                         DEBUG_Ausgabe+="\nDEBUG Folgender MAX_ENT_Ladewert neu zum Schreiben: " + str(Neu_BatteryMaxDischarge)
-                        if len(argv) > 1 and (argv[1] == "schreiben"):
+                        payload_text = ''
+                        trenner_komma = ''
+                        if ('laden' in Options):
+                            trenner_komma = ','
                             payload_text = '{"Active":true,"Power":' + str(aktuellerLadewert) + \
                             ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                            if  Batterieentlandung_steuern == 1:
-                                payload_text += ',{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
-                                ',"ScheduleType":"DISCHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
+                        elif newPercent_schreiben == 1 :
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Ladesteuerung NICHT geschrieben, da Option \"laden\" NICHT gesetzt!\n"
+                        if  ('entladen' in Options) and (Batterieentlandung_steuern == 1):
+                            payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
+                            ',"ScheduleType":"DISCHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
+                        elif Neu_BatteryMaxDischarge != BatteryMaxDischarge:
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
+                        # Wenn payload_text NICHT leer dann schreiben
+                        if (payload_text != ''):
                             response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
                             bereits_geschrieben = 1
-                            if newPercent_schreiben == 1:
+                            if ('laden' in Options) and newPercent_schreiben == 1:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
-                            if Neu_BatteryMaxDischarge != BatteryMaxDischarge:
+                            if ('entladen' in Options) and Neu_BatteryMaxDischarge != BatteryMaxDischarge:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "DISCHARGE_MAX geschrieben: " + str(Neu_BatteryMaxDischarge) + "W\n"
                             Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
                             DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
-                        else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Es wurde nix geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
                     else:
                         Schreib_Ausgabe = Schreib_Ausgabe + "Änderungen kleiner Schreibgrenze!\n"
 
@@ -493,10 +511,13 @@ if __name__ == '__main__':
                         aktuellePVProduktion_tmp = aktuellePVProduktion
 
                         # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
-                        if (BattStatusProz <= MindBattLad):
+                        # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
+                        # + 10, da wegen Hysterse bereits +5 weiter oben
+                        if (BattStatusProz <= MindBattLad + 10):
                             Dauer_Nacht_Std = 2
-                            Eigen_Opt_Std_neu = 0
                             aktuellePVProduktion_tmp = 0
+                        if (BattStatusProz <= MindBattLad):
+                            Eigen_Opt_Std_neu = 0
 
                         if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
@@ -509,14 +530,14 @@ if __name__ == '__main__':
                             Opti_Schreib_Ausgabe = ""
 
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
-                                if len(argv) > 1 and (argv[1] == "schreiben"):
+                                if ('optimierung' in Options):
                                     response = request.send_request('/config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
                                     Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
                                 else:
-                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt. NICHT " + str(Eigen_Opt_Std_neu) +"W geschrieben, da NICHT \"schreiben\" übergeben wurde: \n"
+                                    Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) +"W NICHT geschrieben,\nda Option \"optimierung\"  NICHT gesetzt!\n"
                             else:
                                 Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: Keine Änderung!\n"
 
@@ -537,14 +558,14 @@ if __name__ == '__main__':
                     Logging_ein = basics.getVarConf('Logging','Logging_ein','eval')
                     if Logging_ein == 1:
                         Logging_Schreib_Ausgabe = ""
-                        if len(argv) > 1 and (argv[1] == "schreiben" or argv[1] == "logging"):
+                        if ('logging' in Options):
                             Logging_file = basics.getVarConf('Logging','Logging_file','str')
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
                             sqlall.save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
                             API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
                             Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:
-                            Logging_Schreib_Ausgabe = "Logging wurde NICHT gespeichert, da NICHT \"logging\" oder \"schreiben\" übergeben wurde:\n" 
+                            Logging_Schreib_Ausgabe = "Logging NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
 
                         if print_level >= 1:
                             print(Logging_Schreib_Ausgabe)
