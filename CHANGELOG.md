@@ -1,3 +1,8 @@
+**[0.24.1] – 2024-XX-XX**  
+
+Einbindung von Fronius-Symos
+- Änderung in der CONFIG/default.ini `IP_weitere_Symo = no` in CONFIG/default_priv.ini einfügen
+
 **[0.24.0] – 2024-08-11**  
 
 **Umfangreiche Änderungen in der Steuerung des Ladeprogramms**  

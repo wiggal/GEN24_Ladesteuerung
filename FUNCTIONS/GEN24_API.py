@@ -57,6 +57,24 @@ class gen24api:
                 except:
                     print("API von WR ", weitereIP, " nicht erreichbar")
     
+        # Daten von Symos lesen und addieren
+        IP_weitere_Symo = basics.getVarConf('gen24','IP_weitere_Symo','str')
+        if(IP_weitere_Symo != 'no'):
+            IP_weitere_Symo = IP_weitere_Symo.replace(" ", "")
+            IP_weitere_Symo = IP_weitere_Symo.split(",")
+            for weitereIP in IP_weitere_Symo:
+                try:
+                    gen24url = "http://"+weitereIP+"/components/readable"
+                    url = requests.get(gen24url)
+                    text = url.text
+                    data = json.loads(text)
+                    #data = basics.loadWeatherData('Fronius_MrFrees.json')
+                    API['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PowerReal_PAC_Sum'])
+                    API['AC_Produktion'] +=  int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
+                    API['DC_Produktion'] += int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
+                except:
+                    print("API von WR ", weitereIP, " nicht erreichbar")
+
         return(API)
     
     if __name__ == "__main__":
