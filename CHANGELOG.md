@@ -9,6 +9,8 @@ In der html/config.php wurden folgende Einträge entfernt, auch in der config_pr
 - $WattReservierungsFile = "../Watt_Reservierung.json";
 - $EntLadeSteuerFile = "../Akku_EntLadeSteuerFile.json";
 
+In der Ladesteuerung bezieht sich die feste Ladegrenze in Prozent **nicht** mehr auf `MaxLadung` sondern auf die **maximale Ladeleistung** des GEN24.
+
 Änderung in CONFIG/charge.ini, auch in der CONFIG/charge_priv.ini ändern:
 - FesteLadeleistung = -1, Ladesteuerung steht auf AUTO (0 ist ab jetzt Ladeleistung Null, -1 ist automatische Ladewertberechnung)
 
