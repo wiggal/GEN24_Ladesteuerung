@@ -3,10 +3,6 @@
  <head>
   <title>Akku Entladesteuerung</title>
   <script src="jquery.min.js"></script>
-    <!--
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-  //-->
   <style>
   .box
   {
@@ -60,12 +56,16 @@
 	padding:16px 31px;
 	text-decoration:none;
 	text-shadow:0px 1px 0px #58ACFA;
+    white-space: nowrap;
+    position: fixed;
+    top: 0;
+    transform: translate(-50%, 0);
   }
   .speichern:hover {
 	background-color:#2E64FE;
   }
   .speichern:active {
-	position:relative;
+	position:fixed;
 	top:1px;
   }
 
@@ -121,6 +121,8 @@ input.slider {
   font-family:Arial;
   font-size:150%;
   color: #000000;
+  position: fixed;
+  right: 8px;
 }
 .sliderbeschriftung{
   font-family:Arial;
@@ -133,10 +135,11 @@ input.slider {
  </head>
 
  <body>
-  <div class="hilfe" align="right"> <a href="2_Hilfe.html"><b>Hilfe</b></a></div>
+  <div class="hilfe"> <a href="2_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>
+   <br />
    <br />
 
 <?php
@@ -222,7 +225,6 @@ echo "</tbody></table>\n";
 ?>
    <br />
   </div>
-  <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>
   </div>
 
 <script>

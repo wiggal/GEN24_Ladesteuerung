@@ -49,12 +49,16 @@
 	padding:16px 31px;
 	text-decoration:none;
 	text-shadow:0px 1px 0px #2f6627;
+    white-space: nowrap;
+    position: fixed;
+    top: 0;
+    transform: translate(-50%, 0);
   }
   .speichern:hover {
 	background-color:#5cbf2a;
   }
   .speichern:active {
-	position:relative;
+	position:fixed;
 	top:1px;
   }
 
@@ -118,6 +122,8 @@ input.slider {
   font-family:Arial;
   font-size:150%;
   color: #000000;
+  position: fixed;
+  right: 8px;
 }
 .sliderbeschriftung{
   font-family:Arial;
@@ -130,9 +136,10 @@ input.slider {
  </head>
 
  <body>
-  <div class="hilfe" align="right"> <a href="1_Hilfe.html"><b>Hilfe</b></a></div>
+  <div class="hilfe"> <a href="1_Hilfe.html"><b>Hilfe</b></a></div>
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>
+   <br />
    <br />
 
 <?php
@@ -273,7 +280,6 @@ echo "</tbody></table>\n";
 ?>
    <br />
   </div>
-  <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>
 
 <?php echo "<br />Prognose von $Prognose[messageCreated]"; ?> 
 <script>
