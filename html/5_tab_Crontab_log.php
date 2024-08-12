@@ -2,13 +2,23 @@
 <html>
 <head>
 <style>
+body{font-family:Arial;}
 button {
   font-size: 1.3em;
   background-color: #4CAF50;
 }
+input { font-size: 1.3em; }
 @media screen and (max-width: 64em) {
 body{ font-size: 160%; }
-input { font-size: 100%; }
+input { font-size: 140%; }
+a{
+  font-family:Arial;
+  font-size: 180%;
+}
+}
+a.ende{
+  font-family:Arial;
+  font-size: 110%;
 }
 .headertop{
   background-color:#ffffff;
@@ -84,7 +94,7 @@ switch ($case) {
 ?>
 
 <br>
-<a name="bottom" href="#top">An den Anfang springen!</a>
+<a class="ende" name="bottom" href="#top">An den Anfang springen!</a>
 <br><br>
 <form method="post" action="#bottom" enctype="multipart/form-data">
 <button type="submit">Neu laden</button>

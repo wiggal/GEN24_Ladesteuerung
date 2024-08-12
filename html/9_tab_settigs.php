@@ -130,7 +130,7 @@ foreach ($CheckOptionsALL as &$option) {
 ?>
 
 <div style='text-align: center;'>
-  <p class="containerbeschriftung">Ladesteuerung:</p>
+  <p class="containerbeschriftung">Programmsteuerung:</p>
 <div class="flex-container">
  <label class="auswahllabel" ><input type="radio" name="hausakkuladung" id="steuer0" value="0" onclick="disablecheckboxes('steuer0')" <?php echo $Setting_radio['0'] ?>>WebUI-Settings ausschalten</label>
  <label class="auswahllabel" ><input type="radio" name="hausakkuladung" id="steuer1" value="1" onclick="disablecheckboxes('steuer1')" <?php echo $Setting_radio['1'] ?>>Ladesteuerung AUS (WR-Settings löschen)</label>
