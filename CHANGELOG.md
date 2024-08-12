@@ -1,4 +1,4 @@
-**[0.24.1] – 2024-XX-XX**  
+**[0.24.1] – 2024-08-13**  
 
 Einbindung von Fronius-Symos
 - Änderung in der CONFIG/default.ini `IP_weitere_Symo = no` in CONFIG/default_priv.ini einfügen
