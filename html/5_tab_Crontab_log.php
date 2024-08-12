@@ -10,10 +10,17 @@ button {
 body{ font-size: 160%; }
 input { font-size: 100%; }
 }
+.headertop{
+  background-color:#ffffff;
+  position: fixed;
+  left: 8px;
+}
 </style>
 </head>
 <body>
-<a name="top" href="#bottom">Ans Ende springen!</a>
+<div name="top"><div>
+<div class="headertop">
+<a href="#bottom">Ans Ende springen!</a>
 <br><br>
 <?php
 include "config.php";
@@ -40,7 +47,8 @@ switch ($case) {
     echo '<input type="input" name="suchstring" value="geschrieben" size="10">'."\n";
     echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
     echo '</form>'."\n";
-    echo '<br>';
+    echo '</div>';
+    echo '<br><br><br><br><br>';
 
     # AUSGEBEN DER Crontab.log von Heute
     while(!feof($myfile)) {
@@ -55,6 +63,8 @@ switch ($case) {
     case 'filter':
     $suchstring = '';
     if (isset($_POST["suchstring"])) $suchstring = $_POST["suchstring"];
+    echo '</div>';
+    echo '<br><br>';
     # Ausgabe der gesuchten Zeile mit Datumszeile 
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
