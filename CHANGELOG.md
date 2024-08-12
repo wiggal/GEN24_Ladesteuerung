@@ -1,3 +1,10 @@
+**[0.24.2] – 2024-XX-XX**  
+
+APIs zum Lesen und Schreiben der Steuercodes von externen Anwendungen:
+- Feste Ladegrenze:    = Reservierung; ManuelleSteuerung  
+- Feste Entladegrenze: = ENTLadeStrg; ManuelleEntladesteuerung  
+- Programmsteuerung:   = ProgrammStrg
+
 **[0.24.1] – 2024-08-13**  
 
 Einbindung von Fronius-Symos
