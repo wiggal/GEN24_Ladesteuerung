@@ -51,13 +51,20 @@ td {font-size: 160%;
     font-family:Arial;
     font-size:150%;
     color: #000000;
+    position: fixed;
+    right: 8px;
+    }
+.version{
+    font-family:Arial;
+    font-size:150%;
+    color: #000000;
     }
 
 </style>
 </head>
 <body>
-  <div class="hilfe" align="right"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
-<div class="hilfe" align="center">
+  <div class="hilfe"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
+<div class="version" align="center">
 <b>  GEN24_Ladesteuerung Version: 0.24.1 </b>
 </div>
 <br>
