@@ -1,3 +1,7 @@
+**[0.24.2] – 2024-XX-XX**  
+
+FIX: Symos sind nachts evtl. im Standby und liefern keine Daten 
+
 **[0.24.1] – 2024-08-13**  
 
 Einbindung von Fronius-Symos
