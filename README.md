@@ -33,13 +33,12 @@ Folgende Installationen sind nötig, damit die Pythonskripte funktionieren
 ```
 sudo apt install python3
 sudo apt install python3-pip
-sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig
-sudo pip install pickledb
 sudo pip install pytz
-sudo pip install xmltodict
-sudo pip install NumPy==v1.23.1
 sudo pip install requests
 sudo pip install ping3
+# Ab hier nur für Modbusversion
+sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig
+sudo pip install NumPy==v1.23.1
 ```
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der Datei weatherData.json vorhanden sind!  
