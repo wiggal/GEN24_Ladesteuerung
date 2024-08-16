@@ -71,7 +71,6 @@ class gen24api:
                     url = requests.get(gen24url, timeout=2)
                     text = url.text
                     data = json.loads(text)
-                    #data = basics.loadWeatherData('Fronius_MrFrees.json')
                     API['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PowerReal_PAC_Sum'])
                     API['AC_Produktion'] +=  int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
                     API['DC_Produktion'] += int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
@@ -81,11 +80,12 @@ class gen24api:
                     Produktion_MAX_DB = sqlall.getSQLlastProduktion('PV_Daten.sqlite')
                     #print("Produktion_MAX_DB: ", Produktion_MAX_DB, Produktion_MAX_DB[1] - Produktion_MAX_DB[0])
                     #print("aktuelle Diff DC-AC: ", API['DC_Produktion'] - API['AC_Produktion'] )
-                    #print(" Ergebinis: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]))
+                    #print(" Ergebnis: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]))
                     #print("Neuer AC-WERT: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]) + Produktion_MAX_DB[0])
                     Offline_AC = ((API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]) + Produktion_MAX_DB[0])
                     API['AC_Produktion'] = Offline_AC
-                    API['DC_Produktion'] = Offline_AC
+                    API['DC_Produktion'] = Produktion_MAX_DB[1]
+                    #print("AC_Produktion, DC_Produktion ", API['AC_Produktion'], API['DC_Produktion'])
 
 
         return(API)
