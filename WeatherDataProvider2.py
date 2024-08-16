@@ -88,7 +88,7 @@ if __name__ == '__main__':
         data = loadLatestWeatherData(config)
         if isinstance(data['result'], dict):
             if not data == "False":
-                basics.storeWeatherData(weatherfile, data, now)
+                basics.storeWeatherData(weatherfile, data, now, 'forecast.solar')
         else:
             print("Fehler bei Datenanforderung api.forecast.solar:")
             print(data)
