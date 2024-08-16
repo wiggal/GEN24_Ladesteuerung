@@ -38,13 +38,15 @@ class basics:
                     data = json.load(json_file)
             except:
                     data = {'messageCreated': '2000-01-01 01:01:01'}
+
             return data
     
-    def storeWeatherData(self, wetterfile, data, now):
+    def storeWeatherData(self, wetterfile, data, now, wetterdienst):
         try:
             out_file = open(wetterfile, "w")
             format = "%Y-%m-%d %H:%M:%S"
             data.update({'messageCreated': datetime.strftime(now, format)})
+            data.update({'createdfrom': wetterdienst})
             json.dump(data, out_file, indent = 6)
             out_file.close()
         except:

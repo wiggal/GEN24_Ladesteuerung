@@ -281,7 +281,7 @@ echo "</tbody></table>\n";
    <br />
   </div>
 
-<?php echo "<br />Prognose von $Prognose[messageCreated]"; ?> 
+<?php echo "<br />Prognose von $Prognose[messageCreated] by $Prognose[createdfrom]"; ?> 
 <script>
 
 /* Lesen und speichern der Daten */

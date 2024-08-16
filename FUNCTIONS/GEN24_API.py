@@ -76,6 +76,7 @@ class gen24api:
                     API['AC_Produktion'] +=  int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
                     API['DC_Produktion'] += int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
                 except:
+                    print("API von WR ", weitereIP, " nicht erreichbar, Ersatz AC-Wert schreiben!")
                     API['aktuellePVProduktion'] += 0
                     Produktion_MAX_DB = sqlall.getSQLlastProduktion('PV_Daten.sqlite')
                     #print("Produktion_MAX_DB: ", Produktion_MAX_DB, Produktion_MAX_DB[1] - Produktion_MAX_DB[0])
