@@ -27,33 +27,33 @@ if __name__ == '__main__':
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
 
-        alterLadewert = 0
-        result_get_time_of_use = request.get_time_of_use(host_ip, user, password)
-        for element in result_get_time_of_use:
-            if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
-                alterLadewert = element['Power']
-
-        # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
-        SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
-        print_level = basics.getVarConf('env','print_level','eval')
-        Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
-        Options = Parameter[2]
-        
-        Ausgabe_Parameter = ''
-        if(Parameter[1] != "" and print_level >= 1):
-            Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
-            if(Parameter[0] == "exit0"):
-                # Batteriemangement zurücksetzen
-                if result_get_time_of_use != []:
-                    response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
-                    print("Batteriemanagementeinträge gelöscht!")
-                # Ende Programm
-            if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
-                print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
-                exit()
-                # Ende Programm
-
         if ping(host_ip):
+            alterLadewert = 0
+            result_get_time_of_use = request.get_time_of_use(host_ip, user, password)
+            for element in result_get_time_of_use:
+                if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
+                    alterLadewert = element['Power']
+
+            # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
+            SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
+            print_level = basics.getVarConf('env','print_level','eval')
+            Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
+            Options = Parameter[2]
+        
+            Ausgabe_Parameter = ''
+            if(Parameter[1] != "" and print_level >= 1):
+                Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
+                if(Parameter[0] == "exit0"):
+                    # Batteriemangement zurücksetzen
+                    if result_get_time_of_use != []:
+                        response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
+                        print("Batteriemanagementeinträge gelöscht!")
+                    # Ende Programm
+                if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
+                    print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
+                    exit()
+                    # Ende Programm
+
             # Nur ausführen, wenn WR erreichbar
             try:            
                     newPercent = None

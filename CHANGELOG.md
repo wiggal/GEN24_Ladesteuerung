@@ -1,6 +1,7 @@
 **[0.24.2] – 2024-XX-XX**  
 
-FIX: Symos sind nachts evtl. im Standby und liefern keine Daten 
+FIX: Symos sind nachts evtl. im Standby und liefern keine Daten.  
+Name des Wetterdienstes in LadeStrg-Tab ausgeben.  
 
 **[0.24.1] – 2024-08-13**  
 
