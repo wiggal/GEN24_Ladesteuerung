@@ -2,6 +2,8 @@
 
 FIX: Symos sind nachts evtl. im Standby und liefern keine Daten.  
 Name des Wetterdienstes in LadeStrg-Tab ausgeben.  
+Prognose kleiner Grundlast Prüfung angepasst
+Wenn Akkuschonung aktiv, wird BattVollUm nicht mehr eine Stunde nach vorne verschoben (da Auswirkung zu gering)
 
 **[0.24.1] – 2024-08-13**  
 
