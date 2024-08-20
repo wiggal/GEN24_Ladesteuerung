@@ -116,6 +116,7 @@ class progladewert:
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             LadewertGrund = "Prognoseberechnung"
 
+            # Um morgends auf Null zu stellen
             org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
             if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.5):
                 LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben/2"
@@ -249,7 +250,7 @@ class progladewert:
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
             Std_morgen_only = int(datetime.strftime(self.now + timedelta(hours=i), "%H"))
             Prognose = self.getPrognose(Std_morgen)[0]
-            if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 100:
+            if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 50:
                 if Std_morgen_only < Sonnenuntergang:
                     Sonnenuntergang = Std_morgen_only
             i  += 1
