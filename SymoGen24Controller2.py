@@ -166,8 +166,8 @@ if __name__ == '__main__':
                     if BattVollUm <= 0:
                        BattVollUm = progladewert.getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
-                    if Akkuschonung > 0:
-                        BattVollUm = BattVollUm - 1
+                    #if Akkuschonung > 0:
+                        #BattVollUm = BattVollUm - 1
 
 
                     # Geamtprognose und Ladewert berechnen mit Funktion getRestTagesPrognoseUeberschuss
@@ -246,25 +246,14 @@ if __name__ == '__main__':
     
                         else:
     
-                            if (TagesPrognoseGesamt > Grundlast) and ((TagesPrognoseGesamt - Grundlast_Summe) < BattKapaWatt_akt):
-                                # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
-                                if BattKapaWatt_akt + Grundlast_Summe - TagesPrognoseGesamt < WRSchreibGrenze_nachOben:
-                                    # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
-                                    WRSchreibGrenze_nachUnten = 100000
-                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
-                                    newPercent = DATA[0]
-                                    newPercent_schreiben = DATA[1]
-                                    # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
-                                    if newPercent_schreiben == 0:
-                                        newPercent = oldPercent
-                                        LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt (Unterschied weniger als Schreibgrenze)"
-                                else:
-                                    # volle Ladung ;-)
-                                    aktuellerLadewert = MaxLadung
-                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
-                                    newPercent = DATA[0]
-                                    newPercent_schreiben = DATA[1]
-                                    LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
+                            TagesPrognoseGesamt_tmp = TagesPrognoseGesamt + aktuelleVorhersage
+                            if (TagesPrognoseGesamt_tmp > Grundlast) and ((TagesPrognoseGesamt_tmp - Grundlast_Summe) < BattKapaWatt_akt):
+                                # volle Ladung ;-)
+                                aktuellerLadewert = MaxLadung
+                                DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
+                                newPercent = DATA[0]
+                                newPercent_schreiben = DATA[1]
+                                LadewertGrund = "TagesPrognose+aktuellePrognose-Grundlast_Summe < BattKapaWatt_akt"
     
                             # PrognoseUberschuss - 100 um Schaltverzögerung wieder nach unten zu erreichen
                             elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) and (PrognoseUberschuss - 100 <= Grundlast):
