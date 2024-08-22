@@ -112,7 +112,12 @@ class progladewert:
             Prognoserest_Stunde = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
     
             BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
-            aktuellerLadewert = int(BattKapaWatt_akt_fun / Stunden_sum * BatSparFaktor)
+            aktuellerLadewert_1 = int(BattKapaWatt_akt_fun / Stunden_sum)
+            # Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung
+            if(aktuellerLadewert_1 > self.MaxLadung):
+                aktuellerLadewert = self.MaxLadung
+            else:
+                aktuellerLadewert = int(aktuellerLadewert_1 * BatSparFaktor)
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             LadewertGrund = "Prognoseberechnung"
 

@@ -18,12 +18,12 @@ class sqlall:
         sql_anweisung = """
         CREATE TABLE IF NOT EXISTS pv_daten (
         Zeitpunkt DATETIME,
-        AC_Produktion INT,
-        DC_Produktion INT,
-        Netzverbrauch INT,
-        Einspeisung INT,
-        Batterie_IN INT,
-        Batterie_OUT INT,
+        AC_Produktion BIGINT,
+        DC_Produktion BIGINT,
+        Netzverbrauch BIGINT,
+        Einspeisung BIGINT,
+        Batterie_IN BIGINT,
+        Batterie_OUT BIGINT,
         Vorhersage SMALLINT,
         BattStatus FLOAT
         );"""
