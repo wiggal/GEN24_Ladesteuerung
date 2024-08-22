@@ -65,28 +65,45 @@ class gen24api:
         if(IP_weitere_Symo != 'no'):
             IP_weitere_Symo = IP_weitere_Symo.replace(" ", "")
             IP_weitere_Symo = IP_weitere_Symo.split(",")
+            API_Sym = {}
+            API_Sym['aktuellePVProduktion'] = 0
+            API_Sym['AC_Produktion'] = 0
+            API_Sym['DC_Produktion'] = 0
             for weitereIP in IP_weitere_Symo:
                 try:
                     gen24url = "http://"+weitereIP+"/components/readable"
                     url = requests.get(gen24url, timeout=2)
                     text = url.text
                     data = json.loads(text)
-                    API['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PowerReal_PAC_Sum'])
-                    API['AC_Produktion'] +=  int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
-                    API['DC_Produktion'] += int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
+                    #data = basics.loadWeatherData('Fronius_Symo.json')
+                    API_Sym['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PowerReal_PAC_Sum'])
+                    API_Sym['AC_Produktion'] +=  int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
+                    API_Sym['DC_Produktion'] += int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
                 except:
                     print("API von WR ", weitereIP, " nicht verfügbar, Ersatz-AC-Wert loggen!")
                     API['aktuellePVProduktion'] += 0
                     Produktion_MAX_DB = sqlall.getSQLlastProduktion('PV_Daten.sqlite')
+                    DB_AC = Produktion_MAX_DB[0]
+                    DB_DC = Produktion_MAX_DB[1]
                     #print("Produktion_MAX_DB: ", Produktion_MAX_DB, Produktion_MAX_DB[1] - Produktion_MAX_DB[0])
                     #print("aktuelle Diff DC-AC: ", API['DC_Produktion'] - API['AC_Produktion'] )
                     #print(" Ergebnis: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]))
                     #print("Neuer AC-WERT: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]) + Produktion_MAX_DB[0])
-                    Offline_AC = ((API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]) + Produktion_MAX_DB[0])
+                    #print(DB_DC, DB_AC, API['DC_Produktion'], API['AC_Produktion'])
+                    Offline_AC = (DB_AC + ((API['DC_Produktion'] - API['AC_Produktion']) - (DB_DC - DB_AC)))
+                    #print(DB_DC, Offline_AC, API['DC_Produktion'], API['AC_Produktion'])
                     API['AC_Produktion'] = Offline_AC
-                    API['DC_Produktion'] = Produktion_MAX_DB[1]
+                    API['DC_Produktion'] = DB_DC
                     #print("AC_Produktion, DC_Produktion ", API['AC_Produktion'], API['DC_Produktion'])
+                    API_Sym['AC_Produktion'] = 0
                     return(API)
+
+            #print(API['AC_Produktion'], API_Sym['AC_Produktion'])
+            #print(API['DC_Produktion'], API_Sym['DC_Produktion'])
+            API['aktuellePVProduktion'] += API_Sym['aktuellePVProduktion']
+            API['AC_Produktion'] += API_Sym['AC_Produktion']
+            API['DC_Produktion'] += API_Sym['DC_Produktion']
+            #print(API['AC_Produktion'], API['DC_Produktion'])
 
 
         return(API)
