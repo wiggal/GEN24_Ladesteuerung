@@ -1,4 +1,4 @@
-**[0.24.2] – 2024-08-22**  
+**[0.24.2] – 2024-08-23**  
 
 FIX: Symos sind nachts evtl. im Standby und liefern keine Daten.  
 
