@@ -41,7 +41,7 @@ class gen24api:
             API['Batterie_OUT'] =   int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
             API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
             API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
-            #print("AC_Produktion, DC_Produktion ORG: ", API['AC_Produktion'], API['DC_Produktion'])
+            print("GEN24 ==>> AC_Produktion, DC_Produktion: ", API['AC_Produktion'], API['DC_Produktion'])  #WIGG
     
         # Daten von weiteren GEN24 lesen
         IP_weitere_Gen24 = basics.getVarConf('gen24','IP_weitere_Gen24','str')
@@ -75,7 +75,7 @@ class gen24api:
                     url = requests.get(gen24url, timeout=2)
                     text = url.text
                     data = json.loads(text)
-                    #data = basics.loadWeatherData('Fronius_Symo.json')
+                    #data = basics.loadWeatherData('WIGGFronius_Symo.json') 
                     API_Sym['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PowerReal_PAC_Sum'])
                     API_Sym['AC_Produktion'] +=  int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
                     API_Sym['DC_Produktion'] += int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
@@ -90,14 +90,19 @@ class gen24api:
                     #print(" Ergebnis: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]))
                     #print("Neuer AC-WERT: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]) + Produktion_MAX_DB[0])
                     #print(DB_DC, DB_AC, API['DC_Produktion'], API['AC_Produktion'])
-                    Offline_AC = (DB_AC + ((API['DC_Produktion'] - API['AC_Produktion']) - (DB_DC - DB_AC)))
+                    Offline_AC_DIFF = ((DB_DC - DB_AC) - (API['DC_Produktion'] - API['AC_Produktion']))
+                    print("Offline_AC_DIFF: ", Offline_AC_DIFF)
+                    if(Offline_AC_DIFF < 0): Offline_AC_DIFF = 0
+                    print("Offline_AC_DIFF nicht kleiner 0: ", Offline_AC_DIFF)
+                    Offline_AC = (DB_AC + Offline_AC_DIFF)
                     #print(DB_DC, Offline_AC, API['DC_Produktion'], API['AC_Produktion'])
                     API['AC_Produktion'] = Offline_AC
                     API['DC_Produktion'] = DB_DC
                     #print("AC_Produktion, DC_Produktion ", API['AC_Produktion'], API['DC_Produktion'])
-                    API_Sym['AC_Produktion'] = 0
+                    print("Symos OFF-Line ==>> AC_Produktion, DC_Produktion: ", API['AC_Produktion'], API['DC_Produktion'])  #WIGG
                     return(API)
 
+            print("Symos ON-Line ==>> AC_Produktion, DC_Produktion: ", API_Sym['AC_Produktion'], API_Sym['DC_Produktion'])  #WIGG
             #print(API['AC_Produktion'], API_Sym['AC_Produktion'])
             #print(API['DC_Produktion'], API_Sym['DC_Produktion'])
             API['aktuellePVProduktion'] += API_Sym['aktuellePVProduktion']
