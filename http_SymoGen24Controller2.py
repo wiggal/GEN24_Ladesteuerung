@@ -27,33 +27,33 @@ if __name__ == '__main__':
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
 
-        alterLadewert = 0
-        result_get_time_of_use = request.get_time_of_use(host_ip, user, password)
-        for element in result_get_time_of_use:
-            if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
-                alterLadewert = element['Power']
-
-        # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
-        SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
-        print_level = basics.getVarConf('env','print_level','eval')
-        Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
-        Options = Parameter[2]
-        
-        Ausgabe_Parameter = ''
-        if(Parameter[1] != "" and print_level >= 1):
-            Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
-            if(Parameter[0] == "exit0"):
-                # Batteriemangement zurücksetzen
-                if result_get_time_of_use != []:
-                    response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
-                    print("Batteriemanagementeinträge gelöscht!")
-                # Ende Programm
-            if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
-                print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
-                exit()
-                # Ende Programm
-
         if ping(host_ip):
+            alterLadewert = 0
+            result_get_time_of_use = request.get_time_of_use(host_ip, user, password)
+            for element in result_get_time_of_use:
+                if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
+                    alterLadewert = element['Power']
+
+            # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
+            SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
+            print_level = basics.getVarConf('env','print_level','eval')
+            Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
+            Options = Parameter[2]
+        
+            Ausgabe_Parameter = ''
+            if(Parameter[1] != "" and print_level >= 1):
+                Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
+                if(Parameter[0] == "exit0"):
+                    # Batteriemangement zurücksetzen
+                    if result_get_time_of_use != []:
+                        response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
+                        print("Batteriemanagementeinträge gelöscht!")
+                    # Ende Programm
+                if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
+                    print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
+                    exit()
+                    # Ende Programm
+
             # Nur ausführen, wenn WR erreichbar
             try:            
                     newPercent = None
@@ -242,25 +242,14 @@ if __name__ == '__main__':
     
                         else:
     
-                            if (TagesPrognoseGesamt > Grundlast) and ((TagesPrognoseGesamt - Grundlast_Summe) < BattKapaWatt_akt):
-                                # Auch hier die Schaltverzögerung anbringen und dann MaxLadung, also immer nach oben.
-                                if BattKapaWatt_akt + Grundlast_Summe - TagesPrognoseGesamt < WRSchreibGrenze_nachOben:
-                                    # Nach Prognoseberechnung darf es trotzdem nach oben gehen aber nicht von MaxLadung nach unten !
-                                    WRSchreibGrenze_nachUnten = 100000
-                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
-                                    newPercent = DATA[0]
-                                    newPercent_schreiben = DATA[1]
-                                    # Nur wenn newPercent_schreiben = 0 dann LadewertGrund mit Hinweis übreschreiben
-                                    if newPercent_schreiben == 0:
-                                        newPercent = oldPercent
-                                        LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt (Unterschied weniger als Schreibgrenze)"
-                                else:
-                                    # volle Ladung ;-)
-                                    aktuellerLadewert = MaxLadung
-                                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
-                                    newPercent = DATA[0]
-                                    newPercent_schreiben = DATA[1]
-                                    LadewertGrund = "TagesPrognoseGesamt - Grundlast_Summe < BattKapaWatt_akt"
+                            TagesPrognoseGesamt_tmp = TagesPrognoseGesamt + aktuelleVorhersage
+                            if (TagesPrognoseGesamt_tmp > Grundlast) and ((TagesPrognoseGesamt_tmp - Grundlast_Summe) < BattKapaWatt_akt):
+                                # volle Ladung ;-)
+                                aktuellerLadewert = MaxLadung
+                                DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent)
+                                newPercent = DATA[0]
+                                newPercent_schreiben = DATA[1]
+                                LadewertGrund = "TagesPrognose+aktuellePrognose-Grundlast_Summe < BattKapaWatt_akt"
     
                             # PrognoseUberschuss - 100 um Schaltverzögerung wieder nach unten zu erreichen
                             elif (TagesPrognoseUeberschuss < BattKapaWatt_akt) and (PrognoseUberschuss - 100 <= Grundlast):
