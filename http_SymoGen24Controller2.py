@@ -172,8 +172,8 @@ if __name__ == '__main__':
                     if BattVollUm <= 0:
                        BattVollUm = progladewert.getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
-                    #if Akkuschonung > 0:
-                        #BattVollUm = BattVollUm - 1
+                    if Akkuschonung > 0:
+                        BattVollUm = BattVollUm - 1
 
 
                     # Geamtprognose und Ladewert berechnen mit Funktion getRestTagesPrognoseUeberschuss
