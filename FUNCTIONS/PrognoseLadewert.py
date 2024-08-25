@@ -45,7 +45,7 @@ class progladewert:
     
             return Ladewert
     
-    def getRestTagesPrognoseUeberschuss(self, BattVollUm, Grundlast):
+    def getLadewert(self, BattVollUm, Grundlast):
     
             # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
             format_Tag = "%Y-%m-%d"
@@ -57,7 +57,6 @@ class progladewert:
             i = Akt_Std
             Pro_Ertrag_Tag = 0
             Grundlast_Sum = 0
-            Prognose_array = list()
             groestePrognose = 0
             Stunden_sum = 0.0001
             Zwangs_Ladung = 0
@@ -86,7 +85,6 @@ class progladewert:
                     Einspeisegrenze_fun = int((self.Einspeisegrenze / 60 * (60 - Akt_Minute)))
                     Stunden_fun = (60-Akt_Minute)/60
     
-                Prognose_array.append(Prognose)
                 Pro_Ertrag_Tag += Prognose_fun
     
                 # Alles über WR_Kapazitaet bzw. Einspeisegrenze von BattKapaWatt_akt abziehen,
@@ -108,12 +106,11 @@ class progladewert:
     
             BattKapaWatt_akt_fun = self.BattKapaWatt_akt - Zwangs_Ladung
             if (BattKapaWatt_akt_fun < 0): BattKapaWatt_akt_fun = 0
-            if Stunden_sum < 1: Stunden_sum = 1
-            Prognoserest_Stunde = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
+            if Stunden_sum < 0.1: Stunden_sum = 0.1
     
             BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
             aktuellerLadewert_1 = int(BattKapaWatt_akt_fun / Stunden_sum)
-            # Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung
+            # Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird
             if(aktuellerLadewert_1 > self.MaxLadung):
                 aktuellerLadewert = self.MaxLadung
             else:
@@ -121,31 +118,24 @@ class progladewert:
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             LadewertGrund = "Prognoseberechnung"
 
-            # Um morgends auf Null zu stellen
+            # Um morgens auf Null zu stellen
             org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
-            if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.5):
+            akt_prognose = self.getAktPrognose()[0]
+            if (akt_prognose < org_WRSchreibGrenze_nachOben + Grundlast and BatSparFaktor < 1):
+                LadewertGrund = "Prognose < WRSchreibGrenze_nachOben + Grundlast"
+                aktuellerLadewert = 0
+            if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.5 and BatSparFaktor < 1):
                 LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben/2"
                 aktuellerLadewert = 0
     
-            # hier noch die Ladewerte über MaxLadung ermitteln und Überschuss von Prognoserest_Stunde abziehen
-            # damit wird bei niedrigen Prognosen mehr geladen, da bei hohen nicht über MaxLadung geladen werden kann
-            Pro_Uberschuss = 0
-            Schleifenzaehler = 0
-            for Prognose_einzel in Prognose_array:
-                if (Prognose_einzel - Prognoserest_Stunde > self.MaxLadung): 
-                    Pro_Uberschuss += Prognose_einzel - Prognoserest_Stunde - self.MaxLadung
-                    Schleifenzaehler += 1
-            if (Pro_Uberschuss > 0 and Schleifenzaehler > 0):
-                Prognoserest_Stunde = int(Prognoserest_Stunde - Pro_Uberschuss / Schleifenzaehler)
-            if (Prognoserest_Stunde < 0):
-                Prognoserest_Stunde = 0
+            # Hier noch pruefen ob gesamte Prognose minus Grudlastsumme noch für Akkuladung reicht.
+            if((aktuellerLadewert <= self.MaxLadung) and ((Pro_Ertrag_Tag - Grundlast_Sum) / 1.1) < BattKapaWatt_akt_fun):
+                aktuellerLadewert = self.MaxLadung
+                LadewertGrund = "TagesPrognose - Grundlast_Summe < aktuelleBattKapazität"
     
-            Pro_Uebersch_Tag = Pro_Ertrag_Tag - BattKapaWatt_akt_fun - Grundlast_Sum
-            self.DEBUG_Ausgabe += "DEBUG ##Ergebnis## Prognoserest_Stunde: " + str(round(aktuellerLadewert, 2)) + ",  Pro_Uebersch_Tag: " + str(round(Pro_Uebersch_Tag, 2)) + ", Stunden_sum: "  + str(round(Stunden_sum, 2)) + "\n"
+            return int(Pro_Ertrag_Tag), Grundlast_Sum, groestePrognose, aktuellerLadewert, LadewertGrund
     
-            return int(Pro_Uebersch_Tag), int(Pro_Ertrag_Tag), Prognoserest_Stunde, Grundlast_Sum, groestePrognose, aktuellerLadewert, LadewertGrund
-    
-    def getPrognoseLadewert(self):
+    def getAktPrognose(self):
     
             format_Tag = "%Y-%m-%d"
             PrognoseGlaettung = 1
@@ -221,7 +211,7 @@ class progladewert:
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             return  aktuellerLadewert, LadewertGrund
     
-    def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, oldPercent):
+    def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert):
             # Wegen ManuelleSteuerung nicht begrenzen auf MaxLadewert
             #fun_Ladewert = self.getLadewertinGrenzen(fun_Ladewert)
     
@@ -232,8 +222,8 @@ class progladewert:
     
             # Schaltvezögerung
             # mit altem Ladewert vergleichen
-            diffLadewert_nachOben = int(fun_Ladewert - oldPercent*BattganzeLadeKapazWatt/10000)
-            diffLadewert_nachUnten = int((oldPercent*BattganzeLadeKapazWatt/10000) - fun_Ladewert)
+            diffLadewert_nachOben = int(fun_Ladewert - alterLadewert)
+            diffLadewert_nachUnten = int(alterLadewert - fun_Ladewert)
     
             # Wenn die Differenz in hundertstel Prozent kleiner als die Schreibgrenze nix schreiben
             newPercent_schreiben = 0
