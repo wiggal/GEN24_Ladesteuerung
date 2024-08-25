@@ -21,14 +21,14 @@ class basics:
                         config.read_file(open(c_file))
                         config.read(c_file)
                 except:
-                        print('ERROR: Konfigdatei ' + c_file + ' not found.')
+                        print("\nERROR: ", e, "\n")
             for conf_file in conf_files:
                 c_file = 'CONFIG/'+conf_file+'_priv.ini'
                 try:
                         config.read_file(open(c_file))
                         config.read(c_file)
-                except:
-                        print('ERROR: Konfigdatei ' + c_file + ' not found.')
+                except Exception as e:
+                        print("\nERROR: ", e, "\n")
             return config
     
     def loadWeatherData(self, weatherfile):

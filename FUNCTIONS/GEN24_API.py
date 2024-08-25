@@ -41,7 +41,6 @@ class gen24api:
             API['Batterie_OUT'] =   int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
             API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
             API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
-            print("GEN24 ==>> AC_Produktion, DC_Produktion: ", API['AC_Produktion'], API['DC_Produktion'])  #WIGG
     
         # Daten von weiteren GEN24 lesen
         IP_weitere_Gen24 = basics.getVarConf('gen24','IP_weitere_Gen24','str')
@@ -103,6 +102,7 @@ class gen24api:
                     return(API)
 
             print("Symos ON-Line ==>> AC_Produktion, DC_Produktion: ", API_Sym['AC_Produktion'], API_Sym['DC_Produktion'])  #WIGG
+            print("GEN24 ==>> AC_Produktion, DC_Produktion: ", API['AC_Produktion'], API['DC_Produktion'])  #WIGG
             #print(API['AC_Produktion'], API_Sym['AC_Produktion'])
             #print(API['DC_Produktion'], API_Sym['DC_Produktion'])
             API['aktuellePVProduktion'] += API_Sym['aktuellePVProduktion']
