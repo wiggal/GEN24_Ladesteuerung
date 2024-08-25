@@ -5,7 +5,7 @@ Vereinfachung des Programmcodes zur Ermittlung des Ladewertes
 **Neuerungen bei Ladewertberechnung**  
 
 Bei BatSparFaktor < 1 wird morgens bei folgenden Bedingungen die Ladung auf 0 gestellt:  
-Prognose < WRSchreibGrenze_nachOben + Grundlast 
+Prognose < Grundlast 
 Prognoseladewert < Grenze_nachOben/2"
 
 Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird
