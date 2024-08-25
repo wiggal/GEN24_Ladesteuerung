@@ -121,8 +121,8 @@ class progladewert:
             # Um morgens auf Null zu stellen
             org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
             akt_prognose = self.getAktPrognose()[0]
-            if (akt_prognose < org_WRSchreibGrenze_nachOben + Grundlast and BatSparFaktor < 1):
-                LadewertGrund = "Prognose < WRSchreibGrenze_nachOben + Grundlast"
+            if (akt_prognose < Grundlast and BatSparFaktor < 1):
+                LadewertGrund = "Prognose < Grundlast"
                 aktuellerLadewert = 0
             if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.5 and BatSparFaktor < 1):
                 LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben/2"
