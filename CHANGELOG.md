@@ -1,3 +1,15 @@
+**[0.24.3] – 2024-XX-XX**  
+
+Vereinfachung des Programmcodes zur Ermittlung des Ladewertes
+
+**Neuerungen bei Ladewertberechnung**  
+
+Bei BatSparFaktor < 1 wird morgens bei folgenden Bedingungen die Ladung auf 0 gestellt:  
+Prognose < WRSchreibGrenze_nachOben + Grundlast 
+Prognoseladewert < Grenze_nachOben/2"
+
+Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird
+
 **[0.24.2] – 2024-08-25**  
 
 FIX: Symos sind nachts evtl. im Standby und liefern keine Daten.  
