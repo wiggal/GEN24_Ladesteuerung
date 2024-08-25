@@ -109,8 +109,8 @@ class progladewert:
             if Stunden_sum < 0.1: Stunden_sum = 0.1
     
             BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
-            aktuellerLadewert_1 = int(BattKapaWatt_akt_fun / Stunden_sum)
             # Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird
+            aktuellerLadewert_1 = int(BattKapaWatt_akt_fun / Stunden_sum)
             if(aktuellerLadewert_1 > self.MaxLadung):
                 aktuellerLadewert = self.MaxLadung
             else:
@@ -120,11 +120,7 @@ class progladewert:
 
             # Um morgens auf Null zu stellen
             org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
-            akt_prognose = self.getAktPrognose()[0]
-            if (akt_prognose < Grundlast and BatSparFaktor < 1):
-                LadewertGrund = "Prognose < Grundlast"
-                aktuellerLadewert = 0
-            if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.5 and BatSparFaktor < 1):
+            if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.7 and BatSparFaktor < 1):
                 LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben/2"
                 aktuellerLadewert = 0
     
