@@ -1,3 +1,11 @@
+**[0.24.2] – 2024-08-25**  
+
+FIX: Symos sind nachts evtl. im Standby und liefern keine Daten.  
+
+Name des Wetterdienstes in LadeStrg-Tab ausgeben.  
+Änderung: BattVollUm als Delta der ersten Prognosestunde, die kleiner als **2%** der maximalen PV-Leistung ist.  
+Genauere Fehlerangabe bei Fehler in config-Files. #97    
+
 **[0.24.1] – 2024-08-13**  
 
 Einbindung von Fronius-Symos

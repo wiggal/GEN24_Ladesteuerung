@@ -112,10 +112,16 @@ class progladewert:
             Prognoserest_Stunde = int((Pro_Ertrag_Tag - BattKapaWatt_akt_fun) / Stunden_sum)
     
             BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
-            aktuellerLadewert = int(BattKapaWatt_akt_fun / Stunden_sum * BatSparFaktor)
+            aktuellerLadewert_1 = int(BattKapaWatt_akt_fun / Stunden_sum)
+            # Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung
+            if(aktuellerLadewert_1 > self.MaxLadung):
+                aktuellerLadewert = self.MaxLadung
+            else:
+                aktuellerLadewert = int(aktuellerLadewert_1 * BatSparFaktor)
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             LadewertGrund = "Prognoseberechnung"
 
+            # Um morgends auf Null zu stellen
             org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
             if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.5):
                 LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben/2"
@@ -249,7 +255,7 @@ class progladewert:
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
             Std_morgen_only = int(datetime.strftime(self.now + timedelta(hours=i), "%H"))
             Prognose = self.getPrognose(Std_morgen)[0]
-            if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 100:
+            if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 50:
                 if Std_morgen_only < Sonnenuntergang:
                     Sonnenuntergang = Std_morgen_only
             i  += 1
@@ -305,17 +311,18 @@ class progladewert:
             Eigen_Opt_Std_neu = Eigen_Opt_Std
             if BattStatusProz > AkkuZielProz:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen):
-                    DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
-                    DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = (MaxEinspeisung)/2
                 if (PrognoseMorgen < PrognoseGrenzeMorgen/2):
-                    DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
-                    DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = 0
                 if (PrognoseMorgen >= PrognoseGrenzeMorgen):
-                    DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
-                    DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = MaxEinspeisung 
+                DEBUG_Eig_opt += DEBUG_Eig_opt_tmp
             else:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen/2):
                     DEBUG_Eig_opt += "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"

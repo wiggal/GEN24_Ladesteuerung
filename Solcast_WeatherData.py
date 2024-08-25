@@ -161,7 +161,7 @@ if __name__ == '__main__':
         data = loadLatestWeatherData()
         if(data[0]['result']['watts'] != {}):
             if not data == "False":
-                basics.storeWeatherData(weatherfile, data[0], now)
+                basics.storeWeatherData(weatherfile, data[0], now, 'solcast.com')
         else:
             print("Fehler bei Datenanforderung api.solcast.com.au:")
             print(data[1])
