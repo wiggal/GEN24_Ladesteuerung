@@ -125,6 +125,12 @@ class progladewert:
                 LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben * 0.7"
                 aktuellerLadewert = 0
     
+            # Wenn größter Prognosewert je Stunde ist kleiner als GrenzwertGroestePrognose volle Ladung
+            GrenzwertGroestePrognose = basics.getVarConf('Ladeberechnung','GrenzwertGroestePrognose','eval')
+            if GrenzwertGroestePrognose > groestePrognose:
+                aktuellerLadewert = self.MaxLadung
+                LadewertGrund = "Größter Prognosewert " + str(groestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
+
             # Hier noch pruefen ob gesamte Prognose minus Grudlastsumme noch für Akkuladung reicht.
             # Schaltverzögerung (Hysterse)
             if (aktuellerLadewert == self.MaxLadung): Pro_Ertrag_Tag = Pro_Ertrag_Tag * 0.9
@@ -132,7 +138,7 @@ class progladewert:
                 aktuellerLadewert = self.MaxLadung
                 LadewertGrund = "TagesPrognose - Grundlast_Summe < aktuelleBattKapazität"
     
-            return int(Pro_Ertrag_Tag), Grundlast_Sum, groestePrognose, aktuellerLadewert, LadewertGrund
+            return int(Pro_Ertrag_Tag), Grundlast_Sum, aktuellerLadewert, LadewertGrund
     
     def getAktPrognose(self):
     

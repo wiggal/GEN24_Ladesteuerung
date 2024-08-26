@@ -73,7 +73,6 @@ if __name__ == '__main__':
                     PV_Leistung_Watt = basics.getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
                     Grundlast = basics.getVarConf('Ladeberechnung','Grundlast','eval')
                     MindBattLad = basics.getVarConf('Ladeberechnung','MindBattLad','eval')
-                    GrenzwertGroestePrognose = basics.getVarConf('Ladeberechnung','GrenzwertGroestePrognose','eval')
                     WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
                     WRSchreibGrenze_nachUnten = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachUnten','eval')
                     FesteLadeleistung = basics.getVarConf('Ladeberechnung','FesteLadeleistung','eval')
@@ -175,9 +174,8 @@ if __name__ == '__main__':
                     PrognoseUNDUeberschuss = progladewert.getLadewert(BattVollUm, Grundlast)
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[0]
                     Grundlast_Summe = PrognoseUNDUeberschuss[1]
-                    GroestePrognose = PrognoseUNDUeberschuss[2]
-                    aktuellerLadewert = PrognoseUNDUeberschuss[3]
-                    LadewertGrund = PrognoseUNDUeberschuss[4]
+                    aktuellerLadewert = PrognoseUNDUeberschuss[2]
+                    LadewertGrund = PrognoseUNDUeberschuss[3]
                     # Ladewert auf Schreibgrenzen prüfen
                     DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
                     WR_schreiben = DATA[1]
@@ -232,13 +230,6 @@ if __name__ == '__main__':
                             WR_schreiben = DATA[1]
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
-                        # Wenn größter Prognosewert je Stunde ist kleiner als GrenzwertGroestePrognose volle Ladung
-                        if GrenzwertGroestePrognose > GroestePrognose:
-                            aktuellerLadewert = MaxLadung
-                            DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
-                            WR_schreiben = DATA[1]
-                            LadewertGrund = "Größter Prognosewert " + str(GroestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
-
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren
                     HysteProdFakt = 2
                     if Akkuschonung > 0:
