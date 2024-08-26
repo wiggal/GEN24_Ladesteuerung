@@ -469,6 +469,15 @@ echo "    }]
            font: {
              size: 20,
            }
+        },
+        // Hier die Scala auf X-Wert begrenzen
+        afterDataLimits(scale) {
+          if(scale.max > 15000) {
+          scale.max = 15000;
+          }
+          if(scale.min < -15000) {
+          scale.min = -15000;
+          }
         }
       },
       y2: {
