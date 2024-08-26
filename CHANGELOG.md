@@ -3,7 +3,6 @@
 Vereinfachung des Programmcodes zur Ermittlung des Ladewertes
 
 **Neuerungen bei Ladewertberechnung**  
-
 Bei BatSparFaktor < 1 wird morgens bei folgenden Bedingungen die Ladung auf 0 gestellt:  
 Prognoseladewert < Grenze_nachOben*0.7"
 

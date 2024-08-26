@@ -70,8 +70,6 @@ class progladewert:
                 Prognose = Prognose_arr[0]
                 # Prognose gesamt
                 Prognose_all = Prognose_arr[1]
-                if groestePrognose < Prognose:
-                    groestePrognose = Prognose
                 Grundlast_fun = Grundlast
                 Einspeisegrenze_fun = self.Einspeisegrenze
                 Prognose_fun = Prognose
@@ -86,6 +84,9 @@ class progladewert:
                     Stunden_fun = (60-Akt_Minute)/60
     
                 Pro_Ertrag_Tag += Prognose_fun
+                # Groesste Prognose ermitteln
+                if groestePrognose < Prognose_fun:
+                    groestePrognose = Prognose_fun
     
                 # Alles über WR_Kapazitaet bzw. Einspeisegrenze von BattKapaWatt_akt abziehen,
                 # da dies nicht für die Prognoseberechnung zur Verfügung steht.
@@ -121,11 +122,13 @@ class progladewert:
             # Um morgens auf Null zu stellen
             org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
             if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.7 and BatSparFaktor < 1):
-                LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben/2"
+                LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben * 0.7"
                 aktuellerLadewert = 0
     
             # Hier noch pruefen ob gesamte Prognose minus Grudlastsumme noch für Akkuladung reicht.
-            if((aktuellerLadewert <= self.MaxLadung) and ((Pro_Ertrag_Tag - Grundlast_Sum) / 1.1) < BattKapaWatt_akt_fun):
+            # Schaltverzögerung (Hysterse)
+            if (aktuellerLadewert == self.MaxLadung): Pro_Ertrag_Tag = Pro_Ertrag_Tag * 0.9
+            if(((Pro_Ertrag_Tag - Grundlast_Sum) / 1.1) < self.BattKapaWatt_akt):
                 aktuellerLadewert = self.MaxLadung
                 LadewertGrund = "TagesPrognose - Grundlast_Summe < aktuelleBattKapazität"
     
