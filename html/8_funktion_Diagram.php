@@ -345,7 +345,7 @@ window.onload = function() { zeitsetzer(1); };
 ";
 } # END function Optionenausgabe
 
-function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit)
+function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit, $Diagrammgrenze)
 {
 $Nachkommastellen = 2;
 if ($EnergieEinheit == 'W') $Nachkommastellen = 0;
@@ -472,11 +472,11 @@ echo "    }]
         },
         // Hier die Scala auf X-Wert begrenzen
         afterDataLimits(scale) {
-          if(scale.max > 15000) {
-          scale.max = 15000;
+          if(scale.max > ".$Diagrammgrenze.") {
+          scale.max = ".$Diagrammgrenze.";
           }
-          if(scale.min < -15000) {
-          scale.min = -15000;
+          if(scale.min < -".$Diagrammgrenze.") {
+          scale.min = -".$Diagrammgrenze.";
           }
         }
       },
