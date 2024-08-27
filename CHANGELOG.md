@@ -1,6 +1,7 @@
-**[0.24.3] – 2024-XX-XX**  
+**[0.24.3] – 2024-09-01**  
 
 Vereinfachung des Programmcodes zur Ermittlung des Ladewertes
+Akkuzustand in Prozent aus API ausgeben.
 
 **Neuerungen bei Ladewertberechnung**  
 Bei BatSparFaktor < 1 wird morgens bei folgenden Bedingungen die Ladung auf 0 gestellt:  
@@ -9,11 +10,11 @@ Prognoseladewert < Grenze_nachOben*0.7"
 Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird.  
 
 **Neuerungen bei Eigenverbrauchs-Optimierung**  
-Durch EigenverbOpt_steuern = 2, in der CONFIG/charge_priv.ini wird die Einspeisug am Tag auf Null gesetzt.  
+Durch EigenverbOpt_steuern = 2, in der CONFIG/charge_priv.ini wird die Einspeisung am Tag auf Null gesetzt.  
 
 #### ACHTUNG Änderung in der html/config.php:  
 Eine neu Variable $Diagrammgrenze = 25000; wurde eingefügt, bitte in html/config_priv.php einfügen.  
-Daurch wird die Y-Achse des Diagramms in der QZ-Bilanz auf diese Größe begrenzt, um große Ausreisser
+Dadurch wird die Y-Achse des Tagesdiagramms in der QZ-Bilanz auf diese Größe begrenzt, um große Ausreißer
 in dem Diagramm abzufangen, die durch längeren Loggingausfall entstehen können.
 
 **[0.24.2] – 2024-08-25**  
