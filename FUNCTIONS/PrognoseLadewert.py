@@ -271,7 +271,7 @@ class progladewert:
             i  += 1
         return(Prognose_Summe, Ende_Nacht_Std)
         
-    def getEigenverbrauchOpt(self, host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung=0):
+    def getEigenverbrauchOpt(self, host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung=0):
         DEBUG_Eig_opt ="\n\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>\n"
         GrundlastNacht = basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
         AkkuZielProz = basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
@@ -306,11 +306,7 @@ class progladewert:
             Eigen_Opt_Std_neu = Eigen_Opt_Std
             if BattStatusProz > AkkuZielProz:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen):
-                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen halbe MaxEinspeisung während des Tages"
-                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-                    Eigen_Opt_Std_neu = (MaxEinspeisung)/2
-                if (PrognoseMorgen < PrognoseGrenzeMorgen/2):
-                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen < Hälfte von PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = 0
                 if (PrognoseMorgen >= PrognoseGrenzeMorgen):
@@ -326,6 +322,13 @@ class progladewert:
                 else:
                     Eigen_Opt_Std_neu = 50
                     DEBUG_Eig_opt += "DEBUG ## >>> BattStatusProz: " + str(BattStatusProz) + ", ist kleiner als AkkuZielProz: " + str(AkkuZielProz) 
+                    DEBUG_Eig_opt += "\nDEBUG ## >>> 50 Watt während des Tages"
+
+            # Wenn EigenverbOpt_steuern 2 Optimierung ueber Tags = 0
+            if (EigenverbOpt_steuern == 2):
+                Eigen_Opt_Std_neu = 0
+                DEBUG_Eig_opt += "\nDEBUG ## >>> EigenverbOpt_steuern == 2, keine Einspeisung während des Tages"
+
     
         # Wenn Eigen_Opt_Std_arry[1] = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
         if Eigen_Opt_Std_arry[1] == 0: Eigen_Opt_Std = 0

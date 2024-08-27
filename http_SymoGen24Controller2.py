@@ -432,8 +432,8 @@ if __name__ == '__main__':
                     ######## WR Batteriemanagement ENDE
 
                     ######## Eigenverbrauchs-Optimierung  ab hier wenn eingeschaltet!
-                    if  EigenverbOpt_steuern == 1:
-                        EigenOptERG = progladewert.getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, MaxEinspeisung)
+                    if  EigenverbOpt_steuern > 0:
+                        EigenOptERG = progladewert.getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung)
                         PrognoseMorgen = EigenOptERG[0]
                         Eigen_Opt_Std = EigenOptERG[1]
                         Eigen_Opt_Std_neu = EigenOptERG[2]
