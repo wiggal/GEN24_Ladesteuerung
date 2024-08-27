@@ -8,6 +8,7 @@ if(file_exists("../CONFIG/default_priv.ini")){
 $PrognoseFile = "../weatherData.json";
 $PV_Leistung_KWp = 11.4;
 $Faktor_PVLeistung_Prognose = 1.00;
+$Diagrammgrenze = 25000;
 $Res_Feld1 = "EV_1";
 $Res_Feld2 = "EV_2";
 $passwd_configedit = "0815";
