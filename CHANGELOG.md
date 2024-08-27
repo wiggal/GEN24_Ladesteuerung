@@ -8,6 +8,9 @@ Prognoseladewert < Grenze_nachOben*0.7"
 
 Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird
 
+**Neuerungen bei Eigenverbrauchs-Optimierung**
+Durch EigenverbOpt_steuern = 2, in der CONFIG/charge_priv.ini wird die Einspeisug am Tag auf Null gesetzt.
+
 **[0.24.2] – 2024-08-25**  
 
 FIX: Symos sind nachts evtl. im Standby und liefern keine Daten.  
