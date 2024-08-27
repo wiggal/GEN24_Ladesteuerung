@@ -313,6 +313,7 @@ if __name__ == '__main__':
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
                             print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
                             print("GesamtverbrauchHaus/Watt:   ", GesamtverbrauchHaus)
+                            print("Akku_Zustand in Prozent:    ", API['Akku_Zustand']*100,"%")
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
