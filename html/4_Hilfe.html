@@ -150,7 +150,12 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[16]" value='' >; Größter Batterieladewert, der im WR gesetzt werden soll, aber höchstens der maximale mögliche Ladewert!!!</td></tr>
 <tr><td><input type="hidden" name="Zeile[17][0]" value=''>MaxLadung</td>
 <td><input type="text" name="Zeile[17][1]" value="3000" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[18]" value='' >; die Einspeisegrenze sollte etwas unterhalb der wirklichen Grenze liegen (1-2%).</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[18]" value='' >; die Einspeisegrenze sollte etwas unterhalb der wirklichen Grenze liegen (1-2%), nur in der Modbus-Version.<br>
+;In der HTTP-Version wird sie nicht mehr zur Einspeisebegrenzung verwendet, da der WR dies selber macht. <br>
+;Der Wert wird aber verwendet, um die Batteriekapazität für die Energie über der Einspeisegrenze zu reservieren. <br>
+;Wenn man die Grenze etwas heruntersetzt, reserviert er an schönen Tagen mehr Batteriekapazität für Mittag, und lädt morgens weniger.<br>
+;Damit kann man die Ladung noch mehr gegen Mittag verschieben.
+</td></tr>
 <tr><td><input type="hidden" name="Zeile[19][0]" value=''>Einspeisegrenze</td>
 <td><input type="text" name="Zeile[19][1]" value="8000" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[20]" value='' >; AC Kapazität des Wechselrichters um den Überschuss in die Batterie zu laden (etwas darunter bleiben 1-2%)</td></tr>
