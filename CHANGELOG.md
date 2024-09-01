@@ -1,13 +1,13 @@
 **[0.24.3] – 2024-09-01**  
 
-Vereinfachung des Programmcodes zur Ermittlung des Ladewertes
-Akkuzustand in Prozent aus API ausgeben.
+Vereinfachung des Programmcodes zur Ermittlung des Ladewertes.  
+Akkuzustand in Prozent aus API ausgeben.  
 
 **Neuerungen bei Ladewertberechnung**  
-Bei BatSparFaktor < 1 wird morgens bei folgenden Bedingungen die Ladung auf 0 gestellt:  
+Bei BatSparFaktor < 1 wird morgens bei folgender Bedingung die Ladung auf 0 gestellt:  
 Prognoseladewert < Grenze_nachOben*0.7"  
 
-Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird.  
+Wenn der Ladewert ohne BatSparFaktor größer MaxLadung, dann MaxLadung setzen, damit der Akku auch voll wird.  
 
 **Neuerungen bei Eigenverbrauchs-Optimierung**  
 Durch EigenverbOpt_steuern = 2, in der CONFIG/charge_priv.ini wird die Einspeisung am Tag auf Null gesetzt.  
