@@ -1,5 +1,14 @@
 **[0.24.4] – 2024-XX-XX**  
 
+Auslagerung der jahrezeitenabhängingen Konfiguration in zusätzliche config-files  
+
+#### ACHTUNG Änderung in der CONFIG/charge.ini und charge_priv.ini:  
+- Definition der Zusatz_Ladebloecke und Zeilen mit Zusatz_Ladebloecke **entfernt**.
+- Neuen Block [monats_priv.ini] eingefügt, hier zusätzliche config-files mit Monaten eintragen  
+  Beispielconfig winter_priv.ini = 11, 12, 01 eingefügt und Protofile winter.ini eingefügt.
+
+Aktivieren z.B. in CONFIG/charge_priv.ini  
+- Kommentar entfernen und winter.ini nach winter_priv.ini umbenennen.
 
 **[0.24.3] – 2024-09-01**  
 

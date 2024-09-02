@@ -10,11 +10,12 @@ class basics:
     def loadConfig(self, conf_files):
             # Damit die Variable config auch in der Funktion "getVarConf" vorhanden ist (global config)
             global config
+            # Damit kann man auch meherer configs nacheinander lesen
             try:
                 config
             except NameError:
                 config = configparser.ConfigParser()
-            # Damit kann man auch meherer configs nacheinander lesen
+            # Standard.ini lesen
             for conf_file in conf_files:
                 c_file = 'CONFIG/'+conf_file+'.ini'
                 try:
@@ -22,12 +23,23 @@ class basics:
                         config.read(c_file)
                 except:
                         print("\nERROR: ", e, "\n")
+            # _priv_ini lesen
             for conf_file in conf_files:
                 c_file = 'CONFIG/'+conf_file+'_priv.ini'
                 try:
                         config.read_file(open(c_file))
                         config.read(c_file)
                 except Exception as e:
+                        print("\nERROR: ", e, "\n")
+            # Monatsabhängige ini lesen
+            aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
+            for (c_file, monate) in config.items('monats_priv.ini'):
+                if aktueller_Monat in monate:
+                    c_file = 'CONFIG/'+c_file
+                    try:
+                        config.read_file(open(c_file))
+                        config.read(c_file)
+                    except Exception as e:
                         print("\nERROR: ", e, "\n")
             return config
     
@@ -55,24 +67,6 @@ class basics:
         return()
     
     def getVarConf(self, var_block, var, Type):
-            aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
-            # Für alle Varaiblen aus dem Block [Ladeberechnung] lesen welche Zusatz_Ladebloecke vorhanden sind
-            # ausgenommen die Variable Zusatz_Ladebloecke, wegen Endlosschleife
-            if (var_block == 'Ladeberechnung') and not (var_block == 'Ladeberechnung' and var == 'Zusatz_Ladebloecke'):
-                Bloecke = self.getVarConf('Ladeberechnung','Zusatz_Ladebloecke','str')
-                if ( Bloecke != 'aus' ):
-                    Bloecke = Bloecke.replace(" ", "")
-                    Bloecke = Bloecke.split(",")
-                    for Block in Bloecke:
-                        # Hier pruefen ob Monat in Ersatzblock vorkommt und dann Ersatzblockvariable lesen!!
-                        # Zusatz_configs lesen
-                        Ersatzmonate = self.getVarConf( Block ,'Monate','str')
-                        Ersatzmonate = Ersatzmonate.replace(" ", "")
-                        Ersatzmonate = Ersatzmonate.split(",")
-                        if ( aktueller_Monat in Ersatzmonate ):
-                            if ( var in config[ Block ] ):
-                                var_block = Block
-    
             # Variablen aus config lesen und auf Zahlen prüfen
             try:
                 if(Type == 'eval'):
