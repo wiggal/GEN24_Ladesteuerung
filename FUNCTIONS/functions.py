@@ -32,16 +32,18 @@ class basics:
                 except Exception as e:
                         print("\nERROR: ", e, "\n")
             # Monatsabhängige ini lesen
-            aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
-            for (c_file, monate) in config.items('monats_priv.ini'):
-                if aktueller_Monat in monate:
-                    c_file = 'CONFIG/'+c_file
-                    try:
-                        config.read_file(open(c_file))
-                        config.read(c_file)
-                    except Exception as e:
-                        print("\nERROR: ", e, "\n")
-            return config
+            if ( 'charge' in conf_files ):
+                aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
+                for (c_file, monate) in config.items('monats_priv.ini'):
+                    if aktueller_Monat in monate:
+                        c_file = 'CONFIG/'+c_file
+                        print(">>>>>>>>>>> Konfig von ", c_file)
+                        try:
+                            config.read_file(open(c_file))
+                            config.read(c_file)
+                        except Exception as e:
+                            print("\nERROR: ", e, "\n")
+                return config
     
     def loadWeatherData(self, weatherfile):
             data = None
