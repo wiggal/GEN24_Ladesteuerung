@@ -1,3 +1,6 @@
+**[0.24.4] – 2024-XX-XX**  
+
+
 **[0.24.3] – 2024-09-01**  
 
 Vereinfachung des Programmcodes zur Ermittlung des Ladewertes.  

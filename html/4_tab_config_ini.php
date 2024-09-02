@@ -84,7 +84,7 @@ function getinifile($dir)
 		if ($element != '.' && $element != '..') {
 			// Filter only files mit priv.ini
 			if ((is_file($dir . '/' . $element)) and strpos($element, '_priv.ini')) {
-                $files .= "<option value=\"$dir$element\"> $element></option>";
+                $files .= "<option value=\"$dir$element\"> $element </option>";
 				$i++;
 			}
 		}
