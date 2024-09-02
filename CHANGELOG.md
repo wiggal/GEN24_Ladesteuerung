@@ -1,6 +1,6 @@
 **[0.24.4] – 2024-XX-XX**  
 
-Auslagerung der jahrezeitenabhängingen Konfiguration in zusätzliche config-files  
+Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files  
 
 #### ACHTUNG Änderung in der CONFIG/charge.ini und charge_priv.ini:  
 - Definition der Zusatz_Ladebloecke und Zeilen mit Zusatz_Ladebloecke **entfernt**.
