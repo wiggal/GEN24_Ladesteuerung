@@ -310,7 +310,7 @@ class progladewert:
         Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
         Eigen_Opt_Std_neu = int(Akku_Rest_Watt/Dauer_Nacht_Std)
         # Schaltverzögerung (hysterese) 
-        if abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu: Eigen_Opt_Std_neu -= 50
+        if (abs(Eigen_Opt_Std) > 50) and (abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu): Eigen_Opt_Std_neu -= 50
         # Eigen_Opt_Std_neu auf 100 runden
         Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu, -2))
         if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
