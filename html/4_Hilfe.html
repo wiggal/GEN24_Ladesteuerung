@@ -197,31 +197,13 @@ td {font-size: 160%;
 <tr><td><input type="hidden" name="Zeile[46][0]" value=''>Akkuschonung</td>
 <td><input type="text" name="Zeile[46][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[47]" value='' ></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[48]" value='' >; hier müssen die Namen der zusätzlichen Konfigurationen definiert werden.</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[49]" value='' >; mit Zusatz_Ladebloecke = aus können die zusätzlichen Konfigurationen abgeschaltet werden</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[50]" value='' >; Zusatz_Ladebloecke = aus</td></tr>
-<tr><td><input type="hidden" name="Zeile[51][0]" value=''>Zusatz_Ladebloecke</td>
-<td><input type="text" name="Zeile[51][1]" value="Winter, Uebergang" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[52]" value='' ></td></tr>
-<tr><th colspan="2"><input type="hidden" name="Zeile[53]" value='' >[Winter]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[54]" value='' >; in den Wintermonaten werden die Standardwerte aus dem Block [Ladeberechnung] durch die Nachfolgenden ersetzt</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[55]" value='' >; Monate ist ein Schlüssel und muss im Block vorhanden sein</td></tr>
+<tr><th colspan="2"><input type="hidden" name="Zeile[53]" value='' >[monats_priv.ini]</th></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[54]" value='' >; hier können die Namen von zusätzlichen monatsabhängigen config.ini definiert werden.</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[56]" value='' >; die Monate müssen immer zweistellig sein!!</td></tr>
-<tr><td><input type="hidden" name="Zeile[57][0]" value=''>Monate</td>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[55]" value='' >; Dateiname (immer kleinbuchstaben) = GülitgkeitsMonate</td></tr>
+<tr><td><input type="hidden" name="Zeile[57][0]" value=''>winter_priv.ini</td>
 <td><input type="text" name="Zeile[57][1]" value="11, 12, 01" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[58]" value='' >; hier Werte für den Zusatz_Ladeblock angeben</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[59]" value='' >; die Liste ist nicht abschließend und kann erweitert werden</td></tr>
-<tr><td><input type="hidden" name="Zeile[60][0]" value=''>BatSparFaktor</td>
-<td><input type="text" name="Zeile[60][1]" value="1.5" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[61][0]" value=''>MaxLadung</td>
-<td><input type="text" name="Zeile[61][1]" value="5000" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[62][0]" value=''>WRSchreibGrenze_nachOben</td>
-<td><input type="text" name="Zeile[62][1]" value="700" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[63][0]" value=''>WRSchreibGrenze_nachUnten</td>
-<td><input type="text" name="Zeile[63][1]" value="1600" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[64][0]" value=''>MindBattLad</td>
-<td><input type="text" name="Zeile[64][1]" value="50" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[65]" value='' ></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[58]" value='' >; Die werte für den Winter, müssen dann in der winter_priv.ini definiert werden.</td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[66]" value='' >[Uebergang]</th></tr>
 <tr><td><input type="hidden" name="Zeile[67][0]" value=''>Monate</td>
 <td><input type="text" name="Zeile[67][1]" value="09, 10, 02" readonly></td></tr>

@@ -1,6 +1,9 @@
-**[0.24.4] – 2024-XX-XX**  
+**[0.24.4] – 2024-09-08**  
 
 Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files  
+Vorteil: Man kann dort alle Definitionen, die in der charge.ini, bzw. charge_priv.ini enthalten sind, 
+Monats abhängig ändern. Nicht nur aus dem Block [Ladeberechnung], sondern auch z.B. aus `[Entladung]`, `[EigenverbOptimum]` usw.
+
 
 #### ACHTUNG Änderung in der CONFIG/charge.ini und charge_priv.ini:  
 - Definition der Zusatz_Ladebloecke und Zeilen mit Zusatz_Ladebloecke **entfernt**.
