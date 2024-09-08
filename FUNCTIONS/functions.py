@@ -37,7 +37,6 @@ class basics:
                 for (c_file, monate) in config.items('monats_priv.ini'):
                     if aktueller_Monat in monate:
                         c_file = 'CONFIG/'+c_file
-                        print(">>>>>>>>>>> Konfig von ", c_file)
                         try:
                             config.read_file(open(c_file))
                             config.read(c_file)

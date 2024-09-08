@@ -2,7 +2,7 @@
 
 Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files  
 Vorteil: Man kann dort alle Definitionen, die in der charge.ini, bzw. charge_priv.ini enthalten sind, 
-Monats abhängig ändern. Nicht nur aus dem Block [Ladeberechnung], sondern auch z.B. aus `[Entladung]`, `[EigenverbOptimum]` usw.
+Monats abhängig machen. Nicht nur aus dem Block [Ladeberechnung], sondern auch z.B. aus `[Entladung]`oder `[EigenverbOptimum]`.
 
 
 #### ACHTUNG Änderung in der CONFIG/charge.ini und charge_priv.ini:  
@@ -11,7 +11,7 @@ Monats abhängig ändern. Nicht nur aus dem Block [Ladeberechnung], sondern auch
   Beispielconfig winter_priv.ini = 11, 12, 01 eingefügt und Protofile winter.ini eingefügt.
 
 Aktivieren z.B. in CONFIG/charge_priv.ini  
-- Kommentar entfernen und winter.ini nach winter_priv.ini umbenennen.
+- Kommentar bei `winter_priv.ini = 11, 12, 01` entfernen und winter.ini nach winter_priv.ini umbenennen, und enthaltene Werte anpassen.
 
 **[0.24.3] – 2024-09-01**  
 
