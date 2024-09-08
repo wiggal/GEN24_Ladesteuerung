@@ -2,14 +2,15 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
+Ab Version: **0.24.4**  
+Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files.  
+Änderung in der CONFIG/charge.ini und charge_priv.ini, neuen Block [monats_priv.ini] eingefügt, usw.  
+Ab Version: **0.24.1**  
+Einbindung von Fronius-Symos.  
+Änderung in der CONFIG/default.ini `IP_weitere_Symo = no` in CONFIG/default_priv.ini einfügen.  
 Ab Version: **0.24.0**  
 Alle Daten aus den Steuerungs.json Dateien in SQLite-Datenbankdatei CONFIG/Prog_Steuerung.sqlite abgelegt.
 Änderungen in WebUI: Reiter Settings neu konzipiert, Schieberegler bei den Prozentangaben der Ladesteuerungen.  
-Ab Version: **0.22.0**  
-Die config.ini ins Verzeichnis CONFIG verschoben und aufgeteilt auf `default.ini, charge.ini weather.ini`.
-Zur jeweiligen `xy.ini` kann eine `xy_priv.ini` mit den persönlichen Anpassungen erstellt werden.  
-Ab Version: **0.21.4**  
-BattVollUm als Delta der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.  
 ![new](pics/new2.png)  
 
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
@@ -162,6 +163,11 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 ----------
 
 **News History:**  
+Ab Version: **0.22.0**  
+Die config.ini ins Verzeichnis CONFIG verschoben und aufgeteilt auf `default.ini, charge.ini weather.ini`.
+Zur jeweiligen `xy.ini` kann eine `xy_priv.ini` mit den persönlichen Anpassungen erstellt werden.  
+Ab Version: **0.21.4**  
+BattVollUm als Delta der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.  
 Ab Version: **0.21.3**  
 In der HTTP-Version kann nun im Energiemanagement, ein Einspeisezielwert der Eigenverbrauchs-Optimierung automatisch geschrieben werden.  
 Ab Version: **0.21.2**  
