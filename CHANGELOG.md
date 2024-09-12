@@ -1,3 +1,8 @@
+**[0.24.5] – 2024-XX-XX**  
+
+- WebUI automatischer reload alle 5 Minuten, und beim wechseln des Tab.  
+  Logfile springt beim Öffnen ans Ende.
+
 **[0.24.4] – 2024-09-08**  
 
 Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files  
