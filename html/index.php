@@ -100,14 +100,29 @@ foreach ($TAB_config as $files) {
         } else {
             $id_default = '';
         }
-            $class_tab .= '<input type="radio" name="tabs" id="'.$files['name'].'"'.$id_default.'>'."\n";
+            $class_tab .= '<input type="radio" name="tabs" id="'.$files['name'].'"'.$id_default.' onclick="reloadFrame(\''.$files['name'].'\')">'."\n";
             $class_tab .= '<label style="width: '.$Tab_Proz.'vw;" for="'.$files['name'].'">'.$files['name'].'</label>'."\n";
-            $class_tab .= '<div class="tab"><iframe src="'.$files['file'].'" style="border:none;" height="100%" width="100%"></iframe></div>'."\n";
+            $class_tab .= '<div class="tab"><iframe id="'.$files['name'].'" src="'.$files['file'].'" style="border:none;" height="100%" width="100%"></iframe></div>'."\n";
     }
 }
 $class_tab .= '</div>';
 echo $class_tab;
 ?>
+<script>
+function reloadFrame(button){
+  document.querySelectorAll("iframe").forEach(function(e){ 
+  // nur Iframe des geklickten Tab neu laden
+  if ( e.getAttribute("id") == button ) {
+  e.src+=""; 
+  }
+  });
+}
+// Alle 5 Minuten alle Iframes neu laden
+setInterval(function() {
+  document.querySelectorAll("iframe").forEach(function(e){ e.src+=""; });
+}, 900000);
+
+</script>
 </body>
 </html>
 

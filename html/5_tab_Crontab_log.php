@@ -27,7 +27,7 @@ a.ende{
 }
 </style>
 </head>
-<body>
+<body onLoad="if (location.hash != '#bottom') location.hash = '#bottom';">
 <div name="top"><div>
 <div class="headertop">
 <a href="#bottom">Ans Ende springen!</a>
