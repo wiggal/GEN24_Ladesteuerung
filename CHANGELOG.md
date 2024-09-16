@@ -3,6 +3,9 @@
 - WebUI automatischer reload alle 5 Minuten, und beim wechseln des Tab.  
   Logfile springt beim Öffnen ans Ende.
 
+- Notstrom Reserverkapazität (Entladebegrenzung) höher setzen, wenn schlechte Prognose in nächsten 24 Stunden (HTTP-Version)
+
+
 **[0.24.4] – 2024-09-08**  
 
 Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files  
