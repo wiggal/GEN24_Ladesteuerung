@@ -457,7 +457,7 @@ if __name__ == '__main__':
                         ProgGrenzeMorgen = basics.getVarConf('Entladung','ProgGrenzeMorgen','eval')
                         EntladeGrenze_Min = basics.getVarConf('Entladung','EntladeGrenze_Min','eval')
                         EntladeGrenze_Max = basics.getVarConf('Entladung','EntladeGrenze_Max','eval')
-                        PrognoseMorgen = getPrognoseMorgen()[0]/1000
+                        PrognoseMorgen = progladewert.getPrognoseMorgen()[0]/1000
                         Battery_MinRsvPct = int(gen24.read_data('Battery_MinRsvPct')/100)
                         Neu_Battery_MinRsvPct = EntladeGrenze_Min
                         if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
