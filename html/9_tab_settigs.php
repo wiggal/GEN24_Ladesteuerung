@@ -93,7 +93,6 @@ input[type="checkbox"] {
  <body onload="disablecheckboxes()">
  <div class="hilfe" align="right"> <a href="9_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
-   <br />
    <div class="hilfe" align="center"><p>
    <b>ACHTUNG:</b> Wenn die WebUI-Settings nicht ausgeschaltet sind, 
    <br>überschreiben sie die Aufrufparameter des Skriptes (z.B. vom Cronjob)!
@@ -118,7 +117,7 @@ for ($i = 0; $i <= 4; $i++) {
 
 #Checkbox wie in DB setzen
 $CheckOptionsDB = explode(":", $EV_Reservierung['23:09']['Options']);
-$CheckOptionsALL = array("logging", "laden", "entladen", "optimierung");
+$CheckOptionsALL = array("logging", "laden", "entladen", "optimierung",'notstrom');
 $Setting_check = array();
 foreach ($CheckOptionsALL as &$option) {
     if (in_array($option, $CheckOptionsDB)) {
@@ -142,6 +141,7 @@ foreach ($CheckOptionsALL as &$option) {
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer6" value="laden" <?php echo $Setting_check['laden'] ?> >Ladesteuerung</label>
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer7" value="entladen" <?php echo $Setting_check['entladen'] ?> >Entladesteuerung</label>
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer8" value="optimierung" <?php echo $Setting_check['optimierung'] ?> >Eigenverbrauchs-Optimierung</label>
+ <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer9" value="notstrom" <?php echo $Setting_check['notstrom'] ?> >Notstromreserve</label>
 </div>
 </div>
 
@@ -157,6 +157,7 @@ function disablecheckboxes() {
     document.getElementById("steuer6").disabled = false;
     document.getElementById("steuer7").disabled = false;
     document.getElementById("steuer8").disabled = false;
+    document.getElementById("steuer9").disabled = false;
   } else {
     document.getElementById("steuer5").checked = false;
     document.getElementById("steuer5").disabled = true;
@@ -166,6 +167,8 @@ function disablecheckboxes() {
     document.getElementById("steuer7").disabled = true;
     document.getElementById("steuer8").checked = false;
     document.getElementById("steuer8").disabled = true;
+    document.getElementById("steuer9").checked = false;
+    document.getElementById("steuer9").disabled = true;
   }
 }
 </script>
