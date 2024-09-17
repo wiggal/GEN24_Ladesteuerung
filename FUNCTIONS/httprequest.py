@@ -55,7 +55,7 @@ class request:
         result = json.loads(response.text)['timeofuse']
         return result
     
-    def get_eigenv_opt(self, g_self_address, g_user, g_password):
+    def get_batteries(self, g_self_address, g_user, g_password):
         global user, password, self_address
         user = g_user.lower()
         password = g_password
@@ -67,8 +67,8 @@ class request:
         HYB_EM_POWER = json.loads(response.text)['HYB_EM_POWER']
         # wenn HYB_EM_MODE = 0, Eigenverbrauchs-Optimierung = Automatisch
         HYB_EM_MODE = json.loads(response.text)['HYB_EM_MODE']
-        return HYB_EM_POWER, HYB_EM_MODE
-    
+        HYB_BACKUP_RESERVED = json.loads(response.text)['HYB_BACKUP_RESERVED']
+        return HYB_EM_POWER, HYB_EM_MODE, HYB_BACKUP_RESERVED
     
     def send_request(self, path, method='GET',payload="", params=None, headers={}, auth=False):
         global DEBUG_Ausgabe_fun_http
@@ -93,19 +93,10 @@ class request:
                 response = requests.request(method=method, url=url, params=params, headers=headers,data=payload)
         
                 if response.status_code == 200:
-                    # DEBUG print("SPO## response: ",response)
-                    # method='POST'
-                    # Energiemanagement ->  Batteriemanagement  -> Max. Entladeleistung (="DISCHARGE_MAX")
-                    #path = '/config/timeofuse'
-                    #payload = '{"timeofuse":[{"Active":true,"Power":1,"ScheduleType":"DISCHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}]}'
-                    # Energiemanagement -> Eigenverbrauchs-Optimierung -> Manuell = "HYB_EM_MODE":1
-                    #path = '/config/batteries'
-                    #payload = '{"HYB_EM_POWER":-124,"HYB_EM_MODE":1}'
                     return response
                 elif response.status_code == 401: #unauthorized
                     nonce = self.get_nonce(response)
                     if i > 1:
-                        # DEBUG print('[Fronius] Login failed 3 times .. aborting')
                         print('[Fronius] Login fehlgeschlagen .. falsche Zugangsdaten?')
                         exit()
                     if (response.status_code==200):

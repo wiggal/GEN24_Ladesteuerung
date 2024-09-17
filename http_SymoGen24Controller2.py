@@ -433,6 +433,7 @@ if __name__ == '__main__':
                     ######## WR Batteriemanagement ENDE
 
                     ######## Eigenverbrauchs-Optimierung  ab hier wenn eingeschaltet!
+                    HYB_BACKUP_RESERVED = None
                     if  EigenverbOpt_steuern > 0:
                         EigenOptERG = progladewert.getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung)
                         PrognoseMorgen = EigenOptERG[0]
@@ -441,6 +442,7 @@ if __name__ == '__main__':
                         Dauer_Nacht_Std = EigenOptERG[3]
                         AkkuZielProz = EigenOptERG[4]
                         DEBUG_Ausgabe += EigenOptERG[5]
+                        HYB_BACKUP_RESERVED = EigenOptERG[6]
                         aktuellePVProduktion_tmp = aktuellePVProduktion
 
                         # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
@@ -477,6 +479,52 @@ if __name__ == '__main__':
                             if print_level >= 1:
                                 print(Opti_Schreib_Ausgabe)
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
+
+                    ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
+                    if  EntladeGrenze_steuern == 1 and aktuellePVProduktion < 8210: #WIGG
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
+
+                        ProgGrenzeMorgen = basics.getVarConf('Entladung','ProgGrenzeMorgen','eval')
+                        EntladeGrenze_Min = basics.getVarConf('Entladung','EntladeGrenze_Min','eval')
+                        # EntladeGrenze_Min in Notstromreserve kann nicht kleiner 5% sein
+                        if EntladeGrenze_Min < 5:
+                            EntladeGrenze_Min = 5
+                        EntladeGrenze_Max = basics.getVarConf('Entladung','EntladeGrenze_Max','eval')
+                        PrognoseMorgen = progladewert.getPrognoseMorgen()[0]/1000
+                        if HYB_BACKUP_RESERVED == None:
+                            HYB_BACKUP_RESERVED = request.get_batteries(host_ip, user, password)[2]
+                        Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Min
+                        if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
+                            Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Max
+                        if print_level >= 1:
+                            print("######### N O T S T R O M R E S E R V E #########\n")
+                            print("Prognose Morgen:     ", int(PrognoseMorgen), "KW")
+                            print("ProgGrenze Morgen:   ", ProgGrenzeMorgen, "KW")
+                            print("Batteriereserve:     ", HYB_BACKUP_RESERVED, "%")
+                            print("Neu_Batteriereserve: ", Neu_HYB_BACKUP_RESERVED, "%")
+                            print()
+
+                        Schreib_Ausgabe = ""
+
+                        if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
+                            if ('notstrom' in Options):
+                                response = request.send_request('/config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}')
+                                bereits_geschrieben = 1
+                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladegrenze schreiben: " + str(response)
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladebegrenzung: " + str(Neu_HYB_BACKUP_RESERVED) + "%\n"
+                                Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
+                            else:
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung NICHT geschrieben, da Option \"notstrom\" NICHT gesetzt!\n"
+                        else:
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung hat sich nicht verändert, NICHTS zu schreiben!!\n"
+
+                        if print_level >= 1:
+                            print(Schreib_Ausgabe)
+
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADEBEGRENZUNG >>>>>>>>>>>>>"
+
+                    ######## Notstromreserve setzen, ENDE
+
     
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):

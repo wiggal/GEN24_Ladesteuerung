@@ -40,7 +40,7 @@ class readcontroldata:
             if Parameter == 'logging':
                 Options = ['logging']
             if Parameter == 'schreiben':
-                Options = ['logging','laden','entladen','optimierung']
+                Options = ['logging','laden','entladen','optimierung','notstrom']
         # Ab hier WebUI-Settings
         if Prog_Steuer_code == 1:
             Meldung = "AUS (WR löschen)"

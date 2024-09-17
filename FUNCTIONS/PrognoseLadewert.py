@@ -300,8 +300,10 @@ class progladewert:
         PrognoseMorgen_arr = self.getPrognoseMorgen(MaxEinspeisung)
         PrognoseMorgen = PrognoseMorgen_arr[0]/1000
         Ende_Nacht_Std = PrognoseMorgen_arr[1]
-        Eigen_Opt_Std_arry = request.get_eigenv_opt(host_ip, user, password)
+        Eigen_Opt_Std_arry = request.get_batteries(host_ip, user, password)
         Eigen_Opt_Std = Eigen_Opt_Std_arry[0]
+        Eigen_Opt_auto = Eigen_Opt_Std_arry[1]
+        Backup_Reserve = Eigen_Opt_Std_arry[2]
     
         if Ende_Nacht_Std == 0 : Ende_Nacht_Std = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
         Dauer_Nacht = (datetime.strptime(Ende_Nacht_Std, '%Y-%m-%d %H:%M:%S') - (self.now  - timedelta(hours=1)))
@@ -351,11 +353,11 @@ class progladewert:
                 DEBUG_Eig_opt += "\nDEBUG ## >>> EigenverbOpt_steuern == 2, keine Einspeisung während des Tages"
 
     
-        # Wenn Eigen_Opt_Std_arry[1] = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
-        if Eigen_Opt_Std_arry[1] == 0: Eigen_Opt_Std = 0
+        # Wenn  Eigen_Opt_auto = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
+        if Eigen_Opt_auto == 0: Eigen_Opt_Std = 0
     
         # Einspeisung muss immer Minus sein!!
         Eigen_Opt_Std_neu = abs(Eigen_Opt_Std_neu) * -1
     
-        return PrognoseMorgen, Eigen_Opt_Std, int(Eigen_Opt_Std_neu), Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt
+        return PrognoseMorgen, Eigen_Opt_Std, int(Eigen_Opt_Std_neu), Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt, Backup_Reserve
     
