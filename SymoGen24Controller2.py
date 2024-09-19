@@ -136,7 +136,8 @@ if __name__ == '__main__':
                     alterLadewert = int(oldPercent*BattganzeLadeKapazWatt/10000)
     
                     format_aktStd = "%Y-%m-%d %H:00:00"
-    
+                    aktStd = datetime.strftime(now, "%H:00")
+
     
                     #######################################
                     ## Ab hier geht die Berechnung los
@@ -288,7 +289,8 @@ if __name__ == '__main__':
                     if aktuellePVProduktion < 10:
                         # Für die Nacht zwingend auf MaxLadung, 
                         # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
-                        if alterLadewert < MaxLadung -10 :
+                        Akt_Std = int(datetime.strftime(now, "%H"))
+                        if alterLadewert < MaxLadung -10 and Akt_Std > 12:
                             aktuellerLadewert = MaxLadung
                             DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
                             newPercent = DATA[0]
@@ -381,8 +383,6 @@ if __name__ == '__main__':
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
                             MaxEntladung = int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'])
                             DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
-
-                        aktStd = datetime.strftime(now, "%H:00")
 
                         # Verbrauchsgrenze Entladung lesen
                         if (entladesteurungsdata.get(aktStd)):
