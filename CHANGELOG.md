@@ -1,4 +1,4 @@
-**[0.24.5] – 2024-XX-XX**  
+**[0.24.5] – 2024-09-22**  
 
 - WebUI automatischer reload alle 5 Minuten, und beim wechseln des Tab.  
   Logfile springt beim Öffnen ans Ende.
