@@ -377,7 +377,7 @@ if __name__ == '__main__':
 
                         ## Werte zum Überprüfen ausgeben
                         if print_level >= 1:
-                            print("######### E N T L A D E S T E U E R U N G #########\n")
+                            print("## ENTLADESTEUERUNG ##\n")
                             print("Feste Entladegrenze:       ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100), "W")
                             print("Batteriestatus in Prozent: ", BattStatusProz, "%")
                             print("GesamtverbrauchHaus:       ", GesamtverbrauchHaus, "W")
@@ -455,7 +455,7 @@ if __name__ == '__main__':
 
                         if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
-                                print("### Eigenverbrauchs-Optimierung ###")
+                                print("## Eigenverbrauchs-Optimierung ##")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")
                                 print("Eigenverbrauchs-Opt. ALT: ", Eigen_Opt_Std, "W")
                                 print("Eigenverbrauchs-Opt. NEU: ", Eigen_Opt_Std_neu, "W")
@@ -496,7 +496,7 @@ if __name__ == '__main__':
                         if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
                             Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Max
                         if print_level >= 1:
-                            print("######### N O T S T R O M R E S E R V E #########\n")
+                            print("## NOTSTROMRESERVE ##")
                             print("Prognose Morgen:     ", int(PrognoseMorgen), "KW")
                             print("ProgGrenze Morgen:   ", ProgGrenzeMorgen, "KW")
                             print("Batteriereserve:     ", HYB_BACKUP_RESERVED, "%")
@@ -509,13 +509,13 @@ if __name__ == '__main__':
                             if ('notstrom' in Options):
                                 response = request.send_request('/config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}')
                                 bereits_geschrieben = 1
-                                DEBUG_Ausgabe+="\nDEBUG Meldung Entladegrenze schreiben: " + str(response)
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Folgender Wert wurde geschrieben für Batterieentladebegrenzung: " + str(Neu_HYB_BACKUP_RESERVED) + "%\n"
+                                DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)
+                                Schreib_Ausgabe = Schreib_Ausgabe + str(Neu_HYB_BACKUP_RESERVED) + "% Notstromreserve geschrieben.\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung NICHT geschrieben, da Option \"notstrom\" NICHT gesetzt!\n"
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Notstromreserve NICHT geschrieben, da Option \"notstrom\" NICHT gesetzt!\n"
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Batterieentladebegrenzung hat sich nicht verändert, NICHTS zu schreiben!!\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Notstromreserve, NICHTS zu schreiben!!\n"
 
                         if print_level >= 1:
                             print(Schreib_Ausgabe)
