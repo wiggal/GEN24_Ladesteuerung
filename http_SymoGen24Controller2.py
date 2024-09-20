@@ -140,6 +140,7 @@ if __name__ == '__main__':
     
                     format_aktStd = "%Y-%m-%d %H:00:00"
                     aktStd = datetime.strftime(now, "%H:00")
+                    Akt_Std = int(datetime.strftime(now, "%H"))
     
                     #######################################
                     ## Ab hier geht die Berechnung los
@@ -275,7 +276,6 @@ if __name__ == '__main__':
                     if aktuellePVProduktion < 10:
                         # Für die Nacht zwingend auf MaxLadung, 
                         # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
-                        Akt_Std = int(datetime.strftime(now, "%H"))
                         if alterLadewert < MaxLadung -10 and Akt_Std > 12:
                             aktuellerLadewert = MaxLadung
                             DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
@@ -480,7 +480,7 @@ if __name__ == '__main__':
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
 
                     ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
-                    if  EntladeGrenze_steuern == 1 and aktuellePVProduktion < 8210: #WIGG
+                    if  EntladeGrenze_steuern == 1 and Akt_Std > 20 and aktuellePVProduktion < 10:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
                         ProgGrenzeMorgen = basics.getVarConf('Entladung','ProgGrenzeMorgen','eval')
