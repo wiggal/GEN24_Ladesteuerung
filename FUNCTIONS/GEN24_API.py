@@ -74,7 +74,6 @@ class gen24api:
                     url = requests.get(gen24url, timeout=2)
                     text = url.text
                     data = json.loads(text)
-                    #data = basics.loadWeatherData('WIGGFronius_Symo.json') 
                     API_Sym['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PowerReal_PAC_Sum'])
                     API_Sym['AC_Produktion'] +=  int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
                     API_Sym['DC_Produktion'] += int(data['Body']['Data']['262144']['channels']['EnergyReal_WAC_Sum_EverSince'])
@@ -97,18 +96,11 @@ class gen24api:
                     #print(DB_DC, Offline_AC, API['DC_Produktion'], API['AC_Produktion'])
                     API['AC_Produktion'] = Offline_AC
                     API['DC_Produktion'] = DB_DC
-                    #print("AC_Produktion, DC_Produktion ", API['AC_Produktion'], API['DC_Produktion'])
-                    print("Symos OFF-Line ==>> AC_Produktion, DC_Produktion: ", API['AC_Produktion'], API['DC_Produktion'])  #WIGG
                     return(API)
 
-            print("Symos ON-Line ==>> AC_Produktion, DC_Produktion: ", API_Sym['AC_Produktion'], API_Sym['DC_Produktion'])  #WIGG
-            print("GEN24 ==>> AC_Produktion, DC_Produktion: ", API['AC_Produktion'], API['DC_Produktion'])  #WIGG
-            #print(API['AC_Produktion'], API_Sym['AC_Produktion'])
-            #print(API['DC_Produktion'], API_Sym['DC_Produktion'])
             API['aktuellePVProduktion'] += API_Sym['aktuellePVProduktion']
             API['AC_Produktion'] += API_Sym['AC_Produktion']
             API['DC_Produktion'] += API_Sym['DC_Produktion']
-            #print(API['AC_Produktion'], API['DC_Produktion'])
 
 
         return(API)
