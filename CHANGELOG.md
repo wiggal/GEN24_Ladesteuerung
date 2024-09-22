@@ -5,6 +5,7 @@
 
 - Notstrom Reserverkapazität (Entladebegrenzung) höher setzen, wenn schlechte Prognose in nächsten 24 Stunden (HTTP-Version)
 
+- Netzdienliches Laden durch Prognosekappung, wenn BatSparFaktor = 0.  
 
 **[0.24.4] – 2024-09-08**  
 
