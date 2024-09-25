@@ -1,3 +1,7 @@
+**[0.24.6] – 2024-XX-XX**  
+
+- FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung funktioniert nicht bei MaxEinspeisung < 100W   
+
 **[0.24.5] – 2024-09-22**  
 
 - WebUI automatischer reload alle 5 Minuten, und beim wechseln des Tab.  
