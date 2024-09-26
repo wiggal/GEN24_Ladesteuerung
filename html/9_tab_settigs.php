@@ -79,6 +79,13 @@ input[type="checkbox"] {
   font-family:Arial;
   font-size:150%;
   color: #000000;
+  position: fixed;
+  right: 8px;
+}
+.ACHTUNG{
+  font-family:Arial;
+  font-size:150%;
+  color: #000000;
 }
 .containerbeschriftung{
   font-family:Arial;
@@ -93,11 +100,10 @@ input[type="checkbox"] {
  <body onload="disablecheckboxes()">
  <div class="hilfe" align="right"> <a href="9_Hilfe.html"><b>Hilfe</b></a></div>
   <div class="container">
-   <div class="hilfe" align="center"><p>
+   <div class="ACHTUNG" align="center"><p>
    <b>ACHTUNG:</b> Wenn die WebUI-Settings nicht ausgeschaltet sind, 
    <br>überschreiben sie die Aufrufparameter des Skriptes (z.B. vom Cronjob)!
    </p></div>
-   <br />
   </div>
 
 <?php
