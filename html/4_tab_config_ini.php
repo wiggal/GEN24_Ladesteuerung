@@ -35,6 +35,14 @@ button {
   font-size: 1.3em;
   background-color: #4CAF50;
 }
+button.schreiben {
+    position: fixed;
+    bottom: 0;
+}
+button.dateiauswahl {
+    position: fixed;
+    top: 8px;
+}
 @media screen and (max-width: 64em) {
 body{ font-size: 160%; }
 input { font-size: 100%; }
@@ -65,9 +73,9 @@ td {font-size: 160%;
 <body>
   <div class="hilfe"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
 <div class="version" align="center">
+<br>
 <b>  GEN24_Ladesteuerung Version: 0.24.6 </b>
 </div>
-<br>
 <?php
 include "config.php";
 if(file_exists("config_priv.php")){
@@ -151,12 +159,12 @@ echo '<br><br>';
 
 
     case 'lesen':
-# AUSGEBEN DER gewälten _priv.ini
+# AUSGEBEN DER gewählten _priv.ini
 
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
-echo '<button type="submit">Zurück zur Dateiauswahl</button>';
+echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
 echo '</form>'."\n";
 echo '<br>';
 
@@ -180,7 +188,7 @@ echo '</table>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
-echo '<button type="submit">Zurück zur Dateiauswahl</button>';
+echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
 echo '</form>'."\n";
 echo '<br><br>';
 
@@ -204,7 +212,7 @@ echo '<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
-echo '<button type="submit">Zurück zur Dateiauswahl</button>';
+echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
 echo '</form>'."\n";
 echo '<br>';
 
@@ -219,7 +227,7 @@ echo '</table>';
 echo '<br>';
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="schreiben">'."\n";
-echo '<button type="submit">'.basename($_POST["ini_file"]).' neu schreiben</button>';
+echo '<button class="schreiben" type="submit" >'.basename($_POST["ini_file"]).' neu schreiben</button>';
 echo '</form>';
     } else {
     echo '<br><br> <span style="color:red"><b> Falsches Kennwort!!</b></span>';
