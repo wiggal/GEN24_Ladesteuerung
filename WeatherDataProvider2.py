@@ -6,12 +6,13 @@ import pytz
 from pathlib import Path
 import FUNCTIONS.functions
 
-def loadLatestWeatherData(config):
-    lat = config['forecast.solar']['lat']
-    lon = config['forecast.solar']['lon']
-    dec = config['forecast.solar']['dec']
-    az = config['forecast.solar']['az']
-    kwp = config['forecast.solar']['kwp']
+def loadLatestWeatherData():
+    lat = basics.getVarConf('forecast.solar','lat','eval')
+    lon = basics.getVarConf('forecast.solar','lon','eval')
+    dec = basics.getVarConf('forecast.solar','dec','eval')
+    az = basics.getVarConf('forecast.solar','az','eval')
+    kwp = basics.getVarConf('forecast.solar','kwp','eval')
+    anzahl_strings = basics.getVarConf('pv.strings','anzahl','eval')
     
     try:
         url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
@@ -24,12 +25,12 @@ def loadLatestWeatherData(config):
         #print(json_data1, "\n")
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
         # Koordinaten müssen gleich sein, wegen zeitgleichem Sonnenauf- bzw. untergang 
-        if config['pv.strings']['anzahl'] == '2':
+        if anzahl_strings == 2:
             dict_watts = {}
             dict_watt_hours = {}
-            dec = config['forecast.solar2']['dec']
-            az = config['forecast.solar2']['az']
-            kwp = config['forecast.solar2']['kwp']
+            dec = basics.getVarConf('forecast.solar2','dec','eval')
+            az = basics.getVarConf('forecast.solar2','az','eval')
+            kwp = basics.getVarConf('forecast.solar2','kwp','eval')
 
             url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
             try:
@@ -85,7 +86,7 @@ if __name__ == '__main__':
                 dataIsExpired = False
 
     if (dataIsExpired):
-        data = loadLatestWeatherData(config)
+        data = loadLatestWeatherData()
         if isinstance(data['result'], dict):
             if not data == "False":
                 basics.storeWeatherData(weatherfile, data, now, 'forecast.solar')
