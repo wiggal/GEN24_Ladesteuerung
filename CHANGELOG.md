@@ -1,6 +1,7 @@
-**[0.24.6] – 2024-XX-XX**  
+**[0.24.6] – 2024-09-29**  
 
 - FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung funktioniert nicht bei MaxEinspeisung < 100W   
+- Fix: Prognoseholen mit WeatherDataProvider2.py von forecast.solar funktionierte nicht mehr.  
 
 **[0.24.5] – 2024-09-22**  
 
