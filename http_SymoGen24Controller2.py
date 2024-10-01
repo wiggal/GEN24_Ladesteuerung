@@ -232,7 +232,7 @@ if __name__ == '__main__':
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren
-                    HysteProdFakt = 2
+                    HysteProdFakt = 1
                     if Akkuschonung > 0:
                         Ladefaktor = 1
                         BattStatusProz_Grenze = 100
@@ -262,7 +262,7 @@ if __name__ == '__main__':
                             DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
                             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
                             DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
-                            # Um das setzen der Akkuschonung zu verhindern, wenn zu wenig PV Energie kommt oder der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
+                            # Um das setzen der Akkuschonung zu verhindern, wenn aktuellePVProduktion zu wenig oder der Akku wieder entladen wird.
                             if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
@@ -480,7 +480,7 @@ if __name__ == '__main__':
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
 
                     ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
-                    if  EntladeGrenze_steuern == 1 and Akt_Std > 20 and aktuellePVProduktion < 10:
+                    if  EntladeGrenze_steuern == 1 and Akt_Std > 21 and aktuellePVProduktion < 10:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
                         ProgGrenzeMorgen = basics.getVarConf('Entladung','ProgGrenzeMorgen','eval')

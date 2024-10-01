@@ -1,3 +1,9 @@
+**[0.24.7] – 2024-10.06**  
+
+Notstromprüfung nur zwischen 22:00 und 24:00 Uhr
+
+Wetterdienste FIX: json.decoder.JSONDecodeError wenn keine Daten ankommen
+
 **[0.24.6] – 2024-09-29**  
 
 - FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung funktioniert nicht bei MaxEinspeisung < 100W   
