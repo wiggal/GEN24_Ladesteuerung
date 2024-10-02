@@ -30,7 +30,12 @@ def loadLatestWeatherData():
             # Hier wieder ABHOLEN EIN
             try:
                 apiResponse = requests.get(url, timeout=99.50)
-                json_data1 = dict(json.loads(apiResponse.text))
+                apiResponse.raise_for_status()
+                if apiResponse.status_code != 204:
+                    json_data1 = dict(json.loads(apiResponse.text))
+                else:
+                    print("### ERROR:  Keine forecasts-Daten von api.solcast.com.au")
+                    exit()
             except requests.exceptions.Timeout:
                 print("### ERROR:  Timeout von api.solcast.com.au")
                 exit()
@@ -39,7 +44,12 @@ def loadLatestWeatherData():
                 url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id2, datenloop, api_key)
                 try:
                     apiResponse2 = requests.get(url, timeout=99.50)
-                    json_data2 = dict(json.loads(apiResponse2.text))
+                    apiResponse2.raise_for_status()
+                    if apiResponse2.status_code != 204:
+                        json_data2 = dict(json.loads(apiResponse2.text))
+                    else:
+                        print("### ERROR:  Keine estimated_actuals-Daten von api.solcast.com.au")
+                        exit()
                 except requests.exceptions.Timeout:
                     print("### ERROR:  Timeout von api.solcast.com.au")
                     exit()
