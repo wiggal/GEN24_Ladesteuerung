@@ -271,7 +271,7 @@ class progladewert:
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
             Std_morgen_only = int(datetime.strftime(self.now + timedelta(hours=i), "%H"))
             Prognose = self.getPrognose(Std_morgen)[0]
-            if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 50:
+            if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 100:
                 if Std_morgen_only < Sonnenuntergang:
                     Sonnenuntergang = Std_morgen_only
             i  += 1
