@@ -232,7 +232,8 @@ if __name__ == '__main__':
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren
-                    HysteProdFakt = 1
+                    # HysteProdFakt = 2 da bei 1 häufig hin und her geschaltet wird
+                    HysteProdFakt = 2
                     if Akkuschonung > 0:
                         Ladefaktor = 1
                         BattStatusProz_Grenze = 100
