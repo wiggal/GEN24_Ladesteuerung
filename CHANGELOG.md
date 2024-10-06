@@ -1,3 +1,7 @@
+**[0.24.8] – 2024-10-XX**  
+
+- Akkuschonung frei konfigurierbar machen
+
 **[0.24.7] – 2024-10-06**  
 
 Notstromprüfung nur zwischen 22:00 und 24:00 Uhr.  
