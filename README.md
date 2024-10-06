@@ -5,15 +5,6 @@
 Ab Version: **0.24.5**  
 Notstrom Reserverkapazität (Entladebegrenzung) höher setzen, wenn schlechte Prognose morgen.   
 Netzdienliches Laden durch Prognosekappung, wenn BatSparFaktor = 0.  
-Ab Version: **0.24.4**  
-Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files.  
-Änderung in der CONFIG/charge.ini und charge_priv.ini, neuen Block [monats_priv.ini] eingefügt, usw.  
-Ab Version: **0.24.1**  
-Einbindung von Fronius-Symos.  
-Änderung in der CONFIG/default.ini `IP_weitere_Symo = no` in CONFIG/default_priv.ini einfügen.  
-Ab Version: **0.24.0**  
-Alle Daten aus den Steuerungs.json Dateien in SQLite-Datenbankdatei CONFIG/Prog_Steuerung.sqlite abgelegt.
-Änderungen in WebUI: Reiter Settings neu konzipiert, Schieberegler bei den Prozentangaben der Ladesteuerungen.  
 ![new](pics/new2.png)  
 
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
@@ -21,7 +12,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
-- Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt.  
+- Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt.  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
 Hier eine Grafik um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
@@ -166,6 +157,15 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 ----------
 
 **News History:**  
+Ab Version: **0.24.4**  
+Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files.  
+Änderung in der CONFIG/charge.ini und charge_priv.ini, neuen Block [monats_priv.ini] eingefügt, usw.  
+Ab Version: **0.24.1**  
+Einbindung von Fronius-Symos.  
+Änderung in der CONFIG/default.ini `IP_weitere_Symo = no` in CONFIG/default_priv.ini einfügen.  
+Ab Version: **0.24.0**  
+Alle Daten aus den Steuerungs.json Dateien in SQLite-Datenbankdatei CONFIG/Prog_Steuerung.sqlite abgelegt.
+Änderungen in WebUI: Reiter Settings neu konzipiert, Schieberegler bei den Prozentangaben der Ladesteuerungen.  
 Ab Version: **0.22.0**  
 Die config.ini ins Verzeichnis CONFIG verschoben und aufgeteilt auf `default.ini, charge.ini weather.ini`.
 Zur jeweiligen `xy.ini` kann eine `xy_priv.ini` mit den persönlichen Anpassungen erstellt werden.  
