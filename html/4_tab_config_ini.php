@@ -74,7 +74,7 @@ td {font-size: 160%;
   <div class="hilfe"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
 <div class="version" align="center">
 <br>
-<b>  GEN24_Ladesteuerung Version: 0.24.7 </b>
+<b>  GEN24_Ladesteuerung Version: 0.24.8 </b>
 </div>
 <?php
 include "config.php";
@@ -125,7 +125,7 @@ function config_lesen( $file, $readonly )
                     $Zeilenteil[0] = ltrim(rtrim($Zeilenteil[0]));
                     $Zeilenteil[1] = ltrim(rtrim($Zeilenteil[1]));
                     echo '<tr><td><input type="hidden" name="Zeile['.$Zeilencounter.'][0]" value=\''.$Zeilenteil[0].' = \'>'.$Zeilenteil[0].'</td>'."\n";
-                    echo '<td><input type="text" name="Zeile['.$Zeilencounter.'][1]" value="'.$Zeilenteil[1].'" '.$readonly.'></td></tr>'."\n";
+                    echo '<td><input type="text" name="Zeile['.$Zeilencounter.'][1]" value="'.htmlentities($Zeilenteil[1]).'" '.$readonly.'></td></tr>'."\n";
                 } else {
                     #hier noch die Leerzeilen behandeln
                     $Zeile = rtrim($Zeile);
