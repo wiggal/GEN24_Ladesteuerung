@@ -191,10 +191,11 @@ td {font-size: 160%;
 <tr><td><input type="hidden" name="Zeile[41][0]" value=''>GrenzwertGroestePrognose</td>
 <td><input type="text" name="Zeile[41][1]" value="2000" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[42]" value='' ></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[43]" value='' >; Akkuschonung (0=aus, 0.1 bis 1.0 ein) dadurch wird der Akku zwischen 80 und 95% mit 0,2C bzw. 0,1C geladen</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[43]" value='' >; Ab 95% wir mit 0,1C mal Akkuschonung (z.B.: 0.1x0.5 = 0.05C) geladen </td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[44]" value=''>; und BattVollUm wird um eine Stunde vor verlegt, da am Schluss nicht mehr so stark geladen wird.</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[45]" value='' >; ACHTUNG: Eine Überschreitung der Einspeisegrenze bzw. AC-Leistung des WR setzt die Akkuschonung aus!</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[43]" value='' >
+; Akkuschonung (0=aus, 1=ein) <br>
+; Wenn Akkuschonung ein, wird BattVollUm um eine Stunde vor verlegt, da am Schluss nicht mehr so stark geladen wird.<br>
+; ACHTUNG: Eine Überschreitung der Einspeisegrenze bzw. AC-Leistung des WR setzt die Akkuschonung aus!<br>
+</td></tr>
 <tr><td><input type="hidden" name="Zeile[46][0]" value=''>Akkuschonung</td>
 <td><input type="text" name="Zeile[46][1]" value="1" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[46]" value='' >; Hier können mehrere Ladebegrenzungen für die Akkuschonung definiert werden. 

@@ -1,4 +1,4 @@
-**[0.24.8] – 2024-10-XX**  
+**[0.24.8] – 2024-10-13**  
 
 - Akkuschonung frei konfigurierbar machen:  
 Änderung in CONFIG/charge.ini, folgede Zeilen eingefügt:  
