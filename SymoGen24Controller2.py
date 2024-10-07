@@ -246,35 +246,15 @@ if __name__ == '__main__':
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren
                     HysteProdFakt = 2
                     if Akkuschonung > 0:
-                        Ladefaktor = 1
-                        BattStatusProz_Grenze = 100
-                        # Schaltverzoegerung neu 
-                        if (BattStatusProz >= 78 and ( abs((BattganzeLadeKapazWatt * 0.2) - alterLadewert) < 3 )) or BattStatusProz >= 80:
-                            Ladefaktor = 0.2
-                            AkkuSchonGrund = '80%, Ladewert = 0.2C'
-                            BattStatusProz_Grenze = 80
-                        if (BattStatusProz >= 88 and ( abs((BattganzeLadeKapazWatt * 0.1) - alterLadewert) < 3 )) or BattStatusProz >= 90:
-                            Ladefaktor = 0.1
-                            AkkuSchonGrund = '90%, Ladewert = 0.1C'
-                            BattStatusProz_Grenze = 90
-                        if (BattStatusProz >= 94 and ( abs((BattganzeLadeKapazWatt * 0.1* Akkuschonung) - alterLadewert) < 3 )) or BattStatusProz >= 95:
-                            Ladefaktor = 0.1 * Akkuschonung
-                            AkkuSchonGrund = '95%, Ladewert = ' + str(Ladefaktor) + 'C'
-                            BattStatusProz_Grenze = 95
-
-                        AkkuschonungLadewert = int(BattganzeLadeKapazWatt * Ladefaktor)
-                        # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3W) BattStatusProz_Grenze 5% runter
-                        if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
-                            BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
-                            HysteProdFakt = 5
+                        Akkuschonung_dict = progladewert.getAkkuschonWert(BattStatusProz, BattganzeLadeKapazWatt, alterLadewert, aktuellerLadewert)
+                        AkkuschonungLadewert = Akkuschonung_dict[0]
+                        HysteProdFakt = Akkuschonung_dict[1]
+                        BattStatusProz_Grenze = Akkuschonung_dict[2]
+                        AkkuSchonGrund = Akkuschonung_dict[3]
+                        DEBUG_Ausgabe += Akkuschonung_dict[4]
 
                         if BattStatusProz >= BattStatusProz_Grenze:
-                            DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
-                            DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
-                            DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
-                            DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
-                            DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
-                            # Um das setzen der Akkuschonung zu verhindern, wenn zu wenig PV Energie kommt oder der Akku wieder entladen wird nur bei entspechender Vorhersage anwenden
+                            # Um das setzen der Akkuschonung zu verhindern, wenn aktuellePVProduktion zu wenig oder der Akku wieder entladen wird.
                             if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5

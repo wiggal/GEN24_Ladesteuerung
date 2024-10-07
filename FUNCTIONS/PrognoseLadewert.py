@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 import FUNCTIONS.functions
 import FUNCTIONS.httprequest
 
@@ -361,3 +362,34 @@ class progladewert:
     
         return PrognoseMorgen, Eigen_Opt_Std, int(Eigen_Opt_Std_neu), Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt, Backup_Reserve
     
+    def getAkkuschonWert(self, BattStatusProz, BattganzeLadeKapazWatt, alterLadewert, aktuellerLadewert):
+        HysteProdFakt = 1
+        Ladefaktor = 1
+        BattStatusProz_Grenze = 100
+        DEBUG_Ausgabe = ""
+        AkkuSchonGrund = ""
+        Schaltverzoegerung_Diff = 2
+        if BattStatusProz > 90: Schaltverzoegerung_Diff = 1
+        Akkuschonung_Werte_tmp = json.loads(basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str'))
+        Akkuschonung_Werte = dict(sorted(Akkuschonung_Werte_tmp.items()))
+        DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
+        DEBUG_Ausgabe += "\nDEBUG Akkuschonung_Werte: " + str(Akkuschonung_Werte) + "\n"
+        for Akkuschon_Proz in Akkuschonung_Werte: 
+            # Schaltverzoegerung neu 
+            if (BattStatusProz >= int(Akkuschon_Proz) - Schaltverzoegerung_Diff and ( abs((BattganzeLadeKapazWatt * float(Akkuschonung_Werte[Akkuschon_Proz])) - alterLadewert) < 3 )) or BattStatusProz >= int(Akkuschon_Proz):
+                Ladefaktor = float(Akkuschonung_Werte[Akkuschon_Proz])
+                AkkuSchonGrund = str(Akkuschon_Proz) + '%, Ladewert = ' + str(Akkuschonung_Werte[Akkuschon_Proz]) + 'C'
+                BattStatusProz_Grenze = int(Akkuschon_Proz)
+
+        AkkuschonungLadewert = int(BattganzeLadeKapazWatt * Ladefaktor)
+        # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3W) BattStatusProz_Grenze 5% runter
+        if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
+            BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
+            HysteProdFakt = 5
+
+        if BattStatusProz >= BattStatusProz_Grenze:
+            DEBUG_Ausgabe += "DEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
+            DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
+            DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
+            DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
+        return AkkuschonungLadewert, HysteProdFakt, BattStatusProz_Grenze, AkkuSchonGrund, DEBUG_Ausgabe 

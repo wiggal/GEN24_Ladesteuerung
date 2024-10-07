@@ -1,3 +1,13 @@
+**[0.24.8] – 2024-10-13**  
+
+- Akkuschonung frei konfigurierbar machen:  
+Änderung in CONFIG/charge.ini, folgede Zeilen eingefügt:  
+```
+; Akkuschonung_Werte = {"Ladestand%" : "LadewertC", ...}
+Akkuschonung_Werte = {"90": "0.1", "80": "0.2", "95": "0.05"}
+```
+Bitte in CONFIG/charge.ini übernehmen und anpassen. Es können auch mehr Akkuladepunkte eingefügt werden.
+
 **[0.24.7] – 2024-10-06**  
 
 Notstromprüfung nur zwischen 22:00 und 24:00 Uhr.  
