@@ -197,6 +197,12 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[45]" value='' >; ACHTUNG: Eine Überschreitung der Einspeisegrenze bzw. AC-Leistung des WR setzt die Akkuschonung aus!</td></tr>
 <tr><td><input type="hidden" name="Zeile[46][0]" value=''>Akkuschonung</td>
 <td><input type="text" name="Zeile[46][1]" value="1" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[46]" value='' >; Hier können mehrere Ladebegrenzungen für die Akkuschonung definiert werden. 
+<br>; Syntax: "Ladestand in Prozent" : "Ladeverhältnis zur Ladekapazietät des Akku"
+<br>; Akkuschonung_Werte = {"Ladestand%" : "LadewertC", ...}
+</td></tr>
+<tr><td><input type="hidden" name="Zeile[47][0]" value='Akkuschonung_Werte = '>Akkuschonung_Werte</td>
+<td><input type="text" name="Zeile[47][1]" value="{&quot;90&quot;: &quot;0.1&quot;, &quot;80&quot;: &quot;0.2&quot;, &quot;95&quot;: &quot;0.05&quot;}" readonly=""></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[47]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[53]" value='' >[monats_priv.ini]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[54]" value='' >; hier können die Namen von zusätzlichen monatsabhängigen config.ini definiert werden.</td></tr>
