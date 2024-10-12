@@ -2,6 +2,8 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
+Ab Version: **0.24.8**  
+Werte für Akkuschonung frei konfigurierbar.  
 Ab Version: **0.24.5**  
 Notstrom Reserverkapazität (Entladebegrenzung) höher setzen, wenn schlechte Prognose morgen.   
 Netzdienliches Laden durch Prognosekappung, wenn BatSparFaktor = 0.  

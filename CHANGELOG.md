@@ -4,9 +4,11 @@
 Änderung in CONFIG/charge.ini, folgede Zeilen eingefügt:  
 ```
 ; Akkuschonung_Werte = {"Ladestand%" : "LadewertC", ...}
-Akkuschonung_Werte = {"90": "0.1", "80": "0.2", "95": "0.05"}
+Akkuschonung_Werte = {"80": "0.2", "90": "0.1", "95": "0.05"}
 ```
 Bitte in CONFIG/charge.ini übernehmen und anpassen. Es können auch mehr Akkuladepunkte eingefügt werden.
+
+- Fix: Eigenverbrauchs-Optimierung konnte unter tags nicht unter 50 Watt sein.
 
 **[0.24.7] – 2024-10-06**  
 
@@ -16,7 +18,7 @@ Wetterdienste FIX: json.decoder.JSONDecodeError wenn keine Daten ankommen
 **[0.24.6] – 2024-09-29**  
 
 - FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung funktioniert nicht bei MaxEinspeisung < 100W   
-- Fix: Prognoseholen mit WeatherDataProvider2.py von forecast.solar funktionierte nicht mehr.  
+- Fix: Prognose holen mit WeatherDataProvider2.py von forecast.solar funktionierte nicht mehr.  
 
 **[0.24.5] – 2024-09-22**  
 
