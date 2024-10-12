@@ -344,9 +344,11 @@ class progladewert:
                     DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = 0
                 else:
-                    Eigen_Opt_Std_neu = 50
+                    Grenze = 50
+                    if MaxEinspeisung < 50: Grenze = MaxEinspeisung
+                    Eigen_Opt_Std_neu = Grenze
                     DEBUG_Eig_opt += "DEBUG ## >>> BattStatusProz: " + str(BattStatusProz) + ", ist kleiner als AkkuZielProz: " + str(AkkuZielProz) 
-                    DEBUG_Eig_opt += "\nDEBUG ## >>> 50 Watt während des Tages"
+                    DEBUG_Eig_opt += "\nDEBUG ## >>>  " + str(Eigen_Opt_Std_neu) + " Watt während des Tages"
 
             # Wenn EigenverbOpt_steuern 2 Optimierung ueber Tags = 0
             if (EigenverbOpt_steuern == 2):
