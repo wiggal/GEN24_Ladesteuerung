@@ -313,9 +313,13 @@ class progladewert:
         Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
         Eigen_Opt_Std_neu = int(Akku_Rest_Watt/Dauer_Nacht_Std)
         # Schaltverzögerung (hysterese) 
-        if (abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu): Eigen_Opt_Std_neu -= 50
-        # Eigen_Opt_Std_neu auf 100 runden
-        Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu, -2))
+        HystGrenze = 50
+        if MaxEinspeisung < 50: HystGrenze = MaxEinspeisung
+        if (abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu): Eigen_Opt_Std_neu -= HystGrenze
+        # Eigen_Opt_Std_neu runden
+        RoundGrenze = 100
+        if MaxEinspeisung < 100: RoundGrenze = MaxEinspeisung
+        Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu / RoundGrenze) * RoundGrenze)
         if Akku_Rest_Watt < 0: Eigen_Opt_Std_neu = 0
         DEBUG_Eig_opt += "DEBUG ## Dauer_Nacht_Std: " + str(round(Dauer_Nacht_Std, 2)) + ", Akku_Rest_Watt: " + str(int(Akku_Rest_Watt)) +  \
                     "\nDEBUG ## Eigen_Opt_genau: " + str(int(Akku_Rest_Watt/Dauer_Nacht_Std)) + ", Eigen_Opt_Std_neu: " + str(Eigen_Opt_Std_neu) + "\n"
@@ -344,9 +348,7 @@ class progladewert:
                     DEBUG_Eig_opt += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = 0
                 else:
-                    Grenze = 50
-                    if MaxEinspeisung < 50: Grenze = MaxEinspeisung
-                    Eigen_Opt_Std_neu = Grenze
+                    Eigen_Opt_Std_neu = HystGrenze
                     DEBUG_Eig_opt += "DEBUG ## >>> BattStatusProz: " + str(BattStatusProz) + ", ist kleiner als AkkuZielProz: " + str(AkkuZielProz) 
                     DEBUG_Eig_opt += "\nDEBUG ## >>>  " + str(Eigen_Opt_Std_neu) + " Watt während des Tages"
 

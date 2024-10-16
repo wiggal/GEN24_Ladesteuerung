@@ -425,8 +425,9 @@ if __name__ == '__main__':
 
                         # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
-                        # + 10, da wegen Hysterse bereits +5 weiter oben
-                        if (BattStatusProz <= MindBattLad + 10):
+                        # wegen Hysterse +5, MindBattLad neu laden, da evtl verändert 
+                        MindBattLad = basics.getVarConf('Ladeberechnung','MindBattLad','eval')
+                        if (BattStatusProz <= MindBattLad + 5):
                             Dauer_Nacht_Std = 2
                             aktuellePVProduktion_tmp = 0
                         if (BattStatusProz <= MindBattLad):

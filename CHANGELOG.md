@@ -1,7 +1,9 @@
+**[0.24.9] – 2024-XX-XX**  
+
 **[0.24.8] – 2024-10-13**  
 
 - Akkuschonung frei konfigurierbar machen:  
-Änderung in CONFIG/charge.ini, folgede Zeilen eingefügt:  
+Änderung in CONFIG/charge.ini, folgende Zeilen eingefügt:  
 ```
 ; Akkuschonung_Werte = {"Ladestand%" : "LadewertC", ...}
 Akkuschonung_Werte = {"80": "0.2", "90": "0.1", "95": "0.05"}
