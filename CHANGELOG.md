@@ -1,5 +1,7 @@
 **[0.24.9] – 2024-XX-XX**  
 
+- FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung 
+
 **[0.24.8] – 2024-10-13**  
 
 - Akkuschonung frei konfigurierbar machen:  
