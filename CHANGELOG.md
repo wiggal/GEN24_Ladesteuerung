@@ -1,4 +1,4 @@
-**[0.24.9] – 2024-10-18**  
+**[0.24.9] – 2024-10-19**  
 
 - FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung 
 
