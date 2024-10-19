@@ -287,6 +287,7 @@ if __name__ == '__main__':
                         try:
                             print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
                             print("## MODBUS LADESTEUERUNG ###")
+                            print("\n++ WIRD AB VERSION 0.25 nicht mehr gepflegt!!! ++\n")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognose - BattVollUm: ", TagesPrognoseGesamt,"-", BattVollUm)

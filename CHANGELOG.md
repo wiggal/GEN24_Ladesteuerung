@@ -1,6 +1,9 @@
-**[0.24.9] – 2024-XX-XX**  
+**[0.24.9] – 2024-10-18**  
 
 - FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung 
+
+Da ich die Modbusversion nicht mehr weiterentwickeln werde,
+Hinweis ``WIRD AB VERSION 0.25 nicht mehr gepflegt!!!`` in Modbusversion eingefügt.
 
 **[0.24.8] – 2024-10-13**  
 
