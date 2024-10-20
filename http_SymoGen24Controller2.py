@@ -426,7 +426,7 @@ if __name__ == '__main__':
                         # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
                         # wegen Hysterse +5
-                        if (BattStatusProz <= MindBattLad + 15) and Akt_Std < 12:
+                        if (BattStatusProz <= MindBattLad + 5) and Akt_Std < 12:
                             Dauer_Nacht_Std = 2
                             aktuellePVProduktion_tmp = 0
                         if (BattStatusProz <= MindBattLad):
