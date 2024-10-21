@@ -304,6 +304,8 @@ if __name__ == '__main__':
                     BatteryMaxDischarge = BattganzeLadeKapazWatt
                     Neu_BatteryMaxDischarge = BattganzeLadeKapazWatt
                     BatteryMaxDischarge_Zwangsladung = 0
+                    EntladeEintragloeschen = "nein"
+                    EntladeEintragDa = "nein"
 
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = BattganzeLadeKapazWatt
@@ -313,14 +315,17 @@ if __name__ == '__main__':
                             if element['Active'] == True and element['ScheduleType'] == 'DISCHARGE_MAX':
                                 BatteryMaxDischarge = element['Power']
                                 BatteryMaxDischarge_Zwangsladung = 0
+                                EntladeEintragDa = "ja"
                             elif element['Active'] == True and element['ScheduleType'] == 'CHARGE_MIN':
                                 BatteryMaxDischarge_Zwangsladung = element['Power']
+                                EntladeEintragDa = "ja"
 
                         # EntladeSteuerungdaten lesen
                         entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
                         # Manuellen Entladewert lesen
                         if (entladesteurungsdata.get('ManuelleEntladesteuerung')):
-                            MaxEntladung = int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100)
+                            MaxEntladung_Prozent=int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1'])
+                            MaxEntladung = int(MaxEntladung_Prozent*BattganzeLadeKapazWatt / 100)
                             DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
 
                         # Verbrauchsgrenze Entladung lesen
@@ -352,13 +357,15 @@ if __name__ == '__main__':
                         elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze > 0):
                             Neu_BatteryMaxDischarge = int(FesteEntladegrenze)
                         # Verbrauchsgrenze == 0 (leer) && Feste Grenze == -500 #Negativer Wert = Zwangsladung
-                        elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze < 0) or BatteryMaxDischarge_Zwangsladung > 0:
+                        elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze < 0):
                             BatteryMaxDischarge = BatteryMaxDischarge_Zwangsladung
                             Neu_BatteryMaxDischarge = abs(int(FesteEntladegrenze))
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
                             Ladetype = "CHARGE_MIN"
-                        else:
+                        elif (MaxEntladung_Prozent < 100):
                             Neu_BatteryMaxDischarge = MaxEntladung
+                        elif (EntladeEintragDa == "ja"):
+                            EntladeEintragloeschen = "ja"
 
                         DEBUG_Ausgabe+="\nDEBUG Batterieentladegrenze NEU: " + str(Neu_BatteryMaxDischarge) + "%"
 
@@ -370,17 +377,18 @@ if __name__ == '__main__':
                         ## Werte zum Überprüfen ausgeben
                         if print_level >= 1:
                             print("## ENTLADESTEUERUNG ##\n")
-                            print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100), "W")
-                            print("Batteriestatus in Prozent: ", BattStatusProz, "%")
-                            print("GesamtverbrauchHaus:       ", GesamtverbrauchHaus, "W")
+                            #print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100), "W")
+                            print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']), "%")
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
                             print("Feste Entladegrenze Table: ", FesteEntladegrenze, "W")
-                            if (Ladetype == "DISCHARGE_MAX"):
+                            if (Ladetype == "DISCHARGE_MAX") and (EntladeEintragloeschen == "nein"):
                                 print("Batterieentladegrenze ALT: ", BatteryMaxDischarge, "W")
                                 print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischarge, "W")
-                            if (Ladetype == "CHARGE_MIN"):
+                            if (Ladetype == "CHARGE_MIN") and (EntladeEintragloeschen == "nein"):
                                 print("Zwangsladung ALT:          ", BatteryMaxDischarge, "W")
                                 print("Zwangsladung NEU:          ", Neu_BatteryMaxDischarge, "W")
+                            if (EntladeEintragloeschen == "ja"):
+                                print(">> Entladeeintrag Löschen!")
                             print()
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADESTEUERUNG >>>>>>>>>>>>>"
@@ -393,7 +401,7 @@ if __name__ == '__main__':
                     Schreib_Ausgabe = ""
                     Push_Schreib_Ausgabe = ""
                     # Neuen Ladewert als HTTP_Request schreiben, wenn WR_schreiben == 1 
-                    if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge:
+                    if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
                         DEBUG_Ausgabe+="\nDEBUG Folgender MAX_Ladewert neu zum Schreiben: " + str(aktuellerLadewert)
                         DEBUG_Ausgabe+="\nDEBUG Folgender MAX_ENT_Ladewert neu zum Schreiben: " + str(Neu_BatteryMaxDischarge)
@@ -405,19 +413,21 @@ if __name__ == '__main__':
                             ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
                         elif WR_schreiben == 1 :
                             Schreib_Ausgabe = Schreib_Ausgabe + "Ladesteuerung NICHT geschrieben, da Option \"laden\" NICHT gesetzt!\n"
-                        if  ('entladen' in Options) and (Batterieentlandung_steuern == 1):
+                        if  ('entladen' in Options) and (Batterieentlandung_steuern == 1) and (EntladeEintragloeschen == "nein"):
                             payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
                             ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                        elif Neu_BatteryMaxDischarge != BatteryMaxDischarge:
+                        elif ('entladen' not in Options):
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
                         if (payload_text != ''):
-                            response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
+                            response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}') 
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
-                            if ('entladen' in Options) and Neu_BatteryMaxDischarge != BatteryMaxDischarge:
+                            if ('entladen' in Options) and Neu_BatteryMaxDischarge != BatteryMaxDischarge and (EntladeEintragloeschen == "nein"):
                                 Schreib_Ausgabe = Schreib_Ausgabe + Ladetype + " geschrieben: " + str(Neu_BatteryMaxDischarge) + "W\n"
+                            if ('entladen' in Options) and (EntladeEintragloeschen == "ja"):
+                                Schreib_Ausgabe = Schreib_Ausgabe + "Entladeeintrag wurde gelöscht.\n"
                             Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
                             DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
                     else:
