@@ -2,11 +2,8 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
-Ab Version: **0.24.8**  
-Werte für Akkuschonung frei konfigurierbar.  
-Ab Version: **0.24.5**  
-Notstrom Reserverkapazität (Entladebegrenzung) höher setzen, wenn schlechte Prognose morgen.   
-Netzdienliches Laden durch Prognosekappung, wenn BatSparFaktor = 0.  
+Ab Version: **0.25.0**  
+Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  
 ![new](pics/new2.png)  
 
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
@@ -15,6 +12,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt.  
+- Dynamischen Strompreis nutzen um bei niedrigen Preisen den Akku zu laden (in Entwicklung).  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
 Hier eine Grafik um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
@@ -80,7 +78,7 @@ Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei m
 Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json. Es ist ein "Home User" Account auf solcast.com erforderlich.  
 Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag).  
 
-### :chart_with_upwards_trend: SymoGen24Controller2.py
+### :chart_with_upwards_trend: SymoGen24Controller2.py (Wird NICHT mehr weiterentwickelt)
 
 Berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json, dem Akkustand und der tatsächlichen Einspeisung bzw. Produktion und gibt sie aus.
 Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.  
@@ -145,7 +143,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 
 Unter "Feste Entladegrenze " kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
 
-In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.  
+In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, bzw. zum Laden des Akkus aus dem Netz bei niedrigen Strompreisen, eingetragen werden.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
 
@@ -159,6 +157,11 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 ----------
 
 **News History:**  
+Ab Version: **0.24.8**  
+Werte für Akkuschonung frei konfigurierbar.  
+Ab Version: **0.24.5**  
+Notstrom Reserverkapazität (Entladebegrenzung) höher setzen, wenn schlechte Prognose morgen.   
+Netzdienliches Laden durch Prognosekappung, wenn BatSparFaktor = 0.  
 Ab Version: **0.24.4**  
 Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files.  
 Änderung in der CONFIG/charge.ini und charge_priv.ini, neuen Block [monats_priv.ini] eingefügt, usw.  
