@@ -38,8 +38,8 @@
 <p>Unter &quot;Feste Entladegrenze &quot; kann die
 maximale Entladeleistung in <br/> 
 Prozent der <b>WR-Entladeleistung</b> fest eingestellt werden.</p>
-<p>In der Entladetabelle können Leistungen in KW zur Steuerung der Akkuentladung eingetragen werden.<br/> 
-<b>Kleinster funktionierender Wert ist 0.1(KW)</b><br>
+<p>In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung eingetragen werden.<br/> 
+<b>Kleinster funktionierender Wert ist 0.1(kW)</b><br>
 <br/>
 Je nach Eintrag in den Spalten "Verbrauchsgrenze Entladung" und "Feste Entladegrenze"<br/>
 hat dies folgende Auswirkung:<br/>
@@ -47,9 +47,10 @@ hat dies folgende Auswirkung:<br/>
 <table>
 <tr> <th>Verbrauchsgrenze</th> <th>Feste Grenze</th> <th>Auswirkung</th> </tr>
 <tr> <td>„leer“</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf den Wert von "Feste Entladegrenze %" gesetzt.</td> </tr>
-<tr> <td>„leer“</td> <td>0.8</td> <td>die Entladebegrenzung wird die ganze Stunde auf 0.8KW gesetzt.</td> </tr>
-<tr> <td>8.5</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf (Verbrauch - 8.5)KW gesetzt, wenn der Verbrauch 8.5KW übersteigt, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
-<tr> <td>8.5</td> <td>0.8</td> <td>die Entladebegrenzung wird auf 0.8KW gesetzt, wenn der Verbrauch 8.5KW übersteig, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
+<tr> <td>„leer“</td> <td>0.8</td> <td>die Entladebegrenzung wird die ganze Stunde auf 0.8kW gesetzt.</td> </tr>
+<tr> <td>8.5</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf (Verbrauch - 8.5)kW gesetzt, wenn der Verbrauch 8.5kW übersteigt, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
+<tr> <td>8.5</td> <td>0.8</td> <td>die Entladebegrenzung wird auf 0.8kW gesetzt, wenn der Verbrauch 8.5kW übersteig, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
+<tr> <td>„leer“</td> <td><font color =red>-0.8</font></td> <td>bei einem <font color =red><b>negativen</b></font> Wert im Feld "Feste Grenze" erfolgt eine Zwangsladung mit den eingetragenen kW. </td></tr>
 </table>
 
 <br/><br/>
