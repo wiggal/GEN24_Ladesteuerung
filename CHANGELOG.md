@@ -1,3 +1,8 @@
+**[0.25.0] – 2024-XX-XX**  
+
+- Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg
+
+
 **[0.24.9] – 2024-10-19**  
 
 - FIX: Schreibverzögerung bei Eigenverbrauchs-Optimierung 
