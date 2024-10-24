@@ -1,4 +1,4 @@
-**[0.25.0] – 2024-XX-XX**  
+**[0.25.0] – 2024-10-24**  
 
 - Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  
 
