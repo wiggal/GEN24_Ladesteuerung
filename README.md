@@ -78,7 +78,7 @@ Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei m
 Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json. Es ist ein "Home User" Account auf solcast.com erforderlich.  
 Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag).  
 
-### :chart_with_upwards_trend: SymoGen24Controller2.py (Wird NICHT mehr weiterentwickelt)
+### :chart_with_upwards_trend: SymoGen24Controller2.py (Modbusversion wird NICHT mehr weiterentwickelt)
 
 Berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json, dem Akkustand und der tatsächlichen Einspeisung bzw. Produktion und gibt sie aus.
 Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.  
