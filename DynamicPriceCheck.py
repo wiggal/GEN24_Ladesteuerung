@@ -28,8 +28,15 @@ if __name__ == '__main__':
     Lastprofil = dynamic.getLastprofil()
 
     # Lastprofil neu erzeugen, wenn es älter als zwei Wochen (1209600s) ist.
-    if (int(datetime.now().timestamp()) - int(Lastprofil[0][3]) > 1209500):
-        print("Erzeuge Lastprofil, da älter als zwei Wochen!")
+    try:
+        if (int(datetime.now().timestamp()) - int(Lastprofil[0][3]) > 1209500):
+            print("Erzeuge Lastprofil, da älter als zwei Wochen!")
+            dynamic.makeLastprofil(PV_Database, Lastgrenze)
+    except:
+        print("Erzeuge Lastprofil, erstmalig!!")
         dynamic.makeLastprofil(PV_Database, Lastgrenze)
+        print("Programmende!")
+        exit()
+
 
     # ***** Ab hier Berechnung des AKKU-Status

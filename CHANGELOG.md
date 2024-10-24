@@ -3,12 +3,12 @@
 - Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  
 
 - Ein Lastprofil erzeugen (Loggin DB erforderlich), um damit bei dynamischen Strompreisen zu steuern.  
-  **Neue Skripte:**
-  - DynamicPriceCheck.py  
-  - FUNCTIONS/DynamicPrice.py  
-  **Neue Config:**  
-  - CONFIG/dynprice.ini  
-  - bei Benutzung CONFIG/dynprice_priv.ini anlegen  
+  - **Neue Skripte:**
+    - DynamicPriceCheck.py  
+    - FUNCTIONS/DynamicPrice.py  
+  - **Neue Config:**  
+    - CONFIG/dynprice.ini  
+    - bei Benutzung CONFIG/dynprice_priv.ini anlegen  
 
 **[0.24.9] – 2024-10-19**  
 

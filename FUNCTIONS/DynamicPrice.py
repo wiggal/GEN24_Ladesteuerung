@@ -70,9 +70,13 @@ class dynamic:
             strftime('%w', volle_stunde), Zeit;
         """
 
-        zeiger.execute(sql_anweisung)
-        rows = zeiger.fetchall()
-        #print(rows)
+        try:
+            zeiger.execute(sql_anweisung)
+            rows = zeiger.fetchall()
+            #print(rows)
+        except:
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, Programmende!!")
+            exit()
 
         verbindung.commit()
         verbindung.close()
