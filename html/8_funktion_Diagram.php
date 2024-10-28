@@ -8,6 +8,8 @@ if ($diagramtype == 'line') $next_diagramtype = 'bar';
 
 # Abstand von bis ermitteln
 $zeitdifferenz = strtotime($DiaDatenBis) - strtotime($DiaDatenVon);
+# Wegen Zeitumstellung kann die Differenz 25 Stunden werden, dann werden zwei Tage dargestellt
+if ($zeitdifferenz == 90000) $zeitdifferenz = 86400;
 $VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime($DiaDatenVon)-$zeitdifferenz));
 $VOR_DiaDatenBis = $DiaDatenVon;
 $NACH_DiaDatenVon = $DiaDatenBis;
