@@ -2,6 +2,7 @@
 from datetime import datetime
 import json
 import configparser
+import sqlite3
     
 class basics:
     def __init__(self):
@@ -81,3 +82,49 @@ class basics:
                 exit(0)
             return return_var
     
+    def checkMaxPrognose(self, data, database):
+        verbindung = sqlite3.connect(database)
+        zeiger = verbindung.cursor()
+        sql_anweisung = """
+            WITH stundenwerte AS (
+                        SELECT
+                            strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS volle_stunde,
+                            MAX(DC_Produktion) AS max_dcproduktion
+                        FROM
+                            pv_daten
+                        WHERE
+                            Zeitpunkt >= datetime('now', '-35 days')
+                        GROUP BY
+                            strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
+                    ),
+                    differenzen AS (
+                        SELECT
+                            strftime('%H:00:00',a.volle_stunde) AS Stunde,
+                            a.max_dcproduktion - COALESCE(b.max_dcproduktion, 0) AS DCProduktion
+                        FROM
+                            stundenwerte a
+                        LEFT JOIN
+                            stundenwerte b ON a.volle_stunde = datetime(b.volle_stunde, '+1 hour')
+			            WHERE
+				            DCProduktion < 20000
+                    )
+            SELECT
+            Stunde, MAX(DCProduktion) AS maximalwert
+            FROM differenzen
+            GROUP BY Stunde
+            ORDER BY Stunde;
+            """
+        zeiger.execute(sql_anweisung)
+        DB_data = zeiger.fetchall()
+        #print(type(DB_data), DB_data)
+        for hour in DB_data:
+            DB_MaxWatt = hour[1]
+            search_substring = str(hour[0])
+            for key, value in data['result']['watts'].items():
+                if isinstance(key, str) and search_substring in key:
+                    if (data['result']['watts'][key] > DB_MaxWatt):
+                        data['result']['watts'][key] = DB_MaxWatt
+        # print(data)
+
+        return (data)
+        
