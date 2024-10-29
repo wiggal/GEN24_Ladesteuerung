@@ -1,3 +1,14 @@
+**[0.25.1] – 2024-XX-XX**  
+
+- Da bei bestimmten Konstellationen die Prognose oft zu hoch ausfällt (z.B. Abschattung ab 15:00 Uhr),  
+kann nun die Prognose auf den Höchstwert der Produktion der letzten 30 Tage begrenzt werden.
+Der Höchstwert wird aus der DB PV_Daten.sqlite ermittelt.
+
+Änderung in CONFIG/weather.ini, folgende Zeilen eingefügt:  
+[env]  
+; 0 = aus, 1 = ein: damit wird die Prognose auf den Höchsten Wert der Produktion der letzten 30 Tage begrenzt  
+MaximalPrognosebegrenzung = 0  
+
 **[0.25.0] – 2024-10-24**  
 
 - Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  

@@ -47,7 +47,6 @@ class sqlall:
     def getSQLlastProduktion(self, database):
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
-        #sql_anweisung = "SELECT MAX(CASt(DC_Produktion as INTEGER)) from pv_daten;"
         sql_anweisung = "SELECT MIN(CASt(AC_Produktion as INTEGER)), DC_Produktion from pv_daten WHERE DC_Produktion = (SELECT MAX(CASt(DC_Produktion as INTEGER))FROM pv_daten);"
         zeiger.execute(sql_anweisung)
         row = zeiger.fetchall()
