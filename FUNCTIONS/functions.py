@@ -85,6 +85,8 @@ class basics:
     def checkMaxPrognose(self, data):
         database = self.getVarConf('Logging','Logging_file','str')
         print_level = self.getVarConf('env','print_level','eval')
+        MaxProGrenz_Faktor = self.getVarConf('env','MaxProGrenz_Faktor','eval')
+        MaxProGrenz_Dayback = self.getVarConf('env','MaxProGrenz_Dayback','eval') * -1
         DEBUG_txt = "Folgende Prognosen wurden auf einen Maximalwert reduziert:\n"
         Anzahl_Begrenzung = 0
         verbindung = sqlite3.connect(database)
@@ -97,7 +99,7 @@ class basics:
                         FROM
                             pv_daten
                         WHERE
-                            Zeitpunkt >= datetime('now', '-35 days')
+                            Zeitpunkt >= datetime('now', '""" + str(MaxProGrenz_Dayback) + """ days')
                         GROUP BY
                             strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
                     ),
@@ -121,7 +123,7 @@ class basics:
         zeiger.execute(sql_anweisung)
         DB_data = zeiger.fetchall()
         for hour in DB_data:
-            DB_MaxWatt = hour[1]
+            DB_MaxWatt = hour[1] * MaxProGrenz_Faktor
             search_substring = str(hour[0])
             for key, value in data['result']['watts'].items():
                 if isinstance(key, str) and search_substring in key:
