@@ -272,9 +272,13 @@ td {font-size: 160%;
 <button type="submit">Hilfe zu weather_priv.ini</button></form>
 </center>
 <br><table>
+<tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[env]</th></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; 0 = aus, 1 = ein: damit wird die Prognose auf den höchsten Wert je Stunde der Produktion der letzten 30 Tage begrenzt</td></tr>
+<tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaximalPrognosebegrenzung</td>
+<td><input type="text" name="Zeile[4][1]" value="0" readonly></td></tr>
+<tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[pv.strings]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[2]" value='' >; und die Werte unter [forecast.solar2] und/oder [solcast.com2] eintragen</td></tr>
-<tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[pv.strings]</th></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>anzahl</td>
 <td><input type="text" name="Zeile[4][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[5]" value='' ></td></tr>
