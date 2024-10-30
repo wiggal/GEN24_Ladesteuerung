@@ -51,7 +51,6 @@ if __name__ == '__main__':
     now = datetime.now()    
     
     data = basics.loadWeatherData(weatherfile)
-    # print(data['messageCreated'])
     dataIsExpired = True
     if (data):
         dateCreated = None
@@ -69,10 +68,16 @@ if __name__ == '__main__':
                 dataIsExpired = False
 
     if (dataIsExpired):
-        data = loadLatestWeatherData()
-        if(data[0]['result']['watts'] != {}):
+        data_all = loadLatestWeatherData()
+        data = data_all[0]
+        data_err = data_all[1]
+        if(data['result']['watts'] != {}):
             if not data == "False":
-                basics.storeWeatherData(weatherfile, data[0], now, 'solarprognose.de')
+                # hier evtl Begrenzungen der Prognose anbringen
+                MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
+                if (MaximalPrognosebegrenzung == 1):
+                    data = basics.checkMaxPrognose(data)
+                basics.storeWeatherData(weatherfile, data, now, 'solarprognose.de')
         else:
             print("Fehler bei Datenanforderung solarprognose.de:")
-            print(data[1])
+            print(data_err)
