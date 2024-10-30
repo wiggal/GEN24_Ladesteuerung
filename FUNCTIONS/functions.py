@@ -82,7 +82,11 @@ class basics:
                 exit(0)
             return return_var
     
-    def checkMaxPrognose(self, data, database):
+    def checkMaxPrognose(self, data):
+        database = self.getVarConf('Logging','Logging_file','str')
+        print_level = self.getVarConf('env','print_level','eval')
+        DEBUG_txt = "Folgende Prognosen wurden auf einen Maximalwert reduziert:\n"
+        Anzahl_Begrenzung = 0
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
         sql_anweisung = """
@@ -116,15 +120,18 @@ class basics:
             """
         zeiger.execute(sql_anweisung)
         DB_data = zeiger.fetchall()
-        #print(type(DB_data), DB_data)
         for hour in DB_data:
             DB_MaxWatt = hour[1]
             search_substring = str(hour[0])
             for key, value in data['result']['watts'].items():
                 if isinstance(key, str) and search_substring in key:
                     if (data['result']['watts'][key] > DB_MaxWatt):
+                        DEBUG_txt += str(key) + " " + str(data['result']['watts'][key]) + " ==>> " + str(DB_MaxWatt) + "\n"
+                        Anzahl_Begrenzung += 1
                         data['result']['watts'][key] = DB_MaxWatt
-        # print(data)
+
+        if print_level == 2 and Anzahl_Begrenzung > 0:
+            print(DEBUG_txt)
 
         return (data)
         
