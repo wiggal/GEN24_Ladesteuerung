@@ -123,7 +123,7 @@ class basics:
         zeiger.execute(sql_anweisung)
         DB_data = zeiger.fetchall()
         for hour in DB_data:
-            DB_MaxWatt = hour[1] * MaxProGrenz_Faktor
+            DB_MaxWatt = int(hour[1] * MaxProGrenz_Faktor)
             search_substring = str(hour[0])
             for key, value in data['result']['watts'].items():
                 if isinstance(key, str) and search_substring in key:
