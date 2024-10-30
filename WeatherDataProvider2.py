@@ -99,10 +99,10 @@ if __name__ == '__main__':
         data = loadLatestWeatherData()
         if isinstance(data['result'], dict):
             if not data == "False":
-                database = basics.getVarConf('Logging','Logging_file','str')
+                # hier evtl Begrenzungen der Prognose anbringen
                 MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
                 if (MaximalPrognosebegrenzung == 1):
-                    data = basics.checkMaxPrognose(data, database)
+                    data = basics.checkMaxPrognose(data)
                 basics.storeWeatherData(weatherfile, data, now, 'forecast.solar')
         else:
             print("Fehler bei Datenanforderung api.forecast.solar:")
