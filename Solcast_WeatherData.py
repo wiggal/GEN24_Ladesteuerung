@@ -27,7 +27,6 @@ def loadLatestWeatherData():
 
         try:
             url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id, datenloop, api_key)
-            # Hier wieder ABHOLEN EIN
             try:
                 apiResponse = requests.get(url, timeout=99.50)
                 apiResponse.raise_for_status()
@@ -107,29 +106,30 @@ def loadLatestWeatherData():
                     except:
                         continue
                 
+    
+                # Wenn no_history == 1 historische Daten aus weatherData.json holen
+                if no_history == 1:
+                    try:
+                        with open(weatherfile, 'r') as datei:
+                            json_data_old = json.load(datei)
+                            #print(json_data_old)
+
+                        for wetterwerte_old in json_data_old['result']['watts']:
+                            if heute in wetterwerte_old and wetterwerte_old not in dict_watts['result']['watts']:
+                                dict_watts['result']['watts'][wetterwerte_old] = int(json_data_old['result']['watts'][wetterwerte_old])
+                                #print (wetterwerte_old)
+                    except:
+                        print("Fehler beim Lesen von ", weatherfile)
+
+                #solcast_2.json Nun wieder nach Datum und Stunden sortieren
+                dict_watts['result']['watts'] = dict(sorted(dict_watts['result']['watts'].items()))
+
+
         except requests.exceptions.RequestException as error:
             json_data1 = error
 
-    
-    # Wenn no_history == 1 historische Daten aus weatherData.json holen
-    if no_history == 1:
-        try:
-            with open(weatherfile, 'r') as datei:
-                json_data_old = json.load(datei)
-                #print(json_data_old)
-
-            for wetterwerte_old in json_data_old['result']['watts']:
-                if heute in wetterwerte_old and wetterwerte_old not in dict_watts['result']['watts']:
-                    dict_watts['result']['watts'][wetterwerte_old] = int(json_data_old['result']['watts'][wetterwerte_old])
-                    #print (wetterwerte_old)
-        except:
-            print("Fehler beim Lesen von ", weatherfile)
-
-
-
-    #solcast_2.json Nun wieder nach Datum und Stunden sortieren
-    dict_watts['result']['watts'] = dict(sorted(dict_watts['result']['watts'].items()))
     return(dict_watts, json_data1)
+
 
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
@@ -168,10 +168,17 @@ if __name__ == '__main__':
                 dataIsExpired = False
 
     if (dataIsExpired):
-        data = loadLatestWeatherData()
-        if(data[0]['result']['watts'] != {}):
+        data_all = loadLatestWeatherData()
+        data = data_all[0]
+        data_err = data_all[1]
+        #print(data)
+        if(data['result']['watts'] != {}):
             if not data == "False":
-                basics.storeWeatherData(weatherfile, data[0], now, 'solcast.com')
+                # hier evtl Begrenzungen der Prognose anbringen
+                MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
+                if (MaximalPrognosebegrenzung == 1):
+                    data = basics.checkMaxPrognose(data)
+                basics.storeWeatherData(weatherfile, data, now, 'solcast.com')
         else:
             print("Fehler bei Datenanforderung api.solcast.com.au:")
-            print(data[1])
+            print(data_err)
