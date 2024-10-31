@@ -6,9 +6,17 @@ Der Höchstwert wird aus der DB PV_Daten.sqlite ermittelt.
 
 Änderungen in den Prognoseskripten.
 Änderung in **CONFIG/weather.ini**, folgende Zeilen eingefügt:  
-[env]  
-; 0 = aus, 1 = ein: damit wird die Prognose auf den Höchsten Wert der Produktion der letzten 30 Tage begrenzt  
-MaximalPrognosebegrenzung = 0  
+
+```
+[env]
+; 0 = aus, 1 = ein: damit wird die Prognose auf den höchsten Wert je Stunde der Produktion der letzten MaxProGrenz_Dayback Tage begrenzt
+MaximalPrognosebegrenzung = 0
+; MaxProGrenz_Faktor wird mit dem Werd aus der DB multipilziert
+MaxProGrenz_Faktor = 1
+MaxProGrenz_Dayback = 35
+```
+
+FIX: Solcast_WeatherData.py erkannte bei no_history = 1 nciht wenn die Anzahl der erlaubtem Zugriffe erreicht war.
 
 **[0.25.0] – 2024-10-24**  
 
