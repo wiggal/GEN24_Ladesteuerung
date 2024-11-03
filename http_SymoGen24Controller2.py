@@ -360,6 +360,8 @@ if __name__ == '__main__':
                         elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze < 0):
                             BatteryMaxDischarge = BatteryMaxDischarge_Zwangsladung
                             Neu_BatteryMaxDischarge = abs(int(FesteEntladegrenze))
+                            # Zwangsladung kann nur geschrieben werden, wenn aktuellerLadewert > Neu_BatteryMaxDischarge
+                            if (Neu_BatteryMaxDischarge > aktuellerLadewert): aktuellerLadewert = Neu_BatteryMaxDischarge + 100
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
                             Ladetype = "CHARGE_MIN"
                         elif (MaxEntladung_Prozent < 100):
@@ -387,6 +389,7 @@ if __name__ == '__main__':
                             if (Ladetype == "CHARGE_MIN") and (EntladeEintragloeschen == "nein"):
                                 print("Zwangsladung ALT:          ", BatteryMaxDischarge, "W")
                                 print("Zwangsladung NEU:          ", Neu_BatteryMaxDischarge, "W")
+                                print("Ladewert > Zwangsladung:   ", aktuellerLadewert, "W")
                             if (EntladeEintragloeschen == "ja"):
                                 print(">> Entladeeintrag Löschen!")
                             print()
