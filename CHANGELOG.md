@@ -1,11 +1,11 @@
-**[0.25.1] – 2024-XX-XX**  
+**[0.25.1] – 2024-11-03**  
 
 - Da bei bestimmten Konstellationen die Prognose eventuell zu hoch ausfällt (z.B. Abschattung durch Wald ab 15:00 Uhr),  
 kann nun die Prognose auf den Höchstwert der Produktion der jeweiligen Stunde aus den letzten 30 Tage begrenzt werden.
 Der Höchstwert wird aus der DB PV_Daten.sqlite ermittelt.
 
 Änderungen in den Prognoseskripten.
-Änderung in **CONFIG/weather.ini**, folgende Zeilen eingefügt:  
+Änderung in **CONFIG/weather.ini**, folgende Zeilen eingefügt (evtl in CONFIG/weather_priv.ini einbauen):  
 
 ```
 [env]
@@ -16,7 +16,8 @@ MaxProGrenz_Faktor = 1
 MaxProGrenz_Dayback = 35
 ```
 
-FIX: Solcast_WeatherData.py erkannte bei no_history = 1 nciht wenn die Anzahl der erlaubtem Zugriffe erreicht war.
+FIX: Solcast_WeatherData.py erkannte bei no_history = 1 nicht wenn die Anzahl der erlaubtem Zugriffe erreicht war.
+FIX: Wird eine Zwangsladung geschrieben, muss die Ladegrenze immer höher als die Zwangsladung sein, sonst funktionierts nicht.
 
 **[0.25.0] – 2024-10-24**  
 
