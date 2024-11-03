@@ -2,6 +2,8 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
+Ab Version: **0.25.1**  
+Prognosebegrenzung auf Höchstwerte der historischen Produktion.
 Ab Version: **0.25.0**  
 Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  
 ![new](pics/new2.png)  
