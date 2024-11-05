@@ -3,12 +3,6 @@ from datetime import datetime
 import json
 import configparser
 import sqlite3
-# für Prognoseoptimierung
-import pandas as pd
-import pytz
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
 
     
 class basics:
@@ -171,6 +165,11 @@ class basics:
         return (data)
 
     def Prognoseoptimierung(self, data):
+        import pandas as pd
+        import pytz
+        from sklearn.model_selection import train_test_split
+        from sklearn.ensemble import RandomForestRegressor
+        from sklearn.metrics import mean_squared_error
         database = self.getVarConf('Logging','Logging_file','str')
         print_level = self.getVarConf('env','print_level','eval')
         MaxProGrenz_Dayback = self.getVarConf('env','MaxProGrenz_Dayback','eval')
