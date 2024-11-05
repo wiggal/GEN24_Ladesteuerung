@@ -178,6 +178,8 @@ if __name__ == '__main__':
                 MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
                 if (MaximalPrognosebegrenzung == 1):
                     data = basics.checkMaxPrognose(data)
+                if (MaximalPrognosebegrenzung == 2):
+                    data = basics.Prognoseoptimierung(data)
                 basics.storeWeatherData(weatherfile, data, now, 'solcast.com')
         else:
             print("Fehler bei Datenanforderung api.solcast.com.au:")

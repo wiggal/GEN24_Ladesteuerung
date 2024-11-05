@@ -1,3 +1,13 @@
+**[0.25.2] – 2024-XX-XX**  
+
+Weitere Prognoseoptimierungen:
+
+- Prognosebegrenzung durch Maximalwert aus der DB PV_Daten.sqlite: Sommerzeit berücksichtigt
+
+- Prognoseoptimierung mit scikit-learn (Machine Learning in Python) eingebaut (MaximalPrognosebegrenzung = 2)
+  Erforderliche Pakete:
+  `pip install pandas numpy scikit-learn`
+
 **[0.25.1] – 2024-11-03**  
 
 - Da bei bestimmten Konstellationen die Prognose eventuell zu hoch ausfällt (z.B. Abschattung durch Wald ab 15:00 Uhr),  
