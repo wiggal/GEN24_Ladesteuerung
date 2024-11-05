@@ -77,6 +77,8 @@ if __name__ == '__main__':
                 MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
                 if (MaximalPrognosebegrenzung == 1):
                     data = basics.checkMaxPrognose(data)
+                if (MaximalPrognosebegrenzung == 2):
+                    data = basics.Prognoseoptimierung(data)
                 basics.storeWeatherData(weatherfile, data, now, 'solarprognose.de')
         else:
             print("Fehler bei Datenanforderung solarprognose.de:")
