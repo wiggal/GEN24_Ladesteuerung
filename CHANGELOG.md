@@ -1,7 +1,7 @@
 **[0.25.1] – 2024-11-03**  
 
 - Da bei bestimmten Konstellationen die Prognose eventuell zu hoch ausfällt (z.B. Abschattung durch Wald ab 15:00 Uhr),  
-kann nun die Prognose auf den Höchstwert der Produktion der jeweiligen Stunde aus den letzten 30 Tage begrenzt werden.
+kann nun die Prognose auf den Höchstwert der Produktion der jeweiligen Stunde aus den letzten XX Tage begrenzt werden.
 Der Höchstwert wird aus der DB PV_Daten.sqlite ermittelt.
 
 Änderungen in den Prognoseskripten.
