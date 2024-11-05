@@ -8,6 +8,8 @@ Weitere Prognoseoptimierungen:
   Erforderliche Pakete:
   `pip install pandas numpy scikit-learn`
 
+In CONFIG/default.ini standardmäßig Logging_ein = 1 gesetzt, da die Loggingdaten immer häufiger Verwendung finden.
+
 **[0.25.1] – 2024-11-03**  
 
 - Da bei bestimmten Konstellationen die Prognose eventuell zu hoch ausfällt (z.B. Abschattung durch Wald ab 15:00 Uhr),  
