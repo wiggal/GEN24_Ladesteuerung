@@ -1,8 +1,9 @@
 # Hier die Funktionen zum dynamischen Stromtarif
-from datetime import datetime
+from datetime import datetime, timedelta
 import sqlite3
 import json
 import configparser
+import requests
     
 class dynamic:
     def __init__(self):
@@ -101,9 +102,62 @@ class dynamic:
         verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
         zeiger = verbindung.cursor()
         # Res_Feld1 = Wochentag, Zeit = Stunde, Res_Feld2 = Durchschnittsverbrauch, Options = Timestamp Erzeugung
-        sql_anweisung = "SELECT Res_Feld1, Zeit, Res_Feld2, Options from steuercodes WHERE Res_Feld1 IN (strftime('%w', 'now'), strftime('%w', 'now', '+1 day'));"
+        sql_anweisung = "SELECT Res_Feld1, Zeit, Res_Feld2, Options from steuercodes WHERE Schluessel == 'Lastprofil' AND Res_Feld1 IN (strftime('%w', 'now'), strftime('%w', 'now', '+1 day'));"
         zeiger.execute(sql_anweisung)
         rows = zeiger.fetchall()
 
         #print(rows)
         return(rows)
+
+    def getPrognosen_24H(self, weatherdata):
+        i = 0
+        Prognosen_24H = []
+        while i < 24:
+            # ab aktueller Stunde die nächsten 24 Stunden aufaddieren, da ab 24 Uhr sonst keine Morgenprognose
+            Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
+            try:
+                Prognosen_24H.append((Std_morgen, weatherdata['result']['watts'][Std_morgen]))
+            except:
+                Prognosen_24H.append((Std_morgen, '0'))
+            i  += 1
+        return(Prognosen_24H)
+        
+    def getPrice_energycharts(self, BZN, START):
+        END = START + 86500 # 86400 = 24 Stunden
+        url = 'https://api.energy-charts.info/price?bzn={}&start={}&end={}'.format(BZN,START,END)
+        try:
+            apiResponse = requests.get(url, timeout=52.50)
+            apiResponse.raise_for_status()
+            if apiResponse.status_code != 204:
+                json_data1 = dict(json.loads(apiResponse.text))
+            else:
+                print("### ERROR:  Keine forecasts-Daten von api.forecast.solar")
+                exit()
+        except requests.exceptions.Timeout:
+            print("### ERROR:  Timeout von api.forecast.solar")
+            exit()
+        price = json_data1
+        priecelist = list(zip(price['unix_seconds'], price['price']))
+        priecelist_date = []
+        for row in priecelist:
+            time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
+            price = round(row[1]/1000, 4)
+            priecelist_date.append((time, price))
+        return(priecelist_date)
+
+    def listAStable(self, headers, data):
+
+        # Maximale Breite für die Spalten berechnen
+        col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *data)]
+        
+        # Header ausgeben
+        header_row = " | ".join(f"{headers[i]:<{col_widths[i]}}" for i in range(len(headers)))
+        print(header_row)
+        print("-" * len(header_row))
+
+        # Daten ausgeben
+        for row in data:
+            print(" | ".join(f"{str(row[i]):<{col_widths[i]}}" for i in range(len(row))))
+
+        return()
+
