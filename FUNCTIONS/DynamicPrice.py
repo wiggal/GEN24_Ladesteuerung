@@ -4,7 +4,10 @@ import sqlite3
 import json
 import configparser
 import requests
+import FUNCTIONS.functions
     
+basics = FUNCTIONS.functions.basics()
+
 class dynamic:
     def __init__(self):
         self.now = datetime.now()
@@ -123,6 +126,10 @@ class dynamic:
         return(Prognosen_24H)
         
     def getPrice_energycharts(self, BZN, START):
+        # Aufschläge zum reinen Börsenpreis, return muss immer Bruttoendpreis liefern
+        Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
+        MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
+
         END = START + 86500 # 86400 = 24 Stunden
         url = 'https://api.energy-charts.info/price?bzn={}&start={}&end={}'.format(BZN,START,END)
         try:
@@ -141,7 +148,7 @@ class dynamic:
         priecelist_date = []
         for row in priecelist:
             time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
-            price = round(row[1]/1000, 4)
+            price = round((row[1]/1000 + Nettoaufschlag) * MwSt, 4)
             priecelist_date.append((time, price))
         return(priecelist_date)
 
