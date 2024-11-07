@@ -276,8 +276,11 @@ class basics:
             print("Prognoseoptimierung mit scikit-learn")
             print(df_print)
 
+        # Kleinsten Vorhersagewert ermitteln
+        future_df["KleinererWert"] = future_df[["predicted_power", "predicted_actual_power"]].min(axis=1)
+
         # data im json-Format wieder erzeugen
-        df_data = future_df[['datetime', 'predicted_actual_power']]
+        df_data = future_df[['datetime', 'KleinererWert']]
         data_values = dict(df_data.values.tolist())
         # Werte durch neue Werte ersetzen
         data['result']['watts'] = data_values
