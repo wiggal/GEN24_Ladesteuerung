@@ -193,7 +193,7 @@ if (isset($Akku_EntLadung[$date]['Res_Feld1']) and $Akku_EntLadung[$date]['Res_F
     $Res_Feld1_wert = 0;
 }
 if ($Res_Feld1_wert <> 0) {
-$Res_Feld1_Watt = number_format($Res_Feld1_wert, 1);
+$Res_Feld1_Watt = number_format($Res_Feld1_wert, 3);
 } else  { 
 $Res_Feld1_Watt = "" ;
 }
@@ -204,7 +204,7 @@ if (isset($Akku_EntLadung[$date]['Res_Feld2']) and $Akku_EntLadung[$date]['Res_F
     $Res_Feld2_wert = 0;
 }
 if ($Res_Feld2_wert <> 0) {
-$Res_Feld2_Watt = number_format($Res_Feld2_wert, 1);
+$Res_Feld2_Watt = number_format($Res_Feld2_wert, 3);
 } else  { 
 $Res_Feld2_Watt = "" ;
 }
@@ -250,7 +250,7 @@ $(document).ready(function(){
   $('.Res_Feld2').each(function(){
    Res_Feld2.push($(this).text().replace(",", ".")*1000);
   });
-  je_value = 0.1;
+  je_value = 0.001;
   const je = document.querySelectorAll('input[name="hausakkuentladung"]');
   je_value = je[0].value;
 
