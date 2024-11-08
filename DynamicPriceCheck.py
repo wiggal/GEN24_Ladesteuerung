@@ -4,6 +4,7 @@
 # Über dynamische Strompreise günstige Akkunachladung bzw. -entladestop checken
 # bei negativen Strompreisen bzw. ab Grenzwert Einspeisung stoppen (2. Stufe)
 # Jeden Monat neues Lastprofil ermitteln und in CONFIG/Prog_Steuerung.sqlite speichern
+from sys import argv
 from datetime import datetime, timedelta
 import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
@@ -221,13 +222,13 @@ else:
     LadeProfil = charging_times
     Ausgabe = "Speicher Laden"
 
-# Startzeit für heute (Mitternacht des heutigen Tages)
-heute_start = datetime(jetzt.year, jetzt.month, jetzt.day)
+# Startzeit jetzt
+heute_start = datetime(jetzt.year, jetzt.month, jetzt.day, jetzt.hour)
 
 # Für jede Stunde Steuercode  EntLadesteuerung ermitteln
 
 SteuerCode = []
-for stunde in range(24):  # 24 Stunden des heutigen Tages
+for stunde in range(24):  # die nächsten 24 Stunden
     zeitpunkt = heute_start + timedelta(hours=stunde)
     Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
     Ladewert_Std = 0
@@ -237,11 +238,21 @@ for stunde in range(24):  # 24 Stunden des heutigen Tages
         if SuchStunde in Stundenliste:
             Ladewert_Std = Ladewert
             break
-    #print ( Stunde, 'ENTLadeStrg', Stunde, '0', Ladewert_Std, 'LEER')
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, '0', Ladewert_Std, ''))
 
-dynamic.saveProg_Steuerung(SteuerCode)
-print("\nSteuercodes für", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
+# Zu schreibenen SteuerCode ausgeben
+print()
+headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Anmerkung"]
+dynamic.listAStable(headers, SteuerCode)
+
+if len(argv) > 1 :
+    Parameter = argv[1]
+
+if( Parameter == 'schreiben'):
+    dynamic.saveProg_Steuerung(SteuerCode)
+    print("\nSteuercodes für", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
+else:
+    print("\nSteuercodes für", Ausgabe, "wurden NICHT geschrieben, Parameter schreiben fehlt")
 
 
 
