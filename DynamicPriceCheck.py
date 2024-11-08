@@ -1,3 +1,6 @@
+################################################
+# ACHTUNG: Voraussetzung mindestens zwei Wochen geloggte Daten!!!
+################################################
 # Über dynamische Strompreise günstige Akkunachladung bzw. -entladestop checken
 # bei negativen Strompreisen bzw. ab Grenzwert Einspeisung stoppen (2. Stufe)
 # Jeden Monat neues Lastprofil ermitteln und in CONFIG/Prog_Steuerung.sqlite speichern
