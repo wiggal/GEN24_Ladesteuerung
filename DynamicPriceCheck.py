@@ -116,11 +116,11 @@ battery_status_init = current_charge_Wh
 # Listen für Lade- und Entladeentscheidungen
 charging_times = []
 stopping_times = []
-charging_cost = 0
+charging_cost_tmp = 0
 stopping_cost = 0
 
 for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
-    pv_data_tmp = [("2000-01-01 00:00:00", 0, 0, 9999.999)]
+    pv_data_tmp = [("2000-01-01 00:00:00", 0, 0, 9999.999, 0)]
     battery_status = battery_status_init
     # Iteration durch die Stunden
     #print("#############  ", ladeArray, "############\n")
@@ -160,7 +160,7 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
             cost_tmp = round(((best_price * (ladeWatt + consumption)) / 1000),3)
             if ( ladeArray == 'charging' ):
                 charging_times.append(gefundene_zeile)
-                charging_cost += cost_tmp
+                charging_cost_tmp += cost_tmp
             if ( ladeArray == 'stopping' ):
                 stopping_times.append(gefundene_zeile)
                 stopping_cost += cost_tmp
@@ -181,6 +181,7 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
 # Durchschnittsstrompreis um den unterschiedlichen Ladezustand auszugleichen
 kleinster_price = min(zeile[3] for zeile in charging_times)
 Akkuplus = ((battery_status_stopping-battery_status_charging)*kleinster_price/1000)
+charging_cost = round(charging_cost_tmp + Akkuplus, 2)
 
 # entWIGGlung
 # Werte als Tabelle ausgeben
@@ -189,9 +190,9 @@ headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh
 print()
 dynamic.listAStable(headers, charging_times)
 print("\nBatteriekapazität: ", battery_status_charging)
-print("Kosten Batterieladung: ", round(charging_cost, 2), "€")
+print("Kosten Batterieladung: ", round(charging_cost_tmp, 2), "€")
 print("Preis Akkustandplus  : ", round(Akkuplus, 2), "€")
-print("Vergleichskosten Akku: ", round(charging_cost + Akkuplus, 2), "€")
+print("Vergleichskosten Akku: ", round(charging_cost, 2), "€")
 print()
 
 headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
@@ -201,3 +202,43 @@ dynamic.listAStable(headers, stopping_times)
 print("\nBatteriekapazität: ", battery_status_stopping)
 print("Kosten Stopp Ladung: ", round(stopping_cost, 2), "€")
 # entWIGGlung
+
+# Aktuelles Datum und Uhrzeit
+jetzt = datetime.now()
+
+### Daten zum schreiben in CONFIG/Prog_Steuerung.sqlite vorbereiten
+
+# Ladewert ermitteln charging OR stopping
+if (charging_cost > stopping_cost):
+    Ladewert = 1 # Mit 1Watt entladen = Lade und Entladenstopp
+    LadeProfil = stopping_times
+    Ausgabe = "Ladung stoppen"
+else:
+    Ladewert = charge_rate_kW * -1 # Minuswert um aus dem Netz zu laden
+    LadeProfil = charging_times
+    Ausgabe = "Speicher Laden"
+
+# Startzeit für heute (Mitternacht des heutigen Tages)
+heute_start = datetime(jetzt.year, jetzt.month, jetzt.day)
+
+# Für jede Stunde Steuercode  EntLadesteuerung ermitteln
+
+SteuerCode = []
+for stunde in range(24):  # 24 Stunden des heutigen Tages
+    zeitpunkt = heute_start + timedelta(hours=stunde)
+    Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
+    Ladewert_Std = 0
+    SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
+
+    for Stundenliste in LadeProfil:
+        if SuchStunde in Stundenliste:
+            Ladewert_Std = Ladewert
+            break
+    #print ( Stunde, 'ENTLadeStrg', Stunde, '0', Ladewert_Std, 'LEER')
+    SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, '0', Ladewert_Std, ''))
+
+dynamic.saveProg_Steuerung(SteuerCode)
+print("\nSteuercodes für", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
+
+
+

@@ -84,7 +84,13 @@ class dynamic:
 
         verbindung.commit()
         verbindung.close()
+        # Daten in DB CONFIG/Prog_Steuerung.sqlite schreiben
+        self.saveProg_Steuerung(rows)
+        print("Lastprofil in CONFIG/Prog_Steuerung.sqlite geschrieben")
 
+        return()
+
+    def saveProg_Steuerung(self, rows):
         # Daten in DB schreiben
 
         verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
@@ -96,7 +102,6 @@ class dynamic:
         verbindung.commit()
         verbindung.close()
 
-        print("Lastprofil in CONFIG/Prog_Steuerung.sqlite geschrieben")
 
         return ()
 

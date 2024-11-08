@@ -1,4 +1,4 @@
-**[0.25.2] – 2024-XX-XX**  
+**[0.25.2] – 2024-11-10**  
 
 Weitere Prognoseoptimierungen:
 
