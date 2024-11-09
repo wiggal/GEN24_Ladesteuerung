@@ -31,11 +31,11 @@ if __name__ == '__main__':
     TimestampNow = int(datetime.now().timestamp())
 
     # Lastprofil neu erzeugen, wenn es älter als zwei Wochen (1209600s) ist.
-    try:
+    if len(Lastprofil) > 0 and len(Lastprofil[0]) > 3:
         if ((TimestampNow) - int(Lastprofil[0][3]) > 1209500):
             print("Erzeuge Lastprofil, da älter als zwei Wochen!")
             dynamic.makeLastprofil(PV_Database, Lastgrenze)
-    except OSError:
+    else:
         print("Erzeuge Lastprofil, erstmalig!!")
         dynamic.makeLastprofil(PV_Database, Lastgrenze)
         print("Programmende!")
