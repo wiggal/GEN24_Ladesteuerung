@@ -98,17 +98,18 @@ api = FUNCTIONS.GEN24_API.gen24api
 API = api.get_API()
 battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
 current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
-#current_charge_Wh = 3000 # entWIGGlung
-minimum_charge_Prozent = 20      # Mindest-Ladestand in Prozent 
-minimum_charge_Wh =  battery_capacity_Wh / 100 * minimum_charge_Prozent     # Mindest-Ladestand in Wh
-charge_rate_kW = 3000         # Ladegeschwindigkeit in kW
-discharge_rate_kW = 4500      # Entladegeschwindigkeit in kW
+minimum_batterylevel_Prozent = basics.getVarConf('dynprice','minimum_batterylevel_Prozent', 'eval')      # Mindest-Ladestand in Prozent 
+minimum_batterylevel_kWh =  battery_capacity_Wh / 100 * minimum_batterylevel_Prozent     # Mindest-Ladestand in Wh
+charge_rate_kW =  basics.getVarConf('dynprice','charge_rate_kW', 'eval')        # Ladegeschwindigkeit in kW
+minimum_price_difference = basics.getVarConf('dynprice','minimum_price_difference', 'eval')
+price_difference = max(zeile[3] for zeile in pv_data) - min(zeile[3] for zeile in pv_data)
+
 
 # entWIGGlung
 # Werte als Tabelle ausgeben
 headers = ["Batteriekapazität (Wh)", "Aktueller Ladestand (Wh)", "minimaler Ladestand (Wh)"]
 print()
-table_liste = [(str(battery_capacity_Wh), str(current_charge_Wh), str(minimum_charge_Wh))]
+table_liste = [(str(battery_capacity_Wh), str(current_charge_Wh), str(minimum_batterylevel_kWh))]
 dynamic.listAStable(headers, table_liste)
 print()
 # entWIGGlung
@@ -137,9 +138,9 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
         # Berechnen der Nettostromproduktion
         net_power = pv - consumption
 
-        # PV-Strom in Akku laden wenn unter minimum_charge_Wh und Prognose kleiner Verbrauch
+        # PV-Strom in Akku laden wenn unter minimum_batterylevel_kWh und Prognose kleiner Verbrauch
         best_price = price
-        if battery_status + net_power < minimum_charge_Wh and net_power < 0:
+        if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
             # bisherigen kleisten Wert bisher suchen
             #print("\nJetzt ",ladeArray,":   ", row)
             kleinster_price = min(zeile[3] for zeile in pv_data_tmp)
@@ -245,6 +246,11 @@ print()
 headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Anmerkung"]
 dynamic.listAStable(headers, SteuerCode)
 
+if(minimum_price_difference > price_difference): 
+    print("\nSteuercodes werden nicht geschrieben, da Preisdiffernz",round(price_difference,3), "zu klein:")
+    exit()
+
+Parameter = ''
 if len(argv) > 1 :
     Parameter = argv[1]
 
