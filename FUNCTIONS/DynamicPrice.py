@@ -82,6 +82,10 @@ class dynamic:
             print("Die Datei PV_Daten.sqlite fehlt oder ist leer, Programmende!!")
             exit()
 
+        if (len(rows) < 168):
+            print("Zu wenig Daten in PV_Daten.sqlite,  Programmende!!")
+            exit()
+
         verbindung.commit()
         verbindung.close()
         # Daten in DB CONFIG/Prog_Steuerung.sqlite schreiben
