@@ -12,7 +12,7 @@ def loadLatestWeatherData():
     # Hier wieder ABHOLEN EIN
     try:
         apiResponse = requests.get(url, timeout=99)
-        apiResponse.raise_for_status()
+        #apiResponse.raise_for_status()
         if apiResponse.status_code != 204:
             json_data1 = dict(json.loads(apiResponse.text))
         else:

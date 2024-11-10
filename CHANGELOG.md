@@ -10,6 +10,8 @@ Weitere Prognoseoptimierungen:
 
 In CONFIG/default.ini standardmäßig Logging_ein = 1 gesetzt, da die Loggingdaten immer häufiger Verwendung finden.
 
+FIX: Fehler Prognosebegrenzung wenn keine Loggingdaten vorhanden.
+
 **[0.25.1] – 2024-11-03**  
 
 - Da bei bestimmten Konstellationen die Prognose eventuell zu hoch ausfällt (z.B. Abschattung durch Wald ab 15:00 Uhr),  
