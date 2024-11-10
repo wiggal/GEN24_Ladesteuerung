@@ -146,8 +146,18 @@ class basics:
             GROUP BY Stunde
             ORDER BY Stunde;
             """
-        zeiger.execute(sql_anweisung)
-        DB_data = zeiger.fetchall()
+        try:
+            zeiger.execute(sql_anweisung)
+            DB_data = zeiger.fetchall()
+        except:
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, MaximalPrognosebegrenzung deaktivieren!")
+            # Schließe die Verbindung
+            verbindung.close()
+            exit()
+
+        # Schließe die Verbindung
+        verbindung.close()
+
         for hour in DB_data:
             DB_MaxWatt = int(hour[1] * MaxProGrenz_Faktor)
             search_substring = str(hour[0])
@@ -208,10 +218,20 @@ class basics:
                 WHERE DCProduktion < 15000 AND Stunde IS NOT NULL
                 """
 		
-        df = pd.read_sql(query, conn)
+        try:
+            df = pd.read_sql(query, conn)
+        except:
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, MaximalPrognosebegrenzung deaktivieren!")
+            # Schließe die Verbindung
+            conn.close()
+            exit()
 
         # Schließe die Verbindung
         conn.close()
+
+        if df.empty:
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, MaximalPrognosebegrenzung deaktivieren!")
+            exit()
 
         ### UTC ZEIT einfügen (wegen Sommer und Winterzeit)
         # Zeitzone definieren (z.B. für Berlin)

@@ -18,13 +18,13 @@ def loadLatestWeatherData():
         url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
         try:
             apiResponse = requests.get(url, timeout=52.50)
-            apiResponse.raise_for_status()
+            #apiResponse.raise_for_status()
             if apiResponse.status_code != 204:
                 json_data1 = dict(json.loads(apiResponse.text))
             else:
                 print("### ERROR:  Keine forecasts-Daten von api.forecast.solar")
                 exit()
-        except requests.exceptions.Timeout:
+        except:
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
         #print(json_data1, "\n")

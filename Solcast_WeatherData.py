@@ -29,7 +29,7 @@ def loadLatestWeatherData():
             url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id, datenloop, api_key)
             try:
                 apiResponse = requests.get(url, timeout=99.50)
-                apiResponse.raise_for_status()
+                #apiResponse.raise_for_status()
                 if apiResponse.status_code != 204:
                     json_data1 = dict(json.loads(apiResponse.text))
                 else:
