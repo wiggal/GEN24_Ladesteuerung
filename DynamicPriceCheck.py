@@ -242,12 +242,13 @@ for stunde in range(24):  # die nächsten 24 Stunden
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, '0', Ladewert_Std, ''))
 
 # Zu schreibenen SteuerCode ausgeben
-print()
+print("\nFolgende Steuercodes würden geschrieben:")
 headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Anmerkung"]
 dynamic.listAStable(headers, SteuerCode)
+print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
 
 if(minimum_price_difference > price_difference): 
-    print("\nSteuercodes werden nicht geschrieben, da Preisdiffernz",round(price_difference,3), "zu klein:")
+    print("\nSteuercodes werden nicht geschrieben, da Preisdiffernz zu klein:")
     exit()
 
 Parameter = ''
