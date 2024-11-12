@@ -14,6 +14,7 @@ import FUNCTIONS.GEN24_API
 
 
 if __name__ == '__main__':
+    print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"***\n")
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'dynprice'])
     sqlall = FUNCTIONS.SQLall.sqlall()
@@ -249,6 +250,7 @@ print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference,
 
 if(minimum_price_difference > price_difference): 
     print("\nSteuercodes werden nicht geschrieben, da Preisdiffernz zu klein:")
+    print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
     exit()
 
 Parameter = ''
@@ -261,5 +263,6 @@ if( Parameter == 'schreiben'):
 else:
     print("\nSteuercodes für", Ausgabe, "wurden NICHT geschrieben, Parameter schreiben fehlt")
 
+print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 
 

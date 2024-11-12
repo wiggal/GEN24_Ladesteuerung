@@ -142,7 +142,7 @@ class dynamic:
         END = START + 86500 # 86400 = 24 Stunden
         url = 'https://api.energy-charts.info/price?bzn={}&start={}&end={}'.format(BZN,START,END)
         try:
-            apiResponse = requests.get(url, timeout=52.50)
+            apiResponse = requests.get(url, timeout=180)
             apiResponse.raise_for_status()
             if apiResponse.status_code != 204:
                 json_data1 = dict(json.loads(apiResponse.text))
