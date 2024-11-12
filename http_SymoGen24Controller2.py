@@ -499,6 +499,9 @@ if __name__ == '__main__':
                         PrognoseMorgen = progladewert.getPrognoseMorgen()[0]/1000
                         if HYB_BACKUP_RESERVED == None:
                             HYB_BACKUP_RESERVED = request.get_batteries(host_ip, user, password)[2]
+                        # Hysterese wenn Notstrom bereits eingeschaltet
+                        if HYB_BACKUP_RESERVED == EntladeGrenze_Max:
+                            ProgGrenzeMorgen = ProgGrenzeMorgen * 1.2
                         Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Min
                         if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
                             Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Max
