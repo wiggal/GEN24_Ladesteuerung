@@ -34,6 +34,25 @@ then
 fi
 
 cd $GEN24_Pfad
+LOGFILE="Crontab.log"
+# Hilfsfunktion für die Argumentbehandlung
+while getopts "ho:" opt; do
+  case "$opt" in
+    o)
+      LOGFILE="$OPTARG"
+      ;;
+    h)
+      echo "Usage: $0 [-o logging_file] [Pythonskript Argumente]"
+      exit 0
+      ;;
+    *)
+      echo "Invalid option: -$opt"
+      echo "Usage: $0 [-o logging_file] [Pythonskript Argumente]"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
 if (( $# == 0))
 then
     echo " Bitte Pythonscript als Parameter angeben!"
@@ -48,4 +67,4 @@ then
     exit
 fi
 
-/usr/bin/python3 $1 $2 >>Crontab.log 2>&1
+/usr/bin/python3 $1 $2 >> $LOGFILE 2>&1
