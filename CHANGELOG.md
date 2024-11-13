@@ -1,4 +1,4 @@
-**[0.25.3] – 2024-11-XX**  
+**[0.25.3] – 2024-13-XX**  
 
 Vorbereitungen für ein Dockerupdate und Wegfall der Modbusvariante und des Apacheimage:  
 -Fallback Variablen entfernt
