@@ -14,7 +14,6 @@ import FUNCTIONS.GEN24_API
 
 
 if __name__ == '__main__':
-    print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"***\n")
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'dynprice'])
     sqlall = FUNCTIONS.SQLall.sqlall()
@@ -24,8 +23,10 @@ if __name__ == '__main__':
 
     PV_Database = basics.getVarConf('Logging','Logging_file', 'str')
     Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
+    dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     weatherdata = basics.loadWeatherData(weatherfile)
+    if(dyn_print_level >= 1): print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"***\n")
 
     # Lastprofile holen
     Lastprofil = dynamic.getLastprofil()
@@ -34,12 +35,12 @@ if __name__ == '__main__':
     # Lastprofil neu erzeugen, wenn es älter als zwei Wochen (1209600s) ist.
     if len(Lastprofil) > 0 and len(Lastprofil[0]) > 3:
         if ((TimestampNow) - int(Lastprofil[0][3]) > 1209500):
-            print("Erzeuge Lastprofil, da älter als zwei Wochen!")
+            if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als zwei Wochen!")
             dynamic.makeLastprofil(PV_Database, Lastgrenze)
     else:
-        print("Erzeuge Lastprofil, erstmalig!!")
+        if(dyn_print_level >= 1): print("Erzeuge Lastprofil, erstmalig!!")
         dynamic.makeLastprofil(PV_Database, Lastgrenze)
-        print("Programmende!")
+        if(dyn_print_level >= 1): print("Programmende!")
         exit()
 
 
@@ -84,11 +85,10 @@ for key in data:
         if key[0] == key2[0]:
             pv_data.append((key[0], key[1], key[2], key2[1]))
 
-# entWIGGlung
 # Werte als Tabelle ausgeben
-headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)"]
-dynamic.listAStable(headers, pv_data)
-# ENDWIGGlung
+if(dyn_print_level >= 1):
+    headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)"]
+    dynamic.listAStable(headers, pv_data)
 
 
 ### von GPT
@@ -106,14 +106,13 @@ minimum_price_difference = basics.getVarConf('dynprice','minimum_price_differenc
 price_difference = max(zeile[3] for zeile in pv_data) - min(zeile[3] for zeile in pv_data)
 
 
-# entWIGGlung
 # Werte als Tabelle ausgeben
-headers = ["Batteriekapazität (Wh)", "Aktueller Ladestand (Wh)", "minimaler Ladestand (Wh)"]
-print()
-table_liste = [(str(battery_capacity_Wh), str(current_charge_Wh), str(minimum_batterylevel_kWh))]
-dynamic.listAStable(headers, table_liste)
-print()
-# entWIGGlung
+if(dyn_print_level >= 1):
+    headers = ["Batteriekapazität (Wh)", "Aktueller Ladestand (Wh)", "minimaler Ladestand (Wh)"]
+    table_liste = [(str(battery_capacity_Wh), str(current_charge_Wh), str(minimum_batterylevel_kWh))]
+    print()
+    dynamic.listAStable(headers, table_liste)
+    print()
 
 
 # Initialer Zustand des Akkus
@@ -125,11 +124,12 @@ stopping_times = []
 charging_cost_tmp = 0
 stopping_cost = 0
 
+if(dyn_print_level >= 2): print("\n#################  DEBUGGING #################")
 for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
     pv_data_tmp = [("2000-01-01 00:00:00", 0, 0, 9999.999, 0)]
     battery_status = battery_status_init
     # Iteration durch die Stunden
-    #print("#############  ", ladeArray, "############\n")
+    if(dyn_print_level >= 2): print("\n#############  ", ladeArray, "############")
     for row in pv_data:
         pv = int(row[1])   # Prognose für PV-Leistung in kW
         consumption = int(row[2])  # Verbrauch in Wh
@@ -143,7 +143,7 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
         best_price = price
         if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
             # bisherigen kleisten Wert bisher suchen
-            #print("\nJetzt ",ladeArray,":   ", row)
+            if(dyn_print_level >= 2): print("Jetzt ",ladeArray,":   ", row)
             kleinster_price = min(zeile[3] for zeile in pv_data_tmp)
             # Wenn kleister Wert bisher kleiner aktueller price, Ladung vorverlegen
             if ( kleinster_price < price ):
@@ -154,7 +154,7 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
                         consumption = zeile[2]
                         gefundene_zeile = zeile
                         break  # Beende die Schleife, wenn der Wert gefunden wurde
-                #print("Bessere ",ladeArray,":", gefundene_zeile)
+                if(dyn_print_level >= 2): print("Bessere ",ladeArray,":", gefundene_zeile)
                 # Wenn frühere Zeile gefunden => entfernen, aktuelle Zeile hinzufügen
                 pv_data_tmp.remove(gefundene_zeile)
                 pv_data_tmp.append(row)
@@ -184,30 +184,31 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
         if ( ladeArray == 'stopping' ):
             battery_status_stopping = battery_status
 
+if(dyn_print_level >= 2): print("*************** ENDE DEBUGGING ***************\n")
+
 # Durchschnittsstrompreis um den unterschiedlichen Ladezustand auszugleichen
 kleinster_price = min(zeile[3] for zeile in charging_times)
 Akkuplus = ((battery_status_stopping-battery_status_charging)*kleinster_price/1000)
 charging_cost = round(charging_cost_tmp + Akkuplus, 2)
 
-# entWIGGlung
-# Werte als Tabelle ausgeben
-charging_times.sort(key=lambda x: x[0])
-headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
-print()
-dynamic.listAStable(headers, charging_times)
-print("\nBatteriekapazität: ", battery_status_charging)
-print("Kosten Batterieladung: ", round(charging_cost_tmp, 2), "€")
-print("Preis Akkustandplus  : ", round(Akkuplus, 2), "€")
-print("Vergleichskosten Akku: ", round(charging_cost, 2), "€")
-print()
+if(dyn_print_level >= 1):
+    # Werte als Tabelle ausgeben
+    charging_times.sort(key=lambda x: x[0])
+    headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
+    print()
+    dynamic.listAStable(headers, charging_times)
+    print("\nBatteriekapazität: ", battery_status_charging)
+    print("Kosten Batterieladung: ", round(charging_cost_tmp, 2), "€")
+    print("Preis Akkustandplus  : ", round(Akkuplus, 2), "€")
+    print("Vergleichskosten Akku: ", round(charging_cost, 2), "€")
+    print()
 
-headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
-print()
-stopping_times.sort(key=lambda x: x[0])
-dynamic.listAStable(headers, stopping_times)
-print("\nBatteriekapazität: ", battery_status_stopping)
-print("Kosten Stopp Ladung: ", round(stopping_cost, 2), "€")
-# entWIGGlung
+    headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
+    print()
+    stopping_times.sort(key=lambda x: x[0])
+    dynamic.listAStable(headers, stopping_times)
+    print("\nBatteriekapazität: ", battery_status_stopping)
+    print("Kosten Stopp Ladung: ", round(stopping_cost, 2), "€")
 
 # Aktuelles Datum und Uhrzeit
 jetzt = datetime.now()
@@ -242,16 +243,17 @@ for stunde in range(24):  # die nächsten 24 Stunden
             break
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, '0', Ladewert_Std, ''))
 
-# Zu schreibenen SteuerCode ausgeben
-print("\nFolgende Steuercodes würden geschrieben:")
-headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Anmerkung"]
-dynamic.listAStable(headers, SteuerCode)
-print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
+if(dyn_print_level >= 1):
+    # Zu schreibenen SteuerCode ausgeben
+    print("\nFolgende Steuercodes würden geschrieben:")
+    headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Anmerkung"]
+    dynamic.listAStable(headers, SteuerCode)
+    print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
 
-if(minimum_price_difference > price_difference): 
-    print("\nSteuercodes werden nicht geschrieben, da Preisdiffernz zu klein:")
-    print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
-    exit()
+    if(minimum_price_difference > price_difference): 
+        print("\nSteuercodes werden nicht geschrieben, da Preisdiffernz zu klein:")
+        print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
+        exit()
 
 Parameter = ''
 if len(argv) > 1 :
@@ -259,10 +261,10 @@ if len(argv) > 1 :
 
 if( Parameter == 'schreiben'):
     dynamic.saveProg_Steuerung(SteuerCode)
-    print("\nSteuercodes für", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
+    if(dyn_print_level >= 1): print("\nSteuercodes für", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
 else:
-    print("\nSteuercodes für", Ausgabe, "wurden NICHT geschrieben, Parameter schreiben fehlt")
+    if(dyn_print_level >= 1): print("\nSteuercodes für", Ausgabe, "wurden NICHT geschrieben, Parameter schreiben fehlt")
 
-print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
+if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 
 
