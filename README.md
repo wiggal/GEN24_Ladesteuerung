@@ -2,6 +2,8 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
+Ab Version: **0.25.3**  
+Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
 Ab Version: **0.25.1**  
 Prognosebegrenzung auf Höchstwerte der historischen Produktion.  
 Ab Version: **0.25.0**  
