@@ -3,6 +3,11 @@
 Vorbereitungen für ein Dockerupdate und Wegfall der Modbusvariante und des Apacheimage:  
 -Fallback Variablen entfernt
 
+Dynamischer Strompreis: Ausgabe auf DEBUG umgeleitet
+
+start_PythonScript.sh: Schalter "-o Logfile" erzeugt alterenative Logdatei (z.B. zu Analyse von DynamicPrice.py)
+
+Hysterese bei Notstromfunktion hinzugefügt
 
 **[0.25.2] – 2024-11-10**  
 
