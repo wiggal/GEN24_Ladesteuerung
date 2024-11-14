@@ -95,7 +95,7 @@ Wenn PHP installiert ist, kann durch die Variable `Einfacher_PHP_Webserver = 1` 
 automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port:2424 erreichbar (z.B.: raspberrypi:2424).  
 
 **_Alternativ kann auch der Webserver Apache installiert werden:_**  
-[(siehe Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/1)-Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+[(siehe Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/1\)-Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 
 ### :bar_chart: Logging
 
