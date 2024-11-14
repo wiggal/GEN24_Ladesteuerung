@@ -15,17 +15,14 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
-- Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt.  
+- Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
 - Dynamischen Strompreis nutzen um bei niedrigen Preisen den Akku zu laden (in Entwicklung).  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
-Hier eine Grafik um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
+Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
 ## 💾 Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
-Bei Verwendung von **SymoGen24Controller2.py** ist Voraussetzung, dass "Slave als Modbus TCP" am GEN24 aktiv 
-und auf "int + SF" gestellt ist.  
-Bei Verwendung von **http_SymoGen24Controller2.py** wird Modbus nicht benötigt.
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
 (getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
@@ -35,23 +32,19 @@ sudo apt install python3-pip
 sudo pip install pytz
 sudo pip install requests
 sudo pip install ping3
-# Ab hier nur für Modbusversion
-sudo pip install pyModbusTCP==v0.1.10   # mit Version 0.2.x nicht lauffähig
-sudo pip install NumPy==v1.23.1
+sudo pip install numpy
+sudo pip install pandas
+sudo pip install scikit-learn
 ```
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der Datei weatherData.json vorhanden sind!  
 
 Beispiele für Crontabeinträge ("DIR" durch dein Installationsverzeichnis ersetzen).  
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh).  
-SymoGen24Controller2.py bzw. http_SymoGen24Controller2.py durchgehend (wegen Logging) alle 5/10 Minuten starten  
+http_SymoGen24Controller2.py durchgehend (wegen Logging) alle 10 Minuten starten  
 (Häufigerer Aufruf für Logging nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!).  
 Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch ein Aufruf alle 10 Minuten (1-59/10).  
 
-```
-1-59/5 * * * * /DIR/start_PythonScript.sh SymoGen24Controller2.py schreiben
-```
-**ODER!!**
 ```
 1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
@@ -82,13 +75,6 @@ Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei m
 Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json. Es ist ein "Home User" Account auf solcast.com erforderlich.  
 Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag).  
 
-### :chart_with_upwards_trend: SymoGen24Controller2.py (Modbusversion wird NICHT mehr weiterentwickelt)
-
-Berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json, dem Akkustand und der tatsächlichen Einspeisung bzw. Produktion und gibt sie aus.
-Ist die Einspeisung über der Einspeisebegrenzung bzw. die Produktion über der AC-Kapazität der Wechselrichters, wird dies in der Ladewerteberechnung berücksichtigt.  
-Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh SymoGen24Controller2.py **schreiben**) schreibt er die Ladewerte **per Modbus** auf den Wechselrichter, 
-falls die Änderung über der gesetzten Schreibgrenze ist.
-
 ### :chart_with_downwards_trend: http_SymoGen24Controller2.py
 
 Berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json und dem Akkustand und gibt sie aus. 
@@ -114,7 +100,7 @@ automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann a
 ### :bar_chart: Logging
 
 Wenn in der "CONFIG/default_priv.ini" Logging_ein = 1 gesetzt ist, werden die Werte im "Logging_file" im sqlite-Format gespeichert.  
-Beim Aufruf von `SymoGen24Controller2.py schreiben` oder `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
+Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
 Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
 Aus der SQLite-Datei werden dann in html/7_tab_Diagram.php Diagramme erzeugt.  
 Hier z.B. das Liniendiagramm zur Tagesproduktion:  
@@ -145,9 +131,11 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 ### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
 ![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
 
-Unter "Feste Entladegrenze " kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
+Unter "Feste Entladegrenze" kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
 
 In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, bzw. zum Laden des Akkus aus dem Netz bei niedrigen Strompreisen, eingetragen werden.  
+
+Durch einen negativen Wert in "Feste Entladegrenze" erfolgt eine Zwangsladung des Akkus.
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
 
