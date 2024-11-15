@@ -18,14 +18,13 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
 - Dynamischen Strompreis nutzen um bei niedrigen Preisen den Akku zu laden (in Entwicklung).  
 
-Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „config.ini“ gesteuert werden.  
+Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
 Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
 ## 💾 Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
-(getestet auf einem Ubuntu/Mint und auf einem Raspberry Pi mit Debian GNU/Linux 11)
 ```
 sudo apt install python3
 sudo apt install python3-pip
@@ -79,7 +78,7 @@ Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf 
 
 Berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json und dem Akkustand und gibt sie aus. 
 Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) setzt es die `Maximale Ladeleistung` **per HTTP-Request** 
-im Batteriemanagement des Wechselrichters, falls die Änderung über der gesetzten Schreibgrenze ist.
+im Batteriemanagement des Wechselrichters. 
 Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
@@ -108,7 +107,7 @@ Hier z.B. das Liniendiagramm zur Tagesproduktion:
 oder das Balkendiagramm zum Tagesverbrauch:  
 ![Grafik zur Tagesproduktion](pics/Tagesverbrauch.png)
 
-html/8_tab_Diagram.php erzeugt ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin).  
+html/8_tab_Diagram.php erzeugt ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin). 
 Dadurch soll z.B. ein Laden der Batterie aus dem Netz ersichtlich bzw. gezählt werden.  
 ![Grafik zur Tagesproduktion](pics/QZ_Tag.png)
 
@@ -119,7 +118,7 @@ Dadurch soll z.B. ein Laden der Batterie aus dem Netz ersichtlich bzw. gezählt 
 
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
-Ist das Modul eingeschaltet (in CONFIG/charge_priv.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung  
+Ist das Modul eingeschaltet (in CONFIG/charge_priv.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung 
 beim nächsten Aufruf von SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
 Ist nicht AUTO gewählt, erfolgt eine Batterieladung mit der eingestellten Prozentzahl der **maximalen Ladeleisung des GEN24**,
@@ -133,9 +132,8 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 
 Unter "Feste Entladegrenze" kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
 
-In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, bzw. zum Laden des Akkus aus dem Netz bei niedrigen Strompreisen, eingetragen werden.  
-
-Durch einen negativen Wert in "Feste Entladegrenze" erfolgt eine Zwangsladung des Akkus.
+In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, bzw. zum Laden des Akkus aus dem Netz bei niedrigen Strompreisen, eingetragen werden. 
+Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
 
