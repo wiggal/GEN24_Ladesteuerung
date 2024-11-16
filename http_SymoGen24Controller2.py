@@ -80,7 +80,7 @@ if __name__ == '__main__':
                     PV_Reservierung_steuern = basics.getVarConf('Reservierung','PV_Reservierung_steuern','eval')
                     Batterieentlandung_steuern = basics.getVarConf('Entladung','Batterieentlandung_steuern','eval')
                     WREntladeSchreibGrenze_Watt = basics.getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
-                    EntladeGrenze_steuern = basics.getVarConf('Entladung','EntladeGrenze_steuern','eval')
+                    Notstromreserve_steuern = basics.getVarConf('Notstrom','Notstromreserve_steuern','eval')
                     EigenverbOpt_steuern = basics.getVarConf('EigenverbOptimum','EigenverbOpt_steuern','eval')
                     MaxEinspeisung = basics.getVarConf('EigenverbOptimum','MaxEinspeisung','eval')
 
@@ -487,24 +487,38 @@ if __name__ == '__main__':
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
 
                     ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
-                    if  EntladeGrenze_steuern == 1 and Akt_Std > 21 and aktuellePVProduktion < 10:
+                    if  Notstromreserve_steuern >= 1 and Akt_Std > 21 and aktuellePVProduktion < 10:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
-                        ProgGrenzeMorgen = basics.getVarConf('Entladung','ProgGrenzeMorgen','eval')
-                        EntladeGrenze_Min = basics.getVarConf('Entladung','EntladeGrenze_Min','eval')
-                        # EntladeGrenze_Min in Notstromreserve kann nicht kleiner 5% sein
-                        if EntladeGrenze_Min < 5:
-                            EntladeGrenze_Min = 5
-                        EntladeGrenze_Max = basics.getVarConf('Entladung','EntladeGrenze_Max','eval')
+                        Notstrom_Werte_tmp = json.loads(basics.getVarConf('Notstrom','Notstrom_Werte','str'))
+                        Notstrom_Werte = dict(sorted(Notstrom_Werte_tmp.items(), reverse=True))
+                        Notstromreserve_Min = basics.getVarConf('Notstrom','Notstromreserve_Min','eval')
+                        # Notstromreserve_Min kann nicht kleiner 5% sein
+                        if Notstromreserve_Min < 5:
+                            Notstromreserve_Min = 5
                         PrognoseMorgen = progladewert.getPrognoseMorgen()[0]/1000
+                        # Aktuelle EntladeGrenze_Max und ProgGrenzeMorgen aus Notstrom_Werte ermitteln
+                        EntladeGrenze_Max = Notstromreserve_Min
+                        ProgGrenzeMorgen = 0
+                        for Notstrom_item in Notstrom_Werte: 
+                            if PrognoseMorgen < int(Notstrom_item):
+                                EntladeGrenze_Max = int(Notstrom_Werte[Notstrom_item])
+                                ProgGrenzeMorgen = int(Notstrom_item)
+
                         if HYB_BACKUP_RESERVED == None:
                             HYB_BACKUP_RESERVED = request.get_batteries(host_ip, user, password)[2]
                         # Hysterese wenn Notstrom bereits eingeschaltet
                         if HYB_BACKUP_RESERVED == EntladeGrenze_Max:
                             ProgGrenzeMorgen = ProgGrenzeMorgen * 1.2
-                        Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Min
+                        Neu_HYB_BACKUP_RESERVED = Notstromreserve_Min
                         if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
                             Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Max
+                        # TEST Notstrom ohne Zwangsladung aus dem Netz
+                        if Notstromreserve_steuern > 1 and BattStatusProz < Neu_HYB_BACKUP_RESERVED:
+                            print ("TEST Notstrom ohne Zwangsladung aus dem Netz")
+                            Neu_HYB_BACKUP_RESERVED = BattStatusProz
+                            # aber nicht kleiner 5%
+                            if Neu_HYB_BACKUP_RESERVED < 5: Neu_HYB_BACKUP_RESERVED = 5
                         if print_level >= 1:
                             print("## NOTSTROMRESERVE ##")
                             print("Prognose Morgen:     ", int(PrognoseMorgen), "KW")
