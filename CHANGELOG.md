@@ -1,3 +1,14 @@
+**[0.25.4] – 2024-11-XX**  
+
+**Modbusversion entfernt, da nicht mehr lauffähig!!**
+
+Neukonzeption der Notstromreservesteuerung:
+- Neuer Block [Notstrom] in charge.ini eingefügt, Einträge tlw. aus dem Block [Entladung] übernommen und umbenannt.
+- Die Werte zur Steuerung der Notstromreserve können nun in mehreren Stufen konfiguriert werden:
+  z.B. Notstrom_Werte = {"5": "30", "9": "15"} (Bei 5kWh Prognose morgen auf 30% setzen usw.)
+
+Bitte die Einträche in CONFIG/charge_priv.ini entsprechend anpassen
+
 **[0.25.3] – 2024-11-13**  
 
 Vorbereitungen für ein Dockerupdate und Wegfall der Modbusvariante und des Apacheimage:  

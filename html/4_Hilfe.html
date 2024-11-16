@@ -105,7 +105,6 @@ td {font-size: 160%;
 <td><input type="text" name="Zeile[19][1]" value="'Lohr4111'" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[20]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[21]" value='' >[messaging]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[22]" value='' >; HTTP und MODBUS</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[23]" value='' >; Hier Daten für Pushmessage auf Handy</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[24]" value='' >; Push_Message_EIN (1=EIN/0=AUS)</td></tr>
 <tr><td><input type="hidden" name="Zeile[25][0]" value=''>Push_Message_EIN</td>
@@ -114,7 +113,6 @@ td {font-size: 160%;
 <td><input type="text" name="Zeile[26][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[27]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[28]" value='' >[Logging]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[29]" value='' >; HTTP und MODBUS</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[30]" value='' >; durch Logging ein werden die Werte in eine SQLite Datei zur Auswertung geschrieben (1=ein, 0=aus)</td></tr>
 <tr><td><input type="hidden" name="Zeile[31][0]" value=''>Logging_ein</td>
 <td><input type="text" name="Zeile[31][1]" value="0" readonly></td></tr>
@@ -131,7 +129,6 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; Genauere Erklärungen siehe config.ini.info</td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[2]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[Ladeberechnung]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[4]" value='' >; HTTP und MODBUS</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[5]" value='' >; Wenn die Variable "FesteLadeleistung" größer/gleich "0" Watt ist, wird der Wert geschrieben.</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[5.1]" value='' >; FesteLadeleistung = -1, Ladesteuerung steht auf AUTO. </td></tr>
 <tr><td><input type="hidden" name="Zeile[6][0]" value=''>FesteLadeleistung</td>
@@ -212,22 +209,14 @@ td {font-size: 160%;
 <tr><td><input type="hidden" name="Zeile[57][0]" value=''>winter_priv.ini</td>
 <td><input type="text" name="Zeile[57][1]" value="11, 12, 01" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[58]" value='' >; Die werte für den Winter, müssen dann in der winter_priv.ini definiert werden.</td></tr>
-<tr><th colspan="2"><input type="hidden" name="Zeile[66]" value='' >[Uebergang]</th></tr>
-<tr><td><input type="hidden" name="Zeile[67][0]" value=''>Monate</td>
-<td><input type="text" name="Zeile[67][1]" value="09, 10, 02" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[68][0]" value=''>BatSparFaktor</td>
-<td><input type="text" name="Zeile[68][1]" value="1.0" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[69]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[70]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[71]" value='' >[Reservierung]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[72]" value='' >; HTTP und MODBUS</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[75]" value='' >; Hier kann die PV-Reserierung (z.B. für ein E-Auto nachmittags) eingeschaltet werden (1=ein, 0=aus)</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[75]" value='' >; damit eine feste Ladegrenze aus TAB LadeStrg funktioniert, muss PV_Reservierung_steuern = 1 sein!!!</td></tr>
 <tr><td><input type="hidden" name="Zeile[76][0]" value=''>PV_Reservierung_steuern</td>
 <td><input type="text" name="Zeile[76][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[77]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[78]" value='' >[Entladung]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[79]" value='' >; HTTP und MODBUS</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[82]" value='' >; Batterieentladung und Zwangsladung ein- bzw. ausschalten (1=ein, 0=aus)</td></tr>
 <tr><td><input type="hidden" name="Zeile[83][0]" value=''>Batterieentlandung_steuern</td>
 <td><input type="text" name="Zeile[83][1]" value="0" readonly></td></tr>
@@ -235,22 +224,19 @@ td {font-size: 160%;
 <tr><td><input type="hidden" name="Zeile[85][0]" value=''>WREntladeSchreibGrenze_Watt</td>
 <td><input type="text" name="Zeile[85][1]" value="200" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[86]" value='' ></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[79]" value='' >; HTTP und MODBUS</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[87]" value='' >; Entladung/<b>Notstrom</b> des Akku auf bestimmten Prozentsatz begrenzen (1=ein, 0=aus)</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[87]" value='' >; In der HTTP-Version: Einstellen der <b>Notstrom Reservekapazität</b></td></tr>
-<tr><td><input type="hidden" name="Zeile[88][0]" value=''>EntladeGrenze_steuern</td><td><input type="text" name="Zeile[88][1]" value="0" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[89]" value='' >; PrognoseGrenzeMorgen in KWh</td></tr>
-<tr><td><input type="hidden" name="Zeile[90][0]" value=''>ProgGrenzeMorgen</td>
-<td><input type="text" name="Zeile[90][1]" value="7" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[91]" value='' >; Entladegrenzen in % (bei HTTP-Notstrom EntladeGrenze_Min = 5%)</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[91]" value='' >; In der HTTP-Version wird EntladeGrenze_Min automatisch auf 5% begrenzt, wenn der Wert kleiner ist.</td></tr>
-<tr><td><input type="hidden" name="Zeile[92][0]" value=''>EntladeGrenze_Min</td>
-<td><input type="text" name="Zeile[92][1]" value="0" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[93][0]" value=''>EntladeGrenze_Max</td>
-<td><input type="text" name="Zeile[93][1]" value="30" readonly></td></tr>
+<tr><th colspan="2"><input type="hidden" name="Zeile[68]" value='[Notstrom]' >[Notstrom]</th></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[69]" value='; Notstromreservekapazität auf bestimmten Prozentsatz begrenzen (1=ein, 0=aus)' >; Notstromreservekapazität auf bestimmten Prozentsatz begrenzen (1=ein, 0=aus)</td></tr>
+<tr><td><input type="hidden" name="Zeile[70][0]" value='Notstromreserve_steuern = '>Notstromreserve_steuern</td>
+<td><input type="text" name="Zeile[70][1]" value="1" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[71]" value='; Notstromreservekapazität minimum normalerweise 5% kann hier höher gesetzt werden' >; Notstromreservekapazität minimum normalerweise 5% kann hier höher gesetzt werden</td></tr>
+<tr><td><input type="hidden" name="Zeile[72][0]" value='Notstromreserve_Min = '>Notstromreserve_Min</td>
+<td><input type="text" name="Zeile[72][1]" value="5" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[73]" value='; Notstrom_Werte = {"PrognoseGrenzeMorgen/kWh" : "Notstromreservekapazität/%", ...}' >; Notstrom_Werte = {"PrognoseGrenzeMorgen in kWh" : "Notstromreservekapazität in %", ...}</td></tr>
+<tr><td><input type="hidden" name="Zeile[74][0]" value='Notstrom_Werte = '>Notstrom_Werte</td>
+<td><input type="text" name="Zeile[74][1]" value="{&quot;5&quot;: &quot;30&quot;, &quot;9&quot;: &quot;15&quot;}" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[75]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[94]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[95]" value='' >[EigenverbOptimum]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[96]" value='' >; Nur HTTP</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[97]" value='' >; durch das Setzen eines bestimmten Einspeisewertes unter Eigenverbrauchs-Optimierung</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[98]" value='' >; kann über Nacht der Akku entladen werden</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[99]" value='' >; EigenverbOpt_steuern 0 = aus, 1 = ein und Tagesoptimierung nach Prognose, 2 = nachts ein und tags aus.</td></tr>
