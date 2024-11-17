@@ -83,7 +83,7 @@ class dynamic:
             exit()
 
         if (len(rows) < 168):
-            print("Zu wenig Daten in PV_Daten.sqlite,  Programmende!!")
+            print("Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n Programmende!!")
             exit()
 
         verbindung.commit()
