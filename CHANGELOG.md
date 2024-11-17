@@ -1,3 +1,7 @@
+**[0.25.5] – 2024-11-XX**  
+
+- ping3.ping ersetzt durch requests.get, da ping nur mit Adminrechte ausführbar ist
+
 **[0.25.4] – 2024-11-17**  
 
 **Modbusversion entfernt, da nicht mehr lauffähig!!**
