@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import pytz
 import json
 import requests
-from ping3 import ping
 from sys import argv
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
@@ -27,7 +26,10 @@ if __name__ == '__main__':
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
 
-        if ping(host_ip):
+        try:
+            WR_URL = 'http://'+host_ip
+            response = requests.get(WR_URL)
+            response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             alterLadewert = 0
             result_get_time_of_use = request.get_time_of_use(host_ip, user, password)
             for element in result_get_time_of_use:
@@ -588,7 +590,8 @@ if __name__ == '__main__':
                 print("Es ist ein Fehler aufgetreten!!!")
 
 
-        else:
+        except requests.exceptions.RequestException as e:
             print(datetime.now())
-            print("WR offline")
+            print(f"Fehler bei der Verbindung: {e}")
+            print(">>>>>>>>>> WR offline")
 
