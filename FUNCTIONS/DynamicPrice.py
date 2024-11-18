@@ -79,18 +79,26 @@ class dynamic:
             rows = zeiger.fetchall()
             #print(rows)
         except:
-            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, Programmende!!")
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, zum Erzeugen http_SymoGen24Controller2.py aufrufen, Programmende!!")
             exit()
 
         if (len(rows) < 168):
-            print("Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n Programmende!!")
-            exit()
+            print("\n>>> Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n>>> Fehlende Werte wurden mit 300 Watt aufgefüllt!!\n")
+            # Wenn zu wenige Tage mit 300 Watt auffüllen
+            timestamp_tmp = str(int(rows[1][5]))
+            for Wochentag in range(7):
+                for Stunde in range(24):
+                    index = f"{Wochentag}-{Stunde:02}"
+                    if not any(index in subliste for subliste in rows):
+                        stunde = f"{Stunde:02}:00"
+                        rows.append((index,'Lastprofil',stunde,str(Wochentag),300,timestamp_tmp))
+                        rows.sort()
 
         verbindung.commit()
         verbindung.close()
         # Daten in DB CONFIG/Prog_Steuerung.sqlite schreiben
         self.saveProg_Steuerung(rows)
-        print("Lastprofil in CONFIG/Prog_Steuerung.sqlite geschrieben")
+        print("Lastprofil in CONFIG/Prog_Steuerung.sqlite geschrieben\n")
 
         return()
 

@@ -30,7 +30,6 @@ sudo apt install python3
 sudo apt install python3-pip
 sudo pip install pytz
 sudo pip install requests
-sudo pip install ping3
 sudo pip install numpy
 sudo pip install pandas
 sudo pip install scikit-learn
