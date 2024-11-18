@@ -24,6 +24,7 @@ if __name__ == '__main__':
     PV_Database = basics.getVarConf('Logging','Logging_file', 'str')
     Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
     dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
+    LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     weatherdata = basics.loadWeatherData(weatherfile)
     if(dyn_print_level >= 1): print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"***\n")
@@ -32,10 +33,10 @@ if __name__ == '__main__':
     Lastprofil = dynamic.getLastprofil()
     TimestampNow = int(datetime.now().timestamp())
 
-    # Lastprofil neu erzeugen, wenn es älter als zwei Wochen (1209600s) ist.
+    # Lastprofil neu erzeugen, wenn es älter als LastprofilNeuTage
     if len(Lastprofil) > 0 and len(Lastprofil[0]) > 3:
-        if ((TimestampNow) - int(Lastprofil[0][3]) > 1209500):
-            if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als zwei Wochen!")
+        if ((TimestampNow) - int(Lastprofil[0][3]) > LastprofilNeuTage * 86400):
+            if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als ", LastprofilNeuTage, " Tage!")
             dynamic.makeLastprofil(PV_Database, Lastgrenze)
     else:
         if(dyn_print_level >= 1): print("Erzeuge Lastprofil, erstmalig!!")
@@ -143,7 +144,7 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
         best_price = price
         if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
             # bisherigen kleisten Wert bisher suchen
-            if(dyn_print_level >= 2): print("Jetzt ",ladeArray,":   ", row)
+            if(dyn_print_level >= 2): print("Jetzt  ",ladeArray,":   ", row)
             kleinster_price = min(zeile[3] for zeile in pv_data_tmp)
             # Wenn kleister Wert bisher kleiner aktueller price, Ladung vorverlegen
             if ( kleinster_price < price ):
@@ -154,7 +155,7 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
                         consumption = zeile[2]
                         gefundene_zeile = zeile
                         break  # Beende die Schleife, wenn der Wert gefunden wurde
-                if(dyn_print_level >= 2): print("Bessere ",ladeArray,":", gefundene_zeile)
+                if(dyn_print_level >= 2): print("Besser ",ladeArray,":", gefundene_zeile)
                 # Wenn frühere Zeile gefunden => entfernen, aktuelle Zeile hinzufügen
                 pv_data_tmp.remove(gefundene_zeile)
                 pv_data_tmp.append(row)

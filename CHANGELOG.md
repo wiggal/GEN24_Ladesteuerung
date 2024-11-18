@@ -2,6 +2,12 @@
 
 - ping3.ping ersetzt durch requests.get, da ping nur mit Adminrechte ausführbar ist
 
+Dynamischer Strompreis: 
+- Abstand für Erneuerung des Lastprofils einstellbar.
+  CONFIG/dynprice_priv.ini ==>> LastprofilNeuTage
+- Wenn weniger als 7 Tage im Logfile, werden die Werte im Lastprofil mit 300 Watt aufgefüllt.
+  Damit kann das Tool DynamicPriceCheck.py immer getestet werden.
+
 **[0.25.4] – 2024-11-17**  
 
 **Modbusversion entfernt, da nicht mehr lauffähig!!**
