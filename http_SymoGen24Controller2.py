@@ -163,8 +163,9 @@ if __name__ == '__main__':
 
                     # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
                     BattVollUm = basics.getVarConf('Ladeberechnung','BattVollUm','eval')
+                    Sonnenuntergang = progladewert.getSonnenuntergang(PV_Leistung_Watt)
                     if BattVollUm <= 0:
-                       BattVollUm = progladewert.getSonnenuntergang(PV_Leistung_Watt) + BattVollUm
+                       BattVollUm = Sonnenuntergang + BattVollUm
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
                     if Akkuschonung > 0:
                         BattVollUm = BattVollUm - 1
@@ -489,7 +490,7 @@ if __name__ == '__main__':
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
 
                     ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
-                    if  Notstromreserve_steuern >= 1 and Akt_Std > 21 and aktuellePVProduktion < 10:
+                    if  Notstromreserve_steuern >= 1 and Akt_Std > Sonnenuntergang+1 and Akt_Std < Sonnenuntergang+3 and aktuellePVProduktion < 10:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
                         Notstrom_Werte_tmp = json.loads(basics.getVarConf('Notstrom','Notstrom_Werte','str'))
@@ -511,7 +512,7 @@ if __name__ == '__main__':
                             HYB_BACKUP_RESERVED = request.get_batteries(host_ip, user, password)[2]
                         # Hysterese wenn Notstrom bereits eingeschaltet
                         if HYB_BACKUP_RESERVED == EntladeGrenze_Max:
-                            ProgGrenzeMorgen = ProgGrenzeMorgen * 1.2
+                            ProgGrenzeMorgen = int(ProgGrenzeMorgen * 1.2)
                         Neu_HYB_BACKUP_RESERVED = Notstromreserve_Min
                         if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
                             Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Max

@@ -8,6 +8,8 @@ Dynamischer Strompreis:
 - Wenn weniger als 7 Tage im Logfile, werden die Werte im Lastprofil mit 300 Watt aufgefüllt.
   Damit kann das Tool DynamicPriceCheck.py immer getestet werden.
 
+Notstromprüfung erfolgt nun eine Stunde nach Sonnenuntergang
+
 **[0.25.4] – 2024-11-17**  
 
 **Modbusversion entfernt, da nicht mehr lauffähig!!**
