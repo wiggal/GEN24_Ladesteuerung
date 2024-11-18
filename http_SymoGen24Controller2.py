@@ -519,7 +519,7 @@ if __name__ == '__main__':
                         # TEST Notstrom ohne Zwangsladung aus dem Netz
                         if Notstromreserve_steuern > 1 and BattStatusProz < Neu_HYB_BACKUP_RESERVED:
                             print ("TEST Notstrom ohne Zwangsladung aus dem Netz")
-                            Neu_HYB_BACKUP_RESERVED = BattStatusProz
+                            Neu_HYB_BACKUP_RESERVED = int(BattStatusProz)
                             # aber nicht kleiner 5%
                             if Neu_HYB_BACKUP_RESERVED < 5: Neu_HYB_BACKUP_RESERVED = 5
                         if print_level >= 1:
