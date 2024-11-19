@@ -490,7 +490,7 @@ if __name__ == '__main__':
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
 
                     ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
-                    if  Notstromreserve_steuern >= 1 and Akt_Std > Sonnenuntergang+1 and Akt_Std < Sonnenuntergang+3 and aktuellePVProduktion < 10:
+                    if  Notstromreserve_steuern >= 1 and Akt_Std > Sonnenuntergang and Akt_Std < Sonnenuntergang+2:
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
                         Notstrom_Werte_tmp = json.loads(basics.getVarConf('Notstrom','Notstrom_Werte','str'))
