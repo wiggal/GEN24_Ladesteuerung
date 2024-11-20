@@ -268,7 +268,6 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; MaxProGrenz_Faktor wird mit dem Werd aus der DB multipilziert</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaxProGrenz_Dayback</td>
 <td><input type="text" name="Zeile[4][1]" value="35" readonly></td></tr>
-
 <tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[pv.strings]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[2]" value='' >; und die Werte unter [forecast.solar2] und/oder [solcast.com2] eintragen</td></tr>
@@ -353,6 +352,51 @@ td {font-size: 160%;
 <td><input type="text" name="Zeile[52][1]" value="1.00" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[53]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[54]" value='' ></td></tr>
+</table>
+
+
+<br><br><center>
+<button type="submit">Hilfe zu dynprice_priv.ini</button></form>
+</center>
+<br><table><tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='; Varaiblen zur Steuerung bei dynamischen Strompreisen' >; Varaiblen zur Steuerung bei dynamischen Strompreisen</td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[2]" value='' ></td></tr>
+<tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='[dynprice]' >[dynprice]</th></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[4]" value='; print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe' >; print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe</td></tr>
+<tr><td><input type="hidden" name="Zeile[5][0]" value='dyn_print_level = '>dyn_print_level</td>
+<td><input type="text" name="Zeile[5][1]" value="2" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[6]" value='' ></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[7]" value='; LASTPROFIL' >; LASTPROFIL</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[8]" value='; Damit nicht extrem hohe und nicht regelmäßige Verbräuche, wie E-Autoladung, das Lastprofil verfälschen.' >; Damit nicht extrem hohe und nicht regelmäßige Verbräuche, wie E-Autoladung, das Lastprofil verfälschen.</td></tr>
+<tr><td><input type="hidden" name="Zeile[9][0]" value='Lastgrenze = '>Lastgrenze</td>
+<td><input type="text" name="Zeile[9][1]" value="3000" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[10]" value='; Alle wieviele Tage soll das Lasprofile erneuert werden' >; Alle wieviele Tage soll das Lasprofile erneuert werden</td></tr>
+<tr><td><input type="hidden" name="Zeile[11][0]" value='LastprofilNeuTage = '>LastprofilNeuTage</td>
+<td><input type="text" name="Zeile[11][1]" value="7" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[12]" value='' ></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[13]" value='' ></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[14]" value='; LADEBERECHUNG' >; LADEBERECHUNG</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[15]" value='; Mindest-Akkustadestand in Prozent' >; Mindest-Akkustadestand in Prozent</td></tr>
+<tr><td><input type="hidden" name="Zeile[16][0]" value='minimum_batterylevel_Prozent = '>minimum_batterylevel_Prozent</td>
+<td><input type="text" name="Zeile[16][1]" value="20" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[17]" value='; Ladegeschwindigkeit in kW' >; Ladegeschwindigkeit in kW</td></tr>
+<tr><td><input type="hidden" name="Zeile[18][0]" value='charge_rate_kW = '>charge_rate_kW</td>
+<td><input type="text" name="Zeile[18][1]" value="4000" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='; Preisdifferenz aller stündlichen Strompreise muss überschritten sein, damit die Ladestrategie geschrieben wird' >; Preisdifferenz aller stündlichen Strompreise muss überschritten sein, damit die Ladestrategie geschrieben wird</td></tr>
+<tr><td><input type="hidden" name="Zeile[20][0]" value='minimum_price_difference = '>minimum_price_difference</td>
+<td><input type="text" name="Zeile[20][1]" value="0.08" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[21]" value='' ></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[22]" value='; Infos siehe https://api.energy-charts.info/' >; Infos siehe https://api.energy-charts.info/</td></tr>
+<tr><td><input type="hidden" name="Zeile[23][0]" value='Preisquelle = '>Preisquelle</td>
+<td><input type="text" name="Zeile[23][1]" value="energycharts" readonly></td></tr>
+<tr><td><input type="hidden" name="Zeile[24][0]" value='LAND = '>LAND</td>
+<td><input type="text" name="Zeile[24][1]" value="DE-LU" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[25]" value='; Nettoaufschlag EURO/kWh' >; Nettoaufschlag EURO/kWh</td></tr>
+<tr><td><input type="hidden" name="Zeile[26][0]" value='Nettoaufschlag = '>Nettoaufschlag</td>
+<td><input type="text" name="Zeile[26][1]" value="0.1528" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[27]" value='; Prozentualer Aufschlag z.B. MwSt' >; Prozentualer Aufschlag z.B. MwSt</td></tr>
+<tr><td><input type="hidden" name="Zeile[28][0]" value='MwSt = '>MwSt</td>
+<td><input type="text" name="Zeile[28][1]" value="1.19" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[29]" value='' ></td></tr>
 </table>
 </body>
 </html>
