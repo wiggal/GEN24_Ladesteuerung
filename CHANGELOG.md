@@ -1,14 +1,16 @@
-**[0.25.5] – 2024-11-XX**  
+**[0.25.5] – 2024-11-24**  
 
-- ping3.ping ersetzt durch requests.get, da ping nur mit Adminrechte ausführbar ist
+- ping3.ping ersetzt durch requests.get, da ping nur mit Adminrechte ausführbar ist,
+  und bei manchen Installationen zu einem `PermissionError: [Errno 1]` führt.
 
 Dynamischer Strompreis: 
 - Abstand für Erneuerung des Lastprofils einstellbar.
   CONFIG/dynprice_priv.ini ==>> LastprofilNeuTage
 - Wenn weniger als 7 Tage im Logfile, werden die Werte im Lastprofil mit 300 Watt aufgefüllt.
   Damit kann das Tool DynamicPriceCheck.py immer getestet werden.
+- CONFIG/dynprice.ini überarbeitet und in Hilfe aufgenommen
 
-Notstromprüfung erfolgt nun eine Stunde nach Sonnenuntergang (Prognose < 1% PV-Leistung)
+Notstromprüfung erfolgt nun eine Stunde nach Sonnenuntergang (= Prognose < 1% PV-Leistung)
 
 **[0.25.4] – 2024-11-17**  
 
