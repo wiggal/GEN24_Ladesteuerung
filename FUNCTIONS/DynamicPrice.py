@@ -91,7 +91,7 @@ class dynamic:
                     index = f"{Wochentag}-{Stunde:02}"
                     if not any(index in subliste for subliste in rows):
                         stunde = f"{Stunde:02}:00"
-                        rows.append((index,'Lastprofil',stunde,str(Wochentag),300,timestamp_tmp))
+                        rows.append((index,'Lastprofil',stunde,str(Wochentag),600,timestamp_tmp))
                         rows.sort()
 
         verbindung.commit()
