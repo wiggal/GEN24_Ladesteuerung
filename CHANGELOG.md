@@ -6,7 +6,7 @@
 Dynamischer Strompreis: 
 - Abstand für Erneuerung des Lastprofils einstellbar.
   CONFIG/dynprice_priv.ini ==>> LastprofilNeuTage
-- Wenn weniger als 7 Tage im Logfile, werden die Werte im Lastprofil mit 300 Watt aufgefüllt.
+- Wenn weniger als 7 Tage in der Logging-DB, werden die Werte im Lastprofil mit 600 Watt aufgefüllt.
   Damit kann das Tool DynamicPriceCheck.py immer getestet werden.
 - CONFIG/dynprice.ini überarbeitet und in Hilfe aufgenommen
 
