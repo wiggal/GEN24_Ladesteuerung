@@ -346,6 +346,12 @@ if __name__ == '__main__':
                         # Ladetype = "DISCHARGE_MAX" bei Entladebegrenzung
                         Ladetype = "DISCHARGE_MAX"
 
+                        # Feste Entladebegrenzung ab einem bestimmten Verbrauch
+                        Verbrauch_Feste_Entladegrenze = basics.getVarConf('Entladung','Verbrauch_Feste_Entladegrenze','eval')
+                        Feste_Entladegrenze = basics.getVarConf('Entladung','Feste_Entladegrenze','eval')
+                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze):
+                            Neu_BatteryMaxDischarge = Feste_Entladegrenze
+
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
                         if (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):

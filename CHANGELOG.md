@@ -10,6 +10,15 @@ Dynamischer Strompreis:
   Damit kann das Tool DynamicPriceCheck.py immer getestet werden.
 - CONFIG/dynprice.ini überarbeitet und in Hilfe aufgenommen
 
+Neue Option in CONFIG/charge.ini im Block [Entladung]:
+- Damit kann ab einem bestimmten Verbrauch die Entladung des Hausakkus begrenz werden.
+```
+; Feste Entladebegrenzung ab einem bestimmten Verbrauch (Angaben in Watt)
+; Funktion nur aktiv, wenn Verbrauch_Feste_Entladegrenze > 0 (z.B. 10000 Watt für Wallbox)
+Verbrauch_Feste_Entladegrenze = 0 # Wert Null bedeutet Funktion ist **AUS**
+Feste_Entladegrenze = 300
+```
+
 Notstromprüfung erfolgt nun eine Stunde nach Sonnenuntergang (= Prognose < 1% PV-Leistung)
 
 **[0.25.4] – 2024-11-17**  
