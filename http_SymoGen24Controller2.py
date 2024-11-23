@@ -307,7 +307,6 @@ if __name__ == '__main__':
                     EntladeEintragloeschen = "nein"
                     EntladeEintragDa = "nein"
 
-
                     if  Batterieentlandung_steuern == 1:
                         MaxEntladung = BattganzeLadeKapazWatt
 

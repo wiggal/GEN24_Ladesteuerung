@@ -22,7 +22,7 @@ Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „B
 Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
-## 💾 Installationshinweise: [(siehe auch Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+## 💾 Installationshinweise: [(siehe Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/1\)-Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
 ```
