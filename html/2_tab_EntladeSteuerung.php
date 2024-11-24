@@ -209,6 +209,12 @@ $Res_Feld2_Watt = number_format($Res_Feld2_wert, 3);
 $Res_Feld2_Watt = "" ;
 }
 
+if (isset($Akku_EntLadung[$date]['Options']) and $Akku_EntLadung[$date]['Options'] <> ""){
+    $Options_wert = $Akku_EntLadung[$date]['Options'];
+} else {
+    $Options_wert = "";
+}
+
 echo '<tr><td style="white-space: nowrap;" bgcolor=#F1F3F4 class="Tag_Zeit_lesbar" contenteditable="false">';
 echo $date;
 echo '<td style="white-space: nowrap; display:none" class="Tag_Zeit" contenteditable="false">';
@@ -217,6 +223,8 @@ echo '</td><td bgcolor=#F1F3F4 class="Res_Feld1" contenteditable="true">';
 echo $Res_Feld1_Watt;
 echo '</td><td bgcolor=#F1F3F4 class="Res_Feld2" contenteditable="true">';
 echo $Res_Feld2_Watt;
+echo '<td style="white-space: nowrap; display:none" class="Options" contenteditable="false">';
+echo $Options_wert;
 echo "</td></tr>\n";
 
 } //foreach($Akku_EntLadung....
@@ -241,8 +249,10 @@ $(document).ready(function(){
   $('.Tag_Zeit').each(function(){
    ID.push($(this).text());
    Schluessel.push('ENTLadeStrg');
-   Options.push('');
    Tag_Zeit.push($(this).text());
+  });
+  $('.Options').each(function(){
+   Options.push($(this).text());
   });
   $('.Res_Feld1').each(function(){
    Res_Feld1.push($(this).text().replace(",", ".")*1000);
