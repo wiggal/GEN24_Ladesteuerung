@@ -25,6 +25,7 @@ if __name__ == '__main__':
     Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
     dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
     LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
+    Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     weatherdata = basics.loadWeatherData(weatherfile)
     if(dyn_print_level >= 1): print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"***\n")
@@ -202,16 +203,19 @@ if charging_times:
         dynamic.listAStable(headers, charging_times)
         print("\nBatteriekapazität: ", battery_status_charging)
         print("Kosten Batterieladung: ", round(charging_cost_tmp, 2), "€")
+        print("Kosten Ladung: ", round(charging_cost_tmp, 2), "€")
         print("Preis Akkustandplus  : ", round(Akkuplus, 2), "€")
-        print("Vergleichskosten Akku: ", round(charging_cost, 2), "€")
+        print("Vergleichskosten Akkuladung: ", round(charging_cost, 2), "€ (Ausgleich Akkustand)")
         print()
     
         headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
         print()
         stopping_times.sort(key=lambda x: x[0])
         dynamic.listAStable(headers, stopping_times)
+        stopping_cost_Ladeverlust = stopping_cost * ((100 - Akku_Verlust_Prozent)/100)
         print("\nBatteriekapazität: ", battery_status_stopping)
-        print("Kosten Stopp Ladung: ", round(stopping_cost, 2), "€")
+        print("Kosten Ladungstop: ", round(stopping_cost, 2), "€")
+        print("Vergleichskosten Ladungstop: ", round(stopping_cost_Ladeverlust, 2), "€ (Abzüglich Ladeverluste usw.)")
 
     # Aktuelles Datum und Uhrzeit
     jetzt = datetime.now()
@@ -219,8 +223,8 @@ if charging_times:
     ### Daten zum schreiben in CONFIG/Prog_Steuerung.sqlite vorbereiten
 
     # Ladewert ermitteln charging OR stopping
-    if (charging_cost > stopping_cost):
-        Ladewert = 1 # Mit 1Watt entladen = Lade und Entladenstopp
+    if (charging_cost > stopping_cost_Ladeverlust):
+        Ladewert = -1 # Mit 1Watt zwangsladen = Lade und Entladenstopp
         LadeProfil = stopping_times
         Ausgabe = "Ladung stoppen"
     else:
@@ -232,6 +236,11 @@ if charging_times:
     heute_start = datetime(jetzt.year, jetzt.month, jetzt.day, jetzt.hour)
 
     # Für jede Stunde Steuercode  EntLadesteuerung ermitteln
+    # Alte Einträge in ENTLadeStrg lesen
+    entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
+    #WIGGprint(entladesteurungsdata)
+    #WIGGprint(type(entladesteurungsdata))
+
 
     SteuerCode = []
     for stunde in range(24):  # die nächsten 24 Stunden
@@ -239,6 +248,7 @@ if charging_times:
         Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
         Ladewert_Std = 0
         SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
+        #WIGGprint(entladesteurungsdata[Stunde]['Res_Feld1']) # WIGG
 
         for Stundenliste in LadeProfil:
             if SuchStunde in Stundenliste:
