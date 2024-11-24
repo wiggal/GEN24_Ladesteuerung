@@ -1,3 +1,8 @@
+**[0.26.0] – 2024-XX-XX**  
+
+Dynamischer Strompreis:
+- Um Lade- und Abschreibungsverluste des Hausakkus zu berücksichtigen, wurde eine Variable Akku_Verlust_Prozent in CONFIG/dynprice.ini eingeführt.  
+
 **[0.25.5] – 2024-11-24**  
 
 - ping3.ping ersetzt durch requests.get, da ping nur mit Adminrechte ausführbar ist,
