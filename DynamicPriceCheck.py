@@ -125,13 +125,14 @@ charging_times = []
 stopping_times = []
 charging_cost_tmp = 0
 stopping_cost = 0
+Hinweiszeichen = '>>>>>>>>>>'
 
-if(dyn_print_level >= 2): print("\n#################  DEBUGGING #################")
+if(dyn_print_level >= 2): print("\n*****************  DEBUGGING *****************")
 for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
     pv_data_tmp = [("2000-01-01 00:00:00", 0, 0, 9999.999, 0)]
     battery_status = battery_status_init
     # Iteration durch die Stunden
-    if(dyn_print_level >= 2): print("\n#############  ", ladeArray, "############")
+    if(dyn_print_level >= 2): print("\n", Hinweiszeichen, ladeArray, Hinweiszeichen)
     for row in pv_data:
         pv = int(row[1])   # Prognose für PV-Leistung in kW
         consumption = int(row[2])  # Verbrauch in Wh
@@ -185,101 +186,124 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
             battery_status_charging = battery_status
         if ( ladeArray == 'stopping' ):
             battery_status_stopping = battery_status
+    Hinweiszeichen = '!!!!!!!!!!'
 
-if(dyn_print_level >= 2): print("*************** ENDE DEBUGGING ***************\n")
+if(dyn_print_level >= 2): print("\n*************** ENDE DEBUGGING ***************\n")
 
 # Durchschnittsstrompreis um den unterschiedlichen Ladezustand auszugleichen
 # Nur wenn Liste charging_times nicht leer ist
+Ausgabe = '"Wiederherstellung ENTLadeStrg"'
 if charging_times:
     kleinster_price = min(zeile[3] for zeile in charging_times)
     Akkuplus = ((battery_status_stopping-battery_status_charging)*kleinster_price/1000)
-    charging_cost = round(charging_cost_tmp + Akkuplus, 2)
+    charging_cost = round((charging_cost_tmp + Akkuplus)*(1+(Akku_Verlust_Prozent/100)), 2)
 
     if(dyn_print_level >= 1):
         # Werte als Tabelle ausgeben
+        print(">>>>>>>>>> Batterie laden >>>>>>>>>>")
         charging_times.sort(key=lambda x: x[0])
         headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
-        print()
         dynamic.listAStable(headers, charging_times)
         print("\nBatteriekapazität: ", battery_status_charging)
         print("Kosten Batterieladung: ", round(charging_cost_tmp, 2), "€")
         print("Kosten Ladung: ", round(charging_cost_tmp, 2), "€")
         print("Preis Akkustandplus  : ", round(Akkuplus, 2), "€")
-        print("Vergleichskosten Akkuladung: ", round(charging_cost, 2), "€ (Ausgleich Akkustand)")
+        print("Vergleichskosten Akkuladung: ", round(charging_cost, 2), "€ (Ausgleich Akkustand, plus Ladeverluste)")
         print()
     
+        print("!!!!!!!!!! Entladung stoppen !!!!!!!!!!")
         headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
-        print()
         stopping_times.sort(key=lambda x: x[0])
         dynamic.listAStable(headers, stopping_times)
-        stopping_cost_Ladeverlust = stopping_cost * ((100 - Akku_Verlust_Prozent)/100)
         print("\nBatteriekapazität: ", battery_status_stopping)
-        print("Kosten Ladungstop: ", round(stopping_cost, 2), "€")
-        print("Vergleichskosten Ladungstop: ", round(stopping_cost_Ladeverlust, 2), "€ (Abzüglich Ladeverluste usw.)")
-
-    # Aktuelles Datum und Uhrzeit
-    jetzt = datetime.now()
+        print("Vergleichskosten Ladungstop: ", round(stopping_cost, 2), "€")
 
     ### Daten zum schreiben in CONFIG/Prog_Steuerung.sqlite vorbereiten
 
     # Ladewert ermitteln charging OR stopping
-    if (charging_cost > stopping_cost_Ladeverlust):
+    if (charging_cost > stopping_cost):
         Ladewert = -1 # Mit 1Watt zwangsladen = Lade und Entladenstopp
         LadeProfil = stopping_times
-        Ausgabe = "Ladung stoppen"
+        Ausgabe = '"Ladung stoppen"'
     else:
         Ladewert = charge_rate_kW * -1 # Minuswert um aus dem Netz zu laden
         LadeProfil = charging_times
-        Ausgabe = "Speicher Laden"
-
-    # Startzeit jetzt
-    heute_start = datetime(jetzt.year, jetzt.month, jetzt.day, jetzt.hour)
-
-    # Für jede Stunde Steuercode  EntLadesteuerung ermitteln
-    # Alte Einträge in ENTLadeStrg lesen
-    entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
-    #WIGGprint(entladesteurungsdata)
-    #WIGGprint(type(entladesteurungsdata))
-
-
-    SteuerCode = []
-    for stunde in range(24):  # die nächsten 24 Stunden
-        zeitpunkt = heute_start + timedelta(hours=stunde)
-        Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
-        Ladewert_Std = 0
-        SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
-        #WIGGprint(entladesteurungsdata[Stunde]['Res_Feld1']) # WIGG
-
-        for Stundenliste in LadeProfil:
-            if SuchStunde in Stundenliste:
-                Ladewert_Std = Ladewert
-                break
-        SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, '0', Ladewert_Std, ''))
-
-    if(dyn_print_level >= 1):
-        # Zu schreibenen SteuerCode ausgeben
-        print("\nFolgende Steuercodes würden geschrieben:")
-        headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Anmerkung"]
-        dynamic.listAStable(headers, SteuerCode)
-        print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
-
-        if(minimum_price_difference > price_difference): 
-            print("\nSteuercodes werden nicht geschrieben, da Preisdiffernz zu klein:")
-            print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
-            exit()
-
-    Parameter = ''
-    if len(argv) > 1 :
-        Parameter = argv[1]
-
-    if( Parameter == 'schreiben'):
-        dynamic.saveProg_Steuerung(SteuerCode)
-        if(dyn_print_level >= 1): print("\nSteuercodes für", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
-    else:
-        if(dyn_print_level >= 1): print("\nSteuercodes für", Ausgabe, "wurden NICHT geschrieben, Parameter schreiben fehlt")
+        Ausgabe = '"Speicher Laden"'
 
 else:
     print("Es sind keine Ladezeiten bzw. Entladepausen nötig!!\n")
+
+# Aktuelles Datum und Uhrzeit
+jetzt = datetime.now()
+# Startzeit jetzt
+heute_start = datetime(jetzt.year, jetzt.month, jetzt.day, jetzt.hour)
+
+# SteuerCode erzeugen
+# Für jede Stunde Steuercode  EntLadesteuerung ermitteln
+# Alte Einträge in ENTLadeStrg lesen
+entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
+
+SteuerCode = []
+DBCode = []
+for stunde in range(24):  # die nächsten 24 Stunden
+    zeitpunkt = heute_start + timedelta(hours=stunde)
+    Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
+    Res_Feld1 = 0
+    Res_Feld2 = 0
+    Options = ''
+    SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
+    if entladesteurungsdata[Stunde]['Res_Feld1'] + entladesteurungsdata[Stunde]['Res_Feld2'] > 0:
+        Res_Feld1 = entladesteurungsdata[Stunde]['Res_Feld1']
+        Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
+    if entladesteurungsdata[Stunde]['Options'] != '':
+        Options = entladesteurungsdata[Stunde]['Options']
+
+    if 'LadeProfil' in locals():
+        for Stundenliste in LadeProfil:
+            if SuchStunde in Stundenliste:
+                if Res_Feld1 + Res_Feld2 > 0:
+                    Options = str(Res_Feld1)+","+str(Res_Feld2)
+                Res_Feld1 = 0
+                Res_Feld2 = Ladewert
+                break
+    # Wenn keine DynamicPriceCheck-Eintrag evtl gemerkte Einträge wiederherstellen
+    if Options != '' and Res_Feld2 >= 0:
+        Res_Feld = Options.split(',')
+        Res_Feld1 = Res_Feld[0]
+        Res_Feld2 = Res_Feld[1]
+        Options = ''
+
+    SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, Res_Feld1, Res_Feld2, Options))
+    DBCode.append((Stunde, 'ENTLadeStrg', Stunde, entladesteurungsdata[Stunde]['Res_Feld1'], entladesteurungsdata[Stunde]['Res_Feld2'], entladesteurungsdata[Stunde]['Options']))
+
+if(dyn_print_level >= 1):
+    # Zu schreibenen SteuerCode ausgeben
+    print("\nFolgende Steuercodes wurden ermittelt:")
+    headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Options"]
+    dynamic.listAStable(headers, SteuerCode)
+    print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
+
+else:
+    if(dyn_print_level >= 1):
+        print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
+        print("Steuercodes werden nicht geschrieben, da Preisdiffernz zu klein:")
+        print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
+        exit()
+
+Parameter = ''
+if len(argv) > 1 :
+    Parameter = argv[1]
+
+if( Parameter == 'schreiben'):
+    SteuerCode.sort()
+    DBCode.sort()
+    if SteuerCode == DBCode:
+        if(dyn_print_level >= 1): print("\nSteuercodes", Ausgabe, "wurden NICHT geschrieben, da keine Veränderung!")
+    else:
+        dynamic.saveProg_Steuerung(SteuerCode)
+        if(dyn_print_level >= 1): print("\nSteuercodes", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
+else:
+    if(dyn_print_level >= 1): print("\nSteuercodes", Ausgabe, "wurden NICHT geschrieben, Parameter schreiben fehlt")
 
 if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 
