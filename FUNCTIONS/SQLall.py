@@ -87,7 +87,7 @@ class sqlall:
             data[row[0]][columns[1]] = row[1]
             data[row[0]][columns[2]] = row[2]
             data[row[0]][columns[3]] = row[3]
-        record_json = json.dumps(data, indent=2)
+        record_json = json.dumps(data)
         record_json = json.loads(record_json)
 
         verbindung.commit()
