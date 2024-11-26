@@ -4,6 +4,7 @@ Dynamischer Strompreis:
 - Um Lade- und Abschreibungsverluste des Hausakkus zu berücksichtigen, wurde eine Variable Akku_Verlust_Prozent in CONFIG/dynprice.ini eingeführt.  
 - Manuelle Einträge in der Tabelle ENTLadeStrg werden, falls sie überschrieben werden, gesichert und später wiederhergestellt.
 - Die Steuecodes werden nur bei Veränderung in die Tabelle ENTLadeStrg geschrieben.
+- Im Debug-Modus wird eine DEBUG.csv erzeugt.
 
 **[0.25.5] – 2024-11-24**  
 

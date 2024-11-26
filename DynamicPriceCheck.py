@@ -164,14 +164,18 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
             else:
                 gefundene_zeile = row
 
+            #prüfen ob charging = charge_rate_kW, noch in Akku passt
+            if battery_status + ladeWatt > battery_capacity_Wh:
+                ladeWatt = battery_capacity_Wh - battery_status
+
             # charge_rate_kW zu Speicher geben
             battery_status += ladeWatt
             cost_tmp = round(((best_price * (ladeWatt + consumption)) / 1000),3)
             if ( ladeArray == 'charging' ):
-                charging_times.append(gefundene_zeile)
+                charging_times.append(gefundene_zeile + (ladeWatt * -1,))
                 charging_cost_tmp += cost_tmp
             if ( ladeArray == 'stopping' ):
-                stopping_times.append(gefundene_zeile)
+                stopping_times.append(gefundene_zeile + (-1,))
                 stopping_cost += cost_tmp
 
         else:
@@ -180,12 +184,11 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
             # und pv_data_tmp für Suche kleinster Wert füllen
             pv_data_tmp.append(row)
 
-        
-        if battery_status > battery_capacity_Wh: battery_status = battery_capacity_Wh
-        if ( ladeArray == 'charging' ):
-            battery_status_charging = battery_status
-        if ( ladeArray == 'stopping' ):
-            battery_status_stopping = battery_status
+    if battery_status > battery_capacity_Wh: battery_status = battery_capacity_Wh
+    if ( ladeArray == 'charging' ):
+        battery_status_charging = battery_status
+    if ( ladeArray == 'stopping' ):
+        battery_status_stopping = battery_status
     Hinweiszeichen = '!!!!!!!!!!'
 
 if(dyn_print_level >= 2): print("\n*************** ENDE DEBUGGING ***************\n")
@@ -202,7 +205,7 @@ if charging_times:
         # Werte als Tabelle ausgeben
         print(">>>>>>>>>> Batterie laden >>>>>>>>>>")
         charging_times.sort(key=lambda x: x[0])
-        headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
+        headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
         dynamic.listAStable(headers, charging_times)
         print("\nBatteriekapazität: ", battery_status_charging)
         print("Kosten Batterieladung: ", round(charging_cost_tmp, 2), "€")
@@ -212,7 +215,7 @@ if charging_times:
         print()
     
         print("!!!!!!!!!! Entladung stoppen !!!!!!!!!!")
-        headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)"]
+        headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
         stopping_times.sort(key=lambda x: x[0])
         dynamic.listAStable(headers, stopping_times)
         print("\nBatteriekapazität: ", battery_status_stopping)
@@ -264,7 +267,7 @@ for stunde in range(24):  # die nächsten 24 Stunden
                 if Res_Feld1 + Res_Feld2 > 0:
                     Options = str(Res_Feld1)+","+str(Res_Feld2)
                 Res_Feld1 = 0
-                Res_Feld2 = Ladewert
+                Res_Feld2 = Stundenliste[5]
                 break
     # Wenn keine DynamicPriceCheck-Eintrag evtl gemerkte Einträge wiederherstellen
     if Options != '' and Res_Feld2 >= 0:
@@ -275,6 +278,27 @@ for stunde in range(24):  # die nächsten 24 Stunden
 
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, Res_Feld1, Res_Feld2, Options))
     DBCode.append((Stunde, 'ENTLadeStrg', Stunde, entladesteurungsdata[Stunde]['Res_Feld1'], entladesteurungsdata[Stunde]['Res_Feld2'], entladesteurungsdata[Stunde]['Options']))
+
+    # DEBUG CSV-Ausgabe
+    if(dyn_print_level >= 1):
+        import csv
+        if stunde == 1 :
+            try:
+                with open("DEBUG.csv", "r") as file:
+                    file = open('DEBUG.csv',"a")
+                    csvzeile = [str(Stunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
+                    writer = csv.writer(file, delimiter=',')
+                    writer.writerow(csvzeile)
+                    file.close()
+            except FileNotFoundError:
+                # Behandle den Fall, dass die Datei nicht existiert
+                file = open('DEBUG.csv',"a")
+                csvheader = ["Stunde", "Schluessel", "Entladung", "Entladegrenze", "Preis €/kWh", "Akkustand/W"]
+                csvzeile = [str(Stunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
+                writer = csv.writer(file, delimiter=',')
+                writer.writerow(csvheader)
+                writer.writerow(csvzeile)
+                file.close()
 
 if(dyn_print_level >= 1):
     # Zu schreibenen SteuerCode ausgeben
