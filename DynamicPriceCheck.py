@@ -158,9 +158,13 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
                         gefundene_zeile = zeile
                         break  # Beende die Schleife, wenn der Wert gefunden wurde
                 if(dyn_print_level >= 2): print("Besser ",ladeArray,":", gefundene_zeile)
-                # Wenn frühere Zeile gefunden => entfernen, aktuelle Zeile hinzufügen
+                # Wenn frühere Zeile gefunden => 
+                # entfernen, aktuelle Zeile hinzufügen
                 pv_data_tmp.remove(gefundene_zeile)
                 pv_data_tmp.append(row)
+                # Bereits abgezogener Produktion - Verbrauch wieder addieren, und aktuelle net_power addieren
+                battery_status += (int(gefundene_zeile[2])-int(gefundene_zeile[1]))
+                battery_status += net_power
             else:
                 gefundene_zeile = row
 
