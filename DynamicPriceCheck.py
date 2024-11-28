@@ -133,40 +133,40 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
     battery_status = battery_status_init
     # Iteration durch die Stunden
     if(dyn_print_level >= 2): print("\n", Hinweiszeichen, ladeArray, Hinweiszeichen)
-    for row in pv_data:
-        pv = int(row[1])   # Prognose für PV-Leistung in kW
-        consumption = int(row[2])  # Verbrauch in Wh
+    i = 0
+    while i < len(pv_data):
+        row = pv_data[i]
         price = row[3]  # Preis in Euro/Wh
-        row = row + (battery_status, )
     
         # Berechnen der Nettostromproduktion
-        net_power = pv - consumption
+        # Prognose für PV-Leistung in Wh - Verbrauch in Wh
+        net_power = int(row[1]) - int(row[2])
 
         # PV-Strom in Akku laden wenn unter minimum_batterylevel_kWh und Prognose kleiner Verbrauch
         best_price = price
         if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
             # bisherigen kleisten Wert bisher suchen
-            if(dyn_print_level >= 2): print("Jetzt  ",ladeArray,":   ", row)
+            if(dyn_print_level >= 2): print("Jetzt  ",ladeArray,":   ", row + (battery_status,))
             kleinster_price = min(zeile[3] for zeile in pv_data_tmp)
             # Wenn kleister Wert bisher kleiner aktueller price, Ladung vorverlegen
-            if ( kleinster_price < price ):
+            if ( kleinster_price < price):
                 best_price = kleinster_price
-                gefundene_zeile = None  # Variable für die gefundene Zeile
+                gefundene_zeile = None
                 for zeile in pv_data_tmp:
                     if zeile[3] == kleinster_price:
-                        consumption = zeile[2]
+                        net_power = int(zeile[1]) - int(zeile[2])
                         gefundene_zeile = zeile
                         break  # Beende die Schleife, wenn der Wert gefunden wurde
                 if(dyn_print_level >= 2): print("Besser ",ladeArray,":", gefundene_zeile)
-                # Wenn frühere Zeile gefunden => 
-                # entfernen, aktuelle Zeile hinzufügen
-                pv_data_tmp.remove(gefundene_zeile)
-                pv_data_tmp.append(row)
                 # Bereits abgezogener Produktion - Verbrauch wieder addieren, und aktuelle net_power addieren
+                battery_status_diff = gefundene_zeile[4] - battery_status
                 battery_status += (int(gefundene_zeile[2])-int(gefundene_zeile[1]))
-                battery_status += net_power
+                # Wenn frühere Zeile gefunden => entfernen,
+                pv_data_tmp.remove(gefundene_zeile)
             else:
+                row = row + (battery_status,)
                 gefundene_zeile = row
+                i += 1
 
             #prüfen ob charging = charge_rate_kW, noch in Akku passt
             if battery_status + ladeWatt > battery_capacity_Wh:
@@ -174,7 +174,11 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
 
             # charge_rate_kW zu Speicher geben
             battery_status += ladeWatt
-            cost_tmp = round(((best_price * (ladeWatt + consumption)) / 1000),3)
+            cost_tmp = round(((best_price * (ladeWatt + net_power)) / 1000),3)
+            # aktuellen Ladewert in gefundene_zeile ersetzen
+            gefundene_zeile = list(gefundene_zeile)
+            gefundene_zeile[4] = battery_status + battery_status_diff
+            gefundene_zeile = tuple(gefundene_zeile)
             if ( ladeArray == 'charging' ):
                 charging_times.append(gefundene_zeile + (ladeWatt * -1,))
                 charging_cost_tmp += cost_tmp
@@ -186,7 +190,9 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
             # ansonsten speicher weiter mit net_power ent- bzw. laden
             battery_status += net_power
             # und pv_data_tmp für Suche kleinster Wert füllen
+            row = row + (battery_status,)
             pv_data_tmp.append(row)
+            i += 1
 
     if battery_status > battery_capacity_Wh: battery_status = battery_capacity_Wh
     if ( ladeArray == 'charging' ):
