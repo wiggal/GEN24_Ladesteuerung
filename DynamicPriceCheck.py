@@ -297,7 +297,7 @@ for stunde in range(24):  # die nächsten 24 Stunden
             try:
                 with open("DEBUG.csv", "r") as file:
                     file = open('DEBUG.csv',"a")
-                    csvzeile = [str(Stunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
+                    csvzeile = [str(SuchStunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
                     writer = csv.writer(file, delimiter=',')
                     writer.writerow(csvzeile)
                     file.close()
@@ -305,7 +305,7 @@ for stunde in range(24):  # die nächsten 24 Stunden
                 # Behandle den Fall, dass die Datei nicht existiert
                 file = open('DEBUG.csv',"a")
                 csvheader = ["Stunde", "Schluessel", "Entladung", "Entladegrenze", "Preis €/kWh", "Akkustand/W"]
-                csvzeile = [str(Stunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
+                csvzeile = [str(SuchStunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
                 writer = csv.writer(file, delimiter=',')
                 writer.writerow(csvheader)
                 writer.writerow(csvzeile)
