@@ -137,6 +137,7 @@ for ladeArray, ladeWatt in zip(['charging', 'stopping'], [charge_rate_kW, 0]):
     while i < len(pv_data):
         row = pv_data[i]
         price = row[3]  # Preis in Euro/Wh
+        battery_status_diff = 0
     
         # Berechnen der Nettostromproduktion
         # Prognose für PV-Leistung in Wh - Verbrauch in Wh
