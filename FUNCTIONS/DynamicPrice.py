@@ -164,9 +164,10 @@ class dynamic:
         priecelist = list(zip(price['unix_seconds'], price['price']))
         priecelist_date = []
         for row in priecelist:
-            time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
-            price = round((row[1]/1000 + Nettoaufschlag) * MwSt, 4)
-            priecelist_date.append((time, price))
+            if row[1] is not None:
+                time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
+                price = round((row[1]/1000 + Nettoaufschlag) * MwSt, 4)
+                priecelist_date.append((time, price))
         return(priecelist_date)
 
     def listAStable(self, headers, data):
