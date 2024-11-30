@@ -335,7 +335,7 @@ if __name__ == '__main__':
                             VerbrauchsgrenzeEntladung = 0
 
                         DEBUG_Ausgabe+="\nDEBUG VerbrauchsgrenzeEntladung aus Spalte 1: " + str(VerbrauchsgrenzeEntladung)
-                        # Feste Entladegrenze lesen
+                        # Feste Entladegrenze aus Tabelle  ENTLadeStrg lesen
                         if (entladesteurungsdata.get(aktStd)):
                             FesteEntladegrenze = entladesteurungsdata[aktStd]['Res_Feld2']
                         else:
@@ -349,7 +349,8 @@ if __name__ == '__main__':
                         # Feste Entladebegrenzung ab einem bestimmten Verbrauch
                         Verbrauch_Feste_Entladegrenze = basics.getVarConf('Entladung','Verbrauch_Feste_Entladegrenze','eval')
                         Feste_Entladegrenze = basics.getVarConf('Entladung','Feste_Entladegrenze','eval')
-                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze):
+                        # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
+                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze):
                             Neu_BatteryMaxDischarge = Feste_Entladegrenze
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
