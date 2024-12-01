@@ -138,7 +138,7 @@ class dynamic:
             try:
                 Prognosen_24H.append((Std_morgen, weatherdata['result']['watts'][Std_morgen]))
             except:
-                Prognosen_24H.append((Std_morgen, '0'))
+                Prognosen_24H.append((Std_morgen, 0))
             i  += 1
         return(Prognosen_24H)
         
