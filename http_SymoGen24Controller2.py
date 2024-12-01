@@ -269,7 +269,7 @@ if __name__ == '__main__':
 
                     if print_level >= 1:
                         try:
-                            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
+                            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
                             print("## HTTP-LADESTEUERUNG ##")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
@@ -279,7 +279,7 @@ if __name__ == '__main__':
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
                             print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
                             print("GesamtverbrauchHaus/Watt:   ", GesamtverbrauchHaus)
-                            print("Akku_Zustand in Prozent:    ", API['Akku_Zustand']*100,"%")
+                            #print("Akku_Zustand in Prozent:    ", API['Akku_Zustand']*100,"%")
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
@@ -427,10 +427,10 @@ if __name__ == '__main__':
                             if(Neu_BatteryMaxDischarge != BatteryMaxDischarge):
                                 payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
                                 ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                        elif ('entladen' not in Options):
+                        elif ('entladen' not in Options and Neu_BatteryMaxDischarge != BatteryMaxDischarge):
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
-                        if (payload_text != ''):
+                        if (payload_text != '' or EntladeEintragloeschen == "ja"):
                             response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}') 
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:
