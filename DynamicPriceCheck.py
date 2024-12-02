@@ -344,11 +344,17 @@ for stunde in range(24):  # die nächsten 24 Stunden
     Res_Feld2 = 0
     Options = ''
     SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
-    if entladesteurungsdata[Stunde]['Res_Feld1'] + entladesteurungsdata[Stunde]['Res_Feld2'] > 0:
-        Res_Feld1 = entladesteurungsdata[Stunde]['Res_Feld1']
-        Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
-    if entladesteurungsdata[Stunde]['Options'] != '':
-        Options = entladesteurungsdata[Stunde]['Options']
+    # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
+    try:
+        if entladesteurungsdata[Stunde]['Res_Feld1'] + entladesteurungsdata[Stunde]['Res_Feld2'] > 0:
+            Res_Feld1 = entladesteurungsdata[Stunde]['Res_Feld1']
+            Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
+        if entladesteurungsdata[Stunde]['Options'] != '':
+            Options = entladesteurungsdata[Stunde]['Options']
+    except:
+        Res_Feld1 = 0
+        Res_Feld2 = 0
+        Options = ''
 
     if 'LadeProfil' in locals():
         for Stundenliste in LadeProfil:
@@ -366,7 +372,11 @@ for stunde in range(24):  # die nächsten 24 Stunden
         Options = ''
 
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, Res_Feld1, Res_Feld2, Options))
-    DBCode.append((Stunde, 'ENTLadeStrg', Stunde, entladesteurungsdata[Stunde]['Res_Feld1'], entladesteurungsdata[Stunde]['Res_Feld2'], entladesteurungsdata[Stunde]['Options']))
+    # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
+    try:
+        DBCode.append((Stunde, 'ENTLadeStrg', Stunde, entladesteurungsdata[Stunde]['Res_Feld1'], entladesteurungsdata[Stunde]['Res_Feld2'], entladesteurungsdata[Stunde]['Options']))
+    except:
+        DBCode.append((Stunde, 'ENTLadeStrg', Stunde, 0, 0, ''))
 
     # DEBUG CSV-Ausgabe
     if(dyn_print_level >= 1 and 'Stundenliste' in locals()):

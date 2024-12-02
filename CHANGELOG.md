@@ -1,11 +1,15 @@
 **[0.26.0] – 2024-XX-XX**  
 
-Dynamischer Strompreis:
-- Um Lade- und Abschreibungsverluste des Hausakkus zu berücksichtigen, wurde eine Variable Akku_Verlust_Prozent in CONFIG/dynprice.ini eingeführt.  
-- Gewinnerwartung_kW in CONFIG/dynprice.ini eingeführt, damit kann ein Abstand der Kosten von Laden zu Entladung stoppen eingestellt werden.
-- Manuelle Einträge in der Tabelle ENTLadeStrg werden, falls sie überschrieben werden, gesichert und später wiederhergestellt.
-- Die Steuecodes werden nur bei Veränderung in die Tabelle ENTLadeStrg geschrieben.
-- Im Debug-Modus wird eine DEBUG.csv erzeugt.
+Dynamischer Strompreis:  
+- Um Lade- und Abschreibungsverluste des Hausakku zu berücksichtigen, wurde eine Variable Akku_Verlust_Prozent in CONFIG/dynprice.ini eingeführt.    
+- Gewinnerwartung_kW in CONFIG/dynprice.ini eingeführt, damit kann ein Abstand der Kosten von Laden zu Entladung stoppen eingestellt werden.  
+- Manuelle Einträge in der Tabelle ENTLadeStrg werden, falls sie überschrieben werden, gesichert und später wiederhergestellt.  
+- Die Steuecodes werden nur bei Veränderung in die Tabelle ENTLadeStrg geschrieben.  
+- Im Debug-Modus wird eine DEBUG.csv erzeugt.  
+
+CONFIG/Prog_Steuerung.sqlite wurde aus den Quellen entfernt, da inzwischen sehr viele Infos drin stecken, die sonst überschrieben werden.  
+- Die Prog_Steuerung.sqlite wird, wenn sie fehlt, beim ersten Lauf von http_SymoGen24Controller2.py erzeugt.  
+- Zugriffe von DynamicPriceCheck.py bei fehlender Prog_Steuerung.sqlite wurden abgefangen.  
 
 **[0.25.5] – 2024-11-24**  
 
