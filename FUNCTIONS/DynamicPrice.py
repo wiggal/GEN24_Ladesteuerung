@@ -118,15 +118,19 @@ class dynamic:
         return ()
 
     def getLastprofil(self):
-        # Hier die Lastprofildaten für heute und morgen auslesen
-        verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
-        zeiger = verbindung.cursor()
-        # Res_Feld1 = Wochentag, Zeit = Stunde, Res_Feld2 = Durchschnittsverbrauch, Options = Timestamp Erzeugung
-        sql_anweisung = "SELECT Res_Feld1, Zeit, Res_Feld2, Options from steuercodes WHERE Schluessel == 'Lastprofil' AND Res_Feld1 IN (strftime('%w', 'now'), strftime('%w', 'now', '+1 day'));"
-        zeiger.execute(sql_anweisung)
-        rows = zeiger.fetchall()
+        try:
+            # Hier die Lastprofildaten für heute und morgen auslesen
+            verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
+            zeiger = verbindung.cursor()
+            # Res_Feld1 = Wochentag, Zeit = Stunde, Res_Feld2 = Durchschnittsverbrauch, Options = Timestamp Erzeugung
+            sql_anweisung = "SELECT Res_Feld1, Zeit, Res_Feld2, Options from steuercodes WHERE Schluessel == 'Lastprofil' AND Res_Feld1 IN (strftime('%w', 'now'), strftime('%w', 'now', '+1 day'));"
+            zeiger.execute(sql_anweisung)
+            rows = zeiger.fetchall()
+        except:
+            print("CONFIG/Prog_Steuerung.sqlite fehlt oder ist defekt,\n bitte http_SymoGen24Controller2.py ausführen!")
+            print(">>> Programmabbruch >>>>")
+            exit()
 
-        #print(rows)
         return(rows)
 
     def getPrognosen_24H(self, weatherdata):
