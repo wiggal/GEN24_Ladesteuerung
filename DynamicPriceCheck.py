@@ -147,14 +147,12 @@ while i < len(pv_data):
     net_power = int(row[1]) - int(row[2])
 
     # PV-Strom in Akku laden wenn unter minimum_batterylevel_kWh und Prognose kleiner Verbrauch
-    best_price = price
     if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
         # bisherigen kleisten Wert bisher suchen
         if(dyn_print_level >= 2): print("Jetzt charging:", row + (battery_status,))
         kleinster_price = min(zeile[3] for zeile in pv_data_kleinster_preis)
         # Wenn kleister Wert bisher kleiner aktueller price, Ladung vorverlegen
         if ( kleinster_price < price):
-            best_price = kleinster_price
             gefundene_zeile = None
             for zeile in pv_data_kleinster_preis:
                 if zeile[3] == kleinster_price:
@@ -196,13 +194,13 @@ while i < len(pv_data):
 
         # charge_rate_kW zu Speicher geben
         battery_status += ladeWatt
-        cost_tmp = round(((best_price * (ladeWatt - net_power)) / 1000),3)
         # aktuellen Ladewert in gefundene_zeile ersetzen
         gefundene_zeile = list(gefundene_zeile)
         gefundene_zeile[4] = battery_status + battery_status_diff
         gefundene_zeile = tuple(gefundene_zeile)
 
-        cost_tmp = ((ladeWatt - net_power)/1000 * gefundene_zeile[3] * (1+(Akku_Verlust_Prozent/100)) + Gewinnerwartung_kW)
+        zu_verrechnede_kWh = (ladeWatt - net_power)/1000
+        cost_tmp = (zu_verrechnede_kWh * gefundene_zeile[3] * (1+(Akku_Verlust_Prozent/100)) + zu_verrechnede_kWh * Gewinnerwartung_kW)
         if(dyn_print_level >= 2): print(">> Laden(W), Verbrauch(W), Kosten: ", ladeWatt, (net_power*-1), round(cost_tmp, 2),"€")
         charging_times.append(gefundene_zeile + (ladeWatt * -1,))
         charging_cost += cost_tmp
@@ -239,14 +237,12 @@ while i < len(pv_data):
     net_power = int(row[1]) - int(row[2])
 
     # PV-Strom in Akku laden wenn unter minimum_batterylevel_kWh und Prognose kleiner Verbrauch
-    best_price = price
     if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
         # bisherigen kleisten Wert bisher suchen
         if(dyn_print_level >= 2): print("Jetzt stopping:   ", row + (battery_status,))
         kleinster_price = min(zeile[3] for zeile in pv_data_kleinster_preis)
         # Wenn kleister Wert bisher kleiner aktueller price, Ladung vorverlegen
         if ( kleinster_price < price):
-            best_price = kleinster_price
             gefundene_zeile = None
             for zeile in pv_data_kleinster_preis:
                 if zeile[3] == kleinster_price:
@@ -266,7 +262,6 @@ while i < len(pv_data):
 
         # charge_rate_kW zu Speicher geben
         battery_status += ladeWatt
-        cost_tmp = round(((best_price * (ladeWatt - net_power)) / 1000),3)
         # aktuellen Ladewert in gefundene_zeile ersetzen
         gefundene_zeile = list(gefundene_zeile)
         gefundene_zeile[4] = battery_status + battery_status_diff
