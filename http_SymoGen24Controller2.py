@@ -105,18 +105,24 @@ if __name__ == '__main__':
                     Battery_Status = API['BAT_MODE']
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
+                    # Angenommene Werte, wenn AKKU offline
                     if (Battery_Status == 2):
-                        print(datetime.now())
-                        print("Batterie ist Offline keine Steuerung möglich!!! ")
                         print()
-                        exit()
-                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt'])
-                    BattganzeKapazWatt = (API['BattganzeKapazWatt'])
-                    BattStatusProz = API['BattStatusProz']
-                    BattKapaWatt_akt = API['BattKapaWatt_akt']
+                        print("*********** Batterie ist offline, aktueller Ladestand wird auf 5% gesetzt!!! *********\n")
+                        BattganzeKapazWatt = basics.getVarConf('gen24','battery_capacity_Wh', 'eval') # Kapazität in Wh aus dynprice.ini
+                        BattganzeLadeKapazWatt = BattganzeKapazWatt
+                        BattStatusProz = 5
+                        BattKapaWatt_akt = BattganzeKapazWatt * 0.95
+                        aktuelleBatteriePower = 0
+                    else:
+                        BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt'])
+                        BattganzeKapazWatt = (API['BattganzeKapazWatt'])
+                        BattStatusProz = API['BattStatusProz']
+                        BattKapaWatt_akt = API['BattKapaWatt_akt']
+                        aktuelleBatteriePower = API['aktuelleBatteriePower']
+
                     aktuelleEinspeisung = API['aktuelleEinspeisung'] * -1
                     aktuellePVProduktion = API['aktuellePVProduktion']
-                    aktuelleBatteriePower = API['aktuelleBatteriePower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
@@ -279,7 +285,6 @@ if __name__ == '__main__':
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
                             print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
                             print("GesamtverbrauchHaus/Watt:   ", GesamtverbrauchHaus)
-                            #print("Akku_Zustand in Prozent:    ", API['Akku_Zustand']*100,"%")
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
