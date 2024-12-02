@@ -6,6 +6,7 @@ Dynamischer Strompreis:
 - Manuelle Einträge in der Tabelle ENTLadeStrg werden, falls sie überschrieben werden, gesichert und später wiederhergestellt.  
 - Die Steuecodes werden nur bei Veränderung in die Tabelle ENTLadeStrg geschrieben.  
 - Im Debug-Modus wird eine DEBUG.csv erzeugt.  
+- **Neuer Parameter in dynprice.ini** `battery_capacity_Wh`, wird benötigt, damit das Programm auch läuft, wenn Akku offline ist!!
 
 CONFIG/Prog_Steuerung.sqlite wurde aus den Quellen entfernt, da inzwischen sehr viele Infos drin stecken, die sonst überschrieben werden.  
 - Die Prog_Steuerung.sqlite wird, wenn sie fehlt, beim ersten Lauf von http_SymoGen24Controller2.py erzeugt.  
