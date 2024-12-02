@@ -101,7 +101,7 @@ Battery_Status = API['BAT_MODE']
 if (Battery_Status == 2):
     print()
     print("Batterie ist Offline, aktueller Ladestand wird auf 500 Wh gesetzt!!!\n")
-    battery_capacity_Wh = basics.getVarConf('dynprice','battery_capacity_Wh', 'eval') # Kapazität in Wh aus dynprice.ini
+    battery_capacity_Wh = basics.getVarConf('gen24','battery_capacity_Wh', 'eval') # Kapazität in Wh aus dynprice.ini
     current_charge_Wh = 500 # aktueller Ladestand in Wh, 500Wh geschätzt
 else:
     battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
