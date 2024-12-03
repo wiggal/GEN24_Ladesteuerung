@@ -174,22 +174,24 @@ while i < len(pv_data):
         if battery_status + ladeWatt > battery_capacity_Wh:
             ladeWatt = battery_capacity_Wh - battery_status
 
-        ## Hier in die Zukunft schauen wie viel wirklich geladen werden soll (wann kommt die SOnne?) #WIGG
+        ## Hier in die Zukunft schauen wie viel wirklich geladen werden soll (wann kommt die SOnne?)
         ii = i-1
         ladeWatt_ii = 0
+        battery_status_zukunft = battery_status
         while ii < len(pv_data):
             row_ii = pv_data[ii]
-            #print("row_ii :", ii, row_ii)#WIGG
+            if(dyn_print_level >= 3): print("        row_ii :", ii, row_ii)
             net_power_ii = int(row_ii[1]) - int(row_ii[2])
+            battery_status_zukunft += net_power_ii
+            if(dyn_print_level >= 3): print("        battery_status_zukunft: ", battery_status_zukunft)
             if (net_power_ii < 100):
                 ladeWatt_ii += net_power_ii * -1
-                #print("row_ii:", row_ii)#WIGG
-                #print("net_power_ii, ladeWatt_ii, ii:", net_power_ii, ladeWatt_ii, ii)#WIGG
-            else:
+                if(dyn_print_level >= 3): print("        row_ii:", row_ii)
+                if(dyn_print_level >= 3): print("        net_power_ii, ladeWatt_ii, ii:", net_power_ii, ladeWatt_ii, ii)
+            if (battery_status_zukunft > minimum_batterylevel_kWh):
                 break
             ii += 1
         # Wenn Verbrauch bis Produktionsüberschuss < ladeWatt
-        #print ("ladeWatt_ii < ladeWatt:", ladeWatt_ii , ladeWatt)#WIGG
         if ladeWatt > 0 and ladeWatt_ii < ladeWatt: ladeWatt = ladeWatt_ii
 
         # charge_rate_kW zu Speicher geben
@@ -211,7 +213,7 @@ while i < len(pv_data):
         if battery_status > battery_capacity_Wh: battery_status = battery_capacity_Wh
         # und pv_data_kleinster_preis für Suche kleinster Wert füllen
         row = row + (battery_status,)
-        if(dyn_print_level >= 2): print("--NICHT charging:", row)
+        if(dyn_print_level >= 3): print("--NICHT charging:", row)
         # append zu kleiner Preistabellen nur wenn im Akku Speicherplatz und Produktionsplus
         if(battery_status < battery_capacity_Wh-ladeWatt and net_power < 0):
             pv_data_kleinster_preis.append(row)
@@ -281,7 +283,7 @@ while i < len(pv_data):
         row = row + (battery_status,)
         if net_power < 0:
             pv_data_kleinster_preis.append(row)
-        if(dyn_print_level >= 2): print("--NICHT stopping:", row)
+        if(dyn_print_level >= 3): print("--NICHT stopping:", row)
         i += 1
 
     battery_status_stopping = battery_status
@@ -341,7 +343,7 @@ entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
 
 SteuerCode = []
 DBCode = []
-for stunde in range(24):  # die nächsten 24 Stunden
+for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster Stunde
     zeitpunkt = heute_start + timedelta(hours=stunde)
     Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
     Res_Feld1 = 0
@@ -405,7 +407,7 @@ for stunde in range(24):  # die nächsten 24 Stunden
 
 if(dyn_print_level >= 1):
     # Zu schreibenen SteuerCode ausgeben
-    print("\nFolgende Steuercodes wurden ermittelt:")
+    print("\nFolgende Steuercodes für das günstigere", Ausgabe, "wurden ermittelt:")
     headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Options"]
     dynamic.listAStable(headers, SteuerCode)
 
