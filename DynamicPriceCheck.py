@@ -188,7 +188,7 @@ while i < len(pv_data):
                 ladeWatt_ii += net_power_ii * -1
                 if(dyn_print_level >= 3): print("        row_ii:", row_ii)
                 if(dyn_print_level >= 3): print("        net_power_ii, ladeWatt_ii, ii:", net_power_ii, ladeWatt_ii, ii)
-            if (battery_status_zukunft > minimum_batterylevel_kWh):
+            if (battery_status_zukunft > minimum_batterylevel_kWh + charge_rate_kW):
                 break
             ii += 1
         # Wenn Verbrauch bis Produktionsüberschuss < ladeWatt
@@ -229,6 +229,7 @@ battery_status = current_charge_Wh
 # Iteration durch die Stunden
 if(dyn_print_level >= 2): print("\n!!!!!!!!!! stopping !!!!!!!!!!")
 i = 0
+letzter_Entladewert = 0
 while i < len(pv_data):
     row = pv_data[i]
     price = row[3]  # Preis in Euro/Wh
@@ -239,7 +240,9 @@ while i < len(pv_data):
     net_power = int(row[1]) - int(row[2])
 
     # PV-Strom in Akku laden wenn unter minimum_batterylevel_kWh und Prognose kleiner Verbrauch
-    if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
+    net_power_test = net_power
+    if letzter_Entladewert == -1: net_power_test = net_power * 1.5
+    if battery_status + net_power_test < minimum_batterylevel_kWh and net_power < 0:
         # bisherigen kleisten Wert bisher suchen
         if(dyn_print_level >= 2): print("Jetzt stopping:   ", row + (battery_status,))
         kleinster_price = min(zeile[3] for zeile in pv_data_kleinster_preis)
@@ -269,7 +272,8 @@ while i < len(pv_data):
         gefundene_zeile[4] = battery_status + battery_status_diff
         gefundene_zeile = tuple(gefundene_zeile)
 
-        stopping_times.append(gefundene_zeile + (-1,))
+        letzter_Entladewert = -1
+        stopping_times.append(gefundene_zeile + (letzter_Entladewert,))
         cost_tmp = ((net_power * -1)/1000 * gefundene_zeile[3])
         if(dyn_print_level >= 2): print(">> Verbrauch(W), Kosten: ", (ladeWatt - net_power), round(cost_tmp, 2),"€")
         stopping_cost += cost_tmp
@@ -278,6 +282,7 @@ while i < len(pv_data):
         # ansonsten speicher weiter mit net_power ent- bzw. laden
         battery_status += net_power
         if battery_status > battery_capacity_Wh: battery_status = battery_capacity_Wh
+        letzter_Entladewert = 0
         # und pv_data_kleinster_preis für Suche kleinster Wert füllen
         # Stopping nur sinnvoll, wenn net_power minus 
         row = row + (battery_status,)
