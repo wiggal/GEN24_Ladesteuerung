@@ -12,7 +12,7 @@ class dynamic:
     def __init__(self):
         self.now = datetime.now()
 
-    def makeLastprofil(self, database, Lastgrenze):
+    def makeLastprofil(self, database, Lastgrenze, Daysback='-35'):
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
         # Lastprofil von jetzt 35 Tage zurück für jeden Wochentag ermitteln
@@ -26,13 +26,7 @@ class dynamic:
             FROM
                 pv_daten
             WHERE
-                Zeitpunkt >= datetime('now', '-35 days')
-                /*
-                # Für einen bestimmten Monat die Zeile:
-                Zeitpunkt >= datetime('now', '-35 days')
-                # durch folgende für z.B. Januar 2024 ersetzen
-                Zeitpunkt >= DATE('2024-01-31', '-35 days') AND Zeitpunkt < '2024-01-31'
-                */
+                Zeitpunkt >= datetime('now', '""" + str(Daysback) + """ days')
             GROUP BY
                 strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
         ),
@@ -62,7 +56,12 @@ class dynamic:
             'Lastprofil' AS Schluessel,
             strftime('%H:00', volle_stunde) AS Zeit,
             strftime('%w', volle_stunde) AS Wochentag,
+            /*
+            # Normaler Durchschnitt
             CAST(AVG(Verbrauch) AS INTEGER) AS Verbrauch,
+            # höheres Gewicht je aktueller die Werte
+            */
+			CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGER) AS Verbrauch,
             strftime('%s', 'now') AS Options
         FROM
             verbrauch
@@ -83,7 +82,7 @@ class dynamic:
             exit()
 
         if (len(rows) < 168):
-            print("\n>>> Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n>>> Fehlende Werte wurden mit 300 Watt aufgefüllt!!\n")
+            print("\n>>> Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n>>> Fehlende Werte werden mit 600 Watt aufgefüllt!!\n")
             # Wenn zu wenige Tage mit 300 Watt auffüllen
             timestamp_tmp = str(int(rows[1][5]))
             for Wochentag in range(7):

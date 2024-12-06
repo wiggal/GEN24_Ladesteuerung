@@ -25,6 +25,8 @@ if __name__ == '__main__':
     Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
     dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
     LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
+    Daysback = basics.getVarConf('dynprice','Daysback', 'eval')
+    LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
     Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
     Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
@@ -39,10 +41,10 @@ if __name__ == '__main__':
     if len(Lastprofil) > 0 and len(Lastprofil[0]) > 3:
         if ((TimestampNow) - int(Lastprofil[0][3]) > LastprofilNeuTage * 86400):
             if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als ", LastprofilNeuTage, " Tage!")
-            dynamic.makeLastprofil(PV_Database, Lastgrenze)
+            dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
     else:
         if(dyn_print_level >= 1): print("Erzeuge Lastprofil, erstmalig!!")
-        dynamic.makeLastprofil(PV_Database, Lastgrenze)
+        dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
         if(dyn_print_level >= 1): print("Programmende!")
         exit()
 

@@ -1,8 +1,10 @@
-**[0.26.0] – 2024-XX-XX**  
+**[0.26.0] – 2024-12-08**  
 
 Dynamischer Strompreis:  
 - Um Lade- und Abschreibungsverluste des Hausakku zu berücksichtigen, wurde eine Variable Akku_Verlust_Prozent in CONFIG/dynprice.ini eingeführt.    
-- Gewinnerwartung_kW in CONFIG/dynprice.ini eingeführt, damit kann ein Abstand der Kosten von Laden zu Entladung stoppen eingestellt werden.  
+- **Neuer Parameter in CONFIG/dynprice.ini** `Gewinnerwartung_kW`, damit kann ein Abstand der Kosten von Laden zu Entladung stoppen eingestellt werden.  
+- **Neuer Parameter in CONFIG/dynprice.ini** `Daysback`, Einstellung, wie viele Tage zurück sollen für das Lastprofil verwendet werden.  
+  Die Verbrauchsdaten für das Lastprofil werden so gewichtet, dass aktuelle Daten ein höheres Gewicht bekommen.  
 - Manuelle Einträge in der Tabelle ENTLadeStrg werden, falls sie überschrieben werden, gesichert und später wiederhergestellt.  
 - Die Steuecodes werden nur bei Veränderung in die Tabelle ENTLadeStrg geschrieben.  
 - Im Debug-Modus wird eine DEBUG.csv erzeugt.  
