@@ -105,18 +105,24 @@ if __name__ == '__main__':
                     Battery_Status = API['BAT_MODE']
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
+                    # Angenommene Werte, wenn AKKU offline
                     if (Battery_Status == 2):
-                        print(datetime.now())
-                        print("Batterie ist Offline keine Steuerung möglich!!! ")
                         print()
-                        exit()
-                    BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt'])
-                    BattganzeKapazWatt = (API['BattganzeKapazWatt'])
-                    BattStatusProz = API['BattStatusProz']
-                    BattKapaWatt_akt = API['BattKapaWatt_akt']
+                        print("*********** Batterie ist offline, aktueller Ladestand wird auf 5% gesetzt!!! *********\n")
+                        BattganzeKapazWatt = basics.getVarConf('gen24','battery_capacity_Wh', 'eval') # Kapazität in Wh aus dynprice.ini
+                        BattganzeLadeKapazWatt = BattganzeKapazWatt
+                        BattStatusProz = 5
+                        BattKapaWatt_akt = BattganzeKapazWatt * 0.95
+                        aktuelleBatteriePower = 0
+                    else:
+                        BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt'])
+                        BattganzeKapazWatt = (API['BattganzeKapazWatt'])
+                        BattStatusProz = API['BattStatusProz']
+                        BattKapaWatt_akt = API['BattKapaWatt_akt']
+                        aktuelleBatteriePower = API['aktuelleBatteriePower']
+
                     aktuelleEinspeisung = API['aktuelleEinspeisung'] * -1
                     aktuellePVProduktion = API['aktuellePVProduktion']
-                    aktuelleBatteriePower = API['aktuelleBatteriePower']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
@@ -269,7 +275,7 @@ if __name__ == '__main__':
 
                     if print_level >= 1:
                         try:
-                            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
+                            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
                             print("## HTTP-LADESTEUERUNG ##")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
@@ -279,7 +285,6 @@ if __name__ == '__main__':
                             print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
                             print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
                             print("GesamtverbrauchHaus/Watt:   ", GesamtverbrauchHaus)
-                            print("Akku_Zustand in Prozent:    ", API['Akku_Zustand']*100,"%")
                             print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
@@ -335,7 +340,7 @@ if __name__ == '__main__':
                             VerbrauchsgrenzeEntladung = 0
 
                         DEBUG_Ausgabe+="\nDEBUG VerbrauchsgrenzeEntladung aus Spalte 1: " + str(VerbrauchsgrenzeEntladung)
-                        # Feste Entladegrenze lesen
+                        # Feste Entladegrenze aus Tabelle  ENTLadeStrg lesen
                         if (entladesteurungsdata.get(aktStd)):
                             FesteEntladegrenze = entladesteurungsdata[aktStd]['Res_Feld2']
                         else:
@@ -349,7 +354,8 @@ if __name__ == '__main__':
                         # Feste Entladebegrenzung ab einem bestimmten Verbrauch
                         Verbrauch_Feste_Entladegrenze = basics.getVarConf('Entladung','Verbrauch_Feste_Entladegrenze','eval')
                         Feste_Entladegrenze = basics.getVarConf('Entladung','Feste_Entladegrenze','eval')
-                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze):
+                        # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
+                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze):
                             Neu_BatteryMaxDischarge = Feste_Entladegrenze
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
@@ -426,10 +432,10 @@ if __name__ == '__main__':
                             if(Neu_BatteryMaxDischarge != BatteryMaxDischarge):
                                 payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
                                 ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                        elif ('entladen' not in Options):
+                        elif ('entladen' not in Options and Neu_BatteryMaxDischarge != BatteryMaxDischarge):
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
-                        if (payload_text != ''):
+                        if (payload_text != '' or EntladeEintragloeschen == "ja"):
                             response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}') 
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:

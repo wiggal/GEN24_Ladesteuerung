@@ -12,7 +12,7 @@ class dynamic:
     def __init__(self):
         self.now = datetime.now()
 
-    def makeLastprofil(self, database, Lastgrenze):
+    def makeLastprofil(self, database, Lastgrenze, Daysback='-35'):
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
         # Lastprofil von jetzt 35 Tage zurück für jeden Wochentag ermitteln
@@ -26,13 +26,7 @@ class dynamic:
             FROM
                 pv_daten
             WHERE
-                Zeitpunkt >= datetime('now', '-35 days')
-                /*
-                # Für einen bestimmten Monat die Zeile:
-                Zeitpunkt >= datetime('now', '-35 days')
-                # durch folgende für z.B. Januar 2024 ersetzen
-                Zeitpunkt >= DATE('2024-01-31', '-35 days') AND Zeitpunkt < '2024-01-31'
-                */
+                Zeitpunkt >= datetime('now', '""" + str(Daysback) + """ days')
             GROUP BY
                 strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
         ),
@@ -62,7 +56,12 @@ class dynamic:
             'Lastprofil' AS Schluessel,
             strftime('%H:00', volle_stunde) AS Zeit,
             strftime('%w', volle_stunde) AS Wochentag,
+            /*
+            # Normaler Durchschnitt
             CAST(AVG(Verbrauch) AS INTEGER) AS Verbrauch,
+            # höheres Gewicht je aktueller die Werte
+            */
+			CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGER) AS Verbrauch,
             strftime('%s', 'now') AS Options
         FROM
             verbrauch
@@ -83,7 +82,7 @@ class dynamic:
             exit()
 
         if (len(rows) < 168):
-            print("\n>>> Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n>>> Fehlende Werte wurden mit 300 Watt aufgefüllt!!\n")
+            print("\n>>> Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n>>> Fehlende Werte werden mit 600 Watt aufgefüllt!!\n")
             # Wenn zu wenige Tage mit 300 Watt auffüllen
             timestamp_tmp = str(int(rows[1][5]))
             for Wochentag in range(7):
@@ -118,15 +117,19 @@ class dynamic:
         return ()
 
     def getLastprofil(self):
-        # Hier die Lastprofildaten für heute und morgen auslesen
-        verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
-        zeiger = verbindung.cursor()
-        # Res_Feld1 = Wochentag, Zeit = Stunde, Res_Feld2 = Durchschnittsverbrauch, Options = Timestamp Erzeugung
-        sql_anweisung = "SELECT Res_Feld1, Zeit, Res_Feld2, Options from steuercodes WHERE Schluessel == 'Lastprofil' AND Res_Feld1 IN (strftime('%w', 'now'), strftime('%w', 'now', '+1 day'));"
-        zeiger.execute(sql_anweisung)
-        rows = zeiger.fetchall()
+        try:
+            # Hier die Lastprofildaten für heute und morgen auslesen
+            verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
+            zeiger = verbindung.cursor()
+            # Res_Feld1 = Wochentag, Zeit = Stunde, Res_Feld2 = Durchschnittsverbrauch, Options = Timestamp Erzeugung
+            sql_anweisung = "SELECT Res_Feld1, Zeit, Res_Feld2, Options from steuercodes WHERE Schluessel == 'Lastprofil' AND Res_Feld1 IN (strftime('%w', 'now'), strftime('%w', 'now', '+1 day'));"
+            zeiger.execute(sql_anweisung)
+            rows = zeiger.fetchall()
+        except:
+            print("CONFIG/Prog_Steuerung.sqlite fehlt oder ist defekt,\n bitte http_SymoGen24Controller2.py ausführen!")
+            print(">>> Programmabbruch >>>>")
+            exit()
 
-        #print(rows)
         return(rows)
 
     def getPrognosen_24H(self, weatherdata):
@@ -138,7 +141,7 @@ class dynamic:
             try:
                 Prognosen_24H.append((Std_morgen, weatherdata['result']['watts'][Std_morgen]))
             except:
-                Prognosen_24H.append((Std_morgen, '0'))
+                Prognosen_24H.append((Std_morgen, 0))
             i  += 1
         return(Prognosen_24H)
         
@@ -164,9 +167,10 @@ class dynamic:
         priecelist = list(zip(price['unix_seconds'], price['price']))
         priecelist_date = []
         for row in priecelist:
-            time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
-            price = round((row[1]/1000 + Nettoaufschlag) * MwSt, 4)
-            priecelist_date.append((time, price))
+            if row[1] is not None:
+                time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
+                price = round((row[1]/1000 + Nettoaufschlag) * MwSt, 4)
+                priecelist_date.append((time, price))
         return(priecelist_date)
 
     def listAStable(self, headers, data):
