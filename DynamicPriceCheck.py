@@ -207,8 +207,7 @@ while i < len(pv_data):
         gefundene_zeile[4] = battery_status + battery_status_diff
         gefundene_zeile = tuple(gefundene_zeile)
 
-        zu_verrechnede_kWh = (ladeWatt - net_power)/1000
-        cost_tmp = ((net_power * gefundene_zeile[3]) + (ladeWatt * gefundene_zeile[3] * (1+(Akku_Verlust_Prozent/100))) + (ladeWatt * Gewinnerwartung_kW))/1000
+        cost_tmp = ((net_power * -1 * gefundene_zeile[3]) + (ladeWatt * gefundene_zeile[3] * (1+(Akku_Verlust_Prozent/100))) + (ladeWatt * Gewinnerwartung_kW))/1000
         if(dyn_print_level >= 2): print(">> Laden(W), Verbrauch(W), Kosten: ", ladeWatt, (net_power*-1), round(cost_tmp, 2),"€")
         charging_times.append(gefundene_zeile + (ladeWatt * -1,))
         charging_cost += cost_tmp
