@@ -143,6 +143,8 @@ while i < len(pv_data):
     row = pv_data[i]
     price = row[3]  # Preis in Euro/Wh
     battery_status_diff = 0
+    next_price = price
+    if ( i+1 < len(pv_data)): next_price = pv_data[i+1][3]
 
     # Berechnen der Nettostromproduktion
     # Prognose für PV-Leistung in Wh - Verbrauch in Wh
@@ -172,12 +174,12 @@ while i < len(pv_data):
             gefundene_zeile = row
             i += 1
 
-        #prüfen ob charging = charge_rate_kW, noch in Akku passt
-        if battery_status + ladeWatt > battery_capacity_Wh:
-            ladeWatt = battery_capacity_Wh - battery_status
+        #prüfen ob charging = charge_rate_kW, noch in Akku passt #WIGG macht er selber und spart einemal Schreiben
+        #if battery_status + ladeWatt > battery_capacity_Wh:
+        #    ladeWatt = battery_capacity_Wh - battery_status
 
         # Zukunft ANFANG
-        ## Hier in die Zukunft schauen wie viel wirklich geladen werden soll (wann kommt die SOnne?)
+        ## Hier in die Zukunft schauen wie viel wirklich geladen werden soll (wann kommt die Sonne?)
         ii = i-1
         ladeWatt_ii = 0
         battery_status_zukunft = battery_status
@@ -219,8 +221,8 @@ while i < len(pv_data):
         row = row + (battery_status,)
         if(dyn_print_level >= 3): print("--NICHT charging:", row)
         # append zu kleiner Preistabellen nur wenn im Akku Speicherplatz und Produktionsplus
-        if(battery_status < battery_capacity_Wh-ladeWatt and net_power < 0):
-            pv_data_kleinster_preis.append(row)
+        #if(battery_status < battery_capacity_Wh-ladeWatt):
+        pv_data_kleinster_preis.append(row)
         i += 1
 
     battery_status_charging = battery_status
