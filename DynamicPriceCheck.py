@@ -42,6 +42,8 @@ if __name__ == '__main__':
         if ((TimestampNow) - int(Lastprofil[0][3]) > LastprofilNeuTage * 86400):
             if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als ", LastprofilNeuTage, " Tage!")
             dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
+            # Lastprofil nochmal neu holen
+            Lastprofil = dynamic.getLastprofil()
     else:
         if(dyn_print_level >= 1): print("Erzeuge Lastprofil, erstmalig!!")
         dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
