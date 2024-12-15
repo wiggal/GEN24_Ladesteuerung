@@ -1,4 +1,4 @@
-**[0.26.0] – 2024-12-XX**  
+**[0.26.0] – 2024-12-15**  
 
 Dynamischer Strompreis:  
 - Um Lade- und Abschreibungsverluste des Hausakku zu berücksichtigen, wurde eine Variable Akku_Verlust_Prozent in CONFIG/dynprice.ini eingeführt.    
