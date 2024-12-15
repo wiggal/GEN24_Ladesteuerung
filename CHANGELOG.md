@@ -1,3 +1,7 @@
+**[0.26.1] – 202X-XX-XX**  
+
+Dynamischer Strompreis Weiterentwicklung:  
+
 **[0.26.0] – 2024-12-15**  
 
 Dynamischer Strompreis:  
