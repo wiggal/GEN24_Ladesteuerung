@@ -355,7 +355,9 @@ if __name__ == '__main__':
                         Verbrauch_Feste_Entladegrenze = basics.getVarConf('Entladung','Verbrauch_Feste_Entladegrenze','eval')
                         Feste_Entladegrenze = basics.getVarConf('Entladung','Feste_Entladegrenze','eval')
                         # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
-                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze):
+                        # aktuelleBatteriePower > Feste_Entladegrenze/2 = Damit sie nicht einschaltet, wenn Akku bereits leer ist.
+                        # Feste_Entladegrenze/2 = sonst schaltet sie beim nächsten Durchlauf wieder aus, da die aktuelleBatteriePower dann kleiner ist.
+                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze/2):
                             Neu_BatteryMaxDischarge = Feste_Entladegrenze
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
@@ -507,7 +509,7 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
                         Notstrom_Werte_tmp = json.loads(basics.getVarConf('Notstrom','Notstrom_Werte','str'))
-                        Notstrom_Werte = dict(sorted(Notstrom_Werte_tmp.items(), reverse=True))
+                        Notstrom_Werte = dict(sorted(Notstrom_Werte_tmp.items(), key=lambda item: int(item[1])))
                         Notstromreserve_Min = basics.getVarConf('Notstrom','Notstromreserve_Min','eval')
                         # Notstromreserve_Min kann nicht kleiner 5% sein
                         if Notstromreserve_Min < 5:
