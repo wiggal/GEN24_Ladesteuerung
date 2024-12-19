@@ -507,7 +507,7 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
                         Notstrom_Werte_tmp = json.loads(basics.getVarConf('Notstrom','Notstrom_Werte','str'))
-                        Notstrom_Werte = dict(sorted(Notstrom_Werte_tmp.items(), key=lambda item: int(item[1])))
+                        Notstrom_Werte = dict(sorted(Notstrom_Werte_tmp.items(), key=lambda item: int(item[0]), reverse=True))
                         Notstromreserve_Min = basics.getVarConf('Notstrom','Notstromreserve_Min','eval')
                         # Notstromreserve_Min kann nicht kleiner 5% sein
                         if Notstromreserve_Min < 5:
