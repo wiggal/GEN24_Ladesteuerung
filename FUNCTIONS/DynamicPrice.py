@@ -15,6 +15,8 @@ class dynamic:
     def makeLastprofil(self, database, Lastgrenze, Daysback='-35'):
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
+        # Daysback muss mindestens 8 Tage sein
+        if Daysback > -8: Daysback = -8
         # Lastprofil von jetzt 35 Tage zurück für jeden Wochentag ermitteln
         sql_anweisung = """
         WITH stundenwerte AS (
@@ -61,7 +63,10 @@ class dynamic:
             CAST(AVG(Verbrauch) AS INTEGER) AS Verbrauch,
             # höheres Gewicht je aktueller die Werte
             */
-			CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGER) AS Verbrauch,
+            CASE
+			    WHEN (CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGERA))  IS NULL THEN 600
+			    ELSE CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGER)
+            END AS Verbrauch,
             strftime('%s', 'now') AS Options
         FROM
             verbrauch
@@ -76,14 +81,17 @@ class dynamic:
         try:
             zeiger.execute(sql_anweisung)
             rows = zeiger.fetchall()
-            #print(rows)
+            dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
+            if(dyn_print_level >= 2):
+                headers = ["Index", "Datenart", "Stunde", "Wochentag", "Verbrauch", "Timestamp"]
+                self.listAStable(headers, rows)
         except:
             print("Die Datei PV_Daten.sqlite fehlt oder ist leer, zum Erzeugen http_SymoGen24Controller2.py aufrufen, Programmende!!")
             exit()
 
         if (len(rows) < 168):
             print("\n>>> Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n>>> Fehlende Werte werden mit 600 Watt aufgefüllt!!\n")
-            # Wenn zu wenige Tage mit 300 Watt auffüllen
+            # Wenn zu wenige Tage mit 600 Watt auffüllen
             timestamp_tmp = str(int(rows[1][5]))
             for Wochentag in range(7):
                 for Stunde in range(24):
@@ -133,10 +141,10 @@ class dynamic:
         return(rows)
 
     def getPrognosen_24H(self, weatherdata):
-        i = 0
+        i = 1
         Prognosen_24H = []
-        while i < 24:
-            # ab aktueller Stunde die nächsten 24 Stunden aufaddieren, da ab 24 Uhr sonst keine Morgenprognose
+        while i < 25:
+            # ab aktueller Stunde die nächsten 24 Stunden, da ab 24 Uhr sonst keine Morgenprognose
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
             try:
                 Prognosen_24H.append((Std_morgen, weatherdata['result']['watts'][Std_morgen]))
@@ -145,15 +153,31 @@ class dynamic:
             i  += 1
         return(Prognosen_24H)
         
-    def getPrice_energycharts(self, BZN, START):
+    def getPrice_energycharts(self, BZN):
         # Aufschläge zum reinen Börsenpreis, return muss immer Bruttoendpreis liefern
         Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
         MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
 
-        END = START + 86500 # 86400 = 24 Stunden
-        url = 'https://api.energy-charts.info/price?bzn={}&start={}&end={}'.format(BZN,START,END)
+
+        # Definiere den heutigen Tag (für 0:00 Uhr) und morgen (für 23:00 Uhr)
+        heute = datetime.now()
+        morgen = heute + timedelta(days=1)
+        
+        # Setze das Datum im richtigen Format für die API
+        start_time = heute.strftime('%Y-%m-%d')
+        end_time = morgen.strftime('%Y-%m-%d')
+
+        # API-Endpunkt und Parameter
+        url = "https://api.energy-charts.info/price"
+        params = {
+            "start": start_time,
+            "end": end_time,
+            "area": BZN,  # Beispiel: DE für Deutschland, anpassen je nach Land
+            "currency": "EUR",  # Die Währung
+        }
+        
         try:
-            apiResponse = requests.get(url, timeout=180)
+            apiResponse = requests.get(url, params=params, timeout=180)
             apiResponse.raise_for_status()
             if apiResponse.status_code != 204:
                 json_data1 = dict(json.loads(apiResponse.text))
@@ -164,14 +188,15 @@ class dynamic:
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
         price = json_data1
-        priecelist = list(zip(price['unix_seconds'], price['price']))
-        priecelist_date = []
-        for row in priecelist:
+        pricelist = list(zip(price['unix_seconds'], price['price']))
+        pricelist_date = []
+        for row in pricelist:
             if row[1] is not None:
                 time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
                 price = round((row[1]/1000 + Nettoaufschlag) * MwSt, 4)
-                priecelist_date.append((time, price))
-        return(priecelist_date)
+                # Zeitunkt, Bruttopreis, Börsenpreis
+                pricelist_date.append((time, price, round(row[1]/1000, 3)))
+        return(pricelist_date)
 
     def listAStable(self, headers, data):
 

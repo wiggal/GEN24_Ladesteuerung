@@ -42,6 +42,8 @@ if __name__ == '__main__':
         if ((TimestampNow) - int(Lastprofil[0][3]) > LastprofilNeuTage * 86400):
             if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als ", LastprofilNeuTage, " Tage!")
             dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
+            # Lastprofil nochmal neu holen
+            Lastprofil = dynamic.getLastprofil()
     else:
         if(dyn_print_level >= 1): print("Erzeuge Lastprofil, erstmalig!!")
         dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
@@ -81,12 +83,18 @@ for key in Prognose_24H:
 
 LAND = basics.getVarConf('dynprice','LAND', 'str')
 # List Date (2024-10-27 23:00:00), Euro/kWh
-priecelist_date = dynamic.getPrice_energycharts(LAND, TimestampNow)
+pricelist_date = dynamic.getPrice_energycharts(LAND)
+
+
+if(dyn_print_level >= 2):
+    headers = ["Zeitpunkt", "Strompreis brutto(€/kWh)", "Börsenstrompreis (€/kWh)"]
+    dynamic.listAStable(headers, pricelist_date)
+    print()
 
 # Zusammenführen der Listen2
 pv_data = []
 for key in data:
-    for key2 in priecelist_date:
+    for key2 in pricelist_date:
         if key[0] == key2[0]:
             pv_data.append([key[0], key[1], key[2], key2[1]])
 

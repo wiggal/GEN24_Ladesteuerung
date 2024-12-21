@@ -2,6 +2,8 @@
 
 Dynamischer Strompreis Weiterentwicklung:  
 
+FIX: Teilweise None als Verbrauch im Lastprofil.
+
 **[0.26.0] – 2024-12-15**  
 
 Dynamischer Strompreis:  
