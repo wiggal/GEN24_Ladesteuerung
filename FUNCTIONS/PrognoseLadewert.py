@@ -375,7 +375,7 @@ class progladewert:
         Schaltverzoegerung_Diff = 2
         if BattStatusProz > 90: Schaltverzoegerung_Diff = 1
         Akkuschonung_Werte_tmp = json.loads(basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str'))
-        Akkuschonung_Werte = dict(sorted(Akkuschonung_Werte_tmp.items(), key=lambda item: int(item[0]), reverse=True))
+        Akkuschonung_Werte = dict(sorted(Akkuschonung_Werte_tmp.items(), key=lambda item: int(item[0])))
         DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
         DEBUG_Ausgabe += "\nDEBUG Akkuschonung_Werte: " + str(Akkuschonung_Werte) + "\n"
         for Akkuschon_Proz in Akkuschonung_Werte: 

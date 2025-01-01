@@ -214,3 +214,75 @@ class dynamic:
 
         return()
 
+    def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh):
+        # Ladestand für alle Zeiten neu durchrechnen und Kosten berechnen
+        loadcount = 0
+        for Akkustatus in pv_data_charge:
+            min_net_power = Akkustatus[1] - Akkustatus[2]
+            if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
+            if Akkustatus[5] < 0:
+                akku_soc += int(Akkustatus[5] * -1)
+                if min_net_power < 0:
+                    netz_in_Akku = int((Akkustatus[5] * -1)/1000)
+                    netz_verbrauch = (min_net_power * -1)/1000
+                else:
+                    netz_in_Akku = int((Akkustatus[5] * -1 - min_net_power)/1000)
+                    netz_verbrauch = 0
+            else:
+                akku_soc += min_net_power
+            if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
+            Akkustatus[4] = akku_soc
+            if akku_soc < minimum_batterylevel:
+                loadcount += 1
+                #print("loadcount: ", loadcount)  #entWIGGlung
+            #print(Akkustatus)  #entWIGGlung
+
+        return(pv_data_charge, loadcount)
+
+    def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, profit_price, charge_rate_kW, battery_capacity_Wh, laden):
+        dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
+        if(dyn_print_level >= 2): print("\n==>>> Funktion get_charge_stop")  #entWIGGlung
+        # Ladewert ist -1 wenn kein Profilabler Preis
+        ladewert = charge_rate_kW * -1
+        if laden == 0: ladewert = -1
+        Zeilen = 24
+        while Zeilen > 0:
+            # größten Preis wenn Spalte 5 = -1
+            max_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[5] == 0.1]
+            if(dyn_print_level >= 2): print("\nmax: ", max_gefilterte_zeilen)  #entWIGGlung
+            if max_gefilterte_zeilen:
+                zeile_max_price = max(max_gefilterte_zeilen, key=lambda x: x[3])
+                if(dyn_print_level >= 2): print("\nzeile_max_price: ", zeile_max_price)  #entWIGGlung
+    
+            # Wenn minimum_batterylevel unterschritten Ladepunkt suchen und setzen
+            if zeile_max_price[4] - zeile_max_price[2] + zeile_max_price[1] < minimum_batterylevel:
+                kleiner_profit_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[3] < profit_price and zeile[5] == 0.1]
+                if kleiner_profit_gefilterte_zeilen:
+                    zeile_min_price = min(kleiner_profit_gefilterte_zeilen, key=lambda x: x[3])
+                    zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_min_price[0] in row))
+                    pv_data_charge[zeilen_index][5] = ladewert
+                    if(dyn_print_level >= 2): print("Ladepunkt: ", pv_data_charge[zeilen_index])  #entWIGGlung
+                    if(dyn_print_level >= 2): print("\nkleiner_profit: ", kleiner_profit_gefilterte_zeilen)  #entWIGGlung
+                    Ladewert = 0
+                else:
+                    if(dyn_print_level >= 2): print("\nKeine kleiner_profit_gefilterte_zeilen")  #entWIGGlung
+                    Ladewert = -1
+
+            else:
+                Ladewert = 0
+
+
+            # Finde Index der Zeile mit dem gesuchten Wert
+            zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
+            if(dyn_print_level >= 2): print("\nindex", zeilen_index)  #entWIGGlung
+            # MaxPrice = Entladung (0)
+            pv_data_charge[zeilen_index][5] = Ladewert
+            # Akkustände neu berechnen
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh)
+
+            Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == 0.1)
+            if(dyn_print_level >= 2): print("Zeilen: ", Zeilen)  #entWIGGlung
+
+
+
+        return(pv_data_charge)

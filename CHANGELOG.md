@@ -1,6 +1,7 @@
-**[0.26.1] – 202X-XX-XX**  
+**[0.26.1] – 2025-01-XX**  
 
 Dynamischer Strompreis Weiterentwicklung:  
+- Laden und Ladestops nach Bedarf mischen in einer Berechnung.
 
 FIX: Teilweise None als Verbrauch im Lastprofil.
 
