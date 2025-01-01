@@ -393,7 +393,6 @@ if __name__ == '__main__':
                         ## Werte zum Überprüfen ausgeben
                         if print_level >= 1:
                             print("## ENTLADESTEUERUNG ##\n")
-                            #print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100), "W")
                             print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']), "%")
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
                             print("Feste Entladegrenze Table: ", FesteEntladegrenze, "W")
@@ -434,10 +433,10 @@ if __name__ == '__main__':
                             if(Neu_BatteryMaxDischarge != BatteryMaxDischarge):
                                 payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
                                 ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                        elif ('entladen' not in Options and Neu_BatteryMaxDischarge != BatteryMaxDischarge):
+                        elif ('entladen' not in Options and (Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja")):
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
-                        if (payload_text != '' or EntladeEintragloeschen == "ja"):
+                        if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
                             response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}') 
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:

@@ -4,6 +4,7 @@ Dynamischer Strompreis Weiterentwicklung:
 - Laden und Ladestops nach Bedarf mischen in einer Berechnung.
 
 FIX: Teilweise None als Verbrauch im Lastprofil.
+FIX: Bei "Entladeeintrag löschen!" wurde die Batteriesteuerung auch gelöscht, wenn die optionen `Ladesteuerung` und `Ent- und Zwangsladesteuerung` nicht gesetzt waren.
 
 **[0.26.0] – 2024-12-15**  
 
