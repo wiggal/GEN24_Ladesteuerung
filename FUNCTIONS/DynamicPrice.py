@@ -249,23 +249,25 @@ class dynamic:
         while Zeilen > 0:
             # größten Preis wenn Spalte 5 = -1
             max_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[5] == 0.1]
-            if(dyn_print_level >= 2): print("\nmax: ", max_gefilterte_zeilen)  #entWIGGlung
+            if(dyn_print_level >= 2): print("\n>> max: ", max_gefilterte_zeilen)  #entWIGGlung
             if max_gefilterte_zeilen:
                 zeile_max_price = max(max_gefilterte_zeilen, key=lambda x: x[3])
-                if(dyn_print_level >= 2): print("\nzeile_max_price: ", zeile_max_price)  #entWIGGlung
+                if(dyn_print_level >= 2): print("\n>> zeile_max_price: ", zeile_max_price)  #entWIGGlung
     
             # Wenn minimum_batterylevel unterschritten Ladepunkt suchen und setzen
             if zeile_max_price[4] - zeile_max_price[2] + zeile_max_price[1] < minimum_batterylevel:
-                kleiner_profit_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[3] < profit_price and zeile[5] == 0.1]
+                max_akkustand = battery_capacity_Wh - charge_rate_kW * 0.25
+                kleiner_profit_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[4] < max_akkustand and zeile[3] < profit_price and zeile[5] == 0.1]
                 if kleiner_profit_gefilterte_zeilen:
                     zeile_min_price = min(kleiner_profit_gefilterte_zeilen, key=lambda x: x[3])
+                    if(dyn_print_level >= 2): print(">> Akkustand: ", zeile_min_price)  #entWIGGlung
                     zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_min_price[0] in row))
                     pv_data_charge[zeilen_index][5] = ladewert
-                    if(dyn_print_level >= 2): print("Ladepunkt: ", pv_data_charge[zeilen_index])  #entWIGGlung
-                    if(dyn_print_level >= 2): print("\nkleiner_profit: ", kleiner_profit_gefilterte_zeilen)  #entWIGGlung
+                    if(dyn_print_level >= 2): print(">> Ladepunkt: ", pv_data_charge[zeilen_index])  #entWIGGlung
+                    if(dyn_print_level >= 2): print("\n>> kleiner_profit: ", kleiner_profit_gefilterte_zeilen)  #entWIGGlung
                     Ladewert = 0
                 else:
-                    if(dyn_print_level >= 2): print("\nKeine kleiner_profit_gefilterte_zeilen")  #entWIGGlung
+                    if(dyn_print_level >= 2): print("\n>> Keine kleiner_profit_gefilterte_zeilen")  #entWIGGlung
                     Ladewert = -1
 
             else:
@@ -274,14 +276,11 @@ class dynamic:
 
             # Finde Index der Zeile mit dem gesuchten Wert
             zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
-            if(dyn_print_level >= 2): print("\nindex", zeilen_index)  #entWIGGlung
-            # MaxPrice = Entladung (0)
             pv_data_charge[zeilen_index][5] = Ladewert
             # Akkustände neu berechnen
             self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh)
 
             Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == 0.1)
-            if(dyn_print_level >= 2): print("Zeilen: ", Zeilen)  #entWIGGlung
 
 
 
