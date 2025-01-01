@@ -153,7 +153,13 @@ max_price = max(zeile[3] for zeile in pv_data_charge)
 
   #entWIGGlung !!!ACHTUNG max_price < profit_price dann nur STOPPEN
 # WENN keine Ladezeitpunkte ODER Max.Preis < Rentabler_Wert kein Ladeeingriff
+#entWIGGlung
+if(dyn_print_level >= 1):
+    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
+    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
+    dynamic.listAStable(headers, pv_data_charge)
 #current_charge_Wh = 2000   #entWIGGlung
+
 if loadcount == 0:
     print("\nEs sind KEINE Ladezeiten bzw. Entladepausen nötig!!")
 
@@ -172,15 +178,15 @@ else:
         # Funktion get_charge_stop mit  laden ja (1)
         pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, profit_price, charge_rate_kW, battery_capacity_Wh, 1)
 
-    #entWIGGlung
-    if(dyn_print_level >= 1):
-        print("\n>>>>>>>> Ladezeitpunkte")
-        headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
-        dynamic.listAStable(headers, pv_data_charge)
-    if(dyn_print_level >= 2):
-        print("\nmin_price: ", min_price)  #entWIGGlung
-        print("profit_price: ", profit_price)  #entWIGGlung
-        print("max_price: ", max_price)  #entWIGGlung
+#entWIGGlung
+if(dyn_print_level >= 1):
+    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
+    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
+    dynamic.listAStable(headers, pv_data_charge)
+if(dyn_print_level >= 2):
+    print("\nmin_price: ", min_price)  #entWIGGlung
+    print("profit_price: ", profit_price)  #entWIGGlung
+    print("max_price: ", max_price)  #entWIGGlung
 
 
 # Aktuelles Datum und Uhrzeit
