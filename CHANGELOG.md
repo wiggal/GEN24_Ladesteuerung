@@ -2,6 +2,7 @@
 
 Dynamischer Strompreis Weiterentwicklung:  
 - Laden und Ladestops nach Bedarf mischen in einer Berechnung.
+- **Parameter aus CONFIG/dynprice.ini entfernt** `minimum_price_difference`.    
 
 FIX: Teilweise None als Verbrauch im Lastprofil.
 FIX: Bei "Entladeeintrag löschen!" wurde die Batteriesteuerung auch gelöscht, wenn die optionen `Ladesteuerung` und `Ent- und Zwangsladesteuerung` nicht gesetzt waren.
