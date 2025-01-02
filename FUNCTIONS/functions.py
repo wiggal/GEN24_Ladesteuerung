@@ -179,7 +179,6 @@ class basics:
         import pytz
         from sklearn.model_selection import train_test_split
         from sklearn.ensemble import RandomForestRegressor
-        from sklearn.metrics import mean_squared_error
         database = self.getVarConf('Logging','Logging_file','str')
         print_level = self.getVarConf('env','print_level','eval')
         MaxProGrenz_Dayback = self.getVarConf('env','MaxProGrenz_Dayback','eval')
