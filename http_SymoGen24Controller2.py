@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta
-import pytz
+from datetime import datetime
 import json
-import requests
 from sys import argv
+import requests
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
 import FUNCTIONS.functions

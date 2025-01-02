@@ -1,9 +1,6 @@
 from datetime import datetime
 import requests
 import json
-import os.path
-import pytz
-from pathlib import Path
 import FUNCTIONS.functions
 
 def loadLatestWeatherData():
