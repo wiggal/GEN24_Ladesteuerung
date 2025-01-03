@@ -155,7 +155,7 @@ if(dyn_print_level >= 2):
     print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
     headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
     dynamic.listAStable(headers, pv_data_charge)
-    print("\n>> Ladezeitpunkte: ",loadcount)  #entWIGGlung
+    print("\n>> Ladezeitpunkte: ",loadcount)
 
 if(dyn_print_level >= 1):
     print("\nmin_price:    ", min_price) 
@@ -166,7 +166,7 @@ if loadcount == 0:
     print("\nEs sind KEINE Ladezeiten bzw. Entladepausen nötig!!")
 
 else:
-    # In Spalte Ladewatt -0.1 einragen
+    # In Spalte Ladewatt 0.1 einragen
     pv_data_charge = [zeile[:5] + [0.1]  for zeile in pv_data_charge]
     # Akkustände neu berechnen
     dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
