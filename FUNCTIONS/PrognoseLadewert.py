@@ -358,10 +358,10 @@ class progladewert:
                 DEBUG_Eig_opt += "\nDEBUG ## >>> EigenverbOpt_steuern == 2, keine Einspeisung während des Tages"
 
     
-        # Wenn  Eigen_Opt_auto = 0, Eigenverbrauchs-Optimierung = Automatisch = 0
+        # Wenn  Eigen_Opt_auto = 0, Eigenverbrauchs-Optimierung = Automatisch = 0, Manuell = 1
         if Eigen_Opt_auto == 0: Eigen_Opt_Std = 0
     
-        # Einspeisung muss immer Minus sein!!
+        # Einspeisung ist immer Minus, Bezug ist immer Plus!!
         Eigen_Opt_Std_neu = abs(Eigen_Opt_Std_neu) * -1
     
         return PrognoseMorgen, Eigen_Opt_Std, int(Eigen_Opt_Std_neu), Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt, Backup_Reserve

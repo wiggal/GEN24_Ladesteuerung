@@ -80,10 +80,10 @@ class sqlall:
             zeiger.execute(sql_anweisung)
 
         rows = zeiger.fetchall()
-        data = dict()
+        data = {}
         columns = [col[0] for col in zeiger.description]
         for row in rows:
-            data[row[0]] = dict()
+            data[row[0]] = {}
             data[row[0]][columns[1]] = row[1]
             data[row[0]][columns[2]] = row[2]
             data[row[0]][columns[3]] = row[3]

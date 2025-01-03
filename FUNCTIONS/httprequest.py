@@ -1,7 +1,6 @@
-import requests
 import hashlib
-import uuid
 import json
+import requests
     
 class request:
     def __init__(self):

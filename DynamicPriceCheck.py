@@ -82,15 +82,20 @@ for key in Prognose_24H:
 # Aktuelle Strompreise holen
 
 LAND = basics.getVarConf('dynprice','LAND', 'str')
-# List Date (2024-10-27 23:00:00), Euro/kWh
-priecelist_date = dynamic.getPrice_energycharts(LAND, TimestampNow)
+pricelist_date = dynamic.getPrice_energycharts(LAND)
+
+
+if(dyn_print_level >= 2):
+    headers = ["Zeitpunkt", "Strompreis brutto(€/kWh)", "Börsenstrompreis (€/kWh)"]
+    dynamic.listAStable(headers, pricelist_date)
+    print()
 
 # Zusammenführen der Listen2
 pv_data = []
 for key in data:
-    for key2 in priecelist_date:
+    for key2 in pricelist_date:
         if key[0] == key2[0]:
-            pv_data.append((key[0], key[1], key[2], key2[1]))
+            pv_data.append([key[0], key[1], key[2], key2[1]])
 
 # Werte als Tabelle ausgeben
 if(dyn_print_level >= 1):
@@ -113,12 +118,12 @@ else:
 
 minimum_batterylevel_Prozent = basics.getVarConf('dynprice','minimum_batterylevel_Prozent', 'eval')      # Mindest-Ladestand in Prozent 
 minimum_batterylevel_kWh =  battery_capacity_Wh / 100 * minimum_batterylevel_Prozent     # Mindest-Ladestand in Wh
+Prozent5_batterylevel_kWh =  battery_capacity_Wh / 100 * 5     # 5_Prozent-Ladestand in Wh
 charge_rate_kW =  basics.getVarConf('dynprice','charge_rate_kW', 'eval')        # Ladegeschwindigkeit in kW
-minimum_price_difference = basics.getVarConf('dynprice','minimum_price_difference', 'eval')
 price_difference = max(zeile[3] for zeile in pv_data) - min(zeile[3] for zeile in pv_data)
 
 
-# Werte als Tabelle ausgeben
+# Akkuwerte als Tabelle ausgeben
 if(dyn_print_level >= 1):
     headers = ["Batteriekapazität (Wh)", "Aktueller Ladestand (Wh)", "minimaler Ladestand (Wh)"]
     table_liste = [(str(battery_capacity_Wh), str(current_charge_Wh), str(minimum_batterylevel_kWh))]
@@ -126,222 +131,59 @@ if(dyn_print_level >= 1):
     dynamic.listAStable(headers, table_liste)
     print()
 
-# Listen für Lade- und Entladeentscheidungen
-charging_times = []
-stopping_times = []
-charging_cost = 0
-stopping_cost = 0
-
 if(dyn_print_level >= 2): print("\n*****************  DEBUGGING *****************")
 
-# >>>>> AB HIER  'charging' >>>>>
-pv_data_kleinster_preis = [("2000-01-01 00:00:00", 0, 0, 9999.999, 0)]
-battery_status = current_charge_Wh
-# Iteration durch die Stunden
-if(dyn_print_level >= 2): print("\n>>>>>>>>>> charging >>>>>>>>>>")
-i = 0
-while i < len(pv_data):
-    ladeWatt = charge_rate_kW
-    row = pv_data[i]
-    price = row[3]  # Preis in Euro/Wh
-    battery_status_diff = 0
-    next_price = price
-    if ( i+1 < len(pv_data)): next_price = pv_data[i+1][3]
+# Spalte Akkustand und Ladewatt anhängen
+pv_data_charge = [zeile + [0, 0] for zeile in pv_data]
+# Sind Ladezeitpunkte nötig
+loadcount = dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)[1]
 
-    # Berechnen der Nettostromproduktion
-    # Prognose für PV-Leistung in Wh - Verbrauch in Wh
-    net_power = int(row[1]) - int(row[2])
+# Max.Preis < Rentabler_Wert?
+# Kleinster Preis vor heute oder morgen 18:00 
+datum_1800 = datetime.combine(today.date(), datetime.strptime("18:00", "%H:%M").time())
+# Wenn die aktuelle Zeit nach 18:00 Uhr ist, nimm morgen 18:00 Uhr
+if today > datum_1800:
+    datum_1800 = datum_1800 + timedelta(days=1)
+gefilterte_zeilen = [zeile for zeile in pricelist_date if zeile[0] < str(datum_1800)]
+if gefilterte_zeilen:
+    min_price = min(gefilterte_zeilen, key=lambda x: x[1])[1]
+profit_price = round(min_price * (1+(Akku_Verlust_Prozent/100)) + Gewinnerwartung_kW, 4)
+max_price = max(zeile[3] for zeile in pv_data_charge)
 
-    # PV-Strom in Akku laden wenn unter minimum_batterylevel_kWh und Prognose kleiner Verbrauch
-    if battery_status + net_power < minimum_batterylevel_kWh and net_power < 0:
-        # bisherigen kleisten Wert bisher suchen
-        if(dyn_print_level >= 2): print("Jetzt charging:", row + (battery_status,))
-        kleinster_price = min(zeile[3] for zeile in pv_data_kleinster_preis)
-        # Wenn kleister Wert bisher kleiner aktueller price, Ladung vorverlegen
-        if ( kleinster_price < price):
-            gefundene_zeile = None
-            for zeile in pv_data_kleinster_preis:
-                if zeile[3] == kleinster_price:
-                    net_power = int(zeile[1]) - int(zeile[2])
-                    gefundene_zeile = zeile
-                    break  # Beende die Schleife, wenn der Wert gefunden wurde
-            if(dyn_print_level >= 2): print("Besser charging:", gefundene_zeile)
-            # Bereits abgezogener Produktion - Verbrauch wieder addieren, und aktuelle net_power addieren
-            battery_status_diff = gefundene_zeile[4] - battery_status
-            battery_status += (int(gefundene_zeile[2])-int(gefundene_zeile[1]))
-            # Wenn frühere Zeile gefunden => entfernen,
-            pv_data_kleinster_preis.remove(gefundene_zeile)
-        else:
-            row = row + (battery_status,)
-            gefundene_zeile = row
-            i += 1
+# WENN keine Ladezeitpunkte ODER Max.Preis < Rentabler_Wert kein Ladeeingriff
+if(dyn_print_level >= 2):
+    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
+    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
+    dynamic.listAStable(headers, pv_data_charge)
+    print("\n>> Ladezeitpunkte: ",loadcount)
 
-        #prüfen ob charging = charge_rate_kW, noch in Akku passt #WIGG macht er selber und spart einemal Schreiben
-        #if battery_status + ladeWatt > battery_capacity_Wh:
-        #    ladeWatt = battery_capacity_Wh - battery_status
+if(dyn_print_level >= 1):
+    print("\nmin_price:    ", min_price) 
+    print("profit_price: ", profit_price) 
+    print("max_price:    ", max_price) 
 
-        # Zukunft ANFANG
-        ## Hier in die Zukunft schauen wie viel wirklich geladen werden soll (wann kommt die Sonne?)
-        ii = i-1
-        ladeWatt_ii = 0
-        battery_status_zukunft = battery_status
-        while ii < len(pv_data):
-            row_ii = pv_data[ii]
-            if(dyn_print_level >= 3): print("        row_ii :", ii, row_ii)
-            net_power_ii = int(row_ii[1]) - int(row_ii[2])
-            battery_status_zukunft += net_power_ii
-            if(dyn_print_level >= 3): print("        battery_status_zukunft: ", battery_status_zukunft)
-            if (net_power_ii < 100):
-                ladeWatt_ii += net_power_ii * -1
-                if(dyn_print_level >= 3): print("        row_ii:", row_ii)
-                if(dyn_print_level >= 3): print("        net_power_ii, ladeWatt_ii, ii:", net_power_ii, ladeWatt_ii, ii)
-            if (battery_status_zukunft > minimum_batterylevel_kWh + charge_rate_kW):
-                break
-            ii += 1
-        # Wenn Verbrauch bis Produktionsüberschuss < ladeWatt
-        if ladeWatt > 0 and ladeWatt_ii < ladeWatt: ladeWatt = ladeWatt_ii
-        # Zukunft ENDE
-
-        # charge_rate_kW zu Speicher geben
-        battery_status += ladeWatt
-        # aktuellen Ladewert in gefundene_zeile ersetzen
-        gefundene_zeile = list(gefundene_zeile)
-        gefundene_zeile[4] = battery_status + battery_status_diff
-        gefundene_zeile = tuple(gefundene_zeile)
-
-        cost_tmp = ((net_power * -1 * gefundene_zeile[3]) + (ladeWatt * gefundene_zeile[3] * (1+(Akku_Verlust_Prozent/100))) + (ladeWatt * Gewinnerwartung_kW))/1000
-        if(dyn_print_level >= 2): print(">> Laden(W), Verbrauch(W), Kosten: ", ladeWatt, (net_power*-1), round(cost_tmp, 2),"€")
-        charging_times.append(gefundene_zeile + (ladeWatt * -1,))
-        charging_cost += cost_tmp
-
-    else:
-        # ansonsten speicher weiter mit net_power ent- bzw. laden
-        battery_status += net_power
-        if battery_status > battery_capacity_Wh: battery_status = battery_capacity_Wh
-        # und pv_data_kleinster_preis für Suche kleinster Wert füllen
-        row = row + (battery_status,)
-        if(dyn_print_level >= 3): print("--NICHT charging:", row)
-        # append zu kleiner Preistabellen nur wenn im Akku Speicherplatz und Produktionsplus
-        #if(battery_status < battery_capacity_Wh-ladeWatt):
-        pv_data_kleinster_preis.append(row)
-        i += 1
-
-    battery_status_charging = battery_status
-
-
-# !!!!! AB HIER  'stopping' !!!!!
-ladeWatt = 0
-pv_data_kleinster_preis = [("2000-01-01 00:00:00", 0, 0, 9999.999, 0)]
-battery_status = current_charge_Wh
-# Iteration durch die Stunden
-if(dyn_print_level >= 2): print("\n!!!!!!!!!! stopping !!!!!!!!!!")
-i = 0
-letzter_Entladewert = 0
-while i < len(pv_data):
-    row = pv_data[i]
-    price = row[3]  # Preis in Euro/Wh
-    battery_status_diff = 0
-
-    # Berechnen der Nettostromproduktion
-    # Prognose für PV-Leistung in Wh - Verbrauch in Wh
-    net_power = int(row[1]) - int(row[2])
-
-    # PV-Strom in Akku laden wenn unter minimum_batterylevel_kWh und Prognose kleiner Verbrauch
-    net_power_test = net_power
-    if letzter_Entladewert == -1: net_power_test = net_power * 1.5
-    if battery_status + net_power_test < minimum_batterylevel_kWh and net_power < 0:
-        # bisherigen kleisten Wert bisher suchen
-        if(dyn_print_level >= 2): print("Jetzt stopping:   ", row + (battery_status,))
-        kleinster_price = min(zeile[3] for zeile in pv_data_kleinster_preis)
-        # Wenn kleister Wert bisher kleiner aktueller price, Stopping vorverlegen
-        if ( kleinster_price < price):
-            gefundene_zeile = None
-            for zeile in pv_data_kleinster_preis:
-                if zeile[3] == kleinster_price:
-                    net_power = int(zeile[1]) - int(zeile[2])
-                    gefundene_zeile = zeile
-                    break  # Beende die Schleife, wenn der Wert gefunden wurde
-            if(dyn_print_level >= 2): print("Besser stopping:", gefundene_zeile)
-            # Bereits abgezogener Produktion - Verbrauch wieder addieren, und aktuelle net_power addieren
-            battery_status_diff = gefundene_zeile[4] - battery_status
-            battery_status += (int(gefundene_zeile[2])-int(gefundene_zeile[1]))
-            # Wenn frühere Zeile gefunden => entfernen,
-            pv_data_kleinster_preis.remove(gefundene_zeile)
-        else:
-            row = row + (battery_status,)
-            gefundene_zeile = row
-            i += 1
-
-        # charge_rate_kW zu Speicher geben
-        battery_status += ladeWatt
-        # aktuellen Batteriestatus in gefundene_zeile ersetzen
-        gefundene_zeile = list(gefundene_zeile)
-        gefundene_zeile[4] = battery_status + battery_status_diff
-        gefundene_zeile = tuple(gefundene_zeile)
-
-        letzter_Entladewert = -1
-        stopping_times.append(gefundene_zeile + (letzter_Entladewert,))
-        cost_tmp = ((net_power * -1)/1000 * gefundene_zeile[3])
-        if(dyn_print_level >= 2): print(">> Verbrauch(W), Kosten: ", (ladeWatt - net_power), round(cost_tmp, 2),"€")
-        stopping_cost += cost_tmp
-
-    else:
-        # ansonsten speicher weiter mit net_power ent- bzw. laden
-        battery_status += net_power
-        if battery_status > battery_capacity_Wh: battery_status = battery_capacity_Wh
-        letzter_Entladewert = 0
-        # und pv_data_kleinster_preis für Suche kleinster Wert füllen
-        # Stopping nur sinnvoll, wenn net_power minus 
-        row = row + (battery_status,)
-        if net_power < 0:
-            pv_data_kleinster_preis.append(row)
-        if(dyn_print_level >= 3): print("--NICHT stopping:", row)
-        i += 1
-
-    battery_status_stopping = battery_status
-
-if(dyn_print_level >= 2): print("\n*************** ENDE DEBUGGING ***************\n")
-
-# Durchschnittsstrompreis um den unterschiedlichen Ladezustand auszugleichen
-# Nur wenn Liste charging_times nicht leer ist
-Ausgabe = '"Wiederherstellung ENTLadeStrg"'
-if charging_times:
-    if(dyn_print_level >= 1):
-        # Werte als Tabelle ausgeben
-        print(">>>>>>>>>> Batterie laden >>>>>>>>>>")
-        charging_times.sort(key=lambda x: x[0])
-        headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
-        dynamic.listAStable(headers, charging_times)
-        print("\nVergleichskosten Akkuladung: ", round(charging_cost, 2), "€ (Inklusive Ladeverluste, Gewinnerwartung)")
-        print()
-    
-        print("!!!!!!!!!! Entladung stoppen !!!!!!!!!!")
-        headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
-        stopping_times.sort(key=lambda x: x[0])
-        dynamic.listAStable(headers, stopping_times)
-        print("\nVergleichskosten Ladungstop: ", round(stopping_cost, 2), "€")
-
-    ### Daten zum schreiben in CONFIG/Prog_Steuerung.sqlite vorbereiten
-
-    # Ladewert ermitteln charging OR stopping, NUR wenn minimum_price_difference überschritten.
-    if (price_difference > minimum_price_difference):
-        if (charging_cost > stopping_cost):
-            Ladewert = -1 # Mit 1Watt zwangsladen = Lade und Entladenstopp
-            LadeProfil = stopping_times
-            Ausgabe = '"Ladung stoppen"'
-        else:
-            Ladewert = charge_rate_kW * -1 # Minuswert um aus dem Netz zu laden
-            LadeProfil = charging_times
-            Ausgabe = '"Speicher Laden"'
-        if(dyn_print_level >= 1):
-            print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
-    else:
-        if(dyn_print_level >= 1):
-            print("\nMindestpreisdifferenz >>> Preisdifferenz = ", minimum_price_difference, ">>>", round(price_difference, 3))
-            print("Lade-/Stopzeiten werden nicht geschrieben, da Preisdiffernz zu klein:")
+if loadcount == 0:
+    print("\nEs sind KEINE Ladezeiten bzw. Entladepausen nötig!!")
 
 else:
-    print("Es sind keine Ladezeiten bzw. Entladepausen nötig!!\n")
+    # In Spalte Ladewatt 0.1 einragen
+    pv_data_charge = [zeile[:5] + [0.1]  for zeile in pv_data_charge]
+    # Akkustände neu berechnen
+    dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+    if max_price < profit_price:
+        print("\nEs sind nur Entladepausen nötig, da Maximalpreis kleiner Profitpreis!!")
+        # Funktion get_charge_stop mit  laden nein (0) = nur stoppen
+        pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, profit_price, charge_rate_kW, battery_capacity_Wh, 0)
+
+    else:
+        print("\nEs sind Ladezeiten UND Entladepausen nötig!!")
+        # Funktion get_charge_stop mit  laden ja (1)
+        pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, profit_price, charge_rate_kW, battery_capacity_Wh, 1)
+
+if(dyn_print_level >= 1):
+    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
+    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
+    dynamic.listAStable(headers, pv_data_charge)
 
 # Aktuelles Datum und Uhrzeit
 jetzt = datetime.now()
@@ -374,14 +216,13 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
         Res_Feld2 = 0
         Options = ''
 
-    if 'LadeProfil' in locals():
-        for Stundenliste in LadeProfil:
-            if SuchStunde in Stundenliste:
-                if Res_Feld1 + Res_Feld2 > 0:
-                    Options = str(Res_Feld1)+","+str(Res_Feld2)
-                Res_Feld1 = 0
-                Res_Feld2 = Stundenliste[5]
-                break
+    for Stundenliste in pv_data_charge:
+        if SuchStunde in Stundenliste:
+            if Res_Feld1 + Res_Feld2 > 0:
+                Options = str(Res_Feld1)+","+str(Res_Feld2)
+            Res_Feld1 = 0
+            Res_Feld2 = Stundenliste[5]
+            break
     # Wenn keine DynamicPriceCheck-Eintrag evtl gemerkte Einträge wiederherstellen
     if Options != '' and Res_Feld2 >= 0:
         Res_Feld = Options.split(',')
@@ -416,10 +257,11 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
                 writer.writerow(csvheader)
                 writer.writerow(csvzeile)
                 file.close()
+    # DEBUG CSV-Ausgabe
 
 if(dyn_print_level >= 1):
     # Zu schreibenen SteuerCode ausgeben
-    print("\nFolgende Steuercodes für das günstigere", Ausgabe, "wurden ermittelt:")
+    print("\nFolgende Steuercodes wurden ermittelt:")
     headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Options"]
     dynamic.listAStable(headers, SteuerCode)
 
@@ -431,12 +273,12 @@ if( Parameter == 'schreiben'):
     SteuerCode.sort()
     DBCode.sort()
     if SteuerCode == DBCode:
-        if(dyn_print_level >= 1): print("\nSteuercodes", Ausgabe, "wurden NICHT geschrieben, da keine Veränderung!")
+        if(dyn_print_level >= 1): print("\nSteuercodes wurden NICHT geschrieben, da keine Veränderung!")
     else:
         dynamic.saveProg_Steuerung(SteuerCode)
-        if(dyn_print_level >= 1): print("\nSteuercodes", Ausgabe, "wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
+        if(dyn_print_level >= 1): print("\nSteuercodes wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
 else:
-    if(dyn_print_level >= 1): print("\nSteuercodes", Ausgabe, "wurden NICHT geschrieben, Parameter schreiben fehlt")
+    if(dyn_print_level >= 1): print("\nSteuercodes wurden NICHT geschrieben, Parameter schreiben fehlt")
 
 if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 

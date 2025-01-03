@@ -1,9 +1,6 @@
 import requests
 import json
-import os.path
-import pytz
 import time
-from pathlib import Path
 from datetime import datetime, timedelta
 import FUNCTIONS.functions
 

@@ -1,7 +1,6 @@
 import FUNCTIONS.functions
 import requests
 import json
-import sqlite3
         
 basics = FUNCTIONS.functions.basics()
 sqlall = FUNCTIONS.SQLall.sqlall()
