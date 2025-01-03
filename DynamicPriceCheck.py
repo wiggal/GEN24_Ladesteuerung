@@ -155,6 +155,7 @@ if(dyn_print_level >= 2):
     print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
     headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
     dynamic.listAStable(headers, pv_data_charge)
+    print("\n>> Ladezeitpunkte: ",loadcount)  #entWIGGlung
 
 if(dyn_print_level >= 1):
     print("\nmin_price:    ", min_price) 
