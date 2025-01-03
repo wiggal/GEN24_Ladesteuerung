@@ -216,24 +216,23 @@ class dynamic:
         return()
 
     def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh):
-        # Ladestand für alle Zeiten neu durchrechnen und Kosten berechnen
+        # Ladestand für alle Zeiten neu berechnen
         loadcount = 0
+        akku_soc_loadcount = akku_soc
         for Akkustatus in pv_data_charge:
             min_net_power = Akkustatus[1] - Akkustatus[2]
             if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
             if Akkustatus[5] < 0:
-                akku_soc += int(Akkustatus[5] * -1)
-                if min_net_power < 0:
-                    netz_in_Akku = int((Akkustatus[5] * -1)/1000)
-                    netz_verbrauch = (min_net_power * -1)/1000
+                if int(Akkustatus[5] * -1) < min_net_power:
+                    akku_soc += min_net_power
                 else:
-                    netz_in_Akku = int((Akkustatus[5] * -1 - min_net_power)/1000)
-                    netz_verbrauch = 0
+                    akku_soc += int(Akkustatus[5] * -1)
             else:
                 akku_soc += min_net_power
             if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
             Akkustatus[4] = akku_soc
-            if akku_soc < minimum_batterylevel:
+            # Ladezeitpunkte berechnen, bereits Laderwatt addieren.
+            if akku_soc + loadcount * charge_rate_kW < minimum_batterylevel:
                 loadcount += 1
 
         return(pv_data_charge, loadcount)
@@ -246,7 +245,7 @@ class dynamic:
         if laden == 0: ladewert = -1
         Zeilen = 24
         while Zeilen > 0:
-            # größten Preis wenn Spalte 5 = -1
+            # größten Preis wenn Spalte 5 noch 0.1 ist, also noch nicht behandelt
             max_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[5] == 0.1]
             if(dyn_print_level >= 2): print(">> \n>> max: ", max_gefilterte_zeilen) 
             if max_gefilterte_zeilen:
@@ -259,7 +258,6 @@ class dynamic:
                 kleiner_profit_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[4] < max_akkustand and zeile[3] < profit_price and zeile[5] == 0.1]
                 if kleiner_profit_gefilterte_zeilen:
                     zeile_min_price = min(kleiner_profit_gefilterte_zeilen, key=lambda x: x[3])
-                    if(dyn_print_level >= 2): print(">> \n>> Akkustand: ", zeile_min_price) 
                     zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_min_price[0] in row))
                     pv_data_charge[zeilen_index][5] = ladewert
                     if(dyn_print_level >= 2): print(">> \n>> Ladepunkt: ", pv_data_charge[zeilen_index]) 
