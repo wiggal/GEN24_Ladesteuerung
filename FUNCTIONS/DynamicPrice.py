@@ -199,19 +199,19 @@ class dynamic:
                 pricelist_date.append((time, price, round(row[1]/1000, 3)))
         return(pricelist_date)
 
-    def listAStable(self, headers, data):
+    def listAStable(self, headers, data, Vorspann='' ):
 
         # Maximale Breite für die Spalten berechnen
         col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *data)]
         
         # Header ausgeben
         header_row = " | ".join(f"{headers[i]:<{col_widths[i]}}" for i in range(len(headers)))
-        print(header_row)
-        print("-" * len(header_row))
+        print(Vorspann,header_row)
+        print(Vorspann,"-" * len(header_row))
 
         # Daten ausgeben
         for row in data:
-            print(" | ".join(f"{str(row[i]):<{col_widths[i]}}" for i in range(len(row))))
+            print(Vorspann," | ".join(f"{str(row[i]):<{col_widths[i]}}" for i in range(len(row))))
 
         return()
 
@@ -244,8 +244,9 @@ class dynamic:
         if laden == 0: ladewert = -1
         Zeilen = 24
         while Zeilen > 0:
-            #headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]  #entWIGGlung
-            #self.listAStable(headers, pv_data_charge)  #entWIGGlung
+            if(dyn_print_level >= 3):
+                headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]  #entWIGGlung
+                self.listAStable(headers, pv_data_charge, '>>')  #entWIGGlung
             # größten Preis wenn Spalte 5 noch 0.1 ist, also noch nicht behandelt
             max_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[5] == 0.1]
             if(dyn_print_level >= 3): print(">> \n>> max: ", max_gefilterte_zeilen) 
