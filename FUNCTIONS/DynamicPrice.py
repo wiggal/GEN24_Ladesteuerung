@@ -266,7 +266,10 @@ class dynamic:
                     pv_data_charge[zeilen_index][5] = ladewert
                     if(dyn_print_level >= 3): print(">> \n>> Ladepunkt: ", pv_data_charge[zeilen_index]) 
                     if(dyn_print_level >= 3): print(">> \n>> kleiner_profit: ", kleiner_profit_gefilterte_zeilen) 
-                    Ladewert = 0
+                    if laden == 1:
+                        Ladewert = 0
+                    else:
+                        Ladewert = -1
                 else:
                     if(dyn_print_level >= 3): print(">> \n>> Keine kleiner_profit_gefilterte_zeilen") 
                     Ladewert = -1
