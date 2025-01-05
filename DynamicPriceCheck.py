@@ -118,7 +118,6 @@ else:
     battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
     current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
 
-#current_charge_Wh = 9000   #entWIGGlung
 # Mindest-Ladestand in Prozent vom GEN24 lesen
 host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
 user = basics.getVarConf('gen24','user', 'str')
