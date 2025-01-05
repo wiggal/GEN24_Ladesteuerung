@@ -67,7 +67,8 @@ class request:
         # wenn HYB_EM_MODE = 0, Eigenverbrauchs-Optimierung = Automatisch
         HYB_EM_MODE = json.loads(response.text)['HYB_EM_MODE']
         HYB_BACKUP_RESERVED = json.loads(response.text)['HYB_BACKUP_RESERVED']
-        return HYB_EM_POWER, HYB_EM_MODE, HYB_BACKUP_RESERVED
+        BAT_M0_SOC_MIN = json.loads(response.text)['BAT_M0_SOC_MIN']
+        return HYB_EM_POWER, HYB_EM_MODE, HYB_BACKUP_RESERVED, BAT_M0_SOC_MIN
     
     def send_request(self, path, method='GET',payload="", params=None, headers={}, auth=False):
         global DEBUG_Ausgabe_fun_http
