@@ -267,23 +267,28 @@ class dynamic:
                     profit_price = round(zeile_min_price[3] * (1+(Akku_Verlust_Prozent/100)) + Gewinnerwartung_kW, 4)
                     zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_min_price[0] in row))
                     if(zeile_max_price[3] > profit_price):
+
+                        # Hier noch Ladung auf max_batt_dyn_ladung des Akku begrenzen????  #entWIGGlung
+                        max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
+                        max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
+                        if(dyn_print_level >= 3): print(">> max_batt_dyn_ladung_W: ", max_batt_dyn_ladung_W)  #entWIGGlung
+                        max_ladewert_grenze = int(pv_data_charge[zeilen_index][4] + pv_data_charge[zeilen_index][2] - pv_data_charge[zeilen_index][1] - max_batt_dyn_ladung_W)  #entWIGGlung
+                        if(dyn_print_level >= 3): print(">> max_ladewert_grenze: ", pv_data_charge[zeilen_index][4], max_ladewert_grenze)  #entWIGGlung
+                        if max_ladewert_grenze > -1: max_ladewert = -1
+                        if max_ladewert_grenze > max_ladewert: max_ladewert = max_ladewert_grenze  #entWIGGlung
+
                         pv_data_charge[zeilen_index][5] = max_ladewert
                         if(dyn_print_level >= 3): print(">> \n>> Ladepunkt wenn", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index]) 
-                        Ladewert = 0
                     else:
                         if(dyn_print_level >= 3): print(">> \n>> Kein profitabler Preis", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index]) 
                         if  pv_data_charge[zeilen_index][4] > minimum_batterylevel:
                             pv_data_charge[zeilen_index][5] = -1
-                        Ladewert = 0
                 else:
                     if(dyn_print_level >= 3): print(">> \n>> Keine kleiner_gefilterte_zeilen") 
-                    Ladewert = 0
-            else:
-                Ladewert = 0
 
             # Finde Index der Zeile mit dem gesuchten Wert
             zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
-            pv_data_charge[zeilen_index][5] = Ladewert
+            pv_data_charge[zeilen_index][5] = 0
             # Akkustände neu berechnen
             self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh)
 
