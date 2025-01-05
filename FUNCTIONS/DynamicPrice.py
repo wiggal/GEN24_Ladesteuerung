@@ -143,7 +143,7 @@ class dynamic:
         i = 1
         Prognosen_24H = []
         Prognosestunden = 25
-        Prognosestunden = 19  #entWIGGlung
+        #Prognosestunden = 19  #entWIGGlung
         while i < Prognosestunden:
             # ab aktueller Stunde die nächsten 24 Stunden, da ab 24 Uhr sonst keine Morgenprognose
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
@@ -230,6 +230,8 @@ class dynamic:
             else:
                 akku_soc += min_net_power
             if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
+            # Akustand muss minimal unter minimum_batterylevel sein
+            if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
             Akkustatus[4] = akku_soc
             # Ladezeitpunkte berechnen, bereits Laderwatt addieren.
             if akku_soc + loadcount * charge_rate_kW < minimum_batterylevel:
@@ -237,16 +239,17 @@ class dynamic:
 
         return(pv_data_charge, loadcount)
 
-    def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, profit_price, charge_rate_kW, battery_capacity_Wh, laden):
+    def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh):
         dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
+        Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
+        Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
         # Ladewert ist -1 wenn kein Profilabler Preis
-        ladewert = charge_rate_kW * -1
-        if laden == 0: ladewert = -1
+        max_ladewert = charge_rate_kW * -1
         Zeilen = 24
         while Zeilen > 0:
             if(dyn_print_level >= 3):
-                headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]  #entWIGGlung
-                self.listAStable(headers, pv_data_charge, '>>')  #entWIGGlung
+                headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
+                self.listAStable(headers, pv_data_charge, '>>')
             # größten Preis wenn Spalte 5 noch 0.1 ist, also noch nicht behandelt
             max_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[5] == 0.1]
             if(dyn_print_level >= 3): print(">> \n>> max: ", max_gefilterte_zeilen) 
@@ -255,28 +258,28 @@ class dynamic:
                 if(dyn_print_level >= 3): print(">> \n>> zeile_max_price: ", zeile_max_price) 
     
             # Wenn minimum_batterylevel unterschritten Ladepunkt suchen und setzen
-            #if zeile_max_price[4] - zeile_max_price[2] + zeile_max_price[1] < minimum_batterylevel:
-            #entWIGGlung Abzug ist bereits erledigt???!!!
             if zeile_max_price[4] < minimum_batterylevel:
                 max_akkustand = battery_capacity_Wh - charge_rate_kW * 0.25
-                kleiner_profit_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[4] < max_akkustand and zeile[3] < profit_price and zeile[5] == 0.1]
-                if kleiner_profit_gefilterte_zeilen:
-                    zeile_min_price = min(kleiner_profit_gefilterte_zeilen, key=lambda x: x[3])
+                kleiner_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[4] < max_akkustand and zeile[5] == 0.1]
+                if kleiner_gefilterte_zeilen:
+                    zeile_min_price = min(kleiner_gefilterte_zeilen, key=lambda x: x[3])
+                    # Laden nur wenn profitabel
+                    profit_price = round(zeile_min_price[3] * (1+(Akku_Verlust_Prozent/100)) + Gewinnerwartung_kW, 4)
                     zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_min_price[0] in row))
-                    pv_data_charge[zeilen_index][5] = ladewert
-                    if(dyn_print_level >= 3): print(">> \n>> Ladepunkt: ", pv_data_charge[zeilen_index]) 
-                    if(dyn_print_level >= 3): print(">> \n>> kleiner_profit: ", kleiner_profit_gefilterte_zeilen) 
-                    if laden == 1:
+                    if(zeile_max_price[3] > profit_price):
+                        pv_data_charge[zeilen_index][5] = max_ladewert
+                        if(dyn_print_level >= 3): print(">> \n>> Ladepunkt wenn", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index]) 
                         Ladewert = 0
                     else:
-                        Ladewert = -1
+                        if(dyn_print_level >= 3): print(">> \n>> Kein profitabler Preis", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index]) 
+                        if  pv_data_charge[zeilen_index][4] > minimum_batterylevel:
+                            pv_data_charge[zeilen_index][5] = -1
+                        Ladewert = 0
                 else:
-                    if(dyn_print_level >= 3): print(">> \n>> Keine kleiner_profit_gefilterte_zeilen") 
-                    Ladewert = -1
-
+                    if(dyn_print_level >= 3): print(">> \n>> Keine kleiner_gefilterte_zeilen") 
+                    Ladewert = 0
             else:
                 Ladewert = 0
-
 
             # Finde Index der Zeile mit dem gesuchten Wert
             zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
@@ -285,7 +288,5 @@ class dynamic:
             self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh)
 
             Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == 0.1)
-
-
 
         return(pv_data_charge)

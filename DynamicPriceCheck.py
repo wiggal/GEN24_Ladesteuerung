@@ -11,6 +11,7 @@ import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.GEN24_API
+import FUNCTIONS.httprequest
 
 
 if __name__ == '__main__':
@@ -18,6 +19,7 @@ if __name__ == '__main__':
     config = basics.loadConfig(['default', 'dynprice'])
     sqlall = FUNCTIONS.SQLall.sqlall()
     dynamic = FUNCTIONS.DynamicPrice.dynamic()
+    request = FUNCTIONS.httprequest.request()
     now = datetime.now()
     format = "%Y-%m-%d %H:%M:%S"
 
@@ -116,12 +118,21 @@ else:
     battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
     current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
 
-minimum_batterylevel_Prozent = basics.getVarConf('dynprice','minimum_batterylevel_Prozent', 'eval')      # Mindest-Ladestand in Prozent 
-minimum_batterylevel_kWh =  battery_capacity_Wh / 100 * minimum_batterylevel_Prozent     # Mindest-Ladestand in Wh
+#current_charge_Wh = 9000   #entWIGGlung
+# Mindest-Ladestand in Prozent vom GEN24 lesen
+host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
+user = basics.getVarConf('gen24','user', 'str')
+password = basics.getVarConf('gen24','password', 'str')
+# Hier Hochkommas am Anfang und am Ende enternen
+password = password[1:-1]
+BAT_M0_SOC_MIN = request.get_batteries(host_ip, user, password)[3]
+HYB_BACKUP_RESERVED = request.get_batteries(host_ip, user, password)[2]
+minimum_batterylevel_Prozent = BAT_M0_SOC_MIN
+if HYB_BACKUP_RESERVED > BAT_M0_SOC_MIN: minimum_batterylevel_Prozent = HYB_BACKUP_RESERVED
+
+minimum_batterylevel_kWh =  int(battery_capacity_Wh / 100 * minimum_batterylevel_Prozent)     # Mindest-Ladestand in Wh
 Prozent5_batterylevel_kWh =  battery_capacity_Wh / 100 * 5     # 5_Prozent-Ladestand in Wh
 charge_rate_kW =  basics.getVarConf('dynprice','charge_rate_kW', 'eval')        # Ladegeschwindigkeit in kW
-price_difference = max(zeile[3] for zeile in pv_data) - min(zeile[3] for zeile in pv_data)
-
 
 # Akkuwerte als Tabelle ausgeben
 if(dyn_print_level >= 1):
@@ -133,52 +144,13 @@ if(dyn_print_level >= 1):
 
 if(dyn_print_level >= 2): print("\n*****************  DEBUGGING *****************")
 
-# Spalte Akkustand und Ladewatt anhängen
-pv_data_charge = [zeile + [0, 0] for zeile in pv_data]
-# Sind Ladezeitpunkte nötig
-loadcount = dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)[1]
+# Spalte Akkustand und Ladewatt 0.1 anhängen
+pv_data_charge = [zeile + [0, 0.1] for zeile in pv_data]
 
-# Max.Preis < Rentabler_Wert?
-# Kleinster Preis vor heute oder morgen 18:00 
-datum_1800 = datetime.combine(today.date(), datetime.strptime("18:00", "%H:%M").time())
-# Wenn die aktuelle Zeit nach 18:00 Uhr ist, nimm morgen 18:00 Uhr
-if today > datum_1800:
-    datum_1800 = datum_1800 + timedelta(days=1)
-gefilterte_zeilen = [zeile for zeile in pricelist_date if zeile[0] < str(datum_1800)]
-if gefilterte_zeilen:
-    min_price = min(gefilterte_zeilen, key=lambda x: x[1])[1]
-profit_price = round(min_price * (1+(Akku_Verlust_Prozent/100)) + Gewinnerwartung_kW, 4)
-max_price = max(zeile[3] for zeile in pv_data_charge)
-
-# WENN keine Ladezeitpunkte ODER Max.Preis < Rentabler_Wert kein Ladeeingriff
-if(dyn_print_level >= 2):
-    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
-    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
-    dynamic.listAStable(headers, pv_data_charge)
-    print("\n>> Vermutliche Anzahl Zwangsladezeitpunkte: ",loadcount)
-
-if(dyn_print_level >= 1):
-    print("\nmin_price:    ", min_price) 
-    print("profit_price: ", profit_price) 
-    print("max_price:    ", max_price) 
-
-if loadcount == 0:
-    print("\nEs sind KEINE Ladezeiten bzw. Entladepausen nötig!!")
-
-else:
-    # In Spalte Ladewatt 0.1 einragen
-    pv_data_charge = [zeile[:5] + [0.1]  for zeile in pv_data_charge]
-    # Akkustände neu berechnen
-    dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
-    if max_price < profit_price:
-        print("\nEs sind nur Entladepausen nötig, da Maximalpreis kleiner Profitpreis!!")
-        # Funktion get_charge_stop mit  laden nein (0) = nur stoppen
-        pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, profit_price, charge_rate_kW, battery_capacity_Wh, 0)
-
-    else:
-        print("\nEs sind Ladezeiten UND Entladepausen nötig!!")
-        # Funktion get_charge_stop mit  laden ja (1)
-        pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, profit_price, charge_rate_kW, battery_capacity_Wh, 1)
+# Akkustände neu berechnen
+dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+# Mit Funktion get_charge_stop Ladepunkte usw. berechnen
+pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
 
 if(dyn_print_level >= 1):
     print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
