@@ -2,8 +2,8 @@
 ## ☀️ GEN24_Ladesteuerung 🔋 
 (getestet unter Python 3.8 und 3.9)  
 ![new](pics/new.png)  
-Ab Version: **0.26.0**  
-Dynamischer Strompreis (Beta): Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
+Ab Version: **0.26.1**  
+Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
 Ab Version: **0.25.1**  
 Prognosebegrenzung auf Höchstwerte der historischen Produktion.  
 Ab Version: **0.25.0**  
@@ -16,7 +16,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
-- Dynamischen Strompreis nutzen um bei niedrigen Preisen den Akku zu laden (**Testbetrieb möglich**).  
+- [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/edit/dynamicPrice2/README.md#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden.  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
 Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
@@ -81,6 +81,10 @@ im Batteriemanagement des Wechselrichters.
 Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
+### :heavy_dollar_sign::electric_plug: DynamicPriceCheck.py
+Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt (siehe schematische Darstellung). Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben (siehe kleine Bild).
+![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
+
 ## Webserver Installation (WebUI):  
 Nicht zwingend erforderlich, die prognosebasierte Ladesteuerung funktioniert auch ohne WebUI (Webserver)  
 
@@ -118,10 +122,10 @@ Dadurch soll z.B. ein Laden der Batterie aus dem Netz ersichtlich bzw. gezählt 
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
 Ist das Modul eingeschaltet (in CONFIG/charge_priv.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung 
-beim nächsten Aufruf von SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
+beim nächsten Aufruf von http_SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
 Ist nicht AUTO gewählt, erfolgt eine Batterieladung mit der eingestellten Prozentzahl der **maximalen Ladeleisung des GEN24**,
-ab dem nächsten Aufruf von http- bzw. SymoGen24Controller2.py.  
+ab dem nächsten Aufruf von http_SymoGen24Controller2.py.  
 Die prognosebasierte Ladesteuerung ist dadurch deaktiviert, und kann mit der Option "AUTO" wieder aktiviert werden.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
