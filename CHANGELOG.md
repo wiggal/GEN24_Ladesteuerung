@@ -4,6 +4,7 @@ Dynamischer Strompreis Weiterentwicklung:
 - Laden und Ladestops nach Bedarf mischen in einer Berechnung.
 - **Parameter aus CONFIG/dynprice.ini entfernt** `minimum_price_difference`.    
 - **Parameter aus CONFIG/dynprice.ini entfernt** `minimum_batterylevel_Prozent`, Wert wird nun vom GEN24 gelesen.    
+- **Neuer Parameter in CONFIG/dynprice.ini** `max_batt_dyn_ladung`, bis zu wieviel Prozent darf der Akku aus dem Netz geladen werden.  
 
 FIX: Teilweise None als Verbrauch im Lastprofil.
 FIX: Bei "Entladeeintrag löschen!" wurde die Batteriesteuerung auch gelöscht, wenn die optionen `Ladesteuerung` und `Ent- und Zwangsladesteuerung` nicht gesetzt waren.
