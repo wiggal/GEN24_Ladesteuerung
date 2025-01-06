@@ -16,7 +16,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
-- [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/edit/dynamicPrice2/README.md#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden.  
+- [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/edit/dynamicPrice2/#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden.  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
 Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
@@ -82,7 +82,7 @@ Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss h
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
 ### :heavy_dollar_sign::electric_plug: DynamicPriceCheck.py
-Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt (siehe schematische Darstellung). Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben (siehe kleine Bild).
+Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt (siehe schematische Darstellung). Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben (siehe kleine Bild):
 ![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
 
 ## Webserver Installation (WebUI):  
