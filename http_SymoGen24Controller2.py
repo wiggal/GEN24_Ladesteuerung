@@ -361,7 +361,7 @@ if __name__ == '__main__':
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
-                        if (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
+                        elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
                             Neu_BatteryMaxDischarge = int(GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 500 
                         elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze > 0):
@@ -403,7 +403,7 @@ if __name__ == '__main__':
                                 print("Zwangsladung NEU:          ", Neu_BatteryMaxDischarge, "W")
                                 print("Ladewert > Zwangsladung:   ", aktuellerLadewert, "W")
                             if (EntladeEintragloeschen == "ja"):
-                                print(">> Entladeeintrag Löschen!")
+                                print(">> Entladeeintrag löschen!")
                             print()
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADESTEUERUNG >>>>>>>>>>>>>"
