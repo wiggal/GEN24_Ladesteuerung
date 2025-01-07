@@ -143,7 +143,6 @@ class dynamic:
         i = 1
         Prognosen_24H = []
         Prognosestunden = 25
-        #Prognosestunden = 19  #entWIGGlung
         while i < Prognosestunden:
             # ab aktueller Stunde die nächsten 24 Stunden, da ab 24 Uhr sonst keine Morgenprognose
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
@@ -215,10 +214,11 @@ class dynamic:
 
         return()
 
-    def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh):
+    def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0):
         # Ladestand für alle Zeiten neu berechnen
         loadcount = 0
         akku_soc_loadcount = akku_soc
+        if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
         for Akkustatus in pv_data_charge:
             min_net_power = Akkustatus[1] - Akkustatus[2]
             if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
@@ -229,7 +229,14 @@ class dynamic:
                     akku_soc += int(Akkustatus[5] * -1)
             else:
                 akku_soc += min_net_power
+            # Akku auf Maximum begrenzen
             if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
+            # Akkustatus un Ladung reduzieren, wenn Begrenzung Zwangsladung überschritten
+            if akku_soc > max_batt_dyn_ladung_W and Akkustatus[5] < -1:
+                akku_soc_reduziert = akku_soc - max_batt_dyn_ladung_W + Akkustatus[5]
+                if akku_soc_reduziert > -1: akku_soc_reduziert = -1
+                Akkustatus[5] = akku_soc_reduziert
+                akku_soc = max_batt_dyn_ladung_W
             # Akustand muss minimal unter minimum_batterylevel sein
             if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
             Akkustatus[4] = akku_soc
@@ -243,6 +250,8 @@ class dynamic:
         dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
+        max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
+        max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
         # Ladewert ist -1 wenn kein Profilabler Preis
         max_ladewert = charge_rate_kW * -1
         Zeilen = 24
@@ -268,14 +277,12 @@ class dynamic:
                     zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_min_price[0] in row))
                     if(zeile_max_price[3] > profit_price):
 
-                        # Hier noch Ladung auf max_batt_dyn_ladung des Akku begrenzen????  #entWIGGlung
-                        max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
-                        max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
-                        if(dyn_print_level >= 3): print(">> max_batt_dyn_ladung_W: ", max_batt_dyn_ladung_W)  #entWIGGlung
-                        max_ladewert_grenze = int(pv_data_charge[zeilen_index][4] + pv_data_charge[zeilen_index][2] - pv_data_charge[zeilen_index][1] - max_batt_dyn_ladung_W)  #entWIGGlung
-                        if(dyn_print_level >= 3): print(">> max_ladewert_grenze: ", pv_data_charge[zeilen_index][4], max_ladewert_grenze)  #entWIGGlung
-                        if max_ladewert_grenze > -1: max_ladewert = -1
-                        if max_ladewert_grenze > max_ladewert: max_ladewert = max_ladewert_grenze  #entWIGGlung
+                        # Hier noch Ladung auf max_batt_dyn_ladung des Akku begrenzen
+                        if(dyn_print_level >= 3): print(">> max_batt_dyn_ladung_W: ", max_batt_dyn_ladung_W)
+                        max_ladewert_grenze = int(pv_data_charge[zeilen_index][4] + pv_data_charge[zeilen_index][2] - pv_data_charge[zeilen_index][1] - max_batt_dyn_ladung_W)
+                        if(dyn_print_level >= 3): print(">> max_ladewert_grenze: ", pv_data_charge[zeilen_index][4], max_ladewert_grenze)
+                        if max_ladewert_grenze > -1 or max_ladewert > charge_rate_kW * -1: max_ladewert = -1
+                        if max_ladewert_grenze > max_ladewert: max_ladewert = max_ladewert_grenze
 
                         pv_data_charge[zeilen_index][5] = max_ladewert
                         if(dyn_print_level >= 3): print(">> \n>> Ladepunkt wenn", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index]) 
@@ -290,7 +297,7 @@ class dynamic:
             zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
             pv_data_charge[zeilen_index][5] = 0
             # Akkustände neu berechnen
-            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh)
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
 
             Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == 0.1)
 

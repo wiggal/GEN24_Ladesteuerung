@@ -82,7 +82,7 @@ Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss h
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
 ### :heavy_dollar_sign::electric_plug: DynamicPriceCheck.py
-Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt (siehe schematische Darstellung). Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben (siehe kleine Bild):
+Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt (siehe schematische Darstellung). Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen. Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben (siehe kleine Bild):
 ![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
 
 ## Webserver Installation (WebUI):  
