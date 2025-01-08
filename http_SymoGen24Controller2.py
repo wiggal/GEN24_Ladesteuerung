@@ -353,15 +353,10 @@ if __name__ == '__main__':
                         # Feste Entladebegrenzung ab einem bestimmten Verbrauch
                         Verbrauch_Feste_Entladegrenze = basics.getVarConf('Entladung','Verbrauch_Feste_Entladegrenze','eval')
                         Feste_Entladegrenze = basics.getVarConf('Entladung','Feste_Entladegrenze','eval')
-                        # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
-                        # aktuelleBatteriePower > Feste_Entladegrenze/2 = Damit sie nicht einschaltet, wenn Akku bereits leer ist.
-                        # Feste_Entladegrenze/2 = sonst schaltet sie beim nächsten Durchlauf wieder aus, da die aktuelleBatteriePower dann kleiner ist.
-                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze/2):
-                            Neu_BatteryMaxDischarge = Feste_Entladegrenze
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
-                        elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
+                        if (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze == 0):
                             Neu_BatteryMaxDischarge = int(GesamtverbrauchHaus - VerbrauchsgrenzeEntladung)
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 500 
                         elif (GesamtverbrauchHaus > VerbrauchsgrenzeEntladung and VerbrauchsgrenzeEntladung > 0 and FesteEntladegrenze > 0):
@@ -379,6 +374,11 @@ if __name__ == '__main__':
                             Ladetype = "CHARGE_MIN"
                         elif (MaxEntladung_Prozent < 100):
                             Neu_BatteryMaxDischarge = MaxEntladung
+                        # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
+                        # aktuelleBatteriePower > Feste_Entladegrenze/2 = Damit sie nicht einschaltet, wenn Akku bereits leer ist.
+                        # Feste_Entladegrenze/2 = sonst schaltet sie beim nächsten Durchlauf wieder aus, da die aktuelleBatteriePower dann kleiner ist.
+                        elif (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze/2):
+                            Neu_BatteryMaxDischarge = Feste_Entladegrenze
                         elif (EntladeEintragDa == "ja"):
                             EntladeEintragloeschen = "ja"
 
