@@ -86,7 +86,6 @@ for key in Prognose_24H:
 LAND = basics.getVarConf('dynprice','LAND', 'str')
 pricelist_date = dynamic.getPrice_energycharts(LAND)
 
-
 if(dyn_print_level >= 2):
     headers = ["Zeitpunkt", "Strompreis brutto(€/kWh)", "Börsenstrompreis (€/kWh)"]
     dynamic.listAStable(headers, pricelist_date)
@@ -163,7 +162,8 @@ heute_start = datetime(jetzt.year, jetzt.month, jetzt.day, jetzt.hour)
 
 # SteuerCode erzeugen
 # Für jede Stunde Steuercode  EntLadesteuerung ermitteln
-# Alte Einträge in ENTLadeStrg lesen
+# Alte Einträge in ENTLadeStrg lesen, wenn Wiederherstellung aktiviert.
+Eintraege_wiederherstellen = 0
 entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
 
 SteuerCode = []
@@ -175,31 +175,33 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     Res_Feld2 = 0
     Options = ''
     SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
-    # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
-    try:
-        if entladesteurungsdata[Stunde]['Res_Feld1'] + entladesteurungsdata[Stunde]['Res_Feld2'] > 0:
-            Res_Feld1 = entladesteurungsdata[Stunde]['Res_Feld1']
-            Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
-        if entladesteurungsdata[Stunde]['Options'] != '':
-            Options = entladesteurungsdata[Stunde]['Options']
-    except:
-        Res_Feld1 = 0
-        Res_Feld2 = 0
-        Options = ''
+    if Eintraege_wiederherstellen == 1:
+        # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
+        try:
+            if entladesteurungsdata[Stunde]['Res_Feld1'] + entladesteurungsdata[Stunde]['Res_Feld2'] > 0:
+                Res_Feld1 = entladesteurungsdata[Stunde]['Res_Feld1']
+                Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
+            if entladesteurungsdata[Stunde]['Options'] != '':
+                Options = entladesteurungsdata[Stunde]['Options']
+        except:
+            pass
 
     for Stundenliste in pv_data_charge:
         if SuchStunde in Stundenliste:
-            if Res_Feld1 + Res_Feld2 > 0:
-                Options = str(Res_Feld1)+","+str(Res_Feld2)
+            if Eintraege_wiederherstellen == 1:
+                if Res_Feld1 + Res_Feld2 > 0:
+                    Options = str(Res_Feld1)+","+str(Res_Feld2)
             Res_Feld1 = 0
             Res_Feld2 = Stundenliste[5]
             break
+
     # Wenn keine DynamicPriceCheck-Eintrag evtl gemerkte Einträge wiederherstellen
-    if Options != '' and Res_Feld2 >= 0:
-        Res_Feld = Options.split(',')
-        Res_Feld1 = Res_Feld[0]
-        Res_Feld2 = Res_Feld[1]
-        Options = ''
+    if Eintraege_wiederherstellen == 1:
+        if Options != '' and Res_Feld2 >= 0:
+            Res_Feld = Options.split(',')
+            Res_Feld1 = Res_Feld[0]
+            Res_Feld2 = Res_Feld[1]
+            Options = ''
 
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, Res_Feld1, Res_Feld2, Options))
     # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
@@ -209,7 +211,7 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
         DBCode.append((Stunde, 'ENTLadeStrg', Stunde, 0, 0, ''))
 
     # DEBUG CSV-Ausgabe
-    if(dyn_print_level >= 1 and 'Stundenliste' in locals()):
+    if(dyn_print_level >= 1):
         import csv
         if stunde == 1 :
             try:
@@ -252,5 +254,4 @@ else:
     if(dyn_print_level >= 1): print("\nSteuercodes wurden NICHT geschrieben, Parameter schreiben fehlt")
 
 if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
-
 
