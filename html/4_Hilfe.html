@@ -260,12 +260,17 @@ td {font-size: 160%;
 </center>
 <br><table>
 <tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[env]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; 0 = aus, 1 = ein: damit wird die Prognose auf den höchsten Wert je Stunde der Produktion der letzten 30 Tage begrenzt</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >
+; 0 = aus<br>
+; 1 = ein: damit wird die Prognose auf den höchsten Wert je Stunde der Produktion der letzten MaxProGrenz_Dayback Tage begrenzt<br>
+; 2 = ein: keinsten Wert aus Vorhersage oder Prognoseoptimierung mit scikit-learn (Machine Learning in Python), erforderliche Pakete installiern mit:<br>
+; pip install pandas numpy scikit-learn<br>
+</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaximalPrognosebegrenzung</td>
 <td><input type="text" name="Zeile[4][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; MaxProGrenz_Faktor wird mit dem Wert aus der DB multipilziert</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaxProGrenz_Faktor</td>
 <td><input type="text" name="Zeile[4][1]" value="1" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; MaxProGrenz_Faktor wird mit dem Werd aus der DB multipilziert</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaxProGrenz_Dayback</td>
 <td><input type="text" name="Zeile[4][1]" value="35" readonly></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[pv.strings]</th></tr>
