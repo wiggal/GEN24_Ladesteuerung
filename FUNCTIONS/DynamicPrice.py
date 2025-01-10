@@ -216,8 +216,6 @@ class dynamic:
 
     def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0):
         # Ladestand für alle Zeiten neu berechnen
-        loadcount = 0
-        akku_soc_loadcount = akku_soc
         if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
         for Akkustatus in pv_data_charge:
             min_net_power = Akkustatus[1] - Akkustatus[2]
@@ -231,7 +229,7 @@ class dynamic:
                 akku_soc += min_net_power
             # Akku auf Maximum begrenzen
             if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
-            # Akkustatus un Ladung reduzieren, wenn Begrenzung Zwangsladung überschritten
+            # Akkustatus und Ladung reduzieren, wenn SOC-Begrenzung durch Zwangsladung überschritten
             if akku_soc > max_batt_dyn_ladung_W and Akkustatus[5] < -1:
                 akku_soc_reduziert = akku_soc - max_batt_dyn_ladung_W + Akkustatus[5]
                 if akku_soc_reduziert > -1: akku_soc_reduziert = -1
@@ -240,11 +238,8 @@ class dynamic:
             # Akustand muss minimal unter minimum_batterylevel sein
             if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
             Akkustatus[4] = akku_soc
-            # Ladezeitpunkte berechnen, bereits Laderwatt addieren.
-            if akku_soc + loadcount * charge_rate_kW < minimum_batterylevel:
-                loadcount += 1
 
-        return(pv_data_charge, loadcount)
+        return(pv_data_charge)
 
     def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh):
         dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
