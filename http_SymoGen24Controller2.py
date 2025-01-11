@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta
-import pytz
+from datetime import datetime
 import json
-import requests
 from sys import argv
+import requests
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
 import FUNCTIONS.functions
@@ -354,9 +353,6 @@ if __name__ == '__main__':
                         # Feste Entladebegrenzung ab einem bestimmten Verbrauch
                         Verbrauch_Feste_Entladegrenze = basics.getVarConf('Entladung','Verbrauch_Feste_Entladegrenze','eval')
                         Feste_Entladegrenze = basics.getVarConf('Entladung','Feste_Entladegrenze','eval')
-                        # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
-                        if (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze):
-                            Neu_BatteryMaxDischarge = Feste_Entladegrenze
 
                         # Wenn folgende Bedingungen wahr, Entladung neu schreiben
                         # Verbrauchsgrenze == 2000 && Feste Grenze == 0 (leer)
@@ -378,6 +374,11 @@ if __name__ == '__main__':
                             Ladetype = "CHARGE_MIN"
                         elif (MaxEntladung_Prozent < 100):
                             Neu_BatteryMaxDischarge = MaxEntladung
+                        # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
+                        # aktuelleBatteriePower > Feste_Entladegrenze/2 = Damit sie nicht einschaltet, wenn Akku bereits leer ist.
+                        # Feste_Entladegrenze/2 = sonst schaltet sie beim nächsten Durchlauf wieder aus, da die aktuelleBatteriePower dann kleiner ist.
+                        elif (Verbrauch_Feste_Entladegrenze > 0 and GesamtverbrauchHaus > Verbrauch_Feste_Entladegrenze and aktuelleBatteriePower > Feste_Entladegrenze/2):
+                            Neu_BatteryMaxDischarge = Feste_Entladegrenze
                         elif (EntladeEintragDa == "ja"):
                             EntladeEintragloeschen = "ja"
 
@@ -391,7 +392,6 @@ if __name__ == '__main__':
                         ## Werte zum Überprüfen ausgeben
                         if print_level >= 1:
                             print("## ENTLADESTEUERUNG ##\n")
-                            #print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']*BattganzeLadeKapazWatt / 100), "W")
                             print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']), "%")
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
                             print("Feste Entladegrenze Table: ", FesteEntladegrenze, "W")
@@ -403,7 +403,7 @@ if __name__ == '__main__':
                                 print("Zwangsladung NEU:          ", Neu_BatteryMaxDischarge, "W")
                                 print("Ladewert > Zwangsladung:   ", aktuellerLadewert, "W")
                             if (EntladeEintragloeschen == "ja"):
-                                print(">> Entladeeintrag Löschen!")
+                                print(">> Entladeeintrag löschen!")
                             print()
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENDE ENTLADESTEUERUNG >>>>>>>>>>>>>"
@@ -432,10 +432,10 @@ if __name__ == '__main__':
                             if(Neu_BatteryMaxDischarge != BatteryMaxDischarge):
                                 payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
                                 ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                        elif ('entladen' not in Options and Neu_BatteryMaxDischarge != BatteryMaxDischarge):
+                        elif ('entladen' not in Options and (Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja")):
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
-                        if (payload_text != '' or EntladeEintragloeschen == "ja"):
+                        if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
                             response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}') 
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:
