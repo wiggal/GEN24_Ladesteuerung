@@ -260,12 +260,17 @@ td {font-size: 160%;
 </center>
 <br><table>
 <tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[env]</th></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; 0 = aus, 1 = ein: damit wird die Prognose auf den höchsten Wert je Stunde der Produktion der letzten 30 Tage begrenzt</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >
+; 0 = aus<br>
+; 1 = ein: damit wird die Prognose auf den höchsten Wert je Stunde der Produktion der letzten MaxProGrenz_Dayback Tage begrenzt<br>
+; 2 = ein: keinsten Wert aus Vorhersage oder Prognoseoptimierung mit scikit-learn (Machine Learning in Python), erforderliche Pakete installiern mit:<br>
+; pip install pandas numpy scikit-learn<br>
+</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaximalPrognosebegrenzung</td>
 <td><input type="text" name="Zeile[4][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; MaxProGrenz_Faktor wird mit dem Wert aus der DB multipilziert</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaxProGrenz_Faktor</td>
 <td><input type="text" name="Zeile[4][1]" value="1" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; MaxProGrenz_Faktor wird mit dem Werd aus der DB multipilziert</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value=''>MaxProGrenz_Dayback</td>
 <td><input type="text" name="Zeile[4][1]" value="35" readonly></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[pv.strings]</th></tr>
@@ -363,7 +368,7 @@ td {font-size: 160%;
 <tr><th colspan="2"><input type="hidden" name="Zeile[3]" value='' >[dynprice]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[4]" value='' >; print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe</td></tr>
 <tr><td><input type="hidden" name="Zeile[5][0]" value=''>dyn_print_level</td>
-<td><input type="text" name="Zeile[5][1]" value="2" readonly></td></tr>
+<td><input type="text" name="Zeile[5][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[6]" value='' ></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[7]" value='' >; LASTPROFIL</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[8]" value='' >; Damit nicht extrem hohe und nicht regelmäßige Verbräuche, wie E-Autoladung, das Lastprofil verfälschen.</td></tr>
@@ -372,24 +377,24 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[10]" value='' >; Alle wieviele Tage soll das Lasprofile erneuert werden</td></tr>
 <tr><td><input type="hidden" name="Zeile[11][0]" value=''>LastprofilNeuTage</td>
 <td><input type="text" name="Zeile[11][1]" value="7" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[12]" value='' >; wie viele Tage zurück sollen für das Lastprofil verwendet werden (mindestens 7 erforderlich)</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[12]" value='' >; wie viele Tage zurück sollen für das Lastprofil verwendet werden (mindestens 8 erforderlich)</td></tr>
 <tr><td><input type="hidden" name="Zeile[13][0]" value='Daysback = '>Daysback</td>
 <td><input type="text" name="Zeile[13][1]" value="35" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[14]" value='' ></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[14]" value='' >; LADEBERECHUNG</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[15]" value='' >; Mindest-Akkustadestand in Prozent</td></tr>
-<tr><td><input type="hidden" name="Zeile[16][0]" value=''>minimum_batterylevel_Prozent</td>
-<td><input type="text" name="Zeile[16][1]" value="20" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[17]" value='' >; Ladegeschwindigkeit in kW</td></tr>
 <tr><td><input type="hidden" name="Zeile[18][0]" value=''>charge_rate_kW</td>
-<td><input type="text" name="Zeile[18][1]" value="4000" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Preisdifferenz aller stündlichen Strompreise muss überschritten sein, damit die Ladestrategie geschrieben wird</td></tr>
-<tr><td><input type="hidden" name="Zeile[20][0]" value=''>minimum_price_difference</td>
-<td><input type="text" name="Zeile[20][1]" value="0.08" readonly></td></tr>
+<td><input type="text" name="Zeile[18][1]" value="3000" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Ladeverluste beim Laden und Abschreibungsverluste des Hausakkus</td></tr>
+<tr><td><input type="hidden" name="Zeile[20][0]" value=''>Akku_Verlust_Prozent</td>
+<td><input type="text" name="Zeile[20][1]" value="20" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Um den Wert Gewinnerwartung_kWh muss der Preis Pro kWh bei</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Speicherung in den Akku nach Abzug von Akku_Verlust_Prozent mindestens niedriger sein.</td></tr>
 <tr><td><input type="hidden" name="Zeile[20][0]" value=''>Gewinnerwartung_kW</td>
 <td><input type="text" name="Zeile[20][1]" value="0.05" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Bis zu wieviel Prozent darf der Akku aus dem Netz geladen werden</td></tr>
+<tr><td><input type="hidden" name="Zeile[20][0]" value=''>max_batt_dyn_ladung</td>
+<td><input type="text" name="Zeile[20][1]" value="95" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[22]" value='' >; Infos siehe https://api.energy-charts.info/</td></tr>
 <tr><td><input type="hidden" name="Zeile[23][0]" value=''>Preisquelle</td>
 <td><input type="text" name="Zeile[23][1]" value="energycharts" readonly></td></tr>
