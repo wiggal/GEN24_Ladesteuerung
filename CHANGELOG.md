@@ -1,3 +1,9 @@
+**[0.26.2] – 2025-XX-XX**  
+
+- Verbrauch in Kopfzeile der Diagramme auf Netzladen angepasst
+- Im Säulendiagramm Netzladen darstellen
+- DynamicPriceCheck.py: Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
+
 **[0.26.1] – 2025-01-12**  
 
 Dynamischer Strompreis Weiterentwicklung:  

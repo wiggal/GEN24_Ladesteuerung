@@ -203,23 +203,33 @@ return $SQL;
     case 'bar':
 $SQL = "WITH Alle_PVDaten AS (
 select Zeitpunkt,
-	(max(DC_Produktion) - min(DC_Produktion)) as Produktion,
-	(max(Netzverbrauch) - min(Netzverbrauch)) as Netzbezug,
-    (max(DC_Produktion) - min(DC_Produktion)) - (max(Einspeisung) - min(Einspeisung)) - (max(Batterie_IN) - min(Batterie_IN)) AS Direktverbrauch,
+    (max(DC_Produktion) - min(DC_Produktion)) as Produktion,
+    (max(Netzverbrauch) - min(Netzverbrauch)) as Netzbezug,
     (max(Batterie_IN) - min(Batterie_IN)) as InBatterie,
     (max(Batterie_OUT) - min(Batterie_OUT)) as AusBatterie,
     (max(Einspeisung) - min(Einspeisung)) as Einspeisung
 from pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
 group by STRFTIME('".$groupSTR."', Zeitpunkt))
+, Alle_PVDaten2 AS (
 SELECT Zeitpunkt,
-	Produktion * -1 as Produktion,
-	Netzbezug * -1 as Netzbezug,
-    (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch END) as Direktverbrauch,
-    (CASE WHEN Direktverbrauch < 0 THEN InBatterie + (Direktverbrauch) ELSE InBatterie END) as InBatterie,
-    Produktion + Netzbezug - Einspeisung - InBatterie - Direktverbrauch AS Netzverbrauch,
+    Produktion * -1 as Produktion,
+    Netzbezug * -1 as Netzbezug,
+	Einspeisung,
+	Netzbezug AS Netzverbrauch,
+	InBatterie,
+    Produktion - InBatterie - Einspeisung  AS Direktverbrauch,
+	InBatterie as InBatterie_org,
+	AusBatterie as AusBatterie_org
+FROM Alle_PVDaten)
+SELECT Zeitpunkt,
+    Produktion,
+    Netzbezug,
+    (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch END) AS Direktverbrauch,
+    InBatterie,
+    (CASE WHEN Direktverbrauch < 0 THEN Netzverbrauch + Direktverbrauch ELSE Netzverbrauch END) AS Netzverbrauch,
     Einspeisung
-FROM Alle_PVDaten";
+FROM Alle_PVDaten2";
 return $SQL;
     break; # ENDE case 'Produktion_bar'
 } # ENDE switch
