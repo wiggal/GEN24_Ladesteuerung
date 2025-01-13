@@ -166,8 +166,10 @@ return $SQL;
 # AC Verbrauch
 $SQL = "SELECT 
         MAX(Netzverbrauch)- MIN(Netzverbrauch) + 
-        MAX(AC_Produktion) - min(AC_Produktion) + 
-        MIN (Einspeisung) - MAX (Einspeisung)
+        MAX(DC_Produktion) - min(DC_Produktion) + 
+        MIN (Einspeisung) - MAX (Einspeisung) +
+        MIN (Batterie_IN) - MAX (Batterie_IN) +
+        MAX (Batterie_OUT) - MIN (Batterie_OUT)
         AS AC_Produktion
 from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'";
 return $SQL;
