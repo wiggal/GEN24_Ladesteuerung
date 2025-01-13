@@ -215,8 +215,11 @@ class dynamic:
         return()
 
     def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0):
-        # Ladestand für alle Zeiten neu berechnen
+        # Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
+        Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
+        Ladeverlust = (Akku_Verlust_Prozent/200)
         if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
+        # Ladestand für alle Zeiten neu berechnen
         for Akkustatus in pv_data_charge:
             min_net_power = Akkustatus[1] - Akkustatus[2]
             if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
@@ -224,14 +227,16 @@ class dynamic:
                 if int(Akkustatus[5] * -1) < min_net_power:
                     akku_soc += min_net_power
                 else:
-                    akku_soc += int(Akkustatus[5] * -1)
+                    # Ladeverlust anbringen
+                    akku_soc += int(Akkustatus[5] * (-1 + Ladeverlust))
             else:
                 akku_soc += min_net_power
             # Akku auf Maximum begrenzen
             if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
             # Akkustatus und Ladung reduzieren, wenn SOC-Begrenzung durch Zwangsladung überschritten
+            # auch hier wegen Ladeverlust anbringen, hier ladung um Ladeverlust erhöhen um auf den Akkuollstand zu kommen
             if akku_soc > max_batt_dyn_ladung_W and Akkustatus[5] < -1:
-                akku_soc_reduziert = akku_soc - max_batt_dyn_ladung_W + Akkustatus[5]
+                akku_soc_reduziert = int((akku_soc - max_batt_dyn_ladung_W + Akkustatus[5]) * (1 + Ladeverlust))
                 if akku_soc_reduziert > -1: akku_soc_reduziert = -1
                 Akkustatus[5] = akku_soc_reduziert
                 akku_soc = max_batt_dyn_ladung_W
