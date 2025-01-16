@@ -236,8 +236,8 @@ if __name__ == '__main__':
                             WR_schreiben = DATA[1]
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
-                    # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren
-                    if Akkuschonung > 0:
+                    # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
+                    if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
                         Akkuschonung_dict = progladewert.getAkkuschonWert(BattStatusProz, BattganzeLadeKapazWatt, alterLadewert, aktuellerLadewert)
                         AkkuschonungLadewert = Akkuschonung_dict[0]
                         HysteProdFakt = Akkuschonung_dict[1]
@@ -311,7 +311,7 @@ if __name__ == '__main__':
                     EntladeEintragloeschen = "nein"
                     EntladeEintragDa = "nein"
 
-                    if  Batterieentlandung_steuern == 1:
+                    if  Batterieentlandung_steuern > 0:
                         MaxEntladung = BattganzeLadeKapazWatt
 
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
@@ -368,6 +368,9 @@ if __name__ == '__main__':
                         elif (VerbrauchsgrenzeEntladung == 0 and FesteEntladegrenze < 0):
                             BatteryMaxDischarge = BatteryMaxDischarge_Zwangsladung
                             Neu_BatteryMaxDischarge = abs(int(FesteEntladegrenze))
+                            # Akkuschonung auch bei Zwangsladung
+                            if (AkkuschonungLadewert < Neu_BatteryMaxDischarge and Batterieentlandung_steuern > 1): Neu_BatteryMaxDischarge = AkkuschonungLadewert
+                            DEBUG_Ausgabe+="\nDEBUG Akkuschonung auch bei Zwangsladung: " + str(AkkuschonungLadewert)  #entWIGGlung
                             # Zwangsladung kann nur geschrieben werden, wenn aktuellerLadewert > Neu_BatteryMaxDischarge
                             if (Neu_BatteryMaxDischarge > aktuellerLadewert): aktuellerLadewert = Neu_BatteryMaxDischarge + 100
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
@@ -401,7 +404,7 @@ if __name__ == '__main__':
                             if (Ladetype == "CHARGE_MIN") and (EntladeEintragloeschen == "nein"):
                                 print("Zwangsladung ALT:          ", BatteryMaxDischarge, "W")
                                 print("Zwangsladung NEU:          ", Neu_BatteryMaxDischarge, "W")
-                                print("Ladewert > Zwangsladung:   ", aktuellerLadewert, "W")
+                                print("Ladewert >= Zwangsladung:   ", aktuellerLadewert, "W")
                             if (EntladeEintragloeschen == "ja"):
                                 print(">> Entladeeintrag löschen!")
                             print()
