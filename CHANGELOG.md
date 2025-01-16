@@ -4,6 +4,10 @@
 - Im Säulendiagramm Netzladen darstellen
 - DynamicPriceCheck.py: Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
 
+Änderung in http_SymoGen24Controller2.py
+- Akkuschonung auch bei Zwangsladung möglich durch `Batterieentlandung_steuern = 2`
+
+
 **[0.26.1] – 2025-01-12**  
 
 Dynamischer Strompreis Weiterentwicklung:  
