@@ -33,12 +33,16 @@
 <font style="font-size: 24pt"><b><span style="background: #FB5555">Settings</span></b></font>
 <br/> <br/>
 
-<p><b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim Punkt 'unverändert lassen', die Aufrufparameter (z.B. vom Cronjob)!
+<p><b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim Punkt 'WebUI-Settings ausschalten', die Aufrufparameter (z.B. vom Cronjob)!
 <br/>
 <br/>
 <table>
 <tr style="font-size:150%" > <th colspan="2">Programmsteuerung</th><th>Erläuterung</th> </tr>
-<tr> <td colspan="2"><b>WebUI-Settings ausschalten</b></td>  <td>Die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden (z.B.: logging, schreiben). Die Settings haben keinen Einfluss auf die Programmsteuerung</td> </tr>
+<tr> <td colspan="2"><b>WebUI-Settings ausschalten</b></td>  <td>Die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden, mögliche Aufrufparameter sind:<br>
+<b>logging,laden,entladen,optimierung,notstrom</b><br> 
+Sie können nach Bedarf kombiniert werden, und müssen mit Komma getrennt <b>ohne Leerzeichen</b> beim Programmaufruf angegeben werden.<br>
+Der Aufrufparameter <b>schreiben</b> setzt alle Parameter.<br>
+Die WebUI-Settings haben bei dieser Option keinen Einfluss auf die Programmsteuerung</td> </tr>
 <tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings löschen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>gelöscht</b>.</td> </tr>
 <tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings belassen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>belassen</b>.</td> </tr>
 <tr> <td colspan="2"><b>Nur Analyse in Crontab.log</b></td><td>Die Skripte berechnen die Steuerungswerte, und schreiben sie in die Crontab.log. Am Wechselrichter wird nichts geschrieben</td> </tr>

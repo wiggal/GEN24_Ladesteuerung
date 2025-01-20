@@ -54,6 +54,9 @@ if __name__ == '__main__':
                     print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
                     exit()
                     # Ende Programm
+            else:
+                # Aufrufparameter ausgeben
+                Ausgabe_Parameter = ">>>Aufrufparameter: "  + str(Parameter[2])
 
             # Nur ausführen, wenn WR erreichbar
             try:            
@@ -370,7 +373,7 @@ if __name__ == '__main__':
                             Neu_BatteryMaxDischarge = abs(int(FesteEntladegrenze))
                             # Akkuschonung auch bei Zwangsladung
                             if (AkkuschonungLadewert < Neu_BatteryMaxDischarge and Batterieentlandung_steuern > 1): Neu_BatteryMaxDischarge = AkkuschonungLadewert
-                            DEBUG_Ausgabe+="\nDEBUG Akkuschonung auch bei Zwangsladung: " + str(AkkuschonungLadewert)  #entWIGGlung
+                            DEBUG_Ausgabe+="\nDEBUG Akkuschonung auch bei Zwangsladung: " + str(AkkuschonungLadewert)
                             # Zwangsladung kann nur geschrieben werden, wenn aktuellerLadewert > Neu_BatteryMaxDischarge
                             if (Neu_BatteryMaxDischarge > aktuellerLadewert): aktuellerLadewert = Neu_BatteryMaxDischarge + 100
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
