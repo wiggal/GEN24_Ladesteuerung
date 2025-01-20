@@ -25,9 +25,15 @@ a.ende{
   position: fixed;
   left: 8px;
 }
+.download{
+  background-color:#ffffff;
+  position: fixed;
+  right: 8px
+}
 </style>
 </head>
 <body onLoad="if (location.hash != '#bottom') location.hash = '#bottom';">
+<div class="download"> <a href="5_download_log.php?file=../Crontab.log"><b>Download</b></a></div>
 <div name="top"><div>
 <div class="headertop">
 <a href="#bottom">Ans Ende springen!</a>
