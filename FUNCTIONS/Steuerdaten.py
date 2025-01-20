@@ -37,10 +37,10 @@ class readcontroldata:
 
         # wenn WebUI-Settings ausgeschaltet Aufrufparameter (schreiben, logging) umsetzen
         if Prog_Steuer_code == 0:
-            if Parameter == 'logging':
-                Options = ['logging']
             if Parameter == 'schreiben':
                 Options = ['logging','laden','entladen','optimierung','notstrom']
+            else:
+                Options = Parameter.split(",")
         # Ab hier WebUI-Settings
         if Prog_Steuer_code == 1:
             Meldung = "AUS (WR löschen)"

@@ -7,6 +7,7 @@
 Änderung in http_SymoGen24Controller2.py
 - Akkuschonung auch bei Zwangsladung möglich durch `Batterieentlandung_steuern = 2`
 
+- Alle möglichen Programmoptionen aus den WebUI-Settings sind nun auch als Aufrufparameter möglich.
 
 **[0.26.1] – 2025-01-12**  
 
