@@ -18,36 +18,26 @@ class dynamic:
         if Daysback > -8: Daysback = -8
         # Lastprofil von jetzt 35 Tage zurück für jeden Wochentag ermitteln
         sql_anweisung = """
-        WITH stundenwerte AS (
-            SELECT
-                strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS volle_stunde,
-                MAX(Netzverbrauch) AS max_netzverbrauch,
-                MAX(AC_Produktion) AS max_acproduktion,
-                MAX(Einspeisung) AS max_einspeisung
+        WITH differenzen AS (
+			select Zeitpunkt AS volle_stunde,
+                (max(DC_Produktion) - min(DC_Produktion)) as Produktion,
+                (max(Netzverbrauch) - min(Netzverbrauch)) as Netzverbrauch,
+                (max(Batterie_IN) - min(Batterie_IN)) as InBatterie,
+                (max(Batterie_OUT) - min(Batterie_OUT)) as VonBatterie,
+                (max(Einspeisung) - min(Einspeisung)) as Einspeisung
             FROM
                 pv_daten
-            WHERE
+			WHERE
                 Zeitpunkt >= datetime('now', '""" + str(Daysback) + """ days')
             GROUP BY
-                strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
-        ),
-        differenzen AS (
-            SELECT
-                a.volle_stunde,
-                a.max_netzverbrauch - COALESCE(b.max_netzverbrauch, 0) AS Netzverbrauch,
-                a.max_acproduktion - COALESCE(b.max_acproduktion, 0) AS ACProduktion,
-                a.max_einspeisung- COALESCE(b.max_einspeisung, 0) AS Einspeisung
-            FROM
-                stundenwerte a
-            LEFT JOIN
-                stundenwerte b ON a.volle_stunde = datetime(b.volle_stunde, '+1 hour')
+                strftime('%Y-%m-%d %H:00:00', volle_stunde)
         ),
         verbrauch AS (
         SELECT
             volle_stunde,
 	        CASE 
-                WHEN (Netzverbrauch + ACProduktion - Einspeisung) > """ + str(Lastgrenze) + """ THEN """ + str(Lastgrenze) + """
-                ELSE (Netzverbrauch + ACProduktion - Einspeisung) 
+                WHEN (Netzverbrauch + Produktion - Einspeisung + VonBatterie - InBatterie) > """ + str(Lastgrenze) + """ THEN """ + str(Lastgrenze) + """
+                ELSE (Netzverbrauch + Produktion - Einspeisung + VonBatterie - InBatterie) 
             END AS Verbrauch
         FROM
             differenzen
@@ -59,13 +49,15 @@ class dynamic:
             strftime('%w', volle_stunde) AS Wochentag,
             /*
             # Normaler Durchschnitt
-            CAST(AVG(Verbrauch) AS INTEGER) AS Verbrauch,
-            # höheres Gewicht je aktueller die Werte
             */
+            CAST(AVG(Verbrauch) AS INTEGER) AS Verbrauch,
+            /*
+            # höheres Gewicht je aktueller die Werte
             CASE
 			    WHEN (CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGERA))  IS NULL THEN 600
 			    ELSE CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGER)
             END AS Verbrauch,
+            */
             strftime('%s', 'now') AS Options
         FROM
             verbrauch
