@@ -143,7 +143,7 @@ if ($diagramtype == 'line') {
     $results = $db->query($SQL);
 
     # Diagrammdaten und Optionen holen
-    $DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Direktverbrauch');
+    $DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Netzverbrauch');
     list($daten, $labels) = diagrammdaten($results, $DB_Werte, '1', $Zeitraum);
     $optionen = Dia_Options();
 

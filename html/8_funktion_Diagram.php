@@ -172,6 +172,7 @@ from Alle_PVDaten)
 	Vorhersage,
     BattStatus
 FROM Alle_PVDaten1)
+, Netzladen AS (
 select Zeitpunkt,
 		Produktion * -1 AS Produktion,
 		Netzbezug * -1 AS Netzbezug,
@@ -183,7 +184,20 @@ select Zeitpunkt,
 		Produktion + Netzbezug - Einspeisung + VonBatterie - InBatterie AS Gesamtverbrauch,
 		Vorhersage,
 		BattStatus
-FROM Alle_PVDaten2";
+FROM Alle_PVDaten2)
+SELECT 	Zeitpunkt,
+		Produktion,
+		Netzbezug,
+        (CASE WHEN Direktverbrauch > 0 THEN Direktverbrauch ELSE 0 END)Direktverbrauch,
+        VonBatterie,
+        InBatterie,
+        Einspeisung,
+		(CASE WHEN Direktverbrauch > 0 THEN Netzverbrauch ELSE Netzverbrauch + Direktverbrauch END) AS Netzverbrauch,
+		Gesamtverbrauch,
+		Vorhersage,
+		BattStatus
+FROM Netzladen
+";
 return $SQL;
     break; # ENDE case 'line'
 
