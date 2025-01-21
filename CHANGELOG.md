@@ -9,6 +9,7 @@
 
 - Alle möglichen Programmoptionen aus den WebUI-Settings sind nun auch als Aufrufparameter möglich.
 - Downloadlink für Crontab.log eingebaut
+- FIX: Akkuladen aus dem Netz in den Diagrammen richtig darstellen.
 
 **[0.26.1] – 2025-01-12**  
 
