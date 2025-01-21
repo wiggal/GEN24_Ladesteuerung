@@ -145,7 +145,7 @@ if ($diagramtype == 'line') {
     # Diagrammdaten und Optionen holen
     $DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Netzverbrauch');
     list($daten, $labels) = diagrammdaten($results, $DB_Werte, '1', $Zeitraum);
-    $optionen = Dia_Options();
+    $optionen = Dia_Options('line');
 
     # Nun Linechart ausgeben
     echo "<div class='container'>
@@ -163,7 +163,7 @@ Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenz
     # Diagrammdaten und Optionen holen
     $DB_Werte = array('Gesamtverbrauch', 'Einspeisung', 'InBatterie', 'Direktverbrauch');
     list($daten, $labels) = diagrammdaten($results, $DB_Werte, '1000', $Zeitraum);
-    $optionen = Dia_Options();
+    $optionen = Dia_Options('bar');
 
     # Nun Barchart ausgeben
     echo "<div class='container'>

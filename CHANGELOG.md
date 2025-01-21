@@ -1,16 +1,15 @@
 **[0.26.2] – 2025-XX-XX**  
 
-- Verbrauch in Kopfzeile der Diagramme auf Netzladen angepasst
-- Im Säulendiagramm Netzladen darstellen
 - DynamicPriceCheck.py: Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
+- Downloadlink für Crontab.log eingebaut
 
 Änderung in http_SymoGen24Controller2.py
 - Akkuschonung auch bei Zwangsladung möglich durch `Batterieentlandung_steuern = 2`
-
 - Alle möglichen Programmoptionen aus den WebUI-Settings sind nun auch als Aufrufparameter möglich.
-- Downloadlink für Crontab.log eingebaut
 
 Diagramme:
+- Verbrauch in Kopfzeile der Diagramme auf Netzladen angepasst
+- Im Säulendiagramm Netzladen darstellen
 - FIX: Akkuladen aus dem Netz in den Diagrammen richtig darstellen.
 - Im Balkendiagramm Werte VonBatterie ausgeblendet hinzugefügt.
 - 7_tab_Diagram.php => PV-Bilanz entfernt, da es nicht mehr gepflegt wird.
