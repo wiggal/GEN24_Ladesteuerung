@@ -9,7 +9,11 @@
 
 - Alle möglichen Programmoptionen aus den WebUI-Settings sind nun auch als Aufrufparameter möglich.
 - Downloadlink für Crontab.log eingebaut
+
+Diagramme:
 - FIX: Akkuladen aus dem Netz in den Diagrammen richtig darstellen.
+- Im Balkendiagramm Werte VonBatterie ausgeblendet hinzugefügt.
+- 7_tab_Diagram.php => PV-Bilanz entfernt, da es nicht mehr gepflegt wird.
 
 **[0.26.1] – 2025-01-12**  
 
