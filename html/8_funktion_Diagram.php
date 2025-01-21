@@ -232,15 +232,15 @@ SELECT Zeitpunkt,
 	Einspeisung,
 	Netzbezug AS Netzverbrauch,
 	InBatterie,
-    Produktion - InBatterie - Einspeisung  AS Direktverbrauch,
-	InBatterie as InBatterie_org,
-	AusBatterie as AusBatterie_org
+    AusBatterie AS VonBatterie,
+    Produktion - InBatterie - Einspeisung  AS Direktverbrauch
 FROM Alle_PVDaten)
 SELECT Zeitpunkt,
     Produktion,
     Netzbezug,
     (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch END) AS Direktverbrauch,
     InBatterie,
+	VonBatterie,
     (CASE WHEN Direktverbrauch < 0 THEN Netzverbrauch + Direktverbrauch ELSE Netzverbrauch END) AS Netzverbrauch,
     Einspeisung
 FROM Alle_PVDaten2";
@@ -249,19 +249,24 @@ return $SQL;
 } # ENDE switch
 } # END function getSQL
 
-function Dia_Options()
+function Dia_Options($Diatype)
 {
 $optionen = array();
-$optionen['Gesamtverbrauch']=['Farbe'=>'rgba(255,0,0,1)',      'fill'=>'false', 'stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
-$optionen['Vorhersage']=     ['Farbe'=>'rgba(255,140,05,1)',   'fill'=>'false', 'stack'=>'2','linewidth'=>'2','order'=>'0','borderDash'=>'[15,8]','yAxisID'=>'y'];
-$optionen['BattStatus']=     ['Farbe'=>'rgba(72,118,255,1)',   'fill'=>'false', 'stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y2'];
-$optionen['Einspeisung'] =   ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'5','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
-$optionen['InBatterie'] =    ['Farbe' => 'rgba(60,215,60,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
-$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
-$optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
-$optionen['Direktverbrauch']=['Farbe' => 'rgba(255,215,0,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'1','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
-$optionen['Produktion']=     ['Farbe'=>'rgba(255,200,0,1)',    'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'6','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
-$optionen['Netzbezug'] =     ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'7','borderDash'=>'[0,0]', 'yAxisID'=>'y'];
+$optionen['Gesamtverbrauch']=['Farbe'=>'rgba(255,0,0,1)',      'fill'=>'false', 'stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Vorhersage']=     ['Farbe'=>'rgba(255,140,05,1)',   'fill'=>'false', 'stack'=>'2','linewidth'=>'2','order'=>'0','borderDash'=>'[15,8]','yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['BattStatus']=     ['Farbe'=>'rgba(72,118,255,1)',   'fill'=>'false', 'stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y2', 'hidden'=>'false'];
+$optionen['Einspeisung'] =   ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'5','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['InBatterie'] =    ['Farbe' => 'rgba(60,215,60,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Direktverbrauch']=['Farbe' => 'rgba(255,215,0,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'1','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Produktion']=     ['Farbe'=>'rgba(255,200,0,1)',    'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'6','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Netzbezug'] =     ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'7','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+# Ausnahme im Balkendiagramm VonBatterie beim Aufruf ausblenden:
+if ( $Diatype == 'bar') {
+$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'true'];
+}
+
 return $optionen;
 }  # END function Dia_Options
 
@@ -404,7 +409,8 @@ new Chart('PVDaten', {
       echo "fill: ".$optionen[$x]['fill'].",\n";
       echo "stack: '".$optionen[$x]['stack']."',\n";
       echo "order: '".$optionen[$x]['order']."',\n";
-      echo "yAxisID: '".$optionen[$x]['yAxisID']."'\n";
+      echo "yAxisID: '".$optionen[$x]['yAxisID']."',\n";
+      echo "hidden: ".$optionen[$x]['hidden']."\n";
       $trenner = "},{\n";
       }
 echo "    }]
