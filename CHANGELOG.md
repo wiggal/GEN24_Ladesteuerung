@@ -1,4 +1,4 @@
-**[0.26.2] – 2025-XX-XX**  
+**[0.26.2] – 2025-01-26**  
 
 - DynamicPriceCheck.py: Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
 - Downloadlink für Crontab.log eingebaut
@@ -7,12 +7,13 @@
 - Akkuschonung auch bei Zwangsladung möglich durch `Batterieentlandung_steuern = 2`
 - Alle möglichen Programmoptionen aus den WebUI-Settings sind nun auch als Aufrufparameter möglich.
 
-Diagramme:
-- Verbrauch in Kopfzeile der Diagramme auf Netzladen angepasst
-- Im Säulendiagramm Netzladen darstellen
-- FIX: Akkuladen aus dem Netz in den Diagrammen richtig darstellen.
-- Im Balkendiagramm Werte VonBatterie ausgeblendet hinzugefügt.
-- 7_tab_Diagram.php => PV-Bilanz entfernt, da es nicht mehr gepflegt wird.
+Diagramme:  
+- FIX: Verbrauch in Kopfzeile der Diagramme auf Netzladen angepasst  
+- FIX: Akkuladen aus dem Netz in den Diagrammen richtig darstellen.  
+- Im Balkendiagramm Werte VonBatterie ausgeblendet hinzugefügt.  
+- 7_tab_Diagram.php => PV-Bilanz entfernt, da es nicht mehr gepflegt wird.  
+  Folgende Zeile aus html/config.php entfernt, bitte auch aus html/config_priv.php entfernen:  
+  `array ( 'name' => 'PV-Bilanz','file' => '7_tab_Diagram.php','checked' => 'nein','sichtbar' => 'aus'),`  
 
 **[0.26.1] – 2025-01-12**  
 
