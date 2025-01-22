@@ -219,22 +219,25 @@ class dynamic:
                 if int(Akkustatus[5] * -1) < min_net_power:
                     akku_soc += min_net_power
                 else:
-                    # Ladeverlust anbringen
-                    akku_soc += int(Akkustatus[5] * (-1 + Ladeverlust))
+                    # Akkustatus und Ladung reduzieren, wenn SOC-Begrenzung durch Zwangsladung überschritten und der kleiste Wert größer minimum_batterylevel
+                    # auch hier wegen Ladeverlust anbringen, hier ladung um Ladeverlust erhöhen um auf den Akkuollstand zu kommen
+                    if akku_soc - Akkustatus[5] > max_batt_dyn_ladung_W and Akkustatus[5] < -1:
+                        akku_soc_reduziert = int((akku_soc - max_batt_dyn_ladung_W) * (1 + Ladeverlust))
+                        if akku_soc_reduziert > -1: akku_soc_reduziert = -1
+                        if akku_soc_reduziert < charge_rate_kW * -1: akku_soc_reduziert = charge_rate_kW * -1
+                        Akkustatus[5] = akku_soc_reduziert
+                    # Ladeverlust anbringen, bei charge_rate_kW
+                    if Akkustatus[5] == charge_rate_kW * -1:
+                        akku_soc += int(Akkustatus[5] * (-1 + Ladeverlust))
+                    else:
+                        akku_soc += int(Akkustatus[5] / (-1 - Ladeverlust))
             else:
                 akku_soc += min_net_power
-            # Akku auf Maximum begrenzen
-            if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
-            # Akkustatus und Ladung reduzieren, wenn SOC-Begrenzung durch Zwangsladung überschritten und der kleiste Wert größer minimum_batterylevel
-            # auch hier wegen Ladeverlust anbringen, hier ladung um Ladeverlust erhöhen um auf den Akkuollstand zu kommen
-            kleinster_soc = min(zeile[4] for zeile in pv_data_charge)
-            if akku_soc > max_batt_dyn_ladung_W and Akkustatus[5] < -1:
-                akku_soc_reduziert = int((akku_soc - max_batt_dyn_ladung_W + Akkustatus[5]) * (1 + Ladeverlust))
-                if akku_soc_reduziert > -1: akku_soc_reduziert = -1
-                Akkustatus[5] = akku_soc_reduziert
-                akku_soc = max_batt_dyn_ladung_W
+
             # Akustand muss minimal unter minimum_batterylevel sein
             if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
+            # Akku nochmal auf Maximum begrenzen
+            if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
             Akkustatus[4] = akku_soc
 
         return(pv_data_charge)
@@ -273,7 +276,9 @@ class dynamic:
                         # Hier noch Ladung auf max_batt_dyn_ladung des Akku begrenzen
                         if(dyn_print_level >= 3): print(">> max_batt_dyn_ladung_W: ", max_batt_dyn_ladung_W)
                         # Bei Ladung wird Verbrauch auch aus Netz gezogen + Ladeverlust anbringen
-                        max_ladewert_grenze = int((pv_data_charge[zeilen_index][4] - max_batt_dyn_ladung_W) * (1 + (Akku_Verlust_Prozent/200)))
+                        min_net_power = pv_data_charge[zeilen_index][1] - pv_data_charge[zeilen_index][2]
+                        if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
+                        max_ladewert_grenze = int((pv_data_charge[zeilen_index][4] - min_net_power - max_batt_dyn_ladung_W) * (1 + (Akku_Verlust_Prozent/200)))
                         if(dyn_print_level >= 3): print(">> max_ladewert_grenze: ", pv_data_charge[zeilen_index][4], max_ladewert_grenze)
                         if max_ladewert_grenze > -1 or max_ladewert > charge_rate_kW * -1: max_ladewert = -1
                         if max_ladewert_grenze > max_ladewert: max_ladewert = max_ladewert_grenze
