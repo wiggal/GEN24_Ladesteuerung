@@ -162,8 +162,7 @@ heute_start = datetime(jetzt.year, jetzt.month, jetzt.day, jetzt.hour)
 
 # SteuerCode erzeugen
 # Für jede Stunde Steuercode  EntLadesteuerung ermitteln
-# Alte Einträge in ENTLadeStrg lesen, wenn Wiederherstellung aktiviert.
-Eintraege_wiederherstellen = 0
+# Alte Einträge in ENTLadeStrg lesen
 entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
 
 SteuerCode = []
@@ -175,33 +174,23 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     Res_Feld2 = 0
     Options = ''
     SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
-    if Eintraege_wiederherstellen == 1:
-        # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
-        try:
-            if entladesteurungsdata[Stunde]['Res_Feld1'] + entladesteurungsdata[Stunde]['Res_Feld2'] > 0:
-                Res_Feld1 = entladesteurungsdata[Stunde]['Res_Feld1']
-                Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
-            if entladesteurungsdata[Stunde]['Options'] != '':
-                Options = entladesteurungsdata[Stunde]['Options']
-        except:
-            pass
 
     for Stundenliste in pv_data_charge:
         if SuchStunde in Stundenliste:
-            if Eintraege_wiederherstellen == 1:
-                if Res_Feld1 + Res_Feld2 > 0:
-                    Options = str(Res_Feld1)+","+str(Res_Feld2)
             Res_Feld1 = 0
             Res_Feld2 = Stundenliste[5]
+            if Res_Feld2 < 0:
+                Options = 'DynPrice'
             break
 
-    # Wenn keine DynamicPriceCheck-Eintrag evtl gemerkte Einträge wiederherstellen
-    if Eintraege_wiederherstellen == 1:
-        if Options != '' and Res_Feld2 >= 0:
-            Res_Feld = Options.split(',')
-            Res_Feld1 = Res_Feld[0]
-            Res_Feld2 = Res_Feld[1]
+    # Wenn manueller Eintrag nicht überschreiben
+    # Damit kein Fehler kommt, wenn Datensatz in SQLsteuerdatei nicht existiert
+    try:
+        if entladesteurungsdata[Stunde]['Options'] == '' and entladesteurungsdata[Stunde]['Res_Feld2'] < 0:
+            Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
             Options = ''
+    except:
+        pass
 
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, Res_Feld1, Res_Feld2, Options))
     # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt

@@ -50,7 +50,10 @@ hat dies folgende Auswirkung:<br/>
 <tr> <td>„leer“</td> <td>0.8</td> <td>die Entladebegrenzung wird die ganze Stunde auf 0.8kW gesetzt.</td> </tr>
 <tr> <td>8.5</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf (Verbrauch - 8.5)kW gesetzt, wenn der Verbrauch 8.5kW übersteigt, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
 <tr> <td>8.5</td> <td>0.8</td> <td>die Entladebegrenzung wird auf 0.8kW gesetzt, wenn der Verbrauch 8.5kW übersteig, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
-<tr> <td>„leer“</td> <td><font color =red>-0.8</font></td> <td>bei einem <font color =red><b>negativen</b></font> Wert im Feld "Feste Grenze" erfolgt eine Zwangsladung mit den eingetragenen kW. </td></tr>
+<tr> <td>„leer“</td> <td><font color =red>-0.8</font></td> <td>bei einem <font color =red><b>negativen</b></font> Wert im Feld "Feste Grenze" erfolgt eine Zwangsladung mit den eingetragenen kW.<br>
+Von DynamicPriceCheck.py eingetragene Zwangsladungen erhalten unter Options den Eintrag "DynPrice" und werden bei einer Neuberechung überschieben.<br>
+Manuelle Einräge ohne den "DynPrice" Eintrag werden von DynamicPriceCheck.py nicht überschrieben.
+</td></tr>
 </table>
 
 <br/><br/>

@@ -1,7 +1,12 @@
 **[0.26.2] – 2025-01-26**  
 
-- DynamicPriceCheck.py: Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
 - Downloadlink für Crontab.log eingebaut
+
+DynamicPriceCheck.py: 
+- Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
+- Manuelle Einträge zur Zwangsladung werden nicht mehr überschrieben.  
+  Einträge von DynamicPriceCheck.py erhalten im Feld `Options` den Eintrag `DynPrice` und nur diese werden überschrieben.  
+  **Achtung:** Beim Update auf diese Version müssen Eiträge zur Zwangsladung manuell gelöscht werden.
 
 Änderung in http_SymoGen24Controller2.py
 - Akkuschonung auch bei Zwangsladung möglich durch `Batterieentlandung_steuern = 2`

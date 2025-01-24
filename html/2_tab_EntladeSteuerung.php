@@ -172,7 +172,7 @@ if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
 <br /><div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze Entladung(KW)</th><th>Feste Entladegrenze(KW)</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze Entladung(KW)</th><th>Feste Entladegrenze(KW)</th><th>Options</th></tr>";
 echo "\n";
 
 // Variablen definieren
@@ -223,7 +223,7 @@ echo '</td><td bgcolor=#F1F3F4 class="Res_Feld1" contenteditable="true">';
 echo $Res_Feld1_Watt;
 echo '</td><td bgcolor=#F1F3F4 class="Res_Feld2" contenteditable="true">';
 echo $Res_Feld2_Watt;
-echo '<td style="white-space: nowrap; display:none" class="Options" contenteditable="false">';
+echo '<td style="white-space: nowrap;" bgcolor=#F1F3F4 class="Options" contenteditable="true">';
 echo $Options_wert;
 echo "</td></tr>\n";
 

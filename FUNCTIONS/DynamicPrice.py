@@ -159,17 +159,11 @@ class dynamic:
         start_time = heute.strftime('%Y-%m-%d')
         end_time = morgen.strftime('%Y-%m-%d')
 
-        # API-Endpunkt und Parameter
-        url = "https://api.energy-charts.info/price"
-        params = {
-            "start": start_time,
-            "end": end_time,
-            "area": BZN,  # Beispiel: DE für Deutschland, anpassen je nach Land
-            "currency": "EUR",  # Die Währung
-        }
+        # API-URL mit Parameter
+        url = "https://api.energy-charts.info/price?bzn={}&start={}&end={}".format(BZN, start_time, end_time)
         
         try:
-            apiResponse = requests.get(url, params=params, timeout=180)
+            apiResponse = requests.get(url, timeout=180)
             apiResponse.raise_for_status()
             if apiResponse.status_code != 204:
                 json_data1 = dict(json.loads(apiResponse.text))
@@ -179,6 +173,7 @@ class dynamic:
         except requests.exceptions.Timeout:
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
+        print(json_data1)  #entWIGGlung
         price = json_data1
         pricelist = list(zip(price['unix_seconds'], price['price']))
         pricelist_date = []
