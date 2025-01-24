@@ -173,7 +173,6 @@ class dynamic:
         except requests.exceptions.Timeout:
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
-        print(json_data1)  #entWIGGlung
         price = json_data1
         pricelist = list(zip(price['unix_seconds'], price['price']))
         pricelist_date = []
