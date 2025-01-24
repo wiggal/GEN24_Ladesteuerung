@@ -186,9 +186,9 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     # Wenn manueller Eintrag nicht überschreiben
     # Damit kein Fehler kommt, wenn Datensatz in SQLsteuerdatei nicht existiert
     try:
-        if entladesteurungsdata[Stunde]['Options'] == '' and entladesteurungsdata[Stunde]['Res_Feld2'] < 0:
+        if entladesteurungsdata[Stunde]['Options'] != 'DynPrice' and entladesteurungsdata[Stunde]['Res_Feld2'] < 0:
             Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
-            Options = ''
+            Options = entladesteurungsdata[Stunde]['Options']
     except:
         pass
 
