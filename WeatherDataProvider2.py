@@ -4,39 +4,53 @@ import json
 import FUNCTIONS.functions
 
 def loadLatestWeatherData():
+    api_key = basics.getVarConf('forecast.solar','api_key','str')
+    api_pro_key = basics.getVarConf('forecast.solar','api_pro_key','str')
     lat = basics.getVarConf('forecast.solar','lat','eval')
     lon = basics.getVarConf('forecast.solar','lon','eval')
     dec = basics.getVarConf('forecast.solar','dec','eval')
     az = basics.getVarConf('forecast.solar','az','eval')
     kwp = basics.getVarConf('forecast.solar','kwp','eval')
     anzahl_strings = basics.getVarConf('pv.strings','anzahl','eval')
-    
+    dec2 = basics.getVarConf('forecast.solar2','dec','eval')
+    az2 = basics.getVarConf('forecast.solar2','az','eval')
+    kwp2 = basics.getVarConf('forecast.solar2','kwp','eval')
+
+    # Unterscheidung zwischen Free, Personal und Personal Plus
+    url_anfang ='https://api.forecast.solar'
+    url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
+    url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
+    if api_key != 'kein':
+        url_anfang = 'https://api.forecast.solar/'+api_key
+        url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
+        url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
+        if anzahl_strings == 2 and api_pro_key == 'ja':
+            url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
+            anzahl_strings = 1
+
     try:
-        url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
         try:
             apiResponse = requests.get(url, timeout=52.50)
             #apiResponse.raise_for_status()
-            if apiResponse.status_code != 204:
+            if apiResponse.status_code == 200:
                 json_data1 = dict(json.loads(apiResponse.text))
             else:
                 print("### ERROR:  Keine forecasts-Daten von api.forecast.solar")
+                print("### ERROR URL:", url)
                 exit()
         except:
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
+
         #print(json_data1, "\n")
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
         # Koordinaten müssen gleich sein, wegen zeitgleichem Sonnenauf- bzw. untergang 
         if anzahl_strings == 2:
             dict_watts = {}
             dict_watt_hours = {}
-            dec = basics.getVarConf('forecast.solar2','dec','eval')
-            az = basics.getVarConf('forecast.solar2','az','eval')
-            kwp = basics.getVarConf('forecast.solar2','kwp','eval')
 
-            url = 'https://api.forecast.solar/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
             try:
-                apiResponse2 = requests.get(url, timeout=52.50)
+                apiResponse2 = requests.get(url2, timeout=52.50)
                 apiResponse2.raise_for_status()
                 if apiResponse2.status_code != 204:
                     json_data2 = dict(json.loads(apiResponse2.text))
@@ -61,6 +75,11 @@ def loadLatestWeatherData():
                         dict_watt_hours[key]=dict_watt_hours[key]+value
                 json_data1['result']['watts']=dict_watts
                 json_data1['result']['watt_hours']=dict_watt_hours
+
+        for key in list(json_data1['result']['watts'].keys()):
+            if ':15:00' in key or ':30:00' in key or ':45:00' in key:
+                del json_data1['result']['watts'][key]
+        #print(json_data1, "\n")
         return(json_data1)
     except OSError:
         exit()
