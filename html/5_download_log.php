@@ -13,7 +13,7 @@ if (!file_exists($filePath)) {
 }
 
 // MIME-Typ ermitteln
-$fileType = mime_content_type($filePath);
+$fileType = "log/txt";
 $fileSize = filesize($filePath);
 
 // Header für den Download
