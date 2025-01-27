@@ -1,3 +1,11 @@
+**[0.26.3] – 2025-XX-XX**  
+
+Änderung in WeatherDataProvider2.py
+- Einführen eines API_Key für `Personal` oder `Personal Plus` Accounts
+**Änderung in weather.ini** unter [forecast.solar] Parameter für die API_Keys eingeführt:
+  api_key = kein
+  api_pro_key = nein
+
 **[0.26.2] – 2025-01-26**  
 
 - Downloadlink für Crontab.log eingebaut
