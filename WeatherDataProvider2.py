@@ -5,7 +5,7 @@ import FUNCTIONS.functions
 
 def loadLatestWeatherData():
     api_key = basics.getVarConf('forecast.solar','api_key','str')
-    api_pro_key = basics.getVarConf('forecast.solar','api_pro_key','str')
+    api_pers_plus = basics.getVarConf('forecast.solar','api_pers_plus','str')
     lat = basics.getVarConf('forecast.solar','lat','eval')
     lon = basics.getVarConf('forecast.solar','lon','eval')
     dec = basics.getVarConf('forecast.solar','dec','eval')
@@ -24,7 +24,7 @@ def loadLatestWeatherData():
         url_anfang = 'https://api.forecast.solar/'+api_key
         url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
         url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
-        if anzahl_strings == 2 and api_pro_key == 'ja':
+        if anzahl_strings == 2 and api_pers_plus == 'ja':
             url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
             anzahl_strings = 1
 

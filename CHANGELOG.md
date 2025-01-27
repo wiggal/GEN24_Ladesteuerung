@@ -4,7 +4,7 @@
 - Einführen eines API_Key für `Personal` oder `Personal Plus` Accounts
 **Änderung in weather.ini** unter [forecast.solar] Parameter für die API_Keys eingeführt:
   api_key = kein
-  api_pro_key = nein
+  api_pers_plus = nein
 
 **[0.26.2] – 2025-01-26**  
 
