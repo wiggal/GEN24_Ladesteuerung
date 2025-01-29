@@ -160,7 +160,7 @@ if __name__ == '__main__':
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
                 print_level = basics.getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
-                    print('solcast.com: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
+                    print('solcast.com ERROR: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
                 dataIsExpired = False
 
@@ -178,6 +178,7 @@ if __name__ == '__main__':
                 if (MaximalPrognosebegrenzung == 2):
                     data = basics.Prognoseoptimierung(data)
                 basics.storeWeatherData(weatherfile, data, now, 'solcast.com')
+                print(f'solcast.com OK: Prognosedaten vom {dateCreated} gespeichert.')
         else:
             print("Fehler bei Datenanforderung api.solcast.com.au:")
             print(data_err)
