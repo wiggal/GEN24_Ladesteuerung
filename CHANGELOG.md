@@ -6,6 +6,8 @@
   api_key = kein
   api_pers_plus = nein
 
+Die Prognoseskripte schreiben nun auch bei erfolgreicher Anforderung in die Crontab.log.
+
 FIX: Fehler beim Download von Crontab.log im Docker
 
 **[0.26.2] – 2025-01-26**  

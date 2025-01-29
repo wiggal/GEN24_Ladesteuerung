@@ -107,7 +107,7 @@ if __name__ == '__main__':
             if (dataAgeInMinutes < dataAgeMaxInMinutes):                
                 print_level = basics.getVarConf('env','print_level','eval')
                 if ( print_level != 0 ):
-                    print('forecast.solar: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
+                    print('forecast.solar ERROR: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
                     print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}')
                 dataIsExpired = False
 
@@ -122,6 +122,7 @@ if __name__ == '__main__':
                 if (MaximalPrognosebegrenzung == 2):
                     data = basics.Prognoseoptimierung(data)
                 basics.storeWeatherData(weatherfile, data, now, 'forecast.solar')
+                print(f'forecast.solar OK: Prognosedaten vom {dateCreated} gespeichert.')
         else:
             print("Fehler bei Datenanforderung api.forecast.solar:")
             print(data)
