@@ -283,6 +283,12 @@ td {font-size: 160%;
 <tr><th colspan="2"><input type="hidden" name="Zeile[6]" value='' >[forecast.solar]</th></tr>
 <tr><td><input type="hidden" name="Zeile[7][0]" value=''>weatherfile</td>
 <td><input type="text" name="Zeile[7][1]" value="weatherData.json" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[18]" value='' >; Wenn api_key nicht 'kein' ist, wird er für die Prognoseabfrage verwendet.</td></tr>
+<tr><td><input type="hidden" name="Zeile[19][0]" value='api_key = '>api_key</td>
+<td><input type="text" name="Zeile[19][1]" value="kein" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[20]" value='' >; Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können zwei Ausrichtungen in einer Abrfage behandelt werden.</td></tr>
+<tr><td><input type="hidden" name="Zeile[21][0]" value='api_pers_plus = '>api_pers_plus</td>
+<td><input type="text" name="Zeile[21][1]" value="nein" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[8][0]" value=''>lat</td>
 <td><input type="text" name="Zeile[8][1]" value="48.577" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[9][0]" value=''>lon</td>
@@ -309,7 +315,7 @@ td {font-size: 160%;
 <tr><td><input type="hidden" name="Zeile[22][0]" value=''>weatherfile</td>
 <td><input type="text" name="Zeile[22][1]" value="weatherData.json" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[23][0]" value=''>accesstoken</td>
-<td><input type="text" name="Zeile[23][1]" value="sDN45B3Hz0Sx1HW2j1at0mZpTROP-Gfa" readonly></td></tr>
+<td><input type="text" name="Zeile[23][1]" value="XXXXXXXXXXX" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[24][0]" value=''>item</td>
 <td><input type="text" name="Zeile[24][1]" value="inverter" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[25][0]" value=''>id</td>
@@ -336,9 +342,9 @@ td {font-size: 160%;
 <tr><td><input type="hidden" name="Zeile[39][0]" value=''>weatherfile</td>
 <td><input type="text" name="Zeile[39][1]" value="weatherData.json" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[40][0]" value=''>api_key</td>
-<td><input type="text" name="Zeile[40][1]" value="5XbV-rmsi1edXMKxOAo7Udq_WyPIMWyn" readonly></td></tr>
+<td><input type="text" name="Zeile[40][1]" value="xxxxxxxxxxxxxx" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[41][0]" value=''>resource_id</td>
-<td><input type="text" name="Zeile[41][1]" value="d53c-c3bb-fe03-bc1d" readonly></td></tr>
+<td><input type="text" name="Zeile[41][1]" value="yyyyyyyyy" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[42][0]" value=''>dataAgeMaxInMinutes</td>
 <td><input type="text" name="Zeile[42][1]" value="1000" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[43]" value='' >; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch.</td></tr>
