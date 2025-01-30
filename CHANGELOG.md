@@ -1,3 +1,8 @@
+**[0.26.4] – 2025-01-31**  
+
+FIX: DynamicPriceCheck.py: Strompreisabfrage dauert zu lange, Timeout 10 Sekunden gesetzt
+FIX: Prognoseskripte schreiben falsche Zeit in Crontab.log.
+
 **[0.26.3] – 2025-01-30**  
 
 Änderung in WeatherDataProvider2.py
