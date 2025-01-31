@@ -145,14 +145,18 @@ if(dyn_print_level >= 2): print("\n*****************  DEBUGGING ****************
 # Spalte Akkustand und Ladewatt 0.1 anhängen
 pv_data_charge = [zeile + [0, 0.1] for zeile in pv_data]
 
-# Akkustände neu berechnen
-dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
 # Mit Funktion get_charge_stop Ladepunkte usw. berechnen
-pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+if(dyn_print_level == 4):
+    print(">>>>>>>>>>>>>>>>>  Test neuer Algorithmus   <<<<<<<<<<<<<<<<<\n")
+    pv_data_charge = dynamic.get_charge_stop2(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh)
+else:
+    pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+
+if(dyn_print_level >= 2): print("\n***************** ENDE DEBUGGING *****************")
 
 if(dyn_print_level >= 1):
     print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
-    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Batteriestand (W)", "Ladewert"]
+    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
     dynamic.listAStable(headers, pv_data_charge)
 
 # Aktuelles Datum und Uhrzeit

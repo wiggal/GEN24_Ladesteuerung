@@ -1,3 +1,8 @@
+**[0.26.5] – 2025-XX-XX**  
+
+DynamicPriceCheck.py:
+- Weiterentwicklung durch neue Algorithmen
+
 **[0.26.4] – 2025-01-31**  
 
 FIX: DynamicPriceCheck.py: Strompreisabfrage dauert zu lange, Timeout 10 Sekunden gesetzt
