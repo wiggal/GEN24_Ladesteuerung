@@ -342,7 +342,7 @@ class dynamic:
                     Akkustand = item[4]
                     max_preis = item[3]
                     max_index = index
-            # Bewertung auf 0 setzen, wenn Akuustand reicht, sonst -0.1
+            # Bewertung auf 0 setzen, wenn Akkustand reicht oder PV > Verbrauch, sonst -0.1
             if max_index != -1 and (Akkustand > minimum_batterylevel or pv_data_charge[max_index][1] - pv_data_charge[max_index][2] > 0):
                 pv_data_charge[max_index][5] = 0
                 # Akkustände neu berechnen
@@ -397,8 +397,9 @@ class dynamic:
                         else:
                             max_ladewert_grenze_tmp = zeile_max_price[1] - zeile_max_price[2] - pv_data_charge[zeilen_index][1] + pv_data_charge[zeilen_index][2]
                         #max_ladewert_grenze = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/100)))  #entWIGGlung Erst mal ohne Ladeverlust
+                        if Ladung_merken > 0: max_ladewert_grenze_tmp += Ladung_merken
                         if max_ladewert_grenze_tmp > 0: 
-                            Ladung_merken = max_ladewert_grenze_tmp
+                            Ladung_merken += max_ladewert_grenze_tmp
                             max_ladewert_grenze_tmp = -2
                         max_ladewert_grenze = int(max_ladewert_grenze_tmp )
                         # Wenn noch Restladung vom vorherigen Lauf generkt ist:
