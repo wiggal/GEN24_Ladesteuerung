@@ -343,7 +343,7 @@ class dynamic:
                     max_preis = item[3]
                     max_index = index
             # Bewertung auf 0 setzen, wenn Akuustand reicht, sonst -0.1
-            if max_index != -1 and Akkustand > minimum_batterylevel:
+            if max_index != -1 and (Akkustand > minimum_batterylevel or pv_data_charge[max_index][1] - pv_data_charge[max_index][2] > 0):
                 pv_data_charge[max_index][5] = 0
                 # Akkustände neu berechnen
             else:
@@ -356,6 +356,9 @@ class dynamic:
         # 2.) nächster Schritt Alle Zeten mit -0.1 auf Zwangsladung oder Ladestopp prüfen
         self.akkustand_neu2(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
         Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
+        #zeile_min_soc = min(pv_data_charge, key=lambda x: x[4])  #entWIGGlung
+        #diff_zu_miv_soc = zeile_min_soc[4]-minimum_batterylevel  #entWIGGlung
+        #print("diff_zu_miv_soc: ", diff_zu_miv_soc)  #entWIGGlung
         Ladung_merken = 0
         STOP_Ladung_merken = 0
         while Zeilen > 0:
@@ -394,8 +397,12 @@ class dynamic:
                         else:
                             max_ladewert_grenze_tmp = zeile_max_price[1] - zeile_max_price[2] - pv_data_charge[zeilen_index][1] + pv_data_charge[zeilen_index][2]
                         #max_ladewert_grenze = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/100)))  #entWIGGlung Erst mal ohne Ladeverlust
+                        if max_ladewert_grenze_tmp > 0: 
+                            Ladung_merken = max_ladewert_grenze_tmp
+                            max_ladewert_grenze_tmp = -2
                         max_ladewert_grenze = int(max_ladewert_grenze_tmp )
                         # Wenn noch Restladung vom vorherigen Lauf generkt ist:
+                        print("Ladung_merken:", max_ladewert_grenze, Ladung_merken, pv_data_charge[zeilen_index])  #entWIGGlung
                         if Ladung_merken < 0:
                             if pv_data_charge[zeilen_index][5] < 0:
                                 max_ladewert_grenze = Ladung_merken
