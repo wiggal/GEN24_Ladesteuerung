@@ -163,7 +163,7 @@ class dynamic:
         url = "https://api.energy-charts.info/price?bzn={}&start={}&end={}".format(BZN, start_time, end_time)
         
         try:
-            apiResponse = requests.get(url, timeout=3)  #entWIGGlung soll 10
+            apiResponse = requests.get(url, timeout=10)  #entWIGGlung soll 10
             apiResponse.raise_for_status()
             if apiResponse.status_code != 204:
                 json_data1 = dict(json.loads(apiResponse.text))
@@ -322,6 +322,7 @@ class dynamic:
         return(pv_data_charge)
 
     def get_charge_stop2(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh):
+        print("================ COMMIT 5 =================")  #entWIGGlung
         dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
@@ -358,11 +359,11 @@ class dynamic:
         # 2.) nächster Schritt Alle Zeten mit -0.1 auf Zwangsladung oder Ladestopp prüfen
         self.akkustand_neu2(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
         Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
-        #zeile_min_soc = min(pv_data_charge, key=lambda x: x[4])  #entWIGGlung
-        #diff_zu_miv_soc = zeile_min_soc[4]-minimum_batterylevel  #entWIGGlung
-        #print("diff_zu_miv_soc: ", diff_zu_miv_soc)  #entWIGGlung
         Ladung_merken = 0
-        STOP_Ladung_merken = 0
+        # Wenn kleinster SOC nicht erreicht Überschuss merken
+        zeile_min_soc = min(pv_data_charge, key=lambda x: x[4])
+        Ladung_merken = zeile_min_soc[4]-minimum_batterylevel
+        print("diff_zu_miv_soc => Ladung_merken: ", Ladung_merken)  #entWIGGlung
         while Zeilen > 0:
             max_ladewert = charge_rate_kW * -1
             zeile_max_price_Ladewert = 0
@@ -399,13 +400,16 @@ class dynamic:
                         else:
                             max_ladewert_grenze_tmp = zeile_max_price[1] - zeile_max_price[2] - pv_data_charge[zeilen_index][1] + pv_data_charge[zeilen_index][2]
                         #max_ladewert_grenze = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/100)))  #entWIGGlung Erst mal ohne Ladeverlust
-                        if Ladung_merken > 0: max_ladewert_grenze_tmp += Ladung_merken
+                        if Ladung_merken > 0: 
+                            max_ladewert_grenze_tmp += Ladung_merken
+                            Ladung_merken = 0
+                        # wenn die eingesparte Energie schon höher ist als die benötigte
                         if max_ladewert_grenze_tmp > 0: 
                             Ladung_merken += max_ladewert_grenze_tmp
                             max_ladewert_grenze_tmp = -2
                         max_ladewert_grenze = int(max_ladewert_grenze_tmp )
-                        # Wenn noch Restladung vom vorherigen Lauf generkt ist:
-                        print("Ladung_merken:", max_ladewert_grenze, Ladung_merken, pv_data_charge[zeilen_index])  #entWIGGlung
+                        # Wenn noch Restladung vom vorherigen Lauf gemerkt ist:
+                        print("Stand von Ladung_merken <> 0?", Ladung_merken)  #entWIGGlung
                         if Ladung_merken < 0:
                             if pv_data_charge[zeilen_index][5] < 0:
                                 max_ladewert_grenze = Ladung_merken
@@ -445,20 +449,20 @@ class dynamic:
                     else:
                         kleiner_price_verbrauch = 0
 
-                    if(dyn_print_level >= 3): print(">> \n>> max_price_verbrauch, kleiner_price_verbrauch, STOP_Ladung_merken",max_price_verbrauch, kleiner_price_verbrauch, STOP_Ladung_merken) 
-                    if STOP_Ladung_merken > max_price_verbrauch:
-                        STOP_Ladung_merken -= max_price_verbrauch
+                    if(dyn_print_level >= 3): print(">> \n>> max_price_verbrauch, kleiner_price_verbrauch, Ladung_merken",max_price_verbrauch, kleiner_price_verbrauch, Ladung_merken) 
+                    if Ladung_merken > max_price_verbrauch:
+                        Ladung_merken -= max_price_verbrauch
                         zeile_max_price_Ladewert = 0
-                    elif STOP_Ladung_merken < kleiner_price_verbrauch * -1:
-                        STOP_Ladung_merken += kleiner_price_verbrauch
+                    elif Ladung_merken < kleiner_price_verbrauch * -1:
+                        Ladung_merken += kleiner_price_verbrauch
                         zeile_max_price_Ladewert = -0.1
                         pv_data_charge[zeilen_index_min_price][5] = -1
                     else:
-                        STOP_Ladung_merken += kleiner_price_verbrauch - max_price_verbrauch
+                        Ladung_merken += kleiner_price_verbrauch - max_price_verbrauch
                         zeile_max_price_Ladewert = 0
                         pv_data_charge[zeilen_index_min_price][5] = -1
 
-                    if(dyn_print_level >= 3): print(">> \n>> max_price_verbrauch, kleiner_price_verbrauch, STOP_Ladung_merken",max_price_verbrauch, kleiner_price_verbrauch, STOP_Ladung_merken) 
+                    if(dyn_print_level >= 3): print(">> \n>> max_price_verbrauch, kleiner_price_verbrauch, Ladung_merken",max_price_verbrauch, kleiner_price_verbrauch, Ladung_merken) 
                         
             # Finde Index der Zeile mit dem gesuchten Wert
             zeilen_index_max_price = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
