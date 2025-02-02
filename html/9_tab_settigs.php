@@ -123,7 +123,7 @@ for ($i = 0; $i <= 4; $i++) {
 
 #Checkbox wie in DB setzen
 $CheckOptionsDB = explode(":", $EV_Reservierung['23:09']['Options']);
-$CheckOptionsALL = array("logging", "laden", "entladen", "optimierung",'notstrom');
+$CheckOptionsALL = array("logging", "laden", "entladen", "optimierung",'notstrom','dynamicprice');
 $Setting_check = array();
 foreach ($CheckOptionsALL as &$option) {
     if (in_array($option, $CheckOptionsDB)) {
@@ -148,6 +148,7 @@ foreach ($CheckOptionsALL as &$option) {
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer7" value="entladen" <?php echo $Setting_check['entladen'] ?> >Ent- und Zwangsladesteuerung</label>
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer8" value="optimierung" <?php echo $Setting_check['optimierung'] ?> >Eigenverbrauchs-Optimierung</label>
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer9" value="notstrom" <?php echo $Setting_check['notstrom'] ?> >Notstromreserve</label>
+ <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer10" value="dynamicprice" <?php echo $Setting_check['dynamicprice'] ?> >DynamicPrice</label>
 </div>
 </div>
 
@@ -164,6 +165,7 @@ function disablecheckboxes() {
     document.getElementById("steuer7").disabled = false;
     document.getElementById("steuer8").disabled = false;
     document.getElementById("steuer9").disabled = false;
+    document.getElementById("steuer10").disabled = false;
   } else {
     document.getElementById("steuer5").checked = false;
     document.getElementById("steuer5").disabled = true;
@@ -175,6 +177,8 @@ function disablecheckboxes() {
     document.getElementById("steuer8").disabled = true;
     document.getElementById("steuer9").checked = false;
     document.getElementById("steuer9").disabled = true;
+    document.getElementById("steuer10").checked = false;
+    document.getElementById("steuer10").disabled = true;
   }
 }
 </script>
