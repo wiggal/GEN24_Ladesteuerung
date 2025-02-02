@@ -12,6 +12,7 @@ import FUNCTIONS.SQLall
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.GEN24_API
 import FUNCTIONS.httprequest
+import FUNCTIONS.Steuerdaten
 
 
 if __name__ == '__main__':
@@ -231,11 +232,13 @@ if(dyn_print_level >= 1):
     headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Options"]
     dynamic.listAStable(headers, SteuerCode)
 
-Parameter = ''
-if len(argv) > 1 :
-    Parameter = argv[1]
+# WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
+SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
+print_level = basics.getVarConf('env','print_level','eval')
+Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
+Options = Parameter[2]
 
-if( Parameter == 'schreiben'):
+if ('dynamicprice' in Options):
     SteuerCode.sort()
     DBCode.sort()
     if SteuerCode == DBCode:
@@ -244,7 +247,7 @@ if( Parameter == 'schreiben'):
         dynamic.saveProg_Steuerung(SteuerCode)
         if(dyn_print_level >= 1): print("\nSteuercodes wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
 else:
-    if(dyn_print_level >= 1): print("\nSteuercodes wurden NICHT geschrieben, Parameter schreiben fehlt")
+    if(dyn_print_level >= 1): print("\nSteuercodes wurden NICHT geschrieben, da Option \"dynamicprice\" NICHT gesetzt!")
 
 if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 
