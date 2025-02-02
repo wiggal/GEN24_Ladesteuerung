@@ -314,7 +314,9 @@ class dynamic:
                 akku_soc += min_net_power
 
             # Akustand muss minimal unter minimum_batterylevel sein
-            #if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)  #entWIGGlung
+            if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
+            # Akku nochmal auf Maximum begrenzen
+            if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
             Akkustatus[4] = akku_soc
 
         return(pv_data_charge)
@@ -343,7 +345,7 @@ class dynamic:
                     max_preis = item[3]
                     max_index = index
             # Bewertung auf 0 setzen, wenn Akkustand reicht oder PV > Verbrauch, sonst -0.1
-            if max_index != -1 and (Akkustand > minimum_batterylevel or pv_data_charge[max_index][1] - pv_data_charge[max_index][2] > 0):
+            if max_index != -1 and Akkustand > minimum_batterylevel:
                 pv_data_charge[max_index][5] = 0
                 # Akkustände neu berechnen
             else:
