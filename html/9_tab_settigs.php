@@ -148,7 +148,7 @@ foreach ($CheckOptionsALL as &$option) {
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer7" value="entladen" <?php echo $Setting_check['entladen'] ?> >Ent- und Zwangsladesteuerung</label>
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer8" value="optimierung" <?php echo $Setting_check['optimierung'] ?> >Eigenverbrauchs-Optimierung</label>
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer9" value="notstrom" <?php echo $Setting_check['notstrom'] ?> >Notstromreserve</label>
- <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer10" value="dynamicprice" <?php echo $Setting_check['dynamicprice'] ?> >DynamicPrice</label>
+ <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer10" value="dynamicprice" <?php echo $Setting_check['dynamicprice'] ?> >Dynamischer Strompreis</label>
 </div>
 </div>
 
