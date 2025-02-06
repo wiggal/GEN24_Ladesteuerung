@@ -163,15 +163,15 @@ class dynamic:
         url = "https://api.energy-charts.info/price?bzn={}&start={}&end={}".format(BZN, start_time, end_time)
         
         try:
-            apiResponse = requests.get(url, timeout=10)  #entWIGGlung soll 10
+            apiResponse = requests.get(url, timeout=10)
             apiResponse.raise_for_status()
             if apiResponse.status_code != 204:
                 json_data1 = dict(json.loads(apiResponse.text))
             else:
-                print("### ERROR:  Keine forecasts-Daten von api.forecast.solar")
+                print("### ERROR:  Keine Strompreise von api.energy-charts.info")
                 exit()
         except requests.exceptions.Timeout:
-            print("### ERROR:  Timeout von api.forecast.solar")
+            print("### ERROR:  Timeout, keine Strompreise von api.energy-charts.info")
             exit()
         price = json_data1
         pricelist = list(zip(price['unix_seconds'], price['price']))
@@ -322,7 +322,7 @@ class dynamic:
         return(pv_data_charge)
 
     def get_charge_stop2(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh):
-        print("================ COMMIT 5 =================")  #entWIGGlung
+        print("================ COMMIT 8 =================")  #entWIGGlung
         dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
@@ -406,7 +406,11 @@ class dynamic:
                         # wenn die eingesparte Energie schon höher ist als die benötigte
                         if max_ladewert_grenze_tmp > 0: 
                             Ladung_merken += max_ladewert_grenze_tmp
-                            max_ladewert_grenze_tmp = -2
+                            if pv_data_charge[zeilen_index][5] > -2:
+                                max_ladewert_grenze_tmp = -2
+                            else:
+                                max_ladewert_grenze_tmp = 0
+
                         max_ladewert_grenze = int(max_ladewert_grenze_tmp )
                         # Wenn noch Restladung vom vorherigen Lauf gemerkt ist:
                         print("Stand von Ladung_merken <> 0?", Ladung_merken)  #entWIGGlung
