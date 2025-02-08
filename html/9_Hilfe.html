@@ -39,9 +39,10 @@
 <table>
 <tr style="font-size:150%" > <th colspan="2">Programmsteuerung</th><th>Erläuterung</th> </tr>
 <tr> <td colspan="2"><b>WebUI-Settings ausschalten</b></td>  <td>Die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden, mögliche Aufrufparameter sind:<br>
-<b>logging,laden,entladen,optimierung,notstrom</b><br> 
+<b>logging,laden,entladen,optimierung,notstrom,dynamicprice,nowebui</b><br> 
 Sie können nach Bedarf kombiniert werden, und müssen mit Komma getrennt <b>ohne Leerzeichen</b> beim Programmaufruf angegeben werden.<br>
-Der Aufrufparameter <b>schreiben</b> setzt alle Parameter.<br>
+Der Aufrufparameter <b>schreiben</b> setzt alle Parameter, außer <b>nowebui</b>.<br>
+Mit dem Aufrufparameter <b>nowebui</b> werden die Settings-Einstellungen ignoriert.<br>
 Die WebUI-Settings haben bei dieser Option keinen Einfluss auf die Programmsteuerung</td> </tr>
 <tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings löschen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>gelöscht</b>.</td> </tr>
 <tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings belassen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>belassen</b>.</td> </tr>
