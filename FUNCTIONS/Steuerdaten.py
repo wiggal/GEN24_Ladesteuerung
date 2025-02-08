@@ -36,24 +36,26 @@ class readcontroldata:
         Options = []
 
         # wenn WebUI-Settings ausgeschaltet Aufrufparameter (schreiben, logging) umsetzen
-        if Prog_Steuer_code == 0:
+        if Prog_Steuer_code == 0 or 'nowebui' in Parameter:
             if Parameter == 'schreiben':
                 Options = ['logging','laden','entladen','optimierung','notstrom','dynamicprice']
             else:
                 Options = Parameter.split(",")
-        # Ab hier WebUI-Settings
-        if Prog_Steuer_code == 1:
-            Meldung = "AUS (WR löschen)"
-            Parameter = 'exit0'
-        if Prog_Steuer_code == 2:
-            Meldung = "AUS (WR belassen)"
-            Parameter = 'exit1'
-        if Prog_Steuer_code == 3:
-            Meldung = "Analyse in Crontab.log"
-            Parameter = 'logging'
-        if Prog_Steuer_code == 4:
-            Meldung = "Ladesteuerung:" + str(Optionen)
-            Parameter = 'schreiben'
-            Options = Optionen
+        else:
+            # Ab hier WebUI-Settings
+            if Prog_Steuer_code == 1:
+                Meldung = "AUS (WR löschen)"
+                Parameter = 'exit0'
+            if Prog_Steuer_code == 2:
+                Meldung = "AUS (WR belassen)"
+                Parameter = 'exit1'
+            if Prog_Steuer_code == 3:
+                Meldung = "Analyse in Crontab.log"
+                Parameter = 'logging'
+            if Prog_Steuer_code == 4:
+                Meldung = "Ladesteuerung:" + str(Optionen)
+                Parameter = 'schreiben'
+                Options = Optionen
+
         return(Parameter, Meldung, Options)
     
