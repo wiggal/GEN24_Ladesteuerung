@@ -5,6 +5,8 @@ DynamicPriceCheck.py:
 
 DynamicPriceCheck.py: Steuerung über WebUI-Settings eingebaut
 
+GEN24-API: Anpassungen an Firmwareversion 1.35-4
+
 **[0.26.4] – 2025-01-31**  
 
 FIX: DynamicPriceCheck.py: Strompreisabfrage dauert zu lange, Timeout 10 Sekunden gesetzt

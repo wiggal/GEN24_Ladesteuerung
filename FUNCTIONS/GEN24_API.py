@@ -17,30 +17,57 @@ class gen24api:
         text = url.text
         data = json.loads(text)
         API = {}
-        # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
-        # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
-        API['BAT_MODE'] = data['Body']['Data']['393216']['channels']['BAT_MODE_ENFORCED_U16'] 
-        if API['BAT_MODE'] != 2:
-            # Aktuelle Werte für Prognoseberechung
-            attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
-            # BattganzeKapazWatt * Akku_Zustand
-            API['Akku_Zustand'] = data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16'] / 100
-            #API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'] * API['Akku_Zustand']) # API['Akku_Zustand'] nur geschätzt, daher nicht berücksichtigt
-            API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
-            API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
-            API['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
-            API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
-            API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
-            API['aktuellePVProduktion'] = int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
-            API['aktuelleBatteriePower'] = int(data['Body']['Data']['262144']['channels']['BAT_POWERACTIVE_F64'])
-            API['BatteryMaxDischargePercent'] = ''
-            # Zählerstände fürs Logging
-            API['AC_Produktion'] =  int(data['Body']['Data']['327680']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_U64']/3600)
-            API['DC_Produktion'] =  int((data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
-            API['Batterie_IN'] =    int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
-            API['Batterie_OUT'] =   int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
-            API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
-            API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
+        # "393216 OR 0 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
+        # "393216 OR 0 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
+        try:
+            # API ab Firmware 1.35.4-1
+            API['BAT_MODE'] = data['Body']['Data']['0']['channels']['BAT_MODE_ENFORCED_U16'] 
+            if API['BAT_MODE'] != 2:
+                # Aktuelle Werte für Prognoseberechung
+                attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
+                # BattganzeKapazWatt * Akku_Zustand
+                API['Akku_Zustand'] = data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16'] / 100
+                #API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'] * API['Akku_Zustand']) # API['Akku_Zustand'] nur geschätzt, daher nicht berücksichtigt
+                API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
+                API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
+                API['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
+                API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
+                API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
+                API['aktuellePVProduktion'] = int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32'])
+                API['aktuelleBatteriePower'] = int(data['Body']['Data']['0']['channels']['BAT_POWERACTIVE_MEAN_F32'])
+                API['BatteryMaxDischargePercent'] = ''
+                # Zählerstände fürs Logging
+                API['AC_Produktion'] =  int((data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
+                    data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
+                API['DC_Produktion'] =  int((data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+                API['Batterie_IN'] =    int(data['Body']['Data']['0']['channels']['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
+                API['Batterie_OUT'] =   int(data['Body']['Data']['0']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
+                API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
+                API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
+        except:
+            # API vor Firmware 1.35.4-1
+            API['BAT_MODE'] = data['Body']['Data']['393216']['channels']['BAT_MODE_ENFORCED_U16'] 
+            if API['BAT_MODE'] != 2:
+                # Aktuelle Werte für Prognoseberechung
+                attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
+                # BattganzeKapazWatt * Akku_Zustand
+                API['Akku_Zustand'] = data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16'] / 100
+                #API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'] * API['Akku_Zustand']) # API['Akku_Zustand'] nur geschätzt, daher nicht berücksichtigt
+                API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
+                API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
+                API['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
+                API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
+                API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
+                API['aktuellePVProduktion'] = int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
+                API['aktuelleBatteriePower'] = int(data['Body']['Data']['262144']['channels']['BAT_POWERACTIVE_F64'])
+                API['BatteryMaxDischargePercent'] = ''
+                # Zählerstände fürs Logging
+                API['AC_Produktion'] =  int(data['Body']['Data']['327680']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_U64']/3600)
+                API['DC_Produktion'] =  int((data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+                API['Batterie_IN'] =    int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
+                API['Batterie_OUT'] =   int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
+                API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
+                API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
     
         # Daten von weiteren GEN24 lesen
         IP_weitere_Gen24 = basics.getVarConf('gen24','IP_weitere_Gen24','str')
@@ -53,13 +80,22 @@ class gen24api:
                     url = requests.get(gen24url)
                     text = url.text
                     data = json.loads(text)
-                    API['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
-                    API['AC_Produktion'] +=  int(data['Body']['Data']['327680']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_U64']/3600)
-                    API['DC_Produktion'] += int((data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+                    try:
+                        # API ab Firmware 1.35.4-1
+                        API['aktuellePVProduktion'] += int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32'])
+                        API['AC_Produktion'] += int((data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
+                            data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
+                        API['DC_Produktion'] += int((data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+                    except:
+                        # API vor Firmware 1.35.4-1
+                        API['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
+                        API['AC_Produktion'] +=  int(data['Body']['Data']['327680']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_U64']/3600)
+                        API['DC_Produktion'] += int((data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['393216']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
                 except:
                     print("API von WR ", weitereIP, " nicht erreichbar")
-    
+
         # Daten von Symos lesen und addieren
+        # Symios sind noch auf alter API -> neue Firmware abwarten
         IP_weitere_Symo = basics.getVarConf('gen24','IP_weitere_Symo','str')
         if(IP_weitere_Symo != 'no'):
             IP_weitere_Symo = IP_weitere_Symo.replace(" ", "")
@@ -83,11 +119,6 @@ class gen24api:
                     Produktion_MAX_DB = sqlall.getSQLlastProduktion('PV_Daten.sqlite')
                     DB_AC = Produktion_MAX_DB[0]
                     DB_DC = Produktion_MAX_DB[1]
-                    #print("Produktion_MAX_DB: ", Produktion_MAX_DB, Produktion_MAX_DB[1] - Produktion_MAX_DB[0])
-                    #print("aktuelle Diff DC-AC: ", API['DC_Produktion'] - API['AC_Produktion'] )
-                    #print(" Ergebnis: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]))
-                    #print("Neuer AC-WERT: ", (API['DC_Produktion'] - API['AC_Produktion']) - (Produktion_MAX_DB[1] - Produktion_MAX_DB[0]) + Produktion_MAX_DB[0])
-                    #print(DB_DC, DB_AC, API['DC_Produktion'], API['AC_Produktion'])
                     Offline_AC_DIFF = ((DB_DC - DB_AC) - (API['DC_Produktion'] - API['AC_Produktion']))
                     print("Offline_AC_DIFF: ", Offline_AC_DIFF)
                     if(Offline_AC_DIFF < 0): Offline_AC_DIFF = 0
