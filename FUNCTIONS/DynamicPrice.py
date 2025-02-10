@@ -321,7 +321,7 @@ class dynamic:
         return(pv_data_charge)
 
     def get_charge_stop2(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh):
-        print("================ COMMIT 11 =================")  #entWIGGlung
+        print("================ COMMIT 12 =================")  #entWIGGlung
         dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
@@ -338,15 +338,17 @@ class dynamic:
             max_preis = -1
             Akkustand = -1
             zeile_min_soc = min(pv_data_charge, key=lambda x: x[4])
-            # Suche nach dem größten Preis mit Spalte 5 = -0.1
+            # Suche nach dem größten Preis mit Spalte 5 = -0.01
             for index, item in enumerate(pv_data_charge):
-                if item[5] == -0.1 and item[3] > max_preis:
+                if item[5] == -0.01 and item[3] > max_preis:
                     Akkustand = zeile_min_soc[4] - item[2] + item[1]
                     max_preis = item[3]
                     max_index = index
             # Bewertung auf 0 setzen, wenn Akkustand reicht oder PV > Verbrauch, sonst -0.1
             if Akkustand > minimum_batterylevel:
                 pv_data_charge[max_index][5] = 0
+            else:
+                pv_data_charge[max_index][5] = -0.1 
 
             self.akkustand_neu2(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
 
