@@ -408,27 +408,19 @@ class dynamic:
                             max_ladewert_grenze_tmp = zeile_max_price[1] - zeile_max_price[2]
                         else:
                             max_ladewert_grenze_tmp = zeile_max_price[1] - zeile_max_price[2] - pv_data_charge[zeilen_index][1] + pv_data_charge[zeilen_index][2]
-                        #max_ladewert_grenze = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/100)))  #entWIGGlung Erst mal ohne Ladeverlust
+                            #max_ladewert_grenze = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/100)))  #entWIGGlung Erst mal ohne Ladeverlust
 
-                        if SOC_ueber_Min > 0: 
-                            max_ladewert_grenze_tmp += SOC_ueber_Min
-                            SOC_ueber_Min = 0
+                        # Abweichung vom SOC-Minimum berücksichtigen
+                        max_ladewert_grenze_tmp += SOC_ueber_Min
+
                         # wenn die eingesparte Energie schon höher ist als die benötigte
                         if max_ladewert_grenze_tmp > 0: 
-                            SOC_ueber_Min += max_ladewert_grenze_tmp
                             if pv_data_charge[zeilen_index][5] > -2:
                                 max_ladewert_grenze_tmp = -2
                             else:
                                 max_ladewert_grenze_tmp = 0
 
                         max_ladewert_grenze = int(max_ladewert_grenze_tmp )
-                        # Wenn noch Restladung vom vorherigen Lauf gemerkt ist:
-                        if SOC_ueber_Min < 0:
-                            if pv_data_charge[zeilen_index][5] < 0:
-                                max_ladewert_grenze = SOC_ueber_Min
-                            else:
-                                max_ladewert_grenze = SOC_ueber_Min  - pv_data_charge[zeilen_index][1] + pv_data_charge[zeilen_index][2]
-                            SOC_ueber_Min = 0
 
                         if(self.dyn_print_level >= 3): print(">> Ladepunkt gefunden", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index], "Ladung+", max_ladewert_grenze, "\n>> ")
                         if max_ladewert_grenze > -1 or max_ladewert > charge_rate_kW * -1: max_ladewert = -1
@@ -438,8 +430,6 @@ class dynamic:
                             zeile_max_price_Ladewert = 0
                         else:
                             # Wenn die Summe der Zwangsladungen größer als charge_rate_kW 
-                            # Zeile nochmal behandeln, da nicht gesamter Verbrauch geladen und Restladung merken
-                            # SOC_ueber_Min = charge_rate_kW + pv_data_charge[zeilen_index][5] + max_ladewert_grenze
                             if(self.dyn_print_level >= 3): print(">> charge_rate_kW + pv_data_charge[zeilen_index][5] + max_ladewert_grenze",charge_rate_kW , pv_data_charge[zeilen_index][5] , max_ladewert_grenze)
                             if(self.dyn_print_level >= 3): print(">> SOC_ueber_Min:", SOC_ueber_Min)
                             pv_data_charge[zeilen_index][5] = charge_rate_kW * -1
