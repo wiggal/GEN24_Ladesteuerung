@@ -143,16 +143,10 @@ if(dyn_print_level >= 1):
 
 if(dyn_print_level >= 2): print("\n*****************  DEBUGGING *****************")
 
-# Mit Funktion get_charge_stop Ladepunkte usw. berechnen
-if(dyn_print_level == 4):
-    print(">>>>>>>>>>>>>>>>>  Test neuer Algorithmus   <<<<<<<<<<<<<<<<<\n")
-    # Spalte Akkustand und Ladewatt 0.1 anhängen
-    pv_data_charge = [zeile + [0, -0.01] for zeile in pv_data]
-    pv_data_charge = dynamic.get_charge_stop2(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh)
-else:
-    # Spalte Akkustand und Ladewatt 0.1 anhängen
-    pv_data_charge = [zeile + [0, 0.1] for zeile in pv_data]
-    pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+# Spalte Akkustand und Ladewatt -0.01 anhängen
+pv_data_charge = [zeile + [0, -0.01] for zeile in pv_data]
+# Mit Funktion get_charge_stop2 Ladepunkte usw. berechnen
+pv_data_charge = dynamic.get_charge_stop2(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh)
 
 if(dyn_print_level >= 2): print("\n***************** ENDE DEBUGGING *****************")
 
