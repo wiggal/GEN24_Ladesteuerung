@@ -1,4 +1,4 @@
-**[0.26.5] – 2025-XX-XX**  
+**[0.26.5] – 2025-02-16**  
 
 DynamicPriceCheck.py:
 - Weiterentwicklung durch neue Algorithmen

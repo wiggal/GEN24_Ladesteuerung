@@ -392,7 +392,7 @@ if __name__ == '__main__':
 
                         # Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
                         WREntladeSchreibGrenze_Prozent = int(WREntladeSchreibGrenze_Watt / BattganzeLadeKapazWatt * 100 + 1)
-                        if (abs(Neu_BatteryMaxDischarge - BatteryMaxDischarge) < WREntladeSchreibGrenze_Prozent):
+                        if (abs(Neu_BatteryMaxDischarge - BatteryMaxDischarge) < WREntladeSchreibGrenze_Prozent) and Neu_BatteryMaxDischarge != 1:
                             Neu_BatteryMaxDischarge = BatteryMaxDischarge
 
                         ## Werte zum Überprüfen ausgeben
