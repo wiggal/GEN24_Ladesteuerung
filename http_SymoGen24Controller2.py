@@ -586,7 +586,7 @@ if __name__ == '__main__':
                         if ('logging' in Options):
                             Logging_file = basics.getVarConf('Logging','Logging_file','str')
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
-                            sqlall.save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['Netzverbrauch'], API['Einspeisung'], \
+                            sqlall.save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
                             API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
                             Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:

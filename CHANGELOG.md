@@ -1,3 +1,7 @@
+**[0.26.6] – 2025-XX-XX**  
+
+Erweiterung der DB PV_Daten.sqlite um die Spalte AC_to_DC, der die Energie vom Netz zum Akku abbildet.
+
 **[0.26.5] – 2025-02-16**  
 
 DynamicPriceCheck.py:
