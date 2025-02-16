@@ -8,36 +8,44 @@ class sqlall:
         self.now = datetime.now()
 
     # Daten in SQLite_DB speichern (lifetime Zählerständer)
-    def save_SQLite(self, database, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus):
+    def save_SQLite(self, database, AC_Produktion, DC_Produktion, AC_to_DC, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus):
+        Zeitpunkt = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
+
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
     
-        Zeitpunkt = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
-    
-        # Datenbanktabelle anlegen, wenn sie nicht existiert
-        sql_anweisung = """
-        CREATE TABLE IF NOT EXISTS pv_daten (
-        Zeitpunkt DATETIME,
-        AC_Produktion INT,
-        DC_Produktion INT,
-        Netzverbrauch INT,
-        Einspeisung INT,
-        Batterie_IN INT,
-        Batterie_OUT INT,
-        Vorhersage SMALLINT,
-        BattStatus FLOAT
-        );"""
-        zeiger.execute(sql_anweisung)
-    
-        # Daten in DB schreiben
-        zeiger.execute("""
+        try:
+            # Versuch Daten in DB schreiben (geht nicht, wenn Spalte AC_to_DC noch fehlt)
+            zeiger.execute("""
                     INSERT INTO pv_daten
-                           VALUES (?,?,?,?,?,?,?,?,?)
+                           VALUES (?,?,?,?,?,?,?,?,?,?)
                    """,
-                  (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus)
+                  (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC)
                   )
-    
-        zeiger.execute(sql_anweisung)
+        except:
+            # Wenn Datenbanktabelle noch nicht existiert, anlegen
+            zeiger.execute("""
+            CREATE TABLE IF NOT EXISTS pv_daten (
+            Zeitpunkt DATETIME,
+            AC_Produktion INT,
+            DC_Produktion INT,
+            Netzverbrauch INT,
+            Einspeisung INT,
+            Batterie_IN INT,
+            Batterie_OUT INT,
+            Vorhersage SMALLINT,
+            BattStatus FLOAT
+            )""")
+            # Spalte AC_to_DC anlegen, wenn sie nicht existiert
+            zeiger.execute("""ALTER TABLE pv_daten ADD COLUMN AC_to_DC INT""")
+            # Daten in DB nochmal versuchen zu schreiben
+            zeiger.execute("""
+                    INSERT INTO pv_daten
+                           VALUES (?,?,?,?,?,?,?,?,?,?)
+                   """,
+                  (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC)
+                  )
+            
     
         verbindung.commit()
         verbindung.close()
@@ -93,8 +101,3 @@ class sqlall:
         verbindung.commit()
         verbindung.close()
         return(record_json)
-
-
-
-    
-    
