@@ -485,3 +485,33 @@ class dynamic:
             Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
 
         return(pv_data_charge)
+
+
+    # Strompreise in SQLite_DB speichern
+    def save_Strompreise(self, database, strompreise):
+        verbindung = sqlite3.connect(database)
+        zeiger = verbindung.cursor()
+    
+        # Wenn Datenbanktabelle noch nicht existiert, anlegen
+        zeiger.execute("""
+        CREATE TABLE IF NOT EXISTS strompreise (
+        Zeitpunkt DATETIME PRIMARY KEY,
+        Bruttopreis REAL,
+        Boersenpreis REAL
+        )""")
+
+        # Daten einfügen oder aktualisieren
+        for entry in strompreise:
+            zeiger.execute('''
+                INSERT INTO strompreise (Zeitpunkt, Bruttopreis, Boersenpreis)
+                VALUES (?, ?, ?)
+                ON CONFLICT(Zeitpunkt) DO UPDATE SET
+                Bruttopreis = excluded.Bruttopreis,
+                Boersenpreis = excluded.Boersenpreis
+            ''', entry)
+
+    
+        verbindung.commit()
+        verbindung.close()
+    
+        return ()

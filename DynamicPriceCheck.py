@@ -246,3 +246,11 @@ else:
 
 if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 
+# Strompreise in PV_Daten.sqlite/Strompreise speichern
+if ('logging' in Options):
+    dynamic.save_Strompreise('PV_Daten.sqlite', pricelist_date)
+    Logging_Schreib_Ausgabe = 'Strompreise in SQLite-Datei gespeichert!'
+else:
+    Logging_Schreib_Ausgabe = "Strompreise NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
+if print_level >= 1:
+    print(Logging_Schreib_Ausgabe)
