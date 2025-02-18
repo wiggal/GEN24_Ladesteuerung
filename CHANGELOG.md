@@ -1,5 +1,8 @@
 **[0.26.6] – 2025-XX-XX**  
 
+DynamicPriceCheck.py:
+- Die Strompreise werden nun in PV_Daten.sqlite in einer neuen Tabelle `strompreise` gespeichert.
+
 Erweiterung der DB PV_Daten.sqlite um die Spalte AC_to_DC, der die Energie vom Netz zum Akku abbildet.
 
 FIX: DISCHARGE_MAX wurde gelöscht, wenn sich nur CHARGE_MAX geändert hat.  
