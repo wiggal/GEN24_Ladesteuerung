@@ -2,6 +2,8 @@
 
 Erweiterung der DB PV_Daten.sqlite um die Spalte AC_to_DC, der die Energie vom Netz zum Akku abbildet.
 
+FIX: DISCHARGE_MAX wurde gelöscht, wenn sich nur CHARGE_MAX geändert hat.  
+
 **[0.26.5] – 2025-02-16**  
 
 DynamicPriceCheck.py:

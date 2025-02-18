@@ -434,14 +434,14 @@ if __name__ == '__main__':
                         elif WR_schreiben == 1 :
                             Schreib_Ausgabe = Schreib_Ausgabe + "Ladesteuerung NICHT geschrieben, da Option \"laden\" NICHT gesetzt!\n"
                         if  ('entladen' in Options) and (Batterieentlandung_steuern > 0) and (EntladeEintragloeschen == "nein"):
-                            if(Neu_BatteryMaxDischarge != BatteryMaxDischarge):
+                            if(Neu_BatteryMaxDischarge != BatteryMaxDischarge or payload_text != ''):
                                 payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
                                 ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
                         elif ('entladen' not in Options and (Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja")):
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
                         if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
-                            response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}') 
+                            response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
