@@ -299,6 +299,8 @@ class dynamic:
         return(pv_data_charge)
 
     def akkustand_neu2(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0):
+        # Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
+        Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         # Wenn keine Maximaler Zwangsladung-SOC (0) Akkukapazität setzen.
         if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
         # Ladestand für alle Zeiten neu berechnen
@@ -310,9 +312,13 @@ class dynamic:
                 if int(Akkustatus[5] * -1) < min_net_power:
                     akku_soc += min_net_power
                 else:
-                    akku_soc += int(Akkustatus[5] * -1)
+                    akku_soc += int((Akkustatus[5] * -1) / (1 + (Akku_Verlust_Prozent/200)))
             else:
-                akku_soc += min_net_power
+                if min_net_power > 0:
+                    akku_soc += min_net_power
+                else:
+                    akku_soc += int(min_net_power * (1 + (Akku_Verlust_Prozent/200)))
+                    
 
             # Akustand muss minimal unter minimum_batterylevel sein
             if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
@@ -408,10 +414,12 @@ class dynamic:
                             max_ladewert_grenze_tmp = zeile_max_price[1] - zeile_max_price[2]
                         else:
                             max_ladewert_grenze_tmp = zeile_max_price[1] - zeile_max_price[2] - pv_data_charge[zeilen_index][1] + pv_data_charge[zeilen_index][2]
-                            #max_ladewert_grenze = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/100)))  #entWIGGlung Erst mal ohne Ladeverlust
 
                         # Abweichung vom SOC-Minimum berücksichtigen
                         max_ladewert_grenze_tmp += SOC_ueber_Min
+                        # Hier noch Ladeverlust addieren  #entWIGGlung
+                        max_ladewert_ohne_Ladeverlust = max_ladewert_grenze_tmp
+                        max_ladewert_grenze_tmp = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/200)))  #entWIGGlung 
 
                         # wenn die eingesparte Energie schon höher ist als die benötigte
                         if max_ladewert_grenze_tmp > 0: 
@@ -422,7 +430,8 @@ class dynamic:
 
                         max_ladewert_grenze = int(max_ladewert_grenze_tmp )
 
-                        if(self.dyn_print_level >= 3): print(">> Ladepunkt gefunden", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index], "Ladung+", max_ladewert_grenze, "\n>> ")
+                        if(self.dyn_print_level >= 3): print(">> Ladepunkt gefunden", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index],\
+                                                            "\n>> Ladung ohne und mit Laderverlust", max_ladewert_ohne_Ladeverlust, max_ladewert_grenze, "\n>> ")
                         if max_ladewert_grenze > -1 or max_ladewert > charge_rate_kW * -1: max_ladewert = -1
                         if max_ladewert_grenze > max_ladewert: max_ladewert = max_ladewert_grenze
                         if pv_data_charge[zeilen_index][5] + max_ladewert > charge_rate_kW * -1:
