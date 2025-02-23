@@ -1,4 +1,4 @@
-**[0.26.6] – 2025-XX-XX**  
+**[0.26.6] – 2025-02-23**  
 
 DynamicPriceCheck.py:
 - Die Strompreise werden nun in PV_Daten.sqlite in einer neuen Tabelle `strompreise` gespeichert.
