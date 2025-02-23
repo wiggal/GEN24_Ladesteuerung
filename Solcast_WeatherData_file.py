@@ -11,7 +11,6 @@ def loadLatestWeatherData():
     dict_watts['result']['watts'] = {}
     #heute = datetime.strftime(now, "%Y-%m-%d")
     heute = datetime.now()
-    morgen = datetime.strftime(now + timedelta(days=1), "%Y-%m-%d")
     sommerzeit = time.localtime().tm_isdst
 
     try:
@@ -88,16 +87,9 @@ if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'weather'])
     # Benoetigte Variablen definieren und prüfen
-    Strings = basics.getVarConf('pv.strings', 'anzahl', 'eval')
-    # dataAgeMaxInMinutes = basics.getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
-    Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
-    no_history = basics.getVarConf('solcast.com', 'no_history', 'eval')
-    KW_Faktor = basics.getVarConf('solcast.com2', 'KW_Faktor', 'eval')
-    KW_Faktor2 = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
-    weatherfile = basics.getVarConf('solcast.com', 'weatherfile', 'str')
-    api_key = basics.getVarConf('solcast.com', 'api_key', 'str')
-    resource_id = basics.getVarConf('solcast.com', 'resource_id', 'str')
-    resource_id2 = basics.getVarConf('solcast.com2', 'resource_id', 'str')
+    Zeitzone = basics.getVarConf('solcast.ha', 'Zeitzone', 'eval')
+    KW_Faktor = basics.getVarConf('solcast.ha', 'KW_Faktor', 'eval')
+    weatherfile = basics.getVarConf('solcast.ha', 'weatherfile', 'str')
     solcast_file = basics.getVarConf('solcast.ha', 'file', 'str')
     dataAgeMaxInMinutes = basics.getVarConf('solcast.ha', 'dataAgeMaxInMinutes', 'eval')
 
