@@ -26,7 +26,6 @@ def loadLatestWeatherData():
                     if '00:00' in key_neu_1 and (heute <= datetime.fromisoformat(key_neu_1)):
                         key_neu = datetime.strftime(
                             datetime.strptime(key_neu_1, date_format) + timedelta(hours=Zeitzone + sommerzeit), date_format)
-                        print(key_neu)
                         # hier Mittelwert volle Stunde, halbe Stunde
                         next_wetterwerte = json_data2['forecasts'][(idx + 1) % len(json_data2['forecasts'])]
                         pv_estimate = (wetterwerte['pv_estimate'] + next_wetterwerte['pv_estimate']) / 2
