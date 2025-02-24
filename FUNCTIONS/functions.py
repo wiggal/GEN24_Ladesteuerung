@@ -3,9 +3,8 @@ from datetime import datetime
 import json
 import configparser
 import sqlite3
-import os
 
-    
+
 class basics:
     def __init__(self):
         self.now = datetime.now()
