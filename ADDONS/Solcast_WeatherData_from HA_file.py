@@ -5,7 +5,7 @@ import FUNCTIONS.functions
 
 
 def loadLatestWeatherData():
-    # Varablen definieren
+    # Variablen definieren
     dict_watts = {}
     dict_watts['result'] = {}
     dict_watts['result']['watts'] = {}
@@ -69,11 +69,9 @@ def loadLatestWeatherData():
                     if datetime.strftime(heute, "%Y-%m-%d") in wetterwerte_old and wetterwerte_old not in dict_watts['result']['watts']:
                         dict_watts['result']['watts'][wetterwerte_old] = int(
                             json_data_old['result']['watts'][wetterwerte_old])
-                        # print (wetterwerte_old)
             except FileNotFoundError:
                 print("Fehler beim Lesen von ", weatherfile)
 
-            # solcast_2.json Nun wieder nach Datum und Stunden sortieren
             dict_watts['result']['watts'] = dict(sorted(dict_watts['result']['watts'].items()))
 
     except FileNotFoundError:
@@ -89,11 +87,11 @@ if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'weather'])
     # Benoetigte Variablen definieren und prüfen
-    Zeitzone = basics.getVarConf('solcast.ha', 'Zeitzone', 'eval')
-    KW_Faktor = basics.getVarConf('solcast.ha', 'KW_Faktor', 'eval')
-    weatherfile = basics.getVarConf('solcast.ha', 'weatherfile', 'str')
-    solcast_file = basics.getVarConf('solcast.ha', 'file', 'str')
-    dataAgeMaxInMinutes = basics.getVarConf('solcast.ha', 'dataAgeMaxInMinutes', 'eval')
+    Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
+    KW_Faktor = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
+    weatherfile = '../' + basics.getVarConf('env', 'filePathWeatherData', 'str')
+    solcast_file = basics.getVarConf('solcast.com', 'weatherfile', 'str')
+    dataAgeMaxInMinutes = basics.getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
 
     date_format = "%Y-%m-%d %H:%M:%S"
     now = datetime.now()
