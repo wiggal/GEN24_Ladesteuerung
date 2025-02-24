@@ -28,7 +28,10 @@ def loadLatestWeatherData():
                             datetime.strptime(key_neu_1, date_format) + timedelta(hours=Zeitzone + sommerzeit), date_format)
                         # hier Mittelwert volle Stunde, halbe Stunde
                         next_wetterwerte = json_data2['forecasts'][(idx + 1) % len(json_data2['forecasts'])]
-                        pv_estimate = (wetterwerte['pv_estimate'] + next_wetterwerte['pv_estimate']) / 2
+                        if '30:00' in next_wetterwerte['period_start']:
+                            pv_estimate = (wetterwerte['pv_estimate'] + next_wetterwerte['pv_estimate']) / 2
+                        else:
+                            pv_estimate = wetterwerte['pv_estimate']
                         # hier Werte mit NULLEN weg
                         if pv_estimate == 0:
                             if puffer[1] == 0:
