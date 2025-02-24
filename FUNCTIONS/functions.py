@@ -3,7 +3,6 @@ from datetime import datetime
 import json
 import configparser
 import sqlite3
-import os
 
     
 class basics:
@@ -19,11 +18,8 @@ class basics:
             except NameError:
                 config = configparser.ConfigParser()
             # Standard.ini lesen
-            thisfile = os.path.abspath(__file__)
-            thisdir = os.path.dirname(thisfile)
-            conf_dir = os.path.join(thisdir, '../CONFIG/')
             for conf_file in conf_files:
-                c_file = conf_dir + conf_file+'.ini'
+                c_file = 'CONFIG/'+conf_file+'.ini'
                 try:
                         config.read_file(open(c_file))
                         config.read(c_file)
@@ -31,7 +27,7 @@ class basics:
                         print("\nERROR: ", e, "\n")
             # _priv_ini lesen
             for conf_file in conf_files:
-                c_file = conf_dir + conf_file+'_priv.ini'
+                c_file = 'CONFIG/'+conf_file+'_priv.ini'
                 try:
                         config.read_file(open(c_file))
                         config.read(c_file)
