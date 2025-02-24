@@ -1,12 +1,12 @@
 import sys
 import os
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from FUNCTIONS.functions import basics
 
 
@@ -16,7 +16,7 @@ def loadLatestWeatherData():
     dict_watts['result'] = {}
     dict_watts['result']['watts'] = {}
     #heute = datetime.strftime(now, "%Y-%m-%d")
-    heute = datetime.now()
+    heute = date.today()
     sommerzeit = time.localtime().tm_isdst
 
     try:
@@ -28,10 +28,11 @@ def loadLatestWeatherData():
                 puffer = ['2000-01-01', 5]
                 for idx, wetterwerte in enumerate(json_data2['forecasts']):
                     key_neu_1 = (wetterwerte['period_start'][:19]).replace('T', ' ', 1)
-
-                    if '00:00' in key_neu_1 and (heute <= datetime.fromisoformat(key_neu_1)):
+                    if '00:00' in key_neu_1 and (heute <=
+                                                 datetime.date(datetime.fromisoformat(key_neu_1))):
                         key_neu = datetime.strftime(
-                            datetime.strptime(key_neu_1, date_format) + timedelta(hours=Zeitzone + sommerzeit), date_format)
+                            datetime.strptime(key_neu_1, date_format) + timedelta(hours=Zeitzone
+                                                                                        + sommerzeit), date_format)
                         # hier Mittelwert volle Stunde, halbe Stunde
                         next_wetterwerte = json_data2['forecasts'][(idx + 1) % len(json_data2['forecasts'])]
                         if '30:00' in next_wetterwerte['period_start']:
@@ -67,24 +68,11 @@ def loadLatestWeatherData():
                                 dict_watts['result']['watts'][key_neu] = int(
                                     pv_estimate * 1000 * KW_Faktor)
 
-            try:
-                with open(weatherfile, 'r') as datei:
-                    json_data_old = json.load(datei)
-
-                for wetterwerte_old in json_data_old['result']['watts']:
-                    if datetime.strftime(heute, "%Y-%m-%d") in wetterwerte_old and wetterwerte_old not in dict_watts['result']['watts']:
-                        dict_watts['result']['watts'][wetterwerte_old] = int(
-                            json_data_old['result']['watts'][wetterwerte_old])
-            except FileNotFoundError:
-                print("Fehler beim Lesen von ", weatherfile)
-
             dict_watts['result']['watts'] = dict(sorted(dict_watts['result']['watts'].items()))
 
     except FileNotFoundError:
         print("### ERROR:  Solcast-Datei nicht gefunden")
         exit()
-
-
 
     return dict_watts, json_data1
 
@@ -139,4 +127,3 @@ if __name__ == '__main__':
                 print(f'solcast.com OK: Prognosedaten vom {dateCreated_new} gespeichert.\n')
         else:
             print("Fehler bei Datenanforderung api.solcast.com.au:")
-            #print(data_err)
