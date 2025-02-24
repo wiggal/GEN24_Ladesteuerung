@@ -1,7 +1,7 @@
 import json
 import time
 from datetime import datetime, timedelta
-from FUNCTIONS.functions import basics
+import .FUNCTIONS.functions
 
 
 def loadLatestWeatherData():
@@ -84,7 +84,7 @@ def loadLatestWeatherData():
 
 
 if __name__ == '__main__':
-    basics = basics()
+    basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'weather'])
     # Benoetigte Variablen definieren und prüfen
     Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
