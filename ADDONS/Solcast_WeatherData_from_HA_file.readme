@@ -3,7 +3,7 @@ ha-solcast-solar (https://github.com/BJReplay/ha-solcast-solar).
 
 Settings in weather_priv.ini:
 [solcast.com]
-; Hier den Pfad eintragen, wo die solecast.json vom HA Addon liegt (z.B. /usr(share/hassio/homeassistant/solcast.json)
+; Hier den Pfad eintragen, wo die solecast.json vom HA Addon liegt (z.B. /usr/share/hassio/homeassistant/solcast.json)
 weatherfile = /usr(share/hassio/homeassistant/solcast.json
 
 Werte für

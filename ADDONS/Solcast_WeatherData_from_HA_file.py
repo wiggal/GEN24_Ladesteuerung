@@ -1,8 +1,8 @@
 import sys
 import os
-# Gehe ein Verzeichnis zurück und füge es zu sys.path hinzu
-os.chdir("..")
-sys.path.insert(0, os.getcwd())
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
 
 import json
 import time
