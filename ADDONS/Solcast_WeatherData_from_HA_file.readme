@@ -1,0 +1,18 @@
+Solcast_WeatherData_from_HA_file addon loads solar forecast data from Home Assistant addon
+ha-solcast-solar (https://github.com/BJReplay/ha-solcast-solar).
+
+Settings in weather_priv.ini:
+[solcast.com]
+; Hier den Pfad eintragen, wo die solecast.json vom HA Addon liegt (z.B. /usr(share/hassio/homeassistant/solcast.json)
+weatherfile = /usr(share/hassio/homeassistant/solcast.json
+
+Werte für
+
+dataAgeMaxInMinutes = 1000
+Zeitzone = +1
+KW_Faktor = 1.00
+
+können auch gesetzt werden.
+
+script Aufruf über crontab:
+8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh ADDONS/Solcast_WeatherData_from_HA_file.py
