@@ -1,3 +1,9 @@
+**[0.26.6] – 2025-XX-XX**  
+
+**NEU** Im Verzeichnis ADDONS wird ein Skript Solcast_WeatherData_from_HA_file.py von @roethigj bereitgestellt,
+mit dem eine Solcastfile von Homeassistant für GEN24_Ladesteuerung bereitgestellt werden kann. 
+In Solcast_WeatherData_from_HA_file.readme wird eine Beschreibung bereitgestellt.  
+
 **[0.26.6] – 2025-02-23**  
 
 DynamicPriceCheck.py:
