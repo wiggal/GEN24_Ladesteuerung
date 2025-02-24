@@ -21,7 +21,6 @@ class basics:
             # Standard.ini lesen
             thisfile = os.path.abspath(__file__)
             thisdir = os.path.dirname(thisfile)
-            print(thisdir)
             conf_dir = os.path.join(thisdir, '../CONFIG/')
             for conf_file in conf_files:
                 c_file = conf_dir + conf_file+'.ini'
