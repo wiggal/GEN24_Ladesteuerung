@@ -15,4 +15,4 @@ KW_Faktor = 1.00
 können auch gesetzt werden.
 
 script Aufruf über crontab:
-8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh ADDONS/Solarprognose_WeatherData.py
+8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh ADDONS/Solcast_WeatherData_from_HA_file.py

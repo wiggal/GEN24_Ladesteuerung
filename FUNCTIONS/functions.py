@@ -19,7 +19,7 @@ class basics:
                 config = configparser.ConfigParser()
             # Standard.ini lesen
             for conf_file in conf_files:
-                c_file = 'CONFIG/'+conf_file+'.ini'
+                c_file = 'CONFIG/' + conf_file+'.ini'
                 try:
                         config.read_file(open(c_file))
                         config.read(c_file)
@@ -27,7 +27,7 @@ class basics:
                         print("\nERROR: ", e, "\n")
             # _priv_ini lesen
             for conf_file in conf_files:
-                c_file = 'CONFIG/'+conf_file+'_priv.ini'
+                c_file = 'CONFIG/' + conf_file+'_priv.ini'
                 try:
                         config.read_file(open(c_file))
                         config.read(c_file)

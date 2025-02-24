@@ -95,7 +95,7 @@ if __name__ == '__main__':
     # Benoetigte Variablen definieren und prüfen
     Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
     KW_Faktor = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
-    weatherfile = '../' + basics.getVarConf('env', 'filePathWeatherData', 'str')
+    weatherfile = basics.getVarConf('env', 'filePathWeatherData', 'str')
     solcast_file = basics.getVarConf('solcast.com', 'weatherfile', 'str')
     dataAgeMaxInMinutes = basics.getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
 
