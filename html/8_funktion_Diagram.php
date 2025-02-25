@@ -158,7 +158,7 @@ group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 10 )
 		((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
 		((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS InBatterie,
         (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
-        Vorhersage,
+        Vorhersage *-1 AS Vorhersage,
         BattStatus
 from Alle_PVDaten)
  , Alle_PVDaten2 AS (
