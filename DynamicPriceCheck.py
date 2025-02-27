@@ -31,6 +31,7 @@ if __name__ == '__main__':
     Daysback = basics.getVarConf('dynprice','Daysback', 'eval')
     LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
     Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
+    Lade_Verbrauchs_Faktor = basics.getVarConf('dynprice','Lade_Verbrauchs_Faktor', 'eval')
     Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     weatherdata = basics.loadWeatherData(weatherfile)
@@ -67,10 +68,10 @@ today_weekday = (today.weekday() + 1)  % 7  # Montag=0 -> Sonntag=0
 for row in Lastprofil:
     if (row[0] == today_weekday):
         time=today.strftime("%Y-%m-%d") + " " + row[1]+":00"
-        Verbrauch.append((time, row[2]))
+        Verbrauch.append((time, int(row[2] * Lade_Verbrauchs_Faktor)))
     else:
         time=tomorrow.strftime("%Y-%m-%d") + " " + row[1]+":00"
-        Verbrauch.append((time, row[2]))
+        Verbrauch.append((time, int(row[2] * Lade_Verbrauchs_Faktor)))
 
 # Prognosedaten lesen
 Prognose_24H = dynamic.getPrognosen_24H(weatherdata)
@@ -101,7 +102,7 @@ for key in data:
 
 # Werte als Tabelle ausgeben
 if(dyn_print_level >= 1):
-    headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)"]
+    headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch*"+str(Lade_Verbrauchs_Faktor)+"(W)", "Strompreis (€/kWh)"]
     dynamic.listAStable(headers, pv_data)
 
 # Akku-Kapazität und aktuelle Parameter
