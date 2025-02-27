@@ -6,14 +6,12 @@ import FUNCTIONS.functions
 
 def loadLatestWeatherData():
     url = 'http://www.solarprognose.de/web/solarprediction/api/v1?access-token={}&item={}&id={}&type={}&algorithm={}'.format(accesstoken, item, id, type, algorithm)
-    # Hier wieder ABHOLEN EIN
     try:
         apiResponse = requests.get(url, timeout=99)
-        #apiResponse.raise_for_status()
-        if apiResponse.status_code != 204:
+        if apiResponse.status_code == 200:
             json_data1 = dict(json.loads(apiResponse.text))
         else:
-            print("### ERROR:  Keine forecasts-Daten von www.solarprognose.de")
+            print("### ERROR "+str(apiResponse.status_code)+":  Keine forecasts-Daten von www.solarprognose.de")
             exit()
     except requests.exceptions.Timeout:
         print("### ERROR:  Timeout von www.solarprognose.de")
