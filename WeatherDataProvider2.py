@@ -31,18 +31,15 @@ def loadLatestWeatherData():
     try:
         try:
             apiResponse = requests.get(url, timeout=52.50)
-            #apiResponse.raise_for_status()
             if apiResponse.status_code == 200:
                 json_data1 = dict(json.loads(apiResponse.text))
             else:
-                print("### ERROR:  Keine forecasts-Daten von api.forecast.solar")
-                print("### ERROR URL:", url)
+                print("### ERROR "+str(apiResponse.status_code)+":  Keine forecasts-Daten von api.forecast.solar")
                 exit()
-        except:
+        except requests.exceptions.Timeout:
             print("### ERROR:  Timeout von api.forecast.solar")
             exit()
 
-        #print(json_data1, "\n")
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
         # Koordinaten müssen gleich sein, wegen zeitgleichem Sonnenauf- bzw. untergang 
         if anzahl_strings == 2:
@@ -52,15 +49,14 @@ def loadLatestWeatherData():
             try:
                 apiResponse2 = requests.get(url2, timeout=52.50)
                 apiResponse2.raise_for_status()
-                if apiResponse2.status_code != 204:
+                if apiResponse2.status_code == 200:
                     json_data2 = dict(json.loads(apiResponse2.text))
                 else:
-                    print("### ERROR:  Keine estimated_actuals-Daten von api.forecast.solar")
+                    print("### ERROR "+str(apiResponse2.status_code)+":  Keine forecasts-Daten String 2 von api.forecast.solar")
                     exit()
             except requests.exceptions.Timeout:
                 print("### ERROR:  Timeout von api.forecast.solar")
                 exit()
-            #print(json_data2, "\n")
 		
             if isinstance(json_data1['result'], dict) and isinstance(json_data2['result'], dict):
                 for key, value in json_data1.get('result',{}).get('watts',{}).items():
