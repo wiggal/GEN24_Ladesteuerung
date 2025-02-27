@@ -206,101 +206,6 @@ class dynamic:
     def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0):
         # Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
-        Ladeverlust = (Akku_Verlust_Prozent/200)
-        if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
-        # Ladestand für alle Zeiten neu berechnen
-        for Akkustatus in pv_data_charge:
-            min_net_power = Akkustatus[1] - Akkustatus[2]
-            if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
-            if Akkustatus[5] < 0:
-                if int(Akkustatus[5] * -1) < min_net_power:
-                    akku_soc += min_net_power
-                else:
-                    # Akkustatus und Ladung reduzieren, wenn SOC-Begrenzung durch Zwangsladung überschritten und der kleiste Wert größer minimum_batterylevel
-                    # auch hier wegen Ladeverlust anbringen, hier ladung um Ladeverlust erhöhen um auf den Akkuollstand zu kommen
-                    if akku_soc - Akkustatus[5] > max_batt_dyn_ladung_W and Akkustatus[5] < -1:
-                        akku_soc_reduziert = int((akku_soc - max_batt_dyn_ladung_W) * (1 + Ladeverlust))
-                        if akku_soc_reduziert > -1: akku_soc_reduziert = -1
-                        if akku_soc_reduziert < charge_rate_kW * -1: akku_soc_reduziert = charge_rate_kW * -1
-                        Akkustatus[5] = akku_soc_reduziert
-                    # Ladeverlust anbringen, bei charge_rate_kW
-                    if Akkustatus[5] == charge_rate_kW * -1:
-                        akku_soc += int(Akkustatus[5] * (-1 + Ladeverlust))
-                    else:
-                        akku_soc += int(Akkustatus[5] / (-1 - Ladeverlust))
-            else:
-                akku_soc += min_net_power
-
-            if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
-            # Akku nochmal auf Maximum begrenzen
-            if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
-            Akkustatus[4] = akku_soc
-
-        return(pv_data_charge)
-
-    def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh):
-        Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
-        Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
-        max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
-        max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
-        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
-        # Ladewert ist -1 wenn kein Profilabler Preis
-        max_ladewert = charge_rate_kW * -1
-        Zeilen = 24
-        while Zeilen > 0:
-            if(self.dyn_print_level >= 3):
-                headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
-                self.listAStable(headers, pv_data_charge, '>>')
-            # größten Preis wenn Spalte 5 noch 0.1 ist, also noch nicht behandelt
-            max_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[5] == 0.1]
-            if(self.dyn_print_level >= 3): print(">> \n>> max: ", max_gefilterte_zeilen) 
-            if max_gefilterte_zeilen:
-                zeile_max_price = max(max_gefilterte_zeilen, key=lambda x: x[3])
-                if(self.dyn_print_level >= 3): print(">> \n>> zeile_max_price: ", zeile_max_price) 
-    
-            # Wenn minimum_batterylevel unterschritten Ladepunkt suchen und setzen
-            if zeile_max_price[4] < minimum_batterylevel:
-                max_akkustand = battery_capacity_Wh - charge_rate_kW * 0.25
-                kleiner_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[4] < max_akkustand and zeile[5] == 0.1]
-                if kleiner_gefilterte_zeilen:
-                    zeile_min_price = min(kleiner_gefilterte_zeilen, key=lambda x: x[3])
-                    # Laden nur wenn profitabel
-                    profit_price = round(zeile_min_price[3] * (1+(Akku_Verlust_Prozent/100)) + Gewinnerwartung_kW, 4)
-                    zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_min_price[0] in row))
-                    if(zeile_max_price[3] > profit_price):
-
-                        # Hier noch Ladung auf max_batt_dyn_ladung des Akku begrenzen
-                        if(self.dyn_print_level >= 3): print(">> max_batt_dyn_ladung_W: ", max_batt_dyn_ladung_W)
-                        # Bei Ladung wird Verbrauch auch aus Netz gezogen + Ladeverlust anbringen
-                        min_net_power = pv_data_charge[zeilen_index][1] - pv_data_charge[zeilen_index][2]
-                        if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
-                        max_ladewert_grenze = int((pv_data_charge[zeilen_index][4] - min_net_power - max_batt_dyn_ladung_W) * (1 + (Akku_Verlust_Prozent/200)))
-                        if(self.dyn_print_level >= 3): print(">> max_ladewert_grenze: ", pv_data_charge[zeilen_index][4], max_ladewert_grenze)
-                        if max_ladewert_grenze > -1 or max_ladewert > charge_rate_kW * -1: max_ladewert = -1
-                        if max_ladewert_grenze > max_ladewert: max_ladewert = max_ladewert_grenze
-
-                        pv_data_charge[zeilen_index][5] = max_ladewert
-                        if(self.dyn_print_level >= 3): print(">> \n>> Ladepunkt wenn", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index]) 
-                    else:
-                        if(self.dyn_print_level >= 3): print(">> \n>> Kein profitabler Preis", zeile_max_price[3], ">", profit_price, pv_data_charge[zeilen_index]) 
-                        if  pv_data_charge[zeilen_index][4] > minimum_batterylevel:
-                            pv_data_charge[zeilen_index][5] = -1
-                else:
-                    if(self.dyn_print_level >= 3): print(">> \n>> Keine kleiner_gefilterte_zeilen") 
-
-            # Finde Index der Zeile mit dem gesuchten Wert
-            zeilen_index = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
-            pv_data_charge[zeilen_index][5] = 0
-            # Akkustände neu berechnen
-            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
-
-            Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == 0.1)
-
-        return(pv_data_charge)
-
-    def akkustand_neu2(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0):
-        # Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
-        Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         # Wenn keine Maximaler Zwangsladung-SOC (0) Akkukapazität setzen.
         if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
         # Ladestand für alle Zeiten neu berechnen
@@ -328,12 +233,12 @@ class dynamic:
 
         return(pv_data_charge)
 
-    def get_charge_stop2(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh):
+    def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh):
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
         max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
         max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
-        self.akkustand_neu2(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
         # Ladewert ist -1 wenn kein Profilabler Preis
         max_ladewert = charge_rate_kW * -1
 
@@ -358,7 +263,7 @@ class dynamic:
             else:
                 pv_data_charge[max_index][5] = -0.1 
 
-            self.akkustand_neu2(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
 
             if(self.dyn_print_level >= 4):
                 headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
@@ -367,7 +272,7 @@ class dynamic:
             Zeilen -= 1
 
         # 2.) nächster Schritt Alle Zeten mit -0.1 auf Zwangsladung oder Ladestopp prüfen
-        self.akkustand_neu2(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
         Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
         SOC_ueber_Min = 0
         while Zeilen > 0:
@@ -489,7 +394,7 @@ class dynamic:
             zeilen_index_max_price = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
             pv_data_charge[zeilen_index_max_price][5] = zeile_max_price_Ladewert
             # Akkustände neu berechnen
-            self.akkustand_neu2(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
 
             Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
 
