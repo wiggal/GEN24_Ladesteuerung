@@ -5,8 +5,8 @@ mit dem eine Solcastfile von Homeassistant für GEN24_Ladesteuerung bereitgestel
 In Solcast_WeatherData_from_HA_file.readme wird eine Beschreibung bereitgestellt.  
 
 DynamicPriceCheck.py:
-Neue Variable `Lade_Verbrauchs_Faktor` in CONFIG/dynprice.ini eingefügt.
-Mit dem Faktor wird der Verbrauch aus dem Lastprofil mustipiliziert, damit kann ein Puffer für ungenaue
+Neue Variable `Lade_Verbrauchs_Faktor` in CONFIG/dynprice.ini eingefügt.  
+Mit dem Faktor wird der Verbrauch aus dem Lastprofil multipliziert, damit kann ein Ladestandpuffer für ungenaue
 Verbräuche aus dem Lastprofil, bzw. ungenaue Prognosen individuell eingestellt werden.
 
 **[0.26.6] – 2025-02-23**  
