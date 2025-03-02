@@ -1,15 +1,7 @@
 
 ## ☀️ GEN24_Ladesteuerung 🔋 
-(getestet unter Python 3.8 und 3.9)  
-![new](pics/new.png)  
-Ab Version: **0.26.1**  
-Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
-Ab Version: **0.25.1**  
-Prognosebegrenzung auf Höchstwerte der historischen Produktion.  
-Ab Version: **0.25.0**  
-Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  
-![new](pics/new2.png)  
-
+  
+**Programmfunktionen:**  
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
 und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Batterie zu laden.  
 Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
@@ -17,6 +9,14 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
 - [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden.  
+- **NEU:** Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von ![@Manniene](https://github.com/Manniene).  
+
+![new](pics/new.png)  
+Ab Version: **0.26.8**  
+Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
+Ab Version: **0.26.1**  
+Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
+![new](pics/new2.png)  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
 Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
@@ -147,7 +147,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 
 ### Settings ( TAB--> Settings )
 ![Tabelle zu den Settings](pics/Settings.png)
-
+Programmfunktionen
 Unter Settings kann das Programm zusätzlich gesteuert werden.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.    
@@ -155,6 +155,10 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 ----------
 
 **News History:**  
+Ab Version: **0.25.1**  
+Prognosebegrenzung auf Höchstwerte der historischen Produktion.  
+Ab Version: **0.25.0**  
+Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  
 Ab Version: **0.24.8**  
 Werte für Akkuschonung frei konfigurierbar.  
 Ab Version: **0.24.5**  
@@ -182,3 +186,4 @@ Ab Version: **0.21.1**
 Zur Ermittlung der gesamten Produktion können auch mehrere GEN24 eingebunden werden.  
 Ab Version: **0.20**  
 [:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) `Maximale Ladeleistung` **per HTTP-Request** im Batteriemanagement setzen.  
+
