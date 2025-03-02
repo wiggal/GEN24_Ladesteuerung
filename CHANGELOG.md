@@ -1,3 +1,7 @@
+**[0.26.8] – 2025-XX-XX**  
+
+**NEU** Im Verzeichnis GRAFANA werden Beschreibungen und fertige Dashboards zum Import für Grafana von @Manniene bereitgestellt.
+
 **[0.26.7] – 2025-03-01**  
 
 **NEU** Im Verzeichnis ADDONS wird ein Skript Solcast_WeatherData_from_HA_file.py von @roethigj bereitgestellt,
