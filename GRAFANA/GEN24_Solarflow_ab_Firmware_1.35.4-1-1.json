@@ -1,0 +1,550 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_GEN24",
+      "label": "GEN24",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "marcusolsson-json-datasource",
+      "pluginName": "JSON API"
+    },
+    {
+      "name": "DS_PV_DATEN",
+      "label": "PV_Daten",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "frser-sqlite-datasource",
+      "pluginName": "SQLite"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "frser-sqlite-datasource",
+      "name": "SQLite",
+      "version": "3.5.0"
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.5.1"
+    },
+    {
+      "type": "panel",
+      "id": "lehmannch-flow-panel",
+      "name": "Solar Flow",
+      "version": "1.1.0"
+    },
+    {
+      "type": "datasource",
+      "id": "marcusolsson-json-datasource",
+      "name": "JSON API",
+      "version": "1.3.22"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": " ab Firmware 1.35.4-1",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": {
+        "type": "marcusolsson-json-datasource",
+        "uid": "${DS_GEN24}"
+      },
+      "gridPos": {
+        "h": 22,
+        "w": 10,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "additionalSourceColor": "#51bb43",
+        "additionalSourceIcon": "battery",
+        "additionalSourceLabel": "Battery",
+        "additionalSourceLoadQuery": "Bat­te­rie­leis­tung",
+        "gridColor": "#7b7979",
+        "gridQuery": "From Grid",
+        "linesColor": "rgb(104, 193, 255)",
+        "loadColor": "rgb(0, 141, 209)",
+        "measurementUnit": "kW",
+        "showLegend": true,
+        "solarColor": "#fade2a",
+        "solarQuery": "PV Produktion",
+        "xOffset": 0,
+        "yOffset": 0,
+        "zoom": 1
+      },
+      "pluginVersion": "1.1.0",
+      "targets": [
+        {
+          "cacheDurationSeconds": 5,
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_GEN24}"
+          },
+          "fields": [
+            {
+              "jsonPath": "$sum(Body.Data.\"0\".channels.(PV_POWERACTIVE_MEAN_01_F32 + PV_POWERACTIVE_MEAN_02_F32))",
+              "language": "jsonata",
+              "name": "PV Produktion"
+            },
+            {
+              "jsonPath": "$.Body.Data.\"16252928\".channels.SMARTMETER_POWERACTIVE_MEAN_SUM_F64",
+              "language": "jsonpath",
+              "name": "From Grid"
+            },
+            {
+              "jsonPath": "$.Body.Data.\"0\".channels.BAT_POWERACTIVE_MEAN_F32",
+              "language": "jsonpath",
+              "name": "Bat­te­rie­leis­tung"
+            }
+          ],
+          "method": "GET",
+          "params": [
+            [
+              "",
+              ""
+            ]
+          ],
+          "queryParams": "",
+          "refId": "A",
+          "urlPath": ""
+        }
+      ],
+      "title": "GEN24",
+      "type": "lehmannch-flow-panel"
+    },
+    {
+      "datasource": {
+        "type": "marcusolsson-json-datasource",
+        "uid": "${DS_GEN24}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Grid"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#aca8a8",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "fieldMinMax",
+                "value": false
+              },
+              {
+                "id": "min",
+                "value": -25000
+              },
+              {
+                "id": "max",
+                "value": 25000
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PV Produktion"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "max",
+                "value": 8500
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#FADE2A",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie in %"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 100
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#51bb43",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "fieldMinMax",
+                "value": true
+              },
+              {
+                "id": "max",
+                "value": -8000
+              },
+              {
+                "id": "min",
+                "value": 8000
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#51bb43",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 11,
+        "x": 10,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 59,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showUnfilled": true,
+        "sizing": "manual",
+        "valueMode": "text"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "cacheDurationSeconds": 300,
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_GEN24}"
+          },
+          "fields": [
+            {
+              "jsonPath": "$.Body.Data.16252928.channels.SMARTMETER_POWERACTIVE_MEAN_SUM_F64",
+              "name": "Grid"
+            },
+            {
+              "jsonPath": "$sum(Body.Data.\"0\".channels.(PV_POWERACTIVE_MEAN_01_F32 + PV_POWERACTIVE_MEAN_02_F32))",
+              "language": "jsonata",
+              "name": "PV Produktion"
+            },
+            {
+              "jsonPath": "$.Body.Data.\"0\".channels.BAT_POWERACTIVE_MEAN_F32",
+              "language": "jsonpath",
+              "name": "Batterie"
+            },
+            {
+              "jsonPath": "$.Body.Data.16580608.channels.BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16",
+              "language": "jsonpath",
+              "name": "Batterie in %"
+            }
+          ],
+          "method": "GET",
+          "queryParams": "",
+          "refId": "A",
+          "urlPath": ""
+        }
+      ],
+      "title": "Überblick",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_PV_DATEN}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gesamtverbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Netzverbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit"
+              },
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC Produktion"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DC Produktion"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Einspeisung"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "In Batterie"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Aus Batterie"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie aus Netz geladen"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 11,
+        "x": 10,
+        "y": 13
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_PV_DATEN}"
+          },
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\n) \n\n\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime(1740265200000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1740278206286 / 1000 + 3600, 'unixepoch')\n\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);\n",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\n) \n\n\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Tagesüberblick -> Time Picker",
+      "type": "stat"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now/d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "GEN24 Solarflow  ab Firmware 1.35.4-1",
+  "uid": "dedry6is954owa",
+  "version": 33,
+  "weekStart": ""
+}
