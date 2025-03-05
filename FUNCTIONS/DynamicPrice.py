@@ -17,7 +17,7 @@ class dynamic:
         zeiger = verbindung.cursor()
         # Daysback muss mindestens 8 Tage sein
         if Daysback > -8: Daysback = -8
-        # Lastprofil von jetzt 35 Tage zurück für jeden Wochentag ermitteln
+        # Lastprofil von jetzt 35 Tage zurück für jeden Wochentag ermitteln (0=Sonntag)
         sql_anweisung = """
         WITH differenzen AS (
 			select Zeitpunkt AS volle_stunde,

@@ -217,11 +217,11 @@ return $SQL;
     case 'bar':
 $SQL = "WITH Alle_PVDaten AS (
 select Zeitpunkt,
-    (max(DC_Produktion) - min(DC_Produktion)) as Produktion,
-    (max(Netzverbrauch) - min(Netzverbrauch)) as Netzbezug,
-    (max(Batterie_IN) - min(Batterie_IN)) as InBatterie,
-    (max(Batterie_OUT) - min(Batterie_OUT)) as AusBatterie,
-    (max(Einspeisung) - min(Einspeisung)) as Einspeisung
+    LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Produktion,
+    LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
+    LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS InBatterie,
+    LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS AusBatterie,
+    LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung
 from pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
 group by STRFTIME('".$groupSTR."', Zeitpunkt))
