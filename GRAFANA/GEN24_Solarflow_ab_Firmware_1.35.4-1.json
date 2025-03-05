@@ -9,8 +9,8 @@
       "pluginName": "JSON API"
     },
     {
-      "name": "DS_PV_DATEN",
-      "label": "PV_Daten",
+      "name": "DS_PV_DATEN.SQLITE",
+      "label": "PV_Daten.sqlite",
       "description": "",
       "type": "datasource",
       "pluginId": "frser-sqlite-datasource",
@@ -35,7 +35,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.5.1"
+      "version": "11.5.2"
     },
     {
       "type": "panel",
@@ -325,7 +325,7 @@
         "sizing": "manual",
         "valueMode": "text"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "cacheDurationSeconds": 300,
@@ -366,7 +366,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -510,16 +510,16 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\n) \n\n\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime(1740265200000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1740278206286 / 1000 + 3600, 'unixepoch')\n\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime(1741042800000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1741124318613 / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\n) \n\n\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);\n",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -527,7 +527,7 @@
           ]
         }
       ],
-      "title": "Tagesüberblick -> Time Picker",
+      "title": "Tagesüberblick $__from -> $__to",
       "type": "stat"
     }
   ],
@@ -545,6 +545,6 @@
   "timezone": "browser",
   "title": "GEN24 Solarflow  ab Firmware 1.35.4-1",
   "uid": "dedry6is954owa",
-  "version": 33,
+  "version": 3,
   "weekStart": ""
 }

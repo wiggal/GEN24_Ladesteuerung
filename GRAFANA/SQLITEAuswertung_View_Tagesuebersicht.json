@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_PV_DATEN",
-      "label": "PV_Daten",
+      "name": "DS_PV_DATEN.SQLITE",
+      "label": "PV_Daten.sqlite",
       "description": "",
       "type": "datasource",
       "pluginId": "frser-sqlite-datasource",
@@ -27,7 +27,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.5.1"
+      "version": "11.5.2"
     },
     {
       "type": "panel",
@@ -67,7 +67,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -144,21 +144,21 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime(1740178800000 / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1740265199000 / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_PV_DATEN.SQLITE}"
+          },
+          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS Zeitpunkt,\n  Bruttopreis\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS Zeitpunkt,\n  Bruttopreis\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "refId": "A",
           "timeColumns": [
             "time",
             "ts"
-          ],
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
-          }
+          ]
         }
       ],
       "title": "Strompreise",
@@ -167,7 +167,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -245,20 +245,20 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Netzverbrauch) AS \"Netzverbrauch\"\nFROM verbrauch\nWHERE\n  Zeitpunkt >= datetime(1739746800000 / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1739819747871 / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Netzverbrauch) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Netzverbrauch) AS \"Netzverbrauch\"\nFROM verbrauch\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Netzverbrauch) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -280,7 +280,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -358,20 +358,20 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\n) \n\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_Produktion) AS \"AC Produktion\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_Produktion) AS \"AC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\n) \n\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_Produktion) AS \"AC Produktion\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_Produktion) AS \"AC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -393,7 +393,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -471,20 +471,20 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_to_DC) AS \"BattNetzladung\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_to_DC) AS \"BattNetzladung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_to_DC) AS \"BattNetzladung\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_to_DC) AS \"BattNetzladung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -506,7 +506,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -584,18 +584,18 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime(1739746800000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1739819425437 / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime(1741042800000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1741129199999 / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "queryType": "table",
           "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "refId": "A",
@@ -619,7 +619,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -715,21 +715,21 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
-          "queryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime(1740783600000 / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1740869999999 / 1000+3600, 'unixepoch')\n\nORDER BY Zeitpunkt;\n",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_PV_DATEN.SQLITE}"
+          },
+          "queryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\n\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "timeColumns": [
             "time",
             "ts"
-          ],
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
-          }
+          ]
         }
       ],
       "title": "SOC Batterie",
@@ -752,7 +752,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -830,20 +830,20 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\n) \n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\n) \n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -865,7 +865,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -943,20 +943,20 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Einspeisung) AS \"Einspeisung\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Einspeisung) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Einspeisung) AS \"Einspeisung\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Einspeisung) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -978,7 +978,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1056,20 +1056,20 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\n  \nFROM pv_daten\n) \n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\n  \nFROM pv_daten\n) \n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1091,7 +1091,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN}"
+        "uid": "${DS_PV_DATEN.SQLITE}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1169,20 +1169,20 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN}"
+            "uid": "${DS_PV_DATEN.SQLITE}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime(1741042800000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1741129199999 / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1209,13 +1209,13 @@
     "list": []
   },
   "time": {
-    "from": "now/d",
-    "to": "now/d"
+    "from": "now-1d/d",
+    "to": "now-1d/d"
   },
   "timepicker": {},
   "timezone": "",
   "title": "SQLITEAuswertung View Tagesübersicht",
   "uid": "a20MWPFHd",
-  "version": 38,
+  "version": 7,
   "weekStart": ""
 }
