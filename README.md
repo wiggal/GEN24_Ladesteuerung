@@ -9,8 +9,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
 - [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden.  
-- **NEU:** Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von ![@Manniene](https://github.com/Manniene).  
-
+- **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von ![@Manniene](https://github.com/Manniene).  
 ![new](pics/new.png)  
 Ab Version: **0.26.8**  
 Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
@@ -152,6 +151,9 @@ Unter Settings kann das Programm zusätzlich gesteuert werden.
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.    
 
+### Grafana Beispiele
+![Beispiele](pics/Grafana.png)
+Weitere Erläutereungen und Dashboarddateien ligen im Verzeichnis GRAFANA
 ----------
 
 **News History:**  
