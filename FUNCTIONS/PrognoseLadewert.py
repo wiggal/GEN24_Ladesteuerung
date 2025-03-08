@@ -46,7 +46,7 @@ class progladewert:
     
             return Ladewert
     
-    def getLadewert(self, BattVollUm, Grundlast):
+    def getLadewert(self, BattVollUm, Grundlast, alterLadewert):
     
             # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
             format_Tag = "%Y-%m-%d"
@@ -113,6 +113,8 @@ class progladewert:
     
                 i += 1
     
+            Std = datetime.strftime(self.now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
+            Prognose_Std_nach_BattVollUm = self.getPrognose(Std)
             BattKapaWatt_akt_fun = self.BattKapaWatt_akt - Zwangs_Ladung
             BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
 
@@ -155,8 +157,11 @@ class progladewert:
 
             # Hier noch pruefen ob gesamte Prognose minus Grundlastsumme noch für Akkuladung reicht.
             # Schaltverzögerung (Hysterse)
-            if (aktuellerLadewert == self.MaxLadung): Pro_Ertrag_Tag = Pro_Ertrag_Tag * 0.7
-            if(((Pro_Ertrag_Tag - Grundlast_Sum) / 1.1) < self.BattKapaWatt_akt):
+            if (alterLadewert == self.MaxLadung):
+                Pro_Ertrag_Tag_tmp = Pro_Ertrag_Tag * 0.7
+            else:
+                Pro_Ertrag_Tag_tmp = Pro_Ertrag_Tag + Prognose_Std_nach_BattVollUm[0]
+            if((Pro_Ertrag_Tag_tmp - Grundlast_Sum) < self.BattKapaWatt_akt):
                 aktuellerLadewert = self.MaxLadung
                 LadewertGrund = "TagesPrognose - Grundlast_Summe < aktuelleBattKapazität"
     
