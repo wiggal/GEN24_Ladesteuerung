@@ -180,7 +180,7 @@ if __name__ == '__main__':
 
 
                     # Geamtprognose und Ladewert berechnen mit Funktion getLadewert
-                    PrognoseUNDUeberschuss = progladewert.getLadewert(BattVollUm, Grundlast)
+                    PrognoseUNDUeberschuss = progladewert.getLadewert(BattVollUm, Grundlast, alterLadewert)
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[0]
                     Grundlast_Summe = PrognoseUNDUeberschuss[1]
                     aktuellerLadewert = PrognoseUNDUeberschuss[2]
@@ -258,19 +258,19 @@ if __name__ == '__main__':
                                 WR_schreiben = DATA[1]
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
 
-                    # Wenn die aktuellePVProduktion < 10 Watt ist, nicht schreiben, 
+                    # Wenn die aktuellePVProduktion < 50 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!
-                    if aktuellePVProduktion < 10:
+                    if aktuellePVProduktion < 50:
                         # Für die Nacht zwingend auf MaxLadung, 
                         # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
                         if alterLadewert < MaxLadung -10 and Akt_Std > 12:
                             aktuellerLadewert = MaxLadung
                             DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
                             WR_schreiben = DATA[1]
-                            LadewertGrund = "Auf MaxLadung stellen, da PVProduktion < 10 Watt!"
+                            LadewertGrund = "Auf MaxLadung stellen, da PVProduktion < 50 Watt!"
                         else:
                             WR_schreiben = 0
-                            LadewertGrund = "Nicht schreiben, da PVProduktion < 10 Watt!"
+                            LadewertGrund = "Nicht schreiben, da PVProduktion < 50 Watt!"
 
                     # Auf ganze Watt runden
                     aktuellerLadewert = int(aktuellerLadewert)
