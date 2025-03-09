@@ -1,6 +1,8 @@
-**[0.26.8] – 2025-XX-XX**  
+**[0.26.8] – 2025-03-09**  
 
 **NEU** Im Verzeichnis GRAFANA werden Beschreibungen und fertige Dashboards zum Import für Grafana von @Manniene bereitgestellt.
+
+FIX: Entladeeintrag wurde mit Ladeeintrag mitgeschrieben, auch wenn kein Eintrag erforderlich.  
 
 **[0.26.7] – 2025-03-01**  
 
