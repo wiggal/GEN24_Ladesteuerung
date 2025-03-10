@@ -1,3 +1,7 @@
+**[0.26.9] – 2025-XX-XX**  
+
+- Weiterentwicklung der Grafana Dashboards und der Beschreibung vom @Manniene
+
 **[0.26.8] – 2025-03-09**  
 
 **NEU** Im Verzeichnis GRAFANA werden Beschreibungen und fertige Dashboards zum Import für Grafana von @Manniene bereitgestellt.
