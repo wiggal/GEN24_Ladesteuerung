@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_PV_DATEN.SQLITE",
-      "label": "PV_Daten.sqlite",
+      "name": "DS_GEN24_DATEN_",
+      "label": "GEN24_Daten ",
       "description": "",
       "type": "datasource",
       "pluginId": "frser-sqlite-datasource",
@@ -61,7 +61,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -360,7 +360,7 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
@@ -383,13 +383,13 @@
           }
         }
       ],
-      "title": "Energie Statistiken -> Time Picker",
+      "title": "Energie Statistiken -> wähle Zeitraum über Time Picker ($__from -> $__to)",
       "type": "table"
     },
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -677,7 +677,7 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
@@ -708,7 +708,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -996,7 +996,7 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
@@ -1036,8 +1036,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "SQLITEAuswertung View",
-  "uid": "a20MWPFHk",
-  "version": 7,
+  "title": "SQLITEAuswertung View V2",
+  "uid": "fef59k6k02a68e",
+  "version": 2,
   "weekStart": ""
 }

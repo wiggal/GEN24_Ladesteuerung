@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_PV_DATEN.SQLITE",
-      "label": "PV_Daten.sqlite",
+      "name": "DS_GEN24_DATEN_",
+      "label": "GEN24_Daten ",
       "description": "",
       "type": "datasource",
       "pluginId": "frser-sqlite-datasource",
@@ -63,11 +63,12 @@
   "graphTooltip": 0,
   "id": null,
   "links": [],
+  "liveNow": true,
   "panels": [
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -128,17 +129,24 @@
         "fullHighlight": true,
         "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
         "orientation": "auto",
-        "showValue": "auto",
+        "showValue": "always",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         },
         "xTickLabelRotation": 0,
@@ -149,11 +157,11 @@
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS Zeitpunkt,\n  Bruttopreis\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS Zeitpunkt,\n  Bruttopreis\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -161,13 +169,13 @@
           ]
         }
       ],
-      "title": "Strompreise",
+      "title": "Strompreise Brutto -> wähle Zeitraum über Time Picker ($__from -> $__to)",
       "type": "barchart"
     },
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -237,6 +245,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -251,7 +262,7 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
@@ -280,7 +291,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -350,6 +361,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -364,7 +378,7 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
@@ -393,7 +407,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -463,6 +477,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -477,7 +494,7 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
@@ -500,13 +517,13 @@
           }
         }
       ],
-      "title": "BattNetzladung",
+      "title": "Batterie aus Netz geladen",
       "type": "barchart"
     },
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -541,8 +558,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           },
@@ -576,6 +592,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -590,14 +609,14 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime(1741042800000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1741129199999 / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -619,7 +638,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -633,6 +652,7 @@
             "axisGridShow": true,
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisSoftMin": 0,
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
@@ -645,6 +665,9 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
             "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
@@ -665,8 +688,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red",
-                "value": null
+                "color": "light-red"
               }
             ]
           },
@@ -691,20 +713,15 @@
         ]
       },
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 21,
         "x": 0,
         "y": 42
       },
-      "id": 21,
+      "id": 23,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max",
-            "mean",
-            "lastNotNull"
-          ],
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -720,11 +737,11 @@
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n",
+          "queryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -752,7 +769,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -787,8 +804,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           },
@@ -800,7 +816,7 @@
         "h": 7,
         "w": 21,
         "x": 0,
-        "y": 50
+        "y": 52
       },
       "id": 13,
       "options": {
@@ -822,6 +838,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -836,14 +855,14 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -865,7 +884,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -900,8 +919,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           },
@@ -913,7 +931,7 @@
         "h": 7,
         "w": 21,
         "x": 0,
-        "y": 57
+        "y": 59
       },
       "id": 14,
       "options": {
@@ -935,6 +953,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -949,7 +970,7 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
@@ -978,7 +999,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1013,8 +1034,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           },
@@ -1026,7 +1046,7 @@
         "h": 7,
         "w": 21,
         "x": 0,
-        "y": 64
+        "y": 66
       },
       "id": 15,
       "options": {
@@ -1048,6 +1068,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -1062,14 +1085,14 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1091,7 +1114,7 @@
     {
       "datasource": {
         "type": "frser-sqlite-datasource",
-        "uid": "${DS_PV_DATEN.SQLITE}"
+        "uid": "${DS_GEN24_DATEN_}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1126,8 +1149,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           },
@@ -1139,7 +1161,7 @@
         "h": 7,
         "w": 21,
         "x": 0,
-        "y": 71
+        "y": 73
       },
       "id": 16,
       "options": {
@@ -1161,6 +1183,9 @@
         "orientation": "auto",
         "showValue": "auto",
         "stacking": "none",
+        "text": {
+          "valueSize": 11
+        },
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -1175,14 +1200,14 @@
           "columns": [],
           "datasource": {
             "type": "frser-sqlite-datasource",
-            "uid": "${DS_PV_DATEN.SQLITE}"
+            "uid": "${DS_GEN24_DATEN_}"
           },
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime(1741042800000 / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1741129199999 / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1209,13 +1234,15 @@
     "list": []
   },
   "time": {
-    "from": "now-1d/d",
-    "to": "now-1d/d"
+    "from": "now/d",
+    "to": "now/d"
   },
-  "timepicker": {},
+  "timepicker": {
+    "refresh_intervals": []
+  },
   "timezone": "",
-  "title": "SQLITEAuswertung View Tagesübersicht",
-  "uid": "a20MWPFHd",
-  "version": 7,
+  "title": "SQLITEAuswertung View Tagesübersicht V2",
+  "uid": "cef59mgaig9vkd",
+  "version": 3,
   "weekStart": ""
 }
