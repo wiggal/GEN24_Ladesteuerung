@@ -149,7 +149,23 @@ class dynamic:
         # Aufschläge zum reinen Börsenpreis, return muss immer Bruttoendpreis liefern
         Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
         MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
+        # Tageszeitabhängiger Preisanteil (z.B. $14a Netzentgelte)
+        Tagezeit_Preisanteil_tmp = json.loads(basics.getVarConf('dynprice','Tagezeit_Preisanteil', 'str')) 
+        Tagezeit_Preisanteil_tmp = dict(sorted(Tagezeit_Preisanteil_tmp.items(), key=lambda item: int(item[0])))
 
+        # Schlüssel und Werte in numerische Form umwandeln
+        sorted_hours = sorted(int(k) for k in Tagezeit_Preisanteil_tmp.keys())  # Sortierte Stunden
+        values = [float(Tagezeit_Preisanteil_tmp[str(h).zfill(2)]) for h in sorted_hours]  # Sortierte Werte
+
+        # Dictionary für alle Stunden füllen
+        Tagezeit_Preisanteil = {}
+        for i in range(len(sorted_hours)):
+            start = sorted_hours[i]
+            end = sorted_hours[i + 1] if i + 1 < len(sorted_hours) else 24  # Bis zum nächsten oder 24 Uhr
+            for h in range(start, end):
+                Tagezeit_Preisanteil[str(h).zfill(2)] = values[i]  # Konstanter Wert
+        # DEBUG
+        if(self.dyn_print_level >= 4): print("++ Tagezeit_Preisanteil: ", Tagezeit_Preisanteil, "\n")
 
         # Definiere den heutigen Tag (für 0:00 Uhr) und morgen (für 23:00 Uhr)
         heute = datetime.now()
@@ -181,8 +197,9 @@ class dynamic:
         pricelist_date = []
         for row in pricelist:
             if row[1] is not None:
+                Std = datetime.fromtimestamp(row[0]).strftime("%H")
                 time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
-                price = round((row[1]/1000 + Nettoaufschlag) * MwSt, 4)
+                price = round((row[1]/1000 + Nettoaufschlag + Tagezeit_Preisanteil[Std]) * MwSt, 4)
                 # Zeitunkt, Bruttopreis, Börsenpreis
                 pricelist_date.append((time, price, round(row[1]/1000, 3)))
         return(pricelist_date)
@@ -322,9 +339,9 @@ class dynamic:
 
                         # Abweichung vom SOC-Minimum berücksichtigen
                         max_ladewert_grenze_tmp += SOC_ueber_Min
-                        # Hier noch Ladeverlust addieren  #entWIGGlung
+                        # Hier noch Ladeverlust addieren
                         max_ladewert_ohne_Ladeverlust = max_ladewert_grenze_tmp
-                        max_ladewert_grenze_tmp = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/200)))  #entWIGGlung 
+                        max_ladewert_grenze_tmp = int(max_ladewert_grenze_tmp * (1 + (Akku_Verlust_Prozent/200)))
 
                         # wenn die eingesparte Energie schon höher ist als die benötigte
                         if max_ladewert_grenze_tmp > 0: 
