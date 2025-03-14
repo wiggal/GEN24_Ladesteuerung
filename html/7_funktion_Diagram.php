@@ -136,24 +136,26 @@ return $SQL;
 
     case 'bar':
 $SQL = "WITH Alle_PVDaten AS (
-SELECT Zeitpunkt,
-    LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
-    LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS Netzladen,
-    BattStatus
-from pv_daten
-where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-group by STRFTIME('".$groupSTR."', Zeitpunkt))
-SELECT Zeitpunkt,
-    pv.Netzbezug - pv.Netzladen AS Netzverbrauch,
-    pv.Netzladen,
-    pv.BattStatus,
-	(SELECT sp.Bruttopreis 
-     FROM strompreise sp
-     WHERE sp.Zeitpunkt <= pv.Zeitpunkt
-     ORDER BY sp.Zeitpunkt DESC 
-     LIMIT 1)*100 AS Bruttopreis
-FROM Alle_PVDaten AS pv
-ORDER BY pv.Zeitpunkt
+    SELECT
+        STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
+        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
+        LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS Netzladen,
+        BattStatus
+    FROM pv_daten
+    where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+    group by STRFTIME('".$groupSTR."', Zeitpunkt)
+)
+SELECT
+    sp.Zeitpunkt,
+    COALESCE((pv.Netzbezug - pv.Netzladen), 'null') AS Netzverbrauch,
+    COALESCE(pv.Netzladen, 'null') AS Netzladen,
+    COALESCE(pv.BattStatus, 'null') AS BattStatus,
+    sp.Bruttopreis * 100 AS Bruttopreis
+FROM strompreise AS sp
+LEFT JOIN Alle_PVDaten AS pv
+    ON sp.Zeitpunkt = pv.Zeitpunkt -- JOIN über die Stunden
+where sp.Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+ORDER BY sp.Zeitpunkt
 ";
 return $SQL;
     break; # ENDE case 'Produktion_bar'
@@ -302,6 +304,7 @@ echo "    }]
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
             footerFont: { size: 20 },
+            filter: (tooltipItem) => tooltipItem.raw !== null, 
             callbacks: {
                   label: function(context) {
                     // return value in tooltip
