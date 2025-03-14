@@ -19,7 +19,14 @@ $TAB_config = array (
                 array ( 'name' => 'config','file' => '4_tab_config_ini.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'Logfile','file' => '5_tab_Crontab_log.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'GEN24','file' => '6_tab_GEN24.php','checked' => 'nein','sichtbar' => 'ein'),
+                array ( 'name' => 'Strompreis','file' => '7_tab_Diagram.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'QZ-Bilanz','file' => '8_tab_Diagram.php','checked' => 'nein','sichtbar' => 'ein'),
                 array ( 'name' => 'Settings','file' => '9_tab_settigs.php','checked' => 'nein','sichtbar' => 'ein'),
             );
+# Optionen für das Strompreisdiagramm
+$Strompreis_Dia_optionen = array();
+$Strompreis_Dia_optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2','hidden'=>'false','type'=>'line','unit'=>'%','showLabel'=>'true','decimals'=>'1'];
+$Strompreis_Dia_optionen['Bruttopreis']=['Farbe'=>'rgba(255,51,51,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y3','hidden'=>'false','type'=>'bar','unit'=>'ct','showLabel'=>'true','decimals'=>'1'];
+$Strompreis_Dia_optionen['Netzladen']=['Farbe'=>'rgba(60,215,60,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'W','showLabel'=>'true','decimals'=>'0'];
+$Strompreis_Dia_optionen['Netzverbrauch']=['Farbe'=>'rgba(110,110,110,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'W','showLabel'=>'true','decimals'=>'0'];
 ?>

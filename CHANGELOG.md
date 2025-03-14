@@ -3,7 +3,7 @@
 - Weiterentwicklung der Grafana Dashboards und der Beschreibung von @Manniene
 
 DynamicPriceCheck.py:
-- **Neuer Parameter in CONFIG/dynprice.ini** `Tagezeit_Preisanteil`, für tagezeitabhängige Preisanteile (z.B. Netzentgelte nach $14a)
+- **Neuer Parameter in CONFIG/dynprice.ini** `Tagezeit_Preisanteil`, für tageszeitabhängige Preisanteile (z.B. Netzentgelte nach $14a)
 
 **[0.26.8] – 2025-03-09**  
 
