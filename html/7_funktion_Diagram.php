@@ -121,6 +121,19 @@ from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'"
 return $SQL;
     break; # ENDE case 'SUM_DC_Produktion'
 
+    case 'SUM_AC_Verbrauch':
+# AC Verbrauch
+$SQL = "SELECT 
+        MAX(Netzverbrauch)- MIN(Netzverbrauch) + 
+        MAX(DC_Produktion) - min(DC_Produktion) + 
+        MIN (Einspeisung) - MAX (Einspeisung) +
+        MIN (Batterie_IN) - MAX (Batterie_IN) +
+        MAX (Batterie_OUT) - MIN (Batterie_OUT) 
+        AS AC_Produktion
+from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'";
+return $SQL;
+    break; # ENDE case 'SUM_AC_Verbrauch'
+
     case 'bar':
 $SQL = "WITH Alle_PVDaten AS (
 SELECT Zeitpunkt,
