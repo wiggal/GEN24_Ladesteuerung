@@ -25,8 +25,8 @@ $TAB_config = array (
             );
 # Optionen für das Strompreisdiagramm
 $Strompreis_Dia_optionen = array();
-$Strompreis_Dia_optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2','hidden'=>'false','type'=>'line','unit'=>'%','showLabel'=>'true','decimals'=>'1'];
+$Strompreis_Dia_optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'1','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y2','hidden'=>'false','type'=>'line','unit'=>'%','showLabel'=>'false','decimals'=>'1'];
 $Strompreis_Dia_optionen['Bruttopreis']=['Farbe'=>'rgba(255,51,51,1)','fill'=>'false','stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]','yAxisID'=>'y3','hidden'=>'false','type'=>'bar','unit'=>'ct','showLabel'=>'true','decimals'=>'1'];
-$Strompreis_Dia_optionen['Netzladen']=['Farbe'=>'rgba(60,215,60,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'W','showLabel'=>'true','decimals'=>'0'];
-$Strompreis_Dia_optionen['Netzverbrauch']=['Farbe'=>'rgba(110,110,110,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'W','showLabel'=>'true','decimals'=>'0'];
+$Strompreis_Dia_optionen['Netzladen']=['Farbe'=>'rgba(60,215,60,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'W','showLabel'=>'false','decimals'=>'0'];
+$Strompreis_Dia_optionen['Netzverbrauch']=['Farbe'=>'rgba(110,110,110,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'W','showLabel'=>'false','decimals'=>'0'];
 ?>
