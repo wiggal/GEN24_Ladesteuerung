@@ -1,7 +1,7 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch)
+function schalter_ausgeben ($DBersterTag, $DBletzterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $Strompreis_Dia_optionen)
 {
 $next_diagramtype = 'line';
 if ($diagramtype == 'line') $next_diagramtype = 'bar';
@@ -22,8 +22,7 @@ $NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime($DiaDatenBis)+$zeitdifferenz))
 
 # Schalter am Anfang und am Ende deaktivieren
 $button_vor_on = '';
-$heute = date("Y-m-d H:i");
-if (strtotime($DiaDatenBis) >= strtotime($heute)) $button_vor_on = 'disabled';
+if (strtotime($DiaDatenBis) > strtotime($DBletzterTag)) $button_vor_on = 'disabled';
 # Schalter für Tag out of DB  deaktivieren
 $button_back_on = '';
 if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) $button_back_on = 'disabled';
@@ -68,9 +67,9 @@ echo '<input type="hidden" name="programmpunkt" value="option">'."\n";
 echo '<button type="submit" class="navi" > Tag auswählen </button>';
 echo '</form>'."\n";
 
-echo '</td><td style="text-align:right; font-size: 170%; background-color: rgb(0,255,127)">';
+echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$Strompreis_Dia_optionen['Netzladen']['Farbe'].'">';
 echo "&nbsp;$Produktion KWh&nbsp;";
-echo '</td><td style="text-align:right; font-size: 170%; background-color: rgb(255,158,158)">';
+echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$Strompreis_Dia_optionen['Netzverbrauch']['Farbe'].'">';
 echo "&nbsp;$Verbrauch KWh&nbsp;";
 
 echo '</td></tr></table><br>';
@@ -90,7 +89,17 @@ switch ($XScaleEinheit) {
     case 'jahre': $cut_von = 0; $cut_anzahl = 4; break;  # Monat ausgeben
 }
     
+$rows = [];
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+    $rows[] = $row; // Alle Zeilen speichern
+}
+
+$count = count(array_filter($rows, fn($entry) => strpos($entry["Zeitpunkt"], "00:00:00") !== false));
+
+// Letzte Zeile entfernen, wnn 00:00:00 vom nächsten Tag enthalten ist
+if ( $count  > 1) array_pop($rows);
+
+foreach ($rows as $row) {
         $first = true;
         foreach($row as $x => $val) {
         if ( $first ){
@@ -113,26 +122,21 @@ function getSQL($SQLType, $DiaDatenVon, $DiaDatenBis, $groupSTR)
 {
 # SQL nach $SQLType wählen
 switch ($SQLType) {
-    case 'SUM_DC_Produktion':
+    case 'Netzladen':
 $SQL = "SELECT 
-        MAX(DC_Produktion)- MIN(DC_Produktion)
-        AS DC_Produktion
+        MAX (AC_to_DC) - MIN (AC_to_DC) AS Netzladen
 from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'";
 return $SQL;
     break; # ENDE case 'SUM_DC_Produktion'
 
-    case 'SUM_AC_Verbrauch':
+    case 'Netzverbrauch':
 # AC Verbrauch
 $SQL = "SELECT 
-        MAX(Netzverbrauch)- MIN(Netzverbrauch) + 
-        MAX(DC_Produktion) - min(DC_Produktion) + 
-        MIN (Einspeisung) - MAX (Einspeisung) +
-        MIN (Batterie_IN) - MAX (Batterie_IN) +
-        MAX (Batterie_OUT) - MIN (Batterie_OUT) 
-        AS AC_Produktion
-from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'";
+        (MAX (Netzverbrauch) - MIN (Netzverbrauch)) - (MAX (AC_to_DC) - MIN (AC_to_DC)) AS Netzverbrauch
+from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+";
 return $SQL;
-    break; # ENDE case 'SUM_AC_Verbrauch'
+    break; # ENDE case 'SUM_Netzverbrauch'
 
     case 'bar':
 $SQL = "WITH Alle_PVDaten AS (
@@ -246,7 +250,6 @@ new Chart('PVDaten', {
       echo "borderColor: '".$optionen[$x]['Farbe']."',\n";
       echo "backgroundColor: '".$optionen[$x]['Farbe']."',\n";
       echo "borderWidth: '".$optionen[$x]['linewidth']."',\n";
-      echo "borderDash: ".$optionen[$x]['borderDash'].",\n";
       echo "unit: '".$optionen[$x]['unit']."',\n";
       echo "showLabel: ".$optionen[$x]['showLabel'].",\n";
       echo "pointRadius: 2,\n";
