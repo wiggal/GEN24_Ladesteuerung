@@ -67,9 +67,15 @@ if (!file_exists($SQLite_file)) {
 $labels = '';
 $daten = array();
 
+# Datenbankverbindung herstellen und ersten und letzten Tag ermitteln
+$db = new SQLite3($SQLite_file);
+$DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from strompreise');
+$DBletzterTag = strtotime($GLOBALS['db']->querySingle('SELECT MAX(Zeitpunkt) from strompreise'));
+$DBletzterTag = date('Y-m-d 00:00', $DBletzterTag);
+
 # Diagrammtag festlegen
 # UND _POST_VAR auslesen
-$heute = date("Y-m-d 00:00");
+$heute =  date("Y-m-d 00:00");
 $morgen =  date("Y-m-d 00:00",(strtotime("+1 day", strtotime(date("Y-m-d")))));
 $DiaDatenVon = $heute;
 $DiaDatenBis = $morgen;
@@ -90,15 +96,14 @@ $Zeitraum = 'stunden';
 if (!empty($_POST["Zeitraum"])) $Zeitraum = $_POST["Zeitraum"];
 
 # ProduktionsSQL und Daten holen
+# DiaDatenBis um 5 Minuten erhöhen, damit der Zähler XX:01 auch noch erfasst wird
+$DiaDatenBis_SQL = date('Y-m-d 00:05', strtotime($DiaDatenBis));
+
 $groupSTR = '%Y-%m-%d';
 switch ($Zeitraum) {
     case 'stunden': $groupSTR = '%Y-%m-%d %H'; break;
     case 'tage': $groupSTR = '%Y-%m-%d'; break;
 }
-
-# Datenbankverbindung herstellen
-$db = new SQLite3($SQLite_file);
-$DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from pv_daten');
 
 #$Footer_groupSTR = str_replace(" ","\T",$groupSTR);
 $Footer_groupSTR = str_replace(" %H","",$groupSTR);
@@ -120,17 +125,17 @@ if ($programmpunkt == 'option') {
 } else {
 
 # AC Produktion 
-$SQL = getSQL('SUM_DC_Produktion', $DiaDatenVon, $DiaDatenBis, $groupSTR);
+$SQL = getSQL('Netzladen', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
 $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
-# AC Verbrauch
-$SQL = getSQL('SUM_AC_Verbrauch', $DiaDatenVon, $DiaDatenBis, $groupSTR);
+# Netzverbrauch
+$SQL = getSQL('Netzverbrauch', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Diagrammtype bar
 # Funktion Schalter aufrufen
-schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch);
+schalter_ausgeben($DBersterTag, $DBletzterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $Strompreis_Dia_optionen);
 
-$SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis, $groupSTR, $groupSTR);
+$SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
 $results = $db->query($SQL);
 
 # Diagrammdaten und Optionen holen
