@@ -121,16 +121,18 @@ if ( $Footer_DiaDatenBis != '' and $Footer_DiaDatenVon != $Footer_DiaDatenBis ) 
 
 # END _POST_VAR auslesen
 # Erstes Jahr aus DB, wenn alle Jahre dargestellt werden sollen
+# DiaDatenBis um 5 Minuten erhöhen, damit der Zähler XX:01 auch noch erfasst wird
+$DiaDatenBis_SQL = date('Y-m-d 00:05', strtotime($DiaDatenBis));
 $DBersterTag_Jahr = date_format(date_create($DBersterTag), 'Y');
 if ($energietype == 'option') {
     Optionenausgabe($DBersterTag_Jahr);
 } else {
 
 # AC Produktion 
-$SQL = getSQL('SUM_DC_Produktion', $DiaDatenVon, $DiaDatenBis, $groupSTR);
+$SQL = getSQL('SUM_DC_Produktion', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
 $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
 # AC Verbrauch
-$SQL = getSQL('SUM_AC_Verbrauch', $DiaDatenVon, $DiaDatenBis, $groupSTR);
+$SQL = getSQL('SUM_AC_Verbrauch', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Diagrammtype Auswahl
@@ -139,7 +141,7 @@ if ($diagramtype == 'line') {
     schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch);
 
     # ProduktionsSQL und Daten holen
-    $SQL = getSQL('line', $DiaDatenVon, $DiaDatenBis, $groupSTR);
+    $SQL = getSQL('line', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
     $results = $db->query($SQL);
 
     # Diagrammdaten und Optionen holen
@@ -157,7 +159,7 @@ Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenz
     # Funktion Schalter aufrufen
     schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch);
 
-    $SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis, $groupSTR, $groupSTR);
+    $SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
     $results = $db->query($SQL);
 
     # Diagrammdaten und Optionen holen
