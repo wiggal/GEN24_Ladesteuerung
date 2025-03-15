@@ -103,7 +103,15 @@ switch ($XScaleEinheit) {
     case 'jahre': $cut_von = 0; $cut_anzahl = 4; break;  # Monat ausgeben
 }
     
+$rows = [];
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+    $rows[] = $row; // Alle Zeilen speichern
+}
+
+// Letzte Zeile entfernen, wnn 00:00:00 vom nächsten Tag enthalten ist
+array_pop($rows);
+
+foreach ($rows as $row) {
         $first = true;
         foreach($row as $x => $val) {
         if ( $first ){
