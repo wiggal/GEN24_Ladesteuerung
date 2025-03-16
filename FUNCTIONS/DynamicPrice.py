@@ -447,7 +447,7 @@ class dynamic:
         Zeitpunkt DATETIME PRIMARY KEY,
         Netzverbrauch INT,
         Netzladen INT,
-        BattStatus FLOAT
+        PrognBattStatus FLOAT
         )""")
 
         #Alte Daten abräumen und neu Daten speichern
@@ -455,7 +455,7 @@ class dynamic:
         DELETE FROM priceforecast
         """)
         zeiger.executemany("""
-        INSERT INTO priceforecast (Zeitpunkt, Netzverbrauch, Netzladen, BattStatus)
+        INSERT INTO priceforecast (Zeitpunkt, Netzverbrauch, Netzladen, PrognBattStatus)
         VALUES (?, ?, ?, ?);
         """, priceforecast)
 
