@@ -270,15 +270,13 @@ for row in pv_data_charge:
         else:
             Netzverbrauch = 0
         Netzladen = 0
-    BattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
-    priceforecast.append([Ladezeitpunkt, Netzverbrauch,Netzladen,BattStatus])
+    PrognBattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
+    priceforecast.append([Ladezeitpunkt, Netzverbrauch,Netzladen,PrognBattStatus])
 
 if(dyn_print_level >= 1):
     # priceforecast Daten für DB
-    headers = ["Ladezeitpunkt", "Netzverbrauch", "Netzladen", "BattStatus"]
-    dynamic.listAStable(headers, priceforecast)
-
-
+    headers = ["Ladezeitpunkt", "Netzverbrauch", "Netzladen", "PrognBattStatus"]
+    dynamic.listAStable(headers, priceforecast, '>> ')
 
 if ('logging' in Options):
     # pv_data_charge aufbereiten:
