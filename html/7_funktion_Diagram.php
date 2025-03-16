@@ -19,6 +19,8 @@ $VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime($DiaDatenVon)-$zeitdifferenz));
 $VOR_DiaDatenBis = $DiaDatenVon;
 $NACH_DiaDatenVon = $DiaDatenBis;
 $NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime($DiaDatenBis)+$zeitdifferenz));
+$heute =  date("Y-m-d 00:00");
+$morgen =  date("Y-m-d 00:00",(strtotime("+1 day", strtotime(date("Y-m-d")))));
 
 # Schalter am Anfang und am Ende deaktivieren
 $button_vor_on = '';
@@ -41,12 +43,16 @@ echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaDatenVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
-echo '<input type="hidden" name="DiaDatenBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
+#echo '<input type="hidden" name="DiaDatenVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
+#echo '<input type="hidden" name="DiaDatenBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
+echo '<input type="hidden" name="DiaDatenVon" value="'.$heute.'">'."\n";
+echo '<input type="hidden" name="DiaDatenBis" value="'.$morgen.'">'."\n";
 echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
-echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
-echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
+#echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
+#echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
+echo '<input type="hidden" name="AnfangVon" value="'.$heute.'">'."\n";
+echo '<input type="hidden" name="AnfangBis" value="'.$morgen.'">'."\n";
 echo '<button type="submit" class="navi"> aktuell </button>';
 echo '</form>'."\n";
 

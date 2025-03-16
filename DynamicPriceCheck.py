@@ -248,8 +248,41 @@ else:
 if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 
 # Strompreise in PV_Daten.sqlite/Strompreise speichern
+# Neue Liste mit den Ergebnissen
+priceforecast = []
+for row in pv_data_charge:
+    Ladezeitpunkt = row[0]
+    PV_Prognose = row[1]
+    Verbrauch = row[2]
+    Akkustand_W = row[4]
+    Ladewert = row[5]
+
+    if Ladewert == -1:
+        Netzverbrauch = Verbrauch - PV_Prognose
+        Netzladen = 0
+        if Netzverbrauch < 0: Netzverbrauch = 0
+    elif Ladewert < -1:
+        Netzverbrauch = Verbrauch
+        Netzladen = Ladewert * -1
+    else:
+        if Akkustand_W < minimum_batterylevel_kWh:
+            Netzverbrauch = Verbrauch
+        else:
+            Netzverbrauch = 0
+        Netzladen = 0
+    BattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
+    priceforecast.append([Ladezeitpunkt, Netzverbrauch,Netzladen,BattStatus])
+
+if(dyn_print_level >= 1):
+    # priceforecast Daten für DB
+    headers = ["Ladezeitpunkt", "Netzverbrauch", "Netzladen", "BattStatus"]
+    dynamic.listAStable(headers, priceforecast)
+
+
+
 if ('logging' in Options):
-    dynamic.save_Strompreise('PV_Daten.sqlite', pricelist_date)
+    # pv_data_charge aufbereiten:
+    dynamic.save_Strompreise('PV_Daten.sqlite', pricelist_date, priceforecast)
     Logging_Schreib_Ausgabe = 'Strompreise in SQLite-Datei gespeichert!'
 else:
     Logging_Schreib_Ausgabe = "Strompreise NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
