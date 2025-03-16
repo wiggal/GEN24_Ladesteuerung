@@ -160,10 +160,15 @@ SELECT
     COALESCE((pv.Netzbezug - pv.Netzladen), 'null') AS Netzverbrauch,
     COALESCE(pv.Netzladen, 'null') AS Netzladen,
     COALESCE(pv.BattStatus, 'null') AS BattStatus,
-    sp.Bruttopreis * 100 AS Bruttopreis
+    sp.Bruttopreis * 100 AS Bruttopreis,
+	pfc.Netzverbrauch AS PrognNetzverbrauch,
+	pfc.Netzladen AS PrognNetzladen,
+	pfc.PrognBattStatus AS PrognBattStatus
 FROM strompreise AS sp
 LEFT JOIN Alle_PVDaten AS pv
     ON sp.Zeitpunkt = pv.Zeitpunkt -- JOIN über die Stunden
+LEFT JOIN priceforecast AS pfc
+    ON sp.Zeitpunkt = pfc.Zeitpunkt -- JOIN über die Stunden
 where sp.Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
 ORDER BY sp.Zeitpunkt
 ";
