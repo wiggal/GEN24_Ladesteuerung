@@ -69,6 +69,19 @@ $daten = array();
 
 # Datenbankverbindung herstellen und ersten und letzten Tag ermitteln
 $db = new SQLite3($SQLite_file);
+# Prüfen, ob die Strompreistabellen existieren
+$query = "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('strompreise', 'priceforecast');";
+$result = $db->query($query);
+$count = 0;
+while ($row = $result->fetchArray()) {
+    $count++;
+}
+if ($count != 2) {
+    echo "\nSQLitetabellen strompreise bzw. priceforecast existieren nicht, keine Grafik verfügbar!";
+    echo "</body></html>";
+    exit();
+}
+
 $DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from strompreise');
 $DBletzterTag = strtotime($GLOBALS['db']->querySingle('SELECT MAX(Zeitpunkt) from strompreise'));
 $DBletzterTag = date('Y-m-d 00:00', $DBletzterTag);

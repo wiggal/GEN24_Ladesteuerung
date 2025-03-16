@@ -419,11 +419,11 @@ class dynamic:
 
 
     # Strompreise in SQLite_DB speichern
-    def save_Strompreise(self, database, strompreise):
+    def save_Strompreise(self, database, strompreise, priceforecast):
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
     
-        # Wenn Datenbanktabelle noch nicht existiert, anlegen
+        # Wenn Datenbanktabelle strompreise noch nicht existiert, anlegen
         zeiger.execute("""
         CREATE TABLE IF NOT EXISTS strompreise (
         Zeitpunkt DATETIME PRIMARY KEY,
@@ -441,7 +441,24 @@ class dynamic:
                 Boersenpreis = excluded.Boersenpreis
             ''', entry)
 
-    
+        # Wenn Datenbanktabelle priceforecast noch nicht existiert, anlegen
+        zeiger.execute("""
+        CREATE TABLE IF NOT EXISTS priceforecast (
+        Zeitpunkt DATETIME PRIMARY KEY,
+        Netzverbrauch INT,
+        Netzladen INT,
+        BattStatus FLOAT
+        )""")
+
+        #Alte Daten abräumen und neu Daten speichern
+        zeiger.execute("""
+        DELETE FROM priceforecast
+        """)
+        zeiger.executemany("""
+        INSERT INTO priceforecast (Zeitpunkt, Netzverbrauch, Netzladen, BattStatus)
+        VALUES (?, ?, ?, ?);
+        """, priceforecast)
+
         verbindung.commit()
         verbindung.close()
     
