@@ -77,7 +77,8 @@ while ($row = $result->fetchArray()) {
     $count++;
 }
 if ($count != 2) {
-    echo "\nSQLitetabellen strompreise bzw. priceforecast existieren nicht, keine Grafik verfügbar!";
+    echo "\nSQLitetabellen strompreise bzw. priceforecast existieren nicht, keine Grafik verfügbar!<br>
+    Die Tabellen werden durch das Logging von DynamicPriceCheck.py erzeugt!";
     echo "</body></html>";
     exit();
 }
@@ -98,8 +99,6 @@ $DiaDatenBis =  date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenVon))
 if (empty($_POST["AnfangVon"])) $_POST["AnfangVon"] = $DiaDatenVon;
 if (empty($_POST["AnfangBis"])) $_POST["AnfangBis"] = $DiaDatenBis;
 
-$diagramtype = 'bar';
-
 # programmpunkt = option 
 $programmpunkt = 'Produktion';
 if (!empty($_POST["programmpunkt"])) $programmpunkt = $_POST["programmpunkt"];
@@ -112,23 +111,8 @@ if (!empty($_POST["Zeitraum"])) $Zeitraum = $_POST["Zeitraum"];
 # DiaDatenBis um 5 Minuten erhöhen, damit der Zähler XX:01 auch noch erfasst wird
 $DiaDatenBis_SQL = date('Y-m-d 00:05', strtotime($DiaDatenBis));
 
-$groupSTR = '%Y-%m-%d';
-switch ($Zeitraum) {
-    case 'stunden': $groupSTR = '%Y-%m-%d %H'; break;
-    case 'tage': $groupSTR = '%Y-%m-%d'; break;
-}
-
-#$Footer_groupSTR = str_replace(" ","\T",$groupSTR);
-$Footer_groupSTR = str_replace(" %H","",$groupSTR);
-$Footer_DiaDatenVon = date_format(date_create($DiaDatenVon), str_replace("%","",$Footer_groupSTR));
-# Eine Minute von DiaDatenBis abziehen
-$Footer_DiaDatenBis = date_format(date_add(date_create($DiaDatenBis), date_interval_create_from_date_string("-1 minutes")), str_replace("%","",$Footer_groupSTR));
-
-if ( $Footer_DiaDatenBis != '' and $Footer_DiaDatenVon != $Footer_DiaDatenBis ) {
-    $Footer = $Footer_DiaDatenVon . ' bis '.$Footer_DiaDatenBis;
-} else {
-    $Footer = $Footer_DiaDatenVon;
-}
+$groupSTR = '%Y-%m-%d %H';
+$Tag = date_format(date_create($DiaDatenVon), str_replace("%","",'%Y-%m-%d'));
 
 # END _POST_VAR auslesen
 # Erstes Jahr aus DB, wenn alle Jahre dargestellt werden sollen
@@ -144,26 +128,26 @@ $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
 $SQL = getSQL('Netzverbrauch', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
-# Diagrammtype bar
 # Funktion Schalter aufrufen
-schalter_ausgeben($DBersterTag, $DBletzterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $Strompreis_Dia_optionen);
+schalter_ausgeben($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $Strompreis_Dia_optionen, $Tag);
 
-$SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
+$SQL = getSQL('daten', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
 $results = $db->query($SQL);
 
 # Diagrammdaten und Optionen holen
-$DB_Werte = array('Netzverbrauch', 'Netzladen', 'Bruttopreis');
-list($daten, $labels) = diagrammdaten($results, $DB_Werte, $Zeitraum);
+list($daten, $labels) = diagrammdaten($results, $Zeitraum);
+
+# Preisstatistikdaten erzeugen
+$Preisstatistik = Preisberechnung($DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $db);
 
 # Nun Barchart ausgeben
     echo "<div class='container'>
     <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
 </div>";
-Diagram_ausgabe($Footer, 'bar', $labels, $daten, $Strompreis_Dia_optionen);
+Diagram_ausgabe($labels, $daten, $Strompreis_Dia_optionen, $Preisstatistik);
 
 $db->close();
 } # END if ($programmpunkt == 'option') {
-
 ?>
     </body>
 </html>
