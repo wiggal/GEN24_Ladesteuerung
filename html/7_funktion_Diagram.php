@@ -1,11 +1,8 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ($DBersterTag, $DBletzterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $Strompreis_Dia_optionen)
+function schalter_ausgeben ($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $Strompreis_Dia_optionen, $schaltertext)
 {
-$next_diagramtype = 'line';
-if ($diagramtype == 'line') $next_diagramtype = 'bar';
-
 # Abstand von bis ermitteln
 # Zeitpunkte mit Zeitzonen, die die Sommerzeit und Winterzeit berücksichtigen
 $zeitpunkt1 = new DateTime($GLOBALS['_POST']['AnfangBis'], new DateTimeZone('Europe/Berlin')); 
@@ -34,7 +31,6 @@ echo '<table><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$VOR_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$VOR_DiaDatenBis.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
 echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
@@ -43,14 +39,9 @@ echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-#echo '<input type="hidden" name="DiaDatenVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
-#echo '<input type="hidden" name="DiaDatenBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$heute.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$morgen.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
-#echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
-#echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<input type="hidden" name="AnfangVon" value="'.$heute.'">'."\n";
 echo '<input type="hidden" name="AnfangBis" value="'.$morgen.'">'."\n";
 echo '<button type="submit" class="navi"> aktuell </button>';
@@ -60,7 +51,6 @@ echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$NACH_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$NACH_DiaDatenBis.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
 echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
@@ -70,7 +60,7 @@ echo '</form>'."\n";
 echo '</td><td style="text-align:center; width: 100%;">';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="programmpunkt" value="option">'."\n";
-echo '<button type="submit" class="navi" > Tag auswählen </button>';
+echo '<button type="submit" class="navi" > '.$schaltertext.' </button>';
 echo '</form>'."\n";
 
 echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$Strompreis_Dia_optionen['Netzladen']['Farbe'].'">';
@@ -81,7 +71,7 @@ echo "&nbsp;$Verbrauch KWh&nbsp;";
 echo '</td></tr></table><br>';
 } #END function schalter_ausgeben 
 
-function diagrammdaten( $results, $DB_Werte, $XScaleEinheit )
+function diagrammdaten( $results, $XScaleEinheit )
 {
 $trenner = "";
 $labels = "";
@@ -144,7 +134,7 @@ from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
 return $SQL;
     break; # ENDE case 'SUM_Netzverbrauch'
 
-    case 'bar':
+    case 'daten':
 $SQL = "WITH Alle_PVDaten AS (
     SELECT
         STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
@@ -161,9 +151,9 @@ SELECT
     COALESCE(pv.Netzladen, 'null') AS Netzladen,
     COALESCE(pv.BattStatus, 'null') AS BattStatus,
     sp.Bruttopreis * 100 AS Bruttopreis,
-	pfc.Netzverbrauch AS PrognNetzverbrauch,
-	pfc.Netzladen AS PrognNetzladen,
-	pfc.PrognBattStatus AS PrognBattStatus
+	pfc.PrognNetzverbrauch,
+	pfc.PrognNetzladen,
+	pfc.PrognBattStatus
 FROM strompreise AS sp
 LEFT JOIN Alle_PVDaten AS pv
     ON sp.Zeitpunkt = pv.Zeitpunkt -- JOIN über die Stunden
@@ -176,6 +166,69 @@ return $SQL;
     break; # ENDE case 'Produktion_bar'
 } # ENDE switch
 } # END function getSQL
+
+function Preisberechnung($DiaDatenVon, $DiaDatenBis, $groupSTR, $db) {
+# Schleife für Tag, Monat, Jahr
+$Preisstatistik = [];
+$Zeitraeume = ["T", "M", "J"];
+
+foreach ($Zeitraeume as $Zeitraum) {
+
+
+    if ($Zeitraum == 'M') {
+        $date = new DateTime($DiaDatenVon);
+        $date->modify('first day of this month');
+        $DiaDatenVon =  $date->format('Y-m-d H:i'); 
+        $date = new DateTime($DiaDatenBis);
+        $date->modify('first day of next month');
+        $DiaDatenBis =  $date->format('Y-m-d H:i'); 
+    }
+    if ($Zeitraum == 'J') {
+        $date = new DateTime($DiaDatenVon);
+        $date->modify('first day of January this year');
+        $DiaDatenVon =  $date->format('Y-m-d H:i'); 
+        $date = new DateTime($DiaDatenBis);
+        $date->modify('first day of January next year');
+        $DiaDatenBis =  $date->format('Y-m-d H:i'); 
+    }
+
+    $SQL = "WITH Alle_PVDaten AS (
+        SELECT
+            STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
+            LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug
+        FROM pv_daten
+        where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+        group by STRFTIME('".$groupSTR."', Zeitpunkt)
+    )
+    , Alle_PVDaten2 AS (SELECT
+        sp.Zeitpunkt,
+        COALESCE(pv.Netzbezug, 'null') AS Netzverbrauch,
+        sp.Bruttopreis AS Bruttopreis
+    FROM strompreise AS sp
+    LEFT JOIN Alle_PVDaten AS pv
+        ON sp.Zeitpunkt = pv.Zeitpunkt -- JOIN über die Stunden
+    where sp.Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."' AND Netzverbrauch is not 'null')
+    , Alle_PVDaten3 AS (SELECT
+    Netzverbrauch,
+    Bruttopreis,
+    Netzverbrauch * Bruttopreis/1000.0 AS Preis
+    FROM Alle_PVDaten2)
+    SELECT
+    round(MIN(Bruttopreis),2) AS MIN,
+    round(MAX(Bruttopreis),2) AS MAX,
+    round(AVG(Bruttopreis),2) AS AVG,
+    round(sum(Preis),2) AS SUM,
+    round((sum(Preis)/(sum(Netzverbrauch)/1000.0)),2) AS KostSUM
+    FROM Alle_PVDaten3
+    ";
+
+    $result = $db->query($SQL);
+    $Preisstatistik[$Zeitraum] = $result->fetchArray(SQLITE3_ASSOC);
+
+} # ENDE foreach ($Zeitraeume 
+
+return $Preisstatistik;
+} # ENDE function Preisberechnung
 
 function Optionenausgabe($DBersterTag_Jahr)
 {
@@ -242,12 +295,11 @@ window.onload = function() { zeitsetzer(1); };
 ";
 } # END function Optionenausgabe
 
-function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen)
+function Diagram_ausgabe($labels, $daten, $optionen, $Preisstatistik)
 {
 echo " <script>
 Chart.register(ChartDataLabels);
 new Chart('PVDaten', {
-    type: '". $Diatype ."',
     data: {
       labels: [". $labels ."],
       datasets: [{";
@@ -342,7 +394,12 @@ echo "    }]
         },
         title: {
           display: true,
-          text: '". $Footer ."',
+          align: 'start',
+          text: ['Bruttopreis (T|M|J): Min = ".$Preisstatistik['T']['MIN']."€ | ".$Preisstatistik['M']['MIN']."€ | ".$Preisstatistik['J']['MIN']."€ \
+    Max = ".$Preisstatistik['T']['MAX']."€ | ".$Preisstatistik['M']['MAX']."€ | ".$Preisstatistik['J']['MAX']."€ \
+    Durchschnitt = ".$Preisstatistik['T']['AVG']."€ | ".$Preisstatistik['M']['AVG']."€ | ".$Preisstatistik['J']['AVG']."€',
+                'Kosten (T|M|J):      Gesamt = ".$Preisstatistik['T']['SUM']."€ | ".$Preisstatistik['M']['SUM']."€ | ".$Preisstatistik['J']['SUM']."€ \
+                Pro kWh = ".$Preisstatistik['T']['KostSUM']."€ | ".$Preisstatistik['M']['KostSUM']."€ | ".$Preisstatistik['J']['KostSUM']."€'],
           font: {
              size: 20,
            },

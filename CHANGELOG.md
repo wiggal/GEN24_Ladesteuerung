@@ -2,6 +2,10 @@
 
 - Weiterentwicklung der Grafana Dashboards und der Beschreibung von @Manniene
 
+- **NEU** Strompreis-Chart:
+  Zum Aktivieren, folgende Zeile in html/config_priv.php bei der Definition des TAB_config Array einfügen:
+  `array ( 'name' => 'Strompreis','file' => '7_tab_Diagram.php','checked' => 'nein','sichtbar' => 'ein')`
+
 DynamicPriceCheck.py:
 - **Neuer Parameter in CONFIG/dynprice.ini** `Tagezeit_Preisanteil`, für tageszeitabhängige Preisanteile (z.B. Netzentgelte nach $14a)
 
