@@ -273,7 +273,7 @@ for row in pv_data_charge:
     PrognBattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
     priceforecast.append([Ladezeitpunkt, Netzverbrauch,Netzladen,PrognBattStatus])
 
-if(dyn_print_level >= 1):
+if(dyn_print_level >= 2):
     # priceforecast Daten für DB
     headers = ["Ladezeitpunkt", "Netzverbrauch", "Netzladen", "PrognBattStatus"]
     dynamic.listAStable(headers, priceforecast, '>> ')
