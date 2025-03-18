@@ -147,9 +147,9 @@ $SQL = "WITH Alle_PVDaten AS (
 )
 SELECT
     sp.Zeitpunkt,
-    COALESCE((pv.Netzbezug - pv.Netzladen), 'null') AS Netzverbrauch,
-    COALESCE(pv.Netzladen, 'null') AS Netzladen,
-    COALESCE(pv.BattStatus, 'null') AS BattStatus,
+    pv.Netzbezug - pv.Netzladen AS Netzverbrauch,
+    pv.Netzladen AS Netzladen,
+    pv.BattStatus AS BattStatus,
     sp.Bruttopreis * 100 AS Bruttopreis,
 	pfc.PrognNetzverbrauch,
 	pfc.PrognNetzladen,
@@ -370,17 +370,19 @@ echo "    }]
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
             footerFont: { size: 20 },
-            filter: (tooltipItem) => tooltipItem.raw !== null, 
+            //filter: (tooltipItem) => tooltipItem.raw !== '', 
             callbacks: {
                   label: function(context) {
                     // return value in tooltip
-                    const labelName = context.dataset.label;
-                    const labelValue = context.parsed.y;
-                    const decimals = context.dataset.decimals || 0; // Standard: 0
-                    const unit = context.dataset.unit;
-                    const line = labelName + ' ' + labelValue.toFixed(decimals) + ' ' + unit;
-                    arrayLines = [ line ];
-                    return arrayLines;
+                    let labelName = context.dataset.label || '';
+                    let labelValue = context.raw;
+                    let decimals = context.dataset.decimals || 0; // Standard: 0
+                    let unit = context.dataset.unit || '';
+
+                    if (labelValue !== null && labelValue !== undefined) {
+                        return `\${labelName}: \${labelValue.toFixed(decimals)} \${unit}`;
+                    }
+                    return null;
                 }
             } // Ende callbacks:
         }
