@@ -395,6 +395,13 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Ladeverluste beim Laden und Abschreibungsverluste des Hausakkus</td></tr>
 <tr><td><input type="hidden" name="Zeile[20][0]" value=''>Akku_Verlust_Prozent</td>
 <td><input type="text" name="Zeile[20][1]" value="20" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[191]" value='' >; Ladung anpassen durch Pufferfaktor, der auf den Verbrauch aus dem Lastprofil angewendet wird.
+</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[191]" value='' >
+; Mit dem Faktor wird der Verbrauch aus dem Lastprofil multipliziert, damit kann ein Ladestandpuffer für ungenaue Verbräuche aus dem Lastprofil, bzw. ungenaue Prognosen individuell eingestellt werden.
+</td></tr>
+<tr><td><input type="hidden" name="Zeile[20][0]" value=''>Lade_Verbrauchs_Faktor</td>
+<td><input type="text" name="Zeile[20][1]" value="1.1" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Um den Wert Gewinnerwartung_kWh muss der Preis Pro kWh bei</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Speicherung in den Akku nach Abzug von Akku_Verlust_Prozent mindestens niedriger sein.</td></tr>
 <tr><td><input type="hidden" name="Zeile[20][0]" value=''>Gewinnerwartung_kW</td>
@@ -407,6 +414,12 @@ td {font-size: 160%;
 <td><input type="text" name="Zeile[23][1]" value="energycharts" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[24][0]" value=''>LAND</td>
 <td><input type="text" name="Zeile[24][1]" value="DE-LU" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[32]" value='' >; Tagezeitabhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a)</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[33]" value='' >; Hier die Stundenbereiche mit den Nettopreisen in der Form {"Std":"Nettopreis", ...} angeben,</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[34]" value='' >; Std. muss mit "00" beginnen und immer zweistellig sein.</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[35]" value='' >; Beispiel: { "00":"0.027","09":"0.1105","16":"0.1937"}</td></tr>
+<tr><td><input type="hidden" name="Zeile[36][0]" value='Tagezeit_Preisanteil = '>Tagezeit_Preisanteil</td>
+<td><input type="text" name="Zeile[36][1]" value="{ &quot;00&quot;:&quot;0.000&quot;,&quot;12&quot;:&quot;0.000&quot;}" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[25]" value='' >; Nettoaufschlag EURO/kWh</td></tr>
 <tr><td><input type="hidden" name="Zeile[26][0]" value=''>Nettoaufschlag</td>
 <td><input type="text" name="Zeile[26][1]" value="0.1528" readonly></td></tr>
