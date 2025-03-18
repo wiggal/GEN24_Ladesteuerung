@@ -12,6 +12,8 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.26.9**  
+Diagramm zur Darstellung der dynamischen Strompreise
 Ab Version: **0.26.8**  
 Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
 Ab Version: **0.26.1**  
@@ -87,7 +89,8 @@ Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines 
 ```
 58 * * * * /DIR/start_PythonScript.sh -o LOG_DynamicPriceCheck.log DynamicPriceCheck.py schreiben
 ```
-Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben (siehe kleine Bild):
+Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben.  
+Hier das Diagramm zu den dynamischen Strompreisen:
 ![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
 
 ## Webserver Installation (WebUI):  
