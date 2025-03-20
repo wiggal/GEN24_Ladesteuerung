@@ -3,22 +3,40 @@
 ## BEGIN FUNCTIONS
 function schalter_ausgeben ($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch)
 {
+date_default_timezone_set('UTC');
+$date1 = new DateTime($DiaDatenVon);
+$date2 = new DateTime($DiaDatenBis);
+// Differenz berechnen
+$diff = $date1->diff($date2);
+
 $next_diagramtype = 'line';
 if ($diagramtype == 'line') $next_diagramtype = 'bar';
-
-# Abstand von bis ermitteln
-# Zeitpunkte mit Zeitzonen, die die Sommerzeit und Winterzeit berücksichtigen
-$zeitpunkt1 = new DateTime($GLOBALS['_POST']['AnfangBis'], new DateTimeZone('Europe/Berlin')); 
-$zeitpunkt2 = new DateTime($GLOBALS['_POST']['AnfangVon'], new DateTimeZone('Europe/Berlin'));
-// Berechne die Differenz in Sekunden
-$timestamp1 = $zeitpunkt1->getTimestamp();
-$timestamp2 = $zeitpunkt2->getTimestamp();
-// Differenz in Sekunden
-$zeitdifferenz = $timestamp1 - $timestamp2;
-$VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime($DiaDatenVon)-$zeitdifferenz));
 $VOR_DiaDatenBis = $DiaDatenVon;
 $NACH_DiaDatenVon = $DiaDatenBis;
-$NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime($DiaDatenBis)+$zeitdifferenz));
+
+# Hier prüfen ob Jahre, Monate, oder Tage geblättert werden soll
+if ( $diff->y == 0 AND $diff->m == 0 AND $diff->d == 1) {
+    $VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime("$DiaDatenVon -1 day")));
+    $NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime("$DiaDatenBis +1 day")));
+} elseif ( $diff->y == 0 AND $diff->m == 1 AND $diff->d == 0) {
+    $VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime("$DiaDatenVon -1 month")));
+    $NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime("$DiaDatenBis +1 month")));
+} elseif ( $diff->y == 1 AND $diff->m == 0 AND $diff->d == 0) {
+    $VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime("$DiaDatenVon -1 year")));
+    $NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime("$DiaDatenBis +1 year")));
+} else {
+    # Für Freie Auswahl Abstand von bis ermitteln
+    # Zeitpunkte mit Zeitzonen, die die Sommerzeit und Winterzeit berücksichtigen
+    $zeitpunkt1 = new DateTime($GLOBALS['_POST']['AnfangBis'], new DateTimeZone('Europe/Berlin')); 
+    $zeitpunkt2 = new DateTime($GLOBALS['_POST']['AnfangVon'], new DateTimeZone('Europe/Berlin'));
+    // Berechne die Differenz in Sekunden
+    $timestamp1 = $zeitpunkt1->getTimestamp();
+    $timestamp2 = $zeitpunkt2->getTimestamp();
+    // Differenz in Sekunden
+    $zeitdifferenz = $timestamp1 - $timestamp2;
+    $VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime($DiaDatenVon)-$zeitdifferenz));
+    $NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime($DiaDatenBis)+$zeitdifferenz));
+}
 
 # Schalter am Anfang und am Ende deaktivieren
 $button_vor_on = '';

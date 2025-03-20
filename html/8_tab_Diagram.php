@@ -54,9 +54,6 @@ if(file_exists("config_priv.php")){
 }
 include "8_funktion_Diagram.php";
 
-# ENTW 
-#print_r($_POST);
-
 # Prüfen ob SQLite Voraussetzungen vorhanden sind
 $SQLite_file = "../" . $python_config['Logging']['Logging_file'];
 if (!file_exists($SQLite_file)) {
