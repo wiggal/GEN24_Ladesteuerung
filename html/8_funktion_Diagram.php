@@ -108,9 +108,6 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
     $rows[] = $row; // Alle Zeilen speichern
 }
 
-// Letzte Zeile entfernen, wnn 00:00:00 vom nächsten Tag enthalten ist
-array_pop($rows);
-
 foreach ($rows as $row) {
         $first = true;
         foreach($row as $x => $val) {
@@ -224,16 +221,36 @@ return $SQL;
 
     case 'bar':
 $SQL = "WITH Alle_PVDaten AS (
-select Zeitpunkt,
-    LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Produktion,
-    LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
-    LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS InBatterie,
-    LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS AusBatterie,
-    LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung
-from pv_daten
+SELECT
+    MIN(Zeitpunkt) AS Zeitpunkt,
+    DC_Produktion,
+    Netzverbrauch,
+    Batterie_IN,
+    Batterie_OUT,
+    Einspeisung
+FROM pv_daten
 where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-group by STRFTIME('".$groupSTR."', Zeitpunkt))
+group by STRFTIME('".$groupSTR."', Zeitpunkt)
+UNION
+SELECT
+	MAX(Zeitpunkt) AS Zeitpunkt,
+    DC_Produktion,
+    Netzverbrauch,
+    Batterie_IN,
+    Batterie_OUT,
+    Einspeisung
+FROM pv_daten
+where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+ORDER BY Zeitpunkt)
 , Alle_PVDaten2 AS (
+SELECT
+Zeitpunkt,
+LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Produktion,
+LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
+LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS InBatterie,
+LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS AusBatterie,
+LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung
+from Alle_PVDaten)
 SELECT Zeitpunkt,
     Produktion * -1 as Produktion,
     Netzbezug * -1 as Netzbezug,
@@ -242,16 +259,10 @@ SELECT Zeitpunkt,
 	InBatterie,
     AusBatterie AS VonBatterie,
     Produktion - InBatterie - Einspeisung  AS Direktverbrauch
-FROM Alle_PVDaten)
-SELECT Zeitpunkt,
-    Produktion,
-    Netzbezug,
-    (CASE WHEN Direktverbrauch < 0 THEN 0 ELSE Direktverbrauch END) AS Direktverbrauch,
-    InBatterie,
-	VonBatterie,
-    (CASE WHEN Direktverbrauch < 0 THEN Netzverbrauch + Direktverbrauch ELSE Netzverbrauch END) AS Netzverbrauch,
-    Einspeisung
-FROM Alle_PVDaten2";
+FROM Alle_PVDaten2
+WHERE AusBatterie IS NOT NULL
+ORDER BY Zeitpunkt";
+
 return $SQL;
     break; # ENDE case 'Produktion_bar'
 } # ENDE switch
