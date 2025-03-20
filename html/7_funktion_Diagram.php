@@ -375,7 +375,8 @@ echo "    }]
                   label: function(context) {
                     // return value in tooltip
                     let labelName = context.dataset.label || '';
-                    let labelValue = context.raw;
+                    //let labelValue = context.raw;
+                    let labelValue = context.parsed.y;
                     let decimals = context.dataset.decimals || 0; // Standard: 0
                     let unit = context.dataset.unit || '';
 
