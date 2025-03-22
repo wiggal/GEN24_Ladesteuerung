@@ -33,7 +33,12 @@ class gen24api:
                 API['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
                 API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
                 API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
-                API['aktuellePVProduktion'] = int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32'])
+                # PV_POWERACTIVE_MEAN_02_F32 existiert nicht, wenn nur ein String am GEN24 hängt
+                try:
+                    API_STRING2 = data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32']
+                except:
+                    API_STRING2 = 0
+                API['aktuellePVProduktion'] = int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
                 API['aktuelleBatteriePower'] = int(data['Body']['Data']['0']['channels']['BAT_POWERACTIVE_MEAN_F32'])
                 API['BatteryMaxDischargePercent'] = ''
                 # Zählerstände fürs Logging
@@ -88,7 +93,12 @@ class gen24api:
                     data = json.loads(text)
                     try:
                         # API ab Firmware 1.35.4-1
-                        API['aktuellePVProduktion'] += int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32'])
+                        # PV_POWERACTIVE_MEAN_02_F32 xirstiert nicht, wenn nur ein String am GEN24 hängt
+                        try:
+                            API_STRING2 = data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32']
+                        except:
+                            API_STRING2 = 0
+                        API['aktuellePVProduktion'] = int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
                         API['AC_Produktion'] += int((data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
                             data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
                         API['DC_Produktion'] += int((data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
