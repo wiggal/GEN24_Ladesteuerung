@@ -275,6 +275,7 @@ for row in pv_data_charge:
 
 if(dyn_print_level >= 2):
     # priceforecast Daten für DB
+    print(">>  Folgende Strompreisvorhersage in PV_Daten.sqlite/priceforecast speichern.")
     headers = ["Ladezeitpunkt", "Netzverbrauch", "Netzladen", "PrognBattStatus"]
     dynamic.listAStable(headers, priceforecast, '>> ')
 
