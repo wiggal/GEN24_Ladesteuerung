@@ -13,7 +13,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 
 ![new](pics/new.png)  
 Ab Version: **0.26.9**  
-Diagramm zur Darstellung der dynamischen Strompreise
+Diagramm zur Darstellung der dynamischen Strompreise.  
 Ab Version: **0.26.8**  
 Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
 Ab Version: **0.26.1**  

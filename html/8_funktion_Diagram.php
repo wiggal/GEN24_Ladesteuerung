@@ -80,19 +80,6 @@ echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBi
 echo '<button type="submit" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
 echo '</form>'."\n";
 
-/*
-echo '</td><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
-echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
-echo '<input type="hidden" name="diagramtype" value="'.$next_diagramtype.'">'."\n";
-echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
-echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
-echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
-echo '<button type="submit" class="navi" > '.$next_diagramtype.'&gt;&gt; </button>';
-echo '</form>'."\n";
-*/
-
 echo '</td><td style="text-align:center; width: 100%;">';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="energietype" value="option">'."\n";

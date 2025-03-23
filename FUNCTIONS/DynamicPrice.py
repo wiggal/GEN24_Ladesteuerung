@@ -150,22 +150,22 @@ class dynamic:
         Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
         MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
         # Tageszeitabhängiger Preisanteil (z.B. $14a Netzentgelte)
-        Tagezeit_Preisanteil_tmp = json.loads(basics.getVarConf('dynprice','Tagezeit_Preisanteil', 'str')) 
-        Tagezeit_Preisanteil_tmp = dict(sorted(Tagezeit_Preisanteil_tmp.items(), key=lambda item: int(item[0])))
+        Tageszeit_Preisanteil_tmp = json.loads(basics.getVarConf('dynprice','Tageszeit_Preisanteil', 'str')) 
+        Tageszeit_Preisanteil_tmp = dict(sorted(Tageszeit_Preisanteil_tmp.items(), key=lambda item: int(item[0])))
 
         # Schlüssel und Werte in numerische Form umwandeln
-        sorted_hours = sorted(int(k) for k in Tagezeit_Preisanteil_tmp.keys())  # Sortierte Stunden
-        values = [float(Tagezeit_Preisanteil_tmp[str(h).zfill(2)]) for h in sorted_hours]  # Sortierte Werte
+        sorted_hours = sorted(int(k) for k in Tageszeit_Preisanteil_tmp.keys())  # Sortierte Stunden
+        values = [float(Tageszeit_Preisanteil_tmp[str(h).zfill(2)]) for h in sorted_hours]  # Sortierte Werte
 
         # Dictionary für alle Stunden füllen
-        Tagezeit_Preisanteil = {}
+        Tageszeit_Preisanteil = {}
         for i in range(len(sorted_hours)):
             start = sorted_hours[i]
             end = sorted_hours[i + 1] if i + 1 < len(sorted_hours) else 24  # Bis zum nächsten oder 24 Uhr
             for h in range(start, end):
-                Tagezeit_Preisanteil[str(h).zfill(2)] = values[i]  # Konstanter Wert
+                Tageszeit_Preisanteil[str(h).zfill(2)] = values[i]  # Konstanter Wert
         # DEBUG
-        if(self.dyn_print_level >= 4): print("++ Tagezeit_Preisanteil: ", Tagezeit_Preisanteil, "\n")
+        if(self.dyn_print_level >= 4): print("++ Tageszeit_Preisanteil: ", Tageszeit_Preisanteil, "\n")
 
         # Definiere den heutigen Tag (für 0:00 Uhr) und morgen (für 23:00 Uhr)
         heute = datetime.now()
@@ -199,7 +199,7 @@ class dynamic:
             if row[1] is not None:
                 Std = datetime.fromtimestamp(row[0]).strftime("%H")
                 time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
-                price = round((row[1]/1000 + Nettoaufschlag + Tagezeit_Preisanteil[Std]) * MwSt, 4)
+                price = round((row[1]/1000 + Nettoaufschlag + Tageszeit_Preisanteil[Std]) * MwSt, 4)
                 # Zeitunkt, Bruttopreis, Börsenpreis
                 pricelist_date.append((time, price, round(row[1]/1000, 3)))
         return(pricelist_date)
@@ -442,9 +442,10 @@ class dynamic:
             ''', entry)
 
         #Vorübergehend: Alte Tabelle löschen, wenn existiert.   #entWIGGlung
-        zeiger.execute("""
-        DROP TABLE IF EXISTS priceforecast
-        """)
+        #zeiger.execute("""
+        #DROP TABLE IF EXISTS priceforecast
+        #""")
+
         # Wenn Datenbanktabelle priceforecast noch nicht existiert, anlegen
         zeiger.execute("""
         CREATE TABLE IF NOT EXISTS priceforecast (
@@ -454,10 +455,10 @@ class dynamic:
         PrognBattStatus FLOAT
         )""")
 
-        #Alte Daten abräumen und neu Daten speichern  #entWIGGlung
-        #zeiger.execute("""
-        #DELETE FROM priceforecast
-        #""")
+        # Alte Daten abräumen und neu Daten speichern  #entWIGGlung
+        zeiger.execute("""
+        DELETE FROM priceforecast
+        """)
         zeiger.executemany("""
         INSERT INTO priceforecast (Zeitpunkt, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
         VALUES (?, ?, ?, ?);
