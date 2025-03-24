@@ -8,14 +8,14 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
-- [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden.  
-- **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
+- [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden und grafische Darstellung.  
+- **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
 Ab Version: **0.26.9**  
 Diagramm zur Darstellung der dynamischen Strompreise.  
 Ab Version: **0.26.8**  
-Beschreibung zur Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
+Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
 Ab Version: **0.26.1**  
 Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
 ![new](pics/new2.png)  
@@ -67,7 +67,7 @@ Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen
 ### :sun_behind_rain_cloud: Solarprognose_WeatherData.py 
 
 Holt die Leistungsprognose von solarprognose.de und schreibt sie in weatherData.json. Es ist aber ein Account erforderlich,
-hier wird eine genauer Zeitpunkt für die Anforderung vorgegeben.  
+hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
 Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2-3 Std)  
 
 ### :sun_behind_rain_cloud: Solcast_WeatherData.py
@@ -132,7 +132,7 @@ Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.s
 Ist das Modul eingeschaltet (in CONFIG/charge_priv.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung 
 beim nächsten Aufruf von http_SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
-Ist nicht AUTO gewählt, erfolgt eine Batterieladung mit der eingestellten Prozentzahl der **maximalen Ladeleisung des GEN24**,
+Ist nicht AUTO gewählt, erfolgt eine Batterieladung mit der eingestellten Prozentzahl der **maximalen Ladeleistung des GEN24**,
 ab dem nächsten Aufruf von http_SymoGen24Controller2.py.  
 Die prognosebasierte Ladesteuerung ist dadurch deaktiviert, und kann mit der Option "AUTO" wieder aktiviert werden.  
 
