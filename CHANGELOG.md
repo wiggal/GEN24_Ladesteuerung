@@ -1,3 +1,8 @@
+**[0.27.0] – 2025-XX-XX**  
+
+FIX: Fehler in DynamicPriceCheck.py, wenn keine Daten von api.energy-charts.info kommen:
+     Nun werden in diesem Fall die Strompreise aus der DB verwendet, falls vorhanden.
+
 **[0.26.9] – 2025-03-24**  
 
 - Weiterentwicklung der Grafana Dashboards und der Beschreibung von @Manniene

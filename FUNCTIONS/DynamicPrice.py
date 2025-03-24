@@ -180,6 +180,7 @@ class dynamic:
         timeout_sec = 10
         # Nur für die Entwicklung
         # if(self.dyn_print_level >= 5): timeout_sec = 1
+        Push_Schreib_Ausgabe = ''
         
         try:
             apiResponse = requests.get(url, timeout=timeout_sec)
@@ -187,21 +188,50 @@ class dynamic:
             if apiResponse.status_code != 204:
                 json_data1 = dict(json.loads(apiResponse.text))
             else:
-                print("### ERROR:  Keine Strompreise von api.energy-charts.info")
-                exit()
+                Ausgabe = "### ERROR:  Keine Strompreise von api.energy-charts.info"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
         except requests.exceptions.Timeout:
-            print("### ERROR:  Timeout, keine Strompreise von api.energy-charts.info")
-            exit()
-        price = json_data1
-        pricelist = list(zip(price['unix_seconds'], price['price']))
-        pricelist_date = []
-        for row in pricelist:
-            if row[1] is not None:
-                Std = datetime.fromtimestamp(row[0]).strftime("%H")
-                time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
-                price = round((row[1]/1000 + Nettoaufschlag + Tageszeit_Preisanteil[Std]) * MwSt, 4)
-                # Zeitunkt, Bruttopreis, Börsenpreis
-                pricelist_date.append((time, price, round(row[1]/1000, 3)))
+                Ausgabe = "### ERROR: Timeout, keine Strompreise von api.energy-charts.info"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.HTTPError as http_err:
+                Ausgabe = (f"### ERROR: HTTP-Fehler: {http_err} (Status Code: {apiResponse.status_code})")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.RequestException as req_err:
+                Ausgabe = (f"### ERROR: Verbindungsfehler oder andere Probleme: {req_err}")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+
+        # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+        Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
+        if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
+            Push_Message_Url = basics.getVarConf('messaging','Push_Message_Url','str')
+            apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
+            print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
+
+        try:
+            price = json_data1
+            pricelist = list(zip(price['unix_seconds'], price['price']))
+            pricelist_date = []
+            for row in pricelist:
+                if row[1] is not None:
+                    Std = datetime.fromtimestamp(row[0]).strftime("%H")
+                    time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
+                    price = round((row[1]/1000 + Nettoaufschlag + Tageszeit_Preisanteil[Std]) * MwSt, 4)
+                    # Zeitunkt, Bruttopreis, Börsenpreis
+                    pricelist_date.append((time, price, round(row[1]/1000, 3)))
+        except:
+            print("### ERROR: Keine Daten von api.energy-charts.info, deshalb die Preise aus DB verwenden!\n")
+            verbindung = sqlite3.connect('PV_Daten.sqlite')
+            zeiger = verbindung.cursor()
+            sql_anweisung = "SELECT * from strompreise WHERE DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day');"
+            zeiger.execute(sql_anweisung)
+            pricelist_date = zeiger.fetchall()
+            if pricelist_date == []:
+                print("### ERROR: In der DB sind auch keine aktuellen Strompreise vorhanden, Programmabbruch:")
+                exit()
         return(pricelist_date)
 
     def listAStable(self, headers, data, Vorspann='' ):
