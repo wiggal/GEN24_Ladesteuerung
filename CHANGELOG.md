@@ -2,6 +2,9 @@
 
 FIX: Fehler in DynamicPriceCheck.py, wenn keine Daten von api.energy-charts.info kommen:
      Nun werden in diesem Fall die Strompreise aus der DB verwendet, falls vorhanden.
+     Wenn eingeschaltet, wird eine PushMeldung gesendet.
+
+- Strompreis-Chart: Auch manuell eingetragene Zwangsladungen darstellen
 
 **[0.26.9] – 2025-03-24**  
 
