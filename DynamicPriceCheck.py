@@ -151,11 +151,6 @@ pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kW
 
 if(dyn_print_level >= 2): print("\n***************** ENDE DEBUGGING *****************")
 
-if(dyn_print_level >= 1):
-    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
-    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
-    dynamic.listAStable(headers, pv_data_charge)
-
 # Aktuelles Datum und Uhrzeit
 jetzt = datetime.now()
 # Startzeit jetzt
@@ -190,6 +185,10 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
         if entladesteurungsdata[Stunde]['Options'] != 'DynPrice' and entladesteurungsdata[Stunde]['Res_Feld2'] < 0:
             Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
             Options = entladesteurungsdata[Stunde]['Options']
+            for zeile in pv_data_charge:
+                if zeile[0] == SuchStunde:
+                    zeile[5] = Res_Feld2  
+                    break 
     except:
         pass
 
@@ -222,6 +221,14 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
                 file.close()
     # DEBUG CSV-Ausgabe
 
+# Akkuzustand nochmal neu berechnen mit manuellen Einträgen aus ENTLadeStrg
+dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+
+if(dyn_print_level >= 1):
+    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
+    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
+    dynamic.listAStable(headers, pv_data_charge)
+
 if(dyn_print_level >= 1):
     # Zu schreibenen SteuerCode ausgeben
     print("\nFolgende Steuercodes wurden ermittelt:")
@@ -252,6 +259,8 @@ if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),
 priceforecast = []
 for row in pv_data_charge:
     Ladezeitpunkt = row[0]
+    datum_obj = datetime.strptime(Ladezeitpunkt, "%Y-%m-%d %H:%M:%S")
+    Ladezeitpunkt_Std = datum_obj.strftime("%H:00")
     PV_Prognose = row[1]
     Verbrauch = row[2]
     Akkustand_W = row[4]
@@ -270,6 +279,7 @@ for row in pv_data_charge:
         else:
             Netzverbrauch = 0
         Netzladen = 0
+
     PrognBattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
     priceforecast.append([Ladezeitpunkt, Netzverbrauch,Netzladen,PrognBattStatus])
 
