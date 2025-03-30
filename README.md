@@ -158,7 +158,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.
 ### Grafana Beispiele  
 ![Beispiele](pics/Grafana.png)
 
-Weitere Erläuterungen und Dashboarddateien liegen im Verzeichnis GRAFANA.
+Eine [Beschreibung](GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddateien liegen im Verzeichnis GRAFANA.
 
 ----------
 
