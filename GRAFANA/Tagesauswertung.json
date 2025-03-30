@@ -63,7 +63,6 @@
   "graphTooltip": 0,
   "id": null,
   "links": [],
-  "liveNow": true,
   "panels": [
     {
       "datasource": {
@@ -114,11 +113,27 @@
           },
           "unit": "currencyEUR"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bruttopreis"
+            },
+            "properties": [
+              {
+                "id": "unit"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Euro"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 14,
-        "w": 21,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -142,7 +157,7 @@
         "showValue": "always",
         "stacking": "none",
         "text": {
-          "valueSize": 11
+          "valueSize": 14
         },
         "tooltip": {
           "hideZeros": false,
@@ -189,6 +204,7 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisSoftMax": 1,
             "fillOpacity": 80,
             "gradientMode": "none",
             "hideFrom": {
@@ -204,6 +220,7 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -215,13 +232,26 @@
               }
             ]
           },
-          "unit": "watth"
+          "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Netzverbrauch"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
         "y": 14
       },
@@ -246,7 +276,7 @@
         "showValue": "auto",
         "stacking": "none",
         "text": {
-          "valueSize": 11
+          "valueSize": 12
         },
         "tooltip": {
           "hideZeros": false,
@@ -267,9 +297,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Netzverbrauch) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  ROUND(sum(Netzverbrauch) / 1000.0, 2) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Netzverbrauch) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  ROUND(sum(Netzverbrauch) / 1000.0, 2) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -320,6 +350,7 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -331,13 +362,30 @@
               }
             ]
           },
-          "unit": "watth"
+          "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC_Produktion"
+            },
+            "properties": [
+              {
+                "id": "custom.axisSoftMax",
+                "value": 2
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
         "y": 21
       },
@@ -362,7 +410,7 @@
         "showValue": "auto",
         "stacking": "none",
         "text": {
-          "valueSize": 11
+          "valueSize": 14
         },
         "tooltip": {
           "hideZeros": false,
@@ -383,9 +431,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_Produktion) AS \"AC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_Produktion) AS \"AC Produktion\"\n  ROUND(sum(AC_Produktion) / 1000.0, 2) AS \"AC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_Produktion) AS \"AC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_Produktion) AS \"AC Produktion\"\n  ROUND(sum(AC_Produktion) / 1000.0, 2) AS \"AC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -401,7 +449,7 @@
           }
         }
       ],
-      "title": "AC Produktion",
+      "title": "AC Produktion in kWh",
       "type": "barchart"
     },
     {
@@ -436,6 +484,7 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
@@ -446,14 +495,30 @@
                 "value": null
               }
             ]
-          },
-          "unit": "watth"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC_to_DC"
+            },
+            "properties": [
+              {
+                "id": "custom.axisSoftMax",
+                "value": 1
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
         "y": 28
       },
@@ -499,9 +564,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_to_DC) AS \"BattNetzladung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_to_DC) AS \"BattNetzladung\"\n  ROUND(sum(AC_to_DC) / 1000.0, 2) AS \"AC_to_DC\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(AC_to_DC) AS \"BattNetzladung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_to_DC) AS \"BattNetzladung\"\n  ROUND(sum(AC_to_DC) / 1000.0, 2) AS \"AC_to_DC\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -517,7 +582,7 @@
           }
         }
       ],
-      "title": "Batterie aus Netz geladen",
+      "title": "Batterie aus Netz geladen in kWh",
       "type": "barchart"
     },
     {
@@ -552,23 +617,42 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
+          "fieldMinMax": false,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
-          },
-          "unit": "watth"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Vorhersage"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 1
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
         "y": 35
       },
@@ -593,7 +677,7 @@
         "showValue": "auto",
         "stacking": "none",
         "text": {
-          "valueSize": 11
+          "valueSize": 14
         },
         "tooltip": {
           "hideZeros": false,
@@ -614,9 +698,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n --Vorhersage AS \"Vorhersage\"\n ROUND(sum(Vorhersage) / 10000.0, 2) AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n --Vorhersage AS \"Vorhersage\"\n ROUND(sum(Vorhersage) / 10000.0, 2) AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -632,7 +716,7 @@
           }
         }
       ],
-      "title": "Vorhersage",
+      "title": "Vorhersage in kWh",
       "type": "barchart"
     },
     {
@@ -688,7 +772,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": null
               }
             ]
           },
@@ -713,8 +798,8 @@
         ]
       },
       "gridPos": {
-        "h": 10,
-        "w": 21,
+        "h": 8,
+        "w": 24,
         "x": 0,
         "y": 42
       },
@@ -739,7 +824,7 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime(1743202800000 / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1743289199999 / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
           "rawQueryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
@@ -756,6 +841,7 @@
           "options": {
             "conversions": [
               {
+                "dateFormat": "YYYY-MM-DD HH:mm:SS",
                 "destinationType": "time",
                 "targetField": "Zeitpunkt"
               }
@@ -798,25 +884,47 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
-          },
-          "unit": "watth"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DC_Produktion"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              },
+              {
+                "id": "custom.axisCenteredZero",
+                "value": false
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 1
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
-        "y": 52
+        "y": 50
       },
       "id": 13,
       "options": {
@@ -860,9 +968,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(DC_Produktion) AS \"DC Produktion\"\n  ROUND(sum(DC_Produktion) / 1000.0, 2) AS \"DC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(DC_Produktion) AS \"DC Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(DC_Produktion) AS \"DC Produktion\"\n  ROUND(sum(DC_Produktion) / 1000.0, 2) AS \"DC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -878,7 +986,7 @@
           }
         }
       ],
-      "title": "DC Produktion",
+      "title": "DC Produktion in kWh",
       "type": "barchart"
     },
     {
@@ -913,25 +1021,43 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
-          },
-          "unit": "watth"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Einspeisung"
+            },
+            "properties": [
+              {
+                "id": "custom.axisSoftMax",
+                "value": 1
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
-        "y": 59
+        "y": 57
       },
       "id": 14,
       "options": {
@@ -975,9 +1101,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Einspeisung) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Einspeisung) AS \"Einspeisung\"\n  ROUND(sum(Einspeisung) / 1000.0, 2) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Einspeisung) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Einspeisung) AS \"Einspeisung\"\n  ROUND(sum(Einspeisung) / 1000.0, 2) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1028,25 +1154,43 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
-          },
-          "unit": "watth"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie_In"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 1
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
-        "y": 66
+        "y": 64
       },
       "id": 15,
       "options": {
@@ -1069,7 +1213,7 @@
         "showValue": "auto",
         "stacking": "none",
         "text": {
-          "valueSize": 11
+          "valueSize": 14
         },
         "tooltip": {
           "hideZeros": false,
@@ -1090,9 +1234,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_In) AS \"In Batterie\"\n  ROUND(sum(Batterie_In) / 1000.0, 2) AS \"Batterie_In\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_In) AS \"In Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_In) AS \"In Batterie\"\n  ROUND(sum(Batterie_In) / 1000.0, 2) AS \"Batterie_In\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1108,7 +1252,7 @@
           }
         }
       ],
-      "title": "In Batterie geladen",
+      "title": "In Batterie geladen in kWh",
       "type": "barchart"
     },
     {
@@ -1143,25 +1287,43 @@
               "mode": "off"
             }
           },
+          "decimals": 2,
           "mappings": [],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
-          },
-          "unit": "watth"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie_Out"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "kWh"
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 1
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
-        "w": 21,
+        "w": 24,
         "x": 0,
-        "y": 73
+        "y": 71
       },
       "id": 16,
       "options": {
@@ -1184,7 +1346,7 @@
         "showValue": "auto",
         "stacking": "none",
         "text": {
-          "valueSize": 11
+          "valueSize": 14
         },
         "tooltip": {
           "hideZeros": false,
@@ -1205,9 +1367,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_Out) AS \"Aus Batterie\"\n  ROUND(sum(Batterie_Out) / 1000.0, 2) AS \"Batterie_Out\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_Out) AS \"Aus Batterie\"\n  ROUND(sum(Batterie_Out) / 1000.0, 2) AS \"Batterie_Out\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1223,7 +1385,7 @@
           }
         }
       ],
-      "title": "Aus Batterie geladen",
+      "title": "Aus Batterie geladen in kWh",
       "type": "barchart"
     }
   ],
@@ -1241,8 +1403,8 @@
     "refresh_intervals": []
   },
   "timezone": "",
-  "title": "SQLITEAuswertung View Tagesübersicht V2",
-  "uid": "cef59mgaig9vkd",
-  "version": 3,
+  "title": "Tagesauswertung",
+  "uid": "dash02",
+  "version": 4,
   "weekStart": ""
 }

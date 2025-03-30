@@ -1,0 +1,945 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_GEN24_DATEN_",
+      "label": "GEN24_Daten ",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "frser-sqlite-datasource",
+      "pluginName": "SQLite"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "datasource",
+      "id": "frser-sqlite-datasource",
+      "name": "SQLite",
+      "version": "3.5.0"
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.5.2"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tagesverbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "max",
+                "value": 100000
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tagesstromkosten"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Kosten"
+              },
+              {
+                "id": "min",
+                "value": 1
+              },
+              {
+                "id": "max",
+                "value": 35
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mein_Durchschnittspreis_Verbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "bezahlt pro kWh"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Minimaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Min pro kWh"
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Maximaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Max pro kWh"
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Durchschnittspreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Durchschnitt pro kWh"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 28,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzverbrauch_pro_stunde,\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS AC_TO_DC_pro_stunde,\n        LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS AC_Produktion_pro_stunde,\n        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS DC_Produktion_pro_stunde,\n        LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung_pro_stunde,\n        LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS Batterie_IN_pro_stunde,\n        LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS Batterie_OUT_pro_stunde\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,\n        SUM(Netzverbrauch_pro_stunde) AS Netzverbrauch_pro_stunde,\n        SUM(AC_TO_DC_pro_stunde) AS AC_TO_DC_pro_stunde\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%d-%m-%Y', sv.Stunde) AS Tag,  -- Datumsformat: Tag-Monat-Jahr\n        SUM(sv.Netzverbrauch_pro_stunde) AS Tagesverbrauch,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS Tagesstromkosten,\n        MIN(sp.Bruttopreis) AS Minimaler_Strompreis,\n        MAX(sp.Bruttopreis) AS Maximaler_Strompreis,\n        AVG(sp.Bruttopreis) AS Durchschnittspreis,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS Mein_Durchschnittspreis_Verbrauch\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%d-%m-%Y', sv.Stunde)  -- Gruppierung nach Tag-Monat-Jahr\n)\nSELECT\n    \n    Tagesverbrauch,\n    ROUND(Tagesstromkosten / 1000.0,2 ) as Tagesstromkosten, \n    Mein_Durchschnittspreis_Verbrauch,\n    Durchschnittspreis,\n    Minimaler_Strompreis,\n    Maximaler_Strompreis\n\nFROM tagesweise_kosten\nORDER BY strftime('%Y-%m-%d', Tag) ASC;  -- Sortierung aufsteigend (ältester Eintrag zuerst)",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzverbrauch_pro_stunde,\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS AC_TO_DC_pro_stunde,\n        LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS AC_Produktion_pro_stunde,\n        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS DC_Produktion_pro_stunde,\n        LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung_pro_stunde,\n        LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS Batterie_IN_pro_stunde,\n        LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS Batterie_OUT_pro_stunde\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,\n        SUM(Netzverbrauch_pro_stunde) AS Netzverbrauch_pro_stunde,\n        SUM(AC_TO_DC_pro_stunde) AS AC_TO_DC_pro_stunde\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%d-%m-%Y', sv.Stunde) AS Tag,  -- Datumsformat: Tag-Monat-Jahr\n        SUM(sv.Netzverbrauch_pro_stunde) AS Tagesverbrauch,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS Tagesstromkosten,\n        MIN(sp.Bruttopreis) AS Minimaler_Strompreis,\n        MAX(sp.Bruttopreis) AS Maximaler_Strompreis,\n        AVG(sp.Bruttopreis) AS Durchschnittspreis,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS Mein_Durchschnittspreis_Verbrauch\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%d-%m-%Y', sv.Stunde)  -- Gruppierung nach Tag-Monat-Jahr\n)\nSELECT\n    \n    Tagesverbrauch,\n    ROUND(Tagesstromkosten / 1000.0,2 ) as Tagesstromkosten, \n    Mein_Durchschnittspreis_Verbrauch,\n    Durchschnittspreis,\n    Minimaler_Strompreis,\n    Maximaler_Strompreis\n\nFROM tagesweise_kosten\nORDER BY strftime('%Y-%m-%d', Tag) ASC;  -- Sortierung aufsteigend (ältester Eintrag zuerst)",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Heute",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tagesverbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tagesstromkosten"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Kosten"
+              },
+              {
+                "id": "min",
+                "value": 1
+              },
+              {
+                "id": "max",
+                "value": 35
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mein_Durchschnittspreis_Verbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "bezahlt pro kWh"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Minimaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Min pro kWh"
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Maximaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Max pro kWh"
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Durchschnittspreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Durchschnitt pro kWh"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 31,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": [
+            "Tagesverbrauch",
+            "Tagesstromkosten"
+          ],
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzverbrauch_pro_stunde,\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS AC_TO_DC_pro_stunde,\n        LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS AC_Produktion_pro_stunde,\n        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS DC_Produktion_pro_stunde,\n        LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung_pro_stunde,\n        LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS Batterie_IN_pro_stunde,\n        LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS Batterie_OUT_pro_stunde\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,\n        SUM(Netzverbrauch_pro_stunde) AS Netzverbrauch_pro_stunde,\n        SUM(AC_TO_DC_pro_stunde) AS AC_TO_DC_pro_stunde\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%d.%m.%Y', sv.Stunde) AS Tag,  -- Datumsformat: Tag.Monat.Jahr\n        SUM(sv.Netzverbrauch_pro_stunde) AS Tagesverbrauch,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS Tagesstromkosten,\n        MIN(sp.Bruttopreis) AS Minimaler_Strompreis,\n        MAX(sp.Bruttopreis) AS Maximaler_Strompreis,\n        AVG(sp.Bruttopreis) AS Durchschnittspreis,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS Mein_Durchschnittspreis_Verbrauch\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)  -- Gruppierung nach Jahr-Monat-Tag\n)\nSELECT\n    Tag,\n    Tagesverbrauch,\n    ROUND(Tagesstromkosten / 1000.0, 2) AS Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch,\n    Durchschnittspreis,\n    Minimaler_Strompreis,\n    Maximaler_Strompreis\nFROM tagesweise_kosten\nORDER BY date(substr(Tag, 7, 4) || '-' || substr(Tag, 4, 2) || '-' || substr(Tag, 1, 2)) DESC;",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzverbrauch_pro_stunde,\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS AC_TO_DC_pro_stunde,\n        LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS AC_Produktion_pro_stunde,\n        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS DC_Produktion_pro_stunde,\n        LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung_pro_stunde,\n        LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS Batterie_IN_pro_stunde,\n        LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS Batterie_OUT_pro_stunde\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,\n        SUM(Netzverbrauch_pro_stunde) AS Netzverbrauch_pro_stunde,\n        SUM(AC_TO_DC_pro_stunde) AS AC_TO_DC_pro_stunde\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%d.%m.%Y', sv.Stunde) AS Tag,  -- Datumsformat: Tag.Monat.Jahr\n        SUM(sv.Netzverbrauch_pro_stunde) AS Tagesverbrauch,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS Tagesstromkosten,\n        MIN(sp.Bruttopreis) AS Minimaler_Strompreis,\n        MAX(sp.Bruttopreis) AS Maximaler_Strompreis,\n        AVG(sp.Bruttopreis) AS Durchschnittspreis,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS Mein_Durchschnittspreis_Verbrauch\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)  -- Gruppierung nach Jahr-Monat-Tag\n)\nSELECT\n    Tag,\n    Tagesverbrauch,\n    ROUND(Tagesstromkosten / 1000.0, 2) AS Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch,\n    Durchschnittspreis,\n    Minimaler_Strompreis,\n    Maximaler_Strompreis\nFROM tagesweise_kosten\nORDER BY date(substr(Tag, 7, 4) || '-' || substr(Tag, 4, 2) || '-' || substr(Tag, 1, 2)) DESC;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "30d",
+      "timeShift": "1d/d",
+      "title": "Tage",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Monatsverbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Monatsstromkosten"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Kosten"
+              },
+              {
+                "id": "min",
+                "value": 1
+              },
+              {
+                "id": "max",
+                "value": 200
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mein_Durchschnittspreis_Verbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "bezahlt pro kWh"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Minimaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Min pro kWh"
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Maximaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Max pro kWh"
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Durchschnittspreis"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyEUR"
+              },
+              {
+                "id": "displayName",
+                "value": "Durchschnitt pro kWh"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0.01
+              },
+              {
+                "id": "max",
+                "value": 0.5
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 30,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": [
+            "Monatsverbrauch",
+            "Monatsstromkosten"
+          ],
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzverbrauch_pro_stunde,\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS AC_TO_DC_pro_stunde,\n        LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS AC_Produktion_pro_stunde,\n        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS DC_Produktion_pro_stunde,\n        LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung_pro_stunde,\n        LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS Batterie_IN_pro_stunde,\n        LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS Batterie_OUT_pro_stunde\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,\n        SUM(Netzverbrauch_pro_stunde) AS Netzverbrauch_pro_stunde,\n        SUM(AC_TO_DC_pro_stunde) AS AC_TO_DC_pro_stunde\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS Tag,\n        SUM(sv.Netzverbrauch_pro_stunde) AS Tagesverbrauch,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS Tagesstromkosten,\n        MIN(sp.Bruttopreis) AS Minimaler_Strompreis,\n        MAX(sp.Bruttopreis) AS Maximaler_Strompreis,\n        AVG(sp.Bruttopreis) AS Durchschnittspreis,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS Mein_Durchschnittspreis_Verbrauch\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n),\nmonatsweise_kosten AS (\n    SELECT\n        strftime('%m-%Y', tk.Tag) AS Monat,  -- Format: Monat-Jahr (z. B. \"11-2025\")\n        SUM(tk.Tagesverbrauch) AS Monatsverbrauch,\n        SUM(tk.Tagesstromkosten) AS Monatsstromkosten,\n        MIN(tk.Minimaler_Strompreis) AS Minimaler_Strompreis,\n        MAX(tk.Maximaler_Strompreis) AS Maximaler_Strompreis,\n        AVG(tk.Durchschnittspreis) AS Durchschnittspreis,\n        SUM(tk.Tagesstromkosten) / SUM(tk.Tagesverbrauch) AS Mein_Durchschnittspreis_Verbrauch\n    FROM tagesweise_kosten tk\n    GROUP BY strftime('%Y-%m', tk.Tag)  -- Gruppierung nach Jahr und Monat\n)\nSELECT\n    Monat,\n    Monatsverbrauch,\n    ROUND(Monatsstromkosten / 1000.0, 2) AS Monatsstromkosten,\n    Mein_Durchschnittspreis_Verbrauch,\n    Durchschnittspreis,\n    Minimaler_Strompreis,\n    Maximaler_Strompreis\nFROM monatsweise_kosten\nORDER BY strftime('%Y-%m', Monat) ASC;  -- Sortierung nach Jahr und Monat (aufsteigend)",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzverbrauch_pro_stunde,\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS AC_TO_DC_pro_stunde,\n        LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS AC_Produktion_pro_stunde,\n        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS DC_Produktion_pro_stunde,\n        LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung_pro_stunde,\n        LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS Batterie_IN_pro_stunde,\n        LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS Batterie_OUT_pro_stunde\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,\n        SUM(Netzverbrauch_pro_stunde) AS Netzverbrauch_pro_stunde,\n        SUM(AC_TO_DC_pro_stunde) AS AC_TO_DC_pro_stunde\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS Tag,\n        SUM(sv.Netzverbrauch_pro_stunde) AS Tagesverbrauch,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS Tagesstromkosten,\n        MIN(sp.Bruttopreis) AS Minimaler_Strompreis,\n        MAX(sp.Bruttopreis) AS Maximaler_Strompreis,\n        AVG(sp.Bruttopreis) AS Durchschnittspreis,\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS Mein_Durchschnittspreis_Verbrauch\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n),\nmonatsweise_kosten AS (\n    SELECT\n        strftime('%m-%Y', tk.Tag) AS Monat,  -- Format: Monat-Jahr (z. B. \"11-2025\")\n        SUM(tk.Tagesverbrauch) AS Monatsverbrauch,\n        SUM(tk.Tagesstromkosten) AS Monatsstromkosten,\n        MIN(tk.Minimaler_Strompreis) AS Minimaler_Strompreis,\n        MAX(tk.Maximaler_Strompreis) AS Maximaler_Strompreis,\n        AVG(tk.Durchschnittspreis) AS Durchschnittspreis,\n        SUM(tk.Tagesstromkosten) / SUM(tk.Tagesverbrauch) AS Mein_Durchschnittspreis_Verbrauch\n    FROM tagesweise_kosten tk\n    GROUP BY strftime('%Y-%m', tk.Tag)  -- Gruppierung nach Jahr und Monat\n)\nSELECT\n    Monat,\n    Monatsverbrauch,\n    ROUND(Monatsstromkosten / 1000.0, 2) AS Monatsstromkosten,\n    Mein_Durchschnittspreis_Verbrauch,\n    Durchschnittspreis,\n    Minimaler_Strompreis,\n    Maximaler_Strompreis\nFROM monatsweise_kosten\nORDER BY strftime('%Y-%m', Monat) ASC;  -- Sortierung nach Jahr und Monat (aufsteigend)",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "12M",
+      "title": "Monate",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now/d",
+    "to": "now/d"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Preisstatistiken",
+  "uid": "dash04",
+  "version": 2,
+  "weekStart": ""
+}

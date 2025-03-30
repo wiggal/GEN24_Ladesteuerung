@@ -1,0 +1,705 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_GEN24_DATEN_",
+      "label": "GEN24_Daten ",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "frser-sqlite-datasource",
+      "pluginName": "SQLite"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "datasource",
+      "id": "frser-sqlite-datasource",
+      "name": "SQLite",
+      "version": "3.5.0"
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.5.2"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 16,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bruttopreis"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "Euro"
+              },
+              {
+                "id": "custom.axisSoftMin",
+                "value": 0
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 0.5
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trendline"
+            },
+            "properties": [
+              {
+                "id": "custom.axisSoftMax",
+                "value": 0.5
+              },
+              {
+                "id": "custom.axisSoftMin",
+                "value": 0
+              },
+              {
+                "id": "displayName",
+                "value": "Trendlinie"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-7 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "queryType": "table",
+          "rawQueryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-7 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "7d",
+      "title": "Strompreise an der Tagesbörse",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "dateFormat": "YYYY-MM-DD HH:mm:SS",
+                "destinationType": "time",
+                "targetField": "Zeitpunkt"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 16,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bruttopreis"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "Euro"
+              },
+              {
+                "id": "custom.axisSoftMin"
+              },
+              {
+                "id": "custom.axisSoftMax"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trendline"
+            },
+            "properties": [
+              {
+                "id": "min"
+              },
+              {
+                "id": "custom.axisSoftMin",
+                "value": 0
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 0.5
+              },
+              {
+                "id": "displayName",
+                "value": "Trendlinie"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "queryType": "table",
+          "rawQueryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "30d",
+      "title": "Strompreise an der Tagesbörse",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "dateFormat": "YYYY-MM-DD HH:mm:SS",
+                "destinationType": "time",
+                "targetField": "Zeitpunkt"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 16,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bruttopreis"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "Euro"
+              },
+              {
+                "id": "custom.axisSoftMin",
+                "value": 0
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 0.5
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trendline"
+            },
+            "properties": [
+              {
+                "id": "custom.axisSoftMin",
+                "value": 0
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 0.5
+              },
+              {
+                "id": "displayName",
+                "value": "Trendlinie"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-180 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "queryType": "table",
+          "rawQueryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-180 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "180d",
+      "title": "Strompreise an der Tagesbörse",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "dateFormat": "YYYY-MM-DD HH:mm:SS",
+                "destinationType": "time",
+                "targetField": "Zeitpunkt"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 16,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bruttopreis"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "Euro"
+              },
+              {
+                "id": "custom.axisSoftMin"
+              },
+              {
+                "id": "custom.axisSoftMax"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trendline"
+            },
+            "properties": [
+              {
+                "id": "custom.axisSoftMin",
+                "value": 0
+              },
+              {
+                "id": "custom.axisSoftMax",
+                "value": 0.5
+              },
+              {
+                "id": "displayName",
+                "value": "Trendlinie"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-360 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "queryType": "table",
+          "rawQueryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-360 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "360d",
+      "title": "Strompreise an der Tagesbörse",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "dateFormat": "YYYY-MM-DD HH:mm:SS",
+                "destinationType": "time",
+                "targetField": "Zeitpunkt"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now/d",
+    "to": "now/d"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Strompreisentwicklung",
+  "uid": "dash05",
+  "version": 3,
+  "weekStart": ""
+}

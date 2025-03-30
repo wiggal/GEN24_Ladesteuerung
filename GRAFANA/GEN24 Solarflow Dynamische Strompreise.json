@@ -1,0 +1,1079 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_GEN24_INFINITY",
+      "label": "GEN24_Infinity",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource",
+      "pluginName": "Infinity"
+    },
+    {
+      "name": "DS_GEN24_DATEN_",
+      "label": "GEN24_Daten ",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "frser-sqlite-datasource",
+      "pluginName": "SQLite"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "frser-sqlite-datasource",
+      "name": "SQLite",
+      "version": "3.5.0"
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.5.2"
+    },
+    {
+      "type": "panel",
+      "id": "lehmannch-flow-panel",
+      "name": "Solar Flow",
+      "version": "1.1.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "yesoreyeram-infinity-datasource",
+      "name": "Infinity",
+      "version": "3.0.0-beta.2"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": " ab Firmware 1.35.4-1",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_GEN24_INFINITY}"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 13,
+        "x": 0,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "additionalSourceColor": "#51bb43",
+        "additionalSourceIcon": "battery",
+        "additionalSourceLabel": "Battery",
+        "additionalSourceLoadQuery": "Batterieleistung",
+        "gridColor": "#7b7979",
+        "gridQuery": "From Grid",
+        "linesColor": "rgb(104, 193, 255)",
+        "loadColor": "rgb(0, 141, 209)",
+        "measurementUnit": "kW",
+        "showLegend": false,
+        "solarColor": "#fade2a",
+        "solarQuery": "PV Produktion",
+        "xOffset": 0,
+        "yOffset": 86,
+        "zoom": 0.7
+      },
+      "pluginVersion": "1.1.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_GEN24_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "my-query-1",
+          "hide": false,
+          "parser": "backend",
+          "refId": "PV Produktion",
+          "root_selector": "$sum(Body.Data.\"0\".channels.(PV_POWERACTIVE_MEAN_01_F32 + PV_POWERACTIVE_MEAN_02_F32))",
+          "source": "url",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        },
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_GEN24_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "my-query-1",
+          "parser": "backend",
+          "refId": "From Grid",
+          "root_selector": "$.Body.Data.\"16252928\".channels.SMARTMETER_POWERACTIVE_MEAN_SUM_F64",
+          "source": "url",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        },
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_GEN24_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "my-query-1",
+          "hide": false,
+          "parser": "backend",
+          "refId": "Batterieleistung",
+          "root_selector": "$.Body.Data.\"0\".channels.BAT_POWERACTIVE_MEAN_F32",
+          "source": "url",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Solarflow",
+      "type": "lehmannch-flow-panel"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_GEN24_INFINITY}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Grid"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#aca8a8",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "fieldMinMax",
+                "value": false
+              },
+              {
+                "id": "min",
+                "value": -25000
+              },
+              {
+                "id": "max",
+                "value": 25000
+              },
+              {
+                "id": "displayName",
+                "value": "Grid"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PV Produktion"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "max",
+                "value": 8500
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#FADE2A",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "displayName",
+                "value": "PV Produktion"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie in % Batterie in %"
+            },
+            "properties": [
+              {
+                "id": "max",
+                "value": 100
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#51bb43",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "displayName",
+                "value": "Batterie in %"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              },
+              {
+                "id": "fieldMinMax",
+                "value": true
+              },
+              {
+                "id": "max",
+                "value": -8000
+              },
+              {
+                "id": "min",
+                "value": 8000
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#51bb43",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Batterie"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 11,
+        "x": 13,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 15,
+        "minVizWidth": 8,
+        "namePlacement": "top",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "text": {},
+        "valueMode": "text"
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_GEN24_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "my-query-1",
+          "parser": "backend",
+          "refId": "Grid",
+          "root_selector": "$.Body.Data.\"16252928\".channels.SMARTMETER_POWERACTIVE_MEAN_SUM_F64",
+          "source": "url",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        },
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_GEN24_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "my-query-1",
+          "hide": false,
+          "parser": "backend",
+          "refId": "PV Produktion",
+          "root_selector": "$sum(Body.Data.\"0\".channels.(PV_POWERACTIVE_MEAN_01_F32 + PV_POWERACTIVE_MEAN_02_F32))",
+          "source": "url",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        },
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_GEN24_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "my-query-1",
+          "hide": false,
+          "parser": "backend",
+          "refId": "Batterie",
+          "root_selector": "$.Body.Data.\"0\".channels.BAT_POWERACTIVE_MEAN_F32",
+          "source": "url",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        },
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_GEN24_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "my-query-1",
+          "hide": false,
+          "parser": "backend",
+          "refId": "Batterie in %",
+          "root_selector": "$.Body.Data.\"16580608\".channels.BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16",
+          "source": "url",
+          "type": "json",
+          "url": "",
+          "url_options": {
+            "body_content_type": "text/plain",
+            "body_type": "raw",
+            "data": "",
+            "headers": [
+              {
+                "key": "header-key",
+                "value": "header-value"
+              }
+            ],
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Überblick",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tagesverbrauch_kWh"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Netzbezug Tag"
+              },
+              {
+                "id": "unit",
+                "value": "kwatth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tages_AC_TO_DC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kwatth"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 13,
+        "y": 7
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n     ROUND(Tagesstromkosten / 1000.0, 2) \n    -- Mein_Durchschnittspreis_Verbrauch,  \n    -- Minimaler_Strompreis,\n    -- Maximaler_Strompreis,\n    -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n     ROUND(Tagesstromkosten / 1000.0, 2) \n    -- Mein_Durchschnittspreis_Verbrauch,  \n    -- Minimaler_Strompreis,\n    -- Maximaler_Strompreis,\n    -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Stromkosten heute",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tagesverbrauch_kWh"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Netzbezug Tag"
+              },
+              {
+                "id": "unit",
+                "value": "kwatth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tages_AC_TO_DC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kwatth"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 17,
+        "y": 7
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch\n   -- Minimaler_Strompreis,\n   -- Maximaler_Strompreis,\n   -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch\n   -- Minimaler_Strompreis,\n   -- Maximaler_Strompreis,\n   -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "ø Preis/kWh",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tagesverbrauch_kWh"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Netzbezug Tag"
+              },
+              {
+                "id": "unit",
+                "value": "kwatth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tages_AC_TO_DC"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kwatth"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 20,
+        "y": 7
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH Stundenpreise AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis\n  FROM Strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600 , 'unixepoch')\n)\n\nSELECT \n  Bruttopreis\nFROM Stundenpreise\nWHERE Zeitpunkt = datetime(strftime('%Y-%m-%d %H:00:00', 'now', '+1 hours'));\n\n\n\n\n  ",
+          "queryType": "table",
+          "rawQueryText": "WITH Stundenpreise AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis\n  FROM Strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600 , 'unixepoch')\n)\n\nSELECT \n  Bruttopreis\nFROM Stundenpreise\nWHERE Zeitpunkt = datetime(strftime('%Y-%m-%d %H:00:00', 'now', '+1 hours'));\n\n\n\n\n  ",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "aktueller Preis/kWh",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Minimaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Min"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Maximaler_Strompreis"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Max"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Durchschnittspreis"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Durchschnitt"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 11,
+        "x": 13,
+        "y": 9
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 14,
+          "valueSize": 20
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    -- Mein_Durchschnittspreis_Verbrauch\n   Minimaler_Strompreis,\n   Maximaler_Strompreis,\n   Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    -- Mein_Durchschnittspreis_Verbrauch\n   Minimaler_Strompreis,\n   Maximaler_Strompreis,\n   Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Strompreise",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${DS_GEN24_DATEN_}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#008dd1",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gesamtverbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Netzverbrauch"
+            },
+            "properties": [
+              {
+                "id": "unit"
+              },
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AC Produktion"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DC Produktion"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Einspeisung"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "In Batterie"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Aus Batterie"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Batterie aus Netz geladen"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watth"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${DS_GEN24_DATEN_}"
+          },
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);",
+          "queryType": "table",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Heute",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 11,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"display: flex; justify-content: space-between; font-family: Arial, sans-serif;\">\n  <div style=\"width: 48%;\">\n    <h4 style=\"color: #1F78B4;\">Links zu anderen Dashboards</h4>\n    <hr style=\"border: 1px solid #1F78B4; margin-top: 5px; margin-bottom: 10px;\"> <!-- Farbige Linie -->\n    <ul style=\"font-size: 15px; color: #000000; list-style-type: none; padding: 0;\">\n      <li><a href=\"/d/dash01?kiosk&theme=light\" target=\"_self\" style=\"color: #000000; text-decoration: none;\">Energiestatistiken</a></li>\n      <li><a href=\"/d/dash02?kiosk&theme=light\" target=\"_self\" style=\"color: #000000; text-decoration: none;\">Tagesauswertung</a></li>\n      <li><a href=\"/d/dash03?kiosk&theme=light\" target=\"_self\" style=\"color: #000000; text-decoration: none;\">Strompreise</a></li>\n    </ul>\n  </div>\n  <div style=\"width: 48%;\">\n    <h4 style=\"color: #FFFFFF;\">Spalte 2</h4> <!-- Überschrift in Gelb -->\n    <hr style=\"border: 1px solid #1F78B4; margin-top: 5px; margin-bottom: 10px;\"> <!-- Farbige Linie -->\n    <ul style=\"font-size: 15px; color: #000000; list-style-type: none; padding: 0;\">\n      <li><a href=\"/d/dash04?kiosk&theme=light\" target=\"_self\" style=\"color: #000000; text-decoration: none;\">Preisstatistiken</a></li>\n      <li><a href=\"/d/dash05?kiosk&theme=light\" target=\"_self\" style=\"color: #000000; text-decoration: none;\">Strompreisentwicklung</a></li>\n      <li><a href=\"/d/dash06?kiosk&theme=light\" target=\"_self\" style=\"color: #000000; text-decoration: none;\">Smartphone Solar</a></li>\n    </ul>\n  </div>\n</div>",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.5.2",
+      "type": "text"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now/d",
+    "to": "now/d"
+  },
+  "timepicker": {
+    "hidden": true
+  },
+  "timezone": "browser",
+  "title": "GEN24 Solarflow Dynamische Strompreise",
+  "uid": "dash00",
+  "version": 2,
+  "weekStart": ""
+}
