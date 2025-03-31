@@ -12,10 +12,10 @@ $timestamp1 = $zeitpunkt1->getTimestamp();
 $timestamp2 = $zeitpunkt2->getTimestamp();
 // Differenz in Sekunden
 $zeitdifferenz = $timestamp1 - $timestamp2;
-$VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime($DiaDatenVon)-$zeitdifferenz));
+$VOR_DiaDatenVon = date("Y-m-d 00:00",(strtotime("$DiaDatenVon -1 day")));
 $VOR_DiaDatenBis = $DiaDatenVon;
 $NACH_DiaDatenVon = $DiaDatenBis;
-$NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime($DiaDatenBis)+$zeitdifferenz));
+$NACH_DiaDatenBis = date("Y-m-d 00:00",(strtotime("$DiaDatenBis +1 day")));
 $heute =  date("Y-m-d 00:00");
 $morgen =  date("Y-m-d 00:00",(strtotime("+1 day", strtotime(date("Y-m-d")))));
 
