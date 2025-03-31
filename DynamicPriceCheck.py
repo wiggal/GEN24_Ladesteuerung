@@ -259,8 +259,6 @@ if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),
 priceforecast = []
 for row in pv_data_charge:
     Ladezeitpunkt = row[0]
-    datum_obj = datetime.strptime(Ladezeitpunkt, "%Y-%m-%d %H:%M:%S")
-    Ladezeitpunkt_Std = datum_obj.strftime("%H:00")
     PV_Prognose = row[1]
     Verbrauch = row[2]
     Akkustand_W = row[4]
@@ -281,12 +279,12 @@ for row in pv_data_charge:
         Netzladen = 0
 
     PrognBattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
-    priceforecast.append([Ladezeitpunkt, Netzverbrauch,Netzladen,PrognBattStatus])
+    priceforecast.append([Ladezeitpunkt,PV_Prognose,Netzverbrauch,Netzladen,PrognBattStatus])
 
 if(dyn_print_level >= 2):
     # priceforecast Daten für DB
     print(">>  Folgende Strompreisvorhersage in PV_Daten.sqlite/priceforecast speichern.")
-    headers = ["Ladezeitpunkt", "Netzverbrauch", "Netzladen", "PrognBattStatus"]
+    headers = ["Ladezeitpunkt", "PV_Prognose", "PrognNetzverbrauch", "PrognNetzladen", "PrognBattStatus"]
     dynamic.listAStable(headers, priceforecast, '>> ')
 
 if ('logging' in Options):

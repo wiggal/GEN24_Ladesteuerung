@@ -472,26 +472,27 @@ class dynamic:
             ''', entry)
 
         #Vorübergehend: Alte Tabelle löschen, wenn existiert.   #entWIGGlung
-        #zeiger.execute("""
-        #DROP TABLE IF EXISTS priceforecast
-        #""")
+        zeiger.execute("""
+        DROP TABLE IF EXISTS priceforecast
+        """)
 
         # Wenn Datenbanktabelle priceforecast noch nicht existiert, anlegen
         zeiger.execute("""
         CREATE TABLE IF NOT EXISTS priceforecast (
         Zeitpunkt DATETIME PRIMARY KEY,
+        PV_Prognose INT,
         PrognNetzverbrauch INT,
         PrognNetzladen INT,
         PrognBattStatus FLOAT
         )""")
 
         # Alte Daten abräumen und neu Daten speichern  #entWIGGlung
-        zeiger.execute("""
-        DELETE FROM priceforecast
-        """)
+        #zeiger.execute("""
+        #DELETE FROM priceforecast
+        #""")
         zeiger.executemany("""
-        INSERT INTO priceforecast (Zeitpunkt, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
-        VALUES (?, ?, ?, ?);
+        INSERT INTO priceforecast (Zeitpunkt, PV_Prognose, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
+        VALUES (?, ?, ?, ?, ?);
         """, priceforecast)
 
         verbindung.commit()

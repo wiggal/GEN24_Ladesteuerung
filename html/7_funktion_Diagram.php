@@ -140,7 +140,8 @@ $SQL = "WITH Alle_PVDaten AS (
         STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
         LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
         LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS Netzladen,
-        BattStatus
+        BattStatus,
+        Vorhersage
     FROM pv_daten
     where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
     group by STRFTIME('".$groupSTR."', Zeitpunkt)
@@ -150,7 +151,9 @@ SELECT
     pv.Netzbezug - pv.Netzladen AS Netzverbrauch,
     pv.Netzladen AS Netzladen,
     pv.BattStatus AS BattStatus,
+    pv.Vorhersage,
     sp.Bruttopreis * 100 AS Bruttopreis,
+	pfc.PV_Prognose,
 	pfc.PrognNetzverbrauch,
 	pfc.PrognNetzladen,
 	pfc.PrognBattStatus
