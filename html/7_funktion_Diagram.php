@@ -102,8 +102,8 @@ $MAX_y=0;
 
 foreach ($rows as $row) {
         $first = true;
-        $MAX_y_tmp_ist=0;
-        $MAX_y_tmp_prog=0;
+        $MAX_y_ist=0;
+        $MAX_y_prog=0;
         foreach($row as $x => $val) {
         if ( $first ){
             # Datum zuschneiden 
