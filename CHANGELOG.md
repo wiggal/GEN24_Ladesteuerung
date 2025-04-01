@@ -8,6 +8,7 @@ FIX: Fehler in DynamicPriceCheck.py, wenn keine Daten von api.energy-charts.info
 
 - Strompreis-Chart: Auch manuell eingetragene Zwangsladungen darstellen
   Prognose darstellen, auch in die Zukunft.
+  FIX: Darstellung bei negativen Strompreisen
 
 **[0.26.9] – 2025-03-24**  
 

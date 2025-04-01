@@ -87,16 +87,23 @@ switch ($XScaleEinheit) {
     
 $rows = [];
 while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-    $rows[] = $row; // Alle Zeilen speichern
+    $rows[] = $row; // Alle Zeilen aufsammeln
 }
 
 $count = count(array_filter($rows, fn($entry) => strpos($entry["Zeitpunkt"], "00:00:00") !== false));
 
-// Letzte Zeile entfernen, wnn 00:00:00 vom nächsten Tag enthalten ist
+// Letzte Zeile entfernen, wenn 00:00:00 vom nächsten Tag enthalten ist
 if ( $count  > 1) array_pop($rows);
+
+# MIN und MAX für Y-Achsen setzen
+$MIN_y3=0;
+$MAX_y3=0;
+$MAX_y=0;
 
 foreach ($rows as $row) {
         $first = true;
+        $MAX_y_tmp_ist=0;
+        $MAX_y_tmp_prog=0;
         foreach($row as $x => $val) {
         if ( $first ){
             # Datum zuschneiden 
@@ -104,13 +111,25 @@ foreach ($rows as $row) {
             $labels = $labels.$trenner.'"'.$label_element.'"';
             $first = false;
         } else {
+            ## MIN und MAX für Y-Achsen ermitteln
+            if ($x == 'Bruttopreis' AND $val < $MIN_y3) $MIN_y3 = $val;
+            if ($x == 'Bruttopreis' AND $val > $MAX_y3) $MAX_y3 = $val;
+            if (($x == 'Vorhersage' OR $x == 'PV_Prognose') AND $val > $MAX_y) $MAX_y = $val;
+            if ($x == 'Netzverbrauch' OR $x == 'Netzladen') $MAX_y_ist += $val;
+            if ($x == 'PrognNetzverbrauch' OR $x == 'PrognNetzladen') $MAX_y_prog+= $val;
+
             if (!isset($daten[$x])) $daten[$x] = "";
             $daten[$x] = $daten[$x] .$trenner.$val;
             }
         }
+        if ($MAX_y_ist > $MAX_y) $MAX_y = $MAX_y_ist;
+        if ($MAX_y_prog > $MAX_y) $MAX_y = $MAX_y_prog;
 $trenner = ",";
 }
-return array($daten, $labels);
+$MIN_y3 = floor($MIN_y3);
+$MAX_y3 = floor($MAX_y3 + 3);
+$MAX_y = ceil($MAX_y / 100) * 100;
+return array($daten, $labels, $MIN_y3, $MAX_y, $MAX_y3);
 } #END function diagrammdaten
 
 
@@ -298,7 +317,7 @@ window.onload = function() { zeitsetzer(1); };
 ";
 } # END function Optionenausgabe
 
-function Diagram_ausgabe($labels, $daten, $optionen, $Preisstatistik)
+function Diagram_ausgabe($labels, $daten, $optionen, $Preisstatistik,  $MIN_y3, $MAX_y, $MAX_y3)
 {
 echo " <script>
 Chart.register(ChartDataLabels);
@@ -338,10 +357,10 @@ echo "    }]
       plugins: {
         // hier werden die Labels definiert
         datalabels: {
-                display: (context) => context.dataset.data[context.dataIndex] > 10 && context.dataset.showLabel, // Verhindert, dass < 10  und nicht gewünschte Datasets Labels anzeigen
+                display: (context) => context.dataset.showLabel, // nicht gewünschte Datasets Labels weglassen
                 formatter: function(value, context) {
                     const decimals = context.dataset.decimals || 0; // Standard: 0
-                    return value > 10 ? value.toFixed(decimals) + context.dataset.unit: ''; // Zeigt nur Werte größer 10 an und Einheit pro Dataset
+                    return value !== 0 ? value.toFixed(decimals) + context.dataset.unit: ''; // Zeigt nur Werte ungleich 0 an und Einheit pro Dataset
                 },
                 align: (context) => {
                     // Wechselt die Position der Labels, um Überlappungen zu vermeiden
@@ -411,10 +430,34 @@ echo "    }]
            },
         },
       },
+      y3: {
+        type: 'linear',
+        display: false,
+        position: 'left',
+        min: ".$MIN_y3.",
+        max: ".$MAX_y3.",
+        grid: {
+            drawOnChartArea: false
+        },
+        ticks: {
+           stepSize: 20,
+           font: {
+             size: 20,
+           },
+           callback: function(value, index, values) {
+              return value >= 0 ? Math.round(value) + 'ct.' : '';
+           }
+        }
+      },
       y: {
         type: 'linear', 
         position: 'left',
         stacked: true,
+        max: ".$MAX_y.",
+        min: (context) => {
+            let maxY = context.chart.scales.y.max;
+            return (context.chart.scales.y3.min / context.chart.scales.y3.max * maxY)
+        },
         ticks: {
            font: {
              size: 20,
@@ -428,6 +471,9 @@ echo "    }]
         type: 'linear',
         display: 'auto',
         position: 'right',
+        min: (context) => {
+            return (context.chart.scales.y3.min / context.chart.scales.y3.max * 100)
+        },
         max: 100,
         grid: {
             drawOnChartArea: false
@@ -442,24 +488,7 @@ echo "    }]
            }
         }
       },
-      y3: {
-        type: 'linear',
-        display: false,
-        position: 'left',
-        grid: {
-            drawOnChartArea: false
-        },
-        ticks: {
-           stepSize: 20,
-           font: {
-             size: 20,
-           },
-           callback: function(value, index, values) {
-              return value >= 0 ? Math.round(value) + 'ct.' : '';
-           }
-        }
       },
-    }
     },
   });
 </script>";

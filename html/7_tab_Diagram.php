@@ -135,7 +135,7 @@ $SQL = getSQL('daten', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
 $results = $db->query($SQL);
 
 # Diagrammdaten und Optionen holen
-list($daten, $labels) = diagrammdaten($results, $Zeitraum);
+list($daten, $labels, $MIN_y3, $MAX_y, $MAX_y3) = diagrammdaten($results, $Zeitraum);
 
 # Preisstatistikdaten erzeugen
 $Preisstatistik = Preisberechnung($DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $db);
@@ -144,7 +144,7 @@ $Preisstatistik = Preisberechnung($DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $db
     echo "<div class='container'>
     <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
 </div>";
-Diagram_ausgabe($labels, $daten, $Strompreis_Dia_optionen, $Preisstatistik);
+Diagram_ausgabe($labels, $daten, $Strompreis_Dia_optionen, $Preisstatistik,  $MIN_y3, $MAX_y, $MAX_y3);
 
 $db->close();
 } # END if ($programmpunkt == 'option') {
