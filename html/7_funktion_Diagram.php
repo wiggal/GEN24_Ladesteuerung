@@ -126,8 +126,8 @@ foreach ($rows as $row) {
         if ($MAX_y_prog > $MAX_y) $MAX_y = $MAX_y_prog;
 $trenner = ",";
 }
-$MIN_y3 = floor($MIN_y3);
-$MAX_y3 = floor($MAX_y3 + 3);
+$MIN_y3 = $MIN_y3;
+$MAX_y3 = $MAX_y3 * 1.1;
 $MAX_y = ceil($MAX_y / 100) * 100;
 return array($daten, $labels, $MIN_y3, $MAX_y, $MAX_y3);
 } #END function diagrammdaten
@@ -445,7 +445,7 @@ echo "    }]
              size: 20,
            },
            callback: function(value, index, values) {
-              return value >= 0 ? Math.round(value) + 'ct.' : '';
+              return value + 'ct.';
            }
         }
       },
