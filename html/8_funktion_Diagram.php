@@ -86,10 +86,10 @@ echo '<input type="hidden" name="energietype" value="option">'."\n";
 echo '<button type="submit" class="navi" > Optionen </button>';
 echo '</form>'."\n";
 
-echo '</td><td style="text-align:right; font-size: 170%; background-color: rgb(0,255,127)">';
-echo "&nbsp;$Produktion KWh&nbsp;";
-echo '</td><td style="text-align:right; font-size: 170%; background-color: rgb(255,158,158)">';
-echo "&nbsp;$Verbrauch KWh&nbsp;";
+echo '</td><td style="text-align:right; font-size: 170%; background-color: rgba(255,200,0,1)">';
+echo "&nbsp;$Produktion kWh&nbsp;";
+echo '</td><td style="text-align:right; font-size: 170%; background-color: rgba(255,0,0,1)">';
+echo "&nbsp;$Verbrauch kWh&nbsp;";
 
 echo '</td></tr></table><br>';
 } #END function schalter_ausgeben 
