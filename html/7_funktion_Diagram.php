@@ -64,9 +64,9 @@ echo '<button type="submit" class="navi" > '.$schaltertext.' </button>';
 echo '</form>'."\n";
 
 echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$Strompreis_Dia_optionen['Netzladen']['Farbe'].'">';
-echo "&nbsp;$Produktion KWh&nbsp;";
+echo "&nbsp;$Produktion kWh&nbsp;";
 echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$Strompreis_Dia_optionen['Netzverbrauch']['Farbe'].'">';
-echo "&nbsp;$Verbrauch KWh&nbsp;";
+echo "&nbsp;$Verbrauch kWh&nbsp;";
 
 echo '</td></tr></table><br>';
 } #END function schalter_ausgeben 
