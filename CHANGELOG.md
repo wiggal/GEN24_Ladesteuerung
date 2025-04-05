@@ -1,4 +1,4 @@
-**[0.27.0] – 2025-XX-XX**  
+**[0.27.0] – 2025-04-07**  
 
 - Weiterentwicklung der Grafana Dashboards und der Beschreibung von @Manniene
 
