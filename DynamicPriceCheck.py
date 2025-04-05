@@ -269,11 +269,14 @@ for row in pv_data_charge:
         Netzladen = 0
         if Netzverbrauch < 0: Netzverbrauch = 0
     elif Ladewert < -1:
-        Netzverbrauch = Verbrauch
+        Netzverbrauch = Verbrauch - PV_Prognose
         Netzladen = Ladewert * -1
+        if Netzverbrauch < 0:
+            Netzladen = Netzladen + Netzverbrauch
+            Netzverbrauch = 0
     else:
         if Akkustand_W < minimum_batterylevel_kWh:
-            Netzverbrauch = Verbrauch
+            Netzverbrauch = Verbrauch - PV_Prognose
         else:
             Netzverbrauch = 0
         Netzladen = 0
