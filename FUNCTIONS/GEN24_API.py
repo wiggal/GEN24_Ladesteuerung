@@ -16,12 +16,13 @@ class gen24api:
         url = requests.get(gen24url)
         text = url.text
         data = json.loads(text)
+        first_node = next(iter(data['Body']['Data']))
         API = {}
         # "393216 OR 0 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
         # "393216 OR 0 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
         try:
             # API ab Firmware 1.35.4-1
-            API['BAT_MODE'] = data['Body']['Data']['0']['channels']['BAT_MODE_ENFORCED_U16'] 
+            API['BAT_MODE'] = data['Body']['Data'][first_node]['channels']['BAT_MODE_ENFORCED_U16'] 
             if API['BAT_MODE'] != 2:
                 # Aktuelle Werte für Prognoseberechung
                 attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
@@ -35,21 +36,21 @@ class gen24api:
                 API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
                 # PV_POWERACTIVE_MEAN_02_F32 existiert nicht, wenn nur ein String am GEN24 hängt
                 try:
-                    API_STRING2 = data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32']
+                    API_STRING2 = data['Body']['Data'][first_node]['channels']['PV_POWERACTIVE_MEAN_02_F32']
                 except:
                     API_STRING2 = 0
-                API['aktuellePVProduktion'] = int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
-                API['aktuelleBatteriePower'] = int(data['Body']['Data']['0']['channels']['BAT_POWERACTIVE_MEAN_F32'])
+                API['aktuellePVProduktion'] = int(data['Body']['Data'][first_node]['channels']['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
+                API['aktuelleBatteriePower'] = int(data['Body']['Data'][first_node]['channels']['BAT_POWERACTIVE_MEAN_F32'])
                 API['BatteryMaxDischargePercent'] = ''
                 # Zählerstände fürs Logging
-                API['AC_Produktion'] =  int((data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
-                    data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
-                API['DC_Produktion'] =  int((data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
-                API['AC_to_DC'] = int((data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_01_U64'] +\
-                    data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_02_U64'] +\
-                    data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_03_U64'])/3600)
-                API['Batterie_IN'] =    int(data['Body']['Data']['0']['channels']['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
-                API['Batterie_OUT'] =   int(data['Body']['Data']['0']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
+                API['AC_Produktion'] =  int((data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
+                    data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
+                API['DC_Produktion'] =  int((data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+                API['AC_to_DC'] = int((data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_01_U64'] +\
+                    data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_02_U64'] +\
+                    data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_03_U64'])/3600)
+                API['Batterie_IN'] =    int(data['Body']['Data'][first_node]['channels']['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
+                API['Batterie_OUT'] =   int(data['Body']['Data'][first_node]['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
                 API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
                 API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
         except:
@@ -95,16 +96,16 @@ class gen24api:
                         # API ab Firmware 1.35.4-1
                         # PV_POWERACTIVE_MEAN_02_F32 xirstiert nicht, wenn nur ein String am GEN24 hängt
                         try:
-                            API_STRING2 = data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_02_F32']
+                            API_STRING2 = data['Body']['Data'][first_node]['channels']['PV_POWERACTIVE_MEAN_02_F32']
                         except:
                             API_STRING2 = 0
-                        API['aktuellePVProduktion'] = int(data['Body']['Data']['0']['channels']['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
-                        API['AC_Produktion'] += int((data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
-                            data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
-                        API['DC_Produktion'] += int((data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data']['0']['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
-                        API['AC_to_DC'] = int((data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_01_U64'] +\
-                            data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_02_U64'] +\
-                            data['Body']['Data']['0']['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_03_U64'])/3600)
+                        API['aktuellePVProduktion'] = int(data['Body']['Data'][first_node]['channels']['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
+                        API['AC_Produktion'] += int((data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
+                            data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
+                        API['DC_Produktion'] += int((data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+                        API['AC_to_DC'] = int((data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_01_U64'] +\
+                            data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_02_U64'] +\
+                            data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_03_U64'])/3600)
                     except:
                         # API vor Firmware 1.35.4-1
                         API['aktuellePVProduktion'] += int(data['Body']['Data']['262144']['channels']['PV_POWERACTIVE_SUM_F64'])
