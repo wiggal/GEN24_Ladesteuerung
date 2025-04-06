@@ -592,12 +592,12 @@
         ]
       },
       "gridPos": {
-        "h": 14,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 21
       },
-      "id": 8,
+      "id": 14,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -622,9 +622,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n        Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\",\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\",\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\",\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\",\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\",\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\",\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n \n  sum (Netzverbrauch) + sum(AC_Produktion) - sum(Einspeisung) AS \"Gesamtverbrauch\", \n  sum(Netzverbrauch) AS \"Netzverbrauch\",\n  sum(AC_to_DC) AS \"Batterie aus Netz geladen\",\n  sum(AC_Produktion) AS \"AC Produktion\",\n  sum(DC_Produktion) AS \"DC Produktion\",\n  sum(Einspeisung) AS \"Einspeisung\",\n  sum(Batterie_In) AS \"In Batterie\",\n  sum(Batterie_Out) AS \"Aus Batterie\"\nFROM verbrauchview\nWHERE\n        Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nORDER BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt);",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -689,16 +689,16 @@
         ]
       },
       "gridPos": {
-        "h": 3,
-        "w": 24,
+        "h": 8,
+        "w": 8,
         "x": 0,
-        "y": 35
+        "y": 33
       },
-      "id": 10,
+      "id": 12,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
-        "justifyMode": "center",
+        "justifyMode": "auto",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
@@ -719,9 +719,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n     ROUND(Tagesstromkosten / 1000.0, 2) \n    -- Mein_Durchschnittspreis_Verbrauch,  \n    -- Minimaler_Strompreis,\n    -- Maximaler_Strompreis,\n    -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "queryText": "WITH Stundenpreise AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis\n  FROM Strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600 , 'unixepoch')\n)\n\n\nSELECT \n  Bruttopreis\nFROM Stundenpreise\nWHERE Zeitpunkt = datetime(strftime('%Y-%m-%d %H:00:00', 'now', 'localtime'));\n\n\n  ",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n     ROUND(Tagesstromkosten / 1000.0, 2) \n    -- Mein_Durchschnittspreis_Verbrauch,  \n    -- Minimaler_Strompreis,\n    -- Maximaler_Strompreis,\n    -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "rawQueryText": "WITH Stundenpreise AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis\n  FROM Strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600 , 'unixepoch')\n)\n\n\nSELECT \n  Bruttopreis\nFROM Stundenpreise\nWHERE Zeitpunkt = datetime(strftime('%Y-%m-%d %H:00:00', 'now', 'localtime'));\n\n\n  ",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -729,7 +729,7 @@
           ]
         }
       ],
-      "title": "Stromkosten heute",
+      "title": "aktueller Preis/kWh",
       "type": "stat"
     },
     {
@@ -786,10 +786,10 @@
         ]
       },
       "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 38
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 33
       },
       "id": 11,
       "options": {
@@ -816,9 +816,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch\n   -- Minimaler_Strompreis,\n   -- Maximaler_Strompreis,\n   -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 , 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 , 'unixepoch')\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch\n   -- Minimaler_Strompreis,\n   -- Maximaler_Strompreis,\n   -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch\n   -- Minimaler_Strompreis,\n   -- Maximaler_Strompreis,\n   -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 , 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 , 'unixepoch')\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    Mein_Durchschnittspreis_Verbrauch\n   -- Minimaler_Strompreis,\n   -- Maximaler_Strompreis,\n   -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -883,16 +883,16 @@
         ]
       },
       "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 41
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 33
       },
-      "id": 12,
+      "id": 10,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
@@ -913,9 +913,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "WITH Stundenpreise AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis\n  FROM Strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600 , 'unixepoch')\n)\n\nSELECT \n  Bruttopreis\nFROM Stundenpreise\nWHERE Zeitpunkt = datetime(strftime('%Y-%m-%d %H:00:00', 'now', '+1 hours'));\n\n\n\n\n  ",
+          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 , 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 , 'unixepoch')\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n     ROUND(Tagesstromkosten / 1000.0, 2) \n    -- Mein_Durchschnittspreis_Verbrauch,  \n    -- Minimaler_Strompreis,\n    -- Maximaler_Strompreis,\n    -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
           "queryType": "table",
-          "rawQueryText": "WITH Stundenpreise AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis\n  FROM Strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600 , 'unixepoch')\n)\n\nSELECT \n  Bruttopreis\nFROM Stundenpreise\nWHERE Zeitpunkt = datetime(strftime('%Y-%m-%d %H:00:00', 'now', '+1 hours'));\n\n\n\n\n  ",
+          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 , 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 , 'unixepoch')\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n     ROUND(Tagesstromkosten / 1000.0, 2) \n    -- Mein_Durchschnittspreis_Verbrauch,  \n    -- Minimaler_Strompreis,\n    -- Maximaler_Strompreis,\n    -- Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -923,7 +923,7 @@
           ]
         }
       ],
-      "title": "aktueller Preis/kWh",
+      "title": "Stromkosten heute",
       "type": "stat"
     },
     {
@@ -989,12 +989,12 @@
         ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 8,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 41
       },
-      "id": 9,
+      "id": 15,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -1023,9 +1023,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    -- Mein_Durchschnittspreis_Verbrauch\n   Minimaler_Strompreis,\n   Maximaler_Strompreis,\n   Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "queryText": "\n\nWITH timemove AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis AS \"Bruttopreis\"\n  FROM strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%Y-%m-%d', Zeitpunkt) AS \"Tag\",\n  MAX(Bruttopreis) AS \"Maximaler_Strompreis\",\n  MIN(Bruttopreis) AS \"Minimaler_Strompreis\",\n  AVG(Bruttopreis) AS \"Durchschnittspreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d', Zeitpunkt)\nORDER BY Tag;",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\n    SELECT\n        Zeitpunkt,\n        Netzverbrauch,\n        AC_TO_DC,\n        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch_pro_stunde\",\n        LEAD(AC_TO_DC) OVER (ORDER BY Zeitpunkt) - AC_TO_DC AS \"AC_TO_DC_pro_stunde\"\n    FROM pv_daten\n    WHERE\n        Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n        Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n),\nstundenweise_verbrauch AS (\n    SELECT\n        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS \"Stunde\",\n        SUM(Netzverbrauch_pro_stunde)  AS \"Netzverbrauch_pro_stunde\",\n        SUM(AC_TO_DC_pro_stunde) AS \"AC_TO_DC_pro_stunde\"\n    FROM verbrauchview\n    GROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\n),\ntagesweise_kosten AS (\n    SELECT\n        strftime('%Y-%m-%d', sv.Stunde) AS \"Tag\",\n        SUM(sv.Netzverbrauch_pro_stunde) AS \"Tagesverbrauch\",\n        SUM(sv.AC_TO_DC_pro_stunde) AS \"Tages_AC_TO_DC\",  -- Summe von AC_TO_DC pro Tag\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) AS \"Tagesstromkosten\",\n        MIN(sp.Bruttopreis) AS \"Minimaler_Strompreis\",\n        MAX(sp.Bruttopreis) AS \"Maximaler_Strompreis\",\n        AVG(sp.Bruttopreis) AS \"Durchschnittspreis\",\n        SUM(sv.Netzverbrauch_pro_stunde * sp.Bruttopreis) / SUM(sv.Netzverbrauch_pro_stunde) AS \"Mein_Durchschnittspreis_Verbrauch\"\n    FROM stundenweise_verbrauch sv\n    JOIN Strompreise sp ON sv.Stunde = strftime('%Y-%m-%d %H:00:00', sp.Zeitpunkt)\n    GROUP BY strftime('%Y-%m-%d', sv.Stunde)\n)\nSELECT\n    --Tag,\n    -- ROUND(Tagesverbrauch / 1000.0, 2) AS \"Tagesverbrauch_kWh\",  -- Umrechnung in kWh mit 2 Nachkommastellen\n    -- ROUND(Tages_AC_TO_DC / 1000.0, 2) AS \"Tages_AC_TO_DC\", \n    -- Tagesverbrauch,\n    -- Tages_AC_TO_DC, \n    -- Tagesstromkosten,\n    -- Mein_Durchschnittspreis_Verbrauch\n   Minimaler_Strompreis,\n   Maximaler_Strompreis,\n   Durchschnittspreis       \nFROM tagesweise_kosten\nORDER BY Tag;",
+          "rawQueryText": "\n\nWITH timemove AS (\n  SELECT\n    Zeitpunkt,\n    Bruttopreis AS \"Bruttopreis\"\n  FROM strompreise\n  WHERE\n    Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n    Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%Y-%m-%d', Zeitpunkt) AS \"Tag\",\n  MAX(Bruttopreis) AS \"Maximaler_Strompreis\",\n  MIN(Bruttopreis) AS \"Minimaler_Strompreis\",\n  AVG(Bruttopreis) AS \"Durchschnittspreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d', Zeitpunkt)\nORDER BY Tag;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1109,7 +1109,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 49
       },
       "id": 7,
       "options": {
@@ -1148,9 +1148,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "queryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 -  3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "rawQueryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 -  3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1173,9 +1173,9 @@
     "to": "now/d"
   },
   "timepicker": {},
-  "timezone": "browser",
+  "timezone": "utc",
   "title": "GEN24 Solarflow dynamische Strompreise Smarthphone",
   "uid": "dash06",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
