@@ -92,6 +92,7 @@ class gen24api:
                     url = requests.get(gen24url)
                     text = url.text
                     data = json.loads(text)
+                    first_node = next(iter(data['Body']['Data']))
                     try:
                         # API ab Firmware 1.35.4-1
                         # PV_POWERACTIVE_MEAN_02_F32 xirstiert nicht, wenn nur ein String am GEN24 hängt
