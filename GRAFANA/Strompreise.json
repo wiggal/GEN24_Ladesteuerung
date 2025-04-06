@@ -151,7 +151,7 @@
           "sort": "none"
         },
         "xTickLabelRotation": 0,
-        "xTickLabelSpacing": -100
+        "xTickLabelSpacing": 0
       },
       "pluginVersion": "11.5.2",
       "targets": [
@@ -160,9 +160,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 90000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  -  90000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "queryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 -  90000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 82800, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 86400, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 - 86400, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 90000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  -  90000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "rawQueryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 -  90000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 82800, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 86400, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 - 86400, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -272,7 +272,7 @@
           "sort": "none"
         },
         "xTickLabelRotation": 0,
-        "xTickLabelSpacing": -100
+        "xTickLabelSpacing": 0
       },
       "pluginVersion": "11.5.2",
       "targets": [
@@ -281,9 +281,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "queryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 -  3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "rawQueryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 -  3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -393,7 +393,7 @@
           "sort": "none"
         },
         "xTickLabelRotation": 0,
-        "xTickLabelSpacing": -100
+        "xTickLabelSpacing": 0
       },
       "pluginVersion": "11.5.2",
       "targets": [
@@ -402,9 +402,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 90000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 90000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "queryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 +  82800, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 93600, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 86400, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 86400, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 90000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 90000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "rawQueryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 +  82800, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 93600, 'unixepoch')\n)\n\n\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 86400, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 86400, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -412,7 +412,7 @@
           ]
         }
       ],
-      "title": "1 Tag später",
+      "title": "1 Tag später ",
       "type": "barchart"
     }
   ],
@@ -427,9 +427,9 @@
     "to": "now/d"
   },
   "timepicker": {},
-  "timezone": "browser",
+  "timezone": "utc",
   "title": "Strompreise",
   "uid": "dash03",
-  "version": 1,
+  "version": 3,
   "weekStart": ""
 }

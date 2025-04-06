@@ -183,33 +183,19 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-7 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "WITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-7 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-7 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "rawQueryText": "WITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-7 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n\n\n",
           "refId": "A",
           "timeColumns": [
             "time",
-            "ts"
+            "ts",
+            "timeline"
           ]
         }
       ],
       "timeFrom": "7d",
       "title": "Strompreise an der Tagesbörse",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "dateFormat": "YYYY-MM-DD HH:mm:SS",
-                "destinationType": "time",
-                "targetField": "Zeitpunkt"
-              }
-            ],
-            "fields": {}
-          }
-        }
-      ],
       "type": "timeseries"
     },
     {
@@ -342,33 +328,19 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n",
           "queryType": "table",
-          "rawQueryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n",
           "refId": "A",
           "timeColumns": [
             "time",
-            "ts"
+            "ts",
+            "timeline"
           ]
         }
       ],
       "timeFrom": "30d",
       "title": "Strompreise an der Tagesbörse",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "dateFormat": "YYYY-MM-DD HH:mm:SS",
-                "destinationType": "time",
-                "targetField": "Zeitpunkt"
-              }
-            ],
-            "fields": {}
-          }
-        }
-      ],
       "type": "timeseries"
     },
     {
@@ -500,33 +472,19 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-180 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "WITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-180 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-180 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n\n",
+          "rawQueryText": "WITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-180 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n\n\n",
           "refId": "A",
           "timeColumns": [
             "time",
-            "ts"
+            "ts",
+            "timeline"
           ]
         }
       ],
       "timeFrom": "180d",
       "title": "Strompreise an der Tagesbörse",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "dateFormat": "YYYY-MM-DD HH:mm:SS",
-                "destinationType": "time",
-                "targetField": "Zeitpunkt"
-              }
-            ],
-            "fields": {}
-          }
-        }
-      ],
       "type": "timeseries"
     },
     {
@@ -656,33 +614,19 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-360 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "queryText": "\nWITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n",
           "queryType": "table",
-          "rawQueryText": "\nWITH ranked_data AS (\n    SELECT\n        Zeitpunkt,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-360 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    Zeitpunkt,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "\nWITH ranked_data AS (\n    SELECT\n        strftime('%s', Zeitpunkt) AS timeline,\n        Bruttopreis,\n        ROW_NUMBER() OVER (ORDER BY Zeitpunkt) AS x -- x-Wert als Rang\n    FROM strompreise\n    WHERE\n        Zeitpunkt >= datetime('now', '-30 days', 'localtime') AND\n        Zeitpunkt <= datetime('now', 'localtime')\n),\nstats AS (\n    SELECT\n        COUNT(*) AS N,\n        SUM(x) AS sum_x,\n        SUM(Bruttopreis) AS sum_y,\n        SUM(x * Bruttopreis) AS sum_xy,\n        SUM(x * x) AS sum_x2\n    FROM ranked_data\n),\nregression AS (\n    SELECT\n        (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) AS slope,\n        (sum_y - (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x * sum_x) * sum_x) / N AS intercept\n    FROM stats\n)\nSELECT\n    timeline,\n    Bruttopreis,\n    (slope * x + intercept) AS trendline -- Trendlinie berechnen\nFROM ranked_data, regression\nORDER BY timeline;\n",
           "refId": "A",
           "timeColumns": [
             "time",
-            "ts"
+            "ts",
+            "timeline"
           ]
         }
       ],
       "timeFrom": "360d",
       "title": "Strompreise an der Tagesbörse",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "dateFormat": "YYYY-MM-DD HH:mm:SS",
-                "destinationType": "time",
-                "targetField": "Zeitpunkt"
-              }
-            ],
-            "fields": {}
-          }
-        }
-      ],
       "type": "timeseries"
     }
   ],
@@ -697,9 +641,9 @@
     "to": "now/d"
   },
   "timepicker": {},
-  "timezone": "browser",
+  "timezone": "utc",
   "title": "Strompreisentwicklung",
   "uid": "dash05",
-  "version": 3,
+  "version": 8,
   "weekStart": ""
 }

@@ -174,9 +174,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "queryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n\n)\nSELECT\n  strftime(' %H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
+          "rawQueryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n  Bruttopreis AS \"Bruttopreis\"\nFROM strompreise\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n\n)\nSELECT\n  strftime(' %H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  Bruttopreis AS \"Bruttopreis\"\nFROM timemove\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -297,9 +297,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  ROUND(sum(Netzverbrauch) / 1000.0, 2) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  ROUND(sum(Netzverbrauch) / 1000.0, 2) AS \"Netzverbrauch\"\nFROM verbrauch\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+ 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  ROUND(sum(Netzverbrauch) / 1000.0, 2) AS \"Netzverbrauch\"\nFROM verbrauch\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "\nWITH verbrauch AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS \"Netzverbrauch\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  ROUND(sum(Netzverbrauch) / 1000.0, 2) AS \"Netzverbrauch\"\nFROM verbrauch\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -431,9 +431,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_Produktion) AS \"AC Produktion\"\n  ROUND(sum(AC_Produktion) / 1000.0, 2) AS \"AC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_Produktion) AS \"AC Produktion\"\n  ROUND(sum(AC_Produktion) / 1000.0, 2) AS \"AC_Produktion\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_Produktion) AS \"AC Produktion\"\n  ROUND(sum(AC_Produktion) / 1000.0, 2) AS \"AC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_Produktion) OVER (ORDER BY Zeitpunkt) - AC_Produktion AS \"AC_Produktion\"\n \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_Produktion) AS \"AC Produktion\"\n  ROUND(sum(AC_Produktion) / 1000.0, 2) AS \"AC_Produktion\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -564,9 +564,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_to_DC) AS \"BattNetzladung\"\n  ROUND(sum(AC_to_DC) / 1000.0, 2) AS \"AC_to_DC\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_to_DC) AS \"BattNetzladung\"\n  ROUND(sum(AC_to_DC) / 1000.0, 2) AS \"AC_to_DC\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_to_DC) AS \"BattNetzladung\"\n  ROUND(sum(AC_to_DC) / 1000.0, 2) AS \"AC_to_DC\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS \"AC_to_DC\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00 ', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(AC_to_DC) AS \"BattNetzladung\"\n  ROUND(sum(AC_to_DC) / 1000.0, 2) AS \"AC_to_DC\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -698,9 +698,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n --Vorhersage AS \"Vorhersage\"\n ROUND(sum(Vorhersage) / 10000.0, 2) AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --Vorhersage AS \"Vorhersage\"\n  ROUND(sum(Vorhersage) / 10000.0, 2) AS \"Vorhersage\"\nFROM timemove\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "queryType": "table",
-          "rawQueryText": "SELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n --Vorhersage AS \"Vorhersage\"\n ROUND(sum(Vorhersage) / 10000.0, 2) AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\nGROUP BY strftime('%Y-%m-%d %H:00:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH timemove AS (\nSELECT\n  Zeitpunkt,\n Vorhersage AS \"Vorhersage\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000  + 3600, 'unixepoch')\n\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --Vorhersage AS \"Vorhersage\"\n  ROUND(sum(Vorhersage) / 10000.0, 2) AS \"Vorhersage\"\nFROM timemove\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -824,32 +824,17 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_GEN24_DATEN_}"
           },
-          "queryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime(1743202800000 / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime(1743289199999 / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "with timeline AS (\nSELECT\n strftime('%s', Zeitpunkt) AS times,\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000-3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt\n)\n\nSELECT\ntimes,\n Zeitpunkt,\n \"Batterie SOC\"\nFROM timeline\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nORDER BY times;\n",
           "queryType": "table",
-          "rawQueryText": "SELECT\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000+3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "with timeline AS (\nSELECT\n strftime('%s', Zeitpunkt) AS times,\n Zeitpunkt,\n BattStatus AS \"Batterie SOC\"\nFROM PV_Daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000-3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000+3600, 'unixepoch')\nORDER BY Zeitpunkt\n)\n\nSELECT\ntimes,\n Zeitpunkt,\n \"Batterie SOC\"\nFROM timeline\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nORDER BY times;\n",
           "refId": "A",
           "timeColumns": [
-            "time",
-            "ts"
+            "times",
+            "zeitpunkt"
           ]
         }
       ],
       "title": "SOC Batterie",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "dateFormat": "YYYY-MM-DD HH:mm:SS",
-                "destinationType": "time",
-                "targetField": "Zeitpunkt"
-              }
-            ],
-            "fields": {}
-          }
-        }
-      ],
       "type": "timeseries"
     },
     {
@@ -968,9 +953,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(DC_Produktion) AS \"DC Produktion\"\n  ROUND(sum(DC_Produktion) / 1000.0, 2) AS \"DC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(DC_Produktion) AS \"DC Produktion\"\n  ROUND(sum(DC_Produktion) / 1000.0, 2) AS \"DC_Produktion\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(DC_Produktion) AS \"DC Produktion\"\n  ROUND(sum(DC_Produktion) / 1000.0, 2) AS \"DC_Produktion\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS \"DC_Produktion\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(DC_Produktion) AS \"DC Produktion\"\n  ROUND(sum(DC_Produktion) / 1000.0, 2) AS \"DC_Produktion\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1101,9 +1086,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Einspeisung) AS \"Einspeisung\"\n  ROUND(sum(Einspeisung) / 1000.0, 2) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Einspeisung) AS \"Einspeisung\"\n  ROUND(sum(Einspeisung) / 1000.0, 2) AS \"Einspeisung\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Einspeisung) AS \"Einspeisung\"\n  ROUND(sum(Einspeisung) / 1000.0, 2) AS \"Einspeisung\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS \"Einspeisung\"\n  \nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Einspeisung) AS \"Einspeisung\"\n  ROUND(sum(Einspeisung) / 1000.0, 2) AS \"Einspeisung\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1234,9 +1219,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_In) AS \"In Batterie\"\n  ROUND(sum(Batterie_In) / 1000.0, 2) AS \"Batterie_In\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_In) AS \"In Batterie\"\n  ROUND(sum(Batterie_In) / 1000.0, 2) AS \"Batterie_In\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_In) AS \"In Batterie\"\n  ROUND(sum(Batterie_In) / 1000.0, 2) AS \"Batterie_In\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS \"Batterie_IN\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n)\nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_In) AS \"In Batterie\"\n  ROUND(sum(Batterie_In) / 1000.0, 2) AS \"Batterie_In\"\nFROM verbrauchview\nWHERE\t                                                         -- Und hier grenzt man das Ergebnis wieder ein, damit man nur den ausgewählten Zeitraum bekommt\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1367,9 +1352,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_Out) AS \"Aus Batterie\"\n  ROUND(sum(Batterie_Out) / 1000.0, 2) AS \"Batterie_Out\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "queryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\nROUND(sum(Batterie_Out) / 1000.0, 2) AS \"Batterie_Out\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "queryType": "table",
-          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 + 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\n  --sum(Batterie_Out) AS \"Aus Batterie\"\n  ROUND(sum(Batterie_Out) / 1000.0, 2) AS \"Batterie_Out\"\nFROM verbrauchview\nGROUP BY strftime('%H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
+          "rawQueryText": "WITH verbrauchview AS (\nSELECT\n  Zeitpunkt,\n  LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS \"Batterie_OUT\"\nFROM pv_daten\nWHERE\n  Zeitpunkt >= datetime($__from / 1000 - 3600, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000 + 3600, 'unixepoch')\n) \nSELECT\n  strftime('%H:00', Zeitpunkt) AS \"Zeitpunkt\",\nROUND(sum(Batterie_Out) / 1000.0, 2) AS \"Batterie_Out\"\nFROM verbrauchview\nWHERE\n  Zeitpunkt >= datetime($__from / 1000, 'unixepoch') AND\n  Zeitpunkt <= datetime($__to / 1000, 'unixepoch')\nGROUP BY strftime('%d %H:00', Zeitpunkt)\nORDER BY Zeitpunkt;\n\n",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -1402,9 +1387,9 @@
   "timepicker": {
     "refresh_intervals": []
   },
-  "timezone": "",
+  "timezone": "utc",
   "title": "Tagesauswertung",
   "uid": "dash02",
-  "version": 4,
+  "version": 12,
   "weekStart": ""
 }
