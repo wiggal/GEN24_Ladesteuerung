@@ -4,6 +4,8 @@ DynamicPriceCheck.py:
 - **Neuer Parameter in CONFIG/dynprice.ini** `netzlade_preisschwelle`.   
   Bei einem Strompreis unter diesem Preis, wird immer versucht den Akku voll zuladen (z.B. negative Strompreise, oder unter Einspeisevergütung).  
 
+- Strompreis-Chart: Hier wird nun auch der reine Börsenpreis dargestellt.
+
 FIX: Erste node in response von /components/readable statt fest auf '0' gehen, da auch '1' als erster Node vorkommen kann.  
 
 **[0.27.0] – 2025-04-07**  
