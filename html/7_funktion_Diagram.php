@@ -104,6 +104,7 @@ foreach ($rows as $row) {
         $first = true;
         $MAX_y_ist=0;
         $MAX_y_prog=0;
+        $MAX_y3_Brutto=0;
         foreach($row as $x => $val) {
         if ( $first ){
             # Datum zuschneiden 
@@ -112,8 +113,9 @@ foreach ($rows as $row) {
             $first = false;
         } else {
             ## MIN und MAX für Y-Achsen ermitteln
-            if ($x == 'Bruttopreis' AND $val < $MIN_y3) $MIN_y3 = $val;
-            if ($x == 'Bruttopreis' AND $val > $MAX_y3) $MAX_y3 = $val;
+            if ($x == 'Boersenpreis' AND $val < $MIN_y3) $MIN_y3 = $val;
+            if ($x == 'Preisaufschlag' AND $val < $MIN_y3) $MIN_y3 = $val;
+            if ($x == 'Boersenpreis' OR $x == 'Preisaufschlag') $MAX_y3_Brutto += $val;
             if (($x == 'Vorhersage' OR $x == 'PV_Prognose') AND $val > $MAX_y) $MAX_y = $val;
             if ($x == 'Netzverbrauch' OR $x == 'Netzladen') $MAX_y_ist += $val;
             if ($x == 'PrognNetzverbrauch' OR $x == 'PrognNetzladen') $MAX_y_prog+= $val;
@@ -124,6 +126,7 @@ foreach ($rows as $row) {
         }
         if ($MAX_y_ist > $MAX_y) $MAX_y = $MAX_y_ist;
         if ($MAX_y_prog > $MAX_y) $MAX_y = $MAX_y_prog;
+        if ($MAX_y3_Brutto > $MAX_y3) $MAX_y3 = $MAX_y3_Brutto;
 $trenner = ",";
 }
 $MIN_y3 = $MIN_y3;
@@ -171,7 +174,8 @@ SELECT
     pv.Netzladen AS Netzladen,
     pv.BattStatus AS BattStatus,
     pv.Vorhersage,
-    sp.Bruttopreis * 100 AS Bruttopreis,
+    sp.Boersenpreis * 100 AS Boersenpreis,
+    (sp.Bruttopreis - sp.Boersenpreis) * 100 AS Preisaufschlag,
 	pfc.PV_Prognose,
 	pfc.PrognNetzverbrauch,
 	pfc.PrognNetzladen,
@@ -359,8 +363,21 @@ echo "    }]
         datalabels: {
                 display: (context) => context.dataset.showLabel, // nicht gewünschte Datasets Labels weglassen
                 formatter: function(value, context) {
+                    const datasetLabel = context.dataset.label;
+                    const dataIndex = context.dataIndex;
+                    const chart = context.chart;
                     const decimals = context.dataset.decimals || 0; // Standard: 0
-                    return value !== 0 ? value.toFixed(decimals) + context.dataset.unit: ''; // Zeigt nur Werte ungleich 0 an und Einheit pro Dataset
+
+                    let displayValue = value;
+
+                    // Wenn das aktuelle Dataset Preisaufschlag ist, addiere den Wert von Boersenpreis
+                    if (datasetLabel === 'Preisaufschlag') {
+                        const boersenpreisDataset = chart.data.datasets.find(ds => ds.label === 'Boersenpreis');
+                        if (boersenpreisDataset && boersenpreisDataset.data[dataIndex] != null) {
+                            displayValue += boersenpreisDataset.data[dataIndex];
+                        }
+                    }
+                    return displayValue !== 0 ? displayValue.toFixed(decimals) + context.dataset.unit : ''; // Zeigt nur Werte ungleich 0 an und Einheit pro Dataset
                 },
                 align: (context) => {
                     // Wechselt die Position der Labels, um Überlappungen zu vermeiden

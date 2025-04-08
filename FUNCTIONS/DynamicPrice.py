@@ -250,16 +250,23 @@ class dynamic:
 
         return()
 
-    def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0):
+    def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0, mitPV=1):
         # Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
+        netzlade_preisschwelle = basics.getVarConf('dynprice','netzlade_preisschwelle', 'eval')
         # Wenn keine Maximaler Zwangsladung-SOC (0) Akkukapazität setzen.
         if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
         # Ladestand für alle Zeiten neu berechnen
         for Akkustatus in pv_data_charge:
             min_net_power = Akkustatus[1] - Akkustatus[2]
+            # Wenn mitPV == 0 dann PV-ertrag nicht in Speicher laden, um auf negative Strompreise zu warten
+            Ladewert_tmp = Akkustatus[5]
+            if mitPV == 0: 
+                if min_net_power > 0: min_net_power = 0
+                if Akkustatus[5] == -0.01: Ladewert_tmp = 0
             if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
-            if Akkustatus[5] < 0:
+            #if Akkustatus[5] < 0:
+            if Ladewert_tmp < 0:
                 # Wenn PV-Produktion größer Zwangsladung, PV-Produktion zum SOC.
                 if int(Akkustatus[5] * -1) < min_net_power:
                     akku_soc += min_net_power
@@ -284,12 +291,42 @@ class dynamic:
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
         max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
+        netzlade_preisschwelle = basics.getVarConf('dynprice','netzlade_preisschwelle', 'eval')
         max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
-        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
         # Ladewert ist -1 wenn kein Profilabler Preis
         max_ladewert = charge_rate_kW * -1
 
-        # 1.) alle Stunden in denen der Akku reicht auf 0 setzen, größte zuerst
+        # 1.) negative bzw. sehr niedrige Strompreise suchen und da Akku vollladen
+        # Akkustand ohne PV-Leistung ermitteln
+        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 0)
+        min_Preis_zeilen = [zeile for zeile in pv_data_charge if zeile[3] < netzlade_preisschwelle]
+        # noch nach Preis sortieren
+        min_Preis_zeilen = sorted(min_Preis_zeilen, key=lambda x: x[3])
+        if(self.dyn_print_level >= 3 and min_Preis_zeilen):
+            print("\n>> ******** Wenn Strompreis unter netzlade_preisschwelle ********")
+
+        for min_Preis_Std in min_Preis_zeilen:
+            charge_rate_kW_tmp = charge_rate_kW
+            spaeter_zeile_max_soc = [zeile for zeile in pv_data_charge if zeile[0] >= min_Preis_Std[0]]
+            # print("WIGGAL SPÄTER: ", spaeter_zeile_max_soc)  #entWIGGlung
+            zeile_max_soc = max(spaeter_zeile_max_soc, key=lambda x: x[4])
+            # print("WIGGAL MAX_SOC: ", zeile_max_soc)  #entWIGGlung
+            # print("WIGGAL: ", min_Preis_Std[0], battery_capacity_Wh, zeile_max_soc[4], battery_capacity_Wh - zeile_max_soc[4] )  #entWIGGlung
+            if (battery_capacity_Wh - zeile_max_soc[4] < charge_rate_kW): charge_rate_kW_tmp = int((battery_capacity_Wh - zeile_max_soc[4]) + 1.1)
+            # print("WIGGAL min_Preis_Std: ", charge_rate_kW_tmp, min_Preis_Std)  #entWIGGlung
+            if charge_rate_kW_tmp > 100:
+                min_Preis_Std[5]= charge_rate_kW_tmp * -1
+            # NOCHMAL: Akkustand ohne PV-Leistung ermitteln
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 0)
+            if(self.dyn_print_level >= 3):
+                headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
+                self.listAStable(headers, pv_data_charge, '>>')
+
+        if(self.dyn_print_level >= 3 and min_Preis_zeilen):
+            print(">> ******** ENDE: Wenn Strompreis unter netzlade_preisschwelle ********\n")
+
+        # 2.) alle Stunden in denen der Akku reicht auf 0 setzen, größte zuerst
+        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
         Zeilen = len(pv_data_charge)
         while Zeilen > 0:
             max_index = -1
@@ -318,7 +355,7 @@ class dynamic:
 
             Zeilen -= 1
 
-        # 2.) nächster Schritt Alle Zeten mit -0.1 auf Zwangsladung oder Ladestopp prüfen
+        # 3.) nächster Schritt Alle Zeiten mit -0.1 auf Zwangsladung oder Ladestopp prüfen
         self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
         Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
         SOC_ueber_Min = 0
