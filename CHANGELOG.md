@@ -1,4 +1,4 @@
-**[0.27.1] – 2025-XX-XX**  
+**[0.27.1] – 2025-04-13**  
 
 DynamicPriceCheck.py:
 - **Neuer Parameter in CONFIG/dynprice.ini** `netzlade_preisschwelle`.   

@@ -40,11 +40,19 @@ if ( $diff->y == 0 AND $diff->m == 0 AND $diff->d == 1) {
 
 # Schalter am Anfang und am Ende deaktivieren
 $button_vor_on = '';
+$PfeilGrauton_vor = '1.0';
+$PfeilGrauton_back = '1.0';
 $heute = date("Y-m-d H:i");
-if (strtotime($DiaDatenBis) >= strtotime($heute)) $button_vor_on = 'disabled';
+if (strtotime($DiaDatenBis) >= strtotime($heute)) {
+    $button_vor_on = 'disabled';
+    $PfeilGrauton_vor = '0.3';
+};
 # Schalter für Tag out of DB  deaktivieren
 $button_back_on = '';
-if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) $button_back_on = 'disabled';
+if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) {
+    $button_back_on = 'disabled';
+    $PfeilGrauton_back = '0.3';
+};
 
 # Schalter zum Blättern usw.
 echo '<table><tr><td>';
@@ -55,7 +63,7 @@ echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
 echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
-echo '<button type="submit" class="navi" '.$button_back_on.'> &nbsp;&lt;&lt;&nbsp;</button>';
+echo '<button type="submit" style="opacity: '.$PfeilGrauton_back.'" class="navi" '.$button_back_on.'> &nbsp;&lt;&lt;&nbsp;</button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
@@ -77,7 +85,7 @@ echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
 echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
-echo '<button type="submit" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
+echo '<button type="submit" style="opacity: '.$PfeilGrauton_vor.'" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
 echo '</form>'."\n";
 
 echo '</td><td style="text-align:center; width: 100%;">';
