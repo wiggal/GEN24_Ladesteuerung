@@ -75,7 +75,11 @@ switch ($case) {
         if ($Ausgabe == 1) {
             // DEBUG ausblenden
             if ($DEBUG == "aus") {
-                if (preg_match('/^\s*DEBUG/', $Zeile)) {
+                if (
+                preg_match('/^\s*DEBUG/', $Zeile) ||
+                preg_match('/^\s*>> /', $Zeile) ||
+                preg_match('/^\s*\+\+ /', $Zeile)
+                ) {
                     continue;
                 }
             }
