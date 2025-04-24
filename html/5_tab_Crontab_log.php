@@ -15,6 +15,14 @@ a{
   font-family:Arial;
   font-size: 180%;
 }
+input[type="checkbox"] {
+    width: 0.8em;
+    height: 0.8em;
+  }
+.checkbox{
+  font-family:Arial;
+  font-size: 1.4em;
+}
 }
 a.ende{
   font-family:Arial;
@@ -127,7 +135,7 @@ switch ($case) {
 <a class="ende" name="bottom" href="#top">An den Anfang springen!</a>
 <br><br>
 <form method="post" action="#bottom" enctype="multipart/form-data">
-<input type="checkbox" name="DEBUG" value="ein"> DEBUG-Zeilen anzeigen<br>
+<div class="checkbox" ><input type="checkbox" name="DEBUG" value="ein"> DEBUG-Zeilen anzeigen</div>
 <button type="submit">Neu laden</button>
 </form>
 </body>

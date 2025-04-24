@@ -200,7 +200,7 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
         DBCode.append((Stunde, 'ENTLadeStrg', Stunde, 0, 0, ''))
 
     # DEBUG CSV-Ausgabe
-    if(dyn_print_level >= 1):
+    if(dyn_print_level >= 4):
         import csv
         if stunde == 1 :
             try:
