@@ -3,6 +3,10 @@
 **Anpassungen für Firmware 1.36.5-1**
 - Pfad im httprequest hat sich von /config/... auf /api/config/... geändert
 
+- Änderung in 5_tab_Crontab_log.php
+  Die DEBUG-Zeilen werden nun beim Aufruf ausgeblendet, können aber eingeblendet werden.
+
+
 **[0.27.1] – 2025-04-13**  
 
 DynamicPriceCheck.py:
