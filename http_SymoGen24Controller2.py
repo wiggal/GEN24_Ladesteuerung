@@ -46,7 +46,7 @@ if __name__ == '__main__':
         
             Ausgabe_Parameter = ''
             if(Parameter[1] != "" and print_level >= 1):
-                Ausgabe_Parameter = ">>>Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
+                Ausgabe_Parameter = "DEBUG Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
                 if(Parameter[0] == "exit0"):
                     # Batteriemangement zurücksetzen
                     if result_get_time_of_use != []:
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                     # Ende Programm
             else:
                 # Aufrufparameter ausgeben
-                Ausgabe_Parameter = ">>>Aufrufparameter: "  + str(Parameter[2])
+                Ausgabe_Parameter = "DEBUG Aufrufparameter: "  + str(Parameter[2])
 
             # Nur ausführen, wenn WR erreichbar
             try:            
