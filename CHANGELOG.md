@@ -1,3 +1,8 @@
+**[0.27.2] – 2025-04-25**  
+
+**Anpassungen für Firmware 1.36.5-1**
+- Pfad im httprequest hat sich von /config/... auf /api/config/... geändert
+
 **[0.27.1] – 2025-04-13**  
 
 DynamicPriceCheck.py:

@@ -47,19 +47,33 @@ class request:
         user = g_user.lower()
         password = g_password
         self_address = g_self_address
-        response= self.send_request('/config/timeofuse',auth=True)
+        # vor Firmware 1.36.5-1 = '/' nach Firmware 1.36.5-1 = '/api/'
+        http_request_path = '/'
+        try:
+            # ab Firmware 1.36.5-1
+            response = self.send_request('/api/config/timeofuse',auth=True)
+            http_request_path = '/api/'
+        except:
+            response = self.send_request('/config/timeofuse',auth=True)
+            http_request_path = '/'
+
         if not response:
             return None
     
         result = json.loads(response.text)['timeofuse']
-        return result
+        return result, http_request_path
     
     def get_batteries(self, g_self_address, g_user, g_password):
         global user, password, self_address
         user = g_user.lower()
         password = g_password
         self_address = g_self_address
-        response = self.send_request('/config/batteries',auth=True)
+        try:
+            # ab Firmware 1.36.5-1
+            response = self.send_request('/api/config/batteries',auth=True)
+        except:
+            response = self.send_request('/config/batteries',auth=True)
+
         if not response:
             return None
     

@@ -30,7 +30,10 @@ if __name__ == '__main__':
             response = requests.get(WR_URL)
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             alterLadewert = 0
-            result_get_time_of_use = request.get_time_of_use(host_ip, user, password)
+            # Auf Firmware 1.36.5-1 prüfen und evtl. Pfad anpassen
+            result_get_time_of_use_array = request.get_time_of_use(host_ip, user, password)
+            result_get_time_of_use = result_get_time_of_use_array[0]
+            http_request_path = result_get_time_of_use_array[1]
             for element in result_get_time_of_use:
                 if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
                     alterLadewert = element['Power']
@@ -47,7 +50,7 @@ if __name__ == '__main__':
                 if(Parameter[0] == "exit0"):
                     # Batteriemangement zurücksetzen
                     if result_get_time_of_use != []:
-                        response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
+                        response = request.send_request(http_request_path + 'config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
                         print("Batteriemanagementeinträge gelöscht!")
                     # Ende Programm
                 if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
@@ -441,7 +444,7 @@ if __name__ == '__main__':
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
                         if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
-                            response = request.send_request('/config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
+                            response = request.send_request(http_request_path + 'config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
@@ -493,7 +496,7 @@ if __name__ == '__main__':
 
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
-                                    response = request.send_request('/config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
+                                    response = request.send_request(http_request_path + 'config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
@@ -552,7 +555,7 @@ if __name__ == '__main__':
 
                         if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
                             if ('notstrom' in Options):
-                                response = request.send_request('/config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}')
+                                response = request.send_request(http_request_path + 'config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}')
                                 bereits_geschrieben = 1
                                 DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)
                                 Schreib_Ausgabe = Schreib_Ausgabe + str(Neu_HYB_BACKUP_RESERVED) + "% Notstromreserve geschrieben.\n"
