@@ -55,6 +55,8 @@ $datum = date("Y-m-d", time());
 
 $case = '';
 if (isset($_POST["case"])) $case = $_POST["case"];
+$DEBUG = 'aus';
+if (isset($_POST["DEBUG"])) $DEBUG = $_POST["DEBUG"];
 
 switch ($case) {
     case '':
@@ -71,6 +73,24 @@ switch ($case) {
         $Zeile = fgets($myfile);
         if (strpos($Zeile, $datum) !== false) $Ausgabe = 1;
         if ($Ausgabe == 1) {
+            // DEBUG ausblenden
+            if ($DEBUG == "aus") {
+                if (preg_match('/^\s*DEBUG/', $Zeile)) {
+                    continue;
+                }
+            }
+            // Leerzeilen prüfen und ggf. überspringen
+            if (trim($Zeile) === '') {
+                if ($letzteWarLeer) {
+                    continue; // mehrere Leerzeilen → nur die erste anzeigen
+                } else {
+                    $letzteWarLeer = true;
+                    echo "<br>";
+                    continue;
+                }
+            }
+            // reguläre Zeile anzeigen und Flag zurücksetzen
+            $letzteWarLeer = false;
             echo $Zeile . "<br>";
         }
     }
@@ -103,6 +123,7 @@ switch ($case) {
 <a class="ende" name="bottom" href="#top">An den Anfang springen!</a>
 <br><br>
 <form method="post" action="#bottom" enctype="multipart/form-data">
+<input type="checkbox" name="DEBUG" value="ein"> DEBUG-Zeilen anzeigen<br>
 <button type="submit">Neu laden</button>
 </form>
 </body>

@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
             # Nur ausführen, wenn WR erreichbar
             try:            
-                    DEBUG_Ausgabe= "\nDEBUG <<<<<< E I N >>>>>>>\n\n"
+                    DEBUG_Ausgabe= "\nDEBUG <<<<<< E I N >>>>>>>\nDEBUG"
     
                     ###############################
     
@@ -195,7 +195,7 @@ if __name__ == '__main__':
                     # Aktuelle Prognose berechnen
                     AktuellenLadewert_Array = progladewert.getAktPrognose()
                     aktuelleVorhersage = AktuellenLadewert_Array[0]
-                    DEBUG_Ausgabe = AktuellenLadewert_Array[1]
+                    DEBUG_Ausgabe += AktuellenLadewert_Array[1]
 
                     # DEBUG_Ausgabe der Ladewertermittlung 
                     DEBUG_Ausgabe += ", aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
@@ -303,9 +303,9 @@ if __name__ == '__main__':
                             print()
 
 
-                    DEBUG_Ausgabe+="\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
+                    DEBUG_Ausgabe+="DEBUG\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachUnten:  " + str(WRSchreibGrenze_nachUnten) + "W"
-                    DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W"
+                    DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W\n"
                     
 
                     ######## IN  WR Batteriemanagement schreiben, später gemeinsam
@@ -320,7 +320,7 @@ if __name__ == '__main__':
                     if  Batterieentlandung_steuern > 0:
                         MaxEntladung = BattganzeLadeKapazWatt
 
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
+                        DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
                         for element in result_get_time_of_use:
                             if element['Active'] == True and element['ScheduleType'] == 'DISCHARGE_MAX':
                                 BatteryMaxDischarge = element['Power']
@@ -483,6 +483,10 @@ if __name__ == '__main__':
                             aktuellePVProduktion_tmp = 0
                         if (BattStatusProz <= MindBattLad):
                             Eigen_Opt_Std_neu = 0
+                        # Bei Eigen_Opt_Std_neu == 0 auf HYB_EM_MODE = 0, Eigenverbrauchs-Optimierung = Automatisch schalten
+                        HYB_EM_MODE = 1
+                        if (Eigen_Opt_Std_neu == 0):
+                            HYB_EM_MODE = 0
 
                         if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
@@ -496,7 +500,7 @@ if __name__ == '__main__':
 
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
-                                    response = request.send_request(http_request_path + 'config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":1}')
+                                    response = request.send_request(http_request_path + 'config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":'+str(HYB_EM_MODE)+'}')
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
@@ -603,6 +607,7 @@ if __name__ == '__main__':
 
                     #DEBUG ausgeben
                     if print_level >= 2:
+                        DEBUG_Ausgabe+= "\nDEBUG\nDEBUG <<<<<< A U S >>>>>>>\n"
                         print(DEBUG_Ausgabe)
                     if print_level >= 1:
                         print("***** ENDE: ", datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"),"*****\n")

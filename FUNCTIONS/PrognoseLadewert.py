@@ -185,7 +185,7 @@ class progladewert:
                 Prognose_Log = Prognose_tmp[1]
                 Pro_Akt_fun_Log = Prognose_Log
                 Pro_Akt_fun = Prognose
-                self.DEBUG_Ausgabe += "\nDEBUG *************** Ladewertmittel LOOP: " + str(loop)
+                self.DEBUG_Ausgabe += "DEBUG\nDEBUG *************** Ladewertmittel LOOP: " + str(loop)
                 if loop == 0:
                     Pro_Akt_fun_Log = Prognose_Log * (60 - Akt_Minute) / 60
                     Pro_Akt_fun = Prognose * (60 - Akt_Minute) / 60
@@ -202,7 +202,7 @@ class progladewert:
             Pro_Akt_Log = int(Pro_Akt_Log / PrognoseGlaettung / 2 )
             Pro_Akt = int(Pro_Akt / PrognoseGlaettung / 2 )
     
-            self.DEBUG_Ausgabe += "\nDEBUG " + datetime.strftime(self.now, "%D %H:%M") + " Aktuelle Prognose - Reservierung: " + str(Pro_Akt)
+            self.DEBUG_Ausgabe += "DEBUG\nDEBUG " + datetime.strftime(self.now, "%D %H:%M") + " Aktuelle Prognose - Reservierung: " + str(Pro_Akt)
             self.DEBUG_Ausgabe += ", Batteriekapazität: " + str(self.BattKapaWatt_akt) 
     
             ### Prognose ENDE
@@ -299,7 +299,7 @@ class progladewert:
         return(Prognose_Summe, Ende_Nacht_Std)
         
     def getEigenverbrauchOpt(self, host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung=0):
-        DEBUG_Eig_opt ="\n\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>\n"
+        DEBUG_Eig_opt ="DEBUG\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>\n"
         GrundlastNacht = basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
         AkkuZielProz = basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
         PrognoseGrenzeMorgen = basics.getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
@@ -382,7 +382,7 @@ class progladewert:
         if BattStatusProz > 90: Schaltverzoegerung_Diff = 1
         Akkuschonung_Werte_tmp = json.loads(basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str'))
         Akkuschonung_Werte = dict(sorted(Akkuschonung_Werte_tmp.items(), key=lambda item: int(item[0])))
-        DEBUG_Ausgabe += "\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
+        DEBUG_Ausgabe += "DEBUG\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
         DEBUG_Ausgabe += "\nDEBUG Akkuschonung_Werte: " + str(Akkuschonung_Werte) + "\n"
         for Akkuschon_Proz in Akkuschonung_Werte: 
             # Schaltverzoegerung neu 
