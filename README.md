@@ -30,11 +30,7 @@ Folgende Installationen sind nötig, damit die Pythonskripte funktionieren
 ```
 sudo apt install python3
 sudo apt install python3-pip
-sudo pip install pytz
 sudo pip install requests
-sudo pip install numpy
-sudo pip install pandas
-sudo pip install scikit-learn
 ```
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der Datei weatherData.json vorhanden sind!  
@@ -48,7 +44,7 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 ```
 1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
-**ACHTUNG: ab v0.27.3 Prognoseskripte in Verzeichnis FORECAST verschoben!!** 
+**ACHTUNG: ab v0.27.3 Prognoseskripte in Verzeichnis FORECAST verschoben!!**  
 **ACHTUNG:** nur den Wetterdienst eintragen, den ihr verwenden wollt.
 ```
 33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
@@ -60,21 +56,13 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 0 0 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
 ```
 
-### :sun_behind_rain_cloud: WeatherDataProvider2.py
+### :sun_behind_rain_cloud: Prognoseskripte in FORCECAST/
 
-Holt die Leistungsprognose von forecast.solar und schreibt sie in weatherData.json  
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfters am Tag abzurufen (bei mir alle 2-3 Std)
+Holen von den jeweiligen API-Urls die Prognosedaten und bereiten sie auf für GEN24_Ladesteuerung. 
 
-### :sun_behind_rain_cloud: Solarprognose_WeatherData.py 
-
-Holt die Leistungsprognose von solarprognose.de und schreibt sie in weatherData.json. Es ist aber ein Account erforderlich,
-hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
-Damit die Wetterdaten aktuell bleiben ist es besser sie öfter abzufragen (bei mir alle 2-3 Std)  
-
-### :sun_behind_rain_cloud: Solcast_WeatherData.py
-
-Holt die Leistungsprognose von toolkit.solcast.com.au und schreibt sie in weatherData.json. Es ist ein "Home User" Account auf solcast.com erforderlich.  
-Leider kann Solcast_WeatherData.py nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag).  
+Besonderheiten:  
+- Bei solarprognose.de ist ein Account erforderlich, hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
+- Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag).  
 
 ### :chart_with_downwards_trend: http_SymoGen24Controller2.py
 
