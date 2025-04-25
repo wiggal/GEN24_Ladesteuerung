@@ -31,8 +31,8 @@ def loadLatestWeatherData():
 
     if api_pers_plus == 'ja' and anzahl_strings == 1:
         sqlall = FUNCTIONS.SQLall.sqlall()
-        currentDayProduction = sqlall.getSQLcurrentDayProduction()
-        url = url+'?actual=' +currentDayProduction
+        currentDayProduction = sqlall.getSQLcurrentDayProduction('PV_Daten.sqlite')
+        url = url+'?actual=' +"{:.1f}".format(currentDayProduction)
 
     try:
         try:
