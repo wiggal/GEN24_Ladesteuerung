@@ -24,7 +24,6 @@ if __name__ == '__main__':
     now = datetime.now()
     format = "%Y-%m-%d %H:%M:%S"
 
-    PV_Database = basics.getVarConf('Logging','Logging_file', 'str')
     Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
     dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
     LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
@@ -42,6 +41,7 @@ if __name__ == '__main__':
     TimestampNow = int(datetime.now().timestamp())
 
     # Lastprofil neu erzeugen, wenn es älter als LastprofilNeuTage
+    PV_Database = 'PV_Daten.sqlite'
     if len(Lastprofil) > 0 and len(Lastprofil[0]) > 3:
         if ((TimestampNow) - int(Lastprofil[0][3]) > LastprofilNeuTage * 86400):
             if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als ", LastprofilNeuTage, " Tage!")
