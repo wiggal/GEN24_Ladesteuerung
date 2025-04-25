@@ -98,10 +98,9 @@ automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann a
 
 ### :bar_chart: Logging
 
-Wenn in der "CONFIG/default_priv.ini" Logging_ein = 1 gesetzt ist, werden die Werte im "Logging_file" im sqlite-Format gespeichert.  
-Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
+Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
 Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
-Aus der SQLite-Datei werden dann in html/7_tab_Diagram.php Diagramme erzeugt.  
+Aus der SQLite-Datei `PV_Daten.sqlite` werden dann in html/7_tab_Diagram.php Diagramme erzeugt.  
 Hier z.B. das Liniendiagramm zur Tagesproduktion:  
 ![Grafik zur Tagesproduktion](pics/Tagesproduktion.png)
 oder das Balkendiagramm zum Tagesverbrauch:  
