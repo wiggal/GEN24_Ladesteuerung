@@ -2,6 +2,7 @@ from datetime import datetime
 import requests
 import json
 import FUNCTIONS.functions
+import FUNCTIONS.SQLall
 
 def loadLatestWeatherData():
     api_key = basics.getVarConf('forecast.solar','api_key','str')
@@ -27,6 +28,11 @@ def loadLatestWeatherData():
         if anzahl_strings == 2 and api_pers_plus == 'ja':
             url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
             anzahl_strings = 1
+
+    if api_pers_plus == 'ja' and anzahl_strings == 1:
+        sqlall = FUNCTIONS.SQLall.sqlall()
+        currentDayProduction = sqlall.getSQLcurrentDayProduction()
+        url = url+'?actual=' +currentDayProduction
 
     try:
         try:
