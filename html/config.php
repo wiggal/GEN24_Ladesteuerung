@@ -1,10 +1,4 @@
 <?php
-// Hier die Pythonkonfigs lesen
-if(file_exists("../CONFIG/default_priv.ini")){
-    $python_config = parse_ini_file("../CONFIG/default_priv.ini", true);
-} else {
-    $python_config = parse_ini_file("../CONFIG/default.ini", true);
-}
 $PrognoseFile = "../weatherData.json";
 $PV_Leistung_KWp = 11.4;
 $Faktor_PVLeistung_Prognose = 1.00;
