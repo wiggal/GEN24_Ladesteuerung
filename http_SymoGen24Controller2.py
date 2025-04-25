@@ -83,7 +83,6 @@ if __name__ == '__main__':
                     WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
                     WRSchreibGrenze_nachUnten = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachUnten','eval')
                     FesteLadeleistung = basics.getVarConf('Ladeberechnung','FesteLadeleistung','eval')
-                    Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
                     PV_Reservierung_steuern = basics.getVarConf('Reservierung','PV_Reservierung_steuern','eval')
                     Batterieentlandung_steuern = basics.getVarConf('Entladung','Batterieentlandung_steuern','eval')
                     WREntladeSchreibGrenze_Watt = basics.getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
@@ -578,29 +577,27 @@ if __name__ == '__main__':
 
     
                     # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+                    Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
                     if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
                         Push_Message_Url = basics.getVarConf('messaging','Push_Message_Url','str')
                         apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
                         print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
 
-                    ### LOGGING, Schreibt mit den übergebenen Daten eine CSV- oder SQlite-Datei
+                    ### LOGGING, Schreibt mit den übergebenen Daten SQlite-Datei
                     ## nur wenn "schreiben" oder "logging" übergeben worden ist
                     sqlall = FUNCTIONS.SQLall.sqlall()
-                    Logging_ein = basics.getVarConf('Logging','Logging_ein','eval')
-                    if Logging_ein == 1:
-                        Logging_Schreib_Ausgabe = ""
-                        if ('logging' in Options):
-                            Logging_file = basics.getVarConf('Logging','Logging_file','str')
-                            # In die DB werden die liftime Verbrauchszählerstände gespeichert
-                            sqlall.save_SQLite(Logging_file, API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
-                            API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
-                            Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
-                        else:
-                            Logging_Schreib_Ausgabe = "Logging NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
+                    Logging_Schreib_Ausgabe = ""
+                    if ('logging' in Options):
+                        # In die DB werden die liftime Verbrauchszählerstände gespeichert
+                        sqlall.save_SQLite('PV_Daten.sqlite', API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
+                        API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
+                        Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
+                    else:
+                        Logging_Schreib_Ausgabe = "Logging NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
 
-                        if print_level >= 1:
-                            print(Logging_Schreib_Ausgabe)
+                    if print_level >= 1:
+                        print(Logging_Schreib_Ausgabe)
                     # LOGGING ENDE
 
 
