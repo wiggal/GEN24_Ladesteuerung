@@ -48,11 +48,12 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 ```
 1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
+**ACHTUNG: ab v0.27.3 Prognoseskripte in Verzeichnis FORECAST verschoben!!** 
 **ACHTUNG:** nur den Wetterdienst eintragen, den ihr verwenden wollt.
 ```
-33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh WeatherDataProvider2.py
-8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh Solarprognose_WeatherData.py
-0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh Solcast_WeatherData.py
+33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
+8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
+0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
 ```
 **Crontab.log jeden Montag abräumen**
 ```
