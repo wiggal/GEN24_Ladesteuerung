@@ -1,3 +1,9 @@
+import sys
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
 from datetime import datetime
 import requests
 import json
@@ -115,8 +121,6 @@ if __name__ == '__main__':
                 MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
                 if (MaximalPrognosebegrenzung == 1):
                     data = basics.checkMaxPrognose(data)
-                if (MaximalPrognosebegrenzung == 2):
-                    data = basics.Prognoseoptimierung(data)
                 basics.storeWeatherData(weatherfile, data, now, 'forecast.solar')
                 dateCreated_new = data['messageCreated']
                 print(f'forecast.solar OK: Prognosedaten vom {dateCreated_new} gespeichert.\n')

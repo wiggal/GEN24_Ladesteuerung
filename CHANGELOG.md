@@ -1,3 +1,13 @@
+**[0.27.3] – 2025-XX-XX**  
+
+**Konsolidierung der Wetterdienste**  
+- Prognoseskripte wurden ins Verzeichnis FORECAST/ verschoben, **Crontabs** müssen angepasst werden, z.B.:  
+  `8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py`
+  WeatherDataProvider2.py umbenannt in Forecast_solar__WeatherData.py
+
+- Entfernen der Prognoseoptimierung über sklearn  
+
+
 **[0.27.2] – 2025-04-25**  
 
 **Anpassungen für Firmware 1.36.5-1**
