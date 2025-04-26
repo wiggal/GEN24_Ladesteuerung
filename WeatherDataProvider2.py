@@ -33,6 +33,7 @@ def loadLatestWeatherData():
 
     # resolution auf 60 Minuten und damping an die URL anhängen:
     url = url+'?resolution=60&damping={}'.format(forecastdamping)
+    url2 = url2+'?resolution=60&damping={}'.format(forecastdamping)
 
     # actual nur wenn ein API key vorhanden ist
     if api_key != 'kein' and forecastactual == 'ja':
