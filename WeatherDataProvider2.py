@@ -31,7 +31,8 @@ def loadLatestWeatherData():
             url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2, forecastdamping)
             anzahl_strings = 1
 
-    if forecastactual == "ja":
+    # actual nur wenn ein API key vorhanden ist
+    if api_key != 'kein' and forecastactual == 'ja':
         sqlall = FUNCTIONS.SQLall.sqlall()
         currentDayProduction = sqlall.getSQLcurrentDayProduction('PV_Daten.sqlite')
         url = url+'&actual=' +"{:.1f}".format(currentDayProduction)
