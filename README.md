@@ -12,6 +12,9 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.27.3**
+**ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.
+**Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).
 Ab Version: **0.26.9**  
 Diagramm zur Darstellung der dynamischen Strompreise.  
 Ab Version: **0.26.8**  
@@ -44,7 +47,7 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 ```
 1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
-**ACHTUNG: ab v0.27.3 Prognoseskripte in Verzeichnis FORECAST verschoben!!**  
+**ACHTUNG: ab v0.27.3 Prognoseskripte ins Verzeichnis FORECAST verschoben!!**  
 **ACHTUNG:** nur den Wetterdienst eintragen, den ihr verwenden wollt.
 ```
 33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
@@ -56,7 +59,7 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 0 0 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
 ```
 
-### :sun_behind_rain_cloud: Prognoseskripte in FORCECAST/
+### :sun_behind_rain_cloud: Prognoseskripte in FORECAST/
 
 Holen von den jeweiligen API-Urls die Prognosedaten und bereiten sie auf für GEN24_Ladesteuerung. 
 
