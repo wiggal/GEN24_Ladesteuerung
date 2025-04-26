@@ -34,15 +34,21 @@ def loadLatestWeatherData():
             anzahl_strings = 1
 
     # resolution auf 60 Minuten, horizon und damping an die URL anhängen:
-    url = url+'?resolution=60&horizon={}&damping={}'.format(horizon, forecastdamping)
-    url2 = url2+'?resolution=60&horizon={}&damping={}'.format(horizon2, forecastdamping)
+    if api_pers_plus == 'ja' and basics.getVarConf('pv.strings','anzahl','eval') == 2:
+        # hier gibt es nur noch eine URL zu veraendern
+        url = url+'?resolution=60&horizon1={}&horizon2={}&damping={}'.format(horizon, horizon2, forecastdamping)
+    else:
+        # hier muessen beide URLs angepasst werden
+        url = url+'?resolution=60&horizon={}&damping={}'.format(horizon, forecastdamping)
+        url2 = url2+'?resolution=60&horizon={}&damping={}'.format(horizon2, forecastdamping)
 
     # actual nur wenn ein API key vorhanden ist
+    # Achtung: wenn durch eine Personal Subscription ein API Key vorhanden ist, aber keine Personal _PLUS_ Subscription, kann actual nicht bei beiden Abfragen genutzt werden, sonst verfälscht es die Werte, daher immer nur bei der ersten URL
+    # diese Behandlung deckt auch Personal Plus API Kunden ab, da dann nur noch eine URL aufgerufen wird, url2 wird dort ignoriert
     if api_key != 'kein' and forecastactual == 'ja':
         sqlall = FUNCTIONS.SQLall.sqlall()
         currentDayProduction = sqlall.getSQLcurrentDayProduction('PV_Daten.sqlite')
         url = url+'&actual=' +"{:.1f}".format(currentDayProduction)
-        url2 = url2+'&actual=' +"{:.1f}".format(currentDayProduction)
 
     try:
         try:
