@@ -63,6 +63,16 @@ class sqlall:
 
         return (AC_Produktion, DC_Produktion)
 
+    def getSQLcurrentDayProduction(self, database):
+        verbindung = sqlite3.connect(database)
+        zeiger = verbindung.cursor()
+        sql_anweisung = "SELECT MAX(DC_Produktion)- MIN(DC_Produktion) AS DC_Produktion from pv_daten where Zeitpunkt LIKE '" + self.now.strftime("%Y-%m-%d")+"%';"
+        zeiger.execute(sql_anweisung)
+        row = zeiger.fetchall()
+        currentDayProduction = round(row[0][0]/1000,1)
+
+        return (currentDayProduction)
+
     def getSQLsteuerdaten(self, schluessel):
         verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
         zeiger = verbindung.cursor()
