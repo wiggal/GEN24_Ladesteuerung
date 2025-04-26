@@ -8,9 +8,12 @@ from datetime import datetime
 import requests
 import json
 import FUNCTIONS.functions
+import FUNCTIONS.SQLall
 
 def loadLatestWeatherData():
     api_key = basics.getVarConf('forecast.solar','api_key','str')
+    forecastactual = basics.getVarConf('forecast.solar','forecastactual','str')
+    forecastdamping = basics.getVarConf('forecast.solar','forecastdamping','str')
     api_pers_plus = basics.getVarConf('forecast.solar','api_pers_plus','str')
     lat = basics.getVarConf('forecast.solar','lat','eval')
     lon = basics.getVarConf('forecast.solar','lon','eval')
@@ -33,6 +36,17 @@ def loadLatestWeatherData():
         if anzahl_strings == 2 and api_pers_plus == 'ja':
             url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
             anzahl_strings = 1
+
+    # resolution auf 60 Minuten und damping an die URL anhängen:
+    url = url+'?resolution=60&damping={}'.format(forecastdamping)
+    url2 = url2+'?resolution=60&damping={}'.format(forecastdamping)
+
+    # actual nur wenn ein API key vorhanden ist
+    if api_key != 'kein' and forecastactual == 'ja':
+        sqlall = FUNCTIONS.SQLall.sqlall()
+        currentDayProduction = sqlall.getSQLcurrentDayProduction('PV_Daten.sqlite')
+        url = url+'&actual=' +"{:.1f}".format(currentDayProduction)
+        url2 = url2+'&actual=' +"{:.1f}".format(currentDayProduction)
 
     try:
         try:
@@ -78,9 +92,6 @@ def loadLatestWeatherData():
                 json_data1['result']['watts']=dict_watts
                 json_data1['result']['watt_hours']=dict_watt_hours
 
-        for key in list(json_data1['result']['watts'].keys()):
-            if ':15:00' in key or ':30:00' in key or ':45:00' in key:
-                del json_data1['result']['watts'][key]
         #print(json_data1, "\n")
         return(json_data1)
     except OSError:
