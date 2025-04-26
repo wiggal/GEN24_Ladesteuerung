@@ -9,12 +9,14 @@ def loadLatestWeatherData():
     forecastactual = basics.getVarConf('forecast.solar','forecastactual','str')
     forecastdamping = basics.getVarConf('forecast.solar','forecastdamping','str')
     api_pers_plus = basics.getVarConf('forecast.solar','api_pers_plus','str')
+    horizon = basics.getVarConf('forecast.solar','horizon','eval')
     lat = basics.getVarConf('forecast.solar','lat','eval')
     lon = basics.getVarConf('forecast.solar','lon','eval')
     dec = basics.getVarConf('forecast.solar','dec','eval')
     az = basics.getVarConf('forecast.solar','az','eval')
     kwp = basics.getVarConf('forecast.solar','kwp','eval')
     anzahl_strings = basics.getVarConf('pv.strings','anzahl','eval')
+    horizon2 = basics.getVarConf('forecast.solar2','horizon','eval')
     dec2 = basics.getVarConf('forecast.solar2','dec','eval')
     az2 = basics.getVarConf('forecast.solar2','az','eval')
     kwp2 = basics.getVarConf('forecast.solar2','kwp','eval')
@@ -31,9 +33,9 @@ def loadLatestWeatherData():
             url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
             anzahl_strings = 1
 
-    # resolution auf 60 Minuten und damping an die URL anhängen:
-    url = url+'?resolution=60&damping={}'.format(forecastdamping)
-    url2 = url2+'?resolution=60&damping={}'.format(forecastdamping)
+    # resolution auf 60 Minuten, horizon und damping an die URL anhängen:
+    url = url+'?resolution=60&horizon={}&damping={}'.format(horizon, forecastdamping)
+    url2 = url2+'?resolution=60&horizon={}&damping={}'.format(horizon2, forecastdamping)
 
     # actual nur wenn ein API key vorhanden ist
     if api_key != 'kein' and forecastactual == 'ja':
