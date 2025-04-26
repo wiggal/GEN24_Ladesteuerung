@@ -21,15 +21,18 @@ def loadLatestWeatherData():
 
     # Unterscheidung zwischen Free, Personal und Personal Plus
     url_anfang ='https://api.forecast.solar'
-    url = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec, az, kwp, forecastdamping)
-    url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec2, az2, kwp2, forecastdamping)
+    url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
+    url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
     if api_key != 'kein':
         url_anfang = 'https://api.forecast.solar/'+api_key
-        url = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec, az, kwp, forecastdamping)
-        url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec2, az2, kwp2, forecastdamping)
+        url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
+        url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
         if anzahl_strings == 2 and api_pers_plus == 'ja':
-            url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2, forecastdamping)
+            url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
             anzahl_strings = 1
+
+    # resolution auf 60 Minuten und damping an die URL anhängen:
+    url = url+'?resolution=60&damping={}'.format(forecastdamping)
 
     # actual nur wenn ein API key vorhanden ist
     if api_key != 'kein' and forecastactual == 'ja':
@@ -82,9 +85,6 @@ def loadLatestWeatherData():
                 json_data1['result']['watts']=dict_watts
                 json_data1['result']['watt_hours']=dict_watt_hours
 
-        for key in list(json_data1['result']['watts'].keys()):
-            if ':15:00' in key or ':30:00' in key or ':45:00' in key:
-                del json_data1['result']['watts'][key]
         #print(json_data1, "\n")
         return(json_data1)
     except OSError:
