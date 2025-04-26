@@ -1,6 +1,5 @@
 # Funktionen für die Gen24_Ladesteuerung
 from datetime import datetime
-from datetime import date
 import sqlite3
 import json
     
@@ -67,8 +66,7 @@ class sqlall:
     def getSQLcurrentDayProduction(self, database):
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
-        heute = date.today()
-        sql_anweisung = "SELECT MAX(DC_Produktion)- MIN(DC_Produktion) AS DC_Produktion from pv_daten where Zeitpunkt LIKE '" + heute.strftime("%Y-%m-%d")+"%';"
+        sql_anweisung = "SELECT MAX(DC_Produktion)- MIN(DC_Produktion) AS DC_Produktion from pv_daten where Zeitpunkt LIKE '" + self.now.strftime("%Y-%m-%d")+"%';"
         zeiger.execute(sql_anweisung)
         row = zeiger.fetchall()
         currentDayProduction = round(row[0][0]/1000,1)

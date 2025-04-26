@@ -6,6 +6,8 @@ import FUNCTIONS.SQLall
 
 def loadLatestWeatherData():
     api_key = basics.getVarConf('forecast.solar','api_key','str')
+    forecastactual = basics.getVarConf('forecast.solar','forecastactual','str')
+    forecastdamping = basics.getVarConf('forecast.solar','forecastdamping','str')
     api_pers_plus = basics.getVarConf('forecast.solar','api_pers_plus','str')
     lat = basics.getVarConf('forecast.solar','lat','eval')
     lon = basics.getVarConf('forecast.solar','lon','eval')
@@ -19,20 +21,21 @@ def loadLatestWeatherData():
 
     # Unterscheidung zwischen Free, Personal und Personal Plus
     url_anfang ='https://api.forecast.solar'
-    url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
-    url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
+    url = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec, az, kwp, forecastdamping)
+    url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec2, az2, kwp2, forecastdamping)
     if api_key != 'kein':
         url_anfang = 'https://api.forecast.solar/'+api_key
-        url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
-        url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
+        url = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec, az, kwp, forecastdamping)
+        url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec2, az2, kwp2, forecastdamping)
         if anzahl_strings == 2 and api_pers_plus == 'ja':
-            url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
+            url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}?damping={}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2, forecastdamping)
             anzahl_strings = 1
 
-    if api_pers_plus == 'ja' and anzahl_strings == 1:
+    if forecastactual == "ja":
         sqlall = FUNCTIONS.SQLall.sqlall()
         currentDayProduction = sqlall.getSQLcurrentDayProduction('PV_Daten.sqlite')
-        url = url+'?actual=' +"{:.1f}".format(currentDayProduction)
+        url = url+'&actual=' +"{:.1f}".format(currentDayProduction)
+        url2 = url2+'&actual=' +"{:.1f}".format(currentDayProduction)
 
     try:
         try:
