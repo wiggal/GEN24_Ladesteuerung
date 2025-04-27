@@ -105,7 +105,7 @@ automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann a
 Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
 Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
 Aus der SQLite-Datei `PV_Daten.sqlite` wird dann mit html/8_tab_Diagram.php ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin) erzeugt. 
-![Grafik zur Tagesproduktion](pics/QZ_Tag.png)
+![Grafik zur Quelle/Ziel](pics/QZ_Tag.png)
 
 ## Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
 
