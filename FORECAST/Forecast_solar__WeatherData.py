@@ -59,7 +59,7 @@ def loadLatestWeatherData():
     try:
         try:
             apiResponse = requests.get(url, timeout=52.50)
-	    print("DEBUG Wetter URL: "+url)
+            print("DEBUG Wetter URL: "+url)
             if apiResponse.status_code == 200:
                 json_data1 = dict(json.loads(apiResponse.text))
             else:
@@ -78,7 +78,7 @@ def loadLatestWeatherData():
             try:
                 apiResponse2 = requests.get(url2, timeout=52.50)
                 apiResponse2.raise_for_status()
-		print("DEBUG Wetter URL2: "+url2)
+                print("DEBUG Wetter URL2: "+url2)
                 if apiResponse2.status_code == 200:
                     json_data2 = dict(json.loads(apiResponse2.text))
                 else:
