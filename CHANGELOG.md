@@ -1,4 +1,4 @@
-**[0.27.3] – 2025-XX-XX**  
+**[0.28.0] – 2025-04-27**  
 
 **Konsolidierung der Wetterdienste**  
 - Prognoseskripte wurden ins Verzeichnis FORECAST/ verschoben, **Crontabs** müssen angepasst werden, z.B.:  
