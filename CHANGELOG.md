@@ -7,8 +7,8 @@
 - Entfernen der Prognoseoptimierung über sklearn  
 
 Änderung in Forecast_solar__WeatherData.py  durch @tz8:
-- neue Variablen **forecastactual** und **forecastdamping** in `weather.ini`,
-  dadurch können die entsprechenden Funktionen von forecast.solar genutzt werden.
+- neue Variablen **forecastactual**, **forecastdamping** und **horizon** in `weather.ini`,
+  dadurch können die entsprechenden Funktionen von https://doc.forecast.solar/api genutzt werden.
 
 CONFIG/default.ini:  
 - Block [Logging] entfernt, da nicht mehr nötig. Funktion durch Parameter `logging` gesteuert.  
