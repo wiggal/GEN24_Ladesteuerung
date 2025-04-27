@@ -12,9 +12,9 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
-Ab Version: **0.27.3**
-**ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.
-**Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).
+Ab Version: **0.27.3**  
+**ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.  
+**Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).  
 Ab Version: **0.26.9**  
 Diagramm zur Darstellung der dynamischen Strompreise.  
 Ab Version: **0.26.8**  
