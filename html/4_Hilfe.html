@@ -272,35 +272,65 @@ td {font-size: 160%;
 <td><input type="text" name="Zeile[4][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[5]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[6]" value='' >[forecast.solar]</th></tr>
-<tr><td><input type="hidden" name="Zeile[7][0]" value=''>weatherfile</td>
-<td><input type="text" name="Zeile[7][1]" value="weatherData.json" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[18]" value='' >; Wenn api_key nicht 'kein' ist, wird er für die Prognoseabfrage verwendet.</td></tr>
-<tr><td><input type="hidden" name="Zeile[19][0]" value='api_key = '>api_key</td>
-<td><input type="text" name="Zeile[19][1]" value="kein" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[20]" value='' >; Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können zwei Ausrichtungen in einer Abrfage behandelt werden.</td></tr>
-<tr><td><input type="hidden" name="Zeile[21][0]" value='api_pers_plus = '>api_pers_plus</td>
-<td><input type="text" name="Zeile[21][1]" value="nein" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[8][0]" value=''>lat</td>
-<td><input type="text" name="Zeile[8][1]" value="48.577" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[9][0]" value=''>lon</td>
-<td><input type="text" name="Zeile[9][1]" value="12.732" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[10][0]" value=''>dec</td>
-<td><input type="text" name="Zeile[10][1]" value="30" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[11][0]" value=''>az</td>
-<td><input type="text" name="Zeile[11][1]" value="0" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[12][0]" value=''>kwp</td>
-<td><input type="text" name="Zeile[12][1]" value="11.4" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[13][0]" value=''>dataAgeMaxInMinutes</td>
-<td><input type="text" name="Zeile[13][1]" value="1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[14]" value='' ></td></tr>
-<tr><th colspan="2"><input type="hidden" name="Zeile[15]" value='' >[forecast.solar2]</th></tr>
-<tr><td><input type="hidden" name="Zeile[16][0]" value=''>dec</td>
-<td><input type="text" name="Zeile[16][1]" value="22" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[17][0]" value=''>az</td>
-<td><input type="text" name="Zeile[17][1]" value="135" readonly></td></tr>
-<tr><td><input type="hidden" name="Zeile[18][0]" value=''>kwp</td>
-<td><input type="text" name="Zeile[18][1]" value="4.44" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[19]" value='' ></td></tr>
+
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[15]" value='' >; Daten werden für api.forecast.solar und api.akkudoktor.net verwendet!!</td></tr>
+<tr><td><input type="hidden" name="Zeile[16][0]" value=''>weatherfile</td>
+<td><input type="text" name="Zeile[16][1]" value="weatherData.json" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[17]" value='' >; Wenn api_key nicht 'kein' ist, wird er für die Prognoseabfrage verwendet.</td></tr>
+<tr><td><input type="hidden" name="Zeile[18][0]" value='api_key = '>api_key</td>
+<td><input type="text" name="Zeile[18][1]" value="kein" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; wenn ein API key vorhanden ist, koennen die Forecasts mit aktuellen Ertragswerten des Tages (aus der DB) verbessert werden.</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[20]" value='' >; "ja" nutzt diese Funktion der API, "nein" nicht.</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[21]" value='' >; Siehe https://doc.forecast.solar/actual</td></tr>
+<tr><td><input type="hidden" name="Zeile[22][0]" value='forecastactual = '>forecastactual</td>
+<td><input type="text" name="Zeile[22][1]" value="nein" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[23]" value='' >; wenn "damping" eingesetzt werden soll, hier die entsprechenden Werte einstellen. "0,0" ist Standardwert (kein Damping)</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[24]" value='' >; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas damping am Morgen, hohes Damping am nachmittag.</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[25]" value='' >; beide Werte müssen zwischen 0 und 1 sein</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[26]" value='' >; Siehe https://doc.forecast.solar/damping</td></tr>
+<tr><td><input type="hidden" name="Zeile[27][0]" value='forecastdamping = '>forecastdamping</td>
+<td><input type="text" name="Zeile[27][1]" value="0,0" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[28]" value='' >; Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können zwei Ausrichtungen in einer Abrfage behandelt werden.</td></tr>
+<tr><td><input type="hidden" name="Zeile[29][0]" value='api_pers_plus = '>api_pers_plus</td>
+<td><input type="text" name="Zeile[29][1]" value="nein" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[30]" value='' >; lat und lon sind die Positionsdaten der Anlage bzw. des Strings. Nutze https://www.suncalc.org/ oder andere Tools zur Identifikation</td></tr>
+<tr><td><input type="hidden" name="Zeile[31][0]" value='lat = '>lat</td>
+<td><input type="text" name="Zeile[31][1]" value="44.444" readonly></td></tr>
+<tr><td><input type="hidden" name="Zeile[32][0]" value='lon = '>lon</td>
+<td><input type="text" name="Zeile[32][1]" value="11.111" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[33]" value='' >; horizon gibt mögliche Verschattungen pro String an:</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[34]" value='' >; die 12 Zahlen werden in Grad angegeben und repräsentieren im Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den Horizont</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[35]" value='' >; siehe https://doc.forecast.solar/horizon</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[36]" value='' >; wenn zum Beipiel im Südwesten ein großer Baum Schatten wirft:</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[37]" value='' >; 0,0,0,0,0,0,0,20,45,20,0,0</td></tr>
+<tr><td><input type="hidden" name="Zeile[38][0]" value='horizon = '>horizon</td>
+<td><input type="text" name="Zeile[38][1]" value="0,0,0,0,0,0,0,0,0,0,0,0" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[39]" value='' >; dec ist der Winkel, in dem die Module verbaut sind, wobei 0 waagerecht liegen und 90 senkrecht stehend bedeutet</td></tr>
+<tr><td><input type="hidden" name="Zeile[40][0]" value='dec = '>dec</td>
+<td><input type="text" name="Zeile[40][1]" value="30" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[41]" value='' >; az ist der Azimuth der Anlage, also in welche Himmelsrichtung die Module ausgerichtet. -180 und 180 = Norden, -90 = Osten, 0 = Sueden, 90 = Westen</td></tr>
+<tr><td><input type="hidden" name="Zeile[42][0]" value='az = '>az</td>
+<td><input type="text" name="Zeile[42][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[43]" value='' >; kwp ist installierte Leistung der Module in kWp</td></tr>
+<tr><td><input type="hidden" name="Zeile[44][0]" value='kwp = '>kwp</td>
+<td><input type="text" name="Zeile[44][1]" value="11.4" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[45]" value='' >; Wert in Minuten, bis bisherige Daten ihre Gültigkeit verlieren und neue von der API abgerufen werden sollen</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[46]" value='' >; aktuell gueltige Werte fuer die Anzahl an API Aufrufen pro 60 Minuten findet man unter https://doc.forecast.solar/account_models</td></tr>
+<tr><td><input type="hidden" name="Zeile[47][0]" value='dataAgeMaxInMinutes = '>dataAgeMaxInMinutes</td>
+<td><input type="text" name="Zeile[47][1]" value="1000" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[48]" value='' ></td></tr>
+<tr><th colspan="2"><input type="hidden" name="Zeile[49]" value='[forecast.solar2]' >[forecast.solar2]</th></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[50]" value='' >; hier die Werte des zweiten Strings angeben, wenn vorhanden</td></tr>
+<tr><td><input type="hidden" name="Zeile[51][0]" value='horizon = '>horizon</td>
+<td><input type="text" name="Zeile[51][1]" value="0,0,0,0,0,0,0,0,0,0,0,0" readonly></td></tr>
+<tr><td><input type="hidden" name="Zeile[52][0]" value='dec = '>dec</td>
+<td><input type="text" name="Zeile[52][1]" value="22" readonly></td></tr>
+<tr><td><input type="hidden" name="Zeile[53][0]" value='az = '>az</td>
+<td><input type="text" name="Zeile[53][1]" value="135" readonly></td></tr>
+<tr><td><input type="hidden" name="Zeile[54][0]" value='kwp = '>kwp</td>
+<td><input type="text" name="Zeile[54][1]" value="4.44" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[55]" value='' ></td></tr>
+
 <tr><th colspan="2"><input type="hidden" name="Zeile[20]" value='' >[solarprognose]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[21]" value='' >; Hier die Werte eintragen, wenn die Prognose mit Solarprognose_WeatherData.py von http://www.solarprognose.de geholt werden soll</td></tr>
 <tr><td><input type="hidden" name="Zeile[22][0]" value=''>weatherfile</td>
