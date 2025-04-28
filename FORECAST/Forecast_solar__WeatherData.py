@@ -111,7 +111,7 @@ def loadLatestWeatherData():
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'weather'])
-    dataAgeMaxInMinutes = basics.getVarConf('env','dataAgeMaxInMinutes','eval')
+    dataAgeMaxInMinutes = basics.getVarConf('forecast.solar','dataAgeMaxInMinutes','eval')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    

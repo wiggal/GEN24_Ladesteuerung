@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # Benoetigte Variablen definieren und prüfen
     id = basics.getVarConf('solarprognose', 'id', 'eval')
     KW_Faktor = basics.getVarConf('solarprognose', 'KW_Faktor', 'eval')
-    dataAgeMaxInMinutes = basics.getVarConf('env', 'dataAgeMaxInMinutes', 'eval')
+    dataAgeMaxInMinutes = basics.getVarConf('solarprognose', 'dataAgeMaxInMinutes', 'eval')
     WaitSec = basics.getVarConf('solarprognose', 'WaitSec', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     accesstoken = basics.getVarConf('solarprognose', 'accesstoken', 'str')
