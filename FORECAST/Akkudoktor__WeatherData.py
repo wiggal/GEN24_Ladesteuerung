@@ -1,7 +1,11 @@
+# skript von @tz8
+import time
 import sys
 import os
 
 # TODO: timezone vom system holen
+timezone_name = time.tzname
+print("Zeitzonen-Name:", timezone_name)
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
