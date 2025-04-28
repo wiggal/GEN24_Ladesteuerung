@@ -42,7 +42,7 @@ def loadLatestWeatherData():
         az2 = 1
 
     # Unterscheidung zwischen Free, Personal und Personal Plus
-    url_anfang ='https://api.akkudoktor.solar'
+    url_anfang ='https://api.akkudoktor.net'
     url = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp, az, dec, cellco, albedo, powerInv, inverterEff, horizon)
     url2 = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp2, az2, dec2, cellco2, albedo2, powerInv2, inverterEff, horizon2)
 
