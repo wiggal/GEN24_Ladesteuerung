@@ -1,9 +1,6 @@
 import sys
 import os
 
-# TODO: timezone vom system holen
-
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
@@ -14,25 +11,25 @@ import FUNCTIONS.functions
 import FUNCTIONS.SQLall
 
 def loadLatestWeatherData():
-    horizon = basics.getVarConf('akkudoktor','horizon','str')
-    lat = basics.getVarConf('akkudoktor','lat','eval')
-    lon = basics.getVarConf('akkudoktor','lon','eval')
-    dec = basics.getVarConf('akkudoktor','dec','eval')
-    az = basics.getVarConf('akkudoktor','az','eval')
-    wp = basics.getVarConf('akkudoktor','wp','eval')
+    horizon = basics.getVarConf('pv.strings','horizon','str')
+    lat = basics.getVarConf('pv.strings','lat','eval')
+    lon = basics.getVarConf('pv.strings','lon','eval')
+    dec = basics.getVarConf('pv.strings','dec','eval')
+    az = basics.getVarConf('pv.strings','az','eval')
+    wp = basics.getVarConf('pv.strings','wp','eval')
     cellco = basics.getVarConf('akkudoktor','cellco','eval')
     albedo = basics.getVarConf('akkudoktor','albedo','eval')
     powerInv = basics.getVarConf('akkudoktor','powerInverter','eval')
     inverterEff = basics.getVarConf('akkudoktor','inverterEfficiency','eval')
     anzahl_strings = basics.getVarConf('pv.strings','anzahl','eval')
     # Werte für zweiten String
-    horizon2 = basics.getVarConf('akkudoktor2','horizon','str')
-    dec2 = basics.getVarConf('akkudoktor2','dec','eval')
-    az2 = basics.getVarConf('akkudoktor2','az','eval')
-    wp2 = basics.getVarConf('akkudoktor2','wp','eval')
-    cellco2 = basics.getVarConf('akkudoktor2','cellco','eval')
-    albedo2 = basics.getVarConf('akkudoktor2','albedo','eval')
-    powerInv2 = basics.getVarConf('akkudoktor2','powerInverter','eval')
+    horizon2 = basics.getVarConf('pv.strings','horizon','str')
+    dec2 = basics.getVarConf('pv.strings','dec','eval')
+    az2 = basics.getVarConf('pv.strings','az','eval')
+    wp2 = basics.getVarConf('pv.strings','wp','eval')
+    cellco2 = basics.getVarConf('akkudoktor','cellco2','eval')
+    albedo2 = basics.getVarConf('akkudoktor','albedo2','eval')
+    powerInv2 = basics.getVarConf('akkudoktor','powerInverter2','eval')
 
     # Fehler wenn az oder az2 auf 0 gleich Sueden stehen, siehe https://github.com/nick81nrw/solApi/pull/5
     if az == 0:
@@ -110,12 +107,12 @@ def loadLatestWeatherData():
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'weather'])
-    dataAgeMaxInMinutes = basics.getVarConf('akkudoktor','dataAgeMaxInMinutes','eval')
+    dataAgeMaxInMinutes = basics.getVarConf('env','dataAgeMaxInMinutes','eval')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
-    weatherfile = basics.getVarConf('akkudoktor','weatherfile','str')
+    weatherfile = basics.getVarConf('env','weatherfile','str')
     data = basics.loadWeatherData(weatherfile)
     dataIsExpired = True
     if (data):
@@ -147,5 +144,3 @@ if __name__ == '__main__':
         else:
             print("Fehler bei Datenanforderung api.akkudoktor.net:")
             print(data)
-
-    
