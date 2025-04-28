@@ -14,16 +14,12 @@ import FUNCTIONS.functions
 import FUNCTIONS.SQLall
 
 def loadLatestWeatherData():
-    api_key = basics.getVarConf('akkudoktor','api_key','str')
-    forecastactual = basics.getVarConf('akkudoktor','forecastactual','str')
-    forecastdamping = basics.getVarConf('akkudoktor','forecastdamping','str')
-    api_pers_plus = basics.getVarConf('akkudoktor','api_pers_plus','str')
     horizon = basics.getVarConf('akkudoktor','horizon','str')
     lat = basics.getVarConf('akkudoktor','lat','eval')
     lon = basics.getVarConf('akkudoktor','lon','eval')
     dec = basics.getVarConf('akkudoktor','dec','eval')
     az = basics.getVarConf('akkudoktor','az','eval')
-    kwp = basics.getVarConf('akkudoktor','kwp','eval')
+    wp = basics.getVarConf('akkudoktor','wp','eval')
     cellco = basics.getVarConf('akkudoktor','cellco','eval')
     albedo = basics.getVarConf('akkudoktor','albedo','eval')
     powerInv = basics.getVarConf('akkudoktor','powerInverter','eval')
@@ -33,7 +29,7 @@ def loadLatestWeatherData():
     horizon2 = basics.getVarConf('akkudoktor2','horizon','str')
     dec2 = basics.getVarConf('akkudoktor2','dec','eval')
     az2 = basics.getVarConf('akkudoktor2','az','eval')
-    kwp2 = basics.getVarConf('akkudoktor2','kwp','eval')
+    wp2 = basics.getVarConf('akkudoktor2','wp','eval')
     cellco2 = basics.getVarConf('akkudoktor2','cellco','eval')
     albedo2 = basics.getVarConf('akkudoktor2','albedo','eval')
     powerInv2 = basics.getVarConf('akkudoktor2','powerInverter','eval')
@@ -47,8 +43,8 @@ def loadLatestWeatherData():
 
     # Unterscheidung zwischen Free, Personal und Personal Plus
     url_anfang ='https://api.akkudoktor.solar'
-    url = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, kwp, az, dec, cellco, albedo, powerInv, inverterEff, horizon)
-    url2 = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, kwp2, az2, dec2, cellco2, albedo2, powerInv2, inverterEff, horizon2)
+    url = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp, az, dec, cellco, albedo, powerInv, inverterEff, horizon)
+    url2 = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp2, az2, dec2, cellco2, albedo2, powerInv2, inverterEff, horizon2)
 
     try:
         try:
@@ -88,7 +84,7 @@ def loadLatestWeatherData():
 		
         for stunden in pvdaten['values']:
             for stunde in stunden:
-                valueDate = datetime.datetime.strptime(stunde['datetime'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                valueDate = datetime.strptime(stunde['datetime'], "%Y-%m-%dT%H:%M:%S.%f%z")
                 valuePower2 = 0
                 if anzahl_strings == 2:
                     for stunden2 in pvdaten2['values']:
@@ -102,8 +98,6 @@ def loadLatestWeatherData():
                     forecastData['result']['watts'][valueDate.strftime("%Y-%m-%d %H:%M:%S")] = valuePower
 
         # Metadaten hinzufuegen
-        #      "messageCreated": "2025-04-27 20:30:01",
-        #      "createdfrom": "forecast.solar"
         datumCreated = datetime.datetime.strptime(apiResponse.headers['date'], "%a, %d %b %Y %H:%M:%S GMT")
         forecastData["messageCreated"] = datumCreated.strftime("%Y-%m-%d %H:%M:%S")
         forecastData["createdfrom"] = "api.akkudoktor.net"
