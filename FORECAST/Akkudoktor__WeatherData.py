@@ -4,8 +4,6 @@ import sys
 import os
 
 # TODO: timezone vom system holen
-timezone_name = time.tzname
-print("Zeitzonen-Name:", timezone_name)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -101,7 +99,7 @@ def loadLatestWeatherData():
                     forecastData['result']['watts'][valueDate.strftime("%Y-%m-%d %H:%M:%S")] = valuePower
 
         # Metadaten hinzufuegen
-        datumCreated = datetime.datetime.strptime(apiResponse.headers['date'], "%a, %d %b %Y %H:%M:%S GMT")
+        datumCreated = datetime.strptime(apiResponse.headers['date'], "%a, %d %b %Y %H:%M:%S GMT")
         forecastData["messageCreated"] = datumCreated.strftime("%Y-%m-%d %H:%M:%S")
         forecastData["createdfrom"] = "api.akkudoktor.net"
 
@@ -113,7 +111,7 @@ def loadLatestWeatherData():
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'weather'])
-    dataAgeMaxInMinutes = basics.getVarConf('env','dataAgeMaxInMinutes','eval')
+    dataAgeMaxInMinutes = basics.getVarConf('akkudoktor','dataAgeMaxInMinutes','eval')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    

@@ -139,15 +139,15 @@ if __name__ == '__main__':
     config = basics.loadConfig(['default', 'weather'])
     # Benoetigte Variablen definieren und prüfen
     Strings = basics.getVarConf('pv.strings', 'anzahl', 'eval')
-    dataAgeMaxInMinutes = basics.getVarConf('env', 'dataAgeMaxInMinutes', 'eval')
+    dataAgeMaxInMinutes = basics.getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
     Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
     no_history = basics.getVarConf('solcast.com', 'no_history', 'eval')
-    KW_Faktor = basics.getVarConf('solcast.com2', 'KW_Faktor', 'eval')
-    KW_Faktor2 = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
+    KW_Faktor = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
+    KW_Faktor2 = basics.getVarConf('solcast.com', 'KW_Faktor2', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     api_key = basics.getVarConf('solcast.com', 'api_key', 'str')
     resource_id = basics.getVarConf('solcast.com', 'resource_id', 'str')
-    resource_id2 = basics.getVarConf('solcast.com2', 'resource_id', 'str')
+    resource_id2 = basics.getVarConf('solcast.com', 'resource_id2', 'str')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
