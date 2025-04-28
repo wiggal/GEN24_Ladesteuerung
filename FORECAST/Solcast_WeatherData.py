@@ -139,7 +139,7 @@ if __name__ == '__main__':
     config = basics.loadConfig(['default', 'weather'])
     # Benoetigte Variablen definieren und prüfen
     Strings = basics.getVarConf('pv.strings', 'anzahl', 'eval')
-    dataAgeMaxInMinutes = basics.getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
+    dataAgeMaxInMinutes = basics.getVarConf('env', 'dataAgeMaxInMinutes', 'eval')
     Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
     no_history = basics.getVarConf('solcast.com', 'no_history', 'eval')
     KW_Faktor = basics.getVarConf('solcast.com2', 'KW_Faktor', 'eval')

@@ -15,17 +15,17 @@ def loadLatestWeatherData():
     forecastactual = basics.getVarConf('forecast.solar','forecastactual','str')
     forecastdamping = basics.getVarConf('forecast.solar','forecastdamping','str')
     api_pers_plus = basics.getVarConf('forecast.solar','api_pers_plus','str')
-    horizon = basics.getVarConf('forecast.solar','horizon','str')
-    lat = basics.getVarConf('forecast.solar','lat','eval')
-    lon = basics.getVarConf('forecast.solar','lon','eval')
-    dec = basics.getVarConf('forecast.solar','dec','eval')
-    az = basics.getVarConf('forecast.solar','az','eval')
-    kwp = basics.getVarConf('forecast.solar','kwp','eval')
+    horizon = basics.getVarConf('pv.strings','horizon','str')
+    lat = basics.getVarConf('pv.strings','lat','eval')
+    lon = basics.getVarConf('pv.strings','lon','eval')
+    dec = basics.getVarConf('pv.strings','dec','eval')
+    az = basics.getVarConf('pv.strings','az','eval')
+    kwp = basics.getVarConf('pv.strings','wp','eval') / 1000
     anzahl_strings = basics.getVarConf('pv.strings','anzahl','eval')
-    horizon2 = basics.getVarConf('forecast.solar2','horizon','str')
-    dec2 = basics.getVarConf('forecast.solar2','dec','eval')
-    az2 = basics.getVarConf('forecast.solar2','az','eval')
-    kwp2 = basics.getVarConf('forecast.solar2','kwp','eval')
+    horizon2 = basics.getVarConf('pv.strings','horizon2','str')
+    dec2 = basics.getVarConf('pv.strings','dec2','eval')
+    az2 = basics.getVarConf('pv.strings','az2','eval')
+    kwp2 = basics.getVarConf('pv.strings','wp2','eval') / 1000
 
     # Unterscheidung zwischen Free, Personal und Personal Plus
     url_anfang ='https://api.forecast.solar'
@@ -111,7 +111,7 @@ def loadLatestWeatherData():
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'weather'])
-    dataAgeMaxInMinutes = basics.getVarConf('forecast.solar','dataAgeMaxInMinutes','eval')
+    dataAgeMaxInMinutes = basics.getVarConf('env','dataAgeMaxInMinutes','eval')
     
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
@@ -148,5 +148,3 @@ if __name__ == '__main__':
         else:
             print("Fehler bei Datenanforderung api.forecast.solar:")
             print(data)
-
-    
