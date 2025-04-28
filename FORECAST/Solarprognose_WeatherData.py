@@ -39,7 +39,7 @@ if __name__ == '__main__':
     KW_Faktor = basics.getVarConf('solarprognose', 'KW_Faktor', 'eval')
     dataAgeMaxInMinutes = basics.getVarConf('solarprognose', 'dataAgeMaxInMinutes', 'eval')
     WaitSec = basics.getVarConf('solarprognose', 'WaitSec', 'eval')
-    weatherfile = basics.getVarConf('solarprognose', 'weatherfile', 'str')
+    weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     accesstoken = basics.getVarConf('solarprognose', 'accesstoken', 'str')
     item = basics.getVarConf('solarprognose', 'item', 'str')
     type = basics.getVarConf('solarprognose', 'type', 'str')

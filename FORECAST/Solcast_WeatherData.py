@@ -144,7 +144,7 @@ if __name__ == '__main__':
     no_history = basics.getVarConf('solcast.com', 'no_history', 'eval')
     KW_Faktor = basics.getVarConf('solcast.com2', 'KW_Faktor', 'eval')
     KW_Faktor2 = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
-    weatherfile = basics.getVarConf('solcast.com', 'weatherfile', 'str')
+    weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     api_key = basics.getVarConf('solcast.com', 'api_key', 'str')
     resource_id = basics.getVarConf('solcast.com', 'resource_id', 'str')
     resource_id2 = basics.getVarConf('solcast.com2', 'resource_id', 'str')

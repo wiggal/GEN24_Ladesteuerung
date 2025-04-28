@@ -116,7 +116,7 @@ if __name__ == '__main__':
     format = "%Y-%m-%d %H:%M:%S"    
     now = datetime.now()    
     
-    weatherfile = basics.getVarConf('forecast.solar','weatherfile','str')
+    weatherfile = basics.getVarConf('env','filePathWeatherData','str')
     data = basics.loadWeatherData(weatherfile)
     dataIsExpired = True
     if (data):
