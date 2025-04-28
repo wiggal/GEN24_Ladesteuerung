@@ -1,3 +1,14 @@
+**[0.28.1] – 2025-XX-XX**  
+
+**NEU** Prognoseskript FORECAST/Akkudoktor__WeatherData.py
+die API unterstützt neue Eigenschaften:
+- Horizont / Verschattung mit prozentualer Transparenz
+- Albedo (reflektierende Oberfläche)
+- Wechselrichter Effizienz
+- Modul Effizienz
+
+**ACHTUNG** Umfangreiche Änderungen in `CONFIG/weather.ini` bitte in `CONFIG/weather_priv.ini' einarbeiten!!
+
 **[0.28.0] – 2025-04-27**  
 
 **Konsolidierung der Wetterdienste**  
