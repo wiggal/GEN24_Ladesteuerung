@@ -131,6 +131,11 @@ input.slider {
   font-size:120%;
   color: #000000;
 }
+.prognosevon{
+  position: fixed;
+  top: 8px;
+  left: 0px;
+}
 
   </style>
  </head>
@@ -148,6 +153,9 @@ if(file_exists("config_priv.php")){
   include "config_priv.php";
 }
 $Prognose = json_decode(file_get_contents($PrognoseFile), true);
+$date = new DateTime($Prognose['messageCreated']);
+$erzeugt_um = $date->format('d.m \u\m H:i');
+echo "<div class=\"prognosevon\">$Prognose[createdfrom] $erzeugt_um</div>"; 
 include 'SQL_steuerfunctions.php';
 $EV_Reservierung = getSteuercodes('Reservierung');
 
@@ -280,8 +288,6 @@ echo "</tbody></table>\n";
 ?>
    <br />
   </div>
-
-<?php echo "<br />Prognose von $Prognose[messageCreated] by $Prognose[createdfrom]"; ?> 
 <script>
 
 /* Lesen und speichern der Daten */
