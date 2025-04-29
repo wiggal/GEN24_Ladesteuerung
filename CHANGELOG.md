@@ -1,4 +1,4 @@
-**[0.28.1] – 2025-XX-XX**  
+**[0.28.1] – 2025-04-29**  
 
 **NEU** Prognoseskript FORECAST/Akkudoktor__WeatherData.py von @tz8:
 die API unterstützt neue Eigenschaften:

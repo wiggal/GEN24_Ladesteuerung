@@ -18,12 +18,6 @@ Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net
 Ab Version: **0.28.0**  
 **ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.  
 **Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).  
-Ab Version: **0.26.9**  
-Diagramm zur Darstellung der dynamischen Strompreise.  
-Ab Version: **0.26.8**  
-Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
-Ab Version: **0.26.1**  
-Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
 ![new](pics/new2.png)  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
@@ -151,6 +145,12 @@ Eine [Beschreibung](GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddateie
 ----------
 
 **News History:**  
+Ab Version: **0.26.9**  
+Diagramm zur Darstellung der dynamischen Strompreise.  
+Ab Version: **0.26.8**  
+Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
+Ab Version: **0.26.1**  
+Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
 Ab Version: **0.25.1**  
 Prognosebegrenzung auf Höchstwerte der historischen Produktion.  
 Ab Version: **0.25.0**  
