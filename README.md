@@ -12,6 +12,9 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.28.1**  
+Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/  
+**ACHTUNG:** Umfangreiche Änderungen in CONFIG/weather_priv.ini nötig!!  
 Ab Version: **0.28.0**  
 **ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.  
 **Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).  
