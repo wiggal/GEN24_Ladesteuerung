@@ -154,7 +154,7 @@ if(file_exists("config_priv.php")){
 }
 $Prognose = json_decode(file_get_contents($PrognoseFile), true);
 $date = new DateTime($Prognose['messageCreated']);
-$erzeugt_um = $date->format('d.m \u\m H:i');
+$erzeugt_um = $date->format('d.m. \u\m H:i');
 echo "<div class=\"prognosevon\">$Prognose[createdfrom] $erzeugt_um</div>"; 
 include 'SQL_steuerfunctions.php';
 $EV_Reservierung = getSteuercodes('Reservierung');

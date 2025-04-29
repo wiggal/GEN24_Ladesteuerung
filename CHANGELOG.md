@@ -1,6 +1,6 @@
 **[0.28.1] – 2025-XX-XX**  
 
-**NEU** Prognoseskript FORECAST/Akkudoktor__WeatherData.py
+**NEU** Prognoseskript FORECAST/Akkudoktor__WeatherData.py von @tz8:
 die API unterstützt neue Eigenschaften:
 - Horizont / Verschattung mit prozentualer Transparenz
 - Albedo (reflektierende Oberfläche)
