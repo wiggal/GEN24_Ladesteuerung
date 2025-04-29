@@ -13,7 +13,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 
 ![new](pics/new.png)  
 Ab Version: **0.28.1**  
-Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/  
+Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/ von @tz8  
 **ACHTUNG:** Umfangreiche Änderungen in CONFIG/weather_priv.ini nötig!!  
 Ab Version: **0.28.0**  
 **ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.  
