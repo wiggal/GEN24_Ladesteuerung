@@ -1,3 +1,7 @@
+**[0.28.2] – 2025-04-30**  
+
+- Quick fix: 2. string bei Akkudoktor las falsche Config Werte  
+
 **[0.28.1] – 2025-04-29**  
 
 **NEU** Prognoseskript FORECAST/Akkudoktor__WeatherData.py von @tz8:
@@ -7,7 +11,7 @@ die API unterstützt neue Eigenschaften:
 - Wechselrichter Effizienz
 - Modul Effizienz
 
-**ACHTUNG** Umfangreiche Änderungen in `CONFIG/weather.ini` bitte in `CONFIG/weather_priv.ini' einarbeiten!!
+**ACHTUNG** Umfangreiche Änderungen in `CONFIG/weather.ini` bitte in `CONFIG/weather_priv.ini` einarbeiten!!
 
 **[0.28.0] – 2025-04-27**  
 
