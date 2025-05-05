@@ -84,7 +84,7 @@ class basics:
             return return_var
     
     def checkMaxPrognose(self, data):
-        database = self.getVarConf('Logging','Logging_file','str')
+        database = 'PV_Daten.sqlite'
         print_level = self.getVarConf('env','print_level','eval')
         MaxProGrenz_Faktor = self.getVarConf('env','MaxProGrenz_Faktor','eval')
         MaxProGrenz_Dayback = self.getVarConf('env','MaxProGrenz_Dayback','eval') * -1
