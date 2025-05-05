@@ -1,3 +1,7 @@
+**[0.28.3] – 2025-05-05**  
+
+- Quick FIX: Fehler in Prognoseskripten wenn MaximalPrognosebegrenzung = 1
+
 **[0.28.2] – 2025-04-30**  
 
 - Quick fix: 2. string bei Akkudoktor las falsche Config Werte  
