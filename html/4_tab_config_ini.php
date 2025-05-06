@@ -74,7 +74,7 @@ td {font-size: 160%;
   <div class="hilfe"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
 <div class="version" align="center">
 <br>
-<b>  GEN24_Ladesteuerung Version: 0.28.3 </b>
+<b>  GEN24_Ladesteuerung Version: 0.28.4 </b>
 </div>
 <?php
 include "config.php";
