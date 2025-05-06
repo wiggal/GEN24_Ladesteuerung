@@ -1,3 +1,7 @@
+**[0.28.4] – 2025-XX-XX**  
+
+FIX: Fehler in getSQLlastProduktion  bei leerer PV_Daten.sqlite
+
 **[0.28.3] – 2025-05-05**  
 
 - Quick FIX: Fehler in Prognoseskripten wenn MaximalPrognosebegrenzung = 1
