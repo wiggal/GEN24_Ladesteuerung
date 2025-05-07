@@ -1,3 +1,7 @@
+**[0.28.5] – 2025-XX-XX**  
+
+LadeStrg: Wochentagkürzel hinzugefügt
+
 **[0.28.4] – 2025-05-07**  
 
 FIX: Fehler in getSQLlastProduktion  bei leerer PV_Daten.sqlite, wenn api_key gesetzt und forecastactual = ja.  
