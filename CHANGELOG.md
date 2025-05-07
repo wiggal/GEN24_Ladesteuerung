@@ -1,6 +1,6 @@
 **[0.28.4] – 2025-05-07**  
 
-FIX: Fehler in getSQLlastProduktion  bei leerer PV_Daten.sqlite
+FIX: Fehler in getSQLlastProduktion  bei leerer PV_Daten.sqlite, wenn api_key gesetzt und forecastactual = ja.  
      Dadurch startet der Dockercontainer nicht, wenn die PV_Daten.sqlite leer ist.
 
 **[0.28.3] – 2025-05-05**  
