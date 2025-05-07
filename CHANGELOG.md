@@ -1,6 +1,7 @@
-**[0.28.4] – 2025-XX-XX**  
+**[0.28.4] – 2025-05-07**  
 
 FIX: Fehler in getSQLlastProduktion  bei leerer PV_Daten.sqlite
+     Dadurch startet der Dockercontainer nicht, wenn die PV_Daten.sqlite leer ist.
 
 **[0.28.3] – 2025-05-05**  
 
