@@ -1,6 +1,7 @@
 **[0.28.5] – 2025-XX-XX**  
 
-LadeStrg: Wochentagkürzel hinzugefügt
+LadeStrg: Wochentagkürzel hinzugefügt  
+Eigenverbrauchs-Optimierung: Genauigkeit am Morgen verbessert  
 
 **[0.28.4] – 2025-05-07**  
 

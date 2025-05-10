@@ -478,7 +478,7 @@ if __name__ == '__main__':
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
                         # wegen Hysterse +5
                         if (BattStatusProz <= MindBattLad + 5) and Akt_Std < 12:
-                            Dauer_Nacht_Std = 2
+                            Dauer_Nacht_Std = 1
                             aktuellePVProduktion_tmp = 0
                         if (BattStatusProz <= MindBattLad):
                             Eigen_Opt_Std_neu = 0
@@ -487,7 +487,7 @@ if __name__ == '__main__':
                         if (Eigen_Opt_Std_neu == 0):
                             HYB_EM_MODE = 0
 
-                        if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
+                        if (Dauer_Nacht_Std >= 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
                                 print("## Eigenverbrauchs-Optimierung ##")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")
