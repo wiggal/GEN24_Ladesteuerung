@@ -266,10 +266,14 @@ $Res_Feld2_Watt_Sum = 0;
 }
 
 $Tag_vor_Schl = $Tag_akt_Schl;
+# Wochentag in Deutsch ausgeben
+$wochentage = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+$timestamp = strtotime($date);
+$tagIndex = date('w', $timestamp); // 0 (So) bis 6 (Sa)
 
-echo '<tr><td style="white-space: nowrap;" bgcolor='.$Hintergrund_Tag.' class="Tag_Zeit_lesbar" contenteditable="false">';
-echo date('d.m. H:i',strtotime($date));
-echo '<td style="white-space: nowrap; display:none" class="Tag_Zeit" contenteditable="false">';
+echo '<tr><td style="white-space: nowrap; text-align: left;" bgcolor='.$Hintergrund_Tag.' class="Tag_Zeit_lesbar" contenteditable="false">';
+echo $wochentage[$tagIndex] . ' ' . date('d.m. H:i', $timestamp);
+echo '</td><td style="white-space: nowrap; display:none" class="Tag_Zeit" contenteditable="false">';
 echo $date;
 echo '</td><td style="background: linear-gradient(90deg,  #ff5733 '.$ProgProzent.'%, '.$Hintergrund_Tag.' 0%)" class="Prognose" contenteditable="false">';
 echo $Prognosewert;
