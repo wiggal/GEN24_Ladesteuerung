@@ -290,11 +290,12 @@ class progladewert:
         while i < 24:
             # ab aktueller Stunde die nächsten 24 Stunden aufaddieren, da ab 24 Uhr sonst keine Morgenprognose
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
+            akt_Std_Ende_Nacht = datetime.strftime(self.now + timedelta(hours=i-1), "%Y-%m-%d %H:00:00")
             Prognose_Summe += self.getPrognose(Std_morgen)[0]
             # Wenn Prognosesumme > 50W, dann beginnt die Produktion am nächsten TAG,
             # da erst Abends gestartet wird (Produktion < 10W)
             if Prognose_Summe > MaxEinspeisung and Ende_Nacht_Std == 0:
-                Ende_Nacht_Std = Std_morgen
+                Ende_Nacht_Std = akt_Std_Ende_Nacht
             i  += 1
         return(Prognose_Summe, Ende_Nacht_Std)
         
@@ -314,7 +315,7 @@ class progladewert:
         if Ende_Nacht_Std == 0 : Ende_Nacht_Std = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
         Dauer_Nacht = (datetime.strptime(Ende_Nacht_Std, '%Y-%m-%d %H:%M:%S') - (self.now  - timedelta(hours=1)))
         Dauer_Nacht_Std = Dauer_Nacht.total_seconds()/3600
-        if Dauer_Nacht_Std <= 0: Dauer_Nacht_Std = 1 # sonst Divison durch Null 
+        if Dauer_Nacht_Std <= 0: Dauer_Nacht_Std = 0.1 # sonst Divison durch Null 
         Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - (Dauer_Nacht_Std * GrundlastNacht)
         Eigen_Opt_Std_neu = int(Akku_Rest_Watt/Dauer_Nacht_Std)
         # Schaltverzögerung (hysterese)
@@ -334,7 +335,7 @@ class progladewert:
         if (PrognoseMorgen < PrognoseGrenzeMorgen and PrognoseMorgen != 0):
             Eigen_Opt_Std_neu = 0
         # In der letzten Stunde vor dem Morgengrauen und wenn AkkuZielProz nicht unterschritten, Eigen_Opt_Std für Tag stellen
-        if Dauer_Nacht_Std < 2:
+        if Dauer_Nacht_Std < 1:
             # Die aktuelle Einspeisung nicht mehr verändern
             Eigen_Opt_Std_neu = Eigen_Opt_Std
             if BattStatusProz > AkkuZielProz:
