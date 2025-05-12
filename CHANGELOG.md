@@ -2,6 +2,7 @@
 
 LadeStrg: Wochentagkürzel hinzugefügt  
 Eigenverbrauchs-Optimierung: Genauigkeit am Morgen verbessert  
+Strompreisdiagramm: Börsenpreis und Bruttopreis nebeneinander darstellen.  
 
 **[0.28.4] – 2025-05-07**  
 
