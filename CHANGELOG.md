@@ -1,7 +1,11 @@
 **[0.28.5] – 2025-XX-XX**  
 
 LadeStrg: Wochentagkürzel hinzugefügt  
-Eigenverbrauchs-Optimierung: Genauigkeit am Morgen verbessert  
+
+Eigenverbrauchs-Optimierung: Genauigkeit zu AkkuZielProz am Morgen verbessert  
+**ACHTUNG** Neue Variable `RundungEinspeisewert` in `CONFIG/charge.ini` bitte in `CONFIG/charge_priv.ini` einarbeiten!!  
+Dadurch kann die Häufigkeit der Schreibzugriffe auf den GEN24 gesteuert werden.
+
 Strompreisdiagramm: Börsenpreis und Bruttopreis nebeneinander darstellen.  
 
 **[0.28.4] – 2025-05-07**  
