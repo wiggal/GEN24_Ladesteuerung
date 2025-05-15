@@ -477,11 +477,11 @@ if __name__ == '__main__':
                         # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
                         # wegen Hysterse +5
-                        if (BattStatusProz <= MindBattLad + 5) and Akt_Std < 12:
+                        if (BattStatusProz <= MindBattLad) and Akt_Std < 12:
                             Dauer_Nacht_Std = 1
                             aktuellePVProduktion_tmp = 0
-                        if (BattStatusProz <= MindBattLad):
                             Eigen_Opt_Std_neu = 0
+                            DEBUG_Ausgabe += "DEBUG ##  Akku unter MindBattLad Optimierung auf 0 gesetzt!!!\n"
                         # Bei Eigen_Opt_Std_neu == 0 auf HYB_EM_MODE = 0, Eigenverbrauchs-Optimierung = Automatisch schalten
                         HYB_EM_MODE = 1
                         if (Eigen_Opt_Std_neu == 0):
