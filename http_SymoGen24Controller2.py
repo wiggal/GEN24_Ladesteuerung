@@ -205,7 +205,11 @@ if __name__ == '__main__':
                     ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
                     if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
                         FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
-                        MaxladungDurchPV_Planung = "Manuelle Ladesteuerung in PV-Planung ausgewählt."
+                        MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
+                    # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
+                    if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung == -2):
+                        FesteLadeleistung = MaxLadung
+                        MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
 
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
