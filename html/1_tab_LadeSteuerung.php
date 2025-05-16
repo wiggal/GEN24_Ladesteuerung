@@ -87,7 +87,7 @@ input[type="checkbox"] {
    height: 35px;
    accent-color: #44c767;
 }
-.checkboxlabel {
+.dropdown {
   font-family: system-ui, sans-serif;
   font-size: 2rem;
   line-height: 1.4;
@@ -160,14 +160,21 @@ include 'SQL_steuerfunctions.php';
 $EV_Reservierung = getSteuercodes('Reservierung');
 
 $DB_ManuelleSteuerung_wert = 0;
-$DB_ManuelleSteuerung_check = '';
+$DB_Auto_selected = '';
+$DB_Slider_selected = '';
+$DB_MaxLadung_selected = '';
 
 if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
     $DB_ManuelleSteuerung_wert = $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'];
 
     if ($DB_ManuelleSteuerung_wert == -1){
     $DB_ManuelleSteuerung_wert = 0;
-    $DB_ManuelleSteuerung_check = 'checked';
+    $DB_Auto_selected = 'selected';
+    } elseif ($DB_ManuelleSteuerung_wert == -2) {
+    $DB_ManuelleSteuerung_wert = 0;
+    $DB_Auto_selected = 'selected';
+    } else {
+    $DB_Slider_selected = 'selected';
     }
 }
 ?>
@@ -177,8 +184,13 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
   <p class="sliderbeschriftung">Ladegrenze:</p>
 <div class="flex-container">
     <div>
-    <label class="checkboxlabel" ><input type="checkbox" name="hausakkuladung" value="-1" id="auto" <?php echo $DB_ManuelleSteuerung_check ?>>AUTO</label>
-    </div>
+      <label for="modus" class="dropdown" ></label>
+  <select id="modus" class="dropdown" name="hausakkuladung" >
+    <option value="Auto" <?php echo $DB_Auto_selected ?>>Auto</option>
+    <option value="Slider" <?php echo $DB_Slider_selected ?>>Slider</option>
+    <option value="MaxLadung" <?php echo $DB_MaxLadung_selected ?>>MaxLadung</option>
+  </select>
+</div>
     <div>
 <label class="slider" id="sliderlabel" for="slider"><?php echo $DB_ManuelleSteuerung_wert ?>%</label>
 
@@ -293,7 +305,17 @@ echo "</tbody></table>\n";
    <br />
   </div>
 <script>
-
+/* den Slider beim Seitenaufbau auf dem Wert des Labels sezen */
+  document.addEventListener('DOMContentLoaded', function () {
+    //const slider = document.getElementById('slider');
+    const sliderlabel = document.getElementById('sliderlabel');
+    // Label-Wert lesen  Slider setzen
+    const labelValue = parseInt(sliderlabel.innerText.replace('%', ''), 10);
+    // Wert auf Slider übertragen
+    slider.value = labelValue;
+  });
+</script>
+<script>
 /* Lesen und speichern der Daten */
 $(document).ready(function(){
 
@@ -324,15 +346,18 @@ $(document).ready(function(){
   $('.Res_Feld2').each(function(){
    Res_Feld2.push($(this).text().replace(",", ".")*1000);
   });
-  const js = document.querySelectorAll('input[name="hausakkuladung"]');
-  if(js[0].checked == true){
-      js_value = js[0].value;
+  const modus = document.querySelector('select[name="hausakkuladung"]').value;
+  let js_value = -1;
+
+  if (modus == "Auto") {
+    js_value = -1;
+  } else if (modus == "MaxLadung") {
+    js_value = -2;
   } else {
-      // wenn AUTO nicht gechecked slider lesen
-      js_value = js[1].value;
+    // Bei "Slider" Sliderwert lesen
+    js_value = parseInt(document.querySelector('input[name="hausakkuladung"]').value);
   }
 
-  if (js != "") {
   ID.push("23:59");
   Schluessel.push("Reservierung");
   Tag_Zeit.push("ManuelleSteuerung");
@@ -340,7 +365,6 @@ $(document).ready(function(){
   Res_Feld2.push(0);
   Options.push('');
   //alert(js_value);
-  }
 
   $.ajax({
    url:"SQL_speichern.php",
