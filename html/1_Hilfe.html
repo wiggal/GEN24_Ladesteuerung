@@ -32,13 +32,13 @@
 <font style="font-size: 24pt"><b><span style="background: #44c767">TAB</span>--&gt; LadeSteuerung</b></font>
 <br/> <br/>
 
-<p>Unter &quot;Ladegrenze&quot; kann ausgewählt
+<p>Im Dropdown unter &quot;Ladegrenze&quot; kann ausgewählt
 werden, wie die Hausakkuladung erfolgen soll: 
 </p>
     <table>
     <tr>
     <td>
-	<p>„AUTO“ = angehakt</p>
+	<p>Auto</p>
     </td>
     <td>
     <p>Automatische Ladesteuerung nach Prognose </p>
@@ -46,10 +46,19 @@ werden, wie die Hausakkuladung erfolgen soll:
     </tr>
     <tr>
     <td>
-	<p>„AUTO“ = <b>NICHT</b> angehakt</p>
+	<p>Slider</p>
     </td>
     <td>
-	<p>Batterieladung erfolgt mit der eingestellten Prozentzahl der <b>&quot;maximalen Ladeleistung&quot;</b> des GEN24. </p>
+	<p>Batterieladung erfolgt mit der im Slider eingestellten Prozentzahl der <b>&quot;maximalen Ladeleistung&quot;</b> des GEN24.
+	<br>Es kann sein, dass der Akku die maximalen Ladeleistung <b>&quot;nicht&quot;</b> unterstützt.</p>
+    </td>
+    </tr>
+    <tr>
+    <td>
+	<p>MaxLadung</p>
+    </td>
+    <td>
+    <p>Batterieladung erfolgt mit der in CONFIG/charge_priv.ini unter MaxLadung definierten Ladeleistung.</p>
     </td>
     </tr>
     </table>

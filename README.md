@@ -50,6 +50,7 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
 0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
+0 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
 ```
 **Crontab.log jeden Montag abräumen**
 ```
@@ -64,6 +65,7 @@ Besonderheiten:
 - Bei forecast.solar kann mit einem Account die Prognose mit den Werten der Produktion aus der DB angepasst werden.  
 - Bei solarprognose.de ist ein Account erforderlich, hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
 - Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 5x am Tag aufgerufen werden, da pro Lauf zwei Zugriffe erforderlich sind (10 pro Tag).  
+- Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
 
 ### :chart_with_downwards_trend: http_SymoGen24Controller2.py
 

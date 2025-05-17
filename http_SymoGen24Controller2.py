@@ -205,7 +205,11 @@ if __name__ == '__main__':
                     ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
                     if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
                         FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
-                        MaxladungDurchPV_Planung = "Manuelle Ladesteuerung in PV-Planung ausgewählt."
+                        MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
+                    # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
+                    if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung == -2):
+                        FesteLadeleistung = MaxLadung
+                        MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
 
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
@@ -477,17 +481,17 @@ if __name__ == '__main__':
                         # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
                         # wegen Hysterse +5
-                        if (BattStatusProz <= MindBattLad + 5) and Akt_Std < 12:
-                            Dauer_Nacht_Std = 2
+                        if (BattStatusProz <= MindBattLad) and Akt_Std < 12:
+                            Dauer_Nacht_Std = 1
                             aktuellePVProduktion_tmp = 0
-                        if (BattStatusProz <= MindBattLad):
                             Eigen_Opt_Std_neu = 0
+                            DEBUG_Ausgabe += "DEBUG ##  Akku unter MindBattLad Optimierung auf 0 gesetzt!!!\n"
                         # Bei Eigen_Opt_Std_neu == 0 auf HYB_EM_MODE = 0, Eigenverbrauchs-Optimierung = Automatisch schalten
                         HYB_EM_MODE = 1
                         if (Eigen_Opt_Std_neu == 0):
                             HYB_EM_MODE = 0
 
-                        if (Dauer_Nacht_Std > 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
+                        if (Dauer_Nacht_Std >= 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
                                 print("## Eigenverbrauchs-Optimierung ##")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")
