@@ -172,7 +172,7 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
     $DB_Auto_selected = 'selected';
     } elseif ($DB_ManuelleSteuerung_wert == -2) {
     $DB_ManuelleSteuerung_wert = 0;
-    $DB_Auto_selected = 'selected';
+    $DB_MaxLadung_selected = 'selected';
     } else {
     $DB_Slider_selected = 'selected';
     }
@@ -314,8 +314,7 @@ echo "</tbody></table>\n";
     // Wert auf Slider übertragen
     slider.value = labelValue;
   });
-</script>
-<script>
+
 /* Lesen und speichern der Daten */
 $(document).ready(function(){
 
