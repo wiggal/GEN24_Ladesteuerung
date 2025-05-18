@@ -343,15 +343,16 @@ class progladewert:
         if Dauer_Nacht_Std < 1:
             # Die aktuelle Einspeisung nicht mehr verändern
             Eigen_Opt_Std_neu = Eigen_Opt_Std
-            if (PrognoseMorgen < PrognoseGrenzeMorgen):
-                DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
-                DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-                Eigen_Opt_Std_neu = 0
-            if (PrognoseMorgen >= PrognoseGrenzeMorgen):
-                DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
-                DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-                Eigen_Opt_Std_neu = MaxEinspeisung 
-            DEBUG_Eig_opt += DEBUG_Eig_opt_tmp
+            if BattStatusProz > AkkuZielProz:
+                if (PrognoseMorgen < PrognoseGrenzeMorgen):
+                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    Eigen_Opt_Std_neu = 30
+                if (PrognoseMorgen >= PrognoseGrenzeMorgen):
+                    DEBUG_Eig_opt_tmp = "DEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    Eigen_Opt_Std_neu = MaxEinspeisung 
+                DEBUG_Eig_opt += DEBUG_Eig_opt_tmp
 
             # Wenn EigenverbOpt_steuern 2 Optimierung ueber Tags = 0
             if (EigenverbOpt_steuern == 2):
