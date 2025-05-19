@@ -1,8 +1,8 @@
-**[0.28.5] – 2025-XX-XX**  
+**[0.28.5] – 2025-05-19**  
 
 LadeStrg:  
 - Wochentagkürzel hinzugefügt  
-- Dopdown mit Optionen Auto, Slider und MaxLadung eigeführt. Damit kann die MaxLadung aus der charge.ini als fester Ladewert eingestellt werden.  
+- Dopdown mit Optionen Auto, Slider und MaxLadung eingeführt. Damit kann die MaxLadung aus der charge.ini als fester Ladewert eingestellt werden.  
 
 Eigenverbrauchs-Optimierung: Genauigkeit zu AkkuZielProz am Morgen verbessert  
 **ACHTUNG** Neue Variable `RundungEinspeisewert` in `CONFIG/charge.ini` bitte in `CONFIG/charge_priv.ini` einarbeiten!!  
