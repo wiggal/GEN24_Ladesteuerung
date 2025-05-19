@@ -317,10 +317,9 @@ class progladewert:
         Dauer_Nacht = (datetime.strptime(Ende_Nacht_Std, '%Y-%m-%d %H:%M:%S') - (self.now  - timedelta(hours=1)))
         Dauer_Nacht_Std = Dauer_Nacht.total_seconds()/3600
         if Dauer_Nacht_Std <= 0.99: Dauer_Nacht_Std = 0.99 # sonst Divison durch Null 
-        # TEST   #entWIGGlung  fast eine Stunde weniger, da dann schon Nacht vorbei ist
+        # fast eine Stunde weniger, da dann schon Nacht vorbei ist
         Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - ((Dauer_Nacht_Std - 0.8) * GrundlastNacht)
         Eigen_Opt_Std_neu = int(Akku_Rest_Watt/(Dauer_Nacht_Std - 0.8))
-        print("DEBUG ## Eigen_Opt_Std_neu: ", Eigen_Opt_Std_neu)  #entWIGGlung
         # Schaltverzögerung (hysterese)
         if (abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu): 
             #Eigen_Opt_Std_neu = int(Eigen_Opt_Std_neu * 0.8)
@@ -328,11 +327,9 @@ class progladewert:
         if (abs(Eigen_Opt_Std) > Eigen_Opt_Std_neu): 
             Eigen_Opt_Std_neu = int(Eigen_Opt_Std_neu + RundungEinspeisewert/2)
 
-        print("DEBUG ## Eigen_Opt_Std_neu: ", Eigen_Opt_Std_neu)  #entWIGGlung
         # Eigen_Opt_Std_neu runden
         if MaxEinspeisung < RundungEinspeisewert: RundungEinspeisewert = MaxEinspeisung
         Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu / RundungEinspeisewert) * RundungEinspeisewert)
-        print("DEBUG ## Eigen_Opt_Std_neu: ", Eigen_Opt_Std_neu)  #entWIGGlung
         if Akku_Rest_Watt < 0 or Eigen_Opt_Std_neu < 0: Eigen_Opt_Std_neu = 0
         # Hier auf MaxEinspeisung begrenzen.
         if Eigen_Opt_Std_neu > MaxEinspeisung : Eigen_Opt_Std_neu = MaxEinspeisung
