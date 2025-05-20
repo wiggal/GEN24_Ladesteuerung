@@ -1,3 +1,7 @@
+**[0.29.0] – 2025-XX-XX**  
+
+- DynamicPriceCheck.py: Vorbereitung auf viertelstündliche Stompreise
+
 **[0.28.5] – 2025-05-19**  
 
 LadeStrg:  
