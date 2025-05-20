@@ -84,9 +84,12 @@ for key in Prognose_24H:
             data.append((key[0], key[1], key2[1]))
 
 # Aktuelle Strompreise holen
-
+# Variabler Funktionsaufruf
 LAND = basics.getVarConf('dynprice','LAND', 'str')
-pricelist_date = dynamic.getPrice_energycharts(LAND)
+Preisquelle = basics.getVarConf('dynprice','Preisquelle', 'str')
+funktion_string = 'getPrice_'+Preisquelle
+funktion = getattr(dynamic, funktion_string)
+pricelist_date = funktion(LAND)
 
 if(dyn_print_level >= 2):
     headers = ["Zeitpunkt", "Strompreis brutto(€/kWh)", "Börsenstrompreis (€/kWh)"]
@@ -95,10 +98,11 @@ if(dyn_print_level >= 2):
 
 # Zusammenführen der Listen2
 pv_data = []
-for key in data:
-    for key2 in pricelist_date:
-        if key[0] == key2[0]:
-            pv_data.append([key[0], key[1], key[2], key2[1]])
+for key in pricelist_date:
+    key_neu = key[0][:14] + "00" + key[0][16:]
+    for key2 in data:
+        if key_neu == key2[0]:
+            pv_data.append([key[0], key2[1], key2[2], key[1]])
 
 # Werte als Tabelle ausgeben
 if(dyn_print_level >= 1):
@@ -146,8 +150,11 @@ if(dyn_print_level >= 2): print("\n*****************  DEBUGGING ****************
 
 # Spalte Akkustand und Ladewatt -0.01 anhängen
 pv_data_charge = [zeile + [0, -0.01] for zeile in pv_data]
+# Prüfen, ob vietelstündliche Strompreise
+Stundenteile = 1
+if(len(pv_data_charge) > 24): Stundenteile = 4
 # Mit Funktion get_charge_stop Ladepunkte usw. berechnen
-pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh)
+pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile)
 
 if(dyn_print_level >= 2): print("\n***************** ENDE DEBUGGING *****************")
 
@@ -222,7 +229,9 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     # DEBUG CSV-Ausgabe
 
 # Akkuzustand nochmal neu berechnen mit manuellen Einträgen aus ENTLadeStrg
-dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
+max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
+dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
 
 if(dyn_print_level >= 1):
     print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
