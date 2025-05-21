@@ -170,23 +170,34 @@ entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
 
 SteuerCode = []
 DBCode = []
+# Schleife für die nächsten 24 Stunden in gegebenem Intervall
 for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster Stunde
     zeitpunkt = heute_start + timedelta(hours=stunde)
     Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
     Res_Feld1 = 0
-    Res_Feld2 = 0
+    Res_Feld2 = 0 
+    Res_Feld2_array = {}
     Options = ''
-    SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
+    for minuten in [0, 15, 30, 45]:
+        zeitpunkt = zeitpunkt.replace(minute=minuten, second=0, microsecond=0)
+        SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:00")
 
-    for Stundenliste in pv_data_charge:
-        if SuchStunde in Stundenliste:
-            Res_Feld1 = 0
-            Res_Feld2 = Stundenliste[5]
-            if Res_Feld2 < 0:
-                Options = 'DynPrice'
-            break
+        for Stundenliste in pv_data_charge:
+            if SuchStunde in Stundenliste:
+                Res_Feld1 = 0
+                Res_Feld2_array[minuten] = Stundenliste[5]
+                if Stundenliste[5] != 0:
+                    Options = 'DynPrice'
+                break
+    Res_Feld2_werte = list(Res_Feld2_array.values())
+    # Wenn alle viertestündlichen Werte gleich, nur einmal ausgeben
+    if(len(set(Res_Feld2_werte)) == 1):
+        Res_Feld2 = Res_Feld2_array[0]
+    # Wenn viertestündliche Werte unterschiedlich, alle ausgeben
+    if(len(set(Res_Feld2_werte)) > 1):
+        Res_Feld2 = ";".join(str(wert) for wert in Res_Feld2_werte)
 
-    # Wenn manueller Eintrag nicht überschreiben
+    # Wenn manueller Eintrag, Eintrag nicht überschreiben
     # Damit kein Fehler kommt, wenn Datensatz in SQLsteuerdatei nicht existiert
     try:
         if entladesteurungsdata[Stunde]['Options'] != 'DynPrice' and entladesteurungsdata[Stunde]['Res_Feld2'] < 0:
@@ -205,28 +216,6 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
         DBCode.append((Stunde, 'ENTLadeStrg', Stunde, entladesteurungsdata[Stunde]['Res_Feld1'], entladesteurungsdata[Stunde]['Res_Feld2'], entladesteurungsdata[Stunde]['Options']))
     except:
         DBCode.append((Stunde, 'ENTLadeStrg', Stunde, 0, 0, ''))
-
-    # DEBUG CSV-Ausgabe
-    if(dyn_print_level >= 4):
-        import csv
-        if stunde == 1 :
-            try:
-                with open("DEBUG.csv", "r") as file:
-                    file = open('DEBUG.csv',"a")
-                    csvzeile = [str(SuchStunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
-                    writer = csv.writer(file, delimiter=',')
-                    writer.writerow(csvzeile)
-                    file.close()
-            except FileNotFoundError:
-                # Behandle den Fall, dass die Datei nicht existiert
-                file = open('DEBUG.csv',"a")
-                csvheader = ["Stunde", "Schluessel", "Entladung", "Entladegrenze", "Preis €/kWh", "Akkustand/W"]
-                csvzeile = [str(SuchStunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
-                writer = csv.writer(file, delimiter=',')
-                writer.writerow(csvheader)
-                writer.writerow(csvzeile)
-                file.close()
-    # DEBUG CSV-Ausgabe
 
 # Akkuzustand nochmal neu berechnen mit manuellen Einträgen aus ENTLadeStrg
 max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
@@ -293,7 +282,7 @@ for row in pv_data_charge:
     PrognBattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
     priceforecast.append([Ladezeitpunkt,PV_Prognose,Netzverbrauch,Netzladen,PrognBattStatus])
 
-if(dyn_print_level >= 2):
+if(dyn_print_level >= 1):
     # priceforecast Daten für DB
     print(">>  Folgende Strompreisvorhersage in PV_Daten.sqlite/priceforecast speichern.")
     headers = ["Ladezeitpunkt", "PV_Prognose", "PrognNetzverbrauch", "PrognNetzladen", "PrognBattStatus"]

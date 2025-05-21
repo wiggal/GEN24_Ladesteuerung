@@ -183,7 +183,7 @@ class dynamic:
         Gebietsfilter = 4169 # für DE-LU 
         if(BZN == 'AT'): Gebietsfilter = 4170
 
-        url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_quarterhour_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, montag_timestamp)
+        url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_hour_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, montag_timestamp)
         timeout_sec = 10
         Push_Schreib_Ausgabe = ''
         
