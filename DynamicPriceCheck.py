@@ -178,6 +178,7 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     Res_Feld2 = 0 
     Res_Feld2_array = {}
     Options = ''
+    # Wenn viertelstündliche Preise vorhanden, berücksichtigen
     for minuten in [0, 15, 30, 45]:
         zeitpunkt = zeitpunkt.replace(minute=minuten, second=0, microsecond=0)
         SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:00")
