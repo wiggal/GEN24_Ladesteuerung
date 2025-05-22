@@ -183,7 +183,8 @@ class dynamic:
         Gebietsfilter = 4169 # für DE-LU 
         if(BZN == 'AT'): Gebietsfilter = 4170
 
-        url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_hour_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, montag_timestamp)
+        #  viertestündliche Strompreise
+        url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_quarterhour_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, montag_timestamp)
         timeout_sec = 10
         Push_Schreib_Ausgabe = ''
         
@@ -405,12 +406,8 @@ class dynamic:
         for min_Preis_Std in min_Preis_zeilen:
             charge_rate_kW_tmp = charge_rate_kW
             spaeter_zeile_max_soc = [zeile for zeile in pv_data_charge if zeile[0] >= min_Preis_Std[0]]
-            # print("WIGGAL SPÄTER: ", spaeter_zeile_max_soc)  #entWIGGlung
             zeile_max_soc = max(spaeter_zeile_max_soc, key=lambda x: x[4])
-            # print("WIGGAL MAX_SOC: ", zeile_max_soc)  #entWIGGlung
-            # print("WIGGAL: ", min_Preis_Std[0], battery_capacity_Wh, zeile_max_soc[4], battery_capacity_Wh - zeile_max_soc[4] )  #entWIGGlung
             if (battery_capacity_Wh - zeile_max_soc[4] < charge_rate_kW): charge_rate_kW_tmp = int((battery_capacity_Wh - zeile_max_soc[4]) + 1.1)
-            # print("WIGGAL min_Preis_Std: ", charge_rate_kW_tmp, min_Preis_Std)  #entWIGGlung
             if charge_rate_kW_tmp > 100:
                 min_Preis_Std[5]= charge_rate_kW_tmp * -1
             # NOCHMAL: Akkustand ohne PV-Leistung ermitteln

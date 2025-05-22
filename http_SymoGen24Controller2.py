@@ -350,7 +350,10 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe+="\nDEBUG VerbrauchsgrenzeEntladung aus Spalte 1: " + str(VerbrauchsgrenzeEntladung)
                         # Feste Entladegrenze aus Tabelle  ENTLadeStrg lesen
                         if (entladesteurungsdata.get(aktStd)):
-                            FesteEntladegrenze = entladesteurungsdata[aktStd]['Res_Feld2']
+                            # Funktion aufrufen, die eine evtl. viertelstündliche zuteilung macht
+                            FesteEntladegrenze_tmp = progladewert.get_FesteEntladegrenze(str(entladesteurungsdata[aktStd]['Res_Feld2']))
+                            FesteEntladegrenze = FesteEntladegrenze_tmp[0]
+                            DEBUG_Ausgabe += FesteEntladegrenze_tmp[1]
                         else:
                             FesteEntladegrenze = 0
 
