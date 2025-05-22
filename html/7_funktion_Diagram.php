@@ -450,44 +450,47 @@ echo "    }]
       },
       y3: {
         type: 'linear',
-        display: false,
+        display: true,
         position: 'left',
         min: ".$MIN_y3.",
         max: ".$MAX_y3.",
         grid: {
-            drawOnChartArea: false
+            drawOnChartArea: true
         },
         ticks: {
-           stepSize: 20,
+           stepSize: 5,
            font: {
              size: 20,
            },
            callback: function(value, index, values) {
-              return value + 'ct.';
+              return value.toFixed(0) + 'ct';
            }
         }
       },
       y: {
         type: 'linear', 
-        position: 'left',
+        position: 'right',
         stacked: true,
         max: ".$MAX_y.",
         min: (context) => {
             let maxY = context.chart.scales.y.max;
             return (context.chart.scales.y3.min / context.chart.scales.y3.max * maxY)
         },
+        grid: {
+            drawOnChartArea: false
+        },
         ticks: {
            font: {
              size: 20,
            },
            callback: function(value, index, values) {
-              return value >= 0 ? Math.round(value) + 'W' : '';
+              return value >= 0 ? value.toFixed(0) + 'W' : '';
            }
         },
       },
       y2: {
         type: 'linear',
-        display: 'auto',
+        display: false,
         position: 'right',
         min: (context) => {
             return (context.chart.scales.y3.min / context.chart.scales.y3.max * 100)
