@@ -26,6 +26,10 @@
   margin: 0 0 1em;
   table-layout: auto;
   }
+  th {
+  position: sticky;
+  top: 60px;
+  }
   th, td {
   font-size: 200%;
   font-weight: normal;
@@ -175,15 +179,13 @@ if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
 echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze Entladung(KW)</th><th>Feste Entladegrenze(KW)</th><th>Options</th></tr>";
 echo "\n";
 
-// Variablen definieren
-$Rest_KW = 0;
-$Res_Feld1_Watt = 0;
-$Res_Feld2_Watt = 0;
-$Uhrzeiten = array("00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00");
-// Variablen definieren ENDE
-
+// Alle Stunden in Array
+for ($i = 0; $i < 24; $i++) { $Uhrzeiten[] = str_pad($i, 2, "0", STR_PAD_LEFT) . ":00"; }
 
 foreach($Uhrzeiten AS $date) {
+
+$Res_Feld1_Watt = "";
+$Res_Feld2_Watt = "";
 
 if ($date == 'ManuelleEntladesteuerung') break;
 
@@ -198,15 +200,24 @@ $Res_Feld1_Watt = number_format($Res_Feld1_wert, 3);
 $Res_Feld1_Watt = "" ;
 }
 
-if (isset($Akku_EntLadung[$date]['Res_Feld2']) and $Akku_EntLadung[$date]['Res_Feld2'] <> ""){
-    $Res_Feld2_wert = (float) $Akku_EntLadung[$date]['Res_Feld2']/1000;
-} else {
-    $Res_Feld2_wert = 0;
-}
-if ($Res_Feld2_wert <> 0) {
-$Res_Feld2_Watt = number_format($Res_Feld2_wert, 3);
-} else  { 
-$Res_Feld2_Watt = "" ;
+if (isset($Akku_EntLadung[$date]['Res_Feld2']) and $Akku_EntLadung[$date]['Res_Feld2'] !== ""){
+        # String nach ; aufteilen und formatieren
+        $teile = explode(";", $Akku_EntLadung[$date]['Res_Feld2']);
+        $ergebnisse = [];
+        foreach ($teile as $wert) {
+            if($wert == 0){
+                $ergebnis = $wert;
+            }else{
+                $ergebnis = $wert/1000;
+                # Immer mindestens eine Nachkommastelle, auch wenn Null
+                if (strpos($ergebnis, '.') === false) {
+                    $ergebnis .= '.0';
+                }
+            }
+            $ergebnisse[] = $ergebnis;
+        }
+        $Res_Feld2_Watt = implode(";", $ergebnisse);
+        if($Res_Feld2_Watt == 0) $Res_Feld2_Watt = "";
 }
 
 if (isset($Akku_EntLadung[$date]['Options']) and $Akku_EntLadung[$date]['Options'] <> ""){
@@ -257,9 +268,19 @@ $(document).ready(function(){
   $('.Res_Feld1').each(function(){
    Res_Feld1.push($(this).text().replace(",", ".")*1000);
   });
-  $('.Res_Feld2').each(function(){
-   Res_Feld2.push($(this).text().replace(",", ".")*1000);
+  // Hier müssen evtl. viertelstündliche Werte aufgesplitet werden.
+  $('.Res_Feld2').each(function() {
+    let inputString = $(this).text()
+    let teile = inputString.split(";");
+    let ergebnisse = teile.map(wert => {
+        let zahl = parseFloat(wert.replace(",", "."));
+        return isNaN(zahl) ? 0 : Math.round(zahl * 1000);
+    });
+
+    let neuerString = ergebnisse.join(";");
+    Res_Feld2.push(neuerString);
   });
+
   je_value = 0.001;
   const je = document.querySelectorAll('input[name="hausakkuentladung"]');
   je_value = je[0].value;
