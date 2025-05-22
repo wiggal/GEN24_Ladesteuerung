@@ -46,6 +46,21 @@ class progladewert:
     
             return Ladewert
     
+    from datetime import datetime
+
+    def get_FesteEntladegrenze(self, FesteEntladegrenze_string):
+        values = FesteEntladegrenze_string.split(";")
+        num_values = len(values)
+        # Aktuelle Minute innerhalb der Stunde (0-59)
+        current_minute = datetime.now().minute
+        # Intervallgröße in Minuten
+        interval_size = 60 / num_values
+        # Index berechnen (z.B. bei 4 Werten: 0 für 0-14 Min, 1 für 15-29 Min, usw.)
+        index = int(current_minute // interval_size)
+        # Entsprechenden Wert zurückgeben
+        self.DEBUG_Ausgabe += "\nDEBUG FesteEntladegrenze index " + str(index) + " = " + str(values[index])
+        return int(values[index]), self.DEBUG_Ausgabe
+
     def getLadewert(self, BattVollUm, Grundlast, alterLadewert):
     
             # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
