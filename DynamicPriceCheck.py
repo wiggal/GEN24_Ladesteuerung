@@ -105,7 +105,7 @@ for key in pricelist_date:
             pv_data.append([key[0], key2[1], key2[2], key[1]])
 
 # Werte als Tabelle ausgeben
-if(dyn_print_level >= 1):
+if(dyn_print_level >= 3):
     headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch*"+str(Lade_Verbrauchs_Faktor)+"(W)", "Strompreis (€/kWh)"]
     dynamic.listAStable(headers, pv_data)
 
@@ -146,7 +146,7 @@ if(dyn_print_level >= 1):
     dynamic.listAStable(headers, table_liste)
     print()
 
-if(dyn_print_level >= 2): print("\n*****************  DEBUGGING *****************")
+if(dyn_print_level >= 3): print("\n*****************  DEBUGGING *****************")
 
 # Spalte Akkustand und Ladewatt -0.01 anhängen
 pv_data_charge = [zeile + [0, -0.01] for zeile in pv_data]
@@ -156,7 +156,7 @@ if(len(pv_data_charge) > 24): Stundenteile = 4
 # Mit Funktion get_charge_stop Ladepunkte usw. berechnen
 pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile)
 
-if(dyn_print_level >= 2): print("\n***************** ENDE DEBUGGING *****************")
+if(dyn_print_level >= 3): print("\n***************** ENDE DEBUGGING *****************")
 
 # Aktuelles Datum und Uhrzeit
 jetzt = datetime.now()
@@ -236,7 +236,6 @@ if(dyn_print_level >= 1):
 
 # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
 SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
-print_level = basics.getVarConf('env','print_level','eval')
 Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
 Options = Parameter[2]
 
@@ -283,7 +282,7 @@ for row in pv_data_charge:
     PrognBattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
     priceforecast.append([Ladezeitpunkt,PV_Prognose,Netzverbrauch,Netzladen,PrognBattStatus])
 
-if(dyn_print_level >= 1):
+if(dyn_print_level >= 3):
     # priceforecast Daten für DB
     print(">>  Folgende Strompreisvorhersage in PV_Daten.sqlite/priceforecast speichern.")
     headers = ["Ladezeitpunkt", "PV_Prognose", "PrognNetzverbrauch", "PrognNetzladen", "PrognBattStatus"]
@@ -295,5 +294,5 @@ if ('logging' in Options):
     Logging_Schreib_Ausgabe = 'Strompreise in SQLite-Datei gespeichert!'
 else:
     Logging_Schreib_Ausgabe = "Strompreise NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
-if print_level >= 1:
+if dyn_print_level >= 1:
     print(Logging_Schreib_Ausgabe)

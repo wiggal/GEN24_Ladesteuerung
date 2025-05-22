@@ -73,7 +73,8 @@ class dynamic:
         try:
             zeiger.execute(sql_anweisung)
             rows = zeiger.fetchall()
-            if(self.dyn_print_level >= 2):
+            # Lastprofil ausgeben, wenn dyn_print_level >= 3
+            if(self.dyn_print_level >= 3):
                 headers = ["Index", "Datenart", "Stunde", "Wochentag", "Verbrauch", "Timestamp"]
                 self.listAStable(headers, rows)
         except:
