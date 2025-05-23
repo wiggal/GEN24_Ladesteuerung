@@ -316,7 +316,7 @@ class progladewert:
         if Ende_Nacht_Std == 0 : Ende_Nacht_Std = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
         Dauer_Nacht = (datetime.strptime(Ende_Nacht_Std, '%Y-%m-%d %H:%M:%S') - (self.now  - timedelta(hours=1)))
         Dauer_Nacht_Std = Dauer_Nacht.total_seconds()/3600
-        if Dauer_Nacht_Std <= 0.99: Dauer_Nacht_Std = 0.99 # sonst Divison durch Null 
+        if Dauer_Nacht_Std == 0: Dauer_Nacht_Std = 0.01 # sonst Divison durch Null
         # fast eine Stunde weniger, da dann schon Nacht vorbei ist
         Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - ((Dauer_Nacht_Std - 0.8) * GrundlastNacht)
         Eigen_Opt_Std_neu = int(Akku_Rest_Watt/(Dauer_Nacht_Std - 0.8))
