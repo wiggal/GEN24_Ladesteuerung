@@ -490,7 +490,7 @@ if __name__ == '__main__':
                         if (Eigen_Opt_Std_neu == 0):
                             HYB_EM_MODE = 0
 
-                        if (Dauer_Nacht_Std >= 1 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
+                        if (Dauer_Nacht_Std > 0.5 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
                                 print("## Eigenverbrauchs-Optimierung ##")
                                 print("Prognose Morgen: ", PrognoseMorgen, "KW")
