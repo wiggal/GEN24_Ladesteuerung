@@ -165,10 +165,11 @@ if __name__ == '__main__':
                     progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata, MaxLadung, Einspeisegrenze, aktuelleBatteriePower)
                     #entWIGGlung
                     # evtl. Ladung des Akku auf 80% begrenzen, und damit BattKapaWatt_akt reduzieren
-                    PrognoseMorgen = progladewert.getPrognoseMorgen()[0]/1000
+                    Sdt_24H = datetime.now().hour
+                    PrognoseMorgen = progladewert.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000
                     ProgLimit_SOC80_kW = basics.getVarConf('Ladeberechnung','ProgLimit_SOC80_kW','eval')
+                    DEBUG_BattKapaWatt_akt_org = BattKapaWatt_akt
                     if ProgLimit_SOC80_kW >= 0 and PrognoseMorgen > ProgLimit_SOC80_kW:
-                        DEBUG_BattKapaWatt_akt = BattKapaWatt_akt
                         BattKapaWatt_akt = int(BattKapaWatt_akt - BattganzeKapazWatt*0.20)
                     #entWIGGlung
 
@@ -273,17 +274,22 @@ if __name__ == '__main__':
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
 
                     # Ladung des Akku auf 80% begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
-                    if BattStatusProz > 10 and ProgLimit_SOC80_kW >= 0 and PrognoseMorgen > ProgLimit_SOC80_kW:  #entWIGGlung
+                    if ProgLimit_SOC80_kW >= 0:
                         DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< Ladebegrenzung auf 80% SOC >>>>>>>>>>>>>"
                         DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
                         DEBUG_Ausgabe += ", ProgLimit_SOC80_kW: " + str(ProgLimit_SOC80_kW)
                         DEBUG_Ausgabe += ", BattStatusProz: " + str(BattStatusProz)
-                        DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(DEBUG_BattKapaWatt_akt)
-                        DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürtzt: " + str(BattKapaWatt_akt) + "\n"
+                        DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(DEBUG_BattKapaWatt_akt_org)
+                        DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürtzt: " + str(BattKapaWatt_akt)
+                    # Bei 78% bereits abschalten, da sonst evtl. weit über die 80% geladen wird.
+                    if BattStatusProz >= 78 and ProgLimit_SOC80_kW >= 0 and PrognoseMorgen > ProgLimit_SOC80_kW:
                         aktuellerLadewert = 0
                         DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, BattganzeLadeKapazWatt, alterLadewert)
                         WR_schreiben = DATA[1]
                         LadewertGrund = "Akkuschonung: Ladebegrenzung auf 80% SOC"
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< SOC 80% AKTIV!!! >>>>>>>>>>>>>"
+                    else:
+                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< SOC 100% AKTIV!!! >>>>>>>>>>>>>"
                     #entWIGGlung
 
                     # Wenn die aktuellePVProduktion < 50 Watt ist, nicht schreiben, 
@@ -328,7 +334,7 @@ if __name__ == '__main__':
                             print()
 
 
-                    DEBUG_Ausgabe+="DEBUG\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
+                    DEBUG_Ausgabe+="\nDEBUG\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachUnten:  " + str(WRSchreibGrenze_nachUnten) + "W"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W\n"
                     
@@ -494,7 +500,7 @@ if __name__ == '__main__':
                     HYB_BACKUP_RESERVED = None
                     if  EigenverbOpt_steuern > 0:
                         EigenOptERG = progladewert.getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung)
-                        PrognoseMorgen = EigenOptERG[0]
+                        Prognose_24H = EigenOptERG[0]
                         Eigen_Opt_Std = EigenOptERG[1]
                         Eigen_Opt_Std_neu = EigenOptERG[2]
                         Dauer_Nacht_Std = EigenOptERG[3]
@@ -518,7 +524,7 @@ if __name__ == '__main__':
                         if (Dauer_Nacht_Std > 0.5 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
                             if print_level >= 1:
                                 print("## Eigenverbrauchs-Optimierung ##")
-                                print("Prognose Morgen: ", PrognoseMorgen, "KW")
+                                print("Prognose nächste 24Std: ", Prognose_24H, "KW")
                                 print("Eigenverbrauchs-Opt. ALT: ", Eigen_Opt_Std, "W")
                                 print("Eigenverbrauchs-Opt. NEU: ", Eigen_Opt_Std_neu, "W")
                                 print()
@@ -551,12 +557,12 @@ if __name__ == '__main__':
                         # Notstromreserve_Min kann nicht kleiner 5% sein
                         if Notstromreserve_Min < 5:
                             Notstromreserve_Min = 5
-                        PrognoseMorgen = progladewert.getPrognoseMorgen()[0]/1000
+                        Prognose_24H = progladewert.getPrognoseMorgen()[0]/1000
                         # Aktuelle EntladeGrenze_Max und ProgGrenzeMorgen aus Notstrom_Werte ermitteln
                         EntladeGrenze_Max = Notstromreserve_Min
                         ProgGrenzeMorgen = 0
                         for Notstrom_item in Notstrom_Werte: 
-                            if PrognoseMorgen < int(Notstrom_item):
+                            if Prognose_24H < int(Notstrom_item):
                                 EntladeGrenze_Max = int(Notstrom_Werte[Notstrom_item])
                                 ProgGrenzeMorgen = int(Notstrom_item)
 
@@ -566,7 +572,7 @@ if __name__ == '__main__':
                         if HYB_BACKUP_RESERVED == EntladeGrenze_Max:
                             ProgGrenzeMorgen = int(ProgGrenzeMorgen * 1.2)
                         Neu_HYB_BACKUP_RESERVED = Notstromreserve_Min
-                        if (PrognoseMorgen < ProgGrenzeMorgen and PrognoseMorgen != 0):
+                        if (Prognose_24H < ProgGrenzeMorgen and Prognose_24H != 0):
                             Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Max
                         # TEST Notstrom ohne Zwangsladung aus dem Netz
                         if Notstromreserve_steuern > 1 and BattStatusProz < Neu_HYB_BACKUP_RESERVED:
@@ -576,7 +582,7 @@ if __name__ == '__main__':
                             if Neu_HYB_BACKUP_RESERVED < 5: Neu_HYB_BACKUP_RESERVED = 5
                         if print_level >= 1:
                             print("## NOTSTROMRESERVE ##")
-                            print("Prognose Morgen:     ", int(PrognoseMorgen), "KW")
+                            print("Prognose nächste 24Std:     ", int(Prognose_24H), "KW")
                             print("ProgGrenze Morgen:   ", ProgGrenzeMorgen, "KW")
                             print("Batteriereserve:     ", HYB_BACKUP_RESERVED, "%")
                             print("Neu_Batteriereserve: ", Neu_HYB_BACKUP_RESERVED, "%")
