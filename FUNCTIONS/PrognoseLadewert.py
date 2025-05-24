@@ -297,11 +297,11 @@ class progladewert:
             i  += 1
         return(Sonnenuntergang)
         
-    def getPrognoseMorgen(self, MaxEinspeisung=0):
-        i = 0
+    def getPrognoseMorgen(self, MaxEinspeisung=0, i=0):
         Prognose_Summe = 0
         Ende_Nacht_Std = 0
-        while i < 24:
+        Stunde_bis = 24+i
+        while i < Stunde_bis:
             # ab aktueller Stunde die nächsten 24 Stunden aufaddieren, da ab 24 Uhr sonst keine Morgenprognose
             Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
             akt_Std_Ende_Nacht = datetime.strftime(self.now + timedelta(hours=i-1), "%Y-%m-%d %H:00:00")
@@ -357,11 +357,11 @@ class progladewert:
             if BattStatusProz > AkkuZielProz:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen):
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
-                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = 30
                 else:
-                    DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
-                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> PrognoseMorgen: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei Prognose 24H+ > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = MaxEinspeisung 
                 DEBUG_Eig_opt += DEBUG_Eig_opt_tmp
 
