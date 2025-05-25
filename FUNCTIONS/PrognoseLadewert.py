@@ -216,7 +216,7 @@ class progladewert:
             Pro_Akt_Log = int(Pro_Akt_Log / PrognoseGlaettung / 2 )
             Pro_Akt = int(Pro_Akt / PrognoseGlaettung / 2 )
     
-            self.DEBUG_Ausgabe += "DEBUG\nDEBUG " + datetime.strftime(self.now, "%D %H:%M") + " Aktuelle Prognose - Reservierung: " + str(Pro_Akt)
+            self.DEBUG_Ausgabe += "DEBUG\nDEBUG AktPrognose-Reservierung: " + str(Pro_Akt)
             self.DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) 
     
             ### Prognose ENDE
@@ -314,7 +314,7 @@ class progladewert:
         return(Prognose_Summe, Ende_Nacht_Std)
         
     def getEigenverbrauchOpt(self, host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung=0):
-        DEBUG_Eig_opt ="DEBUG\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>"
+        DEBUG_Eig_opt ="\nDEBUG\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>"
         GrundlastNacht = basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
         AkkuZielProz = basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
         RundungEinspeisewert = basics.getVarConf('EigenverbOptimum','RundungEinspeisewert','eval')
