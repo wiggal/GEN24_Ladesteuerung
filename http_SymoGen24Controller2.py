@@ -206,7 +206,7 @@ if __name__ == '__main__':
                     DEBUG_Ausgabe += AktuellenLadewert_Array[1]
 
                     # DEBUG_Ausgabe der Ladewertermittlung 
-                    DEBUG_Ausgabe += ", aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
+                    DEBUG_Ausgabe += ", PrognoseLadewert: " + str(aktuellerLadewert) + "\n"
 
 
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
@@ -279,17 +279,16 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
                         DEBUG_Ausgabe += ", ProgLimit_SOC80_kW: " + str(ProgLimit_SOC80_kW)
                         DEBUG_Ausgabe += ", BattStatusProz: " + str(BattStatusProz)
-                        DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(DEBUG_BattKapaWatt_akt_org)
-                        DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürtzt: " + str(BattKapaWatt_akt)
                     # Bei 78% bereits abschalten, da sonst evtl. weit über die 80% geladen wird.
                     if BattStatusProz >= 78 and ProgLimit_SOC80_kW >= 0 and PrognoseMorgen > ProgLimit_SOC80_kW:
                         aktuellerLadewert = 0
                         DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, BattganzeLadeKapazWatt, alterLadewert)
                         WR_schreiben = DATA[1]
                         LadewertGrund = "Akkuschonung: Ladebegrenzung auf 80% SOC"
+                    if (DEBUG_BattKapaWatt_akt_org != BattKapaWatt_akt):
+                        DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(DEBUG_BattKapaWatt_akt_org)
+                        DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt)
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< SOC 80% AKTIV!!! >>>>>>>>>>>>>"
-                    else:
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< SOC 100% AKTIV!!! >>>>>>>>>>>>>"
                     #entWIGGlung
 
                     # Wenn die aktuellePVProduktion < 50 Watt ist, nicht schreiben, 
@@ -312,7 +311,6 @@ if __name__ == '__main__':
                     if print_level >= 1:
                         try:
                             print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
-                            print("## HTTP-LADESTEUERUNG ##")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognose - BattVollUm: ", TagesPrognoseGesamt,"-", BattVollUm)
@@ -336,7 +334,7 @@ if __name__ == '__main__':
 
                     DEBUG_Ausgabe+="\nDEBUG\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
                     DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachUnten:  " + str(WRSchreibGrenze_nachUnten) + "W"
-                    DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W\n"
+                    DEBUG_Ausgabe+="\nDEBUG WRSchreibGrenze_nachOben:   " + str(WRSchreibGrenze_nachOben) + "W"
                     
 
                     ######## IN  WR Batteriemanagement schreiben, später gemeinsam
