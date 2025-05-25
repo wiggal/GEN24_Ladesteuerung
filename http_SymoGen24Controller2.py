@@ -167,10 +167,11 @@ if __name__ == '__main__':
                     # evtl. Ladung des Akku auf 80% begrenzen, und damit BattKapaWatt_akt reduzieren
                     Sdt_24H = datetime.now().hour
                     PrognoseMorgen = progladewert.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000
-                    ProgLimit_SOC80_kW = basics.getVarConf('Ladeberechnung','ProgLimit_SOC80_kW','eval')
-                    DEBUG_BattKapaWatt_akt_org = BattKapaWatt_akt
-                    if ProgLimit_SOC80_kW >= 0 and PrognoseMorgen > ProgLimit_SOC80_kW:
-                        BattKapaWatt_akt = int(BattKapaWatt_akt - BattganzeKapazWatt*0.20)
+                    PrognoseLimit_SOC = basics.getVarConf('Ladeberechnung','PrognoseLimit_SOC','eval')
+                    Akkuschonung_Werte = basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str')
+                    BattKapaWatt_akt_SOC = BattKapaWatt_akt
+                    if PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
+                        BattKapaWatt_akt_SOC = int(BattKapaWatt_akt - BattganzeKapazWatt*0.20)
                     #entWIGGlung
 
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
@@ -274,21 +275,26 @@ if __name__ == '__main__':
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
 
                     # Ladung des Akku auf 80% begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
-                    if ProgLimit_SOC80_kW >= 0:
+                    # Akkuschonung_Werte in ein Dictionary umwandeln, ersten Wert extrahieren und in float umwandeln
+                    SOC_data = json.loads(Akkuschonung_Werte)
+                    SOC_Proz_Grenze = float(next(iter(SOC_data.keys())))
+                    # Hysterese anwenden
+                    if (alterLadewert == 0): SOC_Proz_Grenze = SOC_Proz_Grenze - 3
+                    if PrognoseLimit_SOC >= 0:
                         DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< Ladebegrenzung auf 80% SOC >>>>>>>>>>>>>"
                         DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
-                        DEBUG_Ausgabe += ", ProgLimit_SOC80_kW: " + str(ProgLimit_SOC80_kW)
-                        DEBUG_Ausgabe += ", BattStatusProz: " + str(BattStatusProz)
+                        DEBUG_Ausgabe += ", PrognoseLimit_SOC: " + str(PrognoseLimit_SOC)
+                        DEBUG_Ausgabe += ", BattStatusProz_Grenze: " + str(SOC_Proz_Grenze)
                     # Bei 78% bereits abschalten, da sonst evtl. weit über die 80% geladen wird.
-                    if BattStatusProz >= 78 and ProgLimit_SOC80_kW >= 0 and PrognoseMorgen > ProgLimit_SOC80_kW:
+                    if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
                         aktuellerLadewert = 0
                         DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, BattganzeLadeKapazWatt, alterLadewert)
                         WR_schreiben = DATA[1]
                         LadewertGrund = "Akkuschonung: Ladebegrenzung auf 80% SOC"
-                    if (DEBUG_BattKapaWatt_akt_org != BattKapaWatt_akt):
-                        DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(DEBUG_BattKapaWatt_akt_org)
-                        DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt)
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< SOC 80% AKTIV!!! >>>>>>>>>>>>>"
+                    if (BattKapaWatt_akt_SOC != BattKapaWatt_akt):
+                        DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(BattKapaWatt_akt)
+                        DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt_SOC)
+                        DEBUG_Ausgabe+="\nDEBUG <<<< SOC 80% für Ladeberechnung AKTIV!!! >>>>"
                     #entWIGGlung
 
                     # Wenn die aktuellePVProduktion < 50 Watt ist, nicht schreiben, 
