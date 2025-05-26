@@ -3,7 +3,8 @@
 - DynamicPriceCheck.py: Vorbereitung auf viertelstündliche Strompreise. Umfangreiche Umbauten im Code.  
 
 - Neue Funktion für die Akkuschonung.   
-  Der Akku kann nun bei entsprechend großer Prognose für den Folgetag nur bis 80% geladen werden.  
+  Der Akku kann nun bei entsprechend großer Prognose für den Folgetag nur bis XX% geladen werden.  
+  XX ist der erste Wert aus dem String Akkuschonung_Werte.  
   **ACHTUNG:** Neue Variable `ProgLimit_SOC80_kW` in `CONFIG/charge.ini` bitte in `CONFIG/charge_priv.ini` einarbeiten!!  
 
 **[0.28.5] – 2025-05-19**  
