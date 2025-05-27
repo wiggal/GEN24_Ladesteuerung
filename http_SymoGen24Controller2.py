@@ -164,14 +164,17 @@ if __name__ == '__main__':
                     # Klasse ProgLadewert initieren
                     progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata, MaxLadung, Einspeisegrenze, aktuelleBatteriePower)
                     #entWIGGlung
-                    # evtl. Ladung des Akku auf 80% begrenzen, und damit BattKapaWatt_akt reduzieren
+                    # evtl. Ladung des Akku auf SOC_Proz_Grenze begrenzen, und damit BattKapaWatt_akt reduzieren
                     Sdt_24H = datetime.now().hour
                     PrognoseMorgen = progladewert.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000
                     PrognoseLimit_SOC = basics.getVarConf('Ladeberechnung','PrognoseLimit_SOC','eval')
                     Akkuschonung_Werte = basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str')
+                    # Akkuschonung_Werte in ein Dictionary umwandeln, ersten Wert extrahieren und in float umwandeln
+                    SOC_data = json.loads(Akkuschonung_Werte)
+                    SOC_Proz_Grenze = float(next(iter(SOC_data.keys())))
                     BattKapaWatt_akt_SOC = BattKapaWatt_akt
                     if PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
-                        BattKapaWatt_akt_SOC = int(BattKapaWatt_akt - BattganzeKapazWatt*0.20)
+                        BattKapaWatt_akt_SOC = int(BattKapaWatt_akt - BattganzeKapazWatt*((100-SOC_Proz_Grenze)/100))
                     #entWIGGlung
 
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
@@ -213,13 +216,15 @@ if __name__ == '__main__':
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
                     ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
-                    if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
-                        FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
-                        MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
-                    # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
-                    if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung == -2):
-                        FesteLadeleistung = MaxLadung
-                        MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
+                    # Prüfen, ob Einträge schon abgelaufen										      <
+                    if (int(reservierungdata_tmp['ManuelleSteuerung']['Options']) > int(datetime.now().timestamp())):
+                        if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
+                            FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
+                            MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
+                        # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
+                        if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung == -2):
+                            FesteLadeleistung = MaxLadung
+                            MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
 
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
@@ -274,10 +279,7 @@ if __name__ == '__main__':
                                 WR_schreiben = DATA[1]
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
 
-                    # Ladung des Akku auf 80% begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
-                    # Akkuschonung_Werte in ein Dictionary umwandeln, ersten Wert extrahieren und in float umwandeln
-                    SOC_data = json.loads(Akkuschonung_Werte)
-                    SOC_Proz_Grenze = float(next(iter(SOC_data.keys())))
+                    # Ladung des Akku auf XX% (SOC_Proz_Grenze) begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
                     # Hysterese anwenden
                     if (alterLadewert == 0): SOC_Proz_Grenze = SOC_Proz_Grenze - 3
                     if PrognoseLimit_SOC >= 0:
@@ -285,7 +287,6 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
                         DEBUG_Ausgabe += ", PrognoseLimit_SOC: " + str(PrognoseLimit_SOC)
                         DEBUG_Ausgabe += ", BattStatusProz_Grenze: " + str(SOC_Proz_Grenze)
-                    # Bei 78% bereits abschalten, da sonst evtl. weit über die 80% geladen wird.
                     if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
                         aktuellerLadewert = 0
                         DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, BattganzeLadeKapazWatt, alterLadewert)
