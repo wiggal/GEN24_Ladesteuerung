@@ -365,9 +365,13 @@ $(document).ready(function(){
       js_value = -1;
     } else if (modus == "MaxLadung" || modus == "Slider") {
       let input = prompt(`Bitte gib die Gültigkeitsstunden für "${modus}" ein:`, "24");
-      if (input !== null && input.trim() !== "") {
+      if (input === null) {
+        // Nutzer hat auf Abbrechen geklickt -> Funktion beenden
+        return;
+        }
+      if (input.trim() !== "") {
         hours = parseFloat(input);
-      }
+        }
       js_value = (modus === "MaxLadung") ? -2 : parseInt(document.querySelector('input[name="hausakkuladung"]').value);
     }
 
