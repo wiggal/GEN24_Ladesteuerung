@@ -351,7 +351,7 @@ new Chart('PVDaten', {
       echo "borderWidth: '".$optionen[$x]['linewidth']."',\n";
       echo "unit: '".$optionen[$x]['unit']."',\n";
       echo "showLabel: ".$optionen[$x]['showLabel'].",\n";
-      echo "pointRadius: 2,\n";
+      echo "pointRadius: 0,\n";
       echo "cubicInterpolationMode: 'default',\n";
       echo "fill: ".$optionen[$x]['fill'].",\n";
       echo "stack: '".$optionen[$x]['stack']."',\n";

@@ -1,4 +1,4 @@
-**[0.29.0] – 2025-XX-XX**  
+**[0.29.0] – 2025-06-01**  
 
 - DynamicPriceCheck.py: Vorbereitung auf viertelstündliche Strompreise. Umfangreiche Umbauten im Code.  
 
@@ -9,6 +9,8 @@
 
 - Neue Funktion: Beim Speichern der LadeStrg mit der Auswahl "Slider/MaxLadung" kann eine Gültigkeit in Stunden angegeben werden.
   Ist der Zeitbereich abgelaufen, wird automatisch auf "Auto" zurückgeschaltet.
+
+- in html/config.php wurde Zeile 21 entfernt `$Strompreis_Dia_optionen = array();` bitte evtl. auch in html/config_priv.php entfernen.  
 
 **[0.28.5] – 2025-05-19**  
 
