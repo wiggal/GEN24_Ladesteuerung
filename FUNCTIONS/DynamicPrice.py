@@ -73,7 +73,8 @@ class dynamic:
         try:
             zeiger.execute(sql_anweisung)
             rows = zeiger.fetchall()
-            if(self.dyn_print_level >= 2):
+            # Lastprofil ausgeben, wenn dyn_print_level >= 3
+            if(self.dyn_print_level >= 3):
                 headers = ["Index", "Datenart", "Stunde", "Wochentag", "Verbrauch", "Timestamp"]
                 self.listAStable(headers, rows)
         except:
@@ -145,6 +146,105 @@ class dynamic:
             i  += 1
         return(Prognosen_24H)
         
+    def getPrice_smart_api(self, BZN):
+        # Aufschläge zum reinen Börsenpreis, return muss immer Bruttoendpreis liefern
+        Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
+        MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
+        # Tageszeitabhängiger Preisanteil (z.B. $14a Netzentgelte)
+        Tageszeit_Preisanteil_tmp = json.loads(basics.getVarConf('dynprice','Tageszeit_Preisanteil', 'str')) 
+        Tageszeit_Preisanteil_tmp = dict(sorted(Tageszeit_Preisanteil_tmp.items(), key=lambda item: int(item[0])))
+
+        # Schlüssel und Werte in numerische Form umwandeln
+        sorted_hours = sorted(int(k) for k in Tageszeit_Preisanteil_tmp.keys())  # Sortierte Stunden
+        values = [float(Tageszeit_Preisanteil_tmp[str(h).zfill(2)]) for h in sorted_hours]  # Sortierte Werte
+
+        # Dictionary für alle Stunden füllen
+        Tageszeit_Preisanteil = {}
+        for i in range(len(sorted_hours)):
+            start = sorted_hours[i]
+            end = sorted_hours[i + 1] if i + 1 < len(sorted_hours) else 24  # Bis zum nächsten oder 24 Uhr
+            for h in range(start, end):
+                Tageszeit_Preisanteil[str(h).zfill(2)] = values[i]  # Konstanter Wert
+        # DEBUG
+        if(self.dyn_print_level >= 4): print("++ Tageszeit_Preisanteil: ", Tageszeit_Preisanteil, "\n")
+
+        # Aktuelles Datum und Uhrzeit
+        jetzt = datetime.now()
+        # Wochentag berechnen (Montag = 0, Sonntag = 6)
+        wochentag = jetzt.weekday()
+        # Start der Woche (Montag 00:00)
+        montag = datetime(jetzt.year, jetzt.month, jetzt.day) - timedelta(days=wochentag)
+        montag = montag.replace(hour=0, minute=0, second=0, microsecond=0)
+        heute = jetzt.replace(hour=0, minute=0, second=0, microsecond=0)
+        # Unix-Timestamp berechnen
+        montag_timestamp = int(montag.timestamp())
+        heute_timestamp_ms = int(heute.timestamp() * 1000)
+
+        # API-URL mit Parameter
+        Gebietsfilter = 4169 # für DE-LU 
+        if(BZN == 'AT'): Gebietsfilter = 4170
+
+        #  viertestündliche Strompreise
+        url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_quarterhour_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, montag_timestamp)
+        timeout_sec = 10
+        Push_Schreib_Ausgabe = ''
+        
+        try:
+            apiResponse = requests.get(url, timeout=timeout_sec)
+            apiResponse.raise_for_status()
+            if apiResponse.status_code != 204:
+                json_data1 = dict(json.loads(apiResponse.text))
+            else:
+                Ausgabe = "### ERROR:  Keine Strompreise von api.energy-charts.info"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.Timeout:
+                Ausgabe = "### ERROR: Timeout, keine Strompreise von api.energy-charts.info"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.HTTPError as http_err:
+                Ausgabe = (f"### ERROR: HTTP-Fehler: {http_err} (Status Code: {apiResponse.status_code})")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.RequestException as req_err:
+                Ausgabe = (f"### ERROR: Verbindungsfehler oder andere Probleme: {req_err}")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+
+        # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+        Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
+        if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
+            Push_Message_Url = basics.getVarConf('messaging','Push_Message_Url','str')
+            apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
+            print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
+
+        try:
+            json_data1['series'] = [
+            [timestamp, value]
+            for timestamp, value in json_data1['series']
+            if not (timestamp < heute_timestamp_ms or value is None)
+                ]
+            pricelist = json_data1
+            pricelist_date = []
+            for row in pricelist['series']:
+                if row[1] is not None:
+                    Std = datetime.fromtimestamp(row[0]/1000).strftime("%H")
+                    time = datetime.fromtimestamp(row[0]/1000).strftime("%Y-%m-%d %H:%M:%S")
+                    price = round((row[1]/1000 + Nettoaufschlag + Tageszeit_Preisanteil[Std]) * MwSt, 4)
+                    # Zeitunkt, Bruttopreis, Börsenpreis
+                    pricelist_date.append((time, price, round(row[1]/1000, 3)))
+        except:
+            print("### ERROR: Keine Daten von api.energy-charts.info, deshalb die Preise aus DB verwenden!\n")
+            verbindung = sqlite3.connect('PV_Daten.sqlite')
+            zeiger = verbindung.cursor()
+            sql_anweisung = "SELECT * from strompreise WHERE DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day');"
+            zeiger.execute(sql_anweisung)
+            pricelist_date = zeiger.fetchall()
+            if pricelist_date == []:
+                print("### ERROR: In der DB sind auch keine aktuellen Strompreise vorhanden, Programmabbruch:")
+                exit()
+        return(pricelist_date)
+
     def getPrice_energycharts(self, BZN):
         # Aufschläge zum reinen Börsenpreis, return muss immer Bruttoendpreis liefern
         Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
@@ -178,8 +278,6 @@ class dynamic:
         # API-URL mit Parameter
         url = "https://api.energy-charts.info/price?bzn={}&start={}&end={}".format(BZN, start_time, end_time)
         timeout_sec = 10
-        # Nur für die Entwicklung
-        # if(self.dyn_print_level >= 5): timeout_sec = 1
         Push_Schreib_Ausgabe = ''
         
         try:
@@ -250,12 +348,13 @@ class dynamic:
 
         return()
 
-    def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0, mitPV=1):
+    def akkustand_neu(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W=0, mitPV=1, Stundenteile=1):
         # Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         netzlade_preisschwelle = basics.getVarConf('dynprice','netzlade_preisschwelle', 'eval')
         # Wenn keine Maximaler Zwangsladung-SOC (0) Akkukapazität setzen.
         if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
+
         # Ladestand für alle Zeiten neu berechnen
         for Akkustatus in pv_data_charge:
             min_net_power = Akkustatus[1] - Akkustatus[2]
@@ -269,14 +368,14 @@ class dynamic:
             if Ladewert_tmp < 0:
                 # Wenn PV-Produktion größer Zwangsladung, PV-Produktion zum SOC.
                 if int(Akkustatus[5] * -1) < min_net_power:
-                    akku_soc += min_net_power
+                    akku_soc += int(min_net_power / Stundenteile)
                 else:
-                    akku_soc += int((Akkustatus[5] * -1) / (1 + (Akku_Verlust_Prozent/200)))
+                    akku_soc += int(((Akkustatus[5] * -1) / (1 + (Akku_Verlust_Prozent/200))) / Stundenteile)
             else:
                 if min_net_power > 0:
-                    akku_soc += min_net_power
+                    akku_soc += int(min_net_power / Stundenteile)
                 else:
-                    akku_soc += int(min_net_power * (1 + (Akku_Verlust_Prozent/200)))
+                    akku_soc += int((min_net_power * (1 + (Akku_Verlust_Prozent/200))) / Stundenteile)
                     
 
             # Akustand muss minimal unter minimum_batterylevel sein
@@ -287,7 +386,7 @@ class dynamic:
 
         return(pv_data_charge)
 
-    def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh):
+    def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile=1):
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
         max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
@@ -298,7 +397,7 @@ class dynamic:
 
         # 1.) negative bzw. sehr niedrige Strompreise suchen und da Akku vollladen
         # Akkustand ohne PV-Leistung ermitteln
-        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 0)
+        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 0, Stundenteile)
         min_Preis_zeilen = [zeile for zeile in pv_data_charge if zeile[3] < netzlade_preisschwelle]
         # noch nach Preis sortieren
         min_Preis_zeilen = sorted(min_Preis_zeilen, key=lambda x: x[3])
@@ -308,16 +407,12 @@ class dynamic:
         for min_Preis_Std in min_Preis_zeilen:
             charge_rate_kW_tmp = charge_rate_kW
             spaeter_zeile_max_soc = [zeile for zeile in pv_data_charge if zeile[0] >= min_Preis_Std[0]]
-            # print("WIGGAL SPÄTER: ", spaeter_zeile_max_soc)  #entWIGGlung
             zeile_max_soc = max(spaeter_zeile_max_soc, key=lambda x: x[4])
-            # print("WIGGAL MAX_SOC: ", zeile_max_soc)  #entWIGGlung
-            # print("WIGGAL: ", min_Preis_Std[0], battery_capacity_Wh, zeile_max_soc[4], battery_capacity_Wh - zeile_max_soc[4] )  #entWIGGlung
             if (battery_capacity_Wh - zeile_max_soc[4] < charge_rate_kW): charge_rate_kW_tmp = int((battery_capacity_Wh - zeile_max_soc[4]) + 1.1)
-            # print("WIGGAL min_Preis_Std: ", charge_rate_kW_tmp, min_Preis_Std)  #entWIGGlung
             if charge_rate_kW_tmp > 100:
                 min_Preis_Std[5]= charge_rate_kW_tmp * -1
             # NOCHMAL: Akkustand ohne PV-Leistung ermitteln
-            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 0)
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 0, Stundenteile)
             if(self.dyn_print_level >= 3):
                 headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
                 self.listAStable(headers, pv_data_charge, '>>')
@@ -326,7 +421,7 @@ class dynamic:
             print(">> ******** ENDE: Wenn Strompreis unter netzlade_preisschwelle ********\n")
 
         # 2.) alle Stunden in denen der Akku reicht auf 0 setzen, größte zuerst
-        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
         Zeilen = len(pv_data_charge)
         while Zeilen > 0:
             max_index = -1
@@ -347,7 +442,7 @@ class dynamic:
             else:
                 pv_data_charge[max_index][5] = -0.1 
 
-            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
 
             if(self.dyn_print_level >= 4):
                 headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
@@ -356,7 +451,7 @@ class dynamic:
             Zeilen -= 1
 
         # 3.) nächster Schritt Alle Zeiten mit -0.1 auf Zwangsladung oder Ladestopp prüfen
-        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+        self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
         Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
         SOC_ueber_Min = 0
         while Zeilen > 0:
@@ -478,7 +573,7 @@ class dynamic:
             zeilen_index_max_price = next((i for i, row in enumerate(pv_data_charge) if zeile_max_price[0] in row))
             pv_data_charge[zeilen_index_max_price][5] = zeile_max_price_Ladewert
             # Akkustände neu berechnen
-            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W)
+            self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
 
             Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
 

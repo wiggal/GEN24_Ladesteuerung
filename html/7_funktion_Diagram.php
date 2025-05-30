@@ -165,16 +165,18 @@ return $SQL;
     break; # ENDE case 'SUM_Netzverbrauch'
 
     case 'daten':
+# Anpassung an viertestündliche Strompreise
 $SQL = "WITH Alle_PVDaten AS (
     SELECT
-        STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
+        STRFTIME('%Y-%m-%d %H:', Zeitpunkt) ||
+    printf('%02d:00', (CAST(STRFTIME('%M', Zeitpunkt) AS INTEGER) / 15) * 15) AS Zeitraum_15min,
         LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
         LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS Netzladen,
         BattStatus,
         Vorhersage
     FROM pv_daten
     where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-    group by STRFTIME('".$groupSTR."', Zeitpunkt)
+    GROUP BY Zeitraum_15min
 )
 SELECT
     sp.Zeitpunkt,
@@ -190,7 +192,7 @@ SELECT
 	pfc.PrognBattStatus
 FROM strompreise AS sp
 LEFT JOIN Alle_PVDaten AS pv
-    ON sp.Zeitpunkt = pv.Zeitpunkt -- JOIN über die Stunden
+    ON sp.Zeitpunkt = pv.Zeitraum_15min -- JOIN über die Stunden
 LEFT JOIN priceforecast AS pfc
     ON sp.Zeitpunkt = pfc.Zeitpunkt -- JOIN über die Stunden
 where sp.Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
@@ -349,7 +351,7 @@ new Chart('PVDaten', {
       echo "borderWidth: '".$optionen[$x]['linewidth']."',\n";
       echo "unit: '".$optionen[$x]['unit']."',\n";
       echo "showLabel: ".$optionen[$x]['showLabel'].",\n";
-      echo "pointRadius: 2,\n";
+      echo "pointRadius: 0,\n";
       echo "cubicInterpolationMode: 'default',\n";
       echo "fill: ".$optionen[$x]['fill'].",\n";
       echo "stack: '".$optionen[$x]['stack']."',\n";
@@ -448,44 +450,47 @@ echo "    }]
       },
       y3: {
         type: 'linear',
-        display: false,
+        display: true,
         position: 'left',
         min: ".$MIN_y3.",
         max: ".$MAX_y3.",
         grid: {
-            drawOnChartArea: false
+            drawOnChartArea: true
         },
         ticks: {
-           stepSize: 20,
+           stepSize: 5,
            font: {
              size: 20,
            },
            callback: function(value, index, values) {
-              return value + 'ct.';
+              return value.toFixed(0) + 'ct';
            }
         }
       },
       y: {
         type: 'linear', 
-        position: 'left',
+        position: 'right',
         stacked: true,
         max: ".$MAX_y.",
         min: (context) => {
             let maxY = context.chart.scales.y.max;
             return (context.chart.scales.y3.min / context.chart.scales.y3.max * maxY)
         },
+        grid: {
+            drawOnChartArea: false
+        },
         ticks: {
            font: {
              size: 20,
            },
            callback: function(value, index, values) {
-              return value >= 0 ? Math.round(value) + 'W' : '';
+              return value >= 0 ? value.toFixed(0) + 'W' : '';
            }
         },
       },
       y2: {
         type: 'linear',
-        display: 'auto',
+        display: false,
         position: 'right',
         min: (context) => {
             return (context.chart.scales.y3.min / context.chart.scales.y3.max * 100)

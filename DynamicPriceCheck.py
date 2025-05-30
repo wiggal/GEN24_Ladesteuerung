@@ -84,9 +84,12 @@ for key in Prognose_24H:
             data.append((key[0], key[1], key2[1]))
 
 # Aktuelle Strompreise holen
-
+# Variabler Funktionsaufruf
 LAND = basics.getVarConf('dynprice','LAND', 'str')
-pricelist_date = dynamic.getPrice_energycharts(LAND)
+Preisquelle = basics.getVarConf('dynprice','Preisquelle', 'str')
+funktion_string = 'getPrice_'+Preisquelle
+funktion = getattr(dynamic, funktion_string)
+pricelist_date = funktion(LAND)
 
 if(dyn_print_level >= 2):
     headers = ["Zeitpunkt", "Strompreis brutto(€/kWh)", "Börsenstrompreis (€/kWh)"]
@@ -95,13 +98,14 @@ if(dyn_print_level >= 2):
 
 # Zusammenführen der Listen2
 pv_data = []
-for key in data:
-    for key2 in pricelist_date:
-        if key[0] == key2[0]:
-            pv_data.append([key[0], key[1], key[2], key2[1]])
+for key in pricelist_date:
+    key_neu = key[0][:14] + "00" + key[0][16:]
+    for key2 in data:
+        if key_neu == key2[0]:
+            pv_data.append([key[0], key2[1], key2[2], key[1]])
 
 # Werte als Tabelle ausgeben
-if(dyn_print_level >= 1):
+if(dyn_print_level >= 3):
     headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch*"+str(Lade_Verbrauchs_Faktor)+"(W)", "Strompreis (€/kWh)"]
     dynamic.listAStable(headers, pv_data)
 
@@ -142,14 +146,17 @@ if(dyn_print_level >= 1):
     dynamic.listAStable(headers, table_liste)
     print()
 
-if(dyn_print_level >= 2): print("\n*****************  DEBUGGING *****************")
+if(dyn_print_level >= 3): print("\n*****************  DEBUGGING *****************")
 
 # Spalte Akkustand und Ladewatt -0.01 anhängen
 pv_data_charge = [zeile + [0, -0.01] for zeile in pv_data]
+# Prüfen, ob vietelstündliche Strompreise
+Stundenteile = 1
+if(len(pv_data_charge) > 24): Stundenteile = 4
 # Mit Funktion get_charge_stop Ladepunkte usw. berechnen
-pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh)
+pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile)
 
-if(dyn_print_level >= 2): print("\n***************** ENDE DEBUGGING *****************")
+if(dyn_print_level >= 3): print("\n***************** ENDE DEBUGGING *****************")
 
 # Aktuelles Datum und Uhrzeit
 jetzt = datetime.now()
@@ -163,23 +170,35 @@ entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
 
 SteuerCode = []
 DBCode = []
+# Schleife für die nächsten 24 Stunden in gegebenem Intervall
 for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster Stunde
     zeitpunkt = heute_start + timedelta(hours=stunde)
     Stunde = zeitpunkt.strftime("%H:%M")  # Stunde im Speicherformat
     Res_Feld1 = 0
-    Res_Feld2 = 0
+    Res_Feld2 = 0 
+    Res_Feld2_array = {}
     Options = ''
-    SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
+    # Wenn viertelstündliche Preise vorhanden, berücksichtigen
+    for minuten in [0, 15, 30, 45]:
+        zeitpunkt = zeitpunkt.replace(minute=minuten, second=0, microsecond=0)
+        SuchStunde = zeitpunkt.strftime("%Y-%m-%d %H:%M:00")
 
-    for Stundenliste in pv_data_charge:
-        if SuchStunde in Stundenliste:
-            Res_Feld1 = 0
-            Res_Feld2 = Stundenliste[5]
-            if Res_Feld2 < 0:
-                Options = 'DynPrice'
-            break
+        for Stundenliste in pv_data_charge:
+            if SuchStunde in Stundenliste:
+                Res_Feld1 = 0
+                Res_Feld2_array[minuten] = Stundenliste[5]
+                if Stundenliste[5] != 0:
+                    Options = 'DynPrice'
+                break
+    Res_Feld2_werte = list(Res_Feld2_array.values())
+    # Wenn alle viertestündlichen Werte gleich, nur einmal ausgeben
+    if(len(set(Res_Feld2_werte)) == 1):
+        Res_Feld2 = Res_Feld2_array[0]
+    # Wenn viertestündliche Werte unterschiedlich, alle ausgeben
+    if(len(set(Res_Feld2_werte)) > 1):
+        Res_Feld2 = ";".join(str(wert) for wert in Res_Feld2_werte)
 
-    # Wenn manueller Eintrag nicht überschreiben
+    # Wenn manueller Eintrag, Eintrag nicht überschreiben
     # Damit kein Fehler kommt, wenn Datensatz in SQLsteuerdatei nicht existiert
     try:
         if entladesteurungsdata[Stunde]['Options'] != 'DynPrice' and entladesteurungsdata[Stunde]['Res_Feld2'] < 0:
@@ -199,30 +218,10 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     except:
         DBCode.append((Stunde, 'ENTLadeStrg', Stunde, 0, 0, ''))
 
-    # DEBUG CSV-Ausgabe
-    if(dyn_print_level >= 4):
-        import csv
-        if stunde == 1 :
-            try:
-                with open("DEBUG.csv", "r") as file:
-                    file = open('DEBUG.csv',"a")
-                    csvzeile = [str(SuchStunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
-                    writer = csv.writer(file, delimiter=',')
-                    writer.writerow(csvzeile)
-                    file.close()
-            except FileNotFoundError:
-                # Behandle den Fall, dass die Datei nicht existiert
-                file = open('DEBUG.csv',"a")
-                csvheader = ["Stunde", "Schluessel", "Entladung", "Entladegrenze", "Preis €/kWh", "Akkustand/W"]
-                csvzeile = [str(SuchStunde), "ENTLadeStrg", str(Res_Feld1), str(Res_Feld2), str(Stundenliste[3]), str(Stundenliste[4])]
-                writer = csv.writer(file, delimiter=',')
-                writer.writerow(csvheader)
-                writer.writerow(csvzeile)
-                file.close()
-    # DEBUG CSV-Ausgabe
-
 # Akkuzustand nochmal neu berechnen mit manuellen Einträgen aus ENTLadeStrg
-dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh)
+max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
+max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
+dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
 
 if(dyn_print_level >= 1):
     print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
@@ -237,7 +236,6 @@ if(dyn_print_level >= 1):
 
 # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
 SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
-print_level = basics.getVarConf('env','print_level','eval')
 Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
 Options = Parameter[2]
 
@@ -284,7 +282,7 @@ for row in pv_data_charge:
     PrognBattStatus = round(Akkustand_W/battery_capacity_Wh*100, 1)
     priceforecast.append([Ladezeitpunkt,PV_Prognose,Netzverbrauch,Netzladen,PrognBattStatus])
 
-if(dyn_print_level >= 2):
+if(dyn_print_level >= 3):
     # priceforecast Daten für DB
     print(">>  Folgende Strompreisvorhersage in PV_Daten.sqlite/priceforecast speichern.")
     headers = ["Ladezeitpunkt", "PV_Prognose", "PrognNetzverbrauch", "PrognNetzladen", "PrognBattStatus"]
@@ -296,5 +294,5 @@ if ('logging' in Options):
     Logging_Schreib_Ausgabe = 'Strompreise in SQLite-Datei gespeichert!'
 else:
     Logging_Schreib_Ausgabe = "Strompreise NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
-if print_level >= 1:
+if dyn_print_level >= 1:
     print(Logging_Schreib_Ausgabe)
