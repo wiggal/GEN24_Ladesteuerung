@@ -1,4 +1,4 @@
-**[0.29.0] – 2025-06-01**  
+**[0.29.0] – 2025-05-30**  
 
 - DynamicPriceCheck.py: Vorbereitung auf viertelstündliche Strompreise. Umfangreiche Umbauten im Code.  
 
