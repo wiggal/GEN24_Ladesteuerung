@@ -20,9 +20,10 @@ if(isset($_POST["Tag_Zeit"]))
 }
 
 $db = new SQLite3($SQLfile);
+# Alle elemente löschen, sonst bleiben welche übrig
+$db->exec("DELETE FROM steuercodes WHERE Schluessel = '$Schluessel[0]' ");
 $VALUE = ("REPLACE INTO steuercodes (ID, Schluessel, Zeit, Res_Feld1, Res_Feld2, Options) VALUES  $insertvalue ");
 $db->exec($VALUE);
-
-print_r($VALUE);
+$db->close();
 
 ?>

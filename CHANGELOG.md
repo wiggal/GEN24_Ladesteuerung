@@ -1,3 +1,17 @@
+**[0.29.0] – 2025-05-30**  
+
+- DynamicPriceCheck.py: Vorbereitung auf viertelstündliche Strompreise. Umfangreiche Umbauten im Code.  
+
+- Neue Funktion für die Akkuschonung.   
+  Der Akku kann nun bei entsprechend großer Prognose für den Folgetag nur bis XX% geladen werden.  
+  XX ist der erste Wert aus dem String Akkuschonung_Werte.  
+  **ACHTUNG:** Neue Variable `PrognoseLimit_SOC` in `CONFIG/charge.ini` bitte in `CONFIG/charge_priv.ini` einarbeiten!!  
+
+- Neue Funktion: Beim Speichern der LadeStrg mit der Auswahl "Slider/MaxLadung" kann eine Gültigkeit in Stunden angegeben werden.
+  Ist der Zeitbereich abgelaufen, wird automatisch auf "Auto" zurückgeschaltet.
+
+- in html/config.php wurde Zeile 21 entfernt `$Strompreis_Dia_optionen = array();` bitte evtl. auch in html/config_priv.php entfernen.  
+
 **[0.28.5] – 2025-05-19**  
 
 LadeStrg:  

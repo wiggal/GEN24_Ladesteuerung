@@ -136,7 +136,11 @@ input.slider {
   top: 8px;
   left: 0px;
 }
-
+.gueltig {
+  font-weight: normal;
+  color: #555;
+  font-size: 90%;
+}
   </style>
  </head>
 
@@ -163,6 +167,14 @@ $DB_ManuelleSteuerung_wert = 0;
 $DB_Auto_selected = '';
 $DB_Slider_selected = '';
 $DB_MaxLadung_selected = '';
+# Prüfen, ob Einträge für ManuelleSteuerung schon abgelaufen
+date_default_timezone_set('Europe/Berlin');
+if ($EV_Reservierung['ManuelleSteuerung']['Options'] < time() OR $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == -1) {
+    $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] = -1;
+    $gueltig_bis = '';
+    } else {
+    $gueltig_bis = "gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
+    }
 
 if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
     $DB_ManuelleSteuerung_wert = $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'];
@@ -181,7 +193,7 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
 
 <!-- SLIDER -->
 <div style='text-align: center;'>
-  <p class="sliderbeschriftung">Ladegrenze:</p>
+  <p class="sliderbeschriftung">Ladegrenze: <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
 <div class="flex-container">
     <div>
       <label for="modus" class="dropdown" ></label>
@@ -347,22 +359,28 @@ $(document).ready(function(){
   });
   const modus = document.querySelector('select[name="hausakkuladung"]').value;
   let js_value = -1;
+  let hours = 0;
 
   if (modus == "Auto") {
-    js_value = -1;
-  } else if (modus == "MaxLadung") {
-    js_value = -2;
-  } else {
-    // Bei "Slider" Sliderwert lesen
-    js_value = parseInt(document.querySelector('input[name="hausakkuladung"]').value);
-  }
+      js_value = -1;
+    } else if (modus == "MaxLadung" || modus == "Slider") {
+      let input = prompt(`Bitte gib die Gültigkeitsstunden für "${modus}" ein:`, "24");
+      if (input === null) {
+        // Nutzer hat auf Abbrechen geklickt -> Funktion beenden
+        return;
+        }
+      if (input.trim() !== "") {
+        hours = parseFloat(input);
+        }
+      js_value = (modus === "MaxLadung") ? -2 : parseInt(document.querySelector('input[name="hausakkuladung"]').value);
+    }
 
   ID.push("23:59");
   Schluessel.push("Reservierung");
   Tag_Zeit.push("ManuelleSteuerung");
   Res_Feld1.push(js_value);
   Res_Feld2.push(0);
-  Options.push('');
+  Options.push(Math.floor(Date.now() / 1000) + hours * 3600);
   //alert(js_value);
 
   $.ajax({

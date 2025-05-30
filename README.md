@@ -12,6 +12,9 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.29.0**  
+Zur Akkuschonung kann der Akku bei entprechender Prognose auch nur bis 80% geladen werden.  
+Vorbereitung des DynamicPriceCheck auf viertelstündliche Strompreise.  
 Ab Version: **0.28.1**  
 Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/ von @tz8  
 **ACHTUNG:** Umfangreiche Änderungen in CONFIG/weather_priv.ini nötig!!  
