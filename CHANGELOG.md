@@ -1,3 +1,7 @@
+**[0.29.1] – 2025-06-XX**  
+
+- Akkuschonung und Akku SOC-Begrenzung wird nicht mehr angewendet, wenn eine manuelle Ladegrenze eingestellt ist.
+
 **[0.29.0] – 2025-05-30**  
 
 - DynamicPriceCheck.py: Vorbereitung auf viertelstündliche Strompreise. Umfangreiche Umbauten im Code.  
