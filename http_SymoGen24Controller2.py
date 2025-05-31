@@ -215,8 +215,12 @@ if __name__ == '__main__':
                     MaxladungDurchPV_Planung = ""
                     ManuelleStrg_Akkuschon_aus = 0
                     ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
-                    # Prüfen, ob Einträge schon abgelaufen										      <
-                    if (int(reservierungdata_tmp['ManuelleSteuerung']['Options']) > int(datetime.now().timestamp())):
+                    # Prüfen, ob Einträge schon abgelaufen
+                    try: 
+                        Ablaufdatum = int(reservierungdata_tmp['ManuelleSteuerung']['Options'])
+                    except: 
+                        Ablaufdatum = 0
+                    if (Ablaufdatum > int(datetime.now().timestamp())):
                         if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
                             FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
                             ManuelleStrg_Akkuschon_aus = 1

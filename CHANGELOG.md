@@ -2,6 +2,8 @@
 
 - Akkuschonung und Akku SOC-Begrenzung wird nicht mehr angewendet, wenn eine manuelle Ladegrenze eingestellt ist.
 
+FIX: Nach Eingabe von Buchstaben in der Abfrage `Gültigkeit in Stunden` funktioniert deas Programm nicht mehr.
+
 **[0.29.0] – 2025-05-30**  
 
 - DynamicPriceCheck.py: Vorbereitung auf viertelstündliche Strompreise. Umfangreiche Umbauten im Code.  
