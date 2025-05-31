@@ -169,6 +169,10 @@ $DB_Slider_selected = '';
 $DB_MaxLadung_selected = '';
 # Prüfen, ob Einträge für ManuelleSteuerung schon abgelaufen
 date_default_timezone_set('Europe/Berlin');
+# Wenn Fehld in DB keine Zahl
+if (!is_numeric($EV_Reservierung['ManuelleSteuerung']['Options'])){
+    $EV_Reservierung['ManuelleSteuerung']['Options'] = 0;
+}
 if ($EV_Reservierung['ManuelleSteuerung']['Options'] < time() OR $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == -1) {
     $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] = -1;
     $gueltig_bis = '';
@@ -369,8 +373,13 @@ $(document).ready(function(){
         // Nutzer hat auf Abbrechen geklickt -> Funktion beenden
         return;
         }
-      if (input.trim() !== "") {
-        hours = parseFloat(input);
+      // Wenn Buchstaben eingegeben werden, hours = 0
+      let trimmed = input.trim();
+      let parsed = parseFloat(trimmed);
+      if (trimmed !== "" && !isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+            hours = parsed;
+        } else {
+            hours = 0;
         }
       js_value = (modus === "MaxLadung") ? -2 : parseInt(document.querySelector('input[name="hausakkuladung"]').value);
     }
