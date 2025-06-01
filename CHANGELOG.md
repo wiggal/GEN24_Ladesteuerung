@@ -1,9 +1,17 @@
+**[0.30.0] – 2025-XX-XX**  
+
+**Große Änderung bei Prognosespeicherung***  
+- Alle abgerufenen Prognosedaten werden nun in der SQLitedatei `weatherData.sqlite` gespeichert.  
+- Bei Verwendung der Prognosedaten wird ein Mittelwert per Median aus allen gespeicherten Prognosen gebildet.  
+- Es können also alle vorhandenen Prognosedienste abgerufen und gleichzeitig verwendet werden, soweit gewollt.  
+- Neues Tool `ForecastMgr` um die gespeicherten Prognosedaten zu sichten und evtl. zu löschen.
+
 **[0.29.1] – 2025-06-01**  
 
 - Akkuschonung und Akku SOC-Begrenzung wird nicht mehr angewendet, wenn eine manuelle Ladegrenze eingestellt ist.
 - Variable 'Einfacher_PHP_Webserver = 1' in CONFIG/default.ini als Standard gesetzt.
 
-FIX: Nach Eingabe von Buchstaben in der Abfrage `Gültigkeit in Stunden` funktioniert deas Programm nicht mehr.
+FIX: Nach Eingabe von Buchstaben in der Abfrage `Gültigkeit in Stunden` funktioniert das Programm nicht mehr.
 
 **[0.29.0] – 2025-05-30**  
 
