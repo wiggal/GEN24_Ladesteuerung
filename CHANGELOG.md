@@ -1,6 +1,7 @@
-**[0.29.1] – 2025-06-XX**  
+**[0.29.1] – 2025-06-01**  
 
 - Akkuschonung und Akku SOC-Begrenzung wird nicht mehr angewendet, wenn eine manuelle Ladegrenze eingestellt ist.
+- Variable 'Einfacher_PHP_Webserver = 1' in CONFIG/default.ini als Standard gesetzt.
 
 FIX: Nach Eingabe von Buchstaben in der Abfrage `Gültigkeit in Stunden` funktioniert deas Programm nicht mehr.
 

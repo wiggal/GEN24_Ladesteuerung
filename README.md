@@ -89,14 +89,13 @@ Hier das Diagramm zu den dynamischen Strompreisen:
 ![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
 
 ## Webserver Installation (WebUI):  
-Nicht zwingend erforderlich, die prognosebasierte Ladesteuerung funktioniert auch ohne WebUI (Webserver)  
 
 **PHP installieren:**
 ```
 sudo apt update && sudo apt upgrade
 sudo apt install php php-sqlite3
 ```
-Wenn PHP installiert ist, kann durch die Variable `Einfacher_PHP_Webserver = 1` in der CONFIG/default_priv.ini beim nächsten Start von `start_PythonScript.sh`
+Wenn PHP installiert ist, wird durch die Variable `Einfacher_PHP_Webserver = 1` (Standard) in der CONFIG/default_priv.ini beim nächsten Start von `start_PythonScript.sh`
 automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port:2424 erreichbar (z.B.: raspberrypi:2424).  
 
 **_Alternativ kann auch der Webserver Apache installiert werden:_**  
