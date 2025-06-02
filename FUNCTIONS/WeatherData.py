@@ -1,0 +1,177 @@
+# Funktionen für die Gen24_Ladesteuerung
+from datetime import datetime
+import os
+import json
+import configparser
+import sqlite3
+import FUNCTIONS.functions
+
+basics = FUNCTIONS.functions.basics()
+    
+class WeatherData:
+    def __init__(self):
+        self.now = datetime.now()
+
+    def check_or_create_db(self, path):
+        # Prüfen, ob Datei existiert und ob sie leer ist
+        if not os.path.exists(path) or os.path.getsize(path) == 0:
+            print("DB existiert nicht oder ist leer. Wird neu erstellt.")
+            return self.create_database(path)
+
+        # Prüfen, ob Datei eine gültige SQLite-DB ist
+        try:
+            with sqlite3.connect(path) as conn:
+                conn.execute("SELECT name FROM sqlite_master LIMIT 1;")
+        except sqlite3.DatabaseError:
+            print("DB beschädigt oder ungültig. Neu erstellen.")
+            os.remove(path)
+            create_database(path)
+
+    def create_database(self, path):
+        with sqlite3.connect(path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS weatherData (
+                    Zeitpunkt TEXT,
+                    Quelle TEXT,
+                    Prognose_W INTEGER,
+                    Gewicht INTEGER,
+                    Options TEXT,
+                    UNIQUE(Zeitpunkt, Quelle)
+                );
+            """)
+        print("DB wurde erstellt.")
+
+
+    def storeWeatherData_SQL(self, data, quelle):
+        self.check_or_create_db('weatherData.sqlite')
+        verbindung = sqlite3.connect('weatherData.sqlite')
+        zeiger = verbindung.cursor()
+        heute = datetime.today().date().isoformat()
+
+        try:
+            # Alte Einträge löschen
+            zeiger.execute("""
+                DELETE FROM weatherData
+                WHERE datetime(Zeitpunkt) < datetime(?);
+            """, (heute,))
+            # Neue Prognosen speichern
+            zeiger.executemany("""
+            INSERT OR REPLACE INTO weatherData (Zeitpunkt, Quelle, Prognose_W, Gewicht, Options)
+            VALUES (?, ?, ?, ?, ?);
+            """, data)
+
+        except Exception as e:
+            print("Fehler:", e)
+            import traceback
+            traceback.print_exc()
+            print("ERROR :", self.now, "Die Prognosedaten von ", quelle, "konnten NICHT gespeichert werden!")
+            exit(0)
+        verbindung.commit()
+        verbindung.close()
+
+        return()
+    
+    def checkMaxPrognose(self, data):
+        database = 'PV_Daten.sqlite'
+        print_level = basics.getVarConf('env','print_level','eval')
+        MaxProGrenz_Faktor = basics.getVarConf('env','MaxProGrenz_Faktor','eval')
+        MaxProGrenz_Dayback = basics.getVarConf('env','MaxProGrenz_Dayback','eval') * -1
+        DEBUG_txt = "Folgende Prognosen wurden auf einen Maximalwert reduziert:\n"
+        Anzahl_Begrenzung = 0
+
+        # Datum Sommer und Winterzeit ermitteln
+        # Aktuelles Jahr ermitteln
+        current_year = datetime.now().year
+        # Datum für den 31. März des aktuellen Jahres
+        date_03 = datetime(current_year, 3, 31)
+        # Datum für den 31. Oktober des aktuellen Jahres
+        date_10 = datetime(current_year, 10, 31)
+        # Wochentag ermitteln (0=Sonntag, 6=Samstag)
+        weekday_03 = (date_03.weekday() + 1) % 7
+        weekday_10 = (date_10.weekday() + 1) % 7
+        letzter_So_03 = 31 - weekday_03
+        letzter_So_10 = 31 - weekday_10
+        Sommerzeit_anfang= str(current_year)+"-03-"+str(letzter_So_03)+" 02"
+        Winterzeit_anfang= str(current_year)+"-10-"+str(letzter_So_10)+" 02"
+
+        verbindung = sqlite3.connect(database)
+        zeiger = verbindung.cursor()
+        sql_anweisung = """
+            WITH stundenwerte AS (
+                        SELECT
+                            strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS volle_stunde,
+                            MAX(DC_Produktion) AS max_dcproduktion
+                        FROM
+                            pv_daten
+                        WHERE
+                            Zeitpunkt >= datetime('now', '""" + str(MaxProGrenz_Dayback) + """ days')
+                        GROUP BY
+                            strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
+                    ),
+                    sommerzeit AS (
+                        SELECT 
+                            CASE
+                                WHEN volle_stunde BETWEEN '""" + str(Sommerzeit_anfang) + """' AND '""" + str(Winterzeit_anfang) + """' THEN DATETIME(volle_stunde, '-1 hour')
+                            ELSE volle_stunde
+                            END AS volle_stunde,
+                            max_dcproduktion
+                        FROM stundenwerte
+                    ),
+                    differenzen AS (
+                        SELECT
+                            strftime('%H:00:00',a.volle_stunde) AS Stunde,
+                            a.max_dcproduktion - COALESCE(b.max_dcproduktion, 0) AS DCProduktion
+                        FROM
+                            sommerzeit a
+                        LEFT JOIN
+                            sommerzeit b ON a.volle_stunde = datetime(b.volle_stunde, '+1 hour')
+			            WHERE
+				            DCProduktion < 20000
+                    )
+            SELECT
+            Stunde, MAX(DCProduktion) AS maximalwert
+            FROM differenzen
+            GROUP BY Stunde
+            ORDER BY Stunde;
+            """
+        try:
+            zeiger.execute(sql_anweisung)
+            DB_data = zeiger.fetchall()
+        except:
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, MaximalPrognosebegrenzung deaktivieren!")
+            # Schließe die Verbindung
+            verbindung.close()
+            exit()
+
+        # Schließe die Verbindung
+        verbindung.close()
+
+        for hour in DB_data:
+            DB_MaxWatt = int(hour[1] * MaxProGrenz_Faktor)
+            search_substring = str(hour[0])
+            for key, value in data.items():
+                if isinstance(key, str) and search_substring in key:
+                    if (data[key] > DB_MaxWatt):
+                        DEBUG_txt += str(key) + " " + str(data[key]) + " ==>> " + str(DB_MaxWatt) + "\n"
+                        Anzahl_Begrenzung += 1
+                        data[key] = DB_MaxWatt
+
+        if print_level == 2:
+            print("checkMaxPrognose mit letze ", MaxProGrenz_Dayback, " Tage!")
+            print(DEBUG_txt)
+
+        return (data)
+
+    def getSQLcurrentDayProduction(self, database):
+        try:
+            verbindung = sqlite3.connect(database)
+            zeiger = verbindung.cursor()
+            sql_anweisung = "SELECT MAX(DC_Produktion)- MIN(DC_Produktion) AS DC_Produktion from pv_daten where Zeitpunkt LIKE '" + self.now.strftime("%Y-%m-%d")+"%';"
+            zeiger.execute(sql_anweisung)
+            row = zeiger.fetchall()
+            currentDayProduction = round(row[0][0]/1000,1)
+        except:
+            currentDayProduction = 0
+
+        return (currentDayProduction)
+

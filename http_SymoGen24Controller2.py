@@ -67,9 +67,8 @@ if __name__ == '__main__':
     
                     ###############################
     
-                    weatherfile = basics.getVarConf('env','filePathWeatherData','str')
-                    weatherdata = basics.loadWeatherData(weatherfile)
-
+                    # weatherdata ist hier der Median aus weatherData.sqlite
+                    weatherdata = basics.loadWeatherData()
     
                     # Benoetigte Variablen definieren und auf Zahlen prüfen
                     BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
