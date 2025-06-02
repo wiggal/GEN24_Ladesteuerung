@@ -90,11 +90,11 @@ if __name__ == '__main__':
     config = basics.loadConfig(['default', 'weather'])
     weatherdata = WeatherData()
     # Benoetigte Variablen definieren und prüfen
-    Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
-    KW_Faktor = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
-    solcast_file = basics.getVarConf('solcast.com', 'weatherfile', 'str')
-    Gewicht = basics.getVarConf('solcast.com','Gewicht','str')
-    Quelle = 'solcast_ha.com'
+    Zeitzone = basics.getVarConf('solcast_ha', 'Zeitzone', 'eval')
+    KW_Faktor = basics.getVarConf('solcast_ha', 'KW_Faktor', 'eval')
+    solcast_file = basics.getVarConf('solcast_ha', 'HA_weatherfile', 'str')
+    Gewicht = basics.getVarConf('solcast_ha','Gewicht','str')
+    Quelle = 'solcast_ha'
     date_format = "%Y-%m-%d %H:%M:%S"
     now = datetime.now()
 
