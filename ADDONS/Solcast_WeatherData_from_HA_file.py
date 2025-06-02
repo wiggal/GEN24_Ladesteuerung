@@ -103,7 +103,7 @@ if __name__ == '__main__':
     data_err = data_all[1]
     if isinstance(data, list):
         weatherdata.storeWeatherData_SQL(data, Quelle)
-        print(f'{Quelle} OK: Prognosedaten vom {now.strftime(format)} in weatherData.sqlite gespeichert.\n')
+        print(f'{Quelle} OK: Prognosedaten vom {now.strftime(date_format)} in weatherData.sqlite gespeichert.\n')
     else:
         print("Fehler bei Datenanforderung ", Quelle, ":")
         print(data_err)
