@@ -1,3 +1,36 @@
+<?php
+# Download als CSV Funktion
+if (isset($_GET['download']) && $_GET['download'] === 'csv') {
+    $db = new PDO('sqlite:../weatherData.sqlite');
+    $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC); // wichtig!
+
+    $stmt = $db->query("SELECT * FROM weatherData ORDER BY Zeitpunkt ASC");
+
+    // Richtige Header setzen
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="weatherData.csv"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    $output = fopen('php://output', 'w');
+
+    // Kopfzeile schreiben
+    $firstRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($firstRow) {
+        fputcsv($output, array_keys($firstRow));
+        fputcsv($output, array_values($firstRow));
+
+        // Restliche Zeilen
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            fputcsv($output, $row);
+        }
+    }
+
+    fclose($output);
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -163,7 +196,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !
 }
 ?>
 
+<form method="post" action="?download=csv" style="margin-top: 30px;">
+<button type="submit">Daten als CSV herunterladen</button>
+</form>
+
+
     </div>
+
 </body>
 </html>
 
