@@ -8,9 +8,10 @@ import json
 import time
 from datetime import datetime, timedelta, date
 from FUNCTIONS.functions import basics
+from FUNCTIONS.WeatherData import WeatherData
 
 
-def loadLatestWeatherData():
+def loadLatestWeatherData(Quelle, Gewicht):
     # Variablen definieren
     dict_watts = {}
     dict_watts['result'] = {}
@@ -80,50 +81,22 @@ def loadLatestWeatherData():
 if __name__ == '__main__':
     basics = basics()
     config = basics.loadConfig(['default', 'weather'])
+    weatherdata = WeatherData()
     # Benoetigte Variablen definieren und prüfen
     Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
     KW_Faktor = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
-    weatherfile = basics.getVarConf('env', 'filePathWeatherData', 'str')
     solcast_file = basics.getVarConf('solcast.com', 'weatherfile', 'str')
-    dataAgeMaxInMinutes = basics.getVarConf('solcast.com', 'dataAgeMaxInMinutes', 'eval')
-
+    Gewicht = basics.getVarConf('solcast.com','Gewicht','str')
+    Quelle = 'solcast_ha.com'
     date_format = "%Y-%m-%d %H:%M:%S"
     now = datetime.now()
 
-    data = basics.loadWeatherData(weatherfile)
-    # print(data['messageCreated'])
-    dataIsExpired = True
-    if data:
-        dateCreated = None
-        if data['messageCreated']:
-            dateCreated = datetime.strptime(data['messageCreated'], date_format)
-
-        if dateCreated:
-            diff = now - dateCreated
-            dataAgeInMinutes = diff.total_seconds() / 60
-            if dataAgeInMinutes < dataAgeMaxInMinutes:
-                print_level = basics.getVarConf('env', 'print_level', 'eval')
-                if print_level != 0:
-                    print('solcast.com ERROR: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes,
-                          ' Minuten sind noch nicht abgelaufen!!')
-                    print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}\n')
-                dataIsExpired = False
-
-    if dataIsExpired:
-        data_all = loadLatestWeatherData()
-        data = data_all[0]
-        data_err = data_all[1]
-        # print(data)
-        if data['result']['watts'] != {}:
-            if not data == "False":
-                # hier evtl Begrenzungen der Prognose anbringen
-                MaximalPrognosebegrenzung = basics.getVarConf('env', 'MaximalPrognosebegrenzung', 'eval')
-                if MaximalPrognosebegrenzung == 1:
-                    data = basics.checkMaxPrognose(data)
-                if MaximalPrognosebegrenzung == 2:
-                    data = basics.Prognoseoptimierung(data)
-                basics.storeWeatherData(weatherfile, data, now, 'solcast.com')
-                dateCreated_new = data['messageCreated']
-                print(f'solcast.com OK: Prognosedaten vom {dateCreated_new} gespeichert.\n')
-        else:
-            print("Fehler bei Datenanforderung api.solcast.com.au:")
+    data_all = loadLatestWeatherData(Quelle, Gewicht)
+    data = data_all[0]
+    data_err = data_all[1]
+    if isinstance(data, list):
+        weatherdata.storeWeatherData_SQL(data, Quelle)
+        print(f'{Quelle} OK: Prognosedaten vom {now.strftime(format)} in weatherData.sqlite gespeichert.\n')
+    else:
+        print("Fehler bei Datenanforderung ", Quelle, ":")
+        print(data_err)

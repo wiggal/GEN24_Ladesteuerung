@@ -9,9 +9,9 @@ weatherfile = /usr/share/hassio/homeassistant/solcast.json
 
 Werte für
 
-dataAgeMaxInMinutes = 10
 Zeitzone = +1
 KW_Faktor = 1.00
+Gewicht = 1
 
 können auch gesetzt werden.
 
