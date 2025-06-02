@@ -14,8 +14,6 @@ from FUNCTIONS.WeatherData import WeatherData
 def loadLatestWeatherData(Quelle, Gewicht):
     # Variablen definieren
     dict_watts = {}
-    dict_watts['result'] = {}
-    dict_watts['result']['watts'] = {}
     #heute = datetime.strftime(now, "%Y-%m-%d")
     heute = date.today()
     sommerzeit = time.localtime().tm_isdst
@@ -46,37 +44,46 @@ def loadLatestWeatherData(Quelle, Gewicht):
                                 puffer = [key_neu, int(pv_estimate * 1000 * KW_Faktor)]
                                 continue
                             else:
-                                if key_neu in dict_watts['result']['watts']:
+                                if key_neu in dict_watts:
                                     puffer = [key_neu, int(pv_estimate * 1000 * KW_Faktor)]
-                                    dict_watts['result']['watts'][key_neu] = dict_watts['result']['watts'][key_neu] + int(
+                                    dict_watts[key_neu] = dict_watts[key_neu] + int(
                                         pv_estimate * 1000 * KW_Faktor)
                                 else:
                                     puffer = [key_neu, int(pv_estimate * 1000 * KW_Faktor)]
-                                    dict_watts['result']['watts'][key_neu] = int(
+                                    dict_watts[key_neu] = int(
                                         pv_estimate * 1000 * KW_Faktor)
 
                                 continue
                         else:
                             if puffer[1] == 0:
-                                dict_watts['result']['watts'][puffer[0]] = puffer[1]
-                            if key_neu in dict_watts['result']['watts']:
+                                dict_watts[puffer[0]] = puffer[1]
+                            if key_neu in dict_watts:
                                 puffer = [key_neu, int(pv_estimate * 1000 * KW_Faktor)]
-                                dict_watts['result']['watts'][key_neu] = dict_watts['result']['watts'][key_neu] + int(
+                                dict_watts[key_neu] = dict_watts[key_neu] + int(
                                     pv_estimate * 1000 * KW_Faktor)
                             else: # first site
                                 puffer = [key_neu, int(pv_estimate * 1000 * KW_Faktor)]
 
-                                dict_watts['result']['watts'][key_neu] = int(
+                                dict_watts[key_neu] = int(
                                     pv_estimate * 1000 * KW_Faktor)
 
-            dict_watts['result']['watts'] = dict(sorted(dict_watts['result']['watts'].items()))
+            dict_watts = dict(sorted(dict_watts.items()))
 
     except FileNotFoundError:
         print("### ERROR:  Solcast-Datei nicht gefunden")
         exit()
 
-    return dict_watts, json_data1
+    # hier evtl Begrenzungen der Prognose anbringenAdd commentMore actions
+    MaximalPrognosebegrenzung = basics.getVarConf('env', 'MaximalPrognosebegrenzung', 'eval')
+    if (MaximalPrognosebegrenzung == 1):
+        dict_watts = weatherdata.checkMaxPrognose(dict_watts)
+    # Daten für SQL erzeugen
+    SQL_watts = []
+    for key, value in dict_watts.items():
+        SQL_watts.append((key, Quelle, int(value), Gewicht, ''))
 
+
+    return(SQL_watts, json_data1)
 
 if __name__ == '__main__':
     basics = basics()
