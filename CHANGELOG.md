@@ -2,7 +2,7 @@
 
 **Große Änderung bei Prognosespeicherung***  
 - Alle abgerufenen Prognosedaten werden nun in der SQLitedatei `weatherData.sqlite` gespeichert.  
-- Bei Verwendung der Prognosedaten wird ein Mittelwert per Median aus allen gespeicherten Prognosen gebildet.  
+- Bei Verwendung der Prognosedaten wird ein Mittelwert per Median aus allen gespeicherten Prognosen gebildet, die nicht das Gewicht `0` haben.  
 - Es können also alle vorhandenen Prognosedienste abgerufen und gleichzeitig verwendet werden, soweit gewollt.  
 - Neues Tool `ForecastMgr` um die gespeicherten Prognosedaten zu sichten und evtl. zu löschen.
 
