@@ -28,37 +28,31 @@ $db->close();
 return $data;
 }
 
-function gewichteterMedian(array $werteMitGewicht): ?float {
-    if (empty($werteMitGewicht)) return null;
+function median($daten) {
+    $werte = [];
 
-    usort($werteMitGewicht, fn($a, $b) => $a[0] <=> $b[0]);
+    foreach ($daten as $eintrag) {
+        $wert = $eintrag[0];
+        $anzahl = $eintrag[1];
 
-    $gesamtGewicht = array_sum(array_column($werteMitGewicht, 1));
-    $halbGewicht = $gesamtGewicht / 2;
-
-    $kumuliert = 0;
-    foreach ($werteMitGewicht as [$wert, $gewicht]) {
-        $kumuliert += $gewicht;
-        if ($kumuliert >= $halbGewicht) {
-            return $wert;
+        for ($i = 0; $i < $anzahl; $i++) {
+            $werte[] = $wert;
         }
     }
 
-    return null;
-}
-
-function median(array $werte): ?float {
-    if (empty($werte)) return null;
-
     sort($werte);
-    $n = count($werte);
-    $mid = (int) floor($n / 2);
+    $anzahl = count($werte);
+    $mitte = (int) floor($anzahl / 2);
 
-    if ($n % 2 === 1) {
-        return $werte[$mid];
+    if ($anzahl % 2 === 0) {
+        // Gerade Anzahl: Mittelwert der beiden mittleren Zahlen
+        $median = ($werte[$mitte - 1] + $werte[$mitte]) / 2;
     } else {
-        return ($werte[$mid - 1] + $werte[$mid]) / 2;
+        // Ungerade Anzahl: Der mittlere Wert
+        $median = $werte[$mitte];
     }
+
+    return $median;
 }
 
 
@@ -89,19 +83,6 @@ function getPrognose() {
 
         $stundenDaten = [];
 
-
-      /*
-      // Nur für gewichteten Median
-      //$stundenDaten[$stunde][] = [(float)$row['Prognose_W'], (float)$row['Gewicht']];
-      // Gewichteten Median berechnen
-      // Aktuell nur einfachen Median verwenden  #entWIGGlung
-      $watts = [];
-    
-      foreach ($stundenDaten as $stunde => $werte) {
-          $watts[$stunde] = gewichteterMedian($werte);
-      }
-      */
-
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
             $zeit = new DateTime($row['Zeitpunkt']);
             $stunde = $zeit->format("Y-m-d H:00:00");
@@ -110,7 +91,7 @@ function getPrognose() {
                 $stundenDaten[$stunde] = [];
             }
 
-            $stundenDaten[$stunde][] = (float)$row['Prognose_W'];
+            $stundenDaten[$stunde][] = [(int)$row['Prognose_W'], (int)$row['Gewicht']];
         }
 
         foreach ($stundenDaten as $stunde => $werte) {

@@ -1,5 +1,5 @@
 # Funktionen für die Gen24_Ladesteuerung
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import json
 import configparser
@@ -47,13 +47,14 @@ class WeatherData:
         verbindung = sqlite3.connect('weatherData.sqlite')
         zeiger = verbindung.cursor()
         heute = datetime.today().date().isoformat()
+        loesche_bis = (datetime.today() - timedelta(days=7)).date().isoformat()
 
         try:
             # Alte Einträge löschen
             zeiger.execute("""
                 DELETE FROM weatherData
                 WHERE datetime(Zeitpunkt) < datetime(?);
-            """, (heute,))
+            """, (loesche_bis,))
             # Neue Prognosen speichern
             zeiger.executemany("""
             INSERT OR REPLACE INTO weatherData (Zeitpunkt, Quelle, Prognose_W, Gewicht, Options)
