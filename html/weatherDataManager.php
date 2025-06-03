@@ -88,12 +88,15 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         position: fixed;
         right: 8px;
         }
+    .past {
+        opacity: 0.4;
+    }
     </style>
 </head>
 <body>
 <div class="hilfe" align="right"> <a href="1_tab_LadeSteuerung.php"><b>Zurück</b></a></div>
     <h1>Solarprognosen aus weatherData</h1>
-    <p>(Der Median wird über alle vorhandenen Werte berechnet, Werte mit Gewicht 0 werden rot dargestellt!)</p>
+    <p>(Der Median wird über alle vorhandenen Werte berechnet, Werte mit Gewicht 0 werden <span style="color: red;"><b>rot</b></span>, größer 1 <span style="color: blue;"><b>blau</b></span>, dargestellt!)</p>
     <div class="table-container">
         <table>
             <thead>
@@ -132,13 +135,38 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
             ksort($data);
 
+            $letztesDatum = null;
+
+            $jetzt = new DateTime();
+            $heute = $jetzt->format('Y-m-d');
+
             foreach ($data as $zeitpunkt => $werteProQuelle) {
-                echo "<tr><td>$zeitpunkt</td>";
+                $datum = substr($zeitpunkt, 0, 10);
+                $isPast = ($datum < $heute);
+                $class = $isPast ? "class='past'" : "";
+                $aktuellesDatum = substr($zeitpunkt, 0, 10); // "YYYY-MM-DD"
+                $scrollDone = false;
+                $id = ($datum == $heute && !$scrollDone) ? "id='today'" : "";
+                if ($datum == $heute && !$scrollDone) {
+                    $class = "class='today'";
+                    $scrollDone = true;
+                }
+
+                // Wenn sich das Datum geändert hat, füge eine Trennzeile ein
+                if ($letztesDatum !== null && $aktuellesDatum !== $letztesDatum) {
+                    echo "<tr><td colspan='" . (count($quellen) + 2) . "' style='border-top: 4px solid black;'></td></tr>\n";
+                }
+
+                echo "<tr id='row-$zeitpunkt' $class><td>$zeitpunkt</td>";
             
                 // Median berechnen
                 $werte = [];
                 foreach ($werteProQuelle as $eintrag) {
-                    $werte[] = $eintrag['wert'];
+                    $wert = $eintrag['wert'];
+                    $gewicht = isset($eintrag['gewicht']) ? (int)$eintrag['gewicht'] : 0;
+                    for ($i = 0; $i < $gewicht; $i++) {
+                        $werte[] = $wert;
+                    }
                 }
                 sort($werte);
                 $count = count($werte);
@@ -150,25 +178,35 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 } else {
                     $median = '';
                 }
-                echo "<td><strong>" . (int)$median . "</strong></td>";
+                echo '<td><strong><span style="color: #4CAF50;">' . (int)$median . '</span></strong></td>';
 
                 // Prognosewerte je Quelle
                 foreach ($quellen as $quelle) {
                     if (isset($werteProQuelle[$quelle])) {
                         $wert = (int)$werteProQuelle[$quelle]['wert'];
-                        $gewicht = $werteProQuelle[$quelle]['gewicht'];
-                        $stil = ($gewicht == 0) ? "style='color: red;'" : "";
-                        echo "<td $stil>$wert</td>";
+                        $gewicht = (int) $werteProQuelle[$quelle]['gewicht'];
+                        $style = '';
+                        if ($gewicht == 0) {
+                            $style = "style='color: red;'";
+                        } elseif ($gewicht > 1) {
+                            $style = "style='color: blue;'";
+                        }
+                        echo "<td $style>$wert</td>";
                     } else {
                         echo "<td></td>";
                     }
                 }
-                echo "</tr>";
+                echo "</tr>\n";
+                $letztesDatum = $aktuellesDatum;
             }
 
             ?>
             </tbody>
         </table>
+<form method="post" action="?download=csv" style="margin-top: 30px; margin-left: 20px;">
+<button type="submit" style="background-color: #4CAF50; color: white;">Daten als CSV herunterladen</button>
+</form>
+
 <!-- Formular zur Quellenlöschung -->
 <form method="post" style="margin-top: 20px;">
     <fieldset>
@@ -179,7 +217,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         }
         ?>
         <br>
-        <button type="submit" name="submit_delete" onclick="return confirm('Ausgewählte Quellen wirklich löschen?');">Löschen</button>
+        <button type="submit" style="background-color: red; color: white;" name="submit_delete" onclick="return confirm('Ausgewählte Quellen wirklich löschen?');">Auswahl aus DB löschen</button>
     </fieldset>
 </form>
 
@@ -196,13 +234,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !
 }
 ?>
 
-<form method="post" action="?download=csv" style="margin-top: 30px;">
-<button type="submit">Daten als CSV herunterladen</button>
-</form>
-
-
     </div>
 
+<script>
+window.addEventListener('load', function () {
+    const todayRow = document.querySelector('tr.today');
+    const container = document.querySelector('.table-container');
+
+    if (todayRow && container) {
+        const offsetTop = todayRow.offsetTop;
+        container.scrollTo({
+            top: offsetTop - 40, // Höhe deines sticky-Headers
+            behavior: 'smooth'
+        });
+    }
+});
+</script>
 </body>
 </html>
 

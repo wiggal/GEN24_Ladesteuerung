@@ -46,18 +46,6 @@ class basics:
                             print("\nERROR: ", e, "\n")
                 return config
     
-    def gewichteter_median(self, paare):
-        if not paare:
-            return None
-        paare = sorted(paare, key=lambda x: x[0])
-        gesamtgewicht = sum(g for _, g in paare)
-        halbgewicht = gesamtgewicht / 2
-        kumuliert = 0
-        for wert, gewicht in paare:
-            kumuliert += gewicht
-            if kumuliert >= halbgewicht:
-                return wert
-
     def loadWeatherData(self):
         from collections import defaultdict
         from statistics import median
@@ -77,22 +65,22 @@ class basics:
         rows = cursor.fetchall()
 
         stundenwerte = defaultdict(list)
+        stundenwerte = defaultdict(list)
+
         for zeit_str, wert, gewicht in rows:
             zeit = datetime.fromisoformat(zeit_str)
             stunde = zeit.replace(minute=0, second=0, microsecond=0)
-            # Vorerst ohne Gewichtung
-            #stundenwerte[stunde].append((wert, gewicht))
-            stundenwerte[stunde].append(wert)
-    
+            # extend([wert] * gewicht) fügt den wert genau gewicht-mal der Liste hinzu
+            # Damit hat man einen gewichteten Median
+            gewicht = int(gewicht)
+            stundenwerte[stunde].extend([wert] * gewicht)
+
         result = {}
         for stunde in sorted(stundenwerte):
             zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
-            # print(stundenwerte[stunde])  #entWIGGlung
-            # Vorerst ohne Gewichtung
-            #result[zeit_str] = self.gewichteter_median(stundenwerte[stunde])
+            # Mit den Werten nach Gewichtung
             result[zeit_str] = int(median(stundenwerte[stunde]))
     
-        #print(result)  #entWIGGlung
         conn.close()
         return {"result": {"watts": result}}
 
