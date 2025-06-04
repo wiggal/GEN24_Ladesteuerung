@@ -49,8 +49,9 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 ```
 1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
-**ACHTUNG: ab v0.28.0 Prognoseskripte ins Verzeichnis FORECAST verschoben!!**  
-**ACHTUNG:** nur den Wetterdienst eintragen, den ihr verwenden wollt.
+**Ab Version v0.30.0:**   
+Es können nun alle Prognosen abgefragt werden, Speicherung in `weatherData.sqlite`.  
+Die Berechnung der zu erwartenden PV-Produktion erfolgt als Median aus den Werten und Gewichten der DB.
 ```
 33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py

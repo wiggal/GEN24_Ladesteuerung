@@ -29,14 +29,14 @@ def loadLatestWeatherData(Quelle, Gewicht):
 
     # Unterscheidung zwischen Free, Personal und Personal Plus
     url_anfang ='https://api.forecast.solar'
-    url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
-    url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
+    url = url_anfang+'/estimate/watts/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
+    url2 = url_anfang+'/estimate/watts/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
     if api_key != 'kein':
         url_anfang = 'https://api.forecast.solar/'+api_key
-        url = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
-        url2 = url_anfang+'/estimate/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
+        url = url_anfang+'/estimate/watts/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp)
+        url2 = url_anfang+'/estimate/watts/{}/{}/{}/{}/{}'.format(lat, lon, dec2, az2, kwp2)
         if anzahl_strings == 2 and api_pers_plus == 'ja':
-            url = url_anfang+'/estimate/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
+            url = url_anfang+'/estimate/watts/{}/{}/{}/{}/{}/{}/{}/{}'.format(lat, lon, dec, az, kwp, dec2, az2, kwp2)
             anzahl_strings = 1
 
     # resolution auf 60 Minuten, horizon und damping an die URL anhängen:
@@ -71,7 +71,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
 
         if isinstance(json_data1['result'], dict):
             dict_watts = {}
-            for key, value in json_data1.get('result',{}).get('watts',{}).items():
+            for key, value in json_data1.get('result',{}).items():
                 dict_watts[key]=value
 
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
@@ -94,9 +94,9 @@ def loadLatestWeatherData(Quelle, Gewicht):
                 exit()
 		
             if isinstance(json_data1['result'], dict) and isinstance(json_data2['result'], dict):
-                for key, value in json_data1.get('result',{}).get('watts',{}).items():
+                for key, value in json_data1.get('result',{}).items():
                     dict_watts[key]=value
-                for key, value in json_data2.get('result',{}).get('watts',{}).items():
+                for key, value in json_data2.get('result',{}).items():
                     if( key in dict_watts):
                         dict_watts[key]=dict_watts[key]+value
 
