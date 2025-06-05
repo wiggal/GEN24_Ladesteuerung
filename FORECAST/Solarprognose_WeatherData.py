@@ -36,7 +36,8 @@ def loadLatestWeatherData(Quelle, Gewicht):
     # Daten für SQL erzeugen
     SQL_watts = []
     for key, value in dict_watts.items():
-        SQL_watts.append((key, Quelle, value, Gewicht, ''))
+        if (value > 10):
+            SQL_watts.append((key, Quelle, value, Gewicht, ''))
 
     return(SQL_watts, json_data1)
 

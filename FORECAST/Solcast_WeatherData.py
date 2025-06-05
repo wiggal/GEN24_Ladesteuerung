@@ -106,7 +106,8 @@ def loadLatestWeatherData(Quelle, Gewicht):
         # Daten für SQL erzeugen
         SQL_watts = []
         for key, value in dict_watts.items():
-            SQL_watts.append((key, Quelle, int(value), Gewicht, ''))
+            if (value > 10):
+                SQL_watts.append((key, Quelle, int(value), Gewicht, ''))
 
     except requests.exceptions.RequestException as error:
             json_data1 = error
