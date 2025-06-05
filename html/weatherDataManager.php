@@ -338,17 +338,24 @@ const ctx = document.getElementById('dayChart').getContext('2d');
 
 let lineChart = null;
 
-function getColor(index) {
-    const colors = ['#4CAF50', '#FF5722', '#3F51B5', '#FFC107', '#9C27B0', '#009688', '#E91E63'];
-    return colors[index % colors.length];
-}
+// Definieren der Farbzuweisungen für jede Quelle
+const sourceColors = {
+    'Median': '#FF9800', //  Orange für Median
+    'Ist': '#4CAF50',    //  Grün für Ist-Wert
+    'solcast.com': '#3F51B5', // Blau
+    'solarprognose': '#7B3F00', // Braun
+    'akkudoktor': '#9C27B0', // Lila
+    'forecast.solar': '#FF3300', // Rot
+    'openmeteo': '#D3D3D3', // grau
+    'openmeteo2': '#696969', // dunkelgrau
+};
+
 
 function renderChart(date) {
     const dateData = chartData[date];
     const allTimes = new Set();
     const datasets = [];
 
-    let sourceIndex = 0;
     for (const quelle in dateData) {
         const data = dateData[quelle];
         const times = data.map(e => e.time);
@@ -358,16 +365,17 @@ function renderChart(date) {
         datasets.push({
             label: quelle,
             data: werte,
-            borderColor: quelle === 'Median' ? '#FF9800' : 
-                         quelle === 'Ist' ? '#FF9500' : getColor(sourceIndex),
+            // Feste Farbzuweisung basierend auf dem Quellnamen
+            borderColor: sourceColors[quelle] || '#CCCCCC', // Falls Quelle nicht definiert, Fallback-Farbe
             borderWidth: 3,
+            // Anpassung der Strichart basierend auf Quelle
             borderDash: quelle === 'Median' || quelle === 'Ist' ? [0, 0] : [5, 5],
             pointRadius: 0,
-            fill: quelle === 'Ist' ? true : false,
+            fill: quelle === 'Ist' ? true : false, // Nur 'Ist' soll gefüllt sein
             tension: 0.1
         });
 
-        sourceIndex++;
+
     }
 
     const labels = Array.from(allTimes).sort();
