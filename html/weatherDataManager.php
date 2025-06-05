@@ -181,7 +181,9 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 $gewicht = $row['Gewicht'];
 
                 // Speichere Wert und Gewicht
-                $data[$zeitpunkt][$quelle] = ['wert' => $prognose, 'gewicht' => $gewicht];
+                if ($prognose > 10) {
+                    $data[$zeitpunkt][$quelle] = ['wert' => $prognose, 'gewicht' => $gewicht];
+                }
             }
 
             ksort($data);
@@ -300,10 +302,15 @@ $stmt = $db->query("
         ORDER BY Zeitpunkt
     ),
     Alle_PVDaten2 AS (
-        SELECT Zeitpunkt, LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Produktion
+        SELECT Zeitpunkt, 
+        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Produktion
         FROM Alle_PVDaten
     )
-    SELECT Zeitpunkt, Produktion FROM Alle_PVDaten2 ORDER BY Zeitpunkt
+    SELECT Zeitpunkt, 
+    Produktion 
+    FROM Alle_PVDaten2 
+    WHERE DATE(Zeitpunkt) = '".$selectedDay."' AND Produktion IS NOT NULL
+    ORDER BY Zeitpunkt
 ");
 
 foreach ($stmt as $row) {
@@ -311,7 +318,9 @@ foreach ($stmt as $row) {
     $pvData[$zeit] = (float)$row['Produktion'];
 }
 foreach ($pvData as $zeitpunkt => $produktion) {
-    $data[$zeitpunkt]['Ist'] = ['wert' => $produktion, 'gewicht' => 1];
+    if(isset($data[$zeitpunkt])) {
+        $data[$zeitpunkt]['Ist'] = ['wert' => $produktion, 'gewicht' => 1];
+    }
 }
 
 # Daten für Chartjs bilden
@@ -321,13 +330,13 @@ foreach ($data as $zeitpunkt => $werteProQuelle) {
     $datum = substr($zeitpunkt, 0, 10);
     $uhrzeit = substr($zeitpunkt, 11, 5);
     foreach ($werteProQuelle as $quelle => $eintrag) {
-        if ($eintrag['wert'] > 10)
             $chartData[$datum][$quelle][] = [
                 'time' => $uhrzeit,
                 'wert' => $eintrag['wert']
             ];
     }
 }
+#print_r($chartData);  #entWIGGlung
 ?>
 
 <script>
