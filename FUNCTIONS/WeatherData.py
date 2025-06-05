@@ -46,11 +46,10 @@ class WeatherData:
         self.check_or_create_db('weatherData.sqlite')
         verbindung = sqlite3.connect('weatherData.sqlite')
         zeiger = verbindung.cursor()
-        heute = datetime.today().date().isoformat()
-        loesche_bis = (datetime.today() - timedelta(days=7)).date().isoformat()
+        # Alte Einträge löschen die älter 30 Tage sind
+        loesche_bis = (datetime.today() - timedelta(days=30)).date().isoformat()
 
         try:
-            # Alte Einträge löschen
             zeiger.execute("""
                 DELETE FROM weatherData
                 WHERE datetime(Zeitpunkt) < datetime(?);
