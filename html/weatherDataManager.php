@@ -111,7 +111,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     $prevDay = $tage[$currentIndex + 1] ?? null;
     $nextDay = $tage[$currentIndex - 1] ?? null;
     
-    echo '<br><div style="white-space: nowrap; margin-left: 20px;">Tag auswählen:&nbsp;&nbsp;';
+    echo '<div style="white-space: nowrap; margin-left: 20px;">Tag auswählen:&nbsp;&nbsp;';
     // Zurück-Button
     if ($prevDay) {
         echo '<form method="POST" style="display:inline;">';
@@ -137,7 +137,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         echo '<button type="submit">Vor &raquo;</button>';
         echo '</form>';
     }
-    echo '</div><br><br>';
+    echo '</div>';
     ?>
 
 <canvas id="dayChart" style='height:75vh; width:100vw'></canvas>
