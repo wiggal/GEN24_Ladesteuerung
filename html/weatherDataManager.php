@@ -98,15 +98,59 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 <div class="hilfe" align="right"> <a href="1_tab_LadeSteuerung.php"><b>Zurück</b></a></div>
     <h1>Solarprognosen aus weatherData</h1>
     <p>(Der Median wird über alle vorhandenen Werte berechnet, Werte mit Gewicht 0 werden <span style="color: red;"><b>rot</b></span>, größer 1 <span style="color: blue;"><b>blau</b></span>, dargestellt!)</p>
-    <div class="table-container">
-        <table>
+    <?php
+    $db = new PDO('sqlite:../weatherData.sqlite');
+    // Verfügbare Tage aus DB lesen
+    $tagesStmt = $db->query("SELECT DISTINCT substr(Zeitpunkt, 1, 10) AS Tag FROM weatherData ORDER BY Tag DESC");
+    $tage = $tagesStmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // Aktuellen Tag bestimmen (POST hat Vorrang)
+    $selectedDay = $_POST['selected_day'] ?? date('Y-m-d');
+    // Index des aktuellen Tags im $tage-Array finden
+    $currentIndex = array_search($selectedDay, $tage);
+    $prevDay = $tage[$currentIndex + 1] ?? null;
+    $nextDay = $tage[$currentIndex - 1] ?? null;
+    
+    echo '<br><div style="white-space: nowrap; margin-left: 20px;">Tag auswählen:&nbsp;&nbsp;';
+    // Zurück-Button
+    if ($prevDay) {
+        echo '<form method="POST" style="display:inline;">';
+        echo '<input type="hidden" name="selected_day" value="' . htmlspecialchars($prevDay) . '">';
+        echo '<button type="submit">&laquo; Zurück</button>';
+        echo '</form>';
+    }
+    echo '&nbsp;&nbsp;<nobr>';
+    // Dropdown
+    echo '<form method="POST" style="display:inline;"">';
+    echo '<select name="selected_day" id="selected_day" onchange="this.form.submit()">';
+    foreach ($tage as $tag) {
+        $selected = ($tag === $selectedDay) ? 'selected' : '';
+        echo "<option value=\"$tag\" $selected>$tag</option>";
+    }
+    echo '</select>';
+    echo '</form>';
+
+    // Vor-Button
+    if ($nextDay) {
+        echo '<form method="POST" style="display:inline; margin-left: 10px;">';
+        echo '<input type="hidden" name="selected_day" value="' . htmlspecialchars($nextDay) . '">';
+        echo '<button type="submit">Vor &raquo;</button>';
+        echo '</form>';
+    }
+    echo '</div><br><br>';
+    ?>
+
+<canvas id="dayChart" style='height:75vh; width:100vw'></canvas>
+
+    <button onclick="toggleTable()">Tabelle ein-/ausklappen</button>
+    <div id="tableWrapper" class="table-container" style="display: none;">
+        <table id="Prognosetable">
             <thead>
             <tr>
                 <th>Zeitpunkt</th>
                 <th style="background-color: #ffa500;">Median (alle)</th> <!-- Orange für Median -->
                 <?php
                 // Quellenliste abrufen
-                $db = new PDO('sqlite:../weatherData.sqlite');
                 $quellenQuery = "SELECT DISTINCT Quelle FROM weatherData ORDER BY Quelle";
                 $quellenResult = $db->query($quellenQuery);
                 $quellen = [];
@@ -120,7 +164,13 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
             <tbody>
             <?php
-            $stmt = $db->query("SELECT Zeitpunkt, Quelle, Prognose_W, Gewicht FROM weatherData");
+            # Tag auslesen
+            $stmt = $db->prepare("SELECT Zeitpunkt, Quelle, Prognose_W, Gewicht
+                      FROM weatherData
+                      WHERE DATE(Zeitpunkt) = :tag
+                      ORDER BY Zeitpunkt ASC");
+            $stmt->execute([':tag' => $selectedDay]);
+
             $data = [];
             foreach ($stmt as $row) {
                 $zeit = new DateTime($row['Zeitpunkt']);
@@ -136,35 +186,14 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
             ksort($data);
 
-            $erstesDatum = null;
-            $letztesDatum = null;
-
             $jetzt = new DateTime();
             $heute = $jetzt->format('Y-m-d');
 
             foreach ($data as $zeitpunkt => $werteProQuelle) {
                 $datum = substr($zeitpunkt, 0, 10);
-                $isPast = ($datum < $heute);
-                $class = $isPast ? "class='past'" : "";
                 $aktuellesDatum = substr($zeitpunkt, 0, 10); // "YYYY-MM-DD"
-                $scrollDone = false;
-                $id = ($datum == $heute && !$scrollDone) ? "id='today'" : "";
-                if ($datum == $heute && !$scrollDone) {
-                    $class = "class='today'";
-                    $scrollDone = true;
-                }
 
-                // Wenn sich das Datum geändert hat, füge eine Trennzeile ein
-                if ($letztesDatum !== null && $aktuellesDatum !== $letztesDatum) {
-                    echo "<tr><td colspan='" . (count($quellen) + 2) . "' style='border-top: 4px solid black;'></td></tr>\n";
-                }
-
-                // Erstes Datum ermitteln für Produktions-SELECT
-                if ($erstesDatum == null || $aktuellesDatum < $erstesDatum) {
-                    $erstesDatum = $aktuellesDatum;
-                }
-
-                echo "<tr id='row-$zeitpunkt' $class><td>$zeitpunkt</td>";
+                echo "<tr id='row-$zeitpunkt'><td>$zeitpunkt</td>";
             
                 // Median berechnen
                 $werte = [];
@@ -205,7 +234,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                     }
                 }
                 echo "</tr>\n";
-                $letztesDatum = $aktuellesDatum;
                 $data_median[$zeitpunkt]['Median'] = ['wert' => (int)$median, 'gewicht' => 1];
             }
             foreach ($data_median as $zeitpunkt => $werte) {
@@ -217,11 +245,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             ?>
             </tbody>
         </table>
-        <div style="margin: 20px;">
-    <label for="daySelector"><strong>Tag auswählen:</strong></label>
-    <select id="daySelector"></select>
-</div>
-<canvas id="dayChart" height="100"></canvas>
 
 <form method="post" action="?download=csv" style="margin-top: 30px; margin-left: 20px;">
 <button type="submit" style="background-color: #4CAF50; color: white;">Daten als CSV herunterladen</button>
@@ -261,16 +284,19 @@ $db = new PDO('sqlite:../PV_Daten.sqlite');
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC); // wichtig!
 
 $pvData = [];
+$letztesDatum_tmp = new DateTime($selectedDay);
+$letztesDatum_tmp->modify('+1 day +5 minutes');
+$letztesDatum = $letztesDatum_tmp->format('Y-m-d H:i:s');
 $stmt = $db->query("
     WITH Alle_PVDaten AS (
         SELECT MIN(Zeitpunkt) AS Zeitpunkt, DC_Produktion
         FROM pv_daten
-        WHERE Zeitpunkt BETWEEN '".$erstesDatum."' AND '".$letztesDatum."'
+        WHERE Zeitpunkt BETWEEN '".$selectedDay."' AND '".$letztesDatum."'
         GROUP BY STRFTIME('%Y-%m-%d %H', Zeitpunkt)
         UNION
         SELECT MAX(Zeitpunkt) AS Zeitpunkt, DC_Produktion
         FROM pv_daten
-        WHERE Zeitpunkt BETWEEN '".$erstesDatum."' AND '".$letztesDatum."'
+        WHERE Zeitpunkt BETWEEN '".$selectedDay."' AND '".$letztesDatum."'
         ORDER BY Zeitpunkt
     ),
     Alle_PVDaten2 AS (
@@ -306,34 +332,9 @@ foreach ($data as $zeitpunkt => $werteProQuelle) {
 
 <script>
 const chartData = <?php echo json_encode($chartData); ?>;
-</script>
-
-
-<script>
-window.addEventListener('load', function () {
-    const todayRow = document.querySelector('tr.today');
-    const container = document.querySelector('.table-container');
-
-    if (todayRow && container) {
-        const offsetTop = todayRow.offsetTop;
-        container.scrollTo({
-            top: offsetTop - 40, // Höhe deines sticky-Headers
-            behavior: 'smooth'
-        });
-    }
-});
-</script>
-<script>
+const selectedDay = <?= json_encode($selectedDay) ?>;
 const daySelector = document.getElementById('daySelector');
 const ctx = document.getElementById('dayChart').getContext('2d');
-
-// Dropdown füllen
-Object.keys(chartData).forEach(date => {
-    const option = document.createElement('option');
-    option.value = date;
-    option.textContent = date;
-    daySelector.appendChild(option);
-});
 
 let lineChart = null;
 
@@ -359,8 +360,8 @@ function renderChart(date) {
             data: werte,
             borderColor: quelle === 'Median' ? '#FF9800' : 
                          quelle === 'Ist' ? '#FF9500' : getColor(sourceIndex),
-            borderWidth: quelle === 'Median' ? 6 : 2,
-            borderDash: quelle === 'Median' ? [5, 5] : [0, 0],
+            borderWidth: 3,
+            borderDash: quelle === 'Median' || quelle === 'Ist' ? [0, 0] : [5, 5],
             pointRadius: 0,
             fill: quelle === 'Ist' ? true : false,
             tension: 0.1
@@ -374,41 +375,74 @@ function renderChart(date) {
     if (lineChart) lineChart.destroy();
 
     lineChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-                title: {
-                    display: true,
-                    text: `Prognosen am ${date}`
-                }
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: datasets
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' },
+            title: {
+                display: true,
+                text: `Prognosen am ${date}`
             },
-            scales: {
-                x: {
-                    title: { display: true, text: 'Uhrzeit' }
-                },
-                y: {
-                    title: { display: true, text: 'Prognosewert (W)' }
+            tooltip: {
+                titleFont: { size: 20 },
+                bodyFont: { size: 20 },
+                footerFont: { size: 20 },
+                enabled: true,
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: function(context) {
+                        const label = context.dataset.label || '';
+                        const value = context.parsed.y !== null ? context.parsed.y : '';
+                        return `${label}: ${value} W`;
+                    }
                 }
             }
+        },
+        interaction: {
+            mode: 'nearest',
+            intersect: false
+        },
+        scales: {
+            x: {
+                title: { display: true, text: 'Uhrzeit' }
+            },
+            y: {
+                title: { display: true, text: 'Prognosewert (W)' }
+            }
         }
-    });
+    }
+});
 }
 
 // Initialisieren mit heute oder erstem Tag
-const today = new Date().toISOString().split('T')[0];
-const firstAvailable = Object.keys(chartData)[0];
-daySelector.value = chartData[today] ? today : firstAvailable;
-renderChart(daySelector.value);
-
-daySelector.addEventListener('change', () => {
-    renderChart(daySelector.value);
+window.addEventListener('load', function () {
+    const todayRow = document.querySelector('tr.today');
+    const container = document.querySelector('.table-container');
+    // Chart anzeigen, sobald Seite geladen ist
+    renderChart(selectedDay);
 });
+</script>
+<script>
+// Tabelle ein und ausklappen
+function toggleTable() {
+    const tableWrapper = document.getElementById("tableWrapper");
+    const table = document.getElementById("Prognosetable");
+
+    if (tableWrapper.style.display === "none") {
+        tableWrapper.style.display = "block";
+        setTimeout(() => {
+            table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100); // kleiner Delay, damit das DOM-Layout aktualisiert ist
+    } else {
+        tableWrapper.style.display = "none";
+    }
+}
 </script>
 </body>
 </html>
