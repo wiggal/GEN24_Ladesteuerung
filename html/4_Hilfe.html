@@ -138,6 +138,11 @@ td {font-size: 160%;
 <tr><td><input type="hidden" name="Zeile[14][0]" value=''>BatSparFaktor</td>
 <td><input type="text" name="Zeile[14][1]" value="0.5" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[15]" value='' ></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[15]" value='' >; ForecastCalcMethod ist die Berechnungsmethode für die Prognose aus den DB-Werten</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[16]" value='' >; median | mean | min | max  sind gültig</td></tr>
+<tr><td><input type="hidden" name="Zeile[17][0]" value='ForecastCalcMethod = '>ForecastCalcMethod</td>
+<td><input type="text" name="Zeile[17][1]" value="median" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[18]" value='' ></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[16]" value='' >; Größter Batterieladewert, der im WR gesetzt werden soll, aber höchstens der maximale mögliche Ladewert!!!</td></tr>
 <tr><td><input type="hidden" name="Zeile[17][0]" value=''>MaxLadung</td>
 <td><input type="text" name="Zeile[17][1]" value="3000" readonly></td></tr>
@@ -321,12 +326,14 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[46]" value='' >; Siehe https://doc.forecast.solar/damping</td></tr>
 <tr><td><input type="hidden" name="Zeile[47][0]" value='forecastdamping = '>forecastdamping</td>
 <td><input type="text" name="Zeile[47][1]" value="0,0" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[48]" value='' >; Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können zwei Ausrichtungen in einer Abrfage behandelt werden.</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[48]" value='' >; Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können zwei Ausrichtungen in einer Abfrage behandelt werden.</td></tr>
 <tr><td><input type="hidden" name="Zeile[49][0]" value='api_pers_plus = '>api_pers_plus</td>
 <td><input type="text" name="Zeile[49][1]" value="nein" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[50]" value='' >; Alter der Wetterdaten in Minuten bevor neue Daten berücksichtigt werden</td></tr>
-<tr><td><input type="hidden" name="Zeile[51][0]" value='dataAgeMaxInMinutes = '>dataAgeMaxInMinutes</td>
-<td><input type="text" name="Zeile[51][1]" value="1000" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[48]" value='' >; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>
+; Bei Gewicht 0 wird die Prognose in weatherData.sqlite gespeichert und im ForecastMgr angezeigt, aber zur Berechnung nicht verwendet.
+</td></tr>
+<tr><td><input type="hidden" name="Zeile[49][0]" value='Gewicht = '>Gewicht</td>
+<td><input type="text" name="Zeile[49][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[52]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[53]" value='[akkudoktor]' >[akkudoktor]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[54]" value='' >; spezifische Werte für die API von Andreas Schmitz, dem Akkudoktor https://www.youtube.com/@Akkudoktor</td></tr>
@@ -352,9 +359,11 @@ td {font-size: 160%;
 <td><input type="text" name="Zeile[67][1]" value="8000" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[68][0]" value='inverterEfficiency2 = '>inverterEfficiency2</td>
 <td><input type="text" name="Zeile[68][1]" value="1" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[69]" value='' >; Alter der Wetterdaten in Minuten bevor neue Daten berücksichtigt werden</td></tr>
-<tr><td><input type="hidden" name="Zeile[70][0]" value='dataAgeMaxInMinutes = '>dataAgeMaxInMinutes</td>
-<td><input type="text" name="Zeile[70][1]" value="1000" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[48]" value='' >; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>
+; Bei Gewicht 0 wird die Prognose in weatherData.sqlite gespeichert und im ForecastMgr angezeigt, aber zur Berechnung nicht verwendet.
+</td></tr>
+<tr><td><input type="hidden" name="Zeile[49][0]" value='Gewicht = '>Gewicht</td>
+<td><input type="text" name="Zeile[49][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[71]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[72]" value='[solarprognose]' >[solarprognose]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[73]" value='' >; Hier die Werte eintragen, wenn die Prognose mit Solarprognose_WeatherData.py von http://www.solarprognose.de geholt werden soll</td></tr>
@@ -378,9 +387,11 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[84]" value='' >; falls die Anlagengröße in KWp nicht mit der Größe in Solarprognose übereinstimmt (z.B. Erweiterung)</td></tr>
 <tr><td><input type="hidden" name="Zeile[85][0]" value='KW_Faktor = '>KW_Faktor</td>
 <td><input type="text" name="Zeile[85][1]" value="1.00" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[86]" value='' >; Alter der Wetterdaten in Minuten bevor neue Daten berücksichtigt werden</td></tr>
-<tr><td><input type="hidden" name="Zeile[87][0]" value='dataAgeMaxInMinutes = '>dataAgeMaxInMinutes</td>
-<td><input type="text" name="Zeile[87][1]" value="1000" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[48]" value='' >; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>
+; Bei Gewicht 0 wird die Prognose in weatherData.sqlite gespeichert und im ForecastMgr angezeigt, aber zur Berechnung nicht verwendet.
+</td></tr>
+<tr><td><input type="hidden" name="Zeile[49][0]" value='Gewicht = '>Gewicht</td>
+<td><input type="text" name="Zeile[49][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[88]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[89]" value='[solcast.com]' >[solcast.com]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[90]" value='' >; Hier die Werte eintragen, wenn die Prognose mit Solcast_WeatherData.py von https://api.solcast.com.au geholt werden soll</td></tr>
@@ -402,9 +413,11 @@ td {font-size: 160%;
 <td><input type="text" name="Zeile[100][1]" value="xxxx-xxxx-xxxx-xxxx" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[101][0]" value='KW_Faktor2 = '>KW_Faktor2</td>
 <td><input type="text" name="Zeile[101][1]" value="1.00" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[102]" value='' >; Alter der Wetterdaten in Minuten bevor neue Daten berücksichtigt werden</td></tr>
-<tr><td><input type="hidden" name="Zeile[103][0]" value='dataAgeMaxInMinutes = '>dataAgeMaxInMinutes</td>
-<td><input type="text" name="Zeile[103][1]" value="100" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[48]" value='' >; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>
+; Bei Gewicht 0 wird die Prognose in weatherData.sqlite gespeichert und im ForecastMgr angezeigt, aber zur Berechnung nicht verwendet.
+</td></tr>
+<tr><td><input type="hidden" name="Zeile[49][0]" value='Gewicht = '>Gewicht</td>
+<td><input type="text" name="Zeile[49][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[104]" value='' ></td></tr>
 </table>
 

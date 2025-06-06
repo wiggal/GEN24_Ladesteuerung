@@ -97,7 +97,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 <body>
 <div class="hilfe" align="right"> <a href="1_tab_LadeSteuerung.php"><b>Zurück</b></a></div>
     <h1>Solarprognosen aus weatherData</h1>
-    <p>(Der Median wird über alle vorhandenen Werte berechnet, Werte mit Gewicht 0 werden <span style="color: red;"><b>rot</b></span>, größer 1 <span style="color: blue;"><b>blau</b></span>, dargestellt!)</p>
     <?php
     $db = new PDO('sqlite:../weatherData.sqlite');
     // Verfügbare Tage aus DB lesen
@@ -144,6 +143,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
     <button onclick="toggleTable()">Tabelle ein-/ausklappen</button>
     <div id="tableWrapper" class="table-container" style="display: none;">
+    <p>(Werte mit Gewicht <b>0</b> werden <span style="color: red;"><b>rot</b></span>, mit Gewicht größer <b>1</b> <span style="color: blue;"><b>blau</b></span>, dargestellt!)</p>
         <table id="Prognosetable">
             <thead>
             <tr>
