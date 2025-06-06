@@ -325,10 +325,11 @@ if __name__ == '__main__':
                     aktuellerLadewert = int(aktuellerLadewert)
 
                     if print_level >= 1:
+                        ForecastCalcMethod = basics.getVarConf('Ladeberechnung','ForecastCalcMethod','str')
                         try:
                             print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
-                            print("aktuellePrognose:           ", aktuelleVorhersage)
+                            print("aktuellePrognose (",ForecastCalcMethod,"):", aktuelleVorhersage)
                             print("TagesPrognose - BattVollUm: ", TagesPrognoseGesamt,"-", BattVollUm)
                             print("Grundlast_Summe für Tag:    ", Grundlast_Summe)
                             print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
