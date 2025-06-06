@@ -15,6 +15,8 @@ class sqlall:
         zeiger = verbindung.cursor()
     
         try:
+            # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
+            zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
             # Versuch Daten in DB schreiben (geht nicht, wenn Spalte AC_to_DC noch fehlt)
             zeiger.execute("""
                     INSERT INTO pv_daten
@@ -38,6 +40,8 @@ class sqlall:
             )""")
             # Spalte AC_to_DC anlegen, wenn sie nicht existiert
             zeiger.execute("""ALTER TABLE pv_daten ADD COLUMN AC_to_DC INT""")
+            # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
+            zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
             # Daten in DB nochmal versuchen zu schreiben
             zeiger.execute("""
                     INSERT INTO pv_daten

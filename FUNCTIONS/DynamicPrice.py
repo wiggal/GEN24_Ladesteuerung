@@ -592,6 +592,8 @@ class dynamic:
         Bruttopreis REAL,
         Boersenpreis REAL
         )""")
+        # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
+        zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_strompreise_zeitpunkt ON strompreise(Zeitpunkt)""")
 
         # Daten einfügen oder aktualisieren
         for entry in strompreise:
