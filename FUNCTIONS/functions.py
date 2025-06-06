@@ -45,10 +45,25 @@ class basics:
                         except Exception as e:
                             print("\nERROR: ", e, "\n")
                 return config
-    
+
+    def getVarConf(self, var_block, var, Type):
+            # Variablen aus config lesen und auf Zahlen prüfen
+            try:
+                if(Type == 'eval'):
+                    error_type = "als Zahl "
+                    return_var = eval(config[var_block][var].replace(',', '.'))
+                else:
+                    error_type = ""
+                    return_var = str(config[var_block][var])
+            except:
+                print("ERROR: die Variable [" + var_block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
+                exit(0)
+            return return_var
+
     def loadWeatherData(self):
         from collections import defaultdict
-        from statistics import median
+        from statistics import median, mean
+        ForecastCalcMethod = self.getVarConf('Ladeberechnung','ForecastCalcMethod','str')
         conn = sqlite3.connect('weatherData.sqlite')
         cursor = conn.cursor()
     
@@ -80,20 +95,14 @@ class basics:
             zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
             # Mit den Werten nach Gewichtung
             result[zeit_str] = int(median(stundenwerte[stunde]))
-    
+
+            # Andere Statistische Auswertungen
+            if ( ForecastCalcMethod == 'mean'):
+                result[zeit_str] = int(mean(stundenwerte[stunde]))
+            if ( ForecastCalcMethod == 'min'):
+                result[zeit_str] = int(min(stundenwerte[stunde]))
+            if ( ForecastCalcMethod == 'max'):
+                result[zeit_str] = int(max(stundenwerte[stunde]))
+
         conn.close()
         return {"result": {"watts": result}}
-
-    def getVarConf(self, var_block, var, Type):
-            # Variablen aus config lesen und auf Zahlen prüfen
-            try:
-                if(Type == 'eval'):
-                    error_type = "als Zahl "
-                    return_var = eval(config[var_block][var].replace(',', '.'))
-                else:
-                    error_type = ""
-                    return_var = str(config[var_block][var])
-            except:
-                print("ERROR: die Variable [" + var_block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
-                exit(0)
-            return return_var
