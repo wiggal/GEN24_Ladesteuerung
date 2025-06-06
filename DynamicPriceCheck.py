@@ -17,7 +17,7 @@ import FUNCTIONS.Steuerdaten
 
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
-    config = basics.loadConfig(['default', 'dynprice'])
+    config = basics.loadConfig(['default', 'charge', 'dynprice'])
     sqlall = FUNCTIONS.SQLall.sqlall()
     dynamic = FUNCTIONS.DynamicPrice.dynamic()
     request = FUNCTIONS.httprequest.request()

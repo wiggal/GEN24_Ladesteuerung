@@ -148,7 +148,8 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             <thead>
             <tr>
                 <th>Zeitpunkt</th>
-                <th style="background-color: #ffa500;">Median (alle)</th> <!-- Orange für Median -->
+                <th style="background-color: #ffa500;">Median</th> 
+                <th style="background-color: #ffa500;">Mittel</th>
                 <?php
                 // Quellenliste abrufen
                 $quellenQuery = "SELECT DISTINCT Quelle FROM weatherData ORDER BY Quelle";
@@ -180,8 +181,8 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 $prognose = $row['Prognose_W'];
                 $gewicht = $row['Gewicht'];
 
-                // Speichere Wert und Gewicht
-                if ($prognose > 10) {
+                // Speichere Wert und Gewicht wenn Wert > 30
+                if ($prognose > 30) {
                     $data[$zeitpunkt][$quelle] = ['wert' => $prognose, 'gewicht' => $gewicht];
                 }
             }
@@ -213,11 +214,13 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                     $median = $count % 2 === 0
                         ? ($werte[$middle - 1] + $werte[$middle]) / 2
                         : $werte[$middle];
+                    $mean = array_sum($werte)/$count;
                      // NEU: Median als eigene „Quelle“ im Array speichern
                 } else {
                     $median = '';
                 }
                 echo '<td><strong><span style="color: #4CAF50;">' . (int)$median . '</span></strong></td>';
+                echo '<td><strong><span style="color: #4CAF50;">' . (int)$mean . '</span></strong></td>';
 
                 // Prognosewerte je Quelle
                 foreach ($quellen as $quelle) {
@@ -237,6 +240,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 }
                 echo "</tr>\n";
                 $data_median[$zeitpunkt]['Median'] = ['wert' => (int)$median, 'gewicht' => 1];
+                $data_median[$zeitpunkt]['Mittel'] = ['wert' => (int)$mean, 'gewicht' => 1];
             }
             foreach ($data_median as $zeitpunkt => $werte) {
                 foreach ($werte as $quelle => $eintrag) {
@@ -290,28 +294,43 @@ $letztesDatum_tmp = new DateTime($selectedDay);
 $letztesDatum_tmp->modify('+1 day +5 minutes');
 $letztesDatum = $letztesDatum_tmp->format('Y-m-d H:i:s');
 $stmt = $db->query("
-    WITH Alle_PVDaten AS (
-        SELECT MIN(Zeitpunkt) AS Zeitpunkt, DC_Produktion
+    WITH Tagesdaten AS (
+        SELECT *
         FROM pv_daten
-        WHERE Zeitpunkt BETWEEN '".$selectedDay."' AND '".$letztesDatum."'
-        GROUP BY STRFTIME('%Y-%m-%d %H', Zeitpunkt)
-        UNION
-        SELECT MAX(Zeitpunkt) AS Zeitpunkt, DC_Produktion
-        FROM pv_daten
-        WHERE Zeitpunkt BETWEEN '".$selectedDay."' AND '".$letztesDatum."'
-        ORDER BY Zeitpunkt
+        WHERE DATE(Zeitpunkt) = '".$selectedDay."'
     ),
-    Alle_PVDaten2 AS (
-        SELECT Zeitpunkt, 
-        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Produktion
-        FROM Alle_PVDaten
+    Stundenbasis AS (
+        SELECT
+            STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
+            MIN(Zeitpunkt) AS Zeitpunkt_Start,
+            MAX(Zeitpunkt) AS Zeitpunkt_Ende
+        FROM Tagesdaten
+        GROUP BY Stunde
+    ),
+    Nächste_Stunden AS (
+        SELECT
+            s1.Stunde,
+            s1.Zeitpunkt_Start,
+            s1.Zeitpunkt_Ende,
+            s2.Stunde AS Naechste_Stunde
+        FROM Stundenbasis s1
+        JOIN Stundenbasis s2
+          ON s2.Stunde = DATETIME(s1.Stunde, '+1 hour')
+    ),
+    ProduktionBerechnet AS (
+        SELECT
+            s.Stunde,
+            (SELECT DC_Produktion FROM Tagesdaten WHERE Zeitpunkt = s.Zeitpunkt_Ende) -
+            (SELECT DC_Produktion FROM Tagesdaten WHERE Zeitpunkt = s.Zeitpunkt_Start) AS Produktion,
+            s.Zeitpunkt_Ende AS Zeitpunkt
+        FROM Nächste_Stunden s
     )
-    SELECT Zeitpunkt, 
-    Produktion 
-    FROM Alle_PVDaten2 
-    WHERE DATE(Zeitpunkt) = '".$selectedDay."' AND Produktion IS NOT NULL
+    SELECT Zeitpunkt, Produktion
+    FROM ProduktionBerechnet
+    WHERE Produktion IS NOT NULL
     ORDER BY Zeitpunkt
 ");
+
 
 foreach ($stmt as $row) {
     $zeit = (new DateTime($row['Zeitpunkt']))->format('Y-m-d H:00:00');
@@ -336,7 +355,6 @@ foreach ($data as $zeitpunkt => $werteProQuelle) {
             ];
     }
 }
-#print_r($chartData);  #entWIGGlung
 ?>
 
 <script>
@@ -350,11 +368,12 @@ let lineChart = null;
 // Definieren der Farbzuweisungen für jede Quelle
 const sourceColors = {
     'Median': '#FF9800', //  Orange für Median
+    'Mittel': '#FF3300', //  Rot für Mittel
     'Ist': '#4CAF50',    //  Grün für Ist-Wert
     'solcast.com': '#3F51B5', // Blau
     'solarprognose': '#7B3F00', // Braun
     'akkudoktor': '#9C27B0', // Lila
-    'forecast.solar': '#FF3300', // Rot
+    'forecast.solar': '#87CEFA', // Hellblau
     'openmeteo': '#D3D3D3', // grau
     'openmeteo2': '#696969', // dunkelgrau
 };
@@ -371,6 +390,16 @@ function renderChart(date) {
         const werte = data.map(e => e.wert);
         times.forEach(t => allTimes.add(t));
 
+        let fillOption = false;
+        let backgroundColor = 'transparent';
+        if (quelle === 'Ist') {
+            backgroundColor = 'rgba(200, 200, 200, 0.3)';
+            fillOption = true;
+        } else if (quelle === 'Mittel') {
+            backgroundColor = 'rgba(255, 152, 0, 0.3)';
+            fillOption = '-1';
+        }
+
         datasets.push({
             label: quelle,
             data: werte,
@@ -378,9 +407,10 @@ function renderChart(date) {
             borderColor: sourceColors[quelle] || '#CCCCCC', // Falls Quelle nicht definiert, Fallback-Farbe
             borderWidth: 3,
             // Anpassung der Strichart basierend auf Quelle
-            borderDash: quelle === 'Median' || quelle === 'Ist' ? [0, 0] : [5, 5],
+            borderDash: quelle === 'Median' || quelle === 'Mittel' || quelle === 'Ist'? [0, 0] : [5, 5],
             pointRadius: 0,
-            fill: quelle === 'Ist' ? true : false, // Nur 'Ist' soll gefüllt sein
+            fill: fillOption,
+            backgroundColor: backgroundColor,
             tension: 0.1
         });
 
