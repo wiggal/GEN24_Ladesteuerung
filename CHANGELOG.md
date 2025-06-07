@@ -1,14 +1,15 @@
 **[0.30.0] – 2025-XX-XX**  
 
-**Große Änderung bei Prognosespeicherung***  
+**Große Änderungen bei Prognosespeicherung**  
 - Alle abgerufenen Prognosedaten werden nun in der SQLitedatei `weatherData.sqlite` gespeichert.  
-- Bei Verwendung der Prognosedaten wird ein Mittelwert per Median aus allen gespeicherten Prognosen gebildet, die nicht das Gewicht `0` haben.  
+- Die Methode zur Prognoseberechnung kann nun in der `CONFIG/weather_priv.ini` mit `ForecastCalcMethod` eingestellt werden.  
+  Gültige Methoden sind `median | mean | min | max`  
+  (Werte mit Gewicht 0 werden nicht berücksichtigt).  
+- Durch die Prognoseskripte wird das Ergebnis aus allen Prognosedaten nach `ForecastCalcMethod` in `weatherData.sqlite` gespeichert.  
 - Es können also alle vorhandenen Prognosedienste abgerufen und gleichzeitig verwendet werden, soweit gewollt.  
 - Neues Tool `ForecastMgr` um die gespeicherten Prognosedaten zu sichten und evtl. zu löschen.
 
-- Die Methode zur Prognoseberechnung kann nun in der `CONFIG/charge_priv.ini` mit `ForecastCalcMethod` eingestellt werden.  
-  Gültige Methoden sind `median | mean | min | max`  
-  **ACHTUNG:** Neue Variable `ForecastCalcMethod` in `CONFIG/charge.ini` bitte evtl. in `CONFIG/charge_priv.ini` einarbeiten!!  
+  **ACHTUNG:** Neue Variable `ForecastCalcMethod` in `CONFIG/weather.ini` bitte evtl. in `CONFIG/weather_priv.ini` einarbeiten!!  
 
 **[0.29.1] – 2025-06-01**  
 

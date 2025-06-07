@@ -50,6 +50,10 @@ class WeatherData:
         loesche_bis = (datetime.today() - timedelta(days=30)).date().isoformat()
 
         try:
+            # Index auf Zeitpunkt anlegen, falls nicht vorhanden
+            zeiger.execute("""
+                CREATE INDEX IF NOT EXISTS idx_weatherData_Zeitpunkt ON weatherData(Zeitpunkt);
+            """)
             zeiger.execute("""
                 DELETE FROM weatherData
                 WHERE datetime(Zeitpunkt) < datetime(?);
@@ -71,6 +75,57 @@ class WeatherData:
 
         return()
     
+    def store_forecast_result(self):
+        from collections import defaultdict
+        from statistics import median, mean
+        ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
+        conn = sqlite3.connect('weatherData.sqlite')
+        cursor = conn.cursor()
+    
+        query = f"""
+            SELECT Zeitpunkt, Prognose_W, Gewicht
+            FROM weatherData
+            WHERE
+                Prognose_W IS NOT NULL AND
+                Gewicht > 0 AND
+                Quelle IS NOT 'Ergebnis'
+            ORDER BY Zeitpunkt ASC
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        stundenwerte = defaultdict(list)
+        stundenwerte = defaultdict(list)
+
+        for zeit_str, wert, gewicht in rows:
+            zeit = datetime.fromisoformat(zeit_str)
+            stunde = zeit.replace(minute=0, second=0, microsecond=0)
+            # extend([wert] * gewicht) fügt den wert genau gewicht-mal der Liste hinzu
+            # Damit hat man einen gewichteten Median
+            gewicht = int(gewicht)
+            stundenwerte[stunde].extend([wert] * gewicht)
+
+        result = {}
+        for stunde in sorted(stundenwerte):
+            zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
+            # Mit den Werten nach Gewichtung
+            result[zeit_str] = int(median(stundenwerte[stunde]))
+
+            # Andere Statistische Auswertungen
+            if ( ForecastCalcMethod == 'mean'):
+                result[zeit_str] = int(mean(stundenwerte[stunde]))
+            if ( ForecastCalcMethod == 'min'):
+                result[zeit_str] = int(min(stundenwerte[stunde]))
+            if ( ForecastCalcMethod == 'max'):
+                result[zeit_str] = int(max(stundenwerte[stunde]))
+
+        conn.close()
+        data = [(ts, 'Ergebnis', val, '0', '') for ts, val in result.items()]
+        # Speichern der Resultate 
+        self.storeWeatherData_SQL(data, 'Ergebnis')
+
+        return()
+
     def checkMaxPrognose(self, data):
         database = 'PV_Daten.sqlite'
         print_level = basics.getVarConf('env','print_level','eval')

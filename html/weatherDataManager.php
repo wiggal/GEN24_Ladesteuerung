@@ -148,8 +148,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             <thead>
             <tr>
                 <th>Zeitpunkt</th>
-                <th style="background-color: #ffa500;">Median</th> 
-                <th style="background-color: #ffa500;">Mittel</th>
                 <?php
                 // Quellenliste abrufen
                 $quellenQuery = "SELECT DISTINCT Quelle FROM weatherData ORDER BY Quelle";
@@ -157,7 +155,10 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 $quellen = [];
                 foreach ($quellenResult as $row) {
                     $quellen[] = $row['Quelle'];
-                    echo "<th>{$row['Quelle']}</th>";
+                    if ($row['Quelle'] != 'Ergebnis') {
+                        $Style_bg = 'style="background-color: orange;"';
+                    }
+                    echo "<th {$Style_bg}>{$row['Quelle']}</th>";
                 }
                 ?>
             </tr>
@@ -187,7 +188,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 }
             }
 
-            ksort($data);
+            #ksort($data);
 
             $jetzt = new DateTime();
             $heute = $jetzt->format('Y-m-d');
@@ -198,30 +199,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
                 echo "<tr id='row-$zeitpunkt'><td>$zeitpunkt</td>";
             
-                // Median berechnen
-                $werte = [];
-                foreach ($werteProQuelle as $eintrag) {
-                    $wert = $eintrag['wert'];
-                    $gewicht = isset($eintrag['gewicht']) ? (int)$eintrag['gewicht'] : 0;
-                    for ($i = 0; $i < $gewicht; $i++) {
-                        $werte[] = $wert;
-                    }
-                }
-                sort($werte);
-                $count = count($werte);
-                if ($count > 0) {
-                    $middle = floor($count / 2);
-                    $median = $count % 2 === 0
-                        ? ($werte[$middle - 1] + $werte[$middle]) / 2
-                        : $werte[$middle];
-                    $mean = array_sum($werte)/$count;
-                     // NEU: Median als eigene „Quelle“ im Array speichern
-                } else {
-                    $median = '';
-                }
-                echo '<td><strong><span style="color: #4CAF50;">' . (int)$median . '</span></strong></td>';
-                echo '<td><strong><span style="color: #4CAF50;">' . (int)$mean . '</span></strong></td>';
-
                 // Prognosewerte je Quelle
                 foreach ($quellen as $quelle) {
                     if (isset($werteProQuelle[$quelle])) {
@@ -233,21 +210,16 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                         } elseif ($gewicht > 1) {
                             $style = "style='color: blue;'";
                         }
+                        if ($quelle == 'Ergebnis') {
+                            $style = "style='color: #4CAF50; font-weight: bold;'";
+                        }
                         echo "<td $style>$wert</td>";
                     } else {
                         echo "<td></td>";
                     }
                 }
                 echo "</tr>\n";
-                $data_median[$zeitpunkt]['Median'] = ['wert' => (int)$median, 'gewicht' => 1];
-                $data_median[$zeitpunkt]['Mittel'] = ['wert' => (int)$mean, 'gewicht' => 1];
             }
-            foreach ($data_median as $zeitpunkt => $werte) {
-                foreach ($werte as $quelle => $eintrag) {
-                    $data[$zeitpunkt][$quelle] = $eintrag;
-                }
-            }
-
             ?>
             </tbody>
         </table>
@@ -262,7 +234,9 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         <legend><strong>Quellen zum Löschen auswählen:</strong></legend>
         <?php
         foreach ($quellen as $quelle) {
-            echo "<label><input type='checkbox' name='delete_quellen[]' value='$quelle'> $quelle</label><br>";
+            if ( $quelle != 'Ergebnis') {
+                echo "<label><input type='checkbox' name='delete_quellen[]' value='$quelle'> $quelle</label><br>";
+            }
         }
         ?>
         <br>
@@ -367,15 +341,13 @@ let lineChart = null;
 
 // Definieren der Farbzuweisungen für jede Quelle
 const sourceColors = {
-    'Median': '#FF9800', //  Orange für Median
-    'Mittel': '#FF3300', //  Rot für Mittel
+    'Ergebnis': '#FF3300', //  Rot für Mittel
     'Ist': '#4CAF50',    //  Grün für Ist-Wert
     'solcast.com': '#3F51B5', // Blau
     'solarprognose': '#7B3F00', // Braun
     'akkudoktor': '#9C27B0', // Lila
     'forecast.solar': '#87CEFA', // Hellblau
-    'openmeteo': '#D3D3D3', // grau
-    'openmeteo2': '#696969', // dunkelgrau
+    'openmeteo': '#696969', // dunkelgrau
 };
 
 
@@ -395,7 +367,7 @@ function renderChart(date) {
         if (quelle === 'Ist') {
             backgroundColor = 'rgba(200, 200, 200, 0.3)';
             fillOption = true;
-        } else if (quelle === 'Mittel') {
+        } else if (quelle === 'Dummy') {
             backgroundColor = 'rgba(255, 152, 0, 0.3)';
             fillOption = '-1';
         }
@@ -407,7 +379,7 @@ function renderChart(date) {
             borderColor: sourceColors[quelle] || '#CCCCCC', // Falls Quelle nicht definiert, Fallback-Farbe
             borderWidth: 3,
             // Anpassung der Strichart basierend auf Quelle
-            borderDash: quelle === 'Median' || quelle === 'Mittel' || quelle === 'Ist'? [0, 0] : [5, 5],
+            borderDash: quelle === 'Ergebnis' || quelle === 'Ist'? [0, 0] : [5, 5],
             pointRadius: 0,
             fill: fillOption,
             backgroundColor: backgroundColor,

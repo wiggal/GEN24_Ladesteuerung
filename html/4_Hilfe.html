@@ -74,14 +74,13 @@ td {font-size: 160%;
 <button type="submit">Hilfe zu default_priv.ini</button></form>
 </center>
 <br><table>
-<br><table><tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[1]" value='' >; Genauere Erklärungen siehe config.ini.info</td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[2]" value='' >[env]</th></tr>
 <tr><td><input type="hidden" name="Zeile[3][0]" value=''>filePathWeatherData</td>
 <td><input type="text" name="Zeile[3][1]" value="weatherData.json" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[4]" value='' >; durch Einfacher_PHP_Webserver = 1 wird durch start_PythonScript.sh der einfache PHP_Webserver auf Port 2424 gestartet</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[5]" value='' >; wenn Apache Webserver läuft Einfacher_PHP_Webserver = 0 setzen</td></tr>
 <tr><td><input type="hidden" name="Zeile[6][0]" value=''>Einfacher_PHP_Webserver</td>
-<td><input type="text" name="Zeile[6][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[6][1]" value="1" readonly></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[7]" value='' >; print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe</td></tr>
 <tr><td><input type="hidden" name="Zeile[8][0]" value=''>print_level</td>
 <td><input type="text" name="Zeile[8][1]" value="1" readonly></td></tr>
@@ -137,11 +136,6 @@ td {font-size: 160%;
 ; Wenn BatSparFaktor == 0: Ladung an den Prognosespitzen (Netzdienlich).</td></tr>
 <tr><td><input type="hidden" name="Zeile[14][0]" value=''>BatSparFaktor</td>
 <td><input type="text" name="Zeile[14][1]" value="0.5" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[15]" value='' ></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[15]" value='' >; ForecastCalcMethod ist die Berechnungsmethode für die Prognose aus den DB-Werten</td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[16]" value='' >; median | mean | min | max  sind gültig</td></tr>
-<tr><td><input type="hidden" name="Zeile[17][0]" value='ForecastCalcMethod = '>ForecastCalcMethod</td>
-<td><input type="text" name="Zeile[17][1]" value="median" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[18]" value='' ></td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[16]" value='' >; Größter Batterieladewert, der im WR gesetzt werden soll, aber höchstens der maximale mögliche Ladewert!!!</td></tr>
 <tr><td><input type="hidden" name="Zeile[17][0]" value=''>MaxLadung</td>
@@ -265,6 +259,8 @@ td {font-size: 160%;
 <button type="submit">Hilfe zu weather_priv.ini</button></form>
 </center>
 <br><table>
+<tr><th colspan="2"><input type="hidden" name="Zeile[36]" value='[env]' >[env]</th></tr>
+<tr><td><input type="hidden" name="Zeile[4][0]" value='MaximalPrognosebegrenzung = '>; MaximalPrognosebegrenzung zu bestimmten Stunden (z.B. wegen Beschattung im Westen = abends)</td>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[2]" value='' >; 0 = aus</td></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[3]" value='' >; 1 = ein: damit wird die Prognose auf den höchsten Wert je Stunde der Produktion der letzten MaxProGrenz_Dayback Tage begrenzt</td></tr>
 <tr><td><input type="hidden" name="Zeile[4][0]" value='MaximalPrognosebegrenzung = '>MaximalPrognosebegrenzung</td>
@@ -272,9 +268,16 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[5]" value='' >; MaxProGrenz_Faktor wird mit dem Wert aus der DB multipliziert</td></tr>
 <tr><td><input type="hidden" name="Zeile[6][0]" value='MaxProGrenz_Faktor = '>MaxProGrenz_Faktor</td>
 <td><input type="text" name="Zeile[6][1]" value="1" readonly></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[5]" value='' >; Wieviel Tage zurück sollen zur Berechnung der maximalen Prognosebegrenzung verwendet werden.</td></tr>
 <tr><td><input type="hidden" name="Zeile[7][0]" value='MaxProGrenz_Dayback = '>MaxProGrenz_Dayback</td>
 <td><input type="text" name="Zeile[7][1]" value="35" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[8]" value='' ></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[8]" value='' >; ForecastCalcMethod ist die Berechnungsmethode für die Prognose aus den Forecast-Werten</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[9]" value='' >; Der mit ForecastCalcMethod berechnete Wert wird bei jeder Prognoseanforderung in die DB gespeichert!</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[10]" value='' >; median | mittel | min | max  sind gültig</td></tr>
+<tr><td><input type="hidden" name="Zeile[11][0]" value='ForecastCalcMethod = '>ForecastCalcMethod</td>
+<td><input type="text" name="Zeile[11][1]" value="median" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[12]" value='' ></td></tr>
 <tr><th colspan="2"><input type="hidden" name="Zeile[9]" value='[pv.strings]' >[pv.strings]</th></tr>
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[10]" value='' >; Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier Anzahl=2 eintragen</td></tr>
 <tr><td><input type="hidden" name="Zeile[11][0]" value='anzahl = '>anzahl</td>
@@ -464,8 +467,14 @@ td {font-size: 160%;
 <tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[19]" value='' >; Bis zu wieviel Prozent darf der Akku aus dem Netz geladen werden</td></tr>
 <tr><td><input type="hidden" name="Zeile[20][0]" value=''>max_batt_dyn_ladung</td>
 <td><input type="text" name="Zeile[20][1]" value="95" readonly></td></tr>
-<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[22]" value='' >; Infos siehe https://api.energy-charts.info/</td></tr>
-<tr><td><input type="hidden" name="Zeile[23][0]" value=''>Preisquelle</td>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[28]" value='; Preis, in EURO unter dem der Akku immer zwangsgeladen wird (kann auch Minuswert sein)' >; Preis, in EURO unter dem der Akku immer zwangsgeladen wird (kann auch Minuswert sein)</td></tr>
+<tr><td><input type="hidden" name="Zeile[29][0]" value='netzlade_preisschwelle = '>netzlade_preisschwelle</td>
+<td><input type="text" name="Zeile[29][1]" value="0.00" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[30]" value='' ></td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[31]" value='; Strompreisquellen' >; Strompreisquellen</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[32]" value='; energycharts (https://api.energy-charts.info/)' >; energycharts (https://api.energy-charts.info/)</td></tr>
+<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile[33]" value='; smart_api (https://smard.api.bund.dev/)' >; smart_api (https://smard.api.bund.dev/)</td></tr>
+<tr><td><input type="hidden" name="Zeile[35][0]" value='Preisquelle = '>Preisquelle</td>
 <td><input type="text" name="Zeile[23][1]" value="energycharts" readonly></td></tr>
 <tr><td><input type="hidden" name="Zeile[24][0]" value=''>LAND</td>
 <td><input type="text" name="Zeile[24][1]" value="DE-LU" readonly></td></tr>
