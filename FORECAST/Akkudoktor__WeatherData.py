@@ -113,15 +113,18 @@ if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     weatherdata = FUNCTIONS.WeatherData.WeatherData()
     config = basics.loadConfig(['default', 'weather'])
+    ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
     Gewicht = basics.getVarConf('akkudoktor','Gewicht','str')
     Quelle = 'akkudoktor'
     
-    format = "%Y-%m-%d %H:%M:%S"    
+    format = "%H:%M:%S"    
     now = datetime.now()    
     data = loadLatestWeatherData(Quelle, Gewicht)
     if isinstance(data, list):
         weatherdata.storeWeatherData_SQL(data, Quelle)
-        print(f'{Quelle} OK: Prognosedaten vom {now.strftime(format)} in weatherData.sqlite gespeichert.\n')
+        # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
+        weatherdata.store_forecast_result()
+        print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')
     else:
         print("Fehler bei Datenanforderung ", Quelle, ":")
         print(data)

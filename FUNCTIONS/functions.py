@@ -61,48 +61,21 @@ class basics:
             return return_var
 
     def loadWeatherData(self):
-        from collections import defaultdict
-        from statistics import median, mean
-        ForecastCalcMethod = self.getVarConf('Ladeberechnung','ForecastCalcMethod','str')
         conn = sqlite3.connect('weatherData.sqlite')
         cursor = conn.cursor()
     
         query = f"""
-            SELECT Zeitpunkt, Prognose_W, Gewicht
+            SELECT Zeitpunkt, Prognose_W
             FROM weatherData
             WHERE
-                Prognose_W IS NOT NULL AND
-                Gewicht > 0 AND
+                Prognose_W > 30 AND
+                Quelle IS 'Ergebnis' AND
                 DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day')
             ORDER BY Zeitpunkt ASC
         """
         cursor.execute(query)
         rows = cursor.fetchall()
-
-        stundenwerte = defaultdict(list)
-        stundenwerte = defaultdict(list)
-
-        for zeit_str, wert, gewicht in rows:
-            zeit = datetime.fromisoformat(zeit_str)
-            stunde = zeit.replace(minute=0, second=0, microsecond=0)
-            # extend([wert] * gewicht) fügt den wert genau gewicht-mal der Liste hinzu
-            # Damit hat man einen gewichteten Median
-            gewicht = int(gewicht)
-            stundenwerte[stunde].extend([wert] * gewicht)
-
-        result = {}
-        for stunde in sorted(stundenwerte):
-            zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
-            # Mit den Werten nach Gewichtung
-            result[zeit_str] = int(median(stundenwerte[stunde]))
-
-            # Andere Statistische Auswertungen
-            if ( ForecastCalcMethod == 'mean'):
-                result[zeit_str] = int(mean(stundenwerte[stunde]))
-            if ( ForecastCalcMethod == 'min'):
-                result[zeit_str] = int(min(stundenwerte[stunde]))
-            if ( ForecastCalcMethod == 'max'):
-                result[zeit_str] = int(max(stundenwerte[stunde]))
+        result = dict(rows)
 
         conn.close()
         return {"result": {"watts": result}}

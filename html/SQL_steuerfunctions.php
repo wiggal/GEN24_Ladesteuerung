@@ -63,11 +63,11 @@ function getPrognose() {
         $db = new SQLite3('../weatherData.sqlite');
 
         $sql = "
-            SELECT Zeitpunkt, Prognose_W, Gewicht
+            SELECT Zeitpunkt, Prognose_W
             FROM weatherData
             WHERE
-                Prognose_W IS NOT NULL AND
-                Gewicht > 0 AND
+                Prognose_W > 30 AND
+                Quelle IS 'Ergebnis' AND
                 DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+2 day')
             ORDER BY Zeitpunkt ASC
         ";
@@ -87,15 +87,7 @@ function getPrognose() {
             $zeit = new DateTime($row['Zeitpunkt']);
             $stunde = $zeit->format("Y-m-d H:00:00");
 
-            if (!isset($stundenDaten[$stunde])) {
-                $stundenDaten[$stunde] = [];
-            }
-
-            $stundenDaten[$stunde][] = [(int)$row['Prognose_W'], (int)$row['Gewicht']];
-        }
-
-        foreach ($stundenDaten as $stunde => $werte) {
-            $watts[$stunde] = median($werte);
+            $watts[$stunde] = (int)$row['Prognose_W'];
         }
 
         $db->close();
