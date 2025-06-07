@@ -70,7 +70,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
             dict_watts = dict(sorted(dict_watts.items()))
 
     except FileNotFoundError:
-        print("### ERROR:  Solcast-Datei nicht gefunden")
+        print("### ERROR:  HA_Solcast-Datei ",solcast_file," nicht gefunden")
         exit()
 
     # hier evtl Begrenzungen der Prognose anbringenAdd commentMore actions
@@ -93,17 +93,21 @@ if __name__ == '__main__':
     Zeitzone = basics.getVarConf('solcast_ha', 'Zeitzone', 'eval')
     KW_Faktor = basics.getVarConf('solcast_ha', 'KW_Faktor', 'eval')
     solcast_file = basics.getVarConf('solcast_ha', 'HA_weatherfile', 'str')
+    ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
     Gewicht = basics.getVarConf('solcast_ha','Gewicht','str')
     Quelle = 'solcast_ha'
     date_format = "%Y-%m-%d %H:%M:%S"
     now = datetime.now()
 
+    format = "%H:%M:%S"    
     data_all = loadLatestWeatherData(Quelle, Gewicht)
     data = data_all[0]
     data_err = data_all[1]
     if isinstance(data, list):
         weatherdata.storeWeatherData_SQL(data, Quelle)
-        print(f'{Quelle} OK: Prognosedaten vom {now.strftime(date_format)} in weatherData.sqlite gespeichert.\n')
+        # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
+        weatherdata.store_forecast_result()
+        print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')
     else:
         print("Fehler bei Datenanforderung ", Quelle, ":")
         print(data_err)
