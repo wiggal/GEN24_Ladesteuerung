@@ -15,6 +15,8 @@ class sqlall:
         zeiger = verbindung.cursor()
     
         try:
+            # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
+            zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
             # Versuch Daten in DB schreiben (geht nicht, wenn Spalte AC_to_DC noch fehlt)
             zeiger.execute("""
                     INSERT INTO pv_daten
@@ -38,6 +40,8 @@ class sqlall:
             )""")
             # Spalte AC_to_DC anlegen, wenn sie nicht existiert
             zeiger.execute("""ALTER TABLE pv_daten ADD COLUMN AC_to_DC INT""")
+            # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
+            zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
             # Daten in DB nochmal versuchen zu schreiben
             zeiger.execute("""
                     INSERT INTO pv_daten
@@ -61,19 +65,6 @@ class sqlall:
         AC_Produktion = row[0][0]
         DC_Produktion = row[0][1]
         return (AC_Produktion, DC_Produktion)
-
-    def getSQLcurrentDayProduction(self, database):
-        try:
-            verbindung = sqlite3.connect(database)
-            zeiger = verbindung.cursor()
-            sql_anweisung = "SELECT MAX(DC_Produktion)- MIN(DC_Produktion) AS DC_Produktion from pv_daten where Zeitpunkt LIKE '" + self.now.strftime("%Y-%m-%d")+"%';"
-            zeiger.execute(sql_anweisung)
-            row = zeiger.fetchall()
-            currentDayProduction = round(row[0][0]/1000,1)
-        except:
-            currentDayProduction = 0
-
-        return (currentDayProduction)
 
     def getSQLsteuerdaten(self, schluessel):
         verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')

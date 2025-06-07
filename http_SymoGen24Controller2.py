@@ -67,9 +67,8 @@ if __name__ == '__main__':
     
                     ###############################
     
-                    weatherfile = basics.getVarConf('env','filePathWeatherData','str')
-                    weatherdata = basics.loadWeatherData(weatherfile)
-
+                    # weatherdata ist hier der Median aus weatherData.sqlite
+                    weatherdata = basics.loadWeatherData()
     
                     # Benoetigte Variablen definieren und auf Zahlen prüfen
                     BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
@@ -233,7 +232,6 @@ if __name__ == '__main__':
 
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
-                        #DATA = progladewert.setLadewert(FesteLadeleistung, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)  #entWIGGlung kann das weg?
                         aktuellerLadewert = FesteLadeleistung
                         ManuelleStrg_Akkuschon_aus = 1
                         # wegen Rundung

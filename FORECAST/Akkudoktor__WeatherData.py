@@ -12,9 +12,9 @@ from datetime import datetime
 import requests
 import json
 import FUNCTIONS.functions
-import FUNCTIONS.SQLall
+import FUNCTIONS.WeatherData
 
-def loadLatestWeatherData():
+def loadLatestWeatherData(Quelle, Gewicht):
     horizon = basics.getVarConf('pv.strings','horizon','str')
     lat = basics.getVarConf('pv.strings','lat','eval')
     lon = basics.getVarConf('pv.strings','lon','eval')
@@ -44,8 +44,8 @@ def loadLatestWeatherData():
 
     # Unterscheidung zwischen Free, Personal und Personal Plus
     url_anfang ='https://api.akkudoktor.net'
-    url = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp, az, dec, cellco, albedo, powerInv, inverterEff, horizon)
-    url2 = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp2, az2, dec2, cellco2, albedo2, powerInv2, inverterEff, horizon2)
+    url = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&past_days=0&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp, az, dec, cellco, albedo, powerInv, inverterEff, horizon)
+    url2 = url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&past_days=0&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'.format(lat, lon, wp2, az2, dec2, cellco2, albedo2, powerInv2, inverterEff, horizon2)
 
     try:
         try:
@@ -60,12 +60,7 @@ def loadLatestWeatherData():
             print("### ERROR:  Timeout von api.akkudoktor.net")
             exit()
 
-        forecastData = {
-            "result": {
-                "watts": {}
-            }
-        }
-
+        dict_watts = {}
         pvdaten2 = {}
         # Hier werden fuer ein evtl. zweites Feld mit anderer Ausrichtung die Prognosewerte eingearbeitet
         # Koordinaten müssen gleich sein, wegen zeitgleichem Sonnenauf- bzw. untergang 
@@ -96,55 +91,40 @@ def loadLatestWeatherData():
 
                 valuePower = round(stunde['power'] + valuePower2)
                 if valuePower > 0:
-                    forecastData['result']['watts'][valueDate.strftime("%Y-%m-%d %H:%M:%S")] = valuePower
+                    dict_watts[valueDate.strftime("%Y-%m-%d %H:%M:%S")] = valuePower
 
-        # Metadaten hinzufuegen
-        datumCreated = datetime.strptime(apiResponse.headers['date'], "%a, %d %b %Y %H:%M:%S GMT")
-        forecastData["messageCreated"] = datumCreated.strftime("%Y-%m-%d %H:%M:%S")
-        forecastData["createdfrom"] = "api.akkudoktor.net"
+        # hier evtl Begrenzungen der Prognose anbringen
+        MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
+        if (MaximalPrognosebegrenzung == 1):
+            dict_watts = weatherdata.checkMaxPrognose(dict_watts)
 
-        return(forecastData)
+        # Daten für SQL erzeugen
+        SQL_watts = []
+        for key, value in dict_watts.items():
+            if (value > 10):
+                SQL_watts.append((key, Quelle, value, Gewicht, ''))
+
+        return(SQL_watts)
     except OSError:
         exit()
         
     
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
+    weatherdata = FUNCTIONS.WeatherData.WeatherData()
     config = basics.loadConfig(['default', 'weather'])
-    dataAgeMaxInMinutes = basics.getVarConf('akkudoktor','dataAgeMaxInMinutes','eval')
+    ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
+    Gewicht = basics.getVarConf('akkudoktor','Gewicht','str')
+    Quelle = 'akkudoktor'
     
-    format = "%Y-%m-%d %H:%M:%S"    
+    format = "%H:%M:%S"    
     now = datetime.now()    
-    
-    weatherfile = basics.getVarConf('env','filePathWeatherData','str')
-    data = basics.loadWeatherData(weatherfile)
-    dataIsExpired = True
-    if (data):
-        dateCreated = None
-        if (data['messageCreated']):
-            dateCreated = datetime.strptime(data['messageCreated'], format)
-        
-        if (dateCreated):
-            diff = now - dateCreated
-            dataAgeInMinutes = diff.total_seconds() / 60
-            if (dataAgeInMinutes < dataAgeMaxInMinutes):                
-                print_level = basics.getVarConf('env','print_level','eval')
-                if ( print_level != 0 ):
-                    print('akkudoktor API ERROR: Die Minuten aus "dataAgeMaxInMinutes" ', dataAgeMaxInMinutes ,' Minuten sind noch nicht abgelaufen!!')
-                    print(f'[Now: {now}] [Data created:  {dateCreated}] -> age in min: {dataAgeInMinutes}\n')
-                dataIsExpired = False
-
-    if (dataIsExpired):
-        data = loadLatestWeatherData()
-        if isinstance(data['result'], dict):
-            if not data == "False":
-                # hier evtl Begrenzungen der Prognose anbringen
-                MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
-                if (MaximalPrognosebegrenzung == 1):
-                    data = basics.checkMaxPrognose(data)
-                basics.storeWeatherData(weatherfile, data, now, 'akkudoktor')
-                dateCreated_new = data['messageCreated']
-                print(f'akkudoktor OK: Prognosedaten vom {dateCreated_new} gespeichert.\n')
-        else:
-            print("Fehler bei Datenanforderung api.akkudoktor.net:")
-            print(data)
+    data = loadLatestWeatherData(Quelle, Gewicht)
+    if isinstance(data, list):
+        weatherdata.storeWeatherData_SQL(data, Quelle)
+        # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
+        weatherdata.store_forecast_result()
+        print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')
+    else:
+        print("Fehler bei Datenanforderung ", Quelle, ":")
+        print(data)

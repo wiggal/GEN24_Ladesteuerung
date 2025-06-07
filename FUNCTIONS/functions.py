@@ -45,30 +45,7 @@ class basics:
                         except Exception as e:
                             print("\nERROR: ", e, "\n")
                 return config
-    
-    def loadWeatherData(self, weatherfile):
-            data = None
-            try:
-                with open(weatherfile) as json_file:
-                    data = json.load(json_file)
-            except:
-                    data = {'messageCreated': '2000-01-01 01:01:01'}
 
-            return data
-    
-    def storeWeatherData(self, wetterfile, data, now, wetterdienst):
-        try:
-            out_file = open(wetterfile, "w")
-            format = "%Y-%m-%d %H:%M:%S"
-            data.update({'messageCreated': datetime.strftime(now, format)})
-            data.update({'createdfrom': wetterdienst})
-            json.dump(data, out_file, indent = 6)
-            out_file.close()
-        except:
-            print("ERROR: Die Wetterdatei " + wetterfile + " konnte NICHT geschrieben werden!")
-            exit(0)
-        return()
-    
     def getVarConf(self, var_block, var, Type):
             # Variablen aus config lesen und auf Zahlen prüfen
             try:
@@ -82,95 +59,23 @@ class basics:
                 print("ERROR: die Variable [" + var_block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
                 exit(0)
             return return_var
+
+    def loadWeatherData(self):
+        conn = sqlite3.connect('weatherData.sqlite')
+        cursor = conn.cursor()
     
-    def checkMaxPrognose(self, data):
-        database = 'PV_Daten.sqlite'
-        print_level = self.getVarConf('env','print_level','eval')
-        MaxProGrenz_Faktor = self.getVarConf('env','MaxProGrenz_Faktor','eval')
-        MaxProGrenz_Dayback = self.getVarConf('env','MaxProGrenz_Dayback','eval') * -1
-        DEBUG_txt = "Folgende Prognosen wurden auf einen Maximalwert reduziert:\n"
-        Anzahl_Begrenzung = 0
+        query = f"""
+            SELECT Zeitpunkt, Prognose_W
+            FROM weatherData
+            WHERE
+                Prognose_W > 30 AND
+                Quelle IS 'Ergebnis' AND
+                DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day')
+            ORDER BY Zeitpunkt ASC
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        result = dict(rows)
 
-        # Datum Sommer und Winterzeit ermitteln
-        # Aktuelles Jahr ermitteln
-        current_year = datetime.now().year
-        # Datum für den 31. März des aktuellen Jahres
-        date_03 = datetime(current_year, 3, 31)
-        # Datum für den 31. Oktober des aktuellen Jahres
-        date_10 = datetime(current_year, 10, 31)
-        # Wochentag ermitteln (0=Sonntag, 6=Samstag)
-        weekday_03 = (date_03.weekday() + 1) % 7
-        weekday_10 = (date_10.weekday() + 1) % 7
-        letzter_So_03 = 31 - weekday_03
-        letzter_So_10 = 31 - weekday_10
-        Sommerzeit_anfang= str(current_year)+"-03-"+str(letzter_So_03)+" 02"
-        Winterzeit_anfang= str(current_year)+"-10-"+str(letzter_So_10)+" 02"
-
-        verbindung = sqlite3.connect(database)
-        zeiger = verbindung.cursor()
-        sql_anweisung = """
-            WITH stundenwerte AS (
-                        SELECT
-                            strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS volle_stunde,
-                            MAX(DC_Produktion) AS max_dcproduktion
-                        FROM
-                            pv_daten
-                        WHERE
-                            Zeitpunkt >= datetime('now', '""" + str(MaxProGrenz_Dayback) + """ days')
-                        GROUP BY
-                            strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
-                    ),
-                    sommerzeit AS (
-                        SELECT 
-                            CASE
-                                WHEN volle_stunde BETWEEN '""" + str(Sommerzeit_anfang) + """' AND '""" + str(Winterzeit_anfang) + """' THEN DATETIME(volle_stunde, '-1 hour')
-                            ELSE volle_stunde
-                            END AS volle_stunde,
-                            max_dcproduktion
-                        FROM stundenwerte
-                    ),
-                    differenzen AS (
-                        SELECT
-                            strftime('%H:00:00',a.volle_stunde) AS Stunde,
-                            a.max_dcproduktion - COALESCE(b.max_dcproduktion, 0) AS DCProduktion
-                        FROM
-                            sommerzeit a
-                        LEFT JOIN
-                            sommerzeit b ON a.volle_stunde = datetime(b.volle_stunde, '+1 hour')
-			            WHERE
-				            DCProduktion < 20000
-                    )
-            SELECT
-            Stunde, MAX(DCProduktion) AS maximalwert
-            FROM differenzen
-            GROUP BY Stunde
-            ORDER BY Stunde;
-            """
-        try:
-            zeiger.execute(sql_anweisung)
-            DB_data = zeiger.fetchall()
-        except:
-            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, MaximalPrognosebegrenzung deaktivieren!")
-            # Schließe die Verbindung
-            verbindung.close()
-            exit()
-
-        # Schließe die Verbindung
-        verbindung.close()
-
-        for hour in DB_data:
-            DB_MaxWatt = int(hour[1] * MaxProGrenz_Faktor)
-            search_substring = str(hour[0])
-            for key, value in data['result']['watts'].items():
-                if isinstance(key, str) and search_substring in key:
-                    if (data['result']['watts'][key] > DB_MaxWatt):
-                        DEBUG_txt += str(key) + " " + str(data['result']['watts'][key]) + " ==>> " + str(DB_MaxWatt) + "\n"
-                        Anzahl_Begrenzung += 1
-                        data['result']['watts'][key] = DB_MaxWatt
-
-        if print_level == 2:
-            print("checkMaxPrognose mit letze ", MaxProGrenz_Dayback, " Tage!")
-            print(DEBUG_txt)
-
-        return (data)
-
+        conn.close()
+        return {"result": {"watts": result}}

@@ -125,6 +125,13 @@ input.slider {
   position: fixed;
   right: 8px;
 }
+.weatherDataManager{
+  font-family:Arial;
+  font-size:150%;
+  color: #000000;
+  position: fixed;
+  left: 8px;
+}
 .sliderbeschriftung{
   font-family:Arial;
   font-weight: bold;
@@ -145,6 +152,7 @@ input.slider {
  </head>
 
  <body>
+  <div class="weatherDataManager"> <a href="weatherDataManager.php"><b>ForecastMgr</b></a></div>
   <div class="hilfe"> <a href="1_Hilfe.html"><b>Hilfe</b></a></div>
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>
@@ -156,12 +164,9 @@ include "config.php";
 if(file_exists("config_priv.php")){
   include "config_priv.php";
 }
-$Prognose = json_decode(file_get_contents($PrognoseFile), true);
-$date = new DateTime($Prognose['messageCreated']);
-$erzeugt_um = $date->format('d.m. \u\m H:i');
-echo "<div class=\"prognosevon\">$Prognose[createdfrom] $erzeugt_um</div>"; 
 include 'SQL_steuerfunctions.php';
 $EV_Reservierung = getSteuercodes('Reservierung');
+$Prognose = getPrognose();
 
 $DB_ManuelleSteuerung_wert = 0;
 $DB_Auto_selected = '';
@@ -169,7 +174,7 @@ $DB_Slider_selected = '';
 $DB_MaxLadung_selected = '';
 # Prüfen, ob Einträge für ManuelleSteuerung schon abgelaufen
 date_default_timezone_set('Europe/Berlin');
-# Wenn Fehld in DB keine Zahl
+# Wenn Feld in DB keine Zahl
 if (!is_numeric($EV_Reservierung['ManuelleSteuerung']['Options'])){
     $EV_Reservierung['ManuelleSteuerung']['Options'] = 0;
 }

@@ -17,7 +17,7 @@ import FUNCTIONS.Steuerdaten
 
 if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
-    config = basics.loadConfig(['default', 'dynprice'])
+    config = basics.loadConfig(['default', 'charge', 'dynprice'])
     sqlall = FUNCTIONS.SQLall.sqlall()
     dynamic = FUNCTIONS.DynamicPrice.dynamic()
     request = FUNCTIONS.httprequest.request()
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     Lade_Verbrauchs_Faktor = basics.getVarConf('dynprice','Lade_Verbrauchs_Faktor', 'eval')
     Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
     weatherfile = basics.getVarConf('env','filePathWeatherData','str')
-    weatherdata = basics.loadWeatherData(weatherfile)
+    weatherdata = basics.loadWeatherData()
     if(dyn_print_level >= 1): print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"***\n")
 
     # Lastprofile holen
