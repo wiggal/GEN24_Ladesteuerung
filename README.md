@@ -13,7 +13,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 
 ![new](pics/new.png)  
 Ab Version: **0.30.0**  
-Speicherung der Prognosedaten in `weatherData.sqlite`, Mittelbildung der vorhandenen Werte.  
+Speicherung der Prognosedaten in `weatherData.sqlite`, Berechnung der Prognose mit gespeicherten Werten.  
 Mit dem verlinkten  `ForecastMgr` können die Prognosedaten gesichtet und gelöscht werden.  
 Ab Version: **0.29.0**  
 Zur Akkuschonung kann der Akku bei entprechender Prognose auch nur bis 80% geladen werden.  
