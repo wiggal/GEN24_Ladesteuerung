@@ -1,4 +1,4 @@
-**[0.30.0] – 2025-XX-XX**  
+**[0.30.0] – 2025-06-08**  
 
 **Große Änderungen bei Prognosespeicherung**  
 - Alle abgerufenen Prognosedaten werden nun in der SQLitedatei `weatherData.sqlite` gespeichert.  
