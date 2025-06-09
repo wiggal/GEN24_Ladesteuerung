@@ -2,33 +2,76 @@
 # Download als CSV Funktion
 if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     $db = new PDO('sqlite:../weatherData.sqlite');
-    $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC); // wichtig!
+    $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
+    // Prognosedaten aus weather.sqlite holen
     $stmt = $db->query("SELECT * FROM weatherData ORDER BY Zeitpunkt ASC");
+    $data = $stmt->fetchAll();
 
-    // Richtige Header setzen
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="weatherData.csv"');
-    header('Pragma: no-cache');
-    header('Expires: 0');
+    // Hier noch die Ist-Produktion aus PV_Daten.sqlite holen
+    $db2 = new PDO('sqlite:../PV_Daten.sqlite');
+    $db2->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-    $output = fopen('php://output', 'w');
+    $ersterZeitpunkt = ($data[0]['Zeitpunkt']); 
+    $ersterTag = date('Y-m-d', strtotime($ersterZeitpunkt));
+    $heute = date('Y-m-d') . ' 23:59:59';
 
-    // Kopfzeile schreiben
-    $firstRow = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($firstRow) {
-        fputcsv($output, array_keys($firstRow));
-        fputcsv($output, array_values($firstRow));
-
-        // Restliche Zeilen
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            fputcsv($output, $row);
+    $stmt = $db2->query("
+        SELECT
+        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
+        MAX(DC_Produktion) - MIN(DC_Produktion) AS Produktion_DC
+    FROM
+        pv_daten
+    WHERE
+        Zeitpunkt BETWEEN '".$ersterTag."' AND '".$heute."'
+    GROUP BY
+        strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
+    ORDER BY
+        Stunde
+    ");
+    $data2 = $stmt->fetchAll(); 
+    // Beispiel: Spalte ergänzen
+    foreach ($data2 as &$Ist) {
+        if ($Ist['Produktion_DC'] > 10) {
+            $data[] = [
+                    'Zeitpunkt'   => $Ist['Stunde'],
+                    'Quelle'      => 'Produktion',
+                    'Prognose_W'  => $Ist['Produktion_DC'],
+                    'Gewicht'     => 0,
+                    'Options'     => '',
+                ];
         }
     }
 
-    fclose($output);
-    exit;
+    // Wenn Daten vorhanden, CSV erzeugen
+    if (!empty($data)) {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="weatherData.csv"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $output = fopen('php://output', 'w');
+
+        // Kopfzeile anpassen
+        $header = array_keys($data[0]);
+        $index = array_search("Prognose_W", $header);
+        if ($index !== false) {
+            $header[$index] = "Watt";
+        }
+        fputcsv($output, $header);
+
+        // Datenzeilen
+        foreach ($data as $row) {
+            fputcsv($output, $row);
+        }
+
+        fclose($output);
+        exit;
+    } else {
+        echo "Keine Daten gefunden.";
+    }
 }
+
 ?>
 
 <!DOCTYPE html>
