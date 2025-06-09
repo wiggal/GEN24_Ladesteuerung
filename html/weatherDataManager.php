@@ -4,11 +4,14 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     $db = new PDO('sqlite:../weatherData.sqlite');
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-    // Prognosedaten aus weather.sqlite holen
+    // Create associative array to store data by timestamp
+    $pivotedData = array();
+    
+    // Get all data ordered by timestamp
     $stmt = $db->query("SELECT * FROM weatherData ORDER BY Zeitpunkt ASC");
     $data = $stmt->fetchAll();
 
-    // Hier noch die Ist-Produktion aus PV_Daten.sqlite holen
+    // Get production data from PV_Daten.sqlite
     $db2 = new PDO('sqlite:../PV_Daten.sqlite');
     $db2->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
@@ -17,61 +20,70 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     $heute = date('Y-m-d') . ' 23:59:59';
 
     $stmt = $db2->query("
-        SELECT
-        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
-        MAX(DC_Produktion) - MIN(DC_Produktion) AS Produktion_DC
-    FROM
-        pv_daten
-    WHERE
-        Zeitpunkt BETWEEN '".$ersterTag."' AND '".$heute."'
-    GROUP BY
-        strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
-    ORDER BY
-        Stunde
+    WITH Alle_PVDaten AS (
+        select Zeitpunkt, 
+        DC_Produktion
+        from pv_daten
+            where Zeitpunkt BETWEEN '".$ersterTag."' AND '".$heute."'
+        group by STRFTIME('%Y%m%d%H', Zeitpunkt))
+	    	SELECT STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
+		    (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion_DC
+        from Alle_PVDaten
     ");
-    $data2 = $stmt->fetchAll(); 
-    // Beispiel: Spalte ergänzen
-    foreach ($data2 as &$Ist) {
-        if ($Ist['Produktion_DC'] > 10) {
-            $data[] = [
-                    'Zeitpunkt'   => $Ist['Stunde'],
-                    'Quelle'      => 'Produktion',
-                    'Prognose_W'  => $Ist['Produktion_DC'],
-                    'Gewicht'     => 0,
-                    'Options'     => '',
-                ];
+    $productionData = $stmt->fetchAll();
+
+    // Initialize the pivoted data structure
+    foreach ($data as $row) {
+        $timestamp = $row['Zeitpunkt'];
+        if (!isset($pivotedData[$timestamp])) {
+            $pivotedData[$timestamp] = array(
+                'Produktion' => '',
+                'akkudoktor' => '',
+                'forecast.solar' => '',
+                'solcast.com' => '',
+                'Median' => ''
+            );
+        }
+        
+        // Map 'Ergebnis' to 'Median'
+        $source = $row['Quelle'] === 'Ergebnis' ? 'Median' : $row['Quelle'];
+        $pivotedData[$timestamp][$source] = $row['Prognose_W'];
+    }
+
+    // Add production data
+    foreach ($productionData as $row) {
+        if ($row['Produktion_DC'] > 10) {
+            $pivotedData[$row['Stunde']]['Produktion'] = $row['Produktion_DC'];
         }
     }
 
-    // Wenn Daten vorhanden, CSV erzeugen
-    if (!empty($data)) {
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="weatherData.csv"');
-        header('Pragma: no-cache');
-        header('Expires: 0');
+    // Output CSV
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="weatherData.csv"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 
-        $output = fopen('php://output', 'w');
+    $output = fopen('php://output', 'w');
 
-        // Kopfzeile anpassen
-        $header = array_keys($data[0]);
-        $index = array_search("Prognose_W", $header);
-        if ($index !== false) {
-            $header[$index] = "Watt";
-        }
-        fputcsv($output, $header);
+    // Write header
+    fputcsv($output, array('Zeitpunkt', 'Produktion', 'akkudoktor', 'forecast.solar', 'solcast.com', 'Median'));
 
-        // Datenzeilen
-        foreach ($data as $row) {
-            fputcsv($output, $row);
-        }
-
-        fclose($output);
-        exit;
-    } else {
-        echo "Keine Daten gefunden.";
+    // Write data rows
+    ksort($pivotedData); // Sort by timestamp
+    foreach ($pivotedData as $timestamp => $values) {
+        fputcsv($output, array(
+            $timestamp,
+            $values['Produktion'],
+            $values['akkudoktor'],
+            $values['forecast.solar'],
+            $values['solcast.com'],
+            $values['Median']
+        ));
     }
+
+    fclose($output);
+    exit;
 }
-
 ?>
 
 <!DOCTYPE html>
