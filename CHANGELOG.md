@@ -1,3 +1,7 @@
+**[0.30.1] – 2025-XX-XX**  
+
+- Im `ForecastMgr` beim Download die tatsächliche Produktion hizugefügt.
+
 **[0.30.0] – 2025-06-08**  
 
 **Große Änderungen bei Prognosespeicherung**  
