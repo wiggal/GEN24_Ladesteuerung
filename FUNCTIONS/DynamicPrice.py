@@ -84,7 +84,10 @@ class dynamic:
         if (len(rows) < 168):
             print("\n>>> Zu wenig Daten (", round((len(rows)/24), 1), "Tage) in PV_Daten.sqlite, es sind mindestens 7 ganze Tage erforderlich.\n>>> Fehlende Werte werden mit 600 Watt aufgefüllt!!\n")
             # Wenn zu wenige Tage mit 600 Watt auffüllen
-            timestamp_tmp = str(int(rows[1][5]))
+            try:
+                timestamp_tmp = str(int(rows[1][5]))
+            except:
+                timestamp_tmp = datetime.now().timestamp()
             for Wochentag in range(7):
                 for Stunde in range(24):
                     index = f"{Wochentag}-{Stunde:02}"
