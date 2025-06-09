@@ -17,17 +17,15 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     $heute = date('Y-m-d') . ' 23:59:59';
 
     $stmt = $db2->query("
-        SELECT
-        strftime('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
-        MAX(DC_Produktion) - MIN(DC_Produktion) AS Produktion_DC
-    FROM
-        pv_daten
-    WHERE
-        Zeitpunkt BETWEEN '".$ersterTag."' AND '".$heute."'
-    GROUP BY
-        strftime('%Y-%m-%d %H:00:00', Zeitpunkt)
-    ORDER BY
-        Stunde
+    WITH Alle_PVDaten AS (
+        select Zeitpunkt, 
+        DC_Produktion
+        from pv_daten
+            where Zeitpunkt BETWEEN '".$ersterTag."' AND '".$heute."'
+        group by STRFTIME('%Y%m%d%H', Zeitpunkt))
+	    	SELECT STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
+		    (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion_DC
+        from Alle_PVDaten
     ");
     $data2 = $stmt->fetchAll(); 
     // Beispiel: Spalte ergänzen
