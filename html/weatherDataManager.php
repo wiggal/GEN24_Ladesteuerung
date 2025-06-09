@@ -196,6 +196,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 $quellen = [];
                 foreach ($quellenResult as $row) {
                     $quellen[] = $row['Quelle'];
+                    $Style_bg = '';
                     if ($row['Quelle'] != 'Ergebnis') {
                         $Style_bg = 'style="background-color: orange;"';
                     }
@@ -309,43 +310,22 @@ $letztesDatum_tmp = new DateTime($selectedDay);
 $letztesDatum_tmp->modify('+1 day +5 minutes');
 $letztesDatum = $letztesDatum_tmp->format('Y-m-d H:i:s');
 $stmt = $db->query("
-    WITH Tagesdaten AS (
-        SELECT *
-        FROM pv_daten
+WITH Alle_PVDaten AS (
+    select Zeitpunkt, 
+    DC_Produktion
+    from pv_daten
         WHERE DATE(Zeitpunkt) = '".$selectedDay."'
-    ),
-    Stundenbasis AS (
-        SELECT
-            STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
-            MIN(Zeitpunkt) AS Zeitpunkt_Start,
-            MAX(Zeitpunkt) AS Zeitpunkt_Ende
-        FROM Tagesdaten
-        GROUP BY Stunde
-    ),
-    Nächste_Stunden AS (
-        SELECT
-            s1.Stunde,
-            s1.Zeitpunkt_Start,
-            s1.Zeitpunkt_Ende,
-            s2.Stunde AS Naechste_Stunde
-        FROM Stundenbasis s1
-        JOIN Stundenbasis s2
-          ON s2.Stunde = DATETIME(s1.Stunde, '+1 hour')
-    ),
-    ProduktionBerechnet AS (
-        SELECT
-            s.Stunde,
-            (SELECT DC_Produktion FROM Tagesdaten WHERE Zeitpunkt = s.Zeitpunkt_Ende) -
-            (SELECT DC_Produktion FROM Tagesdaten WHERE Zeitpunkt = s.Zeitpunkt_Start) AS Produktion,
-            s.Zeitpunkt_Ende AS Zeitpunkt
-        FROM Nächste_Stunden s
-    )
-    SELECT Zeitpunkt, Produktion
-    FROM ProduktionBerechnet
-    WHERE Produktion IS NOT NULL
-    ORDER BY Zeitpunkt
+    group by STRFTIME('%Y%m%d%H', Zeitpunkt)),
+ProduktionDiff AS (
+    SELECT 
+        STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
+        (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion
+    FROM Alle_PVDaten
+)
+SELECT *
+FROM ProduktionDiff
+WHERE Produktion IS NOT NULL
 ");
-
 
 foreach ($stmt as $row) {
     $zeit = (new DateTime($row['Zeitpunkt']))->format('Y-m-d H:00:00');

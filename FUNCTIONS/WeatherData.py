@@ -61,6 +61,14 @@ class WeatherData:
                 DELETE FROM weatherData
                 WHERE datetime(Zeitpunkt) < datetime(?);
             """, (loesche_bis,))
+
+            #Alle Datesätze mit Prognose kleiner 10 löschen
+            #wurde mit einer älteren Verion geschrieben  #entWIGGlung
+            #zeiger.execute("""
+            #    DELETE FROM weatherData 
+            #    WHERE Prognose_W < 10 AND Quelle = ?;
+            #""", (quelle,))
+
             # Neue Prognosen speichern
             zeiger.executemany("""
             INSERT OR REPLACE INTO weatherData (Zeitpunkt, Quelle, Prognose_W, Gewicht, Options)
