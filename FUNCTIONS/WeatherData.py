@@ -49,6 +49,9 @@ class WeatherData:
         # Alte Einträge löschen die älter 30 Tage sind
         loesche_bis = (datetime.today() - timedelta(days=30)).date().isoformat()
 
+        #Prognosen kleiner 10 löschen
+        data = [entry for entry in data if entry[2] >= 10]
+
         try:
             # Index auf Zeitpunkt anlegen, falls nicht vorhanden
             zeiger.execute("""
@@ -94,7 +97,6 @@ class WeatherData:
         cursor.execute(query)
         rows = cursor.fetchall()
 
-        stundenwerte = defaultdict(list)
         stundenwerte = defaultdict(list)
 
         for zeit_str, wert, gewicht in rows:
