@@ -1,3 +1,7 @@
+**[0.30.1] – 2025-XX-XX**  
+
+- Im `ForecastMgr` beim Download die tatsächliche Produktion hizugefügt.
+
 **[0.30.0] – 2025-06-08**  
 
 **Große Änderungen bei Prognosespeicherung**  
@@ -636,7 +640,7 @@ Ladewerte_Vergleichtabelle.ods entfernt, da nicht mehr aktuell und nötig
 
 #### ACHTUNG Änderung in der config.ini:
 - Im Block [solcast.com] wurde "no_history = 0" hinzugefügt
-- ein neuer Block [solcast.com2] wurde hizugefügt.
+- ein neuer Block [solcast.com2] wurde hinzugefügt.
 
 **[0.13.1] – 2024-03-17**
 
