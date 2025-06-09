@@ -18,58 +18,88 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
     $stmt = $db2->query("
     WITH Alle_PVDaten AS (
-        select Zeitpunkt, 
-        DC_Produktion
-        from pv_daten
-            where Zeitpunkt BETWEEN '".$ersterTag."' AND '".$heute."'
-        group by STRFTIME('%Y%m%d%H', Zeitpunkt))
-	    	SELECT STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
-		    (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion_DC
-        from Alle_PVDaten
+        SELECT Zeitpunkt, DC_Produktion
+        FROM pv_daten
+        WHERE Zeitpunkt BETWEEN '".$ersterTag."' AND '".$heute."'
+        GROUP BY STRFTIME('%Y%m%d%H', Zeitpunkt)
+    )
+    SELECT STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
+           (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion_DC
+    FROM Alle_PVDaten
     ");
     $data2 = $stmt->fetchAll(); 
-    // Beispiel: Spalte ergänzen
+
+    // Produktion in Daten einfügen
     foreach ($data2 as &$Ist) {
         if ($Ist['Produktion_DC'] > 10) {
             $data[] = [
-                    'Zeitpunkt'   => $Ist['Stunde'],
-                    'Quelle'      => 'Produktion',
-                    'Prognose_W'  => $Ist['Produktion_DC'],
-                    'Gewicht'     => 0,
-                    'Options'     => '',
-                ];
+                'Zeitpunkt'   => $Ist['Stunde'],
+                'Quelle'      => 'Produktion',
+                'Prognose_W'  => $Ist['Produktion_DC'],
+                'Gewicht'     => 0,
+                'Options'     => '',
+            ];
         }
     }
 
-    // Wenn Daten vorhanden, CSV erzeugen
-    if (!empty($data)) {
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="weatherData.csv"');
-        header('Pragma: no-cache');
-        header('Expires: 0');
-
-        $output = fopen('php://output', 'w');
-
-        // Kopfzeile anpassen
-        $header = array_keys($data[0]);
-        $index = array_search("Prognose_W", $header);
-        if ($index !== false) {
-            $header[$index] = "Watt";
-        }
-        fputcsv($output, $header);
-
-        // Datenzeilen
-        foreach ($data as $row) {
-            fputcsv($output, $row);
-        }
-
-        fclose($output);
-        exit;
-    } else {
+    // Wenn keine Daten vorhanden sind
+    if (empty($data)) {
         echo "Keine Daten gefunden.";
+        exit;
     }
-}
+    ksort($data2);
 
+    // --- DATEN UMWANDELN ---
+    $structuredData = [];
+    $alleQuellen = [];
+
+    foreach ($data as $row) {
+        $zeit = $row['Zeitpunkt'];
+        $quelle = $row['Quelle'];
+        $wert = $row['Prognose_W'];
+
+        if (!isset($structuredData[$zeit])) {
+            $structuredData[$zeit] = ['Zeitpunkt' => $zeit];
+        }
+        $structuredData[$zeit][$quelle] = $wert;
+
+        $alleQuellen[$quelle] = true; // zur späteren Spaltenreihenfolge
+    }
+
+    // Sortieren
+    ksort($structuredData);
+
+    // Quellen sortieren: Produktion zuerst, Ergebnis an zweiter Stelle
+    $quellenListe = array_keys($alleQuellen);
+
+    // Manuell sortieren
+    $priorisiert = ['Produktion', 'Ergebnis'];
+    $rest = array_diff($quellenListe, $priorisiert);
+    $quellenListe = array_merge($priorisiert, $rest);
+
+    // --- CSV EXPORT ---
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="weatherData.csv"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    $output = fopen('php://output', 'w');
+
+    // Kopfzeile schreiben
+    fputcsv($output, array_merge(['Zeitpunkt'], $quellenListe));
+
+    // Zeilen schreiben
+    foreach ($structuredData as $row) {
+        $zeile = [$row['Zeitpunkt']];
+        foreach ($quellenListe as $q) {
+            $zeile[] = $row[$q] ?? '';
+        }
+        fputcsv($output, $zeile);
+    }
+
+    fclose($output);
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
