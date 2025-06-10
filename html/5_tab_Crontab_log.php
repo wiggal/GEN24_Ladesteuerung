@@ -79,7 +79,7 @@ switch ($case) {
     # AUSGEBEN DER Crontab.log von Heute
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
-        if (strpos($Zeile, $datum) !== false) $Ausgabe = 1;
+        if (strpos($Zeile, 'BEGINN') !== false && strpos($Zeile, $datum) !== false) $Ausgabe = 1;
         if ($Ausgabe == 1) {
             // DEBUG ausblenden
             if ($DEBUG == "aus") {
@@ -116,7 +116,7 @@ switch ($case) {
     # Ausgabe der gesuchten Zeile mit Datumszeile 
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
-        if (strpos($Zeile, $datum) !== false) $Ausgabe = 1;
+        if (strpos($Zeile, 'BEGINN') !== false && strpos($Zeile, $datum) !== false) $Ausgabe = 1;
         if ($Ausgabe == 1) {
             if (strpos($Zeile, 'BEGINN') !== false) {
                 $BEGIN_DATE = explode(" ", $Zeile);
