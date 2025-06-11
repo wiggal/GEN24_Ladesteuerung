@@ -290,14 +290,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !
 # Daten für Chartjs bilden
 $chartData = []; // [datum][quelle] = array of [time, wert]
 
+// Zuerst alle Quellen sammeln umkeine Verschiebung bei nicht vorhandenen Werten
+$alleQuellen = [];
+foreach ($data as $werteProQuelle) {
+    foreach ($werteProQuelle as $quelle => $_) {
+        $alleQuellen[$quelle] = true;
+    }
+}
+$alleQuellen = array_keys($alleQuellen);
+
+// Dann die Daten aufbereiten
 foreach ($data as $zeitpunkt => $werteProQuelle) {
     $datum = substr($zeitpunkt, 0, 10);
     $uhrzeit = substr($zeitpunkt, 11, 5);
-    foreach ($werteProQuelle as $quelle => $eintrag) {
-            $chartData[$datum][$quelle][] = [
-                'time' => $uhrzeit,
-                'wert' => $eintrag['wert']
-            ];
+
+    foreach ($alleQuellen as $quelle) {
+        $wert = isset($werteProQuelle[$quelle]) ? $werteProQuelle[$quelle]['wert'] : NULL;
+
+        $chartData[$datum][$quelle][] = [
+            'time' => $uhrzeit,
+            'wert' => $wert
+        ];
     }
 }
 ?>
