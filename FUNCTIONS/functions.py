@@ -69,7 +69,7 @@ class basics:
             FROM weatherData
             WHERE
                 Prognose_W > 30 AND
-                Quelle IS 'Ergebnis' AND
+                Quelle IS 'Prognose' AND
                 DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day')
             ORDER BY Zeitpunkt ASC
         """
