@@ -83,7 +83,7 @@ class WeatherData:
         conn = sqlite3.connect('PV_Daten.sqlite')
         verbindung = conn.cursor()
         heute = datetime.now().strftime('%Y-%m-%d 23:59:59')
-        #vorgestern = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+        aktuelle_Std = datetime.now().strftime('%Y-%m-%d %H:00:00')
         
         sql_anweisung = f"""
             WITH Alle_PVDaten AS (
@@ -111,9 +111,10 @@ class WeatherData:
             import traceback
             traceback.print_exc()
             print("Die Datei PV_Daten.sqlite fehlt oder ist leer!")
+            DB_data = []
+            DB_data.append((aktuelle_Std, 0),)
             # Schließe die Verbindung
             verbindung.close()
-            exit()
 
         Produktion = [] 
         for Stunde, Watt in DB_data:
