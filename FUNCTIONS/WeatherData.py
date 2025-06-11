@@ -165,7 +165,7 @@ class WeatherData:
             # Statistische Auswertungen nach ForecastCalcMethod
             if ( ForecastCalcMethod == 'median'):
                 result[zeit_str] = int(median(stundenwerte[stunde]))
-            if ( ForecastCalcMethod == 'mean'):
+            if ( ForecastCalcMethod == 'mittel'):
                 result[zeit_str] = int(mean(stundenwerte[stunde]))
             if ( ForecastCalcMethod == 'min'):
                 result[zeit_stDB_datar] = int(min(stundenwerte[stunde]))

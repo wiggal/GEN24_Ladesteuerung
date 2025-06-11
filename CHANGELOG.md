@@ -1,6 +1,7 @@
 **[0.30.1] – 2025-XX-XX**  
 
 - Im `ForecastMgr` beim Download die tatsächliche Produktion hinzugefügt.
+- Speicherung der Produktion in weatherData.sqlite.  
 
 **[0.30.0] – 2025-06-08**  
 

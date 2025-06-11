@@ -13,6 +13,7 @@ import FUNCTIONS.WeatherData
 
 def loadLatestWeatherData(Quelle, Gewicht):
     url = 'http://www.solarprognose.de/web/solarprediction/api/v1?access-token={}&item={}&id={}&type={}&algorithm={}'.format(accesstoken, item, id, type, algorithm)
+    print("DEBUG Wetter URL: "+url)
     try:
         apiResponse = requests.get(url, timeout=99)
         if apiResponse.status_code == 200:
