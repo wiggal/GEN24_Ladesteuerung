@@ -291,21 +291,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !
 # Daten für Chartjs bilden
 $chartData = []; // [datum][quelle] = array of [time, wert]
 
-// Zuerst alle Quellen sammeln umkeine Verschiebung bei nicht vorhandenen Werten
-$alleQuellen = [];
-foreach ($data as $werteProQuelle) {
-    foreach ($werteProQuelle as $quelle => $_) {
-        $alleQuellen[$quelle] = true;
-    }
-}
-$alleQuellen = array_keys($alleQuellen);
-
 // Dann die Daten aufbereiten
 foreach ($data as $zeitpunkt => $werteProQuelle) {
     $datum = substr($zeitpunkt, 0, 10);
     $uhrzeit = substr($zeitpunkt, 11, 5);
 
-    foreach ($alleQuellen as $quelle) {
+    foreach ($quellenListe as $quelle) {
         $wert = isset($werteProQuelle[$quelle]) ? $werteProQuelle[$quelle]['wert'] : NULL;
 
         $chartData[$datum][$quelle][] = [
@@ -327,6 +318,7 @@ let lineChart = null;
 // Definieren der Farbzuweisungen für jede Quelle
 const sourceColors = {
     'Prognose': '#FF3300', //  Rot für Prognosewert
+    'Median': '#FF3300', //  Rot für Prognosewert
     'Produktion': '#4CAF50',    //  Grün für Produktion-Wert
     'solcast.com': '#3F51B5', // Blau
     'solarprognose': '#7B3F00', // Braun
@@ -352,9 +344,9 @@ function renderChart(date) {
         if (quelle === 'Produktion') {
             backgroundColor = 'rgba(200, 200, 200, 0.3)';
             fillOption = true;
-        } else if (quelle === 'Dummy') {
-            backgroundColor = 'rgba(255, 152, 0, 0.3)';
-            fillOption = '-1';
+        } else if (quelle === 'Median') {
+            backgroundColor = 'rgba(255, 51, 0, 0.1)';
+            fillOption = '1';
         }
 
         datasets.push({

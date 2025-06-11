@@ -170,9 +170,11 @@ if __name__ == '__main__':
                     # Akkuschonung_Werte in ein Dictionary umwandeln, ersten Wert extrahieren und in float umwandeln
                     SOC_data = json.loads(Akkuschonung_Werte)
                     SOC_Proz_Grenze = float(next(iter(SOC_data.keys())))
+                    Ladelimit_80 = ' (100%)'
                     BattKapaWatt_akt_SOC = BattKapaWatt_akt
                     if PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
                         BattKapaWatt_akt_SOC = int(BattKapaWatt_akt - BattganzeKapazWatt*((100-SOC_Proz_Grenze)/100))
+                        Ladelimit_80 = ' (80%)'
 
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz > 90 ):
@@ -196,7 +198,7 @@ if __name__ == '__main__':
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[0]
                     Grundlast_Summe = PrognoseUNDUeberschuss[1]
                     aktuellerLadewert = PrognoseUNDUeberschuss[2]
-                    LadewertGrund = PrognoseUNDUeberschuss[3]
+                    LadewertGrund = PrognoseUNDUeberschuss[3] + Ladelimit_80
                     # Ladewert auf Schreibgrenzen prüfen
                     DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
                     WR_schreiben = DATA[1]
