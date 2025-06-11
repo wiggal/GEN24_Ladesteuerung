@@ -62,13 +62,6 @@ class WeatherData:
                 WHERE datetime(Zeitpunkt) < datetime(?);
             """, (loesche_bis,))
 
-            #Alle Datesätze mit Prognose kleiner 10 löschen
-            #wurde mit einer älteren Verion geschrieben  #entWIGGlung
-            #zeiger.execute("""
-            #    DELETE FROM weatherData 
-            #    WHERE Prognose_W < 10 AND Quelle = ?;
-            #""", (quelle,))
-
             # Neue Prognosen speichern
             zeiger.executemany("""
             INSERT OR REPLACE INTO weatherData (Zeitpunkt, Quelle, Prognose_W, Gewicht, Options)
@@ -86,6 +79,48 @@ class WeatherData:
 
         return()
     
+    def get_produktion_result(self, von_tag):
+        conn = sqlite3.connect('PV_Daten.sqlite')
+        verbindung = conn.cursor()
+        heute = datetime.now().strftime('%Y-%m-%d 23:59:59')
+        #vorgestern = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+        
+        sql_anweisung = f"""
+            WITH Alle_PVDaten AS (
+                SELECT Zeitpunkt,
+                    DC_Produktion
+                FROM pv_daten
+                WHERE Zeitpunkt BETWEEN '{von_tag}' AND '{heute}'
+                GROUP BY STRFTIME('%Y%m%d%H', Zeitpunkt)
+            ),
+            ProduktionDiff AS (
+                SELECT
+                    STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
+                    (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion
+                FROM Alle_PVDaten
+            )
+            SELECT *
+            FROM ProduktionDiff
+            WHERE Produktion IS NOT NULL;
+        """
+        try:
+            verbindung.execute(sql_anweisung)
+            DB_data = verbindung.fetchall()
+        except Exception as e:
+            print("Fehler:", e)
+            import traceback
+            traceback.print_exc()
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer!")
+            # Schließe die Verbindung
+            verbindung.close()
+            exit()
+
+        Produktion = [] 
+        for Stunde, Watt in DB_data:
+            Produktion.extend([(Stunde, 'Produktion', Watt, '0', '')])
+
+        return(Produktion)
+
     def store_forecast_result(self):
         from collections import defaultdict
         from statistics import median, mean
@@ -93,13 +128,14 @@ class WeatherData:
         conn = sqlite3.connect('weatherData.sqlite')
         cursor = conn.cursor()
     
+        # 'Prognose', 'Median', 'Produktion' ausschließen, da sie nicht zur Mittelbildung verwendet werden
         query = f"""
             SELECT Zeitpunkt, Prognose_W, Gewicht
             FROM weatherData
             WHERE
                 Prognose_W IS NOT NULL AND
                 Gewicht > 0 AND
-                Quelle IS NOT 'Ergebnis'
+                Quelle NOT IN ('Prognose', 'Median', 'Produktion')
             ORDER BY Zeitpunkt ASC
         """
         cursor.execute(query)
@@ -107,8 +143,11 @@ class WeatherData:
 
         stundenwerte = defaultdict(list)
 
+        von_tag = '2222-01-01'
         for zeit_str, wert, gewicht in rows:
             zeit = datetime.fromisoformat(zeit_str)
+            akt_tag = zeit.strftime("%Y-%m-%d")
+            if akt_tag < von_tag: von_tag = akt_tag
             stunde = zeit.replace(minute=0, second=0, microsecond=0)
             # extend([wert] * gewicht) fügt den wert genau gewicht-mal der Liste hinzu
             # Damit hat man einen gewichteten Median
@@ -116,23 +155,31 @@ class WeatherData:
             stundenwerte[stunde].extend([wert] * gewicht)
 
         result = {}
+        result_median = {}
         for stunde in sorted(stundenwerte):
             zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
-            # Mit den Werten nach Gewichtung
-            result[zeit_str] = int(median(stundenwerte[stunde]))
+            # Median immer speichern, wegen Medianoptimierung
+            result_median[zeit_str] = int(median(stundenwerte[stunde]))
 
-            # Andere Statistische Auswertungen
+            # Statistische Auswertungen nach ForecastCalcMethod
+            if ( ForecastCalcMethod == 'median'):
+                result[zeit_str] = int(median(stundenwerte[stunde]))
             if ( ForecastCalcMethod == 'mean'):
                 result[zeit_str] = int(mean(stundenwerte[stunde]))
             if ( ForecastCalcMethod == 'min'):
-                result[zeit_str] = int(min(stundenwerte[stunde]))
+                result[zeit_stDB_datar] = int(min(stundenwerte[stunde]))
             if ( ForecastCalcMethod == 'max'):
                 result[zeit_str] = int(max(stundenwerte[stunde]))
 
         conn.close()
-        data = [(ts, 'Ergebnis', val, '0', '') for ts, val in result.items()]
+        data = []
+        data.extend([(ts, 'Median', val, '0', '') for ts, val in result_median.items()])
+        data.extend([(ts, 'Prognose', val, '0', '') for ts, val in result.items()])
+        # Prduktion aus PV_Daten.sqlite holen
+        Produktion = self.get_produktion_result(von_tag)
+        data.extend(Produktion)
         # Speichern der Resultate 
-        self.storeWeatherData_SQL(data, 'Ergebnis')
+        self.storeWeatherData_SQL(data, 'Median, Prognose, Produktion')
 
         return()
 
