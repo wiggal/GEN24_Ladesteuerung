@@ -167,8 +167,9 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     echo '<select name="selected_day" id="selected_day" onchange="this.form.submit()">';
     foreach ($tage as $tag) {
         $selected = ($tag === $selectedDay) ? 'selected' : '';
-        if ($tag == $heute) $tag = 'heute';
-        echo "<option value=\"$tag\" $selected>$tag</option>";
+        $tag_show = $tag;
+        if ($tag == $heute) $tag_show = 'heute';
+        echo "<option value=\"$tag\" $selected>$tag_show</option>";
     }
     echo '</select>';
     echo '</form>';
