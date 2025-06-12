@@ -21,21 +21,22 @@ $alleQuellen = [];
 
 $tage2 = [];
 foreach ($data as $row) {
-    $zeit = $row['Zeitpunkt'];
-    $tage2[] = date('Y-m-d', strtotime($zeit));
-    $quelle = $row['Quelle'];
-    $wert = $row['Prognose_W'];
-    $gewicht = $row['Gewicht'];
+    # Prognosen 0 aussieben
+    if ($row['Prognose_W'] > 0) {
+        $zeit = $row['Zeitpunkt'];
+        $tage2[] = date('Y-m-d', strtotime($zeit));
+        $quelle = $row['Quelle'];
+        $wert = $row['Prognose_W'];
+        $gewicht = $row['Gewicht'];
 
-    if (!isset($structuredData[$zeit])) {
-        $structuredData[$zeit] = ['Zeitpunkt' => $zeit];
+        if (!isset($structuredData[$zeit])) {
+            $structuredData[$zeit] = ['Zeitpunkt' => $zeit];
+        }
+        $structuredData[$zeit][$quelle] = $wert;
+            $structuredData_Diagram[$zeit][$quelle]['wert'] = $wert;
+            $structuredData_Diagram[$zeit][$quelle]['gewicht'] = $gewicht;
+        $alleQuellen[$quelle] = true; // zur späteren Spaltenreihenfolge
     }
-    $structuredData[$zeit][$quelle] = $wert;
-    $jetzt = new DateTime();
-    $heute = $jetzt->format('Y-m-d');
-        $structuredData_Diagram[$zeit][$quelle]['wert'] = $wert;
-        $structuredData_Diagram[$zeit][$quelle]['gewicht'] = $gewicht;
-    $alleQuellen[$quelle] = true; // zur späteren Spaltenreihenfolge
 }
 $tageOhneDuplikate = array_unique($tage2);
 # Index neu durchummerieren
@@ -165,6 +166,8 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     // Dropdown
     echo '<form method="POST" style="display:inline;"">';
     echo '<select name="selected_day" id="selected_day" onchange="this.form.submit()">';
+    $jetzt = new DateTime();
+    $heute = $jetzt->format('Y-m-d');
     foreach ($tage as $tag) {
         $selected = ($tag === $selectedDay) ? 'selected' : '';
         $tag_show = $tag;
@@ -213,9 +216,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
             $data = $structuredData_Diagram;
 
-            $jetzt = new DateTime();
-            $heute = $jetzt->format('Y-m-d');
-
             foreach ($data as $zeitpunkt => $werteProQuelle) {
               $datum = substr($zeitpunkt, 0, 10);
               $aktuellesDatum = substr($zeitpunkt, 0, 10); // "YYYY-MM-DD"
@@ -263,7 +263,8 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         }
         ?>
         <br>
-        <button type="submit" style="background-color: red; color: white;" name="submit_delete" onclick="return confirm('Ausgewählte Quellen wirklich löschen?');">Auswahl aus DB löschen</button>
+        <button type="submit" style="background-color: red; color: white;" name="submit_delete" 
+        onclick="return confirm('&#128721; Prognosen können nicht hergestellt werden! &#128721; \n&#128721; Ausgewählte Quellen wirklich löschen? &#128721;');">Auswahl aus DB löschen</button>
     </fieldset>
 </form>
 

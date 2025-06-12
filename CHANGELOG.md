@@ -1,7 +1,8 @@
-**[0.30.1] – 2025-XX-XX**  
+**[0.30.1] – 2025-06-12**  
 
-- Im `ForecastMgr` beim Download die tatsächliche Produktion hinzugefügt.
-- Speicherung der Produktion in weatherData.sqlite.  
+- Im `ForecastMgr` beim Download die tatsächliche Produktion hinzugefügt, und Ausgabe als Kreuztabelle.  
+- Speicherung der Produktion in weatherData.sqlite, damit sie leichter abgefragt werden kann.  
+- Prognose (je nach Einstellung in `ForecastCalcMethod`) und Median werden nun im `ForecastMgr` dargestellt.  
 
 **[0.30.0] – 2025-06-08**  
 
