@@ -168,7 +168,7 @@ class WeatherData:
             if ( ForecastCalcMethod == 'mittel'):
                 result[zeit_str] = int(mean(stundenwerte[stunde]))
             if ( ForecastCalcMethod == 'min'):
-                result[zeit_stDB_datar] = int(min(stundenwerte[stunde]))
+                result[zeit_str] = int(min(stundenwerte[stunde]))
             if ( ForecastCalcMethod == 'max'):
                 result[zeit_str] = int(max(stundenwerte[stunde]))
 
