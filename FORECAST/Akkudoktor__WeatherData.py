@@ -121,7 +121,7 @@ if __name__ == '__main__':
     now = datetime.now()    
     data = loadLatestWeatherData(Quelle, Gewicht)
     if isinstance(data, list):
-        weatherdata.storeWeatherData_SQL(data, Quelle)
+        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
         # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
         weatherdata.store_forecast_result()
         print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')
