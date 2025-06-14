@@ -70,7 +70,7 @@ if __name__ == '__main__':
     data = data_all[0]
     data_err = data_all[1]
     if isinstance(data, list):
-        weatherdata.storeWeatherData_SQL(data, Quelle)
+        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
         # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
         weatherdata.store_forecast_result()
         print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')

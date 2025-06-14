@@ -264,7 +264,10 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         ?>
         <br>
         <button type="submit" style="background-color: red; color: white;" name="submit_delete" 
-        onclick="return confirm('&#128721; Prognosen können nicht hergestellt werden! &#128721; \n&#128721; Ausgewählte Quellen wirklich löschen? &#128721;');">Auswahl aus DB löschen</button>
+        onclick="return confirm('&#128721; Prognosequellen können nicht hergestellt werden! &#128721; \n \
+\nQuellen können auch nur durch setzen von &quot;Gewicht=0&quot; in der &quot;weather_priv.ini&quot; aus der Berechnung der Prognose ausgeschlossen werden. \
+Das neue Gewicht wird bei der nächsten Anforderung der Prognosequelle gesetzt!\n \
+\n&#128721; Ausgewählte Quellen wirklich löschen? &#128721;');">Auswahl aus DB löschen</button>
     </fieldset>
 </form>
 
