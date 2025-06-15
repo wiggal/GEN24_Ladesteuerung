@@ -216,6 +216,8 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
             $data = $structuredData_Diagram;
 
+            $Prognose_Summe = 0;
+            $Produktion_Summe = 0;
             foreach ($data as $zeitpunkt => $werteProQuelle) {
               $datum = substr($zeitpunkt, 0, 10);
               $aktuellesDatum = substr($zeitpunkt, 0, 10); // "YYYY-MM-DD"
@@ -233,7 +235,11 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                             $style = "style='color: blue;'";
                         }
                         if ($quelle == 'Produktion') {
+                            $Produktion_Summe += $wert;
                             $style = "style='color: #4CAF50; font-weight: bold;'";
+                        }
+                        if ($quelle == 'Prognose') {
+                            $Prognose_Summe += $wert;
                         }
                         echo "<td $style>$wert</td>";
                     } else {
@@ -385,7 +391,7 @@ function renderChart(date) {
         plugins: {
             legend: { position: 'top' },
             title: {
-                display: true,
+                display: false,
                 text: `Prognosen am ${date}`
             },
             tooltip: {
@@ -410,11 +416,26 @@ function renderChart(date) {
         },
         scales: {
             x: {
-                title: { display: true, text: 'Uhrzeit' }
+                title: { display: true, text: 'Prognose: <?php echo round($Prognose_Summe/1000,1); ?>kWh => Produktion: <?php echo round($Produktion_Summe/1000,1); ?>kWh' ,
+                    font: {
+                        size: 18 // Hier Schriftgröße Footer ändern
+                    }
+                },
+                ticks: {
+                    font: {
+                        size: 18 // Schriftgröße für Achsenwerte (Tick-Beschriftung)
+                    }
+                }
             },
             y: {
-                title: { display: true, text: 'Prognosewert (W)' }
-            }
+                title: { display: false, text: 'Prognosewert (W)' 
+                },
+                ticks: {
+                    font: {
+                        size: 18 // Schriftgröße für Achsenwerte (Tick-Beschriftung)
+                    }
+                }
+            },
         }
     }
 });
