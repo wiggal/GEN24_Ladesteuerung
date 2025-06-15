@@ -46,6 +46,7 @@ class WeatherData:
         self.check_or_create_db('weatherData.sqlite')
         verbindung = sqlite3.connect('weatherData.sqlite')
         zeiger = verbindung.cursor()
+        print_level = basics.getVarConf('env','print_level','eval')
         # Alte Einträge löschen die älter 30 Tage sind
         loesche_bis = (datetime.today() - timedelta(days=30)).date().isoformat()
 
@@ -78,14 +79,16 @@ class WeatherData:
         # Hier noch prüfen ob sich das gewicht_neu geändert hat und evtl. in DB ändern
         # Aber nur wenn gewicht_neu nicht -1, da ses sonst nicht von einem Wetterdienst kommt
         if (gewicht_neu != -1):
-            print("DEBUG Gewichte überprüft für ", quelle)
+            if print_level >= 3:
+                print("DEBUG Gewichte überprüft für ", quelle)
             zeiger.execute("""
                 UPDATE weatherData
                 SET Gewicht = ?
                 WHERE Quelle = ? AND Gewicht != ?
             """, (gewicht_neu, quelle, gewicht_neu))
         else:
-            print("DEBUG Gewichte !!NICHT!! überprüft für ", quelle)
+            if print_level >= 3:
+                print("DEBUG Gewichte !!NICHT!! überprüft für ", quelle)
 
         verbindung.commit()
         verbindung.close()
@@ -247,6 +250,7 @@ class WeatherData:
     def store_forecast_result(self):
         from collections import defaultdict
         from statistics import median, mean
+        print_level = basics.getVarConf('env','print_level','eval')
         ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
         conn = sqlite3.connect('weatherData.sqlite')
         cursor = conn.cursor()
@@ -278,7 +282,8 @@ class WeatherData:
                     faktoren_dict[stunde] = {}
                 faktoren_dict[stunde][(watt_von, watt_bis)] = faktor
             # Ergebnis
-            print("DEBUG Faktoren und Bereiche je Stunde: ", faktoren_dict)  #entWIGGlung
+            if print_level >= 3:
+                print("DEBUG Faktoren und Bereiche je Stunde: ", faktoren_dict)  #entWIGGlung
 
         for zeit_str, wert, gewicht in rows:
             zeit = datetime.fromisoformat(zeit_str)
@@ -328,7 +333,8 @@ class WeatherData:
                     # Stunde nicht vorhanden → Standardwert
                      factor_tmp = 1
 
-                print("DEBUG Std, Factor, Median, Factor * Median: ", hour,  factor_tmp, median_watt, int( factor_tmp * median_watt))  #entWIGGlung
+                if print_level >= 3:
+                    print("DEBUG Std, Factor, Median, Factor * Median: ", hour,  factor_tmp, median_watt, int( factor_tmp * median_watt))  #entWIGGlung
                 result[zeit_str] = int(factor_tmp * median_watt)
 
         data = []
@@ -344,6 +350,12 @@ class WeatherData:
         return()
 
     def checkMaxPrognose(self, data):
+        #entWIGGlung
+        print(">>>> MaximalPrognosebegrenzung wird nicht mehr unterstützt, bitte ForecastCalcMethod=median_opt benutzen! ")  #entWIGGlung
+        return(data)
+        exit()
+        #entWIGGlung
+
         database = 'PV_Daten.sqlite'
         print_level = basics.getVarConf('env','print_level','eval')
         MaxProGrenz_Faktor = basics.getVarConf('env','MaxProGrenz_Faktor','eval')
@@ -428,7 +440,7 @@ class WeatherData:
                         Anzahl_Begrenzung += 1
                         data[key] = DB_MaxWatt
 
-        if print_level == 2:
+        if print_level == 3:
             print("checkMaxPrognose mit letze ", MaxProGrenz_Dayback, " Tage!")
             print(DEBUG_txt)
 
