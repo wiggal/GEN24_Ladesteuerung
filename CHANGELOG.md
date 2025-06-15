@@ -4,7 +4,8 @@
   Damit wird aus den bisher gespeicherten  Daten in `weatherData.sqlite` mit einem Faktor aus 
   Median/Produktion eine Verbesserung der Prognose berechnet.  
 
-- Nach Änderung des Gewichtes zu einem Prognosedienst, werden in der DB alle Gewichte des Dienstes neu gesetzt.  
+- Nach Änderung des Gewichtes zu einem Prognosedienst, 
+  werden bei dem nächsten Aufruf des Prognosedienstes in der DB alle Gewichte des Dienstes neu gesetzt.    
 
 **[0.30.1] – 2025-06-12**  
 
