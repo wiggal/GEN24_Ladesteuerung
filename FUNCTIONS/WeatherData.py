@@ -172,7 +172,7 @@ class WeatherData:
         SELECT
             stunde,
             MAX(median) AS max_median,
-            MAX(median) / 3.0 AS drittel
+            MAX(median) / 1.0 AS drittel
         FROM joined
         GROUP BY stunde
         ),
@@ -334,7 +334,7 @@ class WeatherData:
                      factor_tmp = 1
 
                 if print_level >= 3:
-                    print("DEBUG Std, Factor, Median, Factor * Median: ", hour,  factor_tmp, median_watt, int( factor_tmp * median_watt))  #entWIGGlung
+                    print("DEBUG Std, Factor, Median, Factor * Median: ", zeit_str,  factor_tmp, median_watt, int( factor_tmp * median_watt))  #entWIGGlung
                 result[zeit_str] = int(factor_tmp * median_watt)
 
         data = []
