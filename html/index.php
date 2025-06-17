@@ -88,8 +88,9 @@ if (!isset($TAB_config) OR !is_array($TAB_config)) {
 }
 $class_link='';
 # Breite der Tabs in % rechnen
-$anzahl_tabs = array_count_values(array_column($TAB_config, 'sichtbar'))['ein'];
-$Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs);
+$anzahl_tabs = array_count_values(array_column($TAB_config, 'sichtbar'))['ein'] + 1; // wegen WIKI-Link
+print_r($anzahl_tabs);
+$Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs+1);
 $class_tab = '';
 
 echo '<div class="tabs">';
@@ -105,10 +106,19 @@ foreach ($TAB_config as $files) {
             $class_tab .= '<div class="tab"><iframe id="'.$files['name'].'" src="'.$files['file'].'" style="border:none;" height="100%" width="100%"></iframe></div>'."\n";
     }
 }
+# WIKI-Link einfügen
+$class_tab .= '<input type="radio" name="tabs" id="WIKI" onclick="openPopup(\'https://wiggal.github.io/GEN24_Ladesteuerung/\')">'."\n";
+$class_tab .= '<label style="width: '.$Tab_Proz.'vw;" for="WIKI">WIKI</label>'."\n";
+$class_tab .= '<div class="tab"></div>'."\n";
+# ENDE DIV
 $class_tab .= '</div>';
 echo $class_tab;
 ?>
 <script>
+  function openPopup(url) {
+    window.open(url, '_blank', 'width=800,height=600');
+  }
+
 function reloadFrame(button){
   document.querySelectorAll("iframe").forEach(function(e){ 
   // nur Iframe des geklickten Tab neu laden
