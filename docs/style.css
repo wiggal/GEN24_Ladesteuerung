@@ -1,0 +1,314 @@
+/* style.css */
+
+/* 1. Universal Box-Sizing:
+   Stellt sicher, dass Padding und Border zur Breite/Höhe eines Elements gehören.
+   Das macht Layouts vorhersehbarer und ist eine Best Practice.
+*/
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* 2. Grundlegende HTML- und Body-Styles:
+   Verhindert horizontales Scrollen auf der Hauptebene, setzt Basis-Schriftarten
+   und fügt den notwendigen oberen Abstand für den fixierten Header hinzu.
+*/
+html, body {
+    width: 100%;             /* Stellt sicher, dass sie nie breiter als der Viewport sind */
+    overflow-x: hidden;      /* Verhindert horizontales Scrollen der gesamten Seite */
+    margin: 0;               /* Entfernt Standard-Browser-Margin */
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    /* WICHTIG: Fügt Padding hinzu, um den Platz des fixierten Headers auszugleichen. */
+    /* Die 92px sind ein Schätzwert basierend auf padding + min-height der Navbar. */
+    /* Bei dynamischen Header-Höhen müsste das per JavaScript berechnet werden. */
+    padding-top: 92px; /* Ausgleich für fixierten Header */
+}
+
+/* 3. Header-Styling:
+   Der obere Bereich der Seite mit Logo und Navigation.
+   'position: fixed' hält ihn dauerhaft am oberen Rand des Viewports.
+*/
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+    position: fixed;        /* Header bleibt fest am oberen Rand */
+    top: 0;                 /* Am oberen Rand des Viewports */
+    left: 0;                /* Am linken Rand des Viewports */
+    width: 100%;            /* Volle Breite des Viewports */
+    z-index: 100;           /* Stellt sicher, dass der Header über anderen Inhalten liegt */
+}
+
+/* 4. Navbar-Layout:
+   Verwaltet das Layout von Logo, Navigationslinks und Hamburger-Button.
+*/
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Logo links, Navi/Burger rechts */
+    align-items: center;            /* Vertikal zentriert */
+    padding: 0 20px;
+    max-width: 1200px;              /* Maximale Breite für Desktop */
+    margin: 0 auto;                 /* Zentriert die Navbar auf der Seite */
+    min-height: 60px;               /* Gibt dem Header eine Mindesthöhe */
+}
+
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    z-index: 101; /* Stellt sicher, dass das Logo über dem Menü liegt (falls offen) */
+}
+
+/* 5. Navigationslinks (Desktop-Ansicht):
+   Standardmäßig nebeneinander und ohne Listenpunkte.
+*/
+.nav-links {
+    list-style: none;
+    display: flex; /* Links nebeneinander */
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin-left: 20px; /* Abstand zwischen den Links */
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    padding: 5px 0;
+    transition: color 0.3s ease; /* Sanfter Farbwechsel beim Hover */
+}
+
+.nav-links a:hover {
+    color: #00bcd4; /* Beispiel-Hover-Farbe */
+}
+
+/* 6. Hamburgermenü-Icon (Desktop = versteckt, Mobile = sichtbar):
+   Basis-Styling und Animation der Linien.
+*/
+.burger {
+    display: none;     /* Standardmäßig versteckt (für Desktop) */
+    cursor: pointer;
+    background: none;  /* Entfernt Standard-Button-Hintergrund */
+    border: none;      /* Entfernt Standard-Button-Rand */
+    padding: 0;
+    z-index: 101;      /* Stellt sicher, dass der Burger über dem Menü liegt */
+}
+
+.burger div {
+    width: 25px;
+    height: 3px;
+    background-color: #fff;
+    margin: 5px;
+    transition: all 0.3s ease; /* Sanfte Übergänge für die Linien */
+}
+
+/* 7. Hauptinhaltsbereiche:
+   Grundlegendes Styling für Abschnitte unterhalb des Headers.
+*/
+main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hero {
+    background: #e2e2e2;
+    padding: 50px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.content {
+    background: #f4f4f4;
+    padding: 30px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    /* Für Texte, die sehr lang sein könnten (z.B. URLs ohne Leerzeichen) */
+    word-wrap: break-word; /* Bricht lange Wörter um */
+    overflow-wrap: break-word; /* Modernere Eigenschaft */
+}
+
+/* 8. Footer-Styling */
+footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    position: relative; /* Oder 'fixed'/'absolute' je nach gewünschtem Verhalten */
+    bottom: 0;
+    width: 100%;
+}
+
+/* 9. Responsive Anpassungen (Media Queries):
+   Hier wird das Hamburgermenü für kleinere Bildschirme aktiviert und gestylt.
+*/
+@media screen and (max-width: 768px) {
+    /* Navigationslinks für Mobile-Ansicht:
+       Wird ein seitlich ausfahrendes Menü.
+    */
+    .nav-links {
+        position: fixed; /* Fixiert relativ zum Viewport, nicht zum Dokument */
+        right: 0;
+        top: 0;          /* Startet oben im Viewport */
+        height: 100vh;   /* Volle Bildschirmhöhe */
+        background-color: #333;
+        display: flex;
+        flex-direction: column; /* Links untereinander */
+        align-items: center;    /* Links horizontal zentriert */
+        width: 60%;             /* Breite des ausgefahrenen Menüs */
+        max-width: 300px;       /* Maximale Breite für größere Smartphones/Tablets */
+        transform: translateX(100%); /* Menü standardmäßig außerhalb des Bildschirms */
+        transition: transform 0.5s ease-in-out; /* Sanfte Ausfahr-Animation */
+        z-index: 100;           /* Stellt sicher, dass das Menü über allem liegt */
+        padding-top: 80px;      /* Platz für den Header, damit Links darunter beginnen */
+        box-shadow: -5px 0 15px rgba(0,0,0,0.3); /* Dezenter Schatten am Rand */
+    }
+
+    .nav-links li {
+        opacity: 0; /* Links anfangs versteckt (für Animation) */
+        margin: 20px 0; /* Vertikaler Abstand zwischen den Links */
+    }
+
+    /* Hamburgermenü-Icon auf Mobilgeräten anzeigen */
+    .burger {
+        display: block;
+    }
+
+    /* Klasse, die per JavaScript hinzugefügt wird, um das Menü zu öffnen */
+    .nav-active {
+        transform: translateX(0%); /* Menü in den sichtbaren Bereich bewegen */
+    }
+
+    /* Animation für Menü-Links beim Öffnen */
+    .nav-active li {
+        opacity: 1;
+        transition: opacity 0.5s ease-in;
+    }
+
+    /* Burger-Icon-Animation beim Öffnen/Schließen (Kreuz-Effekt) */
+    .toggle .line1 {
+        transform: rotate(-45deg) translate(-5px, 6px);
+    }
+    .toggle .line2 {
+        opacity: 0;
+    }
+    .toggle .line3 {
+        transform: rotate(45deg) translate(-5px, -6px);
+    }
+}
+
+/* 10. Keyframes für die Link-Animation:
+    Definiert, wie die Navigationslinks beim Öffnen des Menüs eingeblendet werden.
+*/
+@keyframes navLinkFade {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+}
+
+/* 11. Responsive Medien-Elemente:
+    Stellt sicher, dass Bilder, Videos und Tabellen den Container nicht überlaufen.
+    DAS IST DER SCHLÜSSEL ZUR BEHEBUNG DES HORIZONTALEN SCROLL-PROBLEMS!
+*/
+img {
+    max-width: 100%;   /* Bilder werden nie breiter als ihr Elternelement */
+    height: auto;      /* Höhe wird proportional zur Breite angepasst */
+    display: block;    /* Entfernt zusätzlichen Leerraum unter Bildern */
+}
+
+iframe, video {
+    max-width: 100%;
+    height: auto;
+}
+
+table {
+    max-width: 100%;
+    width: 100%;
+    display: block;      /* Lässt die Tabelle als Block-Element agieren */
+    overflow-x: auto;    /* Erzeugt einen horizontalen Scrollbalken NUR für die Tabelle, wenn sie zu breit ist */
+    border-collapse: collapse;
+}
+
+/* 12. Optional: Styling für Markdown-generierte Elemente
+    Diese Regeln helfen dabei, dass der aus Markdown gerenderte Inhalt gut aussieht.
+*/
+#content-container h1, #content-container h2, #content-container h3,
+#content-container h4, #content-container h5, #content-container h6 {
+    color: #333;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #eee; /* Leichter Trenner unter Überschriften */
+}
+
+#content-container p {
+    margin-bottom: 1em;
+}
+
+#content-container ul, #content-container ol {
+    margin-left: 20px;
+    margin-bottom: 1em;
+}
+
+#content-container li {
+    margin-bottom: 0.5em;
+}
+
+#content-container pre {
+    background-color: #eee;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto; /* Wichtig für Codeblöcke, damit sie scrollbar sind */
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+#content-container code {
+    font-family: monospace;
+    background-color: #e0e0e0;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+#content-container table {
+    /* Diese Regeln wurden bereits oben für alle Tabellen definiert,
+       hier zur Sicherheit noch einmal für den Content-Container */
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+#content-container th, #content-container td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#content-container th {
+    background-color: #f2f2f2;
+}
+
+#content-container blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 15px;
+    color: #666;
+    margin: 1em 0;
+}
+
+#content-container a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+#content-container a:hover {
+    text-decoration: underline;
+}

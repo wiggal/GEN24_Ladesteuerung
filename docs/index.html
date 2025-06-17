@@ -1,42 +1,44 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Wiki Navigation</title>
-  <style>
-    body {
-      display: flex;
-      margin: 0;
-      font-family: sans-serif;
-      height: 100vh;
-    }
-    nav {
-      width: 200px;
-      background: #f0f0f0;
-      padding: 1em;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    }
-    nav a {
-      display: block;
-      margin: 0.5em 0;
-      text-decoration: none;
-      color: #333;
-    }
-    iframe {
-      flex-grow: 1;
-      border: none;
-    }
-  </style>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Responsive Homepage</title>
+    <link rel="stylesheet" href="style.css">
+    </head>
 <body>
-  <nav>
-    <strong>Navigation</strong>
-    </br>
-    <a href="LadeStrg.html" target="content">LadeStrg</a>
-    <a href="pages/FAQ.html" target="content">FAQ</a>
-    <a href="pages/Updates.html" target="content">Updates</a>
-  </nav>
+    <header>
+        <nav class="navbar" role="navigation" aria-label="Hauptnavigation">
+            <a href="#" class="logo">
+                <img src="#" alt="" class="header-logo">
+            </a>
+            <ul class="nav-links" id="navLinks" role="menu">
+                <li role="none"><a href="#" data-path="WIKI/LadeStrg.html" role="menuitem">LadeStrg</a></li>
+                <li role="none"><a href="#" data-path="WIKI/ENTLadeStrg.html" role="menuitem">ENTLadeStrg</a></li>
+                <li role="none"><a href="#" data-path="WIKI/config.html" role="menuitem">config</a></li>
+                <li role="none"><a href="#" data-path="WIKI/Settings.html" role="menuitem">Settings</a></li>
+                <li role="none"><a href="#" data-path="README.md" data-is-markdown="true" role="menuitem">README</a></li>
+            </ul>
+            <button class="burger" id="burger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü öffnen">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </button>
+        </nav>
+    </header>
 
-  <iframe name="content" src="readme.html"></iframe>
+    <main>
+        <div id="content-container">
+            <p>Inhalt wird geladen...</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Meine Homepage</p>
+    </footer>
+
+    <script src="marked.min.js"></script>
+    
+    <script src="script.js"></script>
 </body>
 </html>
