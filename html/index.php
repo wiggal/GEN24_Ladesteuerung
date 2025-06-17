@@ -29,6 +29,13 @@
   text-overflow: ellipsis;
   transition: background ease 0.2s;
 }
+.tabs label.green {
+  background: #44c767;
+}
+.tabs input[type="radio"]:checked + label.green {
+  background: #999;
+}
+
 .tabs .tab {
   order: 99; // Put the tabs last
   flex-grow: 1;
@@ -108,7 +115,7 @@ foreach ($TAB_config as $files) {
 }
 # WIKI-Link einfügen
 $class_tab .= '<input type="radio" name="tabs" id="WIKI" onclick="openPopup(\'https://wiggal.github.io/GEN24_Ladesteuerung/\')">'."\n";
-$class_tab .= '<label style="width: '.$Tab_Proz.'vw;" for="WIKI">WIKI</label>'."\n";
+$class_tab .= '<label class="green" style="width: '.$Tab_Proz.'vw;" for="WIKI">WIKI</label>'."\n";
 $class_tab .= '<div class="tab"></div>'."\n";
 # ENDE DIV
 $class_tab .= '</div>';
