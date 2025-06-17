@@ -1,96 +1,101 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const burger = document.getElementById('burger');
-    const nav = document.getElementById('navLinks');
-    const navLinks = document.querySelectorAll('.nav-links li a'); // Selektiert jetzt die Anker-Tags
+    const navLinks = document.getElementById('navLinks');
+    const navItems = navLinks.querySelectorAll('li a'); // Alle Links in der Navigation
     const contentContainer = document.getElementById('content-container');
+    const logo = document.querySelector('.logo'); // Das Logo-Element
 
-    // Funktion zum Umschalten des Hamburgermenüs (wie zuvor)
-    function toggleMenu() {
-        nav.classList.toggle('nav-active');
+    // Initialer Logo-Text (z.B. der Standard-Titel deiner Seite)
+    const defaultLogoText = logo.textContent; 
+
+    // Funktion zum Umschalten des Navigationsmenüs
+    const toggleNav = () => {
+        navLinks.classList.toggle('nav-active');
         burger.classList.toggle('toggle');
-        const isExpanded = burger.getAttribute('aria-expanded') === 'true';
-        burger.setAttribute('aria-expanded', !isExpanded);
-        navLinks.forEach((link, index) => {
-            if (nav.classList.contains('nav-active')) {
+        
+        // Accessibility: aria-expanded Attribut aktualisieren
+        const isExpanded = burger.classList.contains('toggle');
+        burger.setAttribute('aria-expanded', isExpanded);
+
+        // Animation der Links nur, wenn das Menü geöffnet wird
+        navItems.forEach((link, index) => {
+            if (navLinks.classList.contains('nav-active')) {
                 link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.3}s`;
             } else {
-                link.style.animation = '';
+                link.style.animation = 'none'; // Animation zurücksetzen beim Schließen
             }
         });
-    }
+    };
 
-    // Burger-Button Klick-Event
-    if (burger && nav && navLinks) {
-        burger.addEventListener('click', toggleMenu);
-    }
+    // Event Listener für den Hamburger-Button
+    burger.addEventListener('click', toggleNav);
 
-    // Klick außerhalb des Menüs schließen
-    document.addEventListener('click', function(event) {
-        if (nav.classList.contains('nav-active') &&
-            !burger.contains(event.target) &&
-            !nav.contains(event.target)) {
-            toggleMenu();
-        }
-    });
-
-    // Funktion zum Laden von Inhalten
-    async function loadContent(path, isMarkdown = false) {
-        if (!contentContainer) return;
-
-        contentContainer.innerHTML = '<p>Lade Inhalt...</p>'; // Lade-Indikator
+    // Funktion zum Laden von Inhalten und Aktualisieren des Logos
+    const loadContent = async (path, isMarkdown, newLogoText) => {
         try {
             const response = await fetch(path);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} for ${path}`);
+                throw new Error(`HTTP-Fehler! Status: ${response.status}`);
             }
             let content = await response.text();
 
             if (isMarkdown) {
-                if (typeof marked !== 'undefined') {
-                    content = marked.parse(content);
-                } else {
-                    console.warn("marked.js ist nicht geladen, kann Markdown nicht parsen.");
-                }
+                // Konvertiere Markdown zu HTML
+                content = marked.parse(content);
             }
 
             contentContainer.innerHTML = content;
-        } catch (error) {
-            console.error('Fehler beim Laden des Inhalts:', error);
-            contentContainer.innerHTML = `<p style="color: red;">Fehler beim Laden des Inhalts von ${path}.</p>`;
-        }
-    }
 
-    // Event-Listener für Navigationslinks
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(event) {
-            event.preventDefault();
-
-            const path = this.dataset.path;
-            const isMarkdown = this.dataset.isMarkdown === 'true';
-
-            if (path) {
-                loadContent(path, isMarkdown);
-                if (nav.classList.contains('nav-active')) {
-                    toggleMenu();
-                }
+            // *** NEU: Logo-Text aktualisieren ***
+            // Überprüfen, ob ein spezifischer Text für das Logo übergeben wurde
+            if (newLogoText) {
+                logo.textContent = newLogoText;
+            } else {
+                // Falls kein spezifischer Text, den Linktext verwenden
+                // Dies wird normalerweise für die normalen Links verwendet
+                logo.textContent = newLogoText;
             }
+
+            // Menü schließen, wenn ein Link angeklickt wird
+            if (navLinks.classList.contains('nav-active')) {
+                toggleNav();
+            }
+
+            // Scroll zum Seitenanfang
+            window.scrollTo(0, 0);
+
+        } catch (error) {
+            console.error("Fehler beim Laden des Inhalts:", error);
+            contentContainer.innerHTML = `<p>Entschuldigung, der Inhalt konnte nicht geladen werden: ${error.message}</p>`;
+            logo.textContent = "Fehler!"; // Logo-Text bei Fehler ändern
+        }
+    };
+
+    // Event Listener für Navigationslinks
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault(); // Standard-Link-Verhalten verhindern
+
+            const path = item.dataset.path;
+            const isMarkdown = item.dataset.isMarkdown === 'true';
+            // *** NEU: Den Text des angeklickten Links als neuen Logo-Text übergeben ***
+            const newLogoText = item.textContent; 
+            
+            loadContent(path, isMarkdown, newLogoText);
+
+            // Optional: Aktiven Zustand des Links hervorheben (falls gewünscht)
+            navItems.forEach(link => link.classList.remove('active'));
+            item.classList.add('active');
         });
     });
 
-    // --- Geänderter Standard-Lade-Mechanismus ---
-    // Standardinhalt beim Laden der Seite: Lade zuerst README.md
-    const readmeNavLink = document.querySelector('a[data-path="README.md"]');
+    // Initialen Inhalt laden (z.B. README.md beim ersten Laden der Seite)
+    // Wenn du möchtest, dass beim ersten Laden das Logo den Titel des Startinhalts anzeigt,
+    // musst du hier auch den neuenLogoText übergeben.
+    // Beispiel: loadContent('README.md', true, 'README');
     
-    if (readmeNavLink) {
-        loadContent(readmeNavLink.dataset.path, readmeNavLink.dataset.isMarkdown === 'true');
-    } else {
-        // Fallback: Wenn kein README.md-Link existiert, lade den Home-Link
-        const homeNavLink = document.querySelector('a[data-path="content/home.html"]');
-        if (homeNavLink) {
-            loadContent(homeNavLink.dataset.path, homeNavLink.dataset.isMarkdown === 'true');
-        } else {
-            // Letzter Fallback: Einfache Willkommensnachricht
-            contentContainer.innerHTML = '<p>Willkommen auf unserer Seite!</p>';
-        }
-    }
+    // Für den Startzustand, wenn keine spezifische Seite geladen ist, das Standardlogo anzeigen.
+    // Wenn du eine Startseite hast, die geladen wird, z.B. "README.md",
+    // und du möchtest, dass deren Titel im Logo steht, dann ändere diese Zeile:
+    loadContent('README.md', true, 'README'); // Lädt README.md und setzt Logo auf 'README'
 });

@@ -20,7 +20,7 @@ html, body {
     line-height: 1.6;
     color: #333;
     /* WICHTIG: Fügt Padding hinzu, um den Platz des fixierten Headers auszugleichen. */
-    padding-top: 92px; /* Ausgleich für fixierten Header */
+    padding-top: 35px; /* Ausgleich für fixierten Header */
 }
 
 /* 3. Header-Styling:
