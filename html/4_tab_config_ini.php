@@ -71,7 +71,15 @@ td {font-size: 160%;
 </style>
 </head>
 <body>
-  <div class="hilfe"> <a href="4_Hilfe.html"><b>Hilfe</b></a></div>
+
+<!-- Hilfeaufruf ANFANG -->
+<?php
+  $current_url = urlencode($_SERVER['REQUEST_URI']);
+  $hilfe_link = "Hilfe_Ausgabe.php?file=config&return=$current_url";
+?>
+  <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
+<!-- Hilfeaufruf ENDE -->
+
 <div class="version" align="center">
 <br>
 <b>  GEN24_Ladesteuerung Version: 0.30.2 </b>

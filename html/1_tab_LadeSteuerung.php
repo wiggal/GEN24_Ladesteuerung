@@ -153,7 +153,13 @@ input.slider {
 
  <body>
   <div class="weatherDataManager"> <a href="weatherDataManager.php"><b>ForecastMgr</b></a></div>
-  <div class="hilfe"> <a href="1_Hilfe.html"><b>Hilfe</b></a></div>
+<!-- Hilfeaufruf ANFANG -->
+<?php
+  $current_url = urlencode($_SERVER['REQUEST_URI']);
+  $hilfe_link = "Hilfe_Ausgabe.php?file=LadeStrg&return=$current_url";
+?>
+  <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
+<!-- Hilfeaufruf ENDE -->
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>
    <br />
