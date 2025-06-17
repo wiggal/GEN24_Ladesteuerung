@@ -61,41 +61,60 @@ header {
     z-index: 101; /* Stellt sicher, dass das Logo über dem Menü liegt (falls offen) */
 }
 
-/* 5. Navigationslinks (Desktop-Ansicht):
-   Standardmäßig nebeneinander und ohne Listenpunkte.
-*/
+/* Styling für das Logo-Bild innerhalb des Headers */
+.header-logo {
+    height: 40px; /* Oder eine andere feste Höhe, die zu deinem Header passt */
+    width: auto; /* Breite proportional anpassen */
+    max-height: 100%; /* Stellt sicher, dass es nicht aus dem Header ragt */
+}
+
+/* 5. Navigationslinks (Allgemein und Desktop-Ansicht): */
 .nav-links {
     list-style: none;
-    display: flex; /* Links nebeneinander */
     margin: 0;
     padding: 0;
+    display: flex; /* Links standardmäßig nebeneinander (für Desktop) */
+    align-items: center; /* Vertikal zentrieren, wichtig für Trenner */
 }
 
 .nav-links li {
-    margin-left: 20px; /* Abstand zwischen den Links */
+    margin-left: 20px; /* Abstand zwischen den Links und Trennern */
+    opacity: 1; /* Auf Desktop standardmäßig sichtbar */
 }
 
+/* Stil für Navigationslinks selbst */
 .nav-links a {
     color: #fff;
     text-decoration: none;
     padding: 5px 0;
-    transition: color 0.3s ease; /* Sanfter Farbwechsel beim Hover */
+    transition: color 0.3s ease;
 }
 
 .nav-links a:hover {
-    color: #00bcd4; /* Beispiel-Hover-Farbe */
+    color: #00bcd4;
 }
 
-/* 6. Hamburgermenü-Icon (Desktop = versteckt, Mobile = sichtbar):
-   Basis-Styling und Animation der Linien.
-*/
+/* Styling für den expliziten Trenner (nav-separator) */
+.nav-separator {
+    /* Desktop-Trenner: vertikale Linie */
+    width: 1px; /* Breite der Linie */
+    height: 20px; /* Höhe der Linie, passend zur Link-Höhe */
+    background-color: rgba(255, 255, 255, 0.4); /* Farbe der Linie */
+    margin: 0 10px; /* Abstand des Trenners zu den Links */
+    display: block; /* Stellt sicher, dass es als Block-Element dargestellt wird */
+    opacity: 1; /* Desktop-Trenner sind immer sichtbar */
+    /* Text-spezifische Stile entfernt */
+}
+
+
+/* 6. Hamburgermenü-Icon (Desktop = versteckt, Mobile = sichtbar): */
 .burger {
     display: none;     /* Standardmäßig versteckt (für Desktop) */
     cursor: pointer;
-    background: none;  /* Entfernt Standard-Button-Hintergrund */
-    border: none;      /* Entfernt Standard-Button-Rand */
+    background: none;
+    border: none;
     padding: 0;
-    z-index: 101;      /* Stellt sicher, dass der Burger über dem Menü liegt */
+    z-index: 101;
 }
 
 .burger div {
@@ -103,12 +122,10 @@ header {
     height: 3px;
     background-color: #fff;
     margin: 5px;
-    transition: all 0.3s ease; /* Sanfte Übergänge für die Linien */
+    transition: all 0.3s ease;
 }
 
-/* 7. Hauptinhaltsbereiche:
-   Grundlegendes Styling für Abschnitte unterhalb des Headers.
-*/
+/* 7. Hauptinhaltsbereiche: */
 main {
     padding: 20px;
     max-width: 1200px;
@@ -127,9 +144,8 @@ main {
     padding: 30px 20px;
     margin-bottom: 20px;
     border-radius: 8px;
-    /* Für Texte, die sehr lang sein könnten (z.B. URLs ohne Leerzeichen) */
-    word-wrap: break-word; /* Bricht lange Wörter um */
-    overflow-wrap: break-word; /* Modernere Eigenschaft */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 /* 8. Footer-Styling */
@@ -138,40 +154,73 @@ footer {
     color: #fff;
     text-align: center;
     padding: 1rem 0;
-    position: relative; /* Oder 'fixed'/'absolute' je nach gewünschtem Verhalten */
+    position: relative;
     bottom: 0;
     width: 100%;
 }
 
-/* 9. Responsive Anpassungen (Media Queries):
+/* 9. Responsive Anpassungen (Mobile Media Query bis 768px):
    Hier wird das Hamburgermenü für kleinere Bildschirme aktiviert und gestylt.
 */
 @media screen and (max-width: 768px) {
-    /* Navigationslinks für Mobile-Ansicht:
-       Wird ein seitlich ausfahrendes Menü.
-    */
+    /* Navbar-Layout im Mobile */
+    .navbar {
+        padding: 0 15px; /* Etwas weniger Padding auf sehr kleinen Bildschirmen */
+    }
+
+    /* Mobile Navigationslinks (ausfahrendes Menü) */
     .nav-links {
-        position: fixed; /* Fixiert relativ zum Viewport, nicht zum Dokument */
+        position: fixed;
         right: 0;
-        top: 0;          /* Startet oben im Viewport */
-        height: 100vh;   /* Volle Bildschirmhöhe */
+        top: 0;
+        height: 100vh;
         background-color: #333;
         display: flex;
         flex-direction: column; /* Links untereinander */
-        align-items: center;    /* Links horizontal zentriert */
-        width: 60%;             /* Breite des ausgefahrenen Menüs */
-        max-width: 300px;       /* Maximale Breite für größere Smartphones/Tablets */
-        transform: translateX(100%); /* Menü standardmäßig außerhalb des Bildschirms */
-        transition: transform 0.5s ease-in-out; /* Sanfte Ausfahr-Animation */
-        z-index: 100;           /* Stellt sicher, dass das Menü über allem liegt */
-        padding-top: 80px;      /* Platz für den Header, damit Links darunter beginnen */
-        box-shadow: -5px 0 15px rgba(0,0,0,0.3); /* Dezenter Schatten am Rand */
+        align-items: center;
+        width: 60%;
+        max-width: 300px;
+        transform: translateX(100%);
+        transition: transform 0.5s ease-in-out;
+        z-index: 100;
+        padding-top: 80px;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+
+        /* Scrollen ermöglichen, wenn der Inhalt über die Höhe hinausgeht */
+        overflow-y: auto; /* Vertikal scrollbar machen */
+        -webkit-overflow-scrolling: touch; /* Für sanftes Scrollen auf iOS */
+        max-height: 100vh; /* Sicherstellen, dass es nicht über den Viewport hinausgeht */
     }
 
+    /* Navigations-Listenelemente im Mobile-Menü */
     .nav-links li {
+        margin: 3px 0; /* Vertikalen Abstand reduziert */
+        padding-top: 3px; /* Etwas vertikales Padding für den Text */
+        padding-bottom: 5px; /* Etwas vertikales Padding für den Text */
+
         opacity: 0; /* Links anfangs versteckt (für Animation) */
-        margin: 20px 0; /* Vertikaler Abstand zwischen den Links */
+        width: 100%;
+        text-align: center;
     }
+
+    /* Der Trenner im mobilen Menü anzeigen und anpassen */
+    .nav-separator {
+        display: block; /* Als Block anzeigen */
+        width: 80%; /* Breiter, um unter den Links zu passen */
+        height: 1px; /* Dünne horizontale Linie */
+        background-color: rgba(255, 255, 255, 0.2); /* Dezente Farbe */
+        margin: 5px auto; /* Zentrieren und vertikalen Abstand geben */
+        opacity: 0; /* Standardmäßig unsichtbar für Animation */
+        /* Text-spezifische Stile entfernt */
+    }
+
+    /* Wenn das Navigationsmenü aktiv ist, sollen auch die Trenner sichtbar sein */
+    .nav-active .nav-separator {
+        opacity: 1;
+        transition: opacity 0.5s ease-in;
+        transition-delay: 0.3s; /* Etwas verzögert nach den Links erscheinen */
+    }
+
 
     /* Hamburgermenü-Icon auf Mobilgeräten anzeigen */
     .burger {
@@ -180,7 +229,7 @@ footer {
 
     /* Klasse, die per JavaScript hinzugefügt wird, um das Menü zu öffnen */
     .nav-active {
-        transform: translateX(0%); /* Menü in den sichtbaren Bereich bewegen */
+        transform: translateX(0%);
     }
 
     /* Animation für Menü-Links beim Öffnen */
@@ -201,9 +250,7 @@ footer {
     }
 }
 
-/* 10. Keyframes für die Link-Animation:
-    Definiert, wie die Navigationslinks beim Öffnen des Menüs eingeblendet werden.
-*/
+/* 10. Keyframes für die Link-Animation: */
 @keyframes navLinkFade {
     from {
         opacity: 0;
@@ -215,14 +262,11 @@ footer {
     }
 }
 
-/* 11. Responsive Medien-Elemente:
-    Stellt sicher, dass Bilder, Videos und Tabellen den Container nicht überlaufen.
-    DAS IST DER SCHLÜSSEL ZUR BEHEBUNG DES HORIZONTALEN SCROLL-PROBLEMS!
-*/
+/* 11. Responsive Medien-Elemente: */
 img {
-    max-width: 100%;   /* Bilder werden nie breiter als ihr Elternelement */
-    height: auto;      /* Höhe wird proportional zur Breite angepasst */
-    display: block;    /* Entfernt zusätzlichen Leerraum unter Bildern */
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
 iframe, video {
@@ -233,21 +277,20 @@ iframe, video {
 table {
     max-width: 100%;
     width: 100%;
-    display: block;      /* Lässt die Tabelle als Block-Element agieren */
-    overflow-x: auto;    /* Erzeugt einen horizontalen Scrollbalken NUR für die Tabelle, wenn sie zu breit ist */
+    display: block;
+    overflow-x: auto;
     border-collapse: collapse;
+    border: none;
 }
 
-/* 12. Optional: Styling für Markdown-generierte Elemente
-    Diese Regeln helfen dabei, dass der aus Markdown gerenderte Inhalt gut aussieht.
-*/
+/* 12. Optional: Styling für Markdown-generierte Elemente */
 #content-container h1, #content-container h2, #content-container h3,
 #content-container h4, #content-container h5, #content-container h6 {
     color: #333;
     margin-top: 1.5em;
     margin-bottom: 0.5em;
     padding-bottom: 0.3em;
-    border-bottom: 1px solid #eee; /* Leichter Trenner unter Überschriften */
+    border-bottom: 1px solid #eee;
 }
 
 #content-container p {
@@ -267,7 +310,7 @@ table {
     background-color: #eee;
     padding: 15px;
     border-radius: 5px;
-    overflow-x: auto; /* Wichtig für Codeblöcke, damit sie scrollbar sind */
+    overflow-x: auto;
     font-size: 0.9em;
     line-height: 1.4;
 }
@@ -279,18 +322,12 @@ table {
     border-radius: 3px;
 }
 
-#content-container table {
-    /* Diese Regeln wurden bereits oben für alle Tabellen definiert,
-       hier zur Sicherheit noch einmal für den Content-Container */
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1em;
-}
-
 #content-container th, #content-container td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 #content-container th {
