@@ -10,7 +10,7 @@ if (!function_exists('str_ends_with')) {
 $filename = isset($_GET['file']) ? basename($_GET['file']) : null;
 $return_url = isset($_GET['return']) ? htmlspecialchars($_GET['return']) : null;
 # Alle Dokus unter /docs abgelegt
-$filename = '../docs/' . $filename;
+$filename = '../docs/WIKI/' . $filename;
 if ($filename && !str_ends_with($filename, '.html')) {
     $filename .= '.html';
 }
