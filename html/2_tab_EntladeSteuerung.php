@@ -139,7 +139,15 @@ input.slider {
  </head>
 
  <body>
-  <div class="hilfe"> <a href="2_Hilfe.html"><b>Hilfe</b></a></div>
+
+<!-- Hilfeaufruf ANFANG -->
+<?php
+  $current_url = urlencode($_SERVER['REQUEST_URI']);
+  $hilfe_link = "Hilfe_Ausgabe.php?file=ENTLadeStrg&return=$current_url";
+?>
+  <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
+<!-- Hilfeaufruf ENDE -->
+
   <div class="container">
    <br />
   <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>

@@ -98,7 +98,15 @@ input[type="checkbox"] {
  </head>
 
  <body onload="disablecheckboxes()">
- <div class="hilfe" align="right"> <a href="9_Hilfe.html"><b>Hilfe</b></a></div>
+
+<!-- Hilfeaufruf ANFANG -->
+<?php
+  $current_url = urlencode($_SERVER['REQUEST_URI']);
+  $hilfe_link = "Hilfe_Ausgabe.php?file=Settings&return=$current_url";
+?>
+  <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
+<!-- Hilfeaufruf ENDE -->
+
   <div class="container">
    <div class="ACHTUNG" align="center"><p>
    <b>ACHTUNG:</b> Wenn die WebUI-Settings nicht ausgeschaltet sind, 

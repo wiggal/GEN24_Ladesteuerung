@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Wiki Navigation</title>
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      font-family: sans-serif;
+      height: 100vh;
+    }
+    nav {
+      width: 200px;
+      background: #f0f0f0;
+      padding: 1em;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    nav a {
+      display: block;
+      margin: 0.5em 0;
+      text-decoration: none;
+      color: #333;
+    }
+    iframe {
+      flex-grow: 1;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <strong>Navigation</strong>
+    </br>
+    <a href="LadeStrg.html" target="content">LadeStrg</a>
+    <a href="pages/FAQ.html" target="content">FAQ</a>
+    <a href="pages/Updates.html" target="content">Updates</a>
+  </nav>
+
+  <iframe name="content" src="readme.html"></iframe>
+</body>
+</html>

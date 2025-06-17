@@ -7,6 +7,9 @@
 - Nach Änderung des Gewichtes zu einem Prognosedienst, 
   werden bei dem nächsten Aufruf des Prognosedienstes in der DB alle Gewichte des Dienstes neu gesetzt.    
 
+- Konsolidierung der Dokumentation:  
+  - Hilfen nach docs verschoben  
+
 **[0.30.1] – 2025-06-12**  
 
 - Im `ForecastMgr` beim Download die tatsächliche Produktion hinzugefügt, und Ausgabe als Kreuztabelle.  
