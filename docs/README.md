@@ -64,7 +64,7 @@ Die Berechnung der zu erwartenden PV-Produktion erfolgt als Median aus den Werte
 0 0 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
 ```
 
-### :sun_behind_rain_cloud: Prognoseskripte in FORECAST/
+### 🌦️ Prognoseskripte in FORECAST/
 
 Holen von den jeweiligen API-Urls die Prognosedaten und bereiten sie auf für GEN24_Ladesteuerung. 
 
@@ -74,7 +74,7 @@ Besonderheiten:
 - Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag aufgerufen werden.  
 - Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
 
-### :chart_with_downwards_trend: http_SymoGen24Controller2.py
+### 📉 http_SymoGen24Controller2.py
 
 Berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json und dem Akkustand und gibt sie aus. 
 Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) setzt es die `Maximale Ladeleistung` **per HTTP-Request** 
@@ -82,7 +82,7 @@ im Batteriemanagement des Wechselrichters.
 Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
-### :heavy_dollar_sign::electric_plug: DynamicPriceCheck.py
+### 💲🔌 DynamicPriceCheck.py
 Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt (siehe schematische Darstellung). Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
 **Crontab Beispiel** (-o = alternatives Logfile):
 ```
@@ -105,7 +105,7 @@ automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann a
 **_Alternativ kann auch der Webserver Apache installiert werden:_**  
 [(siehe Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/1\)-Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
 
-### :bar_chart: Logging
+### 📊 Logging
 
 Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
 Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
