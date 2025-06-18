@@ -96,7 +96,6 @@ if (!isset($TAB_config) OR !is_array($TAB_config)) {
 $class_link='';
 # Breite der Tabs in % rechnen
 $anzahl_tabs = array_count_values(array_column($TAB_config, 'sichtbar'))['ein'] + 1; // wegen WIKI-Link
-print_r($anzahl_tabs);
 $Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs+1);
 $class_tab = '';
 
@@ -113,8 +112,7 @@ foreach ($TAB_config as $files) {
             $class_tab .= '<div class="tab"><iframe id="'.$files['name'].'" src="'.$files['file'].'" style="border:none;" height="100%" width="100%"></iframe></div>'."\n";
     }
 }
-# WIKI-Link einfügen
-$class_tab .= '<input type="radio" name="tabs" id="WIKI" onclick="openPopup(\'https://wiggal.github.io/GEN24_Ladesteuerung/\')">'."\n";
+$class_tab .= '<input type="radio" name="tabs" id="WIKI" onclick="openPopup(\'https://wiggal.github.io/GEN24_Ladesteuerung/\'); event.preventDefault();">'."\n";
 $class_tab .= '<label class="green" style="width: '.$Tab_Proz.'vw;" for="WIKI">WIKI</label>'."\n";
 $class_tab .= '<div class="tab"></div>'."\n";
 # ENDE DIV
