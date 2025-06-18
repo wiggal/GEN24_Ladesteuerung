@@ -1,0 +1,67 @@
+/* Grund-Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Tabelle */
+table {
+  border-collapse: collapse;
+  table-layout: auto;
+  width: auto;          /* nur so breit wie nötig */
+  max-width: 100%;      /* max. so breit wie der Viewport */
+  word-break: break-word;
+  white-space: normal;
+  font-size: 1rem;
+  margin: 0 auto; /* ← zentriert die Tabelle */
+  /*display: block;       /* damit overflow-x wirkt */
+  overflow-x: auto;     /* horizontal scrollbar bei Bedarf */
+}
+
+/* Kopfzeile */
+thead {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+/* Zellen */
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+}
+
+/* Schriftgrößen auf Mobilgeräten */
+@media (max-width: 968px) {
+  html {
+    font-size: 22px !important;
+  }
+  body {
+    font-size: 1.6rem !important;
+  }
+  table, th, td {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Optional: Hover-Effekt Desktop */
+@media (hover: hover) and (pointer: fine) {
+  tbody tr:hover {
+    background-color: #f0f8ff;
+  }
+}
+
