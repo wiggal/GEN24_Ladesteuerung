@@ -352,7 +352,7 @@ table {
 }
 
 #content-container th, #content-container td {
-    border: 1px solid #ddd;
+    border: 2px solid #2E64FE;
     padding: 8px;
     text-align: left;
     word-wrap: break-word;

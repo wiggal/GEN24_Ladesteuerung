@@ -1,3 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEN24 Ladesteuerung</title>
+    <style>
+        <?php
+        echo file_get_contents("../docs/style.css");
+        ?>
+    </style>
+    <style>
+@media (max-width: 968px) {
+  html {
+    font-size: 18px !important;
+  }
+  body {
+    font-size: 1.4rem !important;
+  }
+  table, th, td {
+    font-size: 1.4rem !important;
+  }
+}
+.hilfe{
+        position: fixed;
+        top: -2px;
+        right: 8px;
+        }
+    </style>
+
+
+    </head>
+<body>
+    <main>
+        <div id="content-container">
 <?php
 # bei Älteren PHP-Versionen fehlt str_ends_with
 if (!function_exists('str_ends_with')) {
@@ -37,3 +72,8 @@ if (!$filename) {
         echo $html;
     }
 }
+?>
+        </div>
+    </main>
+</body>
+</html>
