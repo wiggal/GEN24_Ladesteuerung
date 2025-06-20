@@ -1,54 +1,116 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="width=device-width" />
-	<title>Hilfe Settigs</title>
-</head>
-<body lang="de-DE" >
-
-<!HIERZURUECK>
-
-
-<br/>
-<center>
-
-
-<font style="font-size: 24pt"><b><span style="background: #FB5555">Settings</span></b></font>
-<br/> <br/>
-
-<p><b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim Punkt 'WebUI-Settings ausschalten', die Aufrufparameter (z.B. vom Cronjob)!
-<br/>
-<br/>
-<table>
-<tr style="font-size:150%" > <th colspan="2">Programmsteuerung</th><th>Erläuterung</th> </tr>
-<tr> <td colspan="2"><b>WebUI-Settings ausschalten</b></td>  <td>Die Skripte laufen mit den Parametern, mit denen die aufgerufen wurden, mögliche Aufrufparameter sind:<br>
-<b>logging,laden,entladen,optimierung,notstrom,dynamicprice,nowebui</b><br> 
-Sie können nach Bedarf kombiniert werden, und müssen mit Komma getrennt <b>ohne Leerzeichen</b> beim Programmaufruf angegeben werden.<br>
-Der Aufrufparameter <b>schreiben</b> setzt alle Parameter, außer <b>nowebui</b>.<br>
-Mit dem Aufrufparameter <b>nowebui</b> werden die Settings-Einstellungen ignoriert.<br>
-Die WebUI-Settings haben bei dieser Option keinen Einfluss auf die Programmsteuerung</td> </tr>
-<tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings löschen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>gelöscht</b>.</td> </tr>
-<tr> <td colspan="2"><b>Ladesteuerung AUS (WR-Settings belassen)</b></td>  <td>Die Skripte werden beendet, und die bisherigen Werte der Wechselrichtersteuerung werden <b>belassen</b>.</td> </tr>
-<tr> <td colspan="2"><b>Nur Analyse in Crontab.log</b></td><td>Die Skripte berechnen die Steuerungswerte, und schreiben sie in die Crontab.log. Am Wechselrichter wird nichts geschrieben</td> </tr>
-<tr> <td colspan="2"><b>Ladesteuerung nach folgenden Optionen:</b></td><td>Die Skripte laufen mit den nachfolgend ausgewählten Optionen.</td> </tr>
-<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><b>Logging</b></td><td>Das Logging wird geschrieben. <br>Logging_ein = <b>1</b> muss in CONFIG/default_priv.ini gesetzt sein.</td> </tr>
-<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><b>Ladesteuerung</b></td><td>Die Ladesteuerung wird oberhalb der Schreibgrenzen geschrieben.</td> </tr>
-<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><b>Ent- und Zwangsladesteuerung</b></td><td>Die Ent- und Zwangsladesteuerung wird oberhalb der Schreibgrenzen geschrieben. <br>Batterieentlandung_steuern = <b>1</b> muss in CONFIG/charge_priv.ini gesetzt sein.</td> </tr>
-<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><b>Eigenverbrauchs-Optimierung</b></td><td>Die Eigenverbrauchs-Optimierung wird oberhalb der Schreibgrenzen geschrieben. <br>EigenverbOpt_steuern = <b>1</b> muss in CONFIG/charge_priv.ini gesetzt sein.</td> </tr>
-<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><b>Notstromreserve</b></td><td>Die Notstromreservekapazität wird oberhalb der Schreibgrenzen geschrieben. <br>Notstromreserve_steuern = <b>1</b> muss in CONFIG/charge_priv.ini gesetzt sein.</td> </tr>
-<tr> <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><b>Dynamischer Strompreis</b></td><td>Aktiviert das Speichern einer Zwangsladung zu den günstigsten Zeiten in der Tabelle "ENTLadeStrg".<br>Damit die Zwangsladung auch auf den GEN24 geschrieben wird, muss auch die Option "Ent- und Zwangsladesteuerung" aktiviert sein</td> </tr>
-</table>
-
-<br/><br/>
-<br/>
-</center>
-
-</body>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Hilfe Settigs</title>
+  </head>
+  <body lang="de-DE">
+    <!--HIERZURUECK-->
+    <br>
+    <center>
+      <font style="font-size: 24pt"><b><span style="background: #FB5555">Settings</span></b></font>
+      <br>
+      <br>
+      <p><b>ACHTUNG:</b> Diese Einstellungen überschreiben, außer beim
+        Punkt 'WebUI-Settings ausschalten', die Aufrufparameter (z.B.
+        vom Cronjob)!
+        <br>
+        <br>
+      </p>
+      <table>
+        <tbody>
+          <tr style="font-size:150%">
+            <th colspan="2">Programmsteuerung</th>
+            <th>Erläuterung</th>
+          </tr>
+          <tr>
+            <td colspan="2"><b>WebUI-Settings ausschalten</b></td>
+            <td>Die Skripte laufen mit den Parametern, mit denen die
+              aufgerufen wurden, mögliche Aufrufparameter sind:<br>
+              <b>logging,laden,entladen,optimierung,notstrom,dynamicprice,nowebui</b><br>
+              Sie können nach Bedarf kombiniert werden, und müssen mit
+              Komma getrennt <b>ohne Leerzeichen</b> beim
+              Programmaufruf angegeben werden.<br>
+              Der Aufrufparameter <b>schreiben</b> setzt alle
+              Parameter, außer <b>nowebui</b>.<br>
+              Mit dem Aufrufparameter <b>nowebui</b> werden die
+              Settings-Einstellungen ignoriert.<br>
+              Die WebUI-Settings haben bei dieser Option keinen Einfluss
+              auf die Programmsteuerung</td>
+          </tr>
+          <tr>
+            <td colspan="2"><b>Ladesteuerung AUS (WR-Settings löschen)</b></td>
+            <td>Die Skripte werden beendet, und die bisherigen Werte der
+              Wechselrichtersteuerung werden <b>gelöscht</b>.</td>
+          </tr>
+          <tr>
+            <td colspan="2"><b>Ladesteuerung AUS (WR-Settings belassen)</b></td>
+            <td>Die Skripte werden beendet, und die bisherigen Werte der
+              Wechselrichtersteuerung werden <b>belassen</b>.</td>
+          </tr>
+          <tr>
+            <td colspan="2"><b>Nur Analyse in Crontab.log</b></td>
+            <td>Die Skripte berechnen die Steuerungswerte, und schreiben
+              sie in die Crontab.log. Am Wechselrichter wird nichts
+              geschrieben</td>
+          </tr>
+          <tr>
+            <td colspan="2"><b>Ladesteuerung nach folgenden Optionen:</b></td>
+            <td>Die Skripte laufen mit den nachfolgend ausgewählten
+              Optionen.</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><b>Logging</b></td>
+            <td>Das Logging wird geschrieben. <br>
+              Logging_ein = <b>1</b> muss in CONFIG/default_priv.ini
+              gesetzt sein.</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><b>Ladesteuerung</b></td>
+            <td>Die Ladesteuerung wird oberhalb der Schreibgrenzen
+              geschrieben.</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><b>Ent- und Zwangsladesteuerung</b></td>
+            <td>Die Ent- und Zwangsladesteuerung wird oberhalb der
+              Schreibgrenzen geschrieben. <br>
+              Batterieentlandung_steuern = <b>1</b> muss in
+              CONFIG/charge_priv.ini gesetzt sein.</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><b>Eigenverbrauchs-Optimierung</b></td>
+            <td>Die Eigenverbrauchs-Optimierung wird oberhalb der
+              Schreibgrenzen geschrieben. <br>
+              EigenverbOpt_steuern = <b>1</b> muss in
+              CONFIG/charge_priv.ini gesetzt sein.</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><b>Notstromreserve</b></td>
+            <td>Die Notstromreservekapazität wird oberhalb der
+              Schreibgrenzen geschrieben. <br>
+              Notstromreserve_steuern = <b>1</b> muss in
+              CONFIG/charge_priv.ini gesetzt sein.</td>
+          </tr>
+          <tr>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><b>Dynamischer Strompreis</b></td>
+            <td>Aktiviert das Speichern einer Zwangsladung zu den
+              günstigsten Zeiten in der Tabelle "ENTLadeStrg".<br>
+              Damit die Zwangsladung auch auf den GEN24 geschrieben
+              wird, muss auch die Option "Ent- und Zwangsladesteuerung"
+              aktiviert sein</td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      <br>
+    </center>
+  </body>
 </html>

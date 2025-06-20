@@ -173,20 +173,6 @@ header {
     
     z-index: 1; /* Stellt sicher, dass der Text über den Linien liegt */
 }
-.nav-category-separator span::before,
-.nav-category-separator span::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    /* NEU: Breite der Linien auf 50% des SPAN-Elements,
-       von dessen Rändern sie sich ausdehnen.
-    */
-    width: 50%; /* Die Linien erstrecken sich über die Hälfte des span-Elements */
-    height: 1px; /* Dicke der horizontalen Linien */
-    background-color: rgba(255, 255, 255, 0.7); /* Helle Linie */
-    transform: translateY(-50%);
-    z-index: 0;
-}
 .nav-category-separator span::before {
     left: 0; /* Beginnt am linken Rand des span */
 }
