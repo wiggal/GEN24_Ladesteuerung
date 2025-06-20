@@ -12,25 +12,21 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.30.2**
+Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/) nach GitHub/Pages übernommen.
 Ab Version: **0.30.0**  
 Speicherung der Prognosedaten in `weatherData.sqlite`, Berechnung der Prognose mit gespeicherten Werten.  
 Mit dem verlinkten  `ForecastMgr` können die Prognosedaten gesichtet und gelöscht werden.  
 Ab Version: **0.29.0**  
 Zur Akkuschonung kann der Akku bei entprechender Prognose auch nur bis 80% geladen werden.  
 Vorbereitung des DynamicPriceCheck auf viertelstündliche Strompreise.  
-Ab Version: **0.28.1**  
-Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/ von @tz8  
-**ACHTUNG:** Umfangreiche Änderungen in CONFIG/weather_priv.ini nötig!!  
-Ab Version: **0.28.0**  
-**ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.  
-**Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).  
 ![new](pics/new2.png)  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
 Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
-## 💾 Installationshinweise: [(siehe Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/1\)-Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+## 💾 Installationshinweise: [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
 ```
@@ -103,7 +99,7 @@ Wenn PHP installiert ist, wird durch die Variable `Einfacher_PHP_Webserver = 1` 
 automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port:2424 erreichbar (z.B.: raspberrypi:2424).  
 
 **_Alternativ kann auch der Webserver Apache installiert werden:_**  
-[(siehe Wikibeitrag)](https://github.com/wiggal/GEN24_Ladesteuerung/wiki/1\)-Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi)
+[siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 ### 📊 Logging
 
@@ -114,7 +110,7 @@ Aus der SQLite-Datei `PV_Daten.sqlite` wird dann mit html/8_tab_Diagram.php ein 
 
 ## Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
 
-### Batterieladesteuerung ( TAB--> LadeSteuerung )
+### Batterieladesteuerung ( TAB--> LadeStrg )
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
@@ -126,9 +122,9 @@ Ist nicht AUTO gewählt, erfolgt eine Batterieladung mit der eingestellten Proze
 ab dem nächsten Aufruf von http_SymoGen24Controller2.py.  
 Die prognosebasierte Ladesteuerung ist dadurch deaktiviert, und kann mit der Option "AUTO" wieder aktiviert werden.  
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
-### BatterieENTladesteuerung ( TAB--> EntladeSteuerung )
+### BatterieENTladesteuerung ( TAB--> ENTLadeStrg )
 ![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
 
 Unter "Feste Entladegrenze" kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
@@ -136,14 +132,14 @@ Unter "Feste Entladegrenze" kann die maximale Entladeleistung in Prozent der WR-
 In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, bzw. zum Laden des Akkus aus dem Netz bei niedrigen Strompreisen, eingetragen werden. 
 Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
 ### Settings ( TAB--> Settings )
 ![Tabelle zu den Settings](pics/Settings.png)
 Programmfunktionen
 Unter Settings kann das Programm zusätzlich gesteuert werden.  
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im Wiki.    
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).    
 
 ### Grafana Beispiele  
 ![Beispiele](pics/Grafana.png)
@@ -153,6 +149,12 @@ Eine [Beschreibung](GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddateie
 ----------
 
 **News History:**  
+Ab Version: **0.28.1**  
+Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/ von @tz8  
+**ACHTUNG:** Umfangreiche Änderungen in CONFIG/weather_priv.ini nötig!!  
+Ab Version: **0.28.0**  
+**ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.  
+**Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).  
 Ab Version: **0.26.9**  
 Diagramm zur Darstellung der dynamischen Strompreise.  
 Ab Version: **0.26.8**  
