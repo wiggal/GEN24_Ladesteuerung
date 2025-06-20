@@ -293,6 +293,7 @@ class WeatherData:
             # extend([wert] * gewicht) fügt den wert genau gewicht-mal der Liste hinzu
             # Damit hat man einen gewichteten Median
             if (wert > 10):
+                if gewicht is None or gewicht == '': gewicht = 0;
                 gewicht = int(gewicht)
                 stundenwerte[stunde].extend([wert] * gewicht)
 
