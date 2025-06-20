@@ -1,20 +1,13 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
-
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>http_SymoGen24Controller</title>
   </head>
   <body>
     <div class="markdown-body">
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      <div class="markdown-heading">
-        <h1 class="heading-element">http_SymoGen24Controller2.py</h1>
-        <a id="user-content-http_symogen24controller2py" class="anchor"
-          aria-label="Permalink: http_SymoGen24Controller2.py"
-href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/http_SymoGen24Controller2.py#http_symogen24controller2py"><svg
-            class="octicon octicon-link" viewBox="0 0 16 16"
-            version="1.1" width="16" height="16" aria-hidden="true"></svg></a></div>
+      <h1 class="heading-element">http_SymoGen24Controller2.py</h1>
       <p><strong>Programmfunktionen:</strong></p>
       <ul>
         <li>
@@ -22,21 +15,18 @@ href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/http_SymoGen24Controlle
             um eine Einspeisebegrenzung (bei mir 70%) zu umgehen, und
             eine Produktion über der AC-Ausgangsleistungsgrenze des WR
             als DC in die Batterie zu laden.<br>
-            Über die Tabelle <a
-href="https://github.com/wiggal/GEN24_Ladesteuerung/#batterieladesteuerung--tab---ladesteuerung-">Ladesteuerung</a>
-            können große, geplante Verbräuche bei der Ladeplanung
-            berücksichtigt werden. </p>
+            Über die Tabelle <i><b>"LadeStrg"</b></i> können große,
+            geplante Verbräuche bei der Ladeplanung berücksichtigt
+            werden, siehe Batterieladesteuerung in der README. </p>
         </li>
         <li>
-          <p><a
-href="https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-">Entladesteuerung,</a>
-            um die Entladung der Batterie bei großen Verbräuchen zu
-            steuern. </p>
+          <p>Um die Entladung der Batterie bei großen Verbräuchen zu
+            steuern, siehe BatterieENTladesteuerung in der README.<br>
+          </p>
         </li>
         <li>
-          <p><a
-              href="https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging">Logging</a>
-            und grafische Darstellung von Produktion und Verbrauch. </p>
+          <p>Grafische Darstellung von Produktion und Verbrauch, siehe
+            Logging in der README.. </p>
         </li>
         <li>
           <p>Akkuschonung: Um einen LFP-Akku zu schonen, wird die
@@ -138,19 +128,18 @@ href="https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--t
             WICHTIG: Die Parameter werden mit Komma getrennt, und es
             dürfen <b>keine</b> Leerzeichen verwendet werden!!<br>
           </p>
-          <p>/DIR/start_PythonScript.sh
-            http_SymoGen24Controller2.py 'logging,optimierung,notstrom'</p>
+          <p>/DIR/start_PythonScript.sh http_SymoGen24Controller2.py
+            'logging,optimierung,notstrom'</p>
         </li>
         <li>
           <p>Welche Werte auf den GEN24 geschrieben werden, kann auch in
             der WebUI im TAB Settings gesteuert werden:<br>
-            Ist der Punkt
-            <code>WebUI-Settings ausschalten</code> angewählt, gelten
-            ausschließlich die
-            Parameter des Programmaufrufs.<br>
-            Alle Anderen Punkte
-            überschreiben die Parameter des Programmaufrufs. Nähere
-            Informationen siehe in der zugehörigen Hilfe der WebUI.</p>
+            Ist der Punkt <code>WebUI-Settings ausschalten</code>
+            angewählt, gelten ausschließlich die Parameter des
+            Programmaufrufs.<br>
+            Alle Anderen Punkte überschreiben die Parameter des
+            Programmaufrufs. Nähere Informationen siehe in der
+            zugehörigen Hilfe der WebUI.</p>
         </li>
       </ul>
     </div>

@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>weather_ini</title>
+  </head>
+  <body>
+    <div class="markdown-body">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <div class="markdown-heading">
+        <h2 class="heading-element">Einstellungen zu den
+          PV-Vorhersagediensten in <code>weather_priv.ini</code>:</h2>
+      </div>
+      <p><strong><code>[env]</code><br>
+          Hier folgen einige grundlegende Einstellungen.</strong><br>
+        <code>MaximalPrognosebegrenzung = 0</code><br>
+        Hier kann die Vorhersage auf lokale Gegebenheiten begrenzt
+        werden, etwa eine Abschattung im Westen nach 15:00 Uhr. Entweder
+        mit dem höchsten Wert aus dem letzten MaxProGrenz_Dayback, evtl.
+        multipliziert mit dem Faktor MaxProGrenz_Faktor, oder mit einem
+        durch scikit-learn, einem Machine Learning Programm in Python.<br>
+        ; 0 = aus<br>
+        ; 1 = ein: damit wird die Prognose auf den höchsten Wert je
+        Stunde der Produktion der letzten MaxProGrenz_Dayback Tage
+        begrenzt<br>
+        <code>MaxProGrenz_Faktor = 1</code><br>
+        Hier wird der Faktor festgelegt, mit dem der ermittelte maximale
+        Prognosewert multipliziert wird.<br>
+        <code>MaxProGrenz_Dayback = 35</code><br>
+        Hier wird die Anzahl der letzten Tage festgelegt, die zur
+        Ermittlung des maximalen Prognosewertes verwendet wird.</p>
+      <p><strong><code>[pv.strings]</code><br>
+          Hier kann die Anzahl der Strings für bestimmte Wetterdienste
+          auf zwei erhöht werden.</strong><br>
+        <code>anzahl = 1</code><br>
+        Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist,
+        hier Anzahl=2 eintragen und die Werte unter [forecast.solar2]
+        und/oder [solcast.com2] eintragen.</p>
+      <p><strong><code>[forecast.solar] bzw. [forecast.solar2]</code><br>
+          Hier die Werte eintragen, wenn die Prognose mit
+          Solarprognose_WeatherData.py von <a
+            href="http://www.solarprognose.de" rel="nofollow">www.solarprognose.de</a>
+          geholt werden soll.</strong><br>
+        Daten werden für api.forecast.solar und zukünftig auch für
+        api.akkudoktor.net verwendet!!</p>
+      <p><code>weatherfile = weatherData.json</code><br>
+        Hier kann die Datei, in die die Prognosewerte gespeichert
+        werden, verändert werden, z.B. um sie mit anderen Prognosen zu
+        vergleichen. Das Programm arbeitet immer mit weatherData.json.</p>
+      <p><code>api_key = kein</code><br>
+        Wenn api_key <strong>nicht</strong> 'kein' ist, wird er für die
+        Prognoseabfrage verwendet</p>
+      <p>; wenn ein API key vorhanden ist, koennen die Forecasts mit
+        aktuellen Ertragswerten des Tages (aus der DB) verbessert
+        werden.<br>
+        ; 'ja' nutzt diese Funktion der API, 'nein' nicht.<br>
+        ; Siehe <a href="https://doc.forecast.solar/actual"
+          rel="nofollow">https://doc.forecast.solar/actual</a><br>
+        <code>forecastactual = nein </code></p>
+      <p>; wenn "damping" eingesetzt werden soll, hier die
+        entsprechenden Werte einstellen. '0,0' ist Standardwert (kein
+        Damping)<br>
+        ; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas damping am
+        Morgen, hohes Damping am nachmittag.<br>
+        ; beide Werte müssen zwischen 0 und 1 sein<br>
+        ; Siehe <a href="https://doc.forecast.solar/damping"
+          rel="nofollow">https://doc.forecast.solar/damping</a><br>
+        <code>forecastdamping = 0,0</code></p>
+      <p><code>api_pers_plus = nein</code><br>
+        Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können
+        zwei Ausrichtungen in einer Abfrage behandelt werden.</p>
+      <p>; lat und lon sind die Positionsdaten der Anlage bzw. des
+        Strings. Nutze <a href="https://www.suncalc.org/"
+          rel="nofollow">https://www.suncalc.org/</a> oder andere Tools
+        zur Identifikation<br>
+        <code>lat = 44.444</code> Breitengrad<br>
+        <code>lon = 11.111</code> Längengrad</p>
+      <p>; horizon gibt mögliche Verschattungen pro String an:<br>
+        ; die 12 Zahlen werden in Grad angegeben und repräsentieren im
+        Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den
+        Horizont<br>
+        ; siehe <a href="https://doc.forecast.solar/horizon"
+          rel="nofollow">https://doc.forecast.solar/horizon</a><br>
+        ; wenn zum Beipiel im Südwesten ein großer Baum Schatten wirft:<br>
+        ; 0,0,0,0,0,0,0,20,45,20,0,0<br>
+        <code>horizon = 0,0,0,0,0,0,0,0,0,0,0,0'</code></p>
+      <p><code>dec = 30</code> Winkel der Module (0=waagerecht,
+        90=senkrecht)<br>
+        <code>az = 0</code> Himmelsrichtung (-180=Nord, -90=Osten,
+        0=Süd, 90=West, 180=Nord)<br>
+        <code>kwp = 11.4</code> kWp der PV-Anlage</p>
+      <p>; Wert in Minuten, bis bisherige Daten ihre Gültigkeit
+        verlieren und neue von der API abgerufen werden sollen<br>
+        ; aktuell gueltige Werte fuer die Anzahl an API Aufrufen pro 60
+        Minuten findet man unter <a
+          href="https://doc.forecast.solar/account_models"
+          rel="nofollow">https://doc.forecast.solar/account_models</a><br>
+        <code>dataAgeMaxInMinutes = 100</code> Mindestabstand in
+        Minuten, innerhalb dem keine neuen Werte angefordert werden.</p>
+      <p><strong><code>[solarprognose]</code><br>
+          Hier die Werte eintragen, wenn die Prognose mit
+          Solarprognose_WeatherData.py von <a
+            href="http://www.solarprognose.de" rel="nofollow">http://www.solarprognose.de</a>
+          geholt werden soll</strong><br>
+        Bei solarprognose.de ist ein Account erforderlich.</p>
+      <p><code>weatherfile = weatherData.json</code> wie forecast.solar.<br>
+        <code>accesstoken = xxxxxx</code> accesstoken des Accounts</p>
+      <p><code>item = inverter</code> Daten aus Account.<br>
+        <code>id = 1111</code> Daten aus Account.<br>
+        <code>type = hourly</code> Daten aus Account.</p>
+      <p><code>Zeitversatz = 0</code><br>
+        Der Zeitversatz verschiebt die Prognose um X Stunden nach vor
+        (-) oder nach hinten, eventuelle Zeitverschiebung.</p>
+      <p><code>dataAgeMaxInMinutes = 1000</code> wie forecast.solar<br>
+        <code>WaitSec = 21</code> Sekunden des sleep = Daten aus
+        Account.</p>
+      <p><code>algorithm = own-v1</code><br>
+        Mögliche Werte mosmix|own-v1|clearsky, für mosmix muss dem
+        Standort eine Mosmix Station zugeordnet sein.<br>
+        Karte mit Stationen: <a
+          href="https://wettwarn.de/mosmix/mosmix.html" rel="nofollow">https://wettwarn.de/mosmix/mosmix.html</a></p>
+      <p><code>KW_Faktor = 1.00</code> Falls die Anlagengröße in kWp
+        nicht mit der Größe in Solarprognose übereinstimmt (z.B.
+        Erweiterung)</p>
+      <p><strong><code>[solcast.com] bzw. [solcast.com2]</code><br>
+          Hier die Werte eintragen, wenn die Prognose mit
+          Solcast_WeatherData.py von <a
+            href="https://api.solcast.com.au" rel="nofollow">https://api.solcast.com.au</a>
+          geholt werden soll.</strong></p>
+      <p><code>weatherfile = weatherData.json</code> wie forecast.solar.<br>
+        <code>api_key = xxxx</code> Daten aus Account.<br>
+        <code>resource_id = xxxx-xxxx-xxxx-xxxx</code> Daten aus
+        Account.<br>
+        <code>dataAgeMaxInMinutes = 1000</code> wie forecast.solar.</p>
+      <p><code>Zeitzone = +1</code><br>
+        Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1,
+        Sommerzeit = +1 erfolgt nun automatisch.<br>
+        <code>KW_Faktor = 1.00</code><br>
+        Falls die Anlagengröße in kWp nicht mit der Größe in solcast.com
+        übereinstimmt (z.B. Erweiterung)</p>
+      <p><code>no_history = 0</code><br>
+        Wenn no_history = 1 dann werden von solcast.com keine
+        historischen Daten geholt, sondern aus der Datei
+        weatherData.json, dadurch hat man bei einer Ausrichtung 10 und
+        bei zwei Ausrichtungen 5 Abfragen.</p>
+    </div>
+  </body>
+</html>
