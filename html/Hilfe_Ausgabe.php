@@ -65,7 +65,7 @@ if (!$filename) {
     } else {
         // Tag ersetzen
         $html = str_replace(
-            '<!HIERZURUECK>',
+            '<!--HIERZURUECK-->',
             '<div class="hilfe" align="right"> <a href="'.$return_url.'"><b>Zurück</b></a></div>',
             $html_contend
             );

@@ -1,51 +1,85 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="width=device-width" />
-	<title>Hilfe ENTLadesteuerung</title>
-</head>
-<body lang="de-DE" >
-
-<!HIERZURUECK>
-
-<center>
-
-<font style="font-size: 24pt">
-</font>
-<br/>
-
-<p>
-<font style="font-size: 24pt"><b><span style="background: #2E64FE">TAB</span>--&gt; EntladeSteuerung</b></font></p>
-<br/>
-
-<p>Unter &quot;Feste Entladegrenze &quot; kann die
-maximale Entladeleistung in <br/> 
-Prozent der <b>WR-Entladeleistung</b> fest eingestellt werden.</p>
-<p>In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung eingetragen werden.<br/> 
-<b>Kleinster funktionierender Wert ist 0.001(kW)</b><br>
-<br/>
-Je nach Eintrag in den Spalten "Verbrauchsgrenze Entladung" und "Feste Entladegrenze"<br/>
-hat dies folgende Auswirkung:<br/>
-<br/>
-<table>
-<tr> <th>Verbrauchsgrenze</th> <th>Feste Grenze</th> <th>Auswirkung</th> </tr>
-<tr> <td>„leer“</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf den Wert von "Feste Entladegrenze %" gesetzt.</td> </tr>
-<tr> <td>„leer“</td> <td>0.8</td> <td>die Entladebegrenzung wird die ganze Stunde auf 0.8kW gesetzt.</td> </tr>
-<tr> <td>8.5</td> <td>„leer“</td> <td>die Entladebegrenzung wird auf (Verbrauch - 8.5)kW gesetzt, wenn der Verbrauch 8.5kW übersteigt, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
-<tr> <td>8.5</td> <td>0.8</td> <td>die Entladebegrenzung wird auf 0.8kW gesetzt, wenn der Verbrauch 8.5kW übersteig, sonst auf den Wert von "Feste Entladegrenze %".</td> </tr>
-<tr> <td>„leer“</td> <td><font color =red>-0.8</font></td> <td>bei einem <font color =red><b>negativen</b></font> Wert im Feld "Feste Grenze" erfolgt eine Zwangsladung mit den eingetragenen kW.<br>
-Von DynamicPriceCheck.py eingetragene Zwangsladungen erhalten unter Options den Eintrag "DynPrice" und werden bei einer Neuberechung überschieben.<br>
-Manuelle Einräge ohne den "DynPrice" Eintrag werden von DynamicPriceCheck.py nicht überschrieben.
-</td></tr>
-</table>
-
-<br/><br/>
-Eine Schreibdämpfung kann in "WREntladeSchreibGrenze_Watt" definiert werden.
-<br/>
-<p><b>ACHTUNG:</b> Die automatische Entladebegrenzung überschreibt die &quot;Feste Entladegrenze &quot;.</p>
-<br/>
-</center>
-
-</body>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Hilfe ENTLadesteuerung</title>
+  </head>
+  <body lang="de-DE">
+    <!--HIERZURUECK--><br>
+    <center>
+      <p>
+        <font style="font-size: 24pt"><b><span style="background:
+              #2E64FE">TAB</span>--&gt; EntladeSteuerung</b></font></p>
+      <br>
+      <p>Unter "Feste Entladegrenze" kann die
+        maximale Entladeleistung in <br>
+        Prozent der <b>WR-Entladeleistung</b> fest eingestellt werden.</p>
+      <p>In der Entladetabelle können Leistungen in kW zur Steuerung der
+        Akkuentladung eingetragen werden.<br>
+        <b>Kleinster funktionierender Wert ist 0.001(kW)</b><br>
+        <br>
+        Je nach Eintrag in den Spalten "Verbrauchsgrenze Entladung" und
+        "Feste Entladegrenze"<br>
+        hat dies folgende Auswirkung:<br>
+        <br>
+      </p>
+      <table>
+        <tbody>
+          <tr>
+            <th>Verbrauchsgrenze</th>
+            <th>Feste Grenze</th>
+            <th>Auswirkung</th>
+          </tr>
+          <tr>
+            <td>„leer“</td>
+            <td>„leer“</td>
+            <td>die Entladebegrenzung wird auf den Wert von "Feste
+              Entladegrenze %" gesetzt.</td>
+          </tr>
+          <tr>
+            <td>„leer“</td>
+            <td>0.8</td>
+            <td>die Entladebegrenzung wird die ganze Stunde auf 0.8kW
+              gesetzt.</td>
+          </tr>
+          <tr>
+            <td>8.5</td>
+            <td>„leer“</td>
+            <td>die Entladebegrenzung wird auf (Verbrauch - 8.5)kW
+              gesetzt, wenn der Verbrauch 8.5kW übersteigt, sonst auf
+              den Wert von "Feste Entladegrenze %".</td>
+          </tr>
+          <tr>
+            <td>8.5</td>
+            <td>0.8</td>
+            <td>die Entladebegrenzung wird auf 0.8kW gesetzt, wenn der
+              Verbrauch 8.5kW übersteig, sonst auf den Wert von "Feste
+              Entladegrenze %".</td>
+          </tr>
+          <tr>
+            <td>„leer“</td>
+            <td><font color="red">-0.8</font></td>
+            <td>bei einem <font color="red"><b>negativen</b></font>
+              Wert im Feld "Feste Grenze" erfolgt eine Zwangsladung mit
+              den eingetragenen kW.<br>
+              Von DynamicPriceCheck.py eingetragene Zwangsladungen
+              erhalten unter Options den Eintrag "DynPrice" und werden
+              bei einer Neuberechnung überschieben.<br>
+              Manuelle Einträge ohne den "DynPrice" Eintrag werden von
+              DynamicPriceCheck.py nicht überschrieben.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      Eine Schreibdämpfung kann in "WREntladeSchreibGrenze_Watt"
+      definiert werden.
+      <br>
+      <p><b>ACHTUNG:</b> Die automatische Entladebegrenzung überschreibt
+        die "Feste Entladegrenze ".</p>
+      <br>
+    </center>
+  </body>
 </html>

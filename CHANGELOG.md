@@ -1,4 +1,4 @@
-**[0.30.2] – 2025-06-XX**  
+**[0.30.2] – 2025-06-22**  
 
 - Neue Methode zur Prognoseberechnung `ForecastCalcMethod` kann nun auch `median_opt` sein.  
   Damit wird aus den bisher gespeicherten  Daten in `weatherData.sqlite` mit einem Faktor aus 
