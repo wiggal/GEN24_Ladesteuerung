@@ -12,8 +12,8 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
-Ab Version: **0.30.2**
-Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/) nach GitHub/Pages übernommen.
+Ab Version: **0.30.2**  
+Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/) nach GitHub/Pages übernommen.  
 Ab Version: **0.30.0**  
 Speicherung der Prognosedaten in `weatherData.sqlite`, Berechnung der Prognose mit gespeicherten Werten.  
 Mit dem verlinkten  `ForecastMgr` können die Prognosedaten gesichtet und gelöscht werden.  
@@ -35,7 +35,7 @@ sudo apt install python3-pip
 sudo pip install requests
 ```
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
-Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der Datei weatherData.json vorhanden sind!  
+Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der DB weatherData.sqlite vorhanden sind!  
 
 Beispiele für Crontabeinträge ("DIR" durch dein Installationsverzeichnis ersetzen).  
 Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh).  
@@ -67,7 +67,7 @@ Holen von den jeweiligen API-Urls die Prognosedaten und bereiten sie auf für GE
 Besonderheiten:  
 - Bei forecast.solar kann mit einem Account die Prognose mit den Werten der Produktion aus der DB angepasst werden.  
 - Bei solarprognose.de ist ein Account erforderlich, hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
-- Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag aufgerufen werden.  
+- Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag angefordert werden.  
 - Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
 
 ### 📉 http_SymoGen24Controller2.py
@@ -115,12 +115,13 @@ Aus der SQLite-Datei `PV_Daten.sqlite` wird dann mit html/8_tab_Diagram.php ein 
 
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
-Ist das Modul eingeschaltet (in CONFIG/charge_priv.ini -->> PV_Reservierung_steuern = 1) wird die Reservierung 
+Ist das Modul eingeschaltet (in CONFIG/charge_priv.ini -->> PV_Reservierung_steuern = 1) und **AUTO** eingestellt, wird die Reservierung 
 beim nächsten Aufruf von http_SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
-Ist nicht AUTO gewählt, erfolgt eine Batterieladung mit der eingestellten Prozentzahl der **maximalen Ladeleistung des GEN24**,
-ab dem nächsten Aufruf von http_SymoGen24Controller2.py.  
-Die prognosebasierte Ladesteuerung ist dadurch deaktiviert, und kann mit der Option "AUTO" wieder aktiviert werden.  
+Bei Einstellung **Slider**, wird mit der eingestellten Prozentzahl der **maximalen Ladeleistung des GEN24**,  
+bei **MaxLadung** mit der in CONFIG/charge_priv.ini unter MaxLadung definierten Ladeleistung,  
+ab dem nächsten Aufruf von http_SymoGen24Controller2.py geladen.  
+Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder Auto angewendet.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
@@ -144,7 +145,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wigga
 ### Grafana Beispiele  
 ![Beispiele](pics/Grafana.png)
 
-Eine [Beschreibung](GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddateien liegen im Verzeichnis GRAFANA.
+Eine [Beschreibung](../GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddateien liegen im Verzeichnis GRAFANA.
 
 ----------
 
