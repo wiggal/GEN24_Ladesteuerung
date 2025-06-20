@@ -58,10 +58,18 @@ class WeatherData:
             zeiger.execute("""
                 CREATE INDEX IF NOT EXISTS idx_weatherData_Zeitpunkt ON weatherData(Zeitpunkt);
             """)
+        
+            # Alte Daten löschen
             zeiger.execute("""
                 DELETE FROM weatherData
                 WHERE datetime(Zeitpunkt) < datetime(?);
             """, (loesche_bis,))
+        
+            # Datensätze mit Quelle = 'Ergebnis' löschen, Historisch
+            zeiger.execute("""
+                DELETE FROM weatherData
+                WHERE Quelle = 'Ergebnis';
+            """)
 
             # Neue Prognosen speichern
             zeiger.executemany("""
@@ -283,7 +291,7 @@ class WeatherData:
                 faktoren_dict[stunde][(watt_von, watt_bis)] = faktor
             # Ergebnis
             if print_level >= 3:
-                print("DEBUG Faktoren und Bereiche je Stunde: ", faktoren_dict)  #entWIGGlung
+                print("DEBUG Faktoren und Bereiche je Stunde: ", faktoren_dict)
 
         for zeit_str, wert, gewicht in rows:
             zeit = datetime.fromisoformat(zeit_str)
@@ -335,7 +343,7 @@ class WeatherData:
                      factor_tmp = 1
 
                 if print_level >= 3:
-                    print("DEBUG Std, Factor, Median, Factor * Median: ", zeit_str,  factor_tmp, median_watt, int( factor_tmp * median_watt))  #entWIGGlung
+                    print("DEBUG Std, Factor, Median, Factor * Median: ", zeit_str,  factor_tmp, median_watt, int( factor_tmp * median_watt))
                 result[zeit_str] = int(factor_tmp * median_watt)
 
         data = []
