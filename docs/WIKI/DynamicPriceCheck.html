@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Dynamischer Strompreis</title>
+  </head>
+  <body>
+    <div class="markdown-body">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <div class="markdown-heading">
+        <h1 class="heading-element">Dynamischen Strompreis zum Laden des
+          Akkus, bzw. Entladestopps verwenden.</h1>
+        <a
+id="user-content-dynamischen-strompreis-zum-laden-des-akkus-bzw-entladestopps-verwenden"
+          class="anchor" aria-label="Permalink: Dynamischen Strompreis
+          zum Laden des Akkus, bzw. Entladestopps verwenden."
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/DynamicPriceCheck#dynamischen-strompreis-zum-laden-des-akkus-bzw-entladestopps-verwenden"><svg
+            class="octicon octicon-link" viewBox="0 0 16 16"
+            version="1.1" width="16" height="16" aria-hidden="true"></svg></a></div>
+      <p>Stand 18.03.2025</p>
+      <ul>
+        <li>
+          <p>Durch einen negativen Eintrag in die Spalte <code>Feste
+              Entladegrenze(KW)</code> in der Tabelle <code>ENTLadeStrg</code>
+            wird eine Zwangsladung für diese Stunde mit der
+            eingetragenen Leistung in Kilowatt veranlasst. Der Eintrag
+            kann auch manuell erfolgen. Der Parameter [Entladung] -&gt;
+            Batterieentlandung_steuern = 1 muss in der
+            CONFIG/charge_priv.ini gesetzt sein.<br>
+            Die Zwangslandung wird dann durch
+            http_SymoGen24Controller2.py auf den GEN24 geschrieben,
+            wobei der Parameter schreiben erforderlich ist, bzw. in den
+            Settings die Option <code>Ent- und Zwangsladesteuerung</code>
+            gesetzt sein muss.</p>
+        </li>
+        <li>
+          <p>Das Tool DynamicPriceCheck.py trägt die erforderlichen
+            Zwangsladungen bzw. Ladepausen automatisch ein.<br>
+            Der Aufruf <code>start_PythonScript.sh DynamicPriceCheck.py
+              schreiben</code> erfolgt entweder manuell, oder immer kurz
+            vor einer vollen Stunde per Cronjob. Ohne den Parameter
+            schreiben erfolgt nur eine Analyse, und es wird nichts in
+            die Tabelle ENTLadeStrg geschrieben.<br>
+            Beispiel für Crontabeintrag mit einem alternativen Logfile:<br>
+            <br>
+            <code>58 * * * * /home/GEN24/start_PythonScript.sh -o
+              LOG_DynamicPriceCheck.log DynamicPriceCheck.py schreiben</code></p>
+        </li>
+        <li>
+          <ul>
+            <li>Als Erstes prüft DynamicPriceCheck.py, ob in
+              CONFIG/Prog_Steuerung.sqlite ein Lastprofil vorhanden,
+              oder älter als die eingestellten Tage (<code>CONFIG/dynprice_priv.ini
+                ==&gt;&gt; LastprofilNeuTage</code>) ist. Wenn eine
+              Erzeugung erforderlich ist, erzeugt es aus den Daten der
+              letzten 35 Tage aus der Loggingdatenbank PV_Daten.sqlite
+              ein Lastprofil, und speichert es in
+              CONFIG/Prog_Steuerung.sqlite. Das Lastprofil enthält den
+              Durchschnittsverbrauch für jede Stunde jedes Wochentages.
+              Ist in der Loggingdatenbank keine vollständige Woche (7
+              Tage) vorhanden, werden die fehlenden Werte mit 600 Watt
+              aufgefüllt.</li>
+            <li>Parameter für die Nutzung des Tools <code>DynamicPriceCheck.py</code>
+              werden in der CONFIG/dynprice_priv.ini gesetzt.</li>
+            <li>Die Strompreise und die geplanten Zwangslandungen werden
+              in die Datenbanktabellen <code>strompreise</code> bzw. <code>priceforecast</code>
+              geschrieben. Daraus wird dann das Diagramm Strompreis
+              gebildet.</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>
