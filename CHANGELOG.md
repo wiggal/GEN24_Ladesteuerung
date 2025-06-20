@@ -8,7 +8,8 @@
   werden bei dem nächsten Aufruf des Prognosedienstes in der DB alle Gewichte des Dienstes neu gesetzt.    
 
 - Konsolidierung der Dokumentation:  
-  - Hilfen nach docs verschoben  
+  - Hilfen nach docs/WIKI verschoben  
+  - Wiki-Dateien nach HTML konvertiert und nach docs/WIKI übernommen.  
 
 **[0.30.1] – 2025-06-12**  
 

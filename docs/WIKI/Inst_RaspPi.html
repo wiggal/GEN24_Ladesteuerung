@@ -1,0 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>GEN24_Ladesteuerung Installation</title>
+  </head>
+  <body>
+      <div id="wiki-content" class="mt-4">
+        <div data-view-component="true" class="Layout
+          Layout--flowRow-until-md Layout--sidebarPosition-end
+          Layout--sidebarPosition-flowRow-end">
+          <div data-view-component="true" class="Layout-main">
+            <div id="wiki-body" class="gollum-markdown-content">
+              <div class="markdown-body">
+                <p>(<strong>ACHTUNG:</strong> Die Beschreibung kann in
+                  Einzelpunkten abweichend sein.)<br>
+                  Stand 01.06.2025</p>
+                <div class="markdown-heading">
+                  <h1 class="heading-element">💾 Installation
+                    GEN24_Ladesteuerung auf einem RaspberryPi</h1>
+                  <a
+id="user-content-floppy_disk-installation-gen24_ladesteuerung-auf-einem-raspberrypi"
+                    class="anchor" aria-label="Permalink: :floppy_disk:
+                    Installation GEN24_Ladesteuerung auf einem
+                    RaspberryPi"
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi#floppy_disk-installation-gen24_ladesteuerung-auf-einem-raspberrypi"><svg
+                      class="octicon octicon-link" viewBox="0 0 16 16"
+                      version="1.1" width="16" height="16"
+                      aria-hidden="true"></svg></a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="markdown-heading">
+        <h2 class="heading-element">Von folgenden Voraussetzungen wird
+          ausgegangen:</h2>
+        <a
+          id="user-content-von-folgenden-voraussetzungen-wird-ausgegangen"
+          class="anchor" aria-label="Permalink: Von folgenden
+          Voraussetzungen wird ausgegangen:"
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi#von-folgenden-voraussetzungen-wird-ausgegangen"><svg
+            class="octicon octicon-link" viewBox="0 0 16 16"
+            version="1.1" width="16" height="16" aria-hidden="true"></svg></a></div>
+      <ul>
+        <li>Die Grundinstallation des RaspberryPi auf der SD-Karte
+          erfolgt auf einem Debian-Linux.</li>
+        <li>Der Benutzer auf dem RaspberryPi ist der Standard-USER „pi“</li>
+        <li>Die Scripte von <a
+            href="https://github.com/wiggal/GEN24_Ladesteuerung">https://github.com/wiggal/GEN24_Ladesteuerung</a>
+          werden unter /home/GEN24/ abgelegt</li>
+        <li>Zu Fehlern und Problemen siehe auch <a
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Tipps-und-Tricks">Tipps-und-Tricks</a>
+        </li>
+      </ul>
+      <div class="markdown-heading">
+        <h2 class="heading-element">Installation System:</h2>
+        <a id="user-content-installation-system" class="anchor"
+          aria-label="Permalink: Installation System:"
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi#installation-system"><svg
+            class="octicon octicon-link" viewBox="0 0 16 16"
+            version="1.1" width="16" height="16" aria-hidden="true"></svg></a></div>
+      <ul>
+        <li>Raspberry Pi Imager installieren<br>
+          <code>sudo apt install rpi-imager</code>
+        </li>
+        <li>Micro-SD Karte einlegen</li>
+        <li>Raspberry Pi Imager starten<br>
+          Betriebssystem auswählen → Raps Pi OS (other) → Rasp Pi OS
+          Lite (64-bit)
+          SD-Karte wählen</li>
+        <li>Erweiterte Optionen<br>
+          x Hostname „raspberrrypi.local“<br>
+          x SSH aktivieren → Password zur Authentifizierung verwenden<br>
+          x Wifi einrichten → SSID = "WLAN-Name" → Password "XXX" →
+          Wifi-Land = DE<br>
+          x Spracheinstellungen → Zeitzone=Berlin → Tastaturlayout=de<br>
+          Speichern<br>
+          SCHREIBEN → alles löschen → JA</li>
+        <li>MicroSD in Raspberry einlegen und warten bis er hochgefahren
+          ist</li>
+      </ul>
+      <div class="markdown-heading">
+        <h2 class="heading-element">Python Installationen</h2>
+        <a id="user-content-python-installationen" class="anchor"
+          aria-label="Permalink: Python Installationen"
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi#python-installationen"><svg
+            class="octicon octicon-link" viewBox="0 0 16 16"
+            version="1.1" width="16" height="16" aria-hidden="true"></svg></a></div>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code>sudo apt install python3
+sudo apt install python3-pip
+sudo pip install requests
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <div class="markdown-heading">
+        <h2 class="heading-element">Skripte GEN24_Ladesteuerung
+          installieren</h2>
+        <a id="user-content-skripte-gen24_ladesteuerung-installieren"
+          class="anchor" aria-label="Permalink: Skripte
+          GEN24_Ladesteuerung installieren"
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi#skripte-gen24_ladesteuerung-installieren"><svg
+            class="octicon octicon-link" viewBox="0 0 16 16"
+            version="1.1" width="16" height="16" aria-hidden="true"></svg></a></div>
+      <p>Am besten die Scripte mit <code>git</code> holen, dann könen
+        sie einfach upgedatet werden, ohne geänderte Dateien zu
+        überschreiben.</p>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code># Erstinstallation Verzeichnis /home/GEN24 erzeugen:
+git clone https://github.com/wiggal/GEN24_Ladesteuerung.git .
+# Die CONFIG/XY.ini's nach CONFIG/XY_priv.ini's und die html/config.php nach html/config_priv.php kopieren.
+# Anpassungen in den CONFIG/XY_priv.ini's und in html/config_priv.php machen.
+# Nun können die Neuerungen immer mit git geholt werden, ohne die Änderungen zu überschreiben
+# Update mit git
+git pull
+# Tipp: Dateien die zukünftig nicht mehr überschieben werden sollen (z.B. weatherData.json) in die Datei .gitignore aufnehmen.
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <p><strong>Alternativ:</strong></p>
+      <ul>
+        <li>Verzeichnis /home/GEN24 erzeugen, Scripte downloaden,
+          entpacken und Rechte setzen.<br>
+          Die Befehle müssen mit <code>sudo</code> ausgeführt werden,
+          da unter <code>/home/</code> nur <code>root</code>
+          Schreibrechte hat.</li>
+      </ul>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code>cd /home/
+sudo wget https://github.com/wiggal/GEN24_Ladesteuerung/archive/refs/heads/main.zip
+sudo unzip main.zip
+sudo rm main.zip
+sudo mv GEN24_Ladesteuerung-main GEN24
+sudo chown -R pi:pi /home/GEN24
+sudo chmod +x /home/GEN24/start_PythonScript.sh
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <p><strong>Konfiguration:</strong></p>
+      <ul>
+        <li>
+          <p>Konfiguration der Ladesteuerung<br>
+            Die jeweilige CONFIG/XY.ini nach CONFIG/XY_priv.ini und die
+            html/config.php nach html/config_priv.php kopieren.
+            Anpassungen in den CONFIG/XY_priv.ini's und in
+            html/config_priv.php machen, siehe auch die jeweils
+            verlinkte Hilfe in der WebUI, bzw. hier im Wiki</p>
+        </li>
+        <li>
+          <p>Crontabeinträge<br>
+            <code>crontab -e</code> # Editor wählen und folgende
+            Einträge machen.<br>
+            http_SymoGen24Controller2.py immer eine Minute nach vollen
+            zehn Minuten ausführen (1-56/10), da der GEN24 die Daten
+            immer etwa zur vollen fünften Minute bereitstellt. Da das
+            Smartmeter die Daten aktuell hat, kann beim Ausführen zur
+            vollen fünften Minute passieren, dass die Daten vom GEN24
+            noch nicht zur Verfügung stehen. Dadurch entstehen unschöne
+            Zacken in der Tagesgrafik.</p>
+        </li>
+      </ul>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code>1-56/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <p><strong>ACHTUNG:</strong> nur den Wetterdienst eintragen, den
+        ihr verwenden wollt, bzw. die als Backup dienen nur einmal am
+        Tag.</p>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code>33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
+8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
+0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
+0 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <p><strong>Crontab.log jeden Montag abräumen</strong></p>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code>0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <ul>
+        <li>Editor mit schreiben beenden, folgende Meldung muss
+          erscheinen, damit die Conjobs aktiv sind:<br>
+          „crontab: installing new crontab“</li>
+      </ul>
+      <div class="markdown-heading">
+        <h2 class="heading-element">Webserver Installation:</h2>
+        <a id="user-content-webserver-installation" class="anchor"
+          aria-label="Permalink: Webserver Installation:"
+href="https://github.com/wiggal/GEN24_Ladesteuerung/wiki/Installation-GEN24_Ladesteuerung-auf-einem-RaspberryPi#webserver-installation"><svg
+            class="octicon octicon-link" viewBox="0 0 16 16"
+            version="1.1" width="16" height="16" aria-hidden="true"></svg></a></div>
+      <p><strong>PHP installieren:</strong></p>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code>sudo apt update &amp;&amp; sudo apt upgrade
+sudo apt install php php-sqlite3
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <p>Wenn PHP installiert ist, wird durch die Variable <code>Einfacher_PHP_Webserver
+          = 1</code> (Standard) in der CONFIG/default_priv.ini beim
+        ersten Start von <code>start_PythonScript.sh</code> automatisch
+        der einfache PHP-Webserver gestartet werden. Die Webseite ist
+        dann auf Port:2424 erreichbar (z.B.: raspberrypi:2424).</p>
+      <p><strong><em>Alternativ kann auch der Webserver Apache
+            installiert werden:</em></strong><br>
+        (dann <code>Einfacher_PHP_Webserver = 0</code> setzen)<br>
+        <strong>Apache installieren und konfigurieren:</strong></p>
+      <div class="snippet-clipboard-content notranslate
+        position-relative overflow-auto">
+        <pre class="notranslate"><code>sudo apt update &amp;&amp; sudo apt upgrade
+sudo apt install apache2
+</code></pre>
+        <div class="zeroclipboard-container position-absolute right-0
+          top-0"> </div>
+      </div>
+      <p>Änderungen der Apachekonfiguration unter /etc/apache2/:<br>
+        ApacheUser auf „pi“ und DokumetRoot auf /home/GEN24/html/ ändern</p>
+      <ul>
+        <li>/etc/apache2/apache2.conf <code>&lt;Directory /var/www/&gt;</code>
+          nach <code>&lt;Directory /home/GEN24/html/&gt;</code> ändern.</li>
+        <li>/etc/apache2/envvars <code>export APACHE_RUN_USER=www-data</code>
+          nach <code>export APACHE_RUN_USER=pi</code> ändern.</li>
+        <li>/etc/apache2/envvars <code>export APACHE_RUN_GROUP=www-data</code>
+          nach <code>export APACHE_RUN_GROUP=pi</code> ändern.</li>
+        <li>/etc/apache2/sites-enabled/000-default.conf <code>DocumentRoot
+            /var/www/html</code> nach <code>DocumentRoot
+            /home/GEN24/html</code> ändern.</li>
+      </ul>
+      <p>Apache neu starten<br>
+        <code>sudo service apache2 restart</code></p>
+      <p><strong>Vorhandene Skripts:</strong><br>
+        1_tab_LadeSteuerung.php ==&gt;&gt; Reservierung von großen
+        PV-Mengen und feste manuelle Ladesteuerung<br>
+        2_tab_EntladeSteuerung.php ==&gt;&gt; EntladeSteuerung durch
+        Eintrag in Tabelle und feste manuelle Entladesteuerung<br>
+        4_tab_config_ini.php ==&gt;&gt; Anzeigen und Editieren der
+        CONFIG/XY_priv.ini's<br>
+        5_tab_Crontab_log.php ==&gt;&gt; Anzeigen der Logdatei
+        Crontab.log<br>
+        6_tab_GEN24.php ==&gt;&gt; lokaler Aufruf des GEN24<br>
+        7_tab_Diagram.php ==&gt;&gt; Diagramme der Strompreise (nur wenn
+        DynamicPriceCheck.py läuft)<br>
+        8_tab_Diagram.php ==&gt;&gt; Diagramm Quelle und Ziel der
+        Energie<br>
+        9_tab_settigs.php ==&gt;&gt; Settings, ändern der Startparameter
+        der Ladesteuerung</p>
+      <p>In der <code>html/config_priv.php</code> können die
+        tab_Skripte unter <code>$TAB_config</code> konfiguriert werden.
+        Man kann den Namen ändern, Tab's die nicht benötigt werden
+        ausblenden, den Tab der beim Start geladen wird auswählen und
+        eigene Skripts als "Tab" einbinden.</p>
+    </div>
+  </body>
+</html>
