@@ -123,6 +123,10 @@ bei **MaxLadung** mit der in CONFIG/charge_priv.ini unter MaxLadung definierten 
 ab dem nächsten Aufruf von http_SymoGen24Controller2.py geladen.  
 Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder Auto angewendet.  
 
+### ForecastMgr
+Im ForecastMgr können die gespeicherten Prognosedaten analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
+![ForecastMgr](pics/ForecastMgr.png)
+
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
 ### BatterieENTladesteuerung ( TAB--> ENTLadeStrg )
