@@ -150,7 +150,7 @@ if ($diagramtype == 'line') {
     echo "<div class='container'>
         <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
     </div>";
-Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenze);
+Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'Wh', $Diagrammgrenze);
 } else {  # Dann bar = Balkendiagramm
 
     # Funktion Schalter aufrufen
@@ -168,7 +168,7 @@ Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenz
     echo "<div class='container'>
         <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
     </div>";
-    Diagram_ausgabe($Footer, 'bar', $labels, $daten, $optionen, 'KW', $Diagrammgrenze);
+    Diagram_ausgabe($Footer, 'bar', $labels, $daten, $optionen, 'kWh', $Diagrammgrenze);
 
 } # END if ($diagramtype == 
     $db->close();
