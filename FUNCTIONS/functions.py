@@ -48,17 +48,18 @@ class basics:
 
     def getVarConf(self, var_block, var, Type):
         try:
-            value = config[var_block][var].replace(',', '.').strip()
+            raw_value = config[var_block][var].strip()
             if Type == 'eval':
                 error_type = "als Zahl "
-                # Nur Float- oder Integer-Parsing, kein eval!
-                if '.' in value:
-                    return_var = float(value)
+                # Nur Kommas in Zahlen durch Punkt ersetzen
+                number_str = raw_value.replace(',', '.')
+                if '.' in number_str:
+                    return_var = float(number_str)
                 else:
-                    return_var = int(value)
+                    return_var = int(number_str)
             else:
                 error_type = ""
-                return_var = value
+                return_var = raw_value  # String bleibt unverändert, inkl. Kommas
         except (KeyError, ValueError):
             print(f"ERROR: die Variable [{var_block}][{var}] wurde NICHT {error_type}definiert!")
             exit(0)
