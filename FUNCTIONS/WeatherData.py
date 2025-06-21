@@ -301,50 +301,53 @@ class WeatherData:
             # extend([wert] * gewicht) fügt den wert genau gewicht-mal der Liste hinzu
             # Damit hat man einen gewichteten Median
             if (wert > 10):
-                if gewicht is None or gewicht == '': gewicht = 0;
-                gewicht = int(gewicht)
+                try:
+                    gewicht = int(gewicht)
+                except (ValueError, TypeError):
+                    gewicht = 0
                 stundenwerte[stunde].extend([wert] * gewicht)
 
         result = {}
         result_median = {}
         for stunde in sorted(stundenwerte):
-            zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
-            # Median immer speichern, wegen Medianoptimierung
-            result_median[zeit_str] = int(median(stundenwerte[stunde]))
+            if stundenwerte.get(stunde):
+                zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
+                # Median immer speichern, wegen Medianoptimierung
+                result_median[zeit_str] = int(median(stundenwerte[stunde]))
 
-            # Statistische Auswertungen nach ForecastCalcMethod
-            if ( ForecastCalcMethod == 'median'):
-                result[zeit_str] = int(median(stundenwerte[stunde]))
-            if ( ForecastCalcMethod == 'mittel'):
-                result[zeit_str] = int(mean(stundenwerte[stunde]))
-            if ( ForecastCalcMethod == 'min'):
-                result[zeit_str] = int(min(stundenwerte[stunde]))
-            if ( ForecastCalcMethod == 'max'):
-                result[zeit_str] = int(max(stundenwerte[stunde]))
+                # Statistische Auswertungen nach ForecastCalcMethod
+                if ( ForecastCalcMethod == 'median'):
+                    result[zeit_str] = int(median(stundenwerte[stunde]))
+                if ( ForecastCalcMethod == 'mittel'):
+                    result[zeit_str] = int(mean(stundenwerte[stunde]))
+                if ( ForecastCalcMethod == 'min'):
+                    result[zeit_str] = int(min(stundenwerte[stunde]))
+                if ( ForecastCalcMethod == 'max'):
+                    result[zeit_str] = int(max(stundenwerte[stunde]))
 
-            # Hier Aufruf der Prognoseoptimierung
-            if ( ForecastCalcMethod == 'median_opt'):
-                median_watt = int(median(stundenwerte[stunde]))
-                hour = stunde.strftime("%H:00")
+                # Hier Aufruf der Prognoseoptimierung
+                if ( ForecastCalcMethod == 'median_opt'):
+                    median_watt = int(median(stundenwerte[stunde]))
+                    hour = stunde.strftime("%H:00")
 
-                # aus faktoren_dict den Faktor holen in dem der Wert median_watt liegt
-                try:
-                    ranges = faktoren_dict[hour]
-                    # Versuche passenden Bereich zu finden
-                    factor_tmp = next(
-                         factor_tmp for (low, high),  factor_tmp in ranges.items()
-                        if low <= median_watt < high
-                    )
-                except StopIteration:
-                    # Kein Bereich gefunden → nimm höchsten (letzten) Wert dieser Stunde
-                     factor_tmp = list(ranges.values())[-1]
-                except KeyError:
-                    # Stunde nicht vorhanden → Standardwert
-                     factor_tmp = 1
+                    # aus faktoren_dict den Faktor holen in dem der Wert median_watt liegt
+                    try:
+                        ranges = faktoren_dict[hour]
+                        # Versuche passenden Bereich zu finden
+                        factor_tmp = next(
+                            factor_tmp for (low, high),  factor_tmp in ranges.items()
+                            if low <= median_watt < high
+                        )
+                    except StopIteration:
+                        # Kein Bereich gefunden → nimm höchsten (letzten) Wert dieser Stunde
+                        factor_tmp = list(ranges.values())[-1]
+                    except KeyError:
+                        # Stunde nicht vorhanden → Standardwert
+                        factor_tmp = 1
 
-                if print_level >= 3:
-                    print("DEBUG Std, Factor, Median, Factor * Median: ", zeit_str,  factor_tmp, median_watt, int( factor_tmp * median_watt))
-                result[zeit_str] = int(factor_tmp * median_watt)
+                    if print_level >= 3:
+                        print("DEBUG Std, Factor, Median, Factor * Median: ", zeit_str,  factor_tmp, median_watt, int( factor_tmp * median_watt))
+                    result[zeit_str] = int(factor_tmp * median_watt)
 
         data = []
         data.extend([(ts, 'Median', val, '0', '') for ts, val in result_median.items()])

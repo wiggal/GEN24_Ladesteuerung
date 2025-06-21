@@ -121,7 +121,7 @@ if __name__ == '__main__':
     weatherdata = FUNCTIONS.WeatherData.WeatherData()
     config = basics.loadConfig(['default', 'weather'])
     ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
-    Gewicht = basics.getVarConf('forecast.solar','Gewicht','str')
+    Gewicht = basics.getVarConf('forecast.solar','Gewicht','eval')
     Quelle = 'forecast.solar'
     
     format = "%H:%M:%S"    
