@@ -1,3 +1,7 @@
+**[0.30.3] – 2025-06-XX**  
+
+- Einheiten in Labels der QZ-Bilanz richtig gestellt.
+
 **[0.30.2] – 2025-06-22**  
 
 - Neue Methode zur Prognoseberechnung `ForecastCalcMethod` kann nun auch `median_opt` sein.  

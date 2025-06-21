@@ -82,7 +82,7 @@ td {font-size: 160%;
 
 <div class="version" align="center">
 <br>
-<b>  GEN24_Ladesteuerung Version: 0.30.2 </b>
+<b>  GEN24_Ladesteuerung Version: 0.30.3 </b>
 </div>
 <?php
 include "config.php";
