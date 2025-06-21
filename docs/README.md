@@ -108,7 +108,7 @@ Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erf
 Aus der SQLite-Datei `PV_Daten.sqlite` wird dann mit html/8_tab_Diagram.php ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin) erzeugt. 
 ![Grafik zur Quelle/Ziel](pics/QZ_Tag.png)
 
-## Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
+### Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
 
 ### Batterieladesteuerung ( TAB--> LadeStrg )
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
