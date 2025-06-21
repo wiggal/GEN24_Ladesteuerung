@@ -47,18 +47,22 @@ class basics:
                 return config
 
     def getVarConf(self, var_block, var, Type):
-            # Variablen aus config lesen und auf Zahlen prüfen
-            try:
-                if(Type == 'eval'):
-                    error_type = "als Zahl "
-                    return_var = eval(config[var_block][var].replace(',', '.'))
+        try:
+            value = config[var_block][var].replace(',', '.').strip()
+            if Type == 'eval':
+                error_type = "als Zahl "
+                # Nur Float- oder Integer-Parsing, kein eval!
+                if '.' in value:
+                    return_var = float(value)
                 else:
-                    error_type = ""
-                    return_var = str(config[var_block][var])
-            except:
-                print("ERROR: die Variable [" + var_block + "][" + var + "] wurde NICHT " + error_type + "definiert!")
-                exit(0)
-            return return_var
+                    return_var = int(value)
+            else:
+                error_type = ""
+                return_var = value
+        except (KeyError, ValueError):
+            print(f"ERROR: die Variable [{var_block}][{var}] wurde NICHT {error_type}definiert!")
+            exit(0)
+        return return_var
 
     def loadWeatherData(self):
         conn = sqlite3.connect('weatherData.sqlite')

@@ -128,7 +128,7 @@ if __name__ == '__main__':
     api_key = basics.getVarConf('solcast.com', 'api_key', 'str')
     resource_id = basics.getVarConf('solcast.com', 'resource_id', 'str')
     resource_id2 = basics.getVarConf('solcast.com', 'resource_id2', 'str')
-    Gewicht = basics.getVarConf('solcast.com','Gewicht','str')
+    Gewicht = basics.getVarConf('solcast.com','Gewicht','eval')
     Quelle = 'solcast.com'
     
     format = "%H:%M:%S"    

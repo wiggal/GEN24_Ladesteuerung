@@ -114,7 +114,7 @@ if __name__ == '__main__':
     weatherdata = FUNCTIONS.WeatherData.WeatherData()
     config = basics.loadConfig(['default', 'weather'])
     ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
-    Gewicht = basics.getVarConf('akkudoktor','Gewicht','str')
+    Gewicht = basics.getVarConf('akkudoktor','Gewicht','eval')
     Quelle = 'akkudoktor'
     
     format = "%H:%M:%S"    
