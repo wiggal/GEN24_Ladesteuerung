@@ -150,7 +150,7 @@ if ($diagramtype == 'line') {
     echo "<div class='container'>
         <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
     </div>";
-Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'Wh', $Diagrammgrenze);
+Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenze);
 } else {  # Dann bar = Balkendiagramm
 
     # Funktion Schalter aufrufen

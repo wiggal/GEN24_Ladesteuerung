@@ -416,7 +416,7 @@ window.onload = function() { zeitsetzer(1); };
 function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit, $Diagrammgrenze)
 {
 $Nachkommastellen = 2;
-if ($EnergieEinheit == 'Wh') $Nachkommastellen = 0;
+if ($EnergieEinheit == 'W') $Nachkommastellen = 0;
 $Y1_stepSize = 100;
 if ($EnergieEinheit == 'kWh') $Y1_stepSize = 10;
 echo " <script>
