@@ -223,40 +223,6 @@ class progladewert:
             return  Pro_Akt_Log, self.DEBUG_Ausgabe
     
     
-    def getEinspeiseGrenzeLadewert(self, WRSchreibGrenze_nachOben, aktuellerLadewert, aktuelleEinspeisung, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt):
-            ### Einspeisegrenze ANFANG
-            # Hinweis: aktuelleBatteriePower ist beim Laden der Batterie minus
-            # Wenn Einspeisung über Einspeisegrenze, dann könnte WR schon abregeln, desshalb WRSchreibGrenze_nachOben addieren
-            # Durch Trägheit des WR wird vereinzelt die Einspeisung durch gleichzeitigen Netzbezug größer als die Produktion, dann nicht anwenden
-            if (aktuelleEinspeisung - self.aktuelleBatteriePower > self.Einspeisegrenze) and aktuelleEinspeisung < aktuellePVProduktion:
-                if (aktuelleEinspeisung - self.aktuelleBatteriePower - alterLadewert > self.Einspeisegrenze):
-                    EinspeisegrenzUeberschuss = int(aktuelleEinspeisung + alterLadewert - self.Einspeisegrenze + (WRSchreibGrenze_nachOben + 5))
-                else:
-                    EinspeisegrenzUeberschuss = int(aktuelleEinspeisung + alterLadewert - self.Einspeisegrenze)
-    
-                # Damit durch die Pufferaddition nicht die maximale PV_Leistung überschritten wird
-                if EinspeisegrenzUeberschuss > PV_Leistung_Watt - self.Einspeisegrenze:
-                    EinspeisegrenzUeberschuss = PV_Leistung_Watt - self.Einspeisegrenze
-    
-                EinspeisegrenzUeberschuss = self.getLadewertinGrenzen(EinspeisegrenzUeberschuss)
-    
-                if EinspeisegrenzUeberschuss > aktuellerLadewert:
-                    self.DEBUG_Ausgabe += "\nDEBUG EinspeisegrenzUeberschuss: " + str(EinspeisegrenzUeberschuss) + " aktuellerLadewert: " + str(aktuellerLadewert) + " alterLadewert: " + str(alterLadewert)
-                    aktuellerLadewert = int(EinspeisegrenzUeberschuss)
-                    LadewertGrund = "PV_Leistungsüberschuss > Einspeisegrenze"
-            return  aktuellerLadewert, LadewertGrund, self.DEBUG_Ausgabe
-    
-    def getAC_KapaLadewert(self, WRSchreibGrenze_nachOben, aktuellerLadewert, aktuellePVProduktion, LadewertGrund, alterLadewert, PV_Leistung_Watt):
-            # Wenn  PV-Produktion + self.aktuelleBatteriePower (in Akku = minus!!)> self.WR_Kapazitaet (AC)
-            if aktuellePVProduktion > self.WR_Kapazitaet:
-                if aktuellePVProduktion + 100 - self.WR_Kapazitaet > alterLadewert:
-                    aktuellerLadewert = alterLadewert + WRSchreibGrenze_nachOben + 10
-                    LadewertGrund = "PV-Produktion > AC_Kapazitaet WR"
-                else:
-                    aktuellerLadewert = alterLadewert
-            aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
-            return  aktuellerLadewert, LadewertGrund
-    
     def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert):
             # Wegen ManuelleSteuerung nicht begrenzen auf MaxLadewert
             #fun_Ladewert = self.getLadewertinGrenzen(fun_Ladewert)
