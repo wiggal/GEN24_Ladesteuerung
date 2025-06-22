@@ -108,6 +108,7 @@ class WeatherData:
         verbindung = conn.cursor()
         heute = datetime.now().strftime('%Y-%m-%d 23:59:59')
         aktuelle_Std = datetime.now().strftime('%Y-%m-%d %H:00:00')
+        Max_Leistung = basics.getVarConf('pv.strings','wp','eval')
         
         sql_anweisung = f"""
             WITH Alle_PVDaten AS (
@@ -141,7 +142,13 @@ class WeatherData:
             verbindung.close()
 
         Produktion = [] 
+        Watt_zuvor = None
         for Stunde, Watt in DB_data:
+            # Wenn Aufzeichnung länger ausgefallen ist, entstehen sonst grosse Produktionen
+            if (Watt > Max_Leistung * 1.1 and Watt_zuvor != None):
+                Watt = Watt_zuvor
+            else:
+                Watt_zuvor = Watt
             Produktion.extend([(Stunde, 'Produktion', Watt, '0', '')])
 
         return(Produktion)
