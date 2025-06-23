@@ -27,8 +27,7 @@ class progladewert:
                 if (self.WR_Kapazitaet * 1.14 < data_fun): data_fun = int(self.WR_Kapazitaet * 1.14 )
                 # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
                 # NUR für berechnung Ladewert, nicht fürs Logging
-                PV_Reservierung_steuern = basics.getVarConf('Reservierung','PV_Reservierung_steuern','eval')
-                if ( PV_Reservierung_steuern == 1 and self.reservierungdata.get(Stunde)):
+                if (self.reservierungdata.get(Stunde)):
                     data_fun = self.data['result']['watts'][Stunde] - self.reservierungdata[Stunde]
                     # Minuswerte verhindern
                     if ( data_fun< 0): data_fun = 0

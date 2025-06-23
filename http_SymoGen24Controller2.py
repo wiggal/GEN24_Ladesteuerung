@@ -82,7 +82,6 @@ if __name__ == '__main__':
                     WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
                     WRSchreibGrenze_nachUnten = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachUnten','eval')
                     FesteLadeleistung = basics.getVarConf('Ladeberechnung','FesteLadeleistung','eval')
-                    PV_Reservierung_steuern = basics.getVarConf('Reservierung','PV_Reservierung_steuern','eval')
                     Batterieentlandung_steuern = basics.getVarConf('Entladung','Batterieentlandung_steuern','eval')
                     WREntladeSchreibGrenze_Watt = basics.getVarConf('Entladung','WREntladeSchreibGrenze_Watt','eval')
                     Notstromreserve_steuern = basics.getVarConf('Notstrom','Notstromreserve_steuern','eval')
@@ -128,21 +127,19 @@ if __name__ == '__main__':
                     aktuellePVProduktion = API['aktuellePVProduktion']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
-                    # Reservierungsdatei lesen, wenn Reservierung eingeschaltet
+                    # Reservierungsdatei lesen
                     reservierungdata = {}
-                    if  PV_Reservierung_steuern == 1:
-                        reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
-                        # Spalte 1 und 2 aufaddieren
-                        reservierungdata = dict()
-                        for key in reservierungdata_tmp:
-                            Res_Feld = 0
-                            i = 0
-                            for key2 in reservierungdata_tmp[key]:
-                                if(i<2):
-                                    Res_Feld += reservierungdata_tmp[key][key2]
-                                i += 1
-                            reservierungdata[key] = Res_Feld
-
+                    reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
+                    # Spalte 1 und 2 aufaddieren
+                    reservierungdata = dict()
+                    for key in reservierungdata_tmp:
+                        Res_Feld = 0
+                        i = 0
+                        for key2 in reservierungdata_tmp[key]:
+                            if(i<2):
+                                Res_Feld += reservierungdata_tmp[key][key2]
+                            i += 1
+                        reservierungdata[key] = Res_Feld
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     WR_schreiben = 0
     
@@ -222,12 +219,12 @@ if __name__ == '__main__':
                     except: 
                         Ablaufdatum = 0
                     if (Ablaufdatum > int(datetime.now().timestamp())):
-                        if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung >= 0):
+                        if (ManuelleSteuerung >= 0):
                             FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
                             ManuelleStrg_Akkuschon_aus = 1
                             MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
                         # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
-                        if (PV_Reservierung_steuern == 1) and (ManuelleSteuerung == -2):
+                        if (ManuelleSteuerung == -2):
                             FesteLadeleistung = MaxLadung
                             ManuelleStrg_Akkuschon_aus = 1
                             MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
