@@ -4,17 +4,21 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width">
     <title>Hilfe Ladesteuerung</title>
+  <style>
+    .weatherDataManager{
+        position: fixed;
+        left: 8px;
+        }
+  </style>
   </head>
   <body lang="de-DE">
+    <div class="weatherDataManager"> <a href="#weatherDataManager"><b>Hilfe ForecastMgr</b></a></div>
     <!--HIERZURUECK-->
-    <center>
+    <center> 
+      <font style="font-size: 24pt"><b><span style="background: #44c767">TAB</span>--&gt; LadeSteuerung</b></font> <br>
       <br>
-      <font style="font-size: 24pt"><b><span style="background: #44c767">TAB</span>--&gt;
-          LadeSteuerung</b></font>
-      <br>
-      <br>
-      <p>Im Dropdown unter "Ladegrenze" kann ausgewählt
-        werden, wie die Hausakkuladung erfolgen soll: </p>
+      <p>Im Dropdown unter "Ladegrenze" kann ausgewählt werden, wie die
+        Hausakkuladung erfolgen soll: </p>
       <table>
         <tbody>
           <tr>
@@ -49,20 +53,66 @@
           </tr>
         </tbody>
       </table>
-      <p>Beim Speichern werden nach Auswahl von <b>Slider</b>
-        oder <b>MaxLadung</b><br>
+      <p>Beim Speichern werden nach Auswahl von <b>Slider</b> oder <b>MaxLadung</b><br>
         Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder <b>Auto</b>
         angewendet.<br>
       </p>
-      <p>In der Prognosetabelle können in den Spalten <b>vier</b>
-        und <b>fünf</b><br>
-        PV-Leistungen in KW zur Reservierung eingetragen
-        werden. <br>
+      <p>In der Prognosetabelle können in den Spalten <b>vier</b> und <b>fünf</b><br>
+        PV-Leistungen in KW zur Reservierung eingetragen werden. <br>
         <br>
         Die Leistungsreservierung wird dann bei der Ladungsplanung<br>
         des Hausakkus berücksichtigt (wenn Ladegrenze = AUTO).</p>
-      <br>
-      <br>
     </center>
+    <hr width="100%" size="2">
+    <h2 class="western" align="center"> <a name="weatherDataManager"></a>Prognoseberechnung und ForecastMgr</h2>
+    <p align="center"><br>
+    </p>
+    <p align="left">Grundsätzliches:</p>
+    <ul>
+      <li>
+        <p align="left">Jedes aufgerufene Prognoseskript aus dem
+          Verzeichnis FORECAST speichert die angeforderten
+          Vorhersagewerte in die SQLite-Datenbank "weatherData.sqlite".</p>
+      </li>
+      <li>
+        <p align="left">Bei jedem Aufruf eines Prognoseskriptes wird aus
+          allen gespeicherten Daten der Median, die Prognose und die
+          Produktion berechnet und neu gespeichert, dabei werden bereits
+          vorhandene Werte überschieben. Die Prognosedaten gehen mit dem
+          definierten Gewicht in die Berechnung ein, Daten mit Gewicht =
+          0 werden bei der Berechnung nicht berücksichtigt.</p>
+        <ul>
+          <li>
+            <p align="left">Der Median wird aus den gespeicherten
+              Prognosewerten gebildet und für die Visualisierung und als
+              Rechengrundlage gespeichert.</p>
+          </li>
+          <li> Die Prognose wird für alle gespeicherten Zeitpunkte je
+            nach Einstellung in CONFIG/weather_priv.ini (median |
+            median_opt | mittel | min | max ) als Median, Mittelwert,
+            kleinster oder größter Wert für jede Stunde berechnet und
+            gespeichert. <br>
+            Bei der Einstellung median_opt, wird der Median um eine
+            durchschnittliche Abweichung (Median) alle gespeicherten
+            Werte für die zu berechnende Stunde optimiert. </li>
+          <li> Die Produktion ist die in dieser Stunde produzierte
+            Energie (z.B.: 5:00-06:00 ist 05:00) und wird erst bei einem
+            Aufruf eines Skriptes nach Ablauf der vollen Stunde
+            gespeichert. </li>
+        </ul>
+      </li>
+      <li>
+          Der ForecastMgr stellt die gespeicherten
+          Prognosedaten als Diagramm und als Tabelle dar. Die Daten
+          können für weitere Auswertungen auch als CSV-Datei
+          heruntergeladen werden.<br>
+          Es besteht hier auch die Möglichkeit, die Daten ganzer
+          Prognosedienste oder gespeicherter Berechnungen zu löschen.<br>
+          Während gelöschte Berechnungen beim nächsten Skriptaufruf
+          wieder erzeugt werden, können historische Prognosedaten nicht
+          wieder erzeugt werden. Deshalb ist beim Löschen der Daten
+          besondere Vorsicht geboten.
+      </li>
+    </ul>
   </body>
 </html>
