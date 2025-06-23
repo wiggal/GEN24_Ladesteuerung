@@ -115,8 +115,7 @@ Aus der SQLite-Datei `PV_Daten.sqlite` wird dann mit html/8_tab_Diagram.php ein 
 
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
-Ist das Modul eingeschaltet (in CONFIG/charge_priv.ini -->> PV_Reservierung_steuern = 1) und **AUTO** eingestellt, wird die Reservierung 
-beim nächsten Aufruf von http_SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
+Ist **AUTO** eingestellt, wird die Reservierung von http_SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
 
 Bei Einstellung **Slider**, wird mit der eingestellten Prozentzahl der **maximalen Ladeleistung des GEN24**,  
 bei **MaxLadung** mit der in CONFIG/charge_priv.ini unter MaxLadung definierten Ladeleistung,  
@@ -170,31 +169,3 @@ Ab Version: **0.25.1**
 Prognosebegrenzung auf Höchstwerte der historischen Produktion.  
 Ab Version: **0.25.0**  
 Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  
-Ab Version: **0.24.8**  
-Werte für Akkuschonung frei konfigurierbar.  
-Ab Version: **0.24.5**  
-Notstrom Reserverkapazität (Entladebegrenzung) höher setzen, wenn schlechte Prognose morgen.   
-Netzdienliches Laden durch Prognosekappung, wenn BatSparFaktor = 0.  
-Ab Version: **0.24.4**  
-Auslagerung der jahreszeitenabhängingen Konfiguration in zusätzliche config-files.  
-Änderung in der CONFIG/charge.ini und charge_priv.ini, neuen Block [monats_priv.ini] eingefügt, usw.  
-Ab Version: **0.24.1**  
-Einbindung von Fronius-Symos.  
-Änderung in der CONFIG/default.ini `IP_weitere_Symo = no` in CONFIG/default_priv.ini einfügen.  
-Ab Version: **0.24.0**  
-Alle Daten aus den Steuerungs.json Dateien in SQLite-Datenbankdatei CONFIG/Prog_Steuerung.sqlite abgelegt.
-Änderungen in WebUI: Reiter Settings neu konzipiert, Schieberegler bei den Prozentangaben der Ladesteuerungen.  
-Ab Version: **0.22.0**  
-Die config.ini ins Verzeichnis CONFIG verschoben und aufgeteilt auf `default.ini, charge.ini weather.ini`.
-Zur jeweiligen `xy.ini` kann eine `xy_priv.ini` mit den persönlichen Anpassungen erstellt werden.  
-Ab Version: **0.21.4**  
-BattVollUm als Delta der ersten Prognosestunde, die kleiner als 1 % der maximalen PV-Leistung ist.  
-Ab Version: **0.21.3**  
-In der HTTP-Version kann nun im Energiemanagement, ein Einspeisezielwert der Eigenverbrauchs-Optimierung automatisch geschrieben werden.  
-Ab Version: **0.21.2**  
-Bei aktivierter EntladeSteuerung auch die `Maximale Entladeleistung` **per HTTP-Request** im Batteriemanagement setzen.  
-Ab Version: **0.21.1**  
-Zur Ermittlung der gesamten Produktion können auch mehrere GEN24 eingebunden werden.  
-Ab Version: **0.20**  
-[:chart_with_downwards_trend: http_SymoGen24Controller2.py](https://github.com/wiggal/GEN24_Ladesteuerung/#chart_with_downwards_trend-http_symogen24controller2py) `Maximale Ladeleistung` **per HTTP-Request** im Batteriemanagement setzen.  
-

@@ -47,6 +47,7 @@ class basics:
                 return config
 
     def getVarConf(self, var_block, var, Type):
+        error_type = ' in den ini-Dateien '
         try:
             raw_value = config[var_block][var].strip()
             if Type == 'eval':
