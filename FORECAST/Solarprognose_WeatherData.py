@@ -29,11 +29,6 @@ def loadLatestWeatherData(Quelle, Gewicht):
         key_neu = str(datetime.fromtimestamp(value[0]) + timedelta(hours=Zeitversatz))
         dict_watts[key_neu] = int(value[1]*1000*KW_Faktor)
 
-    # hier evtl Begrenzungen der Prognose anbringen
-    MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
-    if (MaximalPrognosebegrenzung == 1):
-        dict_watts = weatherdata.checkMaxPrognose(dict_watts)
-
     # Daten für SQL erzeugen
     SQL_watts = []
     for key, value in dict_watts.items():

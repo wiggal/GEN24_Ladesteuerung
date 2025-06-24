@@ -73,10 +73,6 @@ def loadLatestWeatherData(Quelle, Gewicht):
         print("### ERROR:  HA_Solcast-Datei ",solcast_file," nicht gefunden")
         exit()
 
-    # hier evtl Begrenzungen der Prognose anbringenAdd commentMore actions
-    MaximalPrognosebegrenzung = basics.getVarConf('env', 'MaximalPrognosebegrenzung', 'eval')
-    if (MaximalPrognosebegrenzung == 1):
-        dict_watts = weatherdata.checkMaxPrognose(dict_watts)
     # Daten für SQL erzeugen
     SQL_watts = []
     for key, value in dict_watts.items():

@@ -100,11 +100,6 @@ def loadLatestWeatherData(Quelle, Gewicht):
                     if( key in dict_watts):
                         dict_watts[key]=dict_watts[key]+value
 
-        # hier evtl Begrenzungen der Prognose anbringen
-        MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
-        if (MaximalPrognosebegrenzung == 1):
-            dict_watts = weatherdata.checkMaxPrognose(dict_watts)
-
         # Daten für SQL erzeugen
         SQL_watts = []
         for key, value in dict_watts.items():
