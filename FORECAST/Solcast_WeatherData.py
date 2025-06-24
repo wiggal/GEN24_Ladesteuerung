@@ -99,10 +99,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
 
         #solcast_2.json Nun wieder nach Datum und Stunden sortieren
         dict_watts = dict(sorted(dict_watts.items()))
-        # hier evtl Begrenzungen der Prognose anbringen
-        MaximalPrognosebegrenzung = basics.getVarConf('env','MaximalPrognosebegrenzung','eval')
-        if (MaximalPrognosebegrenzung == 1):
-            dict_watts = weatherdata.checkMaxPrognose(dict_watts)
+
         # Daten für SQL erzeugen
         SQL_watts = []
         for key, value in dict_watts.items():

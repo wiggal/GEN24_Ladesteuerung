@@ -3,8 +3,12 @@
 - Einheiten in Labels der QZ-Bilanz richtig gestellt.
 
 - Die Einstellungen im TAB `LadeStrg` werden nun immer berücksichtigt.  
-**ACHTUNG:** Der Block `[Reservierung]` in `CONFIG/charge.ini` ist weggefallen in `CONFIG/charge_priv.ini` einarbeiten!!  
+**ACHTUNG:** Der Block `[Reservierung]` in `CONFIG/charge.ini` ist weggefallen, auch aus `CONFIG/charge_priv.ini` entfernen!!  
 
+- Die Funktion `MaximalPrognosebegrenzung` wurde entfernt, da sie nun durch `ForecastCalcMethod = median_opt` ersetzt wird.
+**ACHTUNG:** Die Variablen `MaximalPrognosebegrenzung`, `MaxProGrenz_Faktor` und `MaxProGrenz_Dayback` aus dem Block `[env]`   
+in `CONFIG/weather.ini` ist weggefallen, auch aus `CONFIG/weather_priv.ini` entfernen!!  
+  
 **[0.30.2] – 2025-06-22**  
 
 - Neue Methode zur Prognoseberechnung `ForecastCalcMethod` kann nun auch `median_opt` sein.  
