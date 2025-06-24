@@ -109,24 +109,31 @@ class WeatherData:
         heute = datetime.now().strftime('%Y-%m-%d 23:59:59')
         aktuelle_Std = datetime.now().strftime('%Y-%m-%d %H:00:00')
         Max_Leistung = basics.getVarConf('pv.strings','wp','eval')
-        
+        # Der offset soll die Stunde in die Mitte der Produktion verschieben
+        offset = '+30 minutes'
         sql_anweisung = f"""
-            WITH Alle_PVDaten AS (
-                SELECT Zeitpunkt,
-                    DC_Produktion
-                FROM pv_daten
-                WHERE Zeitpunkt BETWEEN '{von_tag}' AND '{heute}'
-                GROUP BY STRFTIME('%Y%m%d%H', Zeitpunkt)
-            ),
-            ProduktionDiff AS (
-                SELECT
-                    STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
-                    (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion
-                FROM Alle_PVDaten
-            )
-            SELECT *
-            FROM ProduktionDiff
-            WHERE Produktion IS NOT NULL;
+        WITH VerschobenePVDaten AS (
+            SELECT
+                datetime(Zeitpunkt, '{offset}') AS verschobenerZeitpunkt,
+                DC_Produktion
+            FROM pv_daten
+            WHERE Zeitpunkt BETWEEN '{von_tag}' AND '{heute}'
+        ),
+        Alle_PVDaten AS (
+            SELECT verschobenerZeitpunkt AS Zeitpunkt,
+                DC_Produktion
+            FROM VerschobenePVDaten
+            GROUP BY STRFTIME('%Y%m%d%H', Zeitpunkt)
+        ),
+        ProduktionDiff AS (
+            SELECT
+                STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Zeitpunkt,
+                (LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion) AS Produktion
+            FROM Alle_PVDaten
+        )
+        SELECT *
+        FROM ProduktionDiff
+        WHERE Produktion IS NOT NULL;
         """
         try:
             verbindung.execute(sql_anweisung)

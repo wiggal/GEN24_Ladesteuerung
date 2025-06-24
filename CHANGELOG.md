@@ -3,7 +3,7 @@
 - Einheiten in Labels der QZ-Bilanz richtig gestellt.
 
 - Die Einstellungen im TAB `LadeStrg` werden nun immer berücksichtigt.  
-**ACHTUNG:** Der Block `[Reservierung]` in `CONFIG/charge.ini` ist weggefallen in `CONFIG/charge.ini` einarbeiten!!  
+**ACHTUNG:** Der Block `[Reservierung]` in `CONFIG/charge.ini` ist weggefallen in `CONFIG/charge_priv.ini` einarbeiten!!  
 
 **[0.30.2] – 2025-06-22**  
 
