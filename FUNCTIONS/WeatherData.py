@@ -4,6 +4,7 @@ import os
 import json
 import configparser
 import sqlite3
+from collections import defaultdict
 import FUNCTIONS.functions
 
 basics = FUNCTIONS.functions.basics()
@@ -388,3 +389,15 @@ class WeatherData:
 
         return (currentDayProduction)
 
+    def sum_pv_data(self, pvdaten_dict):
+
+        dict_watts = defaultdict(int)
+        for key in pvdaten_dict:
+            for stunden in pvdaten_dict[key]['values']:
+                for stunde in stunden:
+                    valueDate = datetime.strptime(stunde['datetime'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                    valuePower = int(stunde['power'])
+                    if valuePower > 0:
+                        dict_watts[valueDate.strftime("%Y-%m-%d %H:%M:%S")] += valuePower
+
+        return(dict_watts)
