@@ -16,7 +16,7 @@ class basics:
             try:
                 config
             except NameError:
-                config = configparser.ConfigParser()
+                config = configparser.ConfigParser(strict=False)
             # Standard.ini lesen
             for conf_file in conf_files:
                 c_file = 'CONFIG/'+conf_file+'.ini'
