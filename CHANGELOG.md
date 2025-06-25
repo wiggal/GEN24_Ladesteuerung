@@ -8,6 +8,8 @@
 - Die Funktion `MaximalPrognosebegrenzung` wurde entfernt, da sie nun durch `ForecastCalcMethod = median_opt` ersetzt wird.
 **ACHTUNG:** Die Variablen `MaximalPrognosebegrenzung`, `MaxProGrenz_Faktor` und `MaxProGrenz_Dayback` aus dem Block `[env]`   
 in `CONFIG/weather.ini` ist weggefallen, auch aus `CONFIG/weather_priv.ini` entfernen!!  
+
+- Bei der Berechnung der Produktion für weatherData die Werte 30 Minuten vor und nach der vollen Stunde verwenden.  
   
 **[0.30.2] – 2025-06-22**  
 
