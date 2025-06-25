@@ -1,4 +1,4 @@
-**[0.30.3] – 2025-06-XX**  
+**[0.30.3] – 2025-06-25**  
 
 - Einheiten in Labels der QZ-Bilanz richtig gestellt.
 
