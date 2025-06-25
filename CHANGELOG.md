@@ -1,3 +1,7 @@
+**[0.30.4] – 2025-XX-XX**  
+
+- Für den Wetterdienst von `Akkudoktor` können nun auch mehr als 2 Strings konfiguriert werden.  
+
 **[0.30.3] – 2025-06-25**  
 
 - Einheiten in Labels der QZ-Bilanz richtig gestellt.
