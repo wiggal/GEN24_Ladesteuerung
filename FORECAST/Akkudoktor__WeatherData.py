@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from datetime import datetime
 import requests
 import json
+from collections import defaultdict
 import FUNCTIONS.functions
 import FUNCTIONS.WeatherData
 
@@ -21,13 +22,13 @@ def loadLatestWeatherData(Quelle, Gewicht):
     lon = basics.getVarConf('pv.strings','lon','eval')
     inverterEff = basics.getVarConf('akkudoktor','inverterEfficiency','eval')
 
-    i = 1
-    pvdaten_dict = {}
-    while i <= anzahl_strings:
-        if (i == 1): 
+    string_zaehler = 1
+    SQL_watts_dict = {}
+    while string_zaehler <= anzahl_strings:
+        if (string_zaehler == 1): 
            suffix = ''
         else:
-           suffix = i
+           suffix = string_zaehler
         horizon = basics.getVarConf('pv.strings',f'horizon{suffix}','str')
         dec = basics.getVarConf('pv.strings',f'dec{suffix}','eval')
         az = basics.getVarConf('pv.strings',f'az{suffix}','eval')
@@ -36,7 +37,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
         albedo = basics.getVarConf('akkudoktor',f'albedo{suffix}','eval')
         powerInv = basics.getVarConf('akkudoktor',f'powerInverter{suffix}','eval')
 
-        # Fehler wenn az oder az2 auf 0 gleich Sueden stehen, siehe https://github.com/nick81nrw/solApi/pull/5
+        # Fehler wenn az auf 0 gleich Sueden steht, siehe https://github.com/nick81nrw/solApi/pull/5
         if az == 0:
             az = 1
 
@@ -59,17 +60,25 @@ def loadLatestWeatherData(Quelle, Gewicht):
             print("### ERROR:  Timeout von api.akkudoktor.net")
             exit()
 
-        pvdaten_dict[i] = pvdaten
-        i += 1
+        dict_watts = defaultdict(int)
+        for stunden in pvdaten['values']:
+            for stunde in stunden:
+                valueDate = datetime.strptime(stunde['datetime'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                valuePower = int(stunde['power'])
+                if valuePower > 0:
+                    dict_watts[valueDate.strftime("%Y-%m-%d %H:%M:%S")] = valuePower
+
+        # Daten für SQL erzeugen
+        SQL_watts_tmp = []
+        for key, value in dict_watts.items():
+            if (value > 10):
+                SQL_watts_tmp.append((key, Quelle, value, Gewicht, ''))
+
+        SQL_watts_dict[string_zaehler] = SQL_watts_tmp
+        string_zaehler += 1
 
     # hier dann evtl pvdaten addieren mit Funktion
-    dict_watts = weatherdata.sum_pv_data(pvdaten_dict)
-
-    # Daten für SQL erzeugen
-    SQL_watts = []
-    for key, value in dict_watts.items():
-        if (value > 10):
-            SQL_watts.append((key, Quelle, value, Gewicht, ''))
+    SQL_watts = weatherdata.sum_pv_data(SQL_watts_dict)
 
     return(SQL_watts)
         

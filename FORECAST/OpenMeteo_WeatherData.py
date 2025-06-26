@@ -92,96 +92,125 @@ def compute_mean_field(data, prefix, target_field):
 
     return(data)
 
-def get_pv_forecast_icon_d2_cloud_layers(latitude, longitude, tilt, azimuth, peak_power_kwp, quelle, offset_minuten, cloudEffect, weather_models, base_efficiency_factor, now_local):
+def get_pv_forecast_icon_d2_cloud_layers(quelle, gewicht):
     """
     Ruft die 'global_tilted_irradiance' und die Gesamtbewölkung von Open-Meteo (ICON-D2, usw.) ab
     und berechnet die PV-Produktionsprognose mit verstärktem Bewölkungseinfluss.
     """
     print_level = basics.getVarConf('env','print_level','eval')
-    base_url = "https://api.open-meteo.com/v1/forecast"
-    
+    # Werte für alle Strings
+    anzahl_strings = basics.getVarConf('pv.strings','anzahl','eval')
+    lat = basics.getVarConf('pv.strings','lat','eval')
+    lon = basics.getVarConf('pv.strings','lon','eval')
+    # Auf erlaubte Modelle prüfen
+    valid_models = basics.getVarConf('openmeteo','valid_models','str')
+    weather_models = basics.getVarConf('openmeteo','weather_models','str')
+    # Faktor des Bewölkungseinflusses
+    cloudEffect = basics.getVarConf('openmeteo','cloudEffect','eval')
+    # Basis-Effizienzfaktor (systemische Verluste, nicht-optimale Bedingungen)
+    base_efficiency_factor = basics.getVarConf('openmeteo','base_efficiency_factor','eval')
+    offset_minuten = basics.getVarConf('openmeteo','offset_minuten','eval')
+
     start_date = now_local.strftime('%Y-%m-%d')
     end_date = (now_local + datetime.timedelta(days=2)).strftime('%Y-%m-%d')
 
-    params = {
-        "latitude": latitude,
-        "longitude": longitude,
-        # 'global_tilted_irradiance' für die Hauptberechnung, 'cloudcover' für die zusätzliche Anpassung.
-        "hourly": "global_tilted_irradiance,cloud_cover",
-        "daily": "sunrise,sunset",
-        "temperature_unit": "celsius",
-        "wind_speed_unit": "kmh",
-        "precipitation_unit": "mm",
-        "start_date": start_date,
-        "end_date": end_date,
-        "models": weather_models,
-        "tilt": tilt,
-        "azimuth": azimuth,
-        "output": "json",
-        "timezone": "Europe/Berlin"
-    }
+    string_zaehler = 1
+    SQL_watts_dict = {}
+    while string_zaehler <= anzahl_strings:
+        if (string_zaehler == 1): 
+           suffix = ''
+        else:
+           suffix = string_zaehler
+        dec = basics.getVarConf('pv.strings',f'dec{suffix}','eval')
+        az = basics.getVarConf('pv.strings',f'az{suffix}','eval')
+        kwp = basics.getVarConf('pv.strings',f'wp{suffix}','eval') / 1000
 
-    try:
-        response = requests.get(base_url, params=params)
-        response.raise_for_status()
-        data = response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Fehler beim Abrufen der Daten von Open-Meteo: {e}")
-        return []
+        base_url = "https://api.open-meteo.com/v1/forecast"
+    
+        params = {
+            "latitude": lat,
+            "longitude": lon,
+            # 'global_tilted_irradiance' für die Hauptberechnung, 'cloudcover' für die zusätzliche Anpassung.
+            "hourly": "global_tilted_irradiance,cloud_cover",
+            "daily": "sunrise,sunset",
+            "temperature_unit": "celsius",
+            "wind_speed_unit": "kmh",
+            "precipitation_unit": "mm",
+            "start_date": start_date,
+            "end_date": end_date,
+            "models": weather_models,
+            "tilt": dec,
+            "azimuth": az,
+            "output": "json",
+            "timezone": "Europe/Berlin"
+        }
 
-    # Nur berechnen, wenn das Ziel-Feld nicht vorhanden ist
-    # Mittelwerte berechnen, nur falls noch nicht vorhanden
-    data = compute_mean_field(data, 'global_tilted_irradiance_', 'global_tilted_irradiance')
-    data = compute_mean_field(data, 'cloud_cover_', 'cloud_cover')
+        try:
+            response = requests.get(base_url, params=params)
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Fehler beim Abrufen der Daten von Open-Meteo: {e}")
+            return []
 
-    # Offset anwenden, wenn nicht 0
-    if (offset_minuten != 0):
-        data = interpolate_at_offset(data, offset_minuten)
+        # Mittelwerte berechnen
+        data = compute_mean_field(data, 'global_tilted_irradiance_', 'global_tilted_irradiance')
+        data = compute_mean_field(data, 'cloud_cover_', 'cloud_cover')
 
-    pv_forecast_data = []
-    if "hourly" in data and "time" in data["hourly"] and "global_tilted_irradiance" in data["hourly"]:
-        hourly_times = data["hourly"]["time"]
-        hourly_tilted_irradiance = data["hourly"]["global_tilted_irradiance"]
-        hourly_cloudcover = data["hourly"].get("cloud_cover", [0] * len(hourly_times)) # Gesamtbewölkung in %
+        # Offset anwenden, wenn nicht 0
+        if (offset_minuten != 0):
+            data = interpolate_at_offset(data, offset_minuten)
 
-        for i in range(len(hourly_times)):
-            timestamp_str = hourly_times[i]
-            dt_object = datetime.datetime.fromisoformat(timestamp_str)
-            formatted_timestamp = dt_object.strftime('%Y-%m-%d %H:00:00')
+        pv_forecast_data = []
+        if "hourly" in data and "time" in data["hourly"] and "global_tilted_irradiance" in data["hourly"]:
+            hourly_times = data["hourly"]["time"]
+            hourly_tilted_irradiance = data["hourly"]["global_tilted_irradiance"]
+            hourly_cloudcover = data["hourly"].get("cloud_cover", [0] * len(hourly_times)) # Gesamtbewölkung in %
 
-            estimated_pv_watts = 0
-            if hourly_tilted_irradiance[i] is not None:
-                pv_watts = hourly_tilted_irradiance[i] * peak_power_kwp * base_efficiency_factor
+            for i in range(len(hourly_times)):
+                timestamp_str = hourly_times[i]
+                dt_object = datetime.datetime.fromisoformat(timestamp_str)
+                formatted_timestamp = dt_object.strftime('%Y-%m-%d %H:00:00')
 
-                # --- Verstärkung des Bewölkungseinflusses ---
-                cloud_percentage = hourly_cloudcover[i] if hourly_cloudcover[i] is not None else 0
-                # Definition der Anpassungslogik des Bewölkungseinflusses 
-                additional_cloud_reduction_factor = round((1 - (cloud_percentage/100) * 0.8 * cloudEffect),2) 
-                pv_watts_org = pv_watts
-                pv_watts *= additional_cloud_reduction_factor
-                if print_level >= 2:
-                    print("DEBUG  Bewölkung %:", formatted_timestamp, cloud_percentage, additional_cloud_reduction_factor, int(pv_watts_org), int(pv_watts))  #entWIGGlung
-                # --- Ende der Verstärkung ---
+                estimated_pv_watts = 0
+                if hourly_tilted_irradiance[i] is not None:
+                    pv_watts = hourly_tilted_irradiance[i] * kwp * base_efficiency_factor
+
+                    # --- Verstärkung des Bewölkungseinflusses ---
+                    cloud_percentage = hourly_cloudcover[i] if hourly_cloudcover[i] is not None else 0
+                    # Definition der Anpassungslogik des Bewölkungseinflusses 
+                    additional_cloud_reduction_factor = round((1 - (cloud_percentage/100) * 0.8 * cloudEffect),2) 
+                    pv_watts_org = pv_watts
+                    pv_watts *= additional_cloud_reduction_factor
+                    if print_level >= 2:
+                        print("DEBUG  Bewölkung %:", formatted_timestamp, cloud_percentage, additional_cloud_reduction_factor, int(pv_watts_org), int(pv_watts))  #entWIGGlung
+                    # --- Ende der Verstärkung ---
                 
-                estimated_pv_watts = int(round(pv_watts))
+                    estimated_pv_watts = int(round(pv_watts))
 
-            pv_forecast_data.append((formatted_timestamp, quelle, estimated_pv_watts, '1', ''))
-    else:
-        print("Unerwartetes Datenformat von Open-Meteo oder keine 'global_tilted_irradiance' verfügbar.")
+                pv_forecast_data.append((formatted_timestamp, quelle, estimated_pv_watts, gewicht, ''))
+        else:
+            print("Unerwartetes Datenformat von Open-Meteo oder keine 'global_tilted_irradiance' verfügbar.")
 
-    return pv_forecast_data
+        SQL_watts_dict[string_zaehler] = pv_forecast_data
+        string_zaehler += 1
+
+    # hier dann evtl pvdaten addieren mit Funktion
+    SQL_watts = weatherdata.sum_pv_data(SQL_watts_dict)
+
+    return SQL_watts
 
 if __name__ == "__main__":
     basics = FUNCTIONS.functions.basics()
     weatherdata = FUNCTIONS.WeatherData.WeatherData()
     config = basics.loadConfig(['default', 'weather'])
     ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
+    Gewicht = basics.getVarConf('openmeteo','Gewicht','eval')
     lat = basics.getVarConf('pv.strings','lat','eval')
     lon = basics.getVarConf('pv.strings','lon','eval')
     dec = basics.getVarConf('pv.strings','dec','eval')
     az = basics.getVarConf('pv.strings','az','eval')
     kwp = basics.getVarConf('pv.strings','wp','eval') / 1000
-    Gewicht = basics.getVarConf('openmeteo','Gewicht','eval')
     offset_minuten = basics.getVarConf('openmeteo','offset_minuten','eval')
     # Faktor des Bewölkungseinflusses
     cloudEffect = basics.getVarConf('openmeteo','cloudEffect','eval')
@@ -190,8 +219,8 @@ if __name__ == "__main__":
     # Auf erlaubte Modelle prüfen
     valid_models = basics.getVarConf('openmeteo','valid_models','str')
     weather_models = basics.getVarConf('openmeteo','weather_models','str')
-    format = "%H:%M:%S"    
     Quelle = 'openmeteo'
+    format = "%H:%M:%S"    
 
     # Leerzeichen prüfen
     if ' ' in weather_models:
@@ -212,7 +241,7 @@ if __name__ == "__main__":
         local_timezone = datetime.timezone(current_offset, name='CEST')
         now_local = datetime.datetime.now(local_timezone)
 
-    data = get_pv_forecast_icon_d2_cloud_layers(lat, lon, dec, az, kwp, Quelle, offset_minuten, cloudEffect, weather_models, base_efficiency_factor, now_local)
+    data = get_pv_forecast_icon_d2_cloud_layers(Quelle, Gewicht)
 
     if isinstance(data, list):
         weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
