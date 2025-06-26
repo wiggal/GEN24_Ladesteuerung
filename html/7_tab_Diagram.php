@@ -99,6 +99,12 @@ $DiaDatenBis =  date("Y-m-d 00:00",(strtotime("+1 day", strtotime($DiaDatenVon))
 if (empty($_POST["AnfangVon"])) $_POST["AnfangVon"] = $DiaDatenVon;
 if (empty($_POST["AnfangBis"])) $_POST["AnfangBis"] = $DiaDatenBis;
 
+# Schalter für Durchschnitspeis übergeben
+$durchschnitt = 'nein';
+$durchschnitt_checked = '';
+if (!empty($_POST['durchschnitt'])) $durchschnitt = ($_POST['durchschnitt']);
+if ($durchschnitt == 'ja') $durchschnitt_checked = 'checked';
+
 # programmpunkt = option 
 $programmpunkt = 'Produktion';
 if (!empty($_POST["programmpunkt"])) $programmpunkt = $_POST["programmpunkt"];
@@ -129,7 +135,7 @@ $SQL = getSQL('Netzverbrauch', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Funktion Schalter aufrufen
-schalter_ausgeben($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $Strompreis_Dia_optionen, $Tag);
+schalter_ausgeben($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $Strompreis_Dia_optionen, $Tag, $durchschnitt_checked);
 
 $SQL = getSQL('daten', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
 $results = $db->query($SQL);
@@ -138,7 +144,11 @@ $results = $db->query($SQL);
 list($daten, $labels, $MIN_y3, $MAX_y, $MAX_y3) = diagrammdaten($results, $Zeitraum);
 
 # Preisstatistikdaten erzeugen
-$Preisstatistik = Preisberechnung($DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $db);
+if ($durchschnitt == 'ja') {
+    $Preisstatistik = Preisberechnung($DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $db);
+} else {
+    $Preisstatistik = '';
+    }
 
 # Nun Barchart ausgeben
     echo "<div class='container'>
