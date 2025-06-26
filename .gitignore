@@ -152,3 +152,4 @@ cython_debug/
 #.idea/
 diff_git_PI.sh
 CONFIG/default_priv.ini
+from_raspberrypi.sh
