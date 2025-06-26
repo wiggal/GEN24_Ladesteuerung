@@ -151,9 +151,6 @@ button {
             <td><input name="Zeile[26][1]" value="https://ntfy.sh/XXXXXXXXX" readonly="readonly"
                 type="text"></td>
           </tr>
-          <tr>
-            <td colspan="2"><input name="Zeile[27]" value="" type="hidden"></td>
-          </tr>
         </tbody>
       </table>
     </center>
@@ -180,7 +177,6 @@ button {
           <td><input name="Zeile[6][1]" value="-1" readonly="readonly" type="text"></td>
         </tr>
         <tr>
-          <td colspan="2"><input name="Zeile[7]" value="" type="hidden"></td>
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[8]" value="" type="hidden">; Bis
@@ -196,9 +192,6 @@ button {
           <td><input name="Zeile[10][0]" value="" type="hidden">BattVollUm</td>
           <td><input name="Zeile[10][1]" value="-4" readonly="readonly" type="text"></td>
         </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[11]" value="" type="hidden"></td>
-        </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[12]" value="" type="hidden">;
             Faktor um mehr Batteriekapazität für später aufzusparen.<br>
@@ -210,9 +203,6 @@ button {
         <tr>
           <td><input name="Zeile[14][0]" value="" type="hidden">BatSparFaktor</td>
           <td><input name="Zeile[14][1]" value="0.5" readonly="readonly" type="text"></td>
-        </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[18]" value="" type="hidden"></td>
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[16]" value="" type="hidden">;
@@ -249,9 +239,6 @@ button {
           <td><input name="Zeile[21][0]" value="" type="hidden">WR_Kapazitaet</td>
           <td><input name="Zeile[21][1]" value="10000" readonly="readonly" type="text"></td>
         </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[22]" value="" type="hidden"></td>
-        </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[23]" value="" type="hidden">;
             PV-Leistung reellen Spitzenwert</td>
@@ -259,9 +246,6 @@ button {
         <tr>
           <td><input name="Zeile[24][0]" value="" type="hidden">PV_Leistung_Watt</td>
           <td><input name="Zeile[24][1]" value="11400" readonly="readonly" type="text"></td>
-        </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[25]" value="" type="hidden"></td>
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[26]" value="" type="hidden">;
@@ -285,9 +269,6 @@ button {
           <td><input name="Zeile[30][1]" value="600, 600, 600, 600, 800,
               900, 900" readonly="readonly" type="text"></td>
         </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[31]" value="" type="hidden"></td>
-        </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[32]" value="" type="hidden">;
             Schaltverzögerung um Schreibzugriffe auf WR zu minimieren</td>
@@ -299,9 +280,6 @@ button {
         <tr>
           <td><input name="Zeile[34][0]" value="" type="hidden">WRSchreibGrenze_nachUnten</td>
           <td><input name="Zeile[34][1]" value="1500" readonly="readonly" type="text"></td>
-        </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[35]" value="" type="hidden"></td>
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[36]" value="" type="hidden">; Liegt
@@ -333,9 +311,6 @@ button {
         <tr>
           <td><input name="Zeile[41][0]" value="" type="hidden">GrenzwertGroestePrognose</td>
           <td><input name="Zeile[41][1]" value="2000" readonly="readonly" type="text"></td>
-        </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[42]" value="" type="hidden"></td>
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[43]" value="" type="hidden"> ;
@@ -573,9 +548,11 @@ button {
               type="hidden">[pv.strings] </td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[10]" value="" type="hidden">; Wenn
-            ein zweites Feld mit anderer Ausrichtung vorhanden ist, hier
-            Anzahl=2 eintragen</td>
+          <td colspan="2"><input name="Zeile[10]" value="" type="hidden">
+            ; Für akkudoktor können hier mehere Strings mit anderer Ausrichtung definiert werden, 
+            ; hier Anzahl eintragen, und die Daten der weiternen Stings analgo zum 2. String eintragen
+            ; forecast.solar kann aktuell nur 2 Strings verarbeiten
+            </td>
         </tr>
         <tr>
           <td><input name="Zeile[11][0]" value="anzahl = " type="hidden">anzahl</td>
@@ -669,9 +646,6 @@ button {
           <td><input name="Zeile[33][0]" value="horizon2 = " type="hidden">horizon2</td>
           <td><input name="Zeile[33][1]" value="0,10,10,10,30,30,0,0,10,10,10,0"
               readonly="readonly" type="text"></td>
-        </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[34]" value="" type="hidden"></td>
         </tr>
         <tr>
           <td colspan="2"><input name="Zeile[35]" value="" type="hidden"></td>
@@ -1040,9 +1014,6 @@ button {
           <td><input name="Zeile[13][0]" value="Daysback = " type="hidden">Daysback</td>
           <td><input name="Zeile[13][1]" value="35" readonly="readonly" type="text"></td>
         </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[14]" value="" type="hidden"></td>
-        </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[14]" value="" type="hidden">;
             LADEBERECHUNG</td>
@@ -1111,22 +1082,12 @@ button {
               " type="hidden">netzlade_preisschwelle</td>
           <td><input name="Zeile[29][1]" value="0.00" readonly="readonly" type="text"></td>
         </tr>
-        <tr>
-          <td colspan="2"><input name="Zeile[30]" value="" type="hidden"></td>
-        </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[31]" value=";
-              Strompreisquellen" type="hidden">; Strompreisquellen</td>
-        </tr>
-        <tr class="comment">
-          <td colspan="2"><input name="Zeile[32]" value="; energycharts
-              (https://api.energy-charts.info/)" type="hidden">; energycharts
-            (https://api.energy-charts.info/)</td>
-        </tr>
-        <tr class="comment">
-          <td colspan="2"><input name="Zeile[33]" value="; smart_api
-              (https://smard.api.bund.dev/)" type="hidden">; smart_api
-            (https://smard.api.bund.dev/)</td>
+              Strompreisquellen" type="hidden">; Strompreisquellen<br>
+              ; energycharts (https://api.energy-charts.info/)<br>
+              ; smart_api (https://smard.api.bund.dev/)
+          </td>
         </tr>
         <tr>
           <td><input name="Zeile[35][0]" value="Preisquelle = " type="hidden">Preisquelle</td>
@@ -1138,22 +1099,12 @@ button {
           <td><input name="Zeile[24][1]" value="DE-LU" readonly="readonly" type="text"></td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[32]" value="" type="hidden">;
-            Tageszeitabhängiger Preisanteil in Euro (z.B. Netzentgelte nach
-            $14a)</td>
-        </tr>
-        <tr class="comment">
-          <td colspan="2"><input name="Zeile[33]" value="" type="hidden">; Hier
-            die Stundenbereiche mit den Nettopreisen in der Form
-            {"Std":"Nettopreis", ...} angeben,</td>
-        </tr>
-        <tr class="comment">
-          <td colspan="2"><input name="Zeile[34]" value="" type="hidden">; Std.
-            muss mit "00" beginnen und immer zweistellig sein.</td>
-        </tr>
-        <tr class="comment">
-          <td colspan="2"><input name="Zeile[35]" value="" type="hidden">;
-            Beispiel: { "00":"0.027","09":"0.1105","16":"0.1937"}</td>
+          <td colspan="2"><input name="Zeile[32]" value="" type="hidden">
+          ; Tageszeitabhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a)<br>
+          ; Hier die Stundenbereiche mit den Nettopreisen in der Form {"Std":"Nettopreis", ...} angeben,<br>
+          ; Std. muss mit "00" beginnen und immer zweistellig sein.</br>
+          ; Beispiel: { "00":"0.027","09":"0.1105","16":"0.1937"}</br>
+          </td>
         </tr>
         <tr>
           <td><input name="Zeile[36][0]" value="Tageszeit_Preisanteil =

@@ -2,6 +2,11 @@
 
 - Für den Wetterdienst von `Akkudoktor` können nun auch mehr als 2 Strings konfiguriert werden.  
 
+**NEU** Prognoseskript FORECAST/OpenMeteo_WeatherData.py  
+  Damit können PV-Prognosen von https://open-meteo.com/ abgerufen werden.  
+
+**ACHTUNG** Neuer Block `[openmeteo]` in `CONFIG/weather.ini` bitte bei Bedarf in `CONFIG/weather_priv.ini` einarbeiten!!
+
 **[0.30.3] – 2025-06-25**  
 
 - Einheiten in Labels der QZ-Bilanz richtig gestellt.
