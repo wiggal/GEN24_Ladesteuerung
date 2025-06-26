@@ -390,14 +390,23 @@ class WeatherData:
         return (currentDayProduction)
 
     def sum_pv_data(self, pvdaten_dict):
+        # 1. Daten aus allen Blöcken zusammenfassen und Werte addieren
+        daten_dict = {}
 
-        dict_watts = defaultdict(int)
-        for key in pvdaten_dict:
-            for stunden in pvdaten_dict[key]['values']:
-                for stunde in stunden:
-                    valueDate = datetime.strptime(stunde['datetime'], "%Y-%m-%dT%H:%M:%S.%f%z")
-                    valuePower = int(stunde['power'])
-                    if valuePower > 0:
-                        dict_watts[valueDate.strftime("%Y-%m-%d %H:%M:%S")] += valuePower
+        for block in pvdaten_dict:
+            for zeit, quelle, wert, flag, kommentar in pvdaten_dict.get(block, []):
+                key = (zeit, quelle)
+                if key in daten_dict:
+                    daten_dict[key]['wert'] += wert
+                else:
+                    daten_dict[key] = {'wert': wert, 'flag': flag, 'kommentar': kommentar}
+
+        # 2. Ergebnisliste ohne Blöcke erzeugen
+        dict_watts = []
+        for (zeit, quelle), info in daten_dict.items():
+            dict_watts.append((zeit, quelle, info['wert'], info['flag'], info['kommentar']))
+
+        # Ergebnis nach Zeit sortieren
+        dict_watts.sort(key=lambda x: x[0])
 
         return(dict_watts)
