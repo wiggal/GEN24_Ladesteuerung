@@ -7,6 +7,8 @@
 
 **ACHTUNG: ** Neuer Block `[openmeteo]` in `CONFIG/weather.ini` bitte bei Bedarf in `CONFIG/weather_priv.ini` einarbeiten!!
 
+- Im Diagramm `Strompreis` die Durchschnittspreise nicht standardmäßig anzeigen, da Auswertung zu langsam ist.  
+
 **[0.30.3] – 2025-06-25**  
 
 - Einheiten in Labels der QZ-Bilanz richtig gestellt.

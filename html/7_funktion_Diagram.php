@@ -1,7 +1,7 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $Strompreis_Dia_optionen, $schaltertext)
+function schalter_ausgeben ($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $Strompreis_Dia_optionen, $schaltertext, $durchschnitt_checked)
 {
 # Abstand von bis ermitteln
 # Zeitpunkte mit Zeitzonen, die die Sommerzeit und Winterzeit berücksichtigen
@@ -64,6 +64,28 @@ echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVo
 echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<button type="submit" style="opacity: '.$PfeilGrauton_vor.'" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
 echo '</form>'."\n";
+
+// HTML-Ausgabe
+echo '</td><td>';
+echo '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
+echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
+echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
+echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
+echo '&nbsp;&nbsp;<input type="checkbox" id="durchschnitt" name="durchschnitt" value="ja" ' . $durchschnitt_checked . ' onchange="zeigeBitteWarten(this)">' . "\n";
+echo '<label id="durchschnittLabel" for="durchschnitt"> Durchschnittspreise anzeigen </label>' . "\n";
+echo '<span id="ladehinweis" style="display:none;"><strong>Bitte warten...</strong></span>' . "\n";
+echo '</form>' . "\n";
+
+// JavaScript
+echo '<script>' . "\n";
+echo 'function zeigeBitteWarten(checkbox) {' . "\n";
+echo '  // Checkbox & Label ausblenden, Hinweis einblenden' . "\n";
+echo '  document.getElementById(\'durchschnitt\').style.display = \'none\';' . "\n";
+echo '  document.getElementById(\'durchschnittLabel\').style.display = \'none\';' . "\n";
+echo '  document.getElementById(\'ladehinweis\').style.display = \'inline\';' . "\n";
+echo '  checkbox.form.submit();' . "\n";
+echo '}' . "\n";
+echo '</script>' . "\n";
 
 echo '</td><td style="text-align:center; width: 100%;">';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
@@ -333,6 +355,16 @@ window.onload = function() { zeitsetzer(1); };
 
 function Diagram_ausgabe($labels, $daten, $optionen, $Preisstatistik,  $MIN_y3, $MAX_y, $MAX_y3)
 {
+if ($Preisstatistik != '') {
+    $Preisstatistik_ausgabe="['Bruttopreis (T|M|J): Min = {$Preisstatistik['T']['MIN']}€ | {$Preisstatistik['M']['MIN']}€ | {$Preisstatistik['J']['MIN']}€ \
+    Max = {$Preisstatistik['T']['MAX']}€ | {$Preisstatistik['M']['MAX']}€ | {$Preisstatistik['J']['MAX']}€ \
+    Durchschnitt = {$Preisstatistik['T']['AVG']}€ | {$Preisstatistik['M']['AVG']}€ | {$Preisstatistik['J']['AVG']}€',
+                'Kosten (T|M|J):      Gesamt = {$Preisstatistik['T']['SUM']}€ | {$Preisstatistik['M']['SUM']}€ | {$Preisstatistik['J']['SUM']}€ \
+                Pro kWh = {$Preisstatistik['T']['KostSUM']}€ | {$Preisstatistik['M']['KostSUM']}€ | {$Preisstatistik['J']['KostSUM']}€']";
+} else {
+    $Preisstatistik_ausgabe='\'\'';
+    }
+
 echo " <script>
 Chart.register(ChartDataLabels);
 new Chart('PVDaten', {
@@ -438,11 +470,7 @@ echo "    }]
         title: {
           display: true,
           align: 'start',
-          text: ['Bruttopreis (T|M|J): Min = ".$Preisstatistik['T']['MIN']."€ | ".$Preisstatistik['M']['MIN']."€ | ".$Preisstatistik['J']['MIN']."€ \
-    Max = ".$Preisstatistik['T']['MAX']."€ | ".$Preisstatistik['M']['MAX']."€ | ".$Preisstatistik['J']['MAX']."€ \
-    Durchschnitt = ".$Preisstatistik['T']['AVG']."€ | ".$Preisstatistik['M']['AVG']."€ | ".$Preisstatistik['J']['AVG']."€',
-                'Kosten (T|M|J):      Gesamt = ".$Preisstatistik['T']['SUM']."€ | ".$Preisstatistik['M']['SUM']."€ | ".$Preisstatistik['J']['SUM']."€ \
-                Pro kWh = ".$Preisstatistik['T']['KostSUM']."€ | ".$Preisstatistik['M']['KostSUM']."€ | ".$Preisstatistik['J']['KostSUM']."€'],
+          text: $Preisstatistik_ausgabe ,
           font: {
              size: 20,
            },
