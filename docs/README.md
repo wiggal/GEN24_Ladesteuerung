@@ -12,6 +12,8 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.30.4**  
+Neues Prognoseskripte OpenMeteo_WeatherData.py für https://open-meteo.com.  
 Ab Version: **0.30.2**  
 Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/) nach GitHub/Pages übernommen.  
 Ab Version: **0.30.0**  
@@ -46,7 +48,6 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 ```
 1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
-**Ab Version v0.30.0:**   
 Es können nun alle Prognosen abgefragt werden, Speicherung in `weatherData.sqlite`.  
 Die Berechnung der zu erwartenden PV-Produktion erfolgt als Median aus den Werten und Gewichten der DB.
 ```
@@ -54,6 +55,7 @@ Die Berechnung der zu erwartenden PV-Produktion erfolgt als Median aus den Werte
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
 0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
 0 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
+35 5,7,9,11,13,15,17,19 * * * /home/GEN24/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
 ```
 **Crontab.log jeden Montag abräumen**
 ```
@@ -69,6 +71,7 @@ Besonderheiten:
 - Bei solarprognose.de ist ein Account erforderlich, hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
 - Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag angefordert werden.  
 - Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
+- Bei open-meteo.com können verschiedene Wetterdienste konfiguriert werden, kein Account nötig.  
 
 ### 📉 http_SymoGen24Controller2.py
 

@@ -137,10 +137,12 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
       Methode, aus den Werten und Gewichten der DB.</p>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
-      <pre class="notranslate"><code>33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
+      <pre class="notranslate"><code>
+33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
-2 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
-3 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
+0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
+0 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
+35 5,7,9,11,13,15,17,19 * * * /home/GEN24/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
 </code></pre>
       <div class="zeroclipboard-container position-absolute right-0
         top-0"> </div>
