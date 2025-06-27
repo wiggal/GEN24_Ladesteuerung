@@ -150,11 +150,15 @@ if ($durchschnitt == 'ja') {
     $Preisstatistik = '';
     }
 
-# Nun Barchart ausgeben
+# Nun Chart ausgeben
+if (empty($daten)) {
+    echo '<br><br><p class="navi">Keine Strompreise für ausgewählten Tag vorhanden!!</p>';
+} else {
     echo "<div class='container'>
     <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
 </div>";
 Diagram_ausgabe($labels, $daten, $Strompreis_Dia_optionen, $Preisstatistik,  $MIN_y3, $MAX_y, $MAX_y3);
+}
 
 $db->close();
 } # END if ($programmpunkt == 'option') {
