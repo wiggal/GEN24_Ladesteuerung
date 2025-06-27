@@ -65,6 +65,7 @@ echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBi
 echo '<button type="submit" style="opacity: '.$PfeilGrauton_vor.'" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
 echo '</form>'."\n";
 
+// Checkbox um Strompreisstatistik auzugeben
 // HTML-Ausgabe
 echo '</td><td>';
 echo '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
@@ -72,8 +73,8 @@ echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
 echo '&nbsp;&nbsp;<input type="checkbox" id="durchschnitt" name="durchschnitt" value="ja" ' . $durchschnitt_checked . ' onchange="zeigeBitteWarten(this)">' . "\n";
-echo '<label id="durchschnittLabel" for="durchschnitt"> Durchschnittspreise anzeigen </label>' . "\n";
-echo '<span id="ladehinweis" style="display:none;"><strong>Bitte warten...</strong></span>' . "\n";
+echo '<label id="durchschnittLabel" for="durchschnitt"> Statistik anzeigen </label>' . "\n";
+echo '<span id="ladehinweis" style="display:none;"><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bitte warten .....</strong></span>' . "\n";
 echo '</form>' . "\n";
 
 // JavaScript
