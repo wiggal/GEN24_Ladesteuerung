@@ -2,10 +2,9 @@
 
 - Für den Wetterdienst von `Akkudoktor` können nun auch mehr als 2 Strings konfiguriert werden.  
 
-**NEU:** Neues Prognoseskript FORECAST/OpenMeteo_WeatherData.pyi auch mit mehr als 2 Strings konfigurierbar.  
+- **NEU:** Neues Prognoseskript FORECAST/OpenMeteo_WeatherData.pyi auch mit mehr als 2 Strings konfigurierbar.  
   Damit können PV-Prognosen von https://open-meteo.com/ abgerufen werden.  
-
-**ACHTUNG: ** Neuer Block `[openmeteo]` in `CONFIG/weather.ini` bitte bei Bedarf in `CONFIG/weather_priv.ini` einarbeiten!!
+  **ACHTUNG: ** Neuer Block `[openmeteo]` in `CONFIG/weather.ini` bitte bei Bedarf in `CONFIG/weather_priv.ini` einarbeiten!!
 
 - Im Diagramm `Strompreis` die Durchschnittspreise nicht standardmäßig anzeigen, da Auswertung zu langsam ist.  
 
