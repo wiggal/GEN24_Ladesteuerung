@@ -1,4 +1,4 @@
-**[0.30.4] – 2025-XX-XX**  
+**[0.30.4] – 2025-06-29**  
 
 - Für den Wetterdienst von `Akkudoktor` können nun auch mehr als 2 Strings konfiguriert werden.  
 
