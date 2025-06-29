@@ -48,7 +48,7 @@ ksort($structuredData);
 // Quellen sortieren: Produktion zuerst, Ergebnis an zweiter Stelle
 $quellenListe = array_keys($alleQuellen);
 // Manuell sortieren
-$priorisiert = ['Produktion', 'Prognose', 'Median'];
+$priorisiert = ['Produktion', 'Prognose', 'Basis'];
 // Nur priorisiert ausgeben, wenn auch vorhanden
 $existierendePriorisierte = array_intersect($priorisiert, $quellenListe);
 $rest = array_diff($quellenListe, $priorisiert);
@@ -328,7 +328,7 @@ let lineChart = null;
 // Definieren der Farbzuweisungen für jede Quelle
 const sourceColors = {
     'Prognose': '#FF3300', //  Rot für Prognosewert
-    'Median': '#FF3300', //  Rot für Prognosewert
+    'Basis': '#FF3300', //  Rot für Prognosewert
     'Produktion': '#4CAF50',    //  Grün für Produktion-Wert
     'solcast.com': '#3F51B5', // Blau
     'solarprognose': '#7B3F00', // Braun
@@ -354,7 +354,7 @@ function renderChart(date) {
         if (quelle === 'Produktion') {
             backgroundColor = 'rgba(200, 200, 200, 0.3)';
             fillOption = true;
-        } else if (quelle === 'Median') {
+        } else if (quelle === 'Basis') {
             backgroundColor = 'rgba(255, 51, 0, 0.1)';
             fillOption = '1';
         }

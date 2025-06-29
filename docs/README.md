@@ -49,7 +49,7 @@ Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch 
 1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
 ```
 Es können nun alle Prognosen abgefragt werden, Speicherung in `weatherData.sqlite`.  
-Die Berechnung der zu erwartenden PV-Produktion erfolgt als Median aus den Werten und Gewichten der DB.
+Die Berechnung der zu erwartenden PV-Produktion erfolgt mit der eingestellten `ForecastCalcMethod` aus den Prognosewerten und Gewichten der DB.
 ```
 33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
@@ -75,14 +75,14 @@ Besonderheiten:
 
 ### 📉 http_SymoGen24Controller2.py
 
-Berechnet den aktuell besten Ladewert aufgrund der Prognosewerte in weatherData.json und dem Akkustand und gibt sie aus. 
+Berechnet den aktuell besten Ladewert aufgrund der Prognose in weatherData.sqlite und dem Akkustand und gibt sie aus. 
 Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) setzt es die `Maximale Ladeleistung` **per HTTP-Request** 
 im Batteriemanagement des Wechselrichters. 
 Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
 ### 💲🔌 DynamicPriceCheck.py
-Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt (siehe schematische Darstellung). Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
+Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
 **Crontab Beispiel** (-o = alternatives Logfile):
 ```
 58 * * * * /DIR/start_PythonScript.sh -o LOG_DynamicPriceCheck.log DynamicPriceCheck.py schreiben
@@ -106,9 +106,10 @@ automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann a
 
 ### 📊 Logging
 
-Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt.  
-Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung.  
-Aus der SQLite-Datei `PV_Daten.sqlite` wird dann mit html/8_tab_Diagram.php ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin) erzeugt. 
+Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
+Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung. 
+Beim `logging` werden Zählerstände und ermittelte Werte in die SQLite-Datei `PV_Daten.sqlite` gespeichert, 
+aus der wird dann durch html/8_tab_Diagram.php ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin) erzeugt. 
 ![Grafik zur Quelle/Ziel](pics/QZ_Tag.png)
 
 ### Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
