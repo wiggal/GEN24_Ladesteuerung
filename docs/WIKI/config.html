@@ -553,11 +553,12 @@ button {
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[8]" value="" type="hidden">
-            ; ForecastCalcMethod ist die Berechnungsmethode für die
-            Prognose aus den Forecast-Werten</br>
-            ; Der mit ForecastCalcMethod berechnete Wert wird bei jeder
-            Prognoseanforderung in die DB gespeichert!</br>
-            ; median | median_opt | mittel | min | max sind gültig</td>
+            ; <b>ForecastCalcMethod</b> ist die Berechnungsmethode für die Prognose aus den Forecastwerten.<br>
+            ; Der mit ForecastCalcMethod berechnete Wert wird bei jeder Prognoseanforderung in die DB neu geschrieben,<br>
+            ; für alle gespeicherten Werte, auch die historischen.<br>
+            ; Gültige Werte: median | mittel | min | max<br>
+            ; Mit einem angehängten Plus kann der Wert jeder Methode mit gespeicherten Produktionsdaten optimiert werden.<br>
+            ; Gültige Werte: median+ | mittel+ | min+ | max+<br>
         </tr>
         <tr>
           <td><input name="Zeile[11][0]" value="ForecastCalcMethod = "
