@@ -123,7 +123,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         thead th {
             position: sticky;
             top: 0;
-            background-color: #4CAF50;
+            background-color: gray;
             color: white;
             z-index: 2;
         }
@@ -202,8 +202,10 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 foreach ($quellenListe as $row) {
                     $quellen[] = $row;
                     $Style_bg = '';
-                    if ($row != 'Produktion') {
-                        $Style_bg = 'style="background-color: orange;"';
+                    if ($row == 'Produktion') {
+                        $Style_bg = 'style="background-color: #4CAF50;"';
+                    } elseif (in_array($row, ['Prognose', 'Basis'])) {
+                      $Style_bg = 'style="background-color: red;"';
                     }
                     echo "<th {$Style_bg}>{$row}</th>";
                 }
@@ -261,10 +263,17 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 <form method="post" style="margin-top: 20px;">
     <fieldset>
         <legend><strong>Quellen zum Löschen auswählen:</strong></legend>
+        <span style="color: red;"><b>ACHTUNG!!</b></span><span> Es werden alle Daten der ausgewählten Spalte gelöscht, für <b>Prognosen</b> ist die Historie nicht wiederherstellbar!!!</span>
+        <br>
         <?php
         foreach ($quellen as $quelle) {
+            $quelle_bg = '';
+            if (!in_array($quelle, ['Produktion', 'Prognose', 'Basis'])) {
+              $quelle_bg = 'style="color: red;"';
+            }
             if ( $quelle != 'DUMMY') {
-                echo "<label><input type='checkbox' name='delete_quellen[]' value='$quelle'> $quelle</label><br>";
+                echo "<label><input type='checkbox' name='delete_quellen[]' value='$quelle'>\n";
+                echo "<span $quelle_bg><b> $quelle</b></span></label><br>";
             }
         }
         ?>
