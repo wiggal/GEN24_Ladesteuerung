@@ -317,10 +317,12 @@ foreach ($data as $zeitpunkt => $werteProQuelle) {
 
     foreach ($quellenListe as $quelle) {
         $wert = isset($werteProQuelle[$quelle]) ? $werteProQuelle[$quelle]['wert'] : NULL;
+        $gewicht = isset($werteProQuelle[$quelle]['gewicht']) ? $werteProQuelle[$quelle]['gewicht']: '';
 
         $chartData[$datum][$quelle][] = [
             'time' => $uhrzeit,
-            'wert' => $wert
+            'wert' => $wert,
+            'gewicht' => $gewicht
         ];
     }
 }
@@ -356,10 +358,13 @@ function renderChart(date) {
         const data = dateData[quelle];
         const times = data.map(e => e.time);
         const werte = data.map(e => e.wert);
+        const gewicht_array = data.map(e => e.gewicht);
+        const gewicht = gewicht_array.find(e => typeof e === "number")
         times.forEach(t => allTimes.add(t));
 
         let fillOption = false;
         let backgroundColor = 'transparent';
+        let hidden = false;
         if (quelle === 'Produktion') {
             backgroundColor = 'rgba(200, 200, 200, 0.3)';
             fillOption = true;
@@ -367,6 +372,16 @@ function renderChart(date) {
             backgroundColor = 'rgba(255, 51, 0, 0.1)';
             fillOption = '1';
         }
+        //Strichliert und blass bei Gewicht 0
+        let borderDash = [7, 7];
+        if (quelle === 'Produktion' || quelle === 'Prognose' ) {
+            borderDash = [0, 0];
+        } else if ((gewicht === 0) && (quelle !== 'Basis')) {
+            //sourceColors[quelle] = '#CCCCCC';
+            //borderDash = [5, 8];
+            hidden = true;
+        }
+
 
         datasets.push({
             label: quelle,
@@ -375,10 +390,11 @@ function renderChart(date) {
             borderColor: sourceColors[quelle] || '#CCCCCC', // Falls Quelle nicht definiert, Fallback-Farbe
             borderWidth: 3,
             // Anpassung der Strichart basierend auf Quelle
-            borderDash: quelle === 'Prognose' || quelle === 'Produktion'? [0, 0] : [5, 5],
+            borderDash: borderDash,
             pointRadius: 0,
             fill: fillOption,
             backgroundColor: backgroundColor,
+            hidden: hidden,
             tension: 0.1
         });
 
