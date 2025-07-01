@@ -117,7 +117,8 @@ class WeatherData:
         verbindung = conn.cursor()
         heute = datetime.now().strftime('%Y-%m-%d 23:59:59')
         aktuelle_Std = datetime.now().strftime('%Y-%m-%d %H:00:00')
-        Max_Leistung = basics.getVarConf('pv.strings','wp','eval')
+        config = basics.loadConfig(['charge'])
+        Max_Leistung = basics.getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
         # Der offset soll die Stunde in die Mitte der Produktion verschieben
         offset = '+30 minutes'
         sql_anweisung = f"""
@@ -161,7 +162,7 @@ class WeatherData:
         Watt_zuvor = None
         for Stunde, Watt in DB_data:
             # Wenn Aufzeichnung länger ausgefallen ist, entstehen sonst grosse Produktionen
-            if (Watt > Max_Leistung * 1.1 and Watt_zuvor != None):
+            if (Watt > Max_Leistung * 1.15 and Watt_zuvor != None):
                 Watt = Watt_zuvor
             else:
                 Watt_zuvor = Watt
