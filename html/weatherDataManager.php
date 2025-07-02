@@ -277,6 +277,11 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             }
         }
         ?>
+        <label><input type="checkbox" id="selectAll" onclick="toggleAll(this)"> Alle Quellen auswählen</label><br>
+        <br>
+        <label for="tage">Alle Daten der gewählten Quellen bis auf die letzten</label><br>
+        <input type="number" name="tage" id="tage" value="8" min="0" max="35" required style="width: 30px; text-align: center;">
+        <label for="tage"> Tage <b>löschen!!</b></label>
         <br>
         <button type="submit" style="background-color: red; color: white;" name="submit_delete" 
         onclick="return confirm('&#128721; Prognosequellen können nicht hergestellt werden! &#128721; \n \
@@ -288,25 +293,34 @@ Das neue Gewicht wird bei der nächsten Anforderung der Prognosequelle gesetzt!\
 
 <?php
 // Quellen löschen, wenn Formular abgeschickt wurde
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !empty($_POST['delete_quellen'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !empty($_POST['delete_quellen']) && isset($_POST['tage'])) {
     $toDelete = $_POST['delete_quellen'];
-    $placeholders = implode(',', array_fill(0, count($toDelete), '?'));
+    $tage = intval($_POST['tage']);
+    $grenzeDatum = date('Y-m-d 00:00:00', strtotime("-$tage days"));
 
-    $stmt = $db->prepare("DELETE FROM weatherData WHERE Quelle IN ($placeholders)");
-    if ($stmt) {
-        for ($i = 0; $i < count($toDelete); $i++) {
-            $stmt->bindValue(($i + 1), $toDelete[$i], SQLITE3_TEXT); // Parameter 1-basiert binden
+    foreach ($toDelete as $quelle) {
+        $stmt = $db->prepare("DELETE FROM weatherData WHERE Quelle = ? AND Zeitpunkt < ?");
+        if ($stmt) {
+            $stmt->bindValue(1, $quelle, SQLITE3_TEXT);
+            $stmt->bindValue(2, $grenzeDatum, SQLITE3_TEXT);
+            $stmt->execute();
         }
-        $stmt->execute();
     }
 
-    // Nach dem Löschen neu laden, um Änderungen anzuzeigen
     echo "<script>window.location.href=window.location.href;</script>";
 }
 ?>
-
     </div>
-    <?php
+    <script>
+    function toggleAll(source) {
+        checkboxes = document.getElementsByName('delete_quellen[]');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+    </script>
+
+<?php
 # Daten für Chartjs bilden
 $chartData = []; // [datum][quelle] = array of [time, wert]
 

@@ -49,8 +49,8 @@ class WeatherData:
         verbindung = sqlite3.connect('weatherData.sqlite')
         zeiger = verbindung.cursor()
         print_level = basics.getVarConf('env','print_level','eval')
-        # Alte Einträge löschen die älter 30 Tage sind
-        loesche_bis = (datetime.today() - timedelta(days=30)).date().isoformat()
+        # Alte Einträge löschen die älter 35 Tage sind
+        loesche_bis = (datetime.today() - timedelta(days=35)).date().isoformat()
 
         #Prognosen kleiner 10 löschen
         data = [entry for entry in data if entry[2] >= 10]

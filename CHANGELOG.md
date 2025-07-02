@@ -3,6 +3,9 @@
 - Die Optimierung der Prognose mit gespeicherten Produktionsdaten kann nun für jede `ForecastCalcMethod` eingestellt werden.  
   **ACHTUNG:** `ForecastCalcMethod` `median_opt` nicht mehr gültig muss nun `median+` heißen.  
 
+- Im `ForecastMgr` können nun ältere Prognosedaten gelöschti werden, falls sie nicht mehr repräsentativ sind. 
+  Nach 35 Tagen werden sie programmtechnisch gelöscht.
+
 **[0.30.4] – 2025-06-29**  
 
 - Für den Wetterdienst von `Akkudoktor` können nun auch mehr als 2 Strings konfiguriert werden.  
