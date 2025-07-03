@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Hilfe config.ini</title>
+    <style type="text/css">
+
+.comment {background-color: #f2f2f2;}
+
+.ini_block {
+  text-align: left;
+  background-color: #CCFFCC;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+input:read-only {
+  background-color: #90CAF9;
+  font-size: 1.0em;
+}
+button {
+  font-size: 1.3em;
+  background-color: #2596be;
+}
+.ueberschrift{
+    font-family:Arial;
+    font-size:150%;
+    color: #000000;
+    }
+
+</style>
+  </head>
+<body>
+
+<input type="hidden" name="ini_file" value="../CONFIG/weather.ini">
+<input type="hidden" name="case" value="editieren">
+<br><center><a href="#Hilfezuweatherini" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;<button type="submit">Hilfe zu weather.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[env]' >[env]</th></tr>
+<tr class="comment"><td colspan="2">; ForecastCalcMethod ist die Berechnungsmethode für die Prognose aus den Forecastwerten.<br>; Der mit ForecastCalcMethod berechnete Wert wird bei jeder Prognoseanforderung in die DB neu geschrieben,<br>; für alle gespeicherten Werte, auch die historischen.<br>; Gültige Werte: median | mittel | min | max<br>; Mit einem angehängten Plus kann der Wert jeder Methode mit gespeicherten Produktionsdaten optimiert werden.<br>; Gültige Werte: median+ | mittel+ | min+ | max+ </td></tr>
+<tr><td class="variablenname">ForecastCalcMethod</td>
+<td><input type="text" name="Zeile[2][1]" value="median" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[3]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[4]" value='[pv.strings]' >[pv.strings]</th></tr>
+<tr class="comment"><td colspan="2">; Für akkudoktor und openmeteo können hier mehrere Strings mit anderer Ausrichtung definiert werden,<br>; hier Anzahl eintragen, und die Daten der weiteren Strings analog zum 2. String eintragen<br>; forecast.solar kann aktuell nur 2 Strings verarbeiten </td></tr>
+<tr><td class="variablenname">anzahl</td>
+<td><input type="text" name="Zeile[6][1]" value="1" readonly></td></tr>
+<tr class="comment"><td colspan="2">; lat und lon sind die Positionsdaten der Anlage bzw. des Strings. Nutze https://www.suncalc.org/ oder andere Tools zur Identifikation </td></tr>
+<tr><td class="variablenname">lat</td>
+<td><input type="text" name="Zeile[8][1]" value="44.444" readonly></td></tr>
+<tr><td class="variablenname">lon</td>
+<td><input type="text" name="Zeile[9][1]" value="11.111" readonly></td></tr>
+<tr class="comment"><td colspan="2">; wp ist die Modulleistung des Strings in W </td></tr>
+<tr><td class="variablenname">wp</td>
+<td><input type="text" name="Zeile[11][1]" value="5550" readonly></td></tr>
+<tr class="comment"><td colspan="2">; az ist der Azimuth der Anlage, also in welche Himmelsrichtung die Module ausgerichtet sind. -180 und 180 = Norden, -90 = Osten, 0 = Sueden, 90 = Westen </td></tr>
+<tr><td class="variablenname">az</td>
+<td><input type="text" name="Zeile[13][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; dec ist der Winkel, in dem die Module verbaut sind, wobei 0 waagerecht liegen und 90 senkrecht stehend bedeutet </td></tr>
+<tr><td class="variablenname">dec</td>
+<td><input type="text" name="Zeile[15][1]" value="30" readonly></td></tr>
+<tr class="comment"><td colspan="2">; horizon gibt mögliche Verschattungen pro String an, benutzt Akkudoktor und Forecast_solar mit api_key<br>; die 12 Zahlen werden in Grad angegeben und repräsentieren im Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den Horizont<br>; siehe https://doc.forecast.solar/horizon<br>; wenn zum Beipiel im Südwesten ein großer Baum Schatten wirft:<br>; 0,0,0,0,0,0,0,20,45,20,0,0 </td></tr>
+<tr><td class="variablenname">horizon</td>
+<td><input type="text" name="Zeile[17][1]" value="0,0,0,0,0,0,0,0,0,0,0,0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; wenn es einen 2. String gibt, dann hier die Werte analog zum ersten anpassen: </td></tr>
+<tr><td class="variablenname">wp2</td>
+<td><input type="text" name="Zeile[19][1]" value="4440" readonly></td></tr>
+<tr><td class="variablenname">az2</td>
+<td><input type="text" name="Zeile[20][1]" value="0" readonly></td></tr>
+<tr><td class="variablenname">dec2</td>
+<td><input type="text" name="Zeile[21][1]" value="10" readonly></td></tr>
+<tr><td class="variablenname">horizon2</td>
+<td><input type="text" name="Zeile[22][1]" value="0,10,10,10,30,30,0,0,10,10,10,0" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[23]" value='' ></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[24]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[25]" value='[forecast.solar]' >[forecast.solar]</th></tr>
+<tr class="comment"><td colspan="2">; Wenn api_key nicht &quot;kein&quot; ist, wird er für die Prognoseabfrage verwendet. </td></tr>
+<tr><td class="variablenname">api_key</td>
+<td><input type="text" name="Zeile[27][1]" value="kein" readonly></td></tr>
+<tr class="comment"><td colspan="2">; wenn ein API key vorhanden ist, können die Forecasts mit aktuellen Ertragswerten des Tages (aus der DB) verbessert werden.<br>; &quot;ja&quot; nutzt diese Funktion der API, &quot;nein&quot; nicht.<br>; Siehe https://doc.forecast.solar/actual </td></tr>
+<tr><td class="variablenname">forecastactual</td>
+<td><input type="text" name="Zeile[29][1]" value="nein" readonly></td></tr>
+<tr class="comment"><td colspan="2">; wenn &quot;damping&quot; eingesetzt werden soll, hier die entsprechenden Werte einstellen. &quot;0,0&quot; ist Standardwert (kein Damping)<br>; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas damping am Morgen, hohes Damping am nachmittag.<br>; beide Werte müssen zwischen 0 und 1 sein<br>; Siehe https://doc.forecast.solar/damping </td></tr>
+<tr><td class="variablenname">forecastdamping</td>
+<td><input type="text" name="Zeile[31][1]" value="0,0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können zwei Ausrichtungen in einer Abfrage behandelt werden. </td></tr>
+<tr><td class="variablenname">api_pers_plus</td>
+<td><input type="text" name="Zeile[33][1]" value="nein" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr><td class="variablenname">Gewicht</td>
+<td><input type="text" name="Zeile[35][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[36]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[37]" value='[akkudoktor]' >[akkudoktor]</th></tr>
+<tr class="comment"><td colspan="2">; spezifische Werte für die API von Andreas Schmitz, dem Akkudoktor https://www.youtube.com/@Akkudoktor<br>; weitere Infos unter https://api.akkudoktor.net/<br>; der Zellkoeffizient wird fuer die Berechnung der Verluste im Kontext herrschender Temperaturen genutzt </td></tr>
+<tr><td class="variablenname">cellco</td>
+<td><input type="text" name="Zeile[39][1]" value="-0.4" readonly></td></tr>
+<tr class="comment"><td colspan="2">; albedo ist der Rexlexionsgrad des Untergrunds, auf dem die Zellen montiert sind. Siehe https://pv-navi.de/pv-navi-abc/albedo/ </td></tr>
+<tr><td class="variablenname">albedo</td>
+<td><input type="text" name="Zeile[41][1]" value="0.2" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gesamtleistung des Wechselrichters </td></tr>
+<tr><td class="variablenname">powerInverter</td>
+<td><input type="text" name="Zeile[43][1]" value="8000" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Effizienz des Wechselrichter </td></tr>
+<tr><td class="variablenname">inverterEfficiency</td>
+<td><input type="text" name="Zeile[45][1]" value="1" readonly></td></tr>
+<tr class="comment"><td colspan="2">; spezifische Werte für eventuellen 2. String: </td></tr>
+<tr><td class="variablenname">cellco2</td>
+<td><input type="text" name="Zeile[47][1]" value="-0.4" readonly></td></tr>
+<tr><td class="variablenname">albedo2</td>
+<td><input type="text" name="Zeile[48][1]" value="0.2" readonly></td></tr>
+<tr><td class="variablenname">powerInverter2</td>
+<td><input type="text" name="Zeile[49][1]" value="8000" readonly></td></tr>
+<tr><td class="variablenname">inverterEfficiency2</td>
+<td><input type="text" name="Zeile[50][1]" value="1" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr><td class="variablenname">Gewicht</td>
+<td><input type="text" name="Zeile[52][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[53]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[54]" value='[solarprognose]' >[solarprognose]</th></tr>
+<tr class="comment"><td colspan="2">; Hier die Werte eintragen, wenn die Prognose mit Solarprognose_WeatherData.py von http://www.solarprognose.de geholt werden soll </td></tr>
+<tr><td class="variablenname">accesstoken</td>
+<td><input type="text" name="Zeile[56][1]" value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" readonly></td></tr>
+<tr><td class="variablenname">item</td>
+<td><input type="text" name="Zeile[57][1]" value="inverter" readonly></td></tr>
+<tr><td class="variablenname">id</td>
+<td><input type="text" name="Zeile[58][1]" value="1111" readonly></td></tr>
+<tr><td class="variablenname">type</td>
+<td><input type="text" name="Zeile[59][1]" value="hourly" readonly></td></tr>
+<tr class="comment"><td colspan="2">; der Zeitversatz verschiebt die Prognose um X Stunden nach vor (-) oder nach hinten. </td></tr>
+<tr><td class="variablenname">Zeitversatz</td>
+<td><input type="text" name="Zeile[61][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Sekunden des sleep = Vorgabe von solarprognose.de </td></tr>
+<tr><td class="variablenname">WaitSec</td>
+<td><input type="text" name="Zeile[63][1]" value="21" readonly></td></tr>
+<tr class="comment"><td colspan="2">; mögliche Werte mosmix|own-v1|clearsky, für mosmix muss dem Standort eine Mosmix Station zugeordnet sein.<br>; Karte mit Stationen: https://wettwarn.de/mosmix/mosmix.html </td></tr>
+<tr><td class="variablenname">algorithm</td>
+<td><input type="text" name="Zeile[65][1]" value="own-v1" readonly></td></tr>
+<tr class="comment"><td colspan="2">; falls die Anlagengröße in KWp nicht mit der Größe in Solarprognose übereinstimmt (z.B. Erweiterung) </td></tr>
+<tr><td class="variablenname">KW_Faktor</td>
+<td><input type="text" name="Zeile[67][1]" value="1.00" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr><td class="variablenname">Gewicht</td>
+<td><input type="text" name="Zeile[69][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[70]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[71]" value='[solcast.com]' >[solcast.com]</th></tr>
+<tr class="comment"><td colspan="2">; Hier die Werte eintragen, wenn die Prognose mit Solcast_WeatherData.py von https://api.solcast.com.au geholt werden soll </td></tr>
+<tr><td class="variablenname">api_key</td>
+<td><input type="text" name="Zeile[73][1]" value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" readonly></td></tr>
+<tr><td class="variablenname">resource_id</td>
+<td><input type="text" name="Zeile[74][1]" value="xxxx-xxxx-xxxx-xxxx" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch. </td></tr>
+<tr><td class="variablenname">Zeitzone</td>
+<td><input type="text" name="Zeile[76][1]" value="+1" readonly></td></tr>
+<tr><td class="variablenname">KW_Faktor</td>
+<td><input type="text" name="Zeile[77][1]" value="1.00" readonly></td></tr>
+<tr class="comment"><td colspan="2">; spezifische Werte für eventuellen 2. String: </td></tr>
+<tr><td class="variablenname">resource_id2</td>
+<td><input type="text" name="Zeile[79][1]" value="xxxx-xxxx-xxxx-xxxx" readonly></td></tr>
+<tr><td class="variablenname">KW_Faktor2</td>
+<td><input type="text" name="Zeile[80][1]" value="1.00" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr><td class="variablenname">Gewicht</td>
+<td><input type="text" name="Zeile[82][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[83]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[84]" value='[openmeteo]' >[openmeteo]</th></tr>
+<tr class="comment"><td colspan="2">; Infos zur API siehe https://open-meteo.com/en/docs<br>; Wenn die Prognosekurve zur Produktionskurve generell verschoben ist, kann sie hiermit um X Minuten verschoben werden </td></tr>
+<tr><td class="variablenname">offset_minuten</td>
+<td><input type="text" name="Zeile[86][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Faktor des zusätzlichen Bewölkungseinflusses<br>; 0 = kein Einfluss =&gt; 1.0 starker Einfluss </td></tr>
+<tr><td class="variablenname">cloudEffect</td>
+<td><input type="text" name="Zeile[88][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Basis-Effizienzfaktor (systemische Verluste, nicht-optimale Bedingungen) </td></tr>
+<tr><td class="variablenname">base_efficiency_factor</td>
+<td><input type="text" name="Zeile[90][1]" value="0.90" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Getestete Wettermodelle, Programm überprüft auf dies Modelle<br>; Liste kann erweitert werden </td></tr>
+<tr><td class="variablenname">valid_models</td>
+<td><input type="text" name="Zeile[92][1]" value="{&#039;icon_d2&#039;,&#039;icon_eu&#039;,&#039;ecmwf_aifs025_single&#039;}" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Verwendetes Wettermodel, es können  auch mehrere angegeben werden, der Werte dann gemittelt werden.<br>; z.B. icon_d2,icon_eu </td></tr>
+<tr><td class="variablenname">weather_models</td>
+<td><input type="text" name="Zeile[94][1]" value="icon_d2" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr><td class="variablenname">Gewicht</td>
+<td><input type="text" name="Zeile[96][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[97]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[98]" value='[solcast_ha]' >[solcast_ha]</th></tr>
+<tr class="comment"><td colspan="2">; Konfiguration für ADDONS/Solcast_WeatherData_from_HA_file.py von @roethigj<br>; Beschreibung siehe ADDONS/Solcast_WeatherData_from_HA_file.readme<br>; Hier den Pfad eintragen, wo die solecast.json vom HA Addon liegt<br>; (z.B. /usr/share/hassio/homeassistant/solcast.json) </td></tr>
+<tr><td class="variablenname">HA_weatherfile</td>
+<td><input type="text" name="Zeile[100][1]" value="/usr/share/hassio/homeassistant/solcast.json" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch. </td></tr>
+<tr><td class="variablenname">Zeitzone</td>
+<td><input type="text" name="Zeile[102][1]" value="+1" readonly></td></tr>
+<tr><td class="variablenname">KW_Faktor</td>
+<td><input type="text" name="Zeile[103][1]" value="1.00" readonly></td></tr>
+<tr><td class="variablenname">Gewicht</td>
+<td><input type="text" name="Zeile[104][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[105]" value='' ></td></tr>
+</table><div id="Hilfezuweatherini"></div>
+</body>
+</html>

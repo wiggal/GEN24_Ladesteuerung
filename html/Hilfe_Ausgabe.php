@@ -31,6 +31,7 @@
 
     </head>
 <body>
+    <div id = "top"></div>
     <main>
         <div id="content-container">
 <?php
@@ -41,11 +42,11 @@ if (!function_exists('str_ends_with')) {
     }
 }
 
-// Markdown-Datei einlesen
-$filename = isset($_GET['file']) ? basename($_GET['file']) : null;
+// Hilfe-Dateiname einlesen
+$teilname = isset($_GET['file']) ? basename($_GET['file']) : null;
 $return_url = isset($_GET['return']) ? htmlspecialchars($_GET['return']) : null;
 # Alle Dokus unter /docs abgelegt
-$filename = '../docs/WIKI/' . $filename;
+$filename = '../docs/WIKI/' . $teilname;
 if ($filename && !str_ends_with($filename, '.html')) {
     $filename .= '.html';
 }
@@ -55,8 +56,17 @@ $html = '';
 
 if (!$filename) {
     $warning = '<p style="color:red;">Fehler: Es wurde keine Datei angegeben. Beispiel: ?file=Setup.md</p>';
+} elseif ($teilname == 'config') {
+    $html_contend = '<!--HIERZURUECK-->';
+    $config_list =['config_default.html', 'config_weather.html', 'config_charge.html', 'config_dynprice.html'];
+    foreach ($config_list as $teil_file) {
+        $html_contend .= file_get_contents('../docs/WIKI/' . $teil_file);
+        $html_contend .= '<br><br>';
+        $hr_zaehler++;
+    }
 } else {
     $html_contend = file_get_contents($filename);
+}
 
     if ($html_contend === false) {
         $warning = "<center><p style=\"color:red;\">Fehler: Die Datei <strong>$filename</strong> konnte nicht geladen werden.</p></center>";
@@ -64,14 +74,18 @@ if (!$filename) {
         exit();
     } else {
         // Tag ersetzen
-        $html = str_replace(
+        $html1 = str_replace(
             '<!--HIERZURUECK-->',
             '<div class="hilfe" align="right"> <a href="'.$return_url.'"><b>Zurück</b></a></div>',
             $html_contend
             );
+        $html = str_replace(
+            'scroll-margin-top: 95px;',
+            'scroll-margin-top: 5px;',
+            $html1
+            );
         echo $html;
     }
-}
 ?>
         </div>
     </main>

@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Hilfe config.ini</title>
+    <style type="text/css">
+
+.comment {background-color: #f2f2f2;}
+
+.ini_block {
+  text-align: left;
+  background-color: #CCFFCC;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+input:read-only {
+  background-color: #90CAF9;
+  font-size: 1.0em;
+}
+button {
+  font-size: 1.3em;
+  background-color: #2596be;
+}
+.ueberschrift{
+    font-family:Arial;
+    font-size:150%;
+    color: #000000;
+    }
+
+</style>
+  </head>
+<body>
+
+<input type="hidden" name="ini_file" value="../CONFIG/dynprice.ini">
+<input type="hidden" name="case" value="editieren">
+<br><center><a href="#Hilfezudynpriceini" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;<button type="submit">Hilfe zu dynprice.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center><br><br><table><tr class="comment"><td colspan="2">; Variablen zur Steuerung bei dynamischen Strompreisen </td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[1]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[dynprice]' >[dynprice]</th></tr>
+<tr class="comment"><td colspan="2">; print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe 3=DEBUG-LEVEL2 Ausgabe </td></tr>
+<tr><td class="variablenname">dyn_print_level</td>
+<td><input type="text" name="Zeile[4][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[5]" value='' ></td></tr>
+<tr class="comment"><td colspan="2">; LASTPROFIL<br>; Damit nicht extrem hohe und nicht regelmäßige Verbräuche, wie E-Autoladung, das Lastprofil verfälschen. </td></tr>
+<tr><td class="variablenname">Lastgrenze</td>
+<td><input type="text" name="Zeile[7][1]" value="3000" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Alle wieviele Tage soll das Lastprofile erneuert werden </td></tr>
+<tr><td class="variablenname">LastprofilNeuTage</td>
+<td><input type="text" name="Zeile[9][1]" value="7" readonly></td></tr>
+<tr class="comment"><td colspan="2">; wie viele Tage zurück sollen für das Lastprofil verwendet werden (mindestens 8 erforderlich) </td></tr>
+<tr><td class="variablenname">Daysback</td>
+<td><input type="text" name="Zeile[11][1]" value="35" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[12]" value='' ></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[13]" value='' ></td></tr>
+<tr class="comment"><td colspan="2">; LADEBERECHUNG<br>; Ladegeschwindigkeit in kW </td></tr>
+<tr><td class="variablenname">charge_rate_kW</td>
+<td><input type="text" name="Zeile[15][1]" value="4000" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Ladeverluste beim Laden und Abschreibungsverluste des Hausakkus </td></tr>
+<tr><td class="variablenname">Akku_Verlust_Prozent</td>
+<td><input type="text" name="Zeile[17][1]" value="15" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Ladung anpassen durch Pufferfaktor, der auf den Verbrauch aus dem Lastprofil angewendet wird </td></tr>
+<tr><td class="variablenname">Lade_Verbrauchs_Faktor</td>
+<td><input type="text" name="Zeile[19][1]" value="1.1" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Um den Wert Gewinnerwartung_kWh muss der Preis in EURO/kWh bei<br>; Speicherung in den Akku nach Abzug von Akku_Verlust_Prozent mindestens niedriger sein. </td></tr>
+<tr><td class="variablenname">Gewinnerwartung_kW</td>
+<td><input type="text" name="Zeile[21][1]" value="0.05" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Bis zu wieviel Prozent darf der Akku aus dem Netz geladen werden </td></tr>
+<tr><td class="variablenname">max_batt_dyn_ladung</td>
+<td><input type="text" name="Zeile[23][1]" value="99" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Preis, in EURO unter dem der Akku immer zwangsgeladen wird (kann auch Minuswert sein) </td></tr>
+<tr><td class="variablenname">netzlade_preisschwelle</td>
+<td><input type="text" name="Zeile[25][1]" value="0.00" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[26]" value='' ></td></tr>
+<tr class="comment"><td colspan="2">; Strompreisquellen<br>; energycharts (https://api.energy-charts.info/)<br>; ACHTUNG: smart_api liefert viertestündliche Strompreise, Aktuell nur zu Testzwecken verwenden<br>; smart_api (https://smard.api.bund.dev/) </td></tr>
+<tr><td class="variablenname">Preisquelle</td>
+<td><input type="text" name="Zeile[28][1]" value="energycharts" readonly></td></tr>
+<tr><td class="variablenname">LAND</td>
+<td><input type="text" name="Zeile[29][1]" value="DE-LU" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Tageszeitabhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a)<br>; Hier die Stundenbereiche mit den Nettopreisen in der Form {&quot;Std&quot;:&quot;Nettopreis&quot;, ...} angeben,<br>; Std. muss mit &quot;00&quot; beginnen und immer zweistellig sein.<br>; Beispiel: { &quot;00&quot;:&quot;0.027&quot;,&quot;09&quot;:&quot;0.1105&quot;,&quot;16&quot;:&quot;0.1937&quot;} </td></tr>
+<tr><td class="variablenname">Tageszeit_Preisanteil</td>
+<td><input type="text" name="Zeile[31][1]" value="{ &quot;00&quot;:&quot;0.000&quot;,&quot;12&quot;:&quot;0.000&quot;}" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Nettoaufschlag EURO/kWh </td></tr>
+<tr><td class="variablenname">Nettoaufschlag</td>
+<td><input type="text" name="Zeile[33][1]" value="0.1528" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Prozentualer Aufschlag z.B. MwSt </td></tr>
+<tr><td class="variablenname">MwSt</td>
+<td><input type="text" name="Zeile[35][1]" value="1.19" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[36]" value='' ></td></tr>
+</table><div id="Hilfezudynpriceini"></div>
+</body>
+</html>

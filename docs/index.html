@@ -21,7 +21,6 @@
                 <li role="none"><a href="#" data-path="WIKI/config.html" role="menuitem">config</a></li>
                 <li role="none"><a href="#" data-path="WIKI/Settings.html" role="menuitem">Settings</a></li>
                 <li role="separator" class="nav-separator nav-category-separator"><span>INI-Dateien</span></li>
-                <li role="none"><a href="#" data-path="WIKI/default_ini.html"  role="menuitem">default.ini</a></li>
                 <li role="none"><a href="#" data-path="WIKI/weather_ini.html"  role="menuitem">weather.ini</a></li>
                 <li role="none"><a href="#" data-path="WIKI/charge_ini.html"  role="menuitem">charge.ini</a></li>
                 <li role="separator" class="nav-separator"></li> 
@@ -44,5 +43,22 @@
     <script src="marked.min.js"></script>
     
     <script src="script.js"></script>
+    <script type="module">
+        class HtmlLoader extends HTMLElement {
+        async connectedCallback() {
+            const src = this.getAttribute('src');
+            if (!src) return;
+
+            try {
+            const response = await fetch(src);
+            const html = await response.text();
+            this.innerHTML = html; // Kein Shadow DOM, sondern direkt im Element!
+            } catch {
+            this.innerHTML = `<p style="color:red;">Fehler beim Laden: ${src}</p>`;
+            }
+        }
+        }
+        customElements.define('html-loader', HtmlLoader);
+    </script>
 </body>
 </html>
