@@ -31,6 +31,18 @@ select {
   font-size: 1.3em;
   background-color: #F5F5DC;
 }
+.button-container {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 8px; /* Abstand zwischen den Buttons */
+}
+
+button {
+  padding: 6px 12px;
+  font-size: 14px;
+}
 button {
   font-size: 1.3em;
   background-color: #4CAF50;
@@ -38,10 +50,6 @@ button {
 button.schreiben {
     position: fixed;
     bottom: 0;
-}
-button.dateiauswahl {
-    position: fixed;
-    top: 8px;
 }
 @media screen and (max-width: 64em) {
 body{ font-size: 160%; }
@@ -188,7 +196,10 @@ echo '<br><br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
+echo '<div class="button-container">';
 echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
+echo '&nbsp;<button class="Kommentare" type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
+echo '</div>';
 echo '</form>'."\n";
 echo '<br>';
 
@@ -198,7 +209,6 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="editieren">'."\n";
 echo '<button type="submit">'.basename($_POST["ini_file"]).' editieren</button>';
-echo '&nbsp;<button type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
 echo '</form>'."\n";
 echo '<br>';
 echo '<table>';
@@ -237,8 +247,10 @@ echo '<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
+echo '<div class="button-container">';
 echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
 echo '&nbsp;<button type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
+echo '</div>';
 echo '</form>'."\n";
 echo '<br>';
 
