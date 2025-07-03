@@ -198,6 +198,7 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="editieren">'."\n";
 echo '<button type="submit">'.basename($_POST["ini_file"]).' editieren</button>';
+echo '&nbsp;<button type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
 echo '</form>'."\n";
 echo '<br>';
 echo '<table>';
@@ -237,6 +238,7 @@ echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
 echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
+echo '&nbsp;<button type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
 echo '</form>'."\n";
 echo '<br>';
 
@@ -306,6 +308,15 @@ exit();
     break;
 } # ENDE switch
 ?>
+<script>
+function toggleComments() {
+    const rows = document.querySelectorAll('.comment');
+    rows.forEach(row => {
+        row.style.display = (row.style.display === 'none') ? '' : 'none';
+    });
+}
+</script>
+
 
 </body>
 </html>
