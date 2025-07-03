@@ -46,9 +46,12 @@ button {
                 value="" type="hidden">[env] </td>
           </tr>
           <tr class="comment">
-            <td colspan="2"><input name="Zeile[4]" value="" type="hidden">
-            ; durch Einfacher_PHP_Webserver = 1 wird durch start_PythonScript.sh der einfache PHP_Webserver auf Port 2424 gestartet</br>
-            ; wenn Apache Webserver läuft Einfacher_PHP_Webserver = 0 setzen</td>
+            <td colspan="2"><input name="Zeile[4]" value=""
+                type="hidden"> ; durch Einfacher_PHP_Webserver = 1 wird
+              durch start_PythonScript.sh der einfache PHP_Webserver auf
+              Port 2424 gestartet<br>
+              ; wenn Apache Webserver läuft Einfacher_PHP_Webserver = 0
+              setzen</td>
           </tr>
           <tr>
             <td><input name="Zeile[6][0]" value="" type="hidden">Einfacher_PHP_Webserver</td>
@@ -109,9 +112,11 @@ button {
                 readonly="readonly" type="text"></td>
           </tr>
           <tr class="comment">
-            <td colspan="2"><input name="Zeile[18]" value="" type="hidden">
-            ; Das Kennwort muss in einfache Hochkommas gesetzt werden, wegen evtl. Sonderzeichen</br>
-            ; sollte das Kennwort ein % enthalten bitte zwei %% eintragen</td>
+            <td colspan="2"><input name="Zeile[18]" value=""
+                type="hidden"> ; Das Kennwort muss in einfache
+              Hochkommas gesetzt werden, wegen evtl. Sonderzeichen<br>
+              ; sollte das Kennwort ein % enthalten bitte zwei %%
+              eintragen</td>
           </tr>
           <tr>
             <td><input name="Zeile[19][0]" value="" type="hidden">password</td>
@@ -136,9 +141,9 @@ button {
                 value="" type="hidden">[messaging] </td>
           </tr>
           <tr class="comment">
-            <td colspan="2"><input name="Zeile[23]" value="" type="hidden">
-            ; Hier Daten für Pushmessage auf Handy</br>
-            ; Push_Message_EIN (1=EIN/0=AUS)</td>
+            <td colspan="2"><input name="Zeile[23]" value=""
+                type="hidden"> ; Hier Daten für Pushmessage auf Handy<br>
+              ; Push_Message_EIN (1=EIN/0=AUS)</td>
           </tr>
           <tr>
             <td><input name="Zeile[25][0]" value="" type="hidden">Push_Message_EIN</td>
@@ -167,12 +172,7 @@ button {
         <tr class="comment">
           <td colspan="2">; Wenn die Variable "FesteLadeleistung"
             größer/gleich "0" Watt ist, wird der Wert geschrieben.<br>
-          </td>
-        </tr>
-        <tr class="comment">
-          <td colspan="2"><input name="Zeile[5.1]" value=""
-              type="hidden">; FesteLadeleistung = -1, Ladesteuerung
-            steht auf AUTO. </td>
+            ; FesteLadeleistung = -1, Ladesteuerung steht auf AUTO. </td>
         </tr>
         <tr>
           <td><input name="Zeile[6][0]" value="" type="hidden">FesteLadeleistung</td>
@@ -184,12 +184,12 @@ button {
         <tr class="comment">
           <td colspan="2"><input name="Zeile[8]" value="" type="hidden">;
             Bis wann (Stunde) soll die Batterie voll sein, ganze Zahl
-            &gt; 0 ist Stunde</td>
-        </tr>
-        <tr class="comment">
-          <td colspan="2"><input name="Zeile[9]" value="" type="hidden">;
-            Zahlen &lt;= 0 wird Differenz zum Sonnenuntergang (=
-            Prognosewert &lt; 2% PV_Leistung_Watt)</td>
+            &gt; 0 ist Stunde<br>
+            ; Zahlen &lt;= 0 wird Differenz zum Sonnenuntergang (=
+            Prognosewert &lt; 2% PV_Leistung_Watt)<br>
+            ; wenn Akkuschonung = 1 nochmal BattVollUm -1,&nbsp; siehe
+            Akkuschonung<br>
+          </td>
         </tr>
         <tr>
           <td><input name="Zeile[10][0]" value="" type="hidden">BattVollUm</td>
@@ -221,6 +221,9 @@ button {
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[18]" value="" type="hidden">;In
+
+
+
             der HTTP-Version wird sie nicht mehr zur Einspeisebegrenzung
             verwendet, da der WR dies selber macht. <br>
             ;Der Wert wird aber verwendet, um die Batteriekapazität für
@@ -270,7 +273,8 @@ button {
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[28]" value="" type="hidden">
-            ; Grundlast je nach Wochentag wird gesetzt, wenn Grundlast == 0</br>
+            ; Grundlast je nach Wochentag wird gesetzt, wenn Grundlast
+            == 0<br>
             ; Wochentage = Mo, Die, Mi, Do, Fr, Sa, So</td>
         </tr>
         <tr>
@@ -380,8 +384,8 @@ button {
         <tr class="comment">
           <td colspan="2"><input name="Zeile[54]" value="" type="hidden">
             ; hier können die Namen von zusätzlichen monatsabhängigen
-            config.ini definiert werden.</br>
-            ; die Monate müssen immer zweistellig sein!!</br>
+            config.ini definiert werden.<br>
+            ; die Monate müssen immer zweistellig sein!!<br>
             ; Dateiname (immer Kleinbuchstaben) = GültigkeitsMonate</td>
         </tr>
         <tr>
@@ -479,7 +483,7 @@ button {
         <tr class="comment">
           <td colspan="2"><input name="Zeile[97]" value="" type="hidden">
             ; durch das Setzen eines bestimmten Einspeisewertes unter
-            Eigenverbrauchs-Optimierung</br>
+            Eigenverbrauchs-Optimierung<br>
             ; kann über Nacht der Akku entladen werden, um z.B. wieder
             Kapazität zur Vermeidung der Einspeisebegrenzung zu haben.<br>
             ; EigenverbOpt_steuern 0 = aus, 1 = ein und Tagesoptimierung
@@ -548,12 +552,16 @@ button {
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[8]" value="" type="hidden">
-            ; <b>ForecastCalcMethod</b> ist die Berechnungsmethode für die Prognose aus den Forecastwerten.<br>
-            ; Der mit ForecastCalcMethod berechnete Wert wird bei jeder Prognoseanforderung in die DB neu geschrieben,<br>
+            ; <b>ForecastCalcMethod</b> ist die Berechnungsmethode für
+            die Prognose aus den Forecastwerten.<br>
+            ; Der mit ForecastCalcMethod berechnete Wert wird bei jeder
+            Prognoseanforderung in die DB neu geschrieben,<br>
             ; für alle gespeicherten Werte, auch die historischen.<br>
             ; Gültige Werte: median | mittel | min | max<br>
-            ; Mit einem angehängten Plus kann der Wert jeder Methode mit gespeicherten Produktionsdaten optimiert werden.<br>
+            ; Mit einem angehängten Plus kann der Wert jeder Methode mit
+            gespeicherten Produktionsdaten optimiert werden.<br>
             ; Gültige Werte: median+ | mittel+ | min+ | max+<br>
+          </td>
         </tr>
         <tr>
           <td><input name="Zeile[11][0]" value="ForecastCalcMethod = "
@@ -630,11 +638,11 @@ button {
         <tr class="comment">
           <td colspan="2"><input name="Zeile[21]" value="" type="hidden">
             ; horizon gibt mögliche Verschattungen pro String an,
-            benutzt Akkudoktor und Forecast_solar mit api_key </br>
-            ; die 12 Zahlen werden in Grad angegeben und repräsentieren im
-            Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den
-            Horizont</br>
-            ; siehe https://doc.forecast.solar/horizon</br>
+            benutzt Akkudoktor und Forecast_solar mit api_key <br>
+            ; die 12 Zahlen werden in Grad angegeben und repräsentieren
+            im Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord,
+            den Horizont<br>
+            ; siehe https://doc.forecast.solar/horizon<br>
             ; wenn zum Beipiel im Südwesten ein großer Baum Schatten
             wirft:</td>
         </tr>
@@ -697,9 +705,10 @@ button {
           <td colspan="2"><input name="Zeile[39]" value="" type="hidden">
             ; wenn ein API key vorhanden ist, koennen die Forecasts mit
             aktuellen Ertragswerten des Tages (aus der DB) verbessert
-            werden.</br>
-            ; "ja" nutzt diese Funktion der API, "nein" nicht.</br>
-            ; Siehe https://doc.forecast.solar/actual</br>
+            werden.<br>
+            ; "ja" nutzt diese Funktion der API, "nein" nicht.<br>
+            ; Siehe https://doc.forecast.solar/actual<br>
+          </td>
         </tr>
         <tr>
           <td><input name="Zeile[42][0]" value="forecastactual = "
@@ -711,11 +720,12 @@ button {
           <td colspan="2"><input name="Zeile[43]" value="" type="hidden">
             ; wenn "damping" eingesetzt werden soll, hier die
             entsprechenden Werte einstellen. "0,0" ist Standardwert
-            (kein Damping)</br>
-            ; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas damping
-            am Morgen, hohes Damping am nachmittag.</br>
-            ; beide Werte müssen zwischen 0 und 1 sein</br>
-            ; Siehe https://doc.forecast.solar/damping</br>
+            (kein Damping)<br>
+            ; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas
+            damping am Morgen, hohes Damping am nachmittag.<br>
+            ; beide Werte müssen zwischen 0 und 1 sein<br>
+            ; Siehe https://doc.forecast.solar/damping<br>
+          </td>
         </tr>
         <tr>
           <td><input name="Zeile[47][0]" value="forecastdamping = "
@@ -758,10 +768,10 @@ button {
         <tr class="comment">
           <td colspan="2"><input name="Zeile[54]" value="" type="hidden">
             ; Spezifische Werte für die API von Andreas Schmitz, dem
-            Akkudoktor https://www.youtube.com/@Akkudoktor</br>
-            ; weitere Infos unter https://api.akkudoktor.net/</br>
-            ; der Zellkoeffizient wird fuer die Berechnung der Verluste im
-            Kontext herrschender Temperaturen genutzt</td>
+            Akkudoktor https://www.youtube.com/@Akkudoktor<br>
+            ; weitere Infos unter https://api.akkudoktor.net/<br>
+            ; der Zellkoeffizient wird fuer die Berechnung der Verluste
+            im Kontext herrschender Temperaturen genutzt</td>
         </tr>
         <tr>
           <td><input name="Zeile[57][0]" value="cellco = " type="hidden">cellco</td>
@@ -1011,9 +1021,12 @@ button {
               value="" type="hidden">[openmeteo] </td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[101]" value="" type="hidden">
-          ;  Infos zur API siehe https://open-meteo.com/en/docs</br>
-          ; Wenn die Prognosekurve zur Produktionskurve generell verschoben ist, kann sie hiermit um X Minuten verschoben werden</td>
+          <td colspan="2"><input name="Zeile[101]" value=""
+              type="hidden"> ; Infos zur API siehe
+            https://open-meteo.com/en/docs<br>
+            ; Wenn die Prognosekurve zur Produktionskurve generell
+            verschoben ist, kann sie hiermit um X Minuten verschoben
+            werden</td>
         </tr>
         <tr>
           <td><input name="Zeile[103][0]" value="" type="hidden">offset_minuten</td>
@@ -1021,9 +1034,10 @@ button {
               type="text"></td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[104]" value="" type="hidden">
-          ; Faktor des zusätzlichen Bewölkungseinflusses</br>
-          ; 0 = kein Einfluss =&gt; 1.0 starker Einfluss</td>
+          <td colspan="2"><input name="Zeile[104]" value=""
+              type="hidden"> ; Faktor des zusätzlichen
+            Bewölkungseinflusses<br>
+            ; 0 = kein Einfluss =&gt; 1.0 starker Einfluss</td>
         </tr>
         <tr>
           <td><input name="Zeile[106][0]" value="" type="hidden">cloudEffect</td>
@@ -1031,9 +1045,9 @@ button {
               readonly="readonly" type="text"></td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[107]" value="" type="hidden">;
-            Basis-Effizienzfaktor (systemische Verluste, nicht-optimale
-            Bedingungen)</td>
+          <td colspan="2"><input name="Zeile[107]" value=""
+              type="hidden">; Basis-Effizienzfaktor (systemische
+            Verluste, nicht-optimale Bedingungen)</td>
         </tr>
         <tr>
           <td><input name="Zeile[108][0]" value="" type="hidden">base_efficiency_factor</td>
@@ -1041,19 +1055,22 @@ button {
               readonly="readonly" type="text"></td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[109]" value="" type="hidden">
-          ; Getestete Wettermodelle, Programm überprüft auf dies Modelle</br>
-          ; Liste kann erweitert werden</td>
+          <td colspan="2"><input name="Zeile[109]" value=""
+              type="hidden"> ; Getestete Wettermodelle, Programm
+            überprüft auf dies Modelle<br>
+            ; Liste kann erweitert werden</td>
         </tr>
         <tr>
           <td><input name="Zeile[111][0]" value="" type="hidden">valid_models</td>
-          <td><input name="Zeile[111][1]" value="{'icon_d2','icon_eu','ecmwf_aifs025_single'}"
+          <td><input name="Zeile[111][1]"
+              value="{'icon_d2','icon_eu','ecmwf_aifs025_single'}"
               readonly="readonly" type="text"></td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[112]" value="" type="hidden">
-          ; Verwendetes Wettermodel, es können auch mehrere angegeben werden, der Werte dann gemittelt werden.</br>
-          ; z.B. icon_d2,icon_eu</td>
+          <td colspan="2"><input name="Zeile[112]" value=""
+              type="hidden"> ; Verwendetes Wettermodel, es können auch
+            mehrere angegeben werden, der Werte dann gemittelt werden.<br>
+            ; z.B. icon_d2,icon_eu</td>
         </tr>
         <tr>
           <td><input name="Zeile[114][0]" value="" type="hidden">weather_models</td>
@@ -1061,8 +1078,10 @@ button {
               readonly="readonly" type="text"></td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[115]" value="" type="hidden">
-            ; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)</td>
+          <td colspan="2"><input name="Zeile[115]" value=""
+              type="hidden"> ; Gewicht ermöglicht eine höhere Gewichtung
+            des Wetterdienstes ( je Größer der Wert umso größer das
+            Gewicht)</td>
         </tr>
         <tr>
           <td><input name="Zeile[116][0]" value="" type="hidden">Gewicht</td>
@@ -1163,10 +1182,13 @@ button {
               type="text"></td>
         </tr>
         <tr class="comment">
-          <td colspan="2"><input name="Zeile[191]" value="" type="hidden">
-          ; Ladung anpassen durch Pufferfaktor, der auf den Verbrauch aus dem Lastprofil angewendet wird. </br>
-          ; Mit dem Faktor wird der Verbrauch aus dem Lastprofil multipliziert, damit kann ein Ladestandpuffer für
-            ungenaue Verbräuche aus dem Lastprofil, bzw. ungenaue Prognosen individuell eingestellt werden. </td>
+          <td colspan="2"><input name="Zeile[191]" value=""
+              type="hidden"> ; Ladung anpassen durch Pufferfaktor, der
+            auf den Verbrauch aus dem Lastprofil angewendet wird. <br>
+            ; Mit dem Faktor wird der Verbrauch aus dem Lastprofil
+            multipliziert, damit kann ein Ladestandpuffer für ungenaue
+            Verbräuche aus dem Lastprofil, bzw. ungenaue Prognosen
+            individuell eingestellt werden. </td>
         </tr>
         <tr>
           <td><input name="Zeile[20][0]" value="" type="hidden">Lade_Verbrauchs_Faktor</td>
@@ -1175,8 +1197,9 @@ button {
         </tr>
         <tr class="comment">
           <td colspan="2"><input name="Zeile[19]" value="" type="hidden">
-            ; Um den Wert Gewinnerwartung_kWh muss der Preis Pro kWh bei</br>
-            ; Speicherung in den Akku nach Abzug von Akku_Verlust_Prozent mindestens niedriger sein.</td>
+            ; Um den Wert Gewinnerwartung_kWh muss der Preis Pro kWh bei<br>
+            ; Speicherung in den Akku nach Abzug von
+            Akku_Verlust_Prozent mindestens niedriger sein.</td>
         </tr>
         <tr>
           <td><input name="Zeile[20][0]" value="" type="hidden">Gewinnerwartung_kW</td>
