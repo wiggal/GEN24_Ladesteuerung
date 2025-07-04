@@ -11,129 +11,199 @@
         <h2 class="heading-element">Einstellungen zu den
           PV-Vorhersagediensten in <code>weather_priv.ini</code>:</h2>
       </div>
-      <p><strong><code>[env]</code><br>
-          Hier folgen einige grundlegende Einstellungen.</strong><br>
-        ; ForecastCalcMethod ist die Berechnungsmethode für die Prognose
-        aus den Forecast-Werten<br>
-        ; Der mit ForecastCalcMethod berechnete Wert wird bei jeder
-        Prognoseanforderung in die DB gespeichert!<br>
-        ; median | median_opt| mittel | min | max sind gültig<br>
-        <code>ForecastCalcMethod = median</code><br>
+      <p><strong><font size="+2"><code>[env]</code></font><br>
+          <font size="+1"> Hier folgen einige grundlegende
+            Einstellungen.</font></strong><br>
+        <font size="+1">ForecastCalcMethod ist die Berechnungsmethode
+          für die Prognose aus den Forecastwerten.<br>
+          Der mit ForecastCalcMethod berechnete Wert wird bei jeder
+          Prognoseanforderung in die DB neu geschrieben,<br>
+          für alle gespeicherten Werte, auch die historischen.<br>
+          Gültige Werte: median | mittel | min | max<br>
+          Mit einem angehängten Plus kann der Wert jeder Methode mit
+          gespeicherten Produktionsdaten optimiert werden.<br>
+          Gültige Werte: median+ | mittel+ | min+ | max+</font><br>
+        <font size="+1"> <code>ForecastCalcMethod = median</code></font><br>
       </p>
-      <p><strong><code>[pv.strings]</code><br>
-          Hier kann die Anzahl der Strings für bestimmte Wetterdienste
-          auf zwei erhöht werden.</strong><br>
-        <code>anzahl = 1</code><br>
-        Wenn ein zweites Feld mit anderer Ausrichtung vorhanden ist,
-        hier Anzahl=2 eintragen und die Werte unter [forecast.solar2]
-        und/oder [solcast.com2] eintragen.</p>
-      <p><strong><code>[forecast.solar] bzw. [forecast.solar2]</code><br>
-          Hier die Werte eintragen, wenn die Prognose mit
-          Solarprognose_WeatherData.py von <a
-            href="http://www.solarprognose.de" rel="nofollow">www.solarprognose.de</a>
-          geholt werden soll.</strong><br>
-        Daten werden für api.forecast.solar und zukünftig auch für
-        api.akkudoktor.net verwendet!!</p>
-      <p><code>weatherfile = weatherData.json</code><br>
-        Hier kann die Datei, in die die Prognosewerte gespeichert
-        werden, verändert werden, z.B. um sie mit anderen Prognosen zu
-        vergleichen. Das Programm arbeitet immer mit weatherData.json.</p>
-      <p><code>api_key = kein</code><br>
-        Wenn api_key <strong>nicht</strong> 'kein' ist, wird er für die
-        Prognoseabfrage verwendet</p>
-      <p>; wenn ein API key vorhanden ist, koennen die Forecasts mit
-        aktuellen Ertragswerten des Tages (aus der DB) verbessert
-        werden.<br>
-        ; 'ja' nutzt diese Funktion der API, 'nein' nicht.<br>
-        ; Siehe <a href="https://doc.forecast.solar/actual"
-          rel="nofollow">https://doc.forecast.solar/actual</a><br>
-        <code>forecastactual = nein </code></p>
-      <p>; wenn "damping" eingesetzt werden soll, hier die
-        entsprechenden Werte einstellen. '0,0' ist Standardwert (kein
-        Damping)<br>
-        ; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas damping am
-        Morgen, hohes Damping am nachmittag.<br>
-        ; beide Werte müssen zwischen 0 und 1 sein<br>
-        ; Siehe <a href="https://doc.forecast.solar/damping"
-          rel="nofollow">https://doc.forecast.solar/damping</a><br>
-        <code>forecastdamping = 0,0</code></p>
-      <p><code>api_pers_plus = nein</code><br>
-        Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können
-        zwei Ausrichtungen in einer Abfrage behandelt werden.</p>
-      <p>; lat und lon sind die Positionsdaten der Anlage bzw. des
-        Strings. Nutze <a href="https://www.suncalc.org/"
-          rel="nofollow">https://www.suncalc.org/</a> oder andere Tools
-        zur Identifikation<br>
-        <code>lat = 44.444</code> Breitengrad<br>
-        <code>lon = 11.111</code> Längengrad</p>
-      <p>; horizon gibt mögliche Verschattungen pro String an:<br>
-        ; die 12 Zahlen werden in Grad angegeben und repräsentieren im
-        Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den
-        Horizont<br>
-        ; siehe <a href="https://doc.forecast.solar/horizon"
-          rel="nofollow">https://doc.forecast.solar/horizon</a><br>
-        ; wenn zum Beipiel im Südwesten ein großer Baum Schatten wirft:<br>
-        ; 0,0,0,0,0,0,0,20,45,20,0,0<br>
-        <code>horizon = 0,0,0,0,0,0,0,0,0,0,0,0'</code></p>
-      <p><code>dec = 30</code> Winkel der Module (0=waagerecht,
-        90=senkrecht)<br>
-        <code>az = 0</code> Himmelsrichtung (-180=Nord, -90=Osten,
-        0=Süd, 90=West, 180=Nord)<br>
-        <code>kwp = 11.4</code> kWp der PV-Anlage</p>
-      <p>; Wert in Minuten, bis bisherige Daten ihre Gültigkeit
-        verlieren und neue von der API abgerufen werden sollen<br>
-        ; aktuell gueltige Werte fuer die Anzahl an API Aufrufen pro 60
-        Minuten findet man unter <a
-          href="https://doc.forecast.solar/account_models"
-          rel="nofollow">https://doc.forecast.solar/account_models</a><br>
-        <code>dataAgeMaxInMinutes = 100</code> Mindestabstand in
-        Minuten, innerhalb dem keine neuen Werte angefordert werden.</p>
-      <p><strong><code>[solarprognose]</code><br>
-          Hier die Werte eintragen, wenn die Prognose mit
-          Solarprognose_WeatherData.py von <a
-            href="http://www.solarprognose.de" rel="nofollow">http://www.solarprognose.de</a>
-          geholt werden soll</strong><br>
-        Bei solarprognose.de ist ein Account erforderlich.</p>
-      <p><code>weatherfile = weatherData.json</code> wie forecast.solar.<br>
-        <code>accesstoken = xxxxxx</code> accesstoken des Accounts</p>
-      <p><code>item = inverter</code> Daten aus Account.<br>
-        <code>id = 1111</code> Daten aus Account.<br>
-        <code>type = hourly</code> Daten aus Account.</p>
-      <p><code>Zeitversatz = 0</code><br>
-        Der Zeitversatz verschiebt die Prognose um X Stunden nach vor
-        (-) oder nach hinten, eventuelle Zeitverschiebung.</p>
-      <p><code>dataAgeMaxInMinutes = 1000</code> wie forecast.solar<br>
-        <code>WaitSec = 21</code> Sekunden des sleep = Daten aus
-        Account.</p>
-      <p><code>algorithm = own-v1</code><br>
+      <p><font size="+1"><strong><font size="+2"><code>[pv.strings]</code></font><br>
+            Hier kann die Anzahl der Strings für bestimmte Wetterdienste
+            eingetragen werden.<br>
+          </strong>Für akkudoktor und openmeteo können hier mehrere
+          Strings mit anderer Ausrichtung definiert werden, <br>
+          hier Anzahl eintragen, und die Daten der weiteren Strings
+          analog zum 2. String eintragen (z.B.: </font><font size="+1">wp2,
+
+          wp3)<br>
+          forecast.solar kann aktuell nur 2 Strings verarbeiten.<strong><br>
+          </strong><code>anzahl = 1</code></font><br>
+        <font size="+1">lat und lon sind die Positionsdaten der Anlage
+          bzw. des Strings. Nutze https://www.suncalc.org/ oder andere
+          Tools zur Identifikation.</font><br>
+        <font size="+1"><code>lat = 44.444</code><br>
+          <code>lon = 11.111</code></font><br>
+        <font size="+1">wp ist die Modulleistung des Strings in W</font><br>
+        <font size="+1"><code>wp = 5550</code></font><br>
+        <font size="+1">az ist der Azimut der Anlage, also in welche
+          Himmelsrichtung die Module ausgerichtet sind.<br>
+          &nbsp;-180 und 180 = Norden, -90 = Osten, 0 = Süden, 90 =
+          Westen</font><br>
+        <font size="+1"><code>az = 0</code></font><br>
+        <font size="+1">dec ist der Winkel, in dem die Module verbaut
+          sind, wobei 0 waagerecht liegen und 90 senkrecht stehend
+          bedeutet</font><br>
+        <font size="+1"><code>dec = 30</code></font><br>
+        <font size="+1">horizon gibt mögliche Verschattungen pro String
+          an, benutzt Akkudoktor und Forecast_solar mit api_key<br>
+          die 12 Zahlen werden in Grad angegeben und repräsentieren im
+          Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den
+          Horizont<br>
+          siehe https://doc.forecast.solar/horizon<br>
+          wenn zum Beispiel im Südwesten ein großer Baum Schatten wirft:<br>
+          z.B.: 0,0,0,0,0,0,0,20,45,20,0,0</font><br>
+        <font size="+1"><code>horizon = 0,0,0,0,0,0,0,0,0,0,0,0</code></font><br>
+        <font size="+1">wenn es einen 2. bzw. 3. String gibt, dann hier
+          die Werte analog zum ersten anpassen (wp2, wp3 ....)</font><br>
+        <font size="+1"><code>wp2 = 4440</code><code><br>
+          </code><code>az2 = 0</code><code><br>
+          </code><code>dec2 = 10</code><code><br>
+          </code><code>horizon2 = 0,10,10,10,30,30,0,0,10,10,10,0</code></font><br>
+        <br>
+      </p>
+      <p><strong><font size="+2"><code>[forecast.solar]</code></font><br>
+          <font size="+1"> Hier die Werte eintragen, wenn die Prognose
+            von <a href="http://www.solarprognose.de" rel="nofollow">www.solarprognose.de</a>
+            geholt werden soll.<br>
+          </font></strong><font size="+1"><br>
+          Wenn api_key nicht 'kein' ist, wird der eingetragene Key für
+          die Prognoseabfrage verwendet</font><strong><font size="+1"><br>
+          </font></strong><font size="+1"><code>api_key = kein</code></font><br>
+        <font size="+1">Wenn ein API key vorhanden ist, können die
+          Forecasts mit aktuellen Ertragswerten des Tages (aus der DB)
+          verbessert werden.<br>
+          "ja" nutzt diese Funktion der API, "nein" nicht. Siehe
+          https://doc.forecast.solar/actual</font><br>
+        <font size="+1"> <code>forecastactual = nein</code></font><br>
+        <font size="+1">Wenn "damping" eingesetzt werden soll, hier die
+          entsprechenden Werte einstellen. </font><br>
+        <font size="+1">0,0 bedeutet kein Damping, 0.25,0.75 bedeutet
+          etwas Damping am Morgen, hohes Damping am Nachmittag.</font><br>
+        <font size="+1"> beide Werte müssen zwischen 0 und 1 sein. Siehe
+          <a href="https://doc.forecast.solar/damping" rel="nofollow">https://doc.forecast.solar/damping</a></font><br>
+        <font size="+1"> </font><code><font size="+1">forecastdamping =
+            0,0</font><br>
+        </code><font size="+1">Wenn ein api_pers_plus vorhanden ist
+          (api_pers_plus = ja) können zwei Ausrichtungen in einer
+          Abfrage behandelt werden.</font><code><br>
+          <font size="+1">api_pers_plus = nein</font></code><br>
+        <font size="+1">Gewicht ermöglicht eine höhere Gewichtung des
+          Wetterdienstes ( je Größer der Wert umso größer das Gewicht)</font><br>
+        <font size="+1"><code>Gewicht = 1</code></font><br>
+      </p>
+      <p><font size="+2"><code><b>[akkudoktor]</b></code></font><br>
+        <b><font size="+1">Hier die Werte eintragen, wenn die Prognose
+            von <a href="https://api.akkudoktor.net/">https://api.akkudoktor.net/</a>
+            geholt werden soll.</font></b><br>
+        <font size="+1"><br>
+          Spezifische Werte für die API von Andreas Schmitz, dem
+          Akkudoktor https://www.youtube.com/@Akkudoktor<br>
+          weitere Infos unter https://api.akkudoktor.net/<br>
+          der Zellkoeffizient wird für die Berechnung der Verluste im
+          Kontext herrschender Temperaturen genutzt</font><br>
+        <font size="+1"><code>cellco = -0.4</code></font><br>
+        <font size="+1">albedo ist der Reflexionsgrad des Untergrunds,
+          auf dem die Zellen montiert sind. Siehe
+          https://pv-navi.de/pv-navi-abc/albedo/</font><br>
+        <font size="+1"><code>albedo = 0.2</code></font><br>
+        <font size="+1">Gesamtleistung des Wechselrichters</font><br>
+        <font size="+1"><code>powerInverter = 8000</code></font><br>
+        <font size="+1">Effizienz des Wechselrichter</font><br>
+        <font size="+1"><code>inverterEfficiency = 1</code></font><br>
+        <font size="+1">spezifische Werte für eventuellen 2. String:</font><br>
+        <font size="+1"><code>cellco2 = -0.4</code><code><br>
+          </code><code>albedo2 = 0.2</code><code><br>
+          </code><code>powerInverter2 = 8000</code><code><br>
+          </code><code>inverterEfficiency2 = 1</code></font><br>
+        <font size="+1">Gewicht ermöglicht eine höhere Gewichtung des
+          Wetterdienstes ( je Größer der Wert umso größer das Gewicht)</font><br>
+        <font size="+1"><code>Gewicht = 1</code></font><br>
+        <br>
+      </p>
+      <p><strong><font size="+2"><code>[solarprognose]</code></font><br>
+          <font size="+1"> Hier die Werte eintragen, wenn die Prognose
+            von <a href="http://www.solarprognose.de" rel="nofollow">http://www.solarprognose.de</a>
+            geholt werden soll.</font></strong><br>
+        <font size="+1"> Bei solarprognose.de ist ein Account
+          erforderlich.</font></p>
+      <p><font size="+1">Accesstoken und Daten des Accounts.<br>
+          <code> </code><code>accesstoken = xxxxxx</code></font><code><br>
+        </code><font size="+1"><code>item = inverter</code><code><br>
+          </code><code> </code><code>id = 1111</code><code> </code><code><br>
+          </code><code>type = hourly</code></font><br>
+        <font size="+1">Der Zeitversatz verschiebt die Prognose um X
+          Stunden nach vor (-) oder nach hinten, eventuelle
+          Zeitverschiebung.</font><br>
+        <font size="+1"><code>Zeitversatz = 0</code></font><br>
+        <font size="+1">Sekunden des sleep = Daten aus Account.</font><code><br>
+          <font size="+1">WaitSec = 21</font></code><code><font
+            size="+1"> </font></code><br>
         Mögliche Werte mosmix|own-v1|clearsky, für mosmix muss dem
         Standort eine Mosmix Station zugeordnet sein.<br>
         Karte mit Stationen: <a
-          href="https://wettwarn.de/mosmix/mosmix.html" rel="nofollow">https://wettwarn.de/mosmix/mosmix.html</a></p>
-      <p><code>KW_Faktor = 1.00</code> Falls die Anlagengröße in kWp
-        nicht mit der Größe in Solarprognose übereinstimmt (z.B.
-        Erweiterung)</p>
-      <p><strong><code>[solcast.com] bzw. [solcast.com2]</code><br>
-          Hier die Werte eintragen, wenn die Prognose mit
-          Solcast_WeatherData.py von <a
+          href="https://wettwarn.de/mosmix/mosmix.html" rel="nofollow">https://wettwarn.de/mosmix/mosmix.html</a><code><br>
+          <font size="+1">algorithm = own-v1<br>
+          </font></code><font size="+1">Falls die Anlagengröße in kWp
+          nicht mit der Größe in Solarprognose übereinstimmt (z.B.
+          Erweiterung)</font><br>
+        <font size="+1"><code>KW_Faktor = 1.00</code><code><br>
+          </code></font><font size="+1">Gewicht ermöglicht eine höhere
+          Gewichtung des Wetterdienstes ( je Größer der Wert umso größer
+          das Gewicht)</font><br>
+        <font size="+1"><code>Gewicht = 1</code></font></p>
+      <p><strong><font size="+2"><code>[solcast.com]</code></font><br>
+          Hier die Werte eintragen, wenn die Prognose von <a
             href="https://api.solcast.com.au" rel="nofollow">https://api.solcast.com.au</a>
           geholt werden soll.</strong></p>
-      <p><code>weatherfile = weatherData.json</code> wie forecast.solar.<br>
-        <code>api_key = xxxx</code> Daten aus Account.<br>
-        <code>resource_id = xxxx-xxxx-xxxx-xxxx</code> Daten aus
-        Account.<br>
-        <code>dataAgeMaxInMinutes = 1000</code> wie forecast.solar.</p>
-      <p><code>Zeitzone = +1</code><br>
-        Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1,
-        Sommerzeit = +1 erfolgt nun automatisch.<br>
-        <code>KW_Faktor = 1.00</code><br>
-        Falls die Anlagengröße in kWp nicht mit der Größe in solcast.com
-        übereinstimmt (z.B. Erweiterung)</p>
-      <p><code>no_history = 0</code><br>
-        Wenn no_history = 1 dann werden von solcast.com keine
-        historischen Daten geholt, sondern aus der Datei
-        weatherData.json, dadurch hat man bei einer Ausrichtung 10 und
-        bei zwei Ausrichtungen 5 Abfragen.</p>
+      <p><font size="+1">ApiKey und Daten des Accounts.</font><code><br>
+          <font size="+1">api_key = xxxx</font></code><font size="+1"><br>
+          <code>resource_id = xxxx-xxxx-xxxx-xxxx</code></font><br>
+        <font size="+1"> Zeitversatz zu UTC, hier für Zeitzone
+          Europe/Berlin UTC +1, Sommerzeit erfolgt&nbsp; automatisch.</font><br>
+        <font size="+1"><code>Zeitzone = +1</code></font><br>
+        <font size="+1"> Falls die Anlagengröße in kWp nicht mit der
+          Größe in solcast.com übereinstimmt (z.B. Erweiterung)</font><br>
+        <font size="+1"> <code>KW_Faktor = 1.00</code></font><br>
+        <font size="+1">Werte für einen eventuellen 2. String:</font><br>
+        <font size="+1"><code>resource_id2 = xxxx-xxxx-xxxx-xxxx</code></font><br>
+        <font size="+1"><code>KW_Faktor2 = 1.00</code></font><br>
+        <font size="+1">Gewicht ermöglicht eine höhere Gewichtung des
+          Wett</font><font size="+1"><font size="+1"><font size="+1"><code><font
+                  size="+2">Infos zur API siehe
+                  https://open-meteo.com/en/docs<br>
+                  Wenn die Prognosekurve zur Produktionskurve generell
+                  verschoben ist, kann sie hiermit um X Minuten
+                  verschoben werden.</font></code></font></font>erdienstes
+          ( je Größer der Wert umso größer das Gewicht)</font><br>
+        <font size="+1"> <font size="+1"><code>Gewicht = 1<br>
+            </code></font></font></p>
+      <p><strong><font size="+2"><code>[openmeteo]</code></font><br>
+          Hier die Werte eintragen, wenn die Prognose von <a
+            href="https://open-meteo.com">https://open-meteo.com</a>
+          geholt werden soll.</strong></p>
+      <font size="+1">Infos zur API siehe https://open-meteo.com/en/docs<br>
+        Wenn die Prognosekurve zur Produktionskurve generell verschoben
+        ist, kann sie hiermit um X Minuten verschoben werden</font><code><br>
+      </code><code><font size="+1">offset_minuten = 0</font></code><code></code><font
+        size="+1"><br>
+      </font><font size="+1">Faktor des zusätzlichen
+        Bewölkungseinflusses<br>
+        0 = kein Einfluss =&gt; 1.0 starker Einfluss<br>
+        <code>cloudEffect = 0</code><br>
+        <br>
+      </font>
+      <p>hier weiter#########<br>
+        <font size="+1"><font size="+1"><code><font size="+1"> <code>resource_id
+                  = xxxx-xxxx-xxxx-xxxx</code></font><br>
+            </code></font></font> </p>
     </div>
   </body>
 </html>

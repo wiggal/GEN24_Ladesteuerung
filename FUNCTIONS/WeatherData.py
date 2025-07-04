@@ -5,6 +5,7 @@ import json
 import configparser
 import sqlite3
 from collections import defaultdict
+from statistics import median, mean
 import FUNCTIONS.functions
 
 basics = FUNCTIONS.functions.basics()
@@ -43,13 +44,13 @@ class WeatherData:
         print("DB wurde erstellt.")
 
 
-    def storeWeatherData_SQL(self, data, quelle, gewicht_neu=-1):
+    def storeWeatherData_SQL(self, data, quelle, gewicht_neu=-1, loesche_quelle=''):
         self.check_or_create_db('weatherData.sqlite')
         verbindung = sqlite3.connect('weatherData.sqlite')
         zeiger = verbindung.cursor()
         print_level = basics.getVarConf('env','print_level','eval')
-        # Alte Einträge löschen die älter 30 Tage sind
-        loesche_bis = (datetime.today() - timedelta(days=30)).date().isoformat()
+        # Alte Einträge löschen die älter 35 Tage sind
+        loesche_bis = (datetime.today() - timedelta(days=35)).date().isoformat()
 
         #Prognosen kleiner 10 löschen
         data = [entry for entry in data if entry[2] >= 10]
@@ -66,11 +67,18 @@ class WeatherData:
                 WHERE datetime(Zeitpunkt) < datetime(?);
             """, (loesche_bis,))
         
-            # Datensätze mit Quelle = 'Ergebnis' löschen, Historisch
-            zeiger.execute("""
+            # Basis-Quellenliste
+            loesche_quellen = ['Ergebnis', 'Median']
+            if (loesche_quelle != ''):
+                loesche_quellen.append(loesche_quelle)
+            # SQL-Statement generieren
+            platzhalter = ', '.join(['?'] * len(loesche_quellen))
+
+            # Datensätze mit Quelle = 'Ergebnis, 'Median' usw' löschen, Historisch
+            zeiger.execute(f"""
                 DELETE FROM weatherData
-                WHERE Quelle = 'Ergebnis';
-            """)
+                WHERE Quelle IN ({platzhalter});
+            """, loesche_quellen)
 
             # Neue Prognosen speichern
             zeiger.executemany("""
@@ -86,7 +94,7 @@ class WeatherData:
             exit(0)
 
         # Hier noch prüfen ob sich das gewicht_neu geändert hat und evtl. in DB ändern
-        # Aber nur wenn gewicht_neu nicht -1, da ses sonst nicht von einem Wetterdienst kommt
+        # Aber nur wenn gewicht_neu nicht -1, da es sonst nicht von einem Wetterdienst kommt
         if (gewicht_neu != -1):
             if print_level >= 3:
                 print("DEBUG Gewichte überprüft für ", quelle)
@@ -109,7 +117,8 @@ class WeatherData:
         verbindung = conn.cursor()
         heute = datetime.now().strftime('%Y-%m-%d 23:59:59')
         aktuelle_Std = datetime.now().strftime('%Y-%m-%d %H:00:00')
-        Max_Leistung = basics.getVarConf('pv.strings','wp','eval')
+        config = basics.loadConfig(['charge'])
+        Max_Leistung = basics.getVarConf('Ladeberechnung','PV_Leistung_Watt','eval')
         # Der offset soll die Stunde in die Mitte der Produktion verschieben
         offset = '+30 minutes'
         sql_anweisung = f"""
@@ -134,7 +143,7 @@ class WeatherData:
         )
         SELECT *
         FROM ProduktionDiff
-        WHERE Produktion IS NOT NULL;
+        WHERE Produktion > 10;
         """
         try:
             verbindung.execute(sql_anweisung)
@@ -153,7 +162,7 @@ class WeatherData:
         Watt_zuvor = None
         for Stunde, Watt in DB_data:
             # Wenn Aufzeichnung länger ausgefallen ist, entstehen sonst grosse Produktionen
-            if (Watt > Max_Leistung * 1.1 and Watt_zuvor != None):
+            if (Watt > Max_Leistung * 1.15 and Watt_zuvor != None):
                 Watt = Watt_zuvor
             else:
                 Watt_zuvor = Watt
@@ -161,118 +170,49 @@ class WeatherData:
 
         return(Produktion)
 
-    def get_Std_Watt_Faktor(self):
-        conn = sqlite3.connect('weatherData.sqlite')
-        cursor = conn.cursor()
-        query = f"""
-        WITH median_raw AS (
-        SELECT
-            strftime('%H:00', Zeitpunkt) AS stunde,
-            Zeitpunkt,
-            Prognose_W AS median
-        FROM weatherData
-        WHERE Quelle = 'Median'
-        ),
-        produktion_raw AS (
-        SELECT
-            strftime('%H:00', Zeitpunkt) AS stunde,
-            Zeitpunkt,
-            Prognose_W AS produktion
-        FROM weatherData
-        WHERE Quelle = 'Produktion'
-        ),
-        joined AS (
-        SELECT
-            m.stunde,
-            m.Zeitpunkt,
-            m.median,
-            p.produktion
-        FROM median_raw m
-        JOIN produktion_raw p ON m.Zeitpunkt = p.Zeitpunkt
-        WHERE m.median > 50
-        ),
-        max_median AS (
-        SELECT
-            stunde,
-            MAX(median) AS max_median,
-            MAX(median) / 1.0 AS drittel
-        FROM joined
-        GROUP BY stunde
-        ),
-        mit_bereich AS (
-        SELECT
-            j.stunde,
-            j.Zeitpunkt,
-            j.median,
-            j.produktion,
-            CASE
-            WHEN j.median <= m.drittel THEN 1
-            WHEN j.median <= 2 * m.drittel THEN 2
-            ELSE 3
-            END AS bereich,
-            m.drittel,
-            m.max_median,
-            (j.produktion * 1.0 / j.median) AS faktor
-        FROM joined j
-        JOIN max_median m ON j.stunde = m.stunde
-        WHERE m.max_median > 100
-        ),
-        alle_faktoren AS (
-        SELECT
-            CAST(substr(stunde, 1, 2) AS INTEGER) AS stunden_nr,
-            bereich,
-            faktor
-        FROM mit_bereich
-        ),
-        gruppiert_mit_nachbarn AS (
-        SELECT
-            a1.stunden_nr,
-            a1.bereich,
-            a2.faktor
-        FROM alle_faktoren a1
-        JOIN alle_faktoren a2
-            ON a1.bereich = a2.bereich
-        AND a2.stunden_nr BETWEEN a1.stunden_nr - 1 AND a1.stunden_nr + 1
-        ),
-        gerankt AS (
-        SELECT
-            stunden_nr,
-            bereich,
-            faktor,
-            ROW_NUMBER() OVER (PARTITION BY stunden_nr, bereich ORDER BY faktor) AS rn,
-            COUNT(*) OVER (PARTITION BY stunden_nr, bereich) AS cnt
-        FROM gruppiert_mit_nachbarn
-        ),
-        mediane AS (
-        SELECT
-            stunden_nr,
-            bereich,
-            CASE
-            WHEN cnt < 3 THEN 1
-            ELSE ROUND(AVG(faktor), 3)
-            END AS median_faktor
-        FROM gerankt
-        WHERE rn IN ((cnt + 1) / 2, (cnt + 2) / 2)
-        GROUP BY stunden_nr, bereich
-        )
-        SELECT
-        printf('%02d:00', m.stunden_nr) AS stunde,
-        m.bereich,
-        ROUND(mx.drittel * (m.bereich - 1), 0) AS von_W,
-        ROUND(mx.drittel * m.bereich, 0) AS bis_W,
-        m.median_faktor
-        FROM mediane m
-        JOIN max_median mx ON printf('%02d:00', m.stunden_nr) = mx.stunde
-        ORDER BY stunde, bereich
-        """
-        cursor.execute(query)
-        rows = cursor.fetchall()
+    def get_opt_prognose(self, Produktion, Basis):
+        # 1. Dictionaries vorbereiten
+        prognose_dict = {zeit: watt for zeit, _, watt, *_ in Basis}
+        produktion_dict = {zeit: watt for zeit, _, watt, *_ in Produktion}
+        # 2. Faktoren nach Uhrzeit (HH:MM:SS) sammeln
+        faktoren_nach_stunde = defaultdict(list)
+        for zeit in prognose_dict:
+            # Damit nur relevate Prognosen verwendet werden Faktor nur bei > 100Watt
+            if zeit in produktion_dict: 
+                uhrzeit = zeit[11:]  # z.B. '05:00:00'
+                if produktion_dict[zeit] > 100 and prognose_dict[zeit] > 100:
+                    faktor = produktion_dict[zeit] / prognose_dict[zeit]
+                else:
+                    faktor = 1.0
+                faktoren_nach_stunde[uhrzeit].append(faktor)
+        
+        #entWIGGlung CSV AUSGABE DER FAKTOREN
+        # print(zeit, produktion_dict[zeit], prognose_dict[zeit], faktor)  #entWIGGlung
+        #import csv
+        #import sys
+        #for uhrzeit, faktoren in faktoren_nach_stunde.items():
+            #faktoren_als_text = [str(round(f, 4)).replace('.', ',') for f in faktoren]
+            #zeile = [uhrzeit] + faktoren_als_text
+            #print(";".join(zeile))
+        #entWIGGlung
 
-        return(rows)
+        # 3. Median-Faktor je Uhrzeit berechnen
+        median_faktoren = {
+            uhrzeit: median(faktoren)
+            for uhrzeit, faktoren in faktoren_nach_stunde.items()
+        }
+        # 4. Justierte Prognose-Liste erzeugen
+        Opt_Prognose = []
+        for zeit in prognose_dict:
+            uhrzeit = zeit[11:]  # z. B. '06:00:00'
+            faktor = median_faktoren.get(uhrzeit)
+            if faktor:
+                neue_prognose = round(prognose_dict[zeit] * faktor)
+                Opt_Prognose.append((zeit, "Prognose", neue_prognose, '0', ''))
+
+        return(Opt_Prognose)
 
     def store_forecast_result(self):
-        from collections import defaultdict
-        from statistics import median, mean
         print_level = basics.getVarConf('env','print_level','eval')
         ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
         conn = sqlite3.connect('weatherData.sqlite')
@@ -296,18 +236,7 @@ class WeatherData:
         akt_tag_Std = self.now.strftime("%Y-%m-%d %H:00:00")
         von_tag = '2222-01-01'
 
-        # Für jede Stunde und ein Prognosedrittel Faktor Produktion/prognose holen
-        if ( ForecastCalcMethod == 'median_opt'):
-            Prog_Faktoren = self.get_Std_Watt_Faktor()
-            faktoren_dict = {}
-            for stunde, bereich, watt_von, watt_bis, faktor in Prog_Faktoren:
-                if stunde not in faktoren_dict:
-                    faktoren_dict[stunde] = {}
-                faktoren_dict[stunde][(watt_von, watt_bis)] = faktor
-            # Ergebnis
-            if print_level >= 3:
-                print("DEBUG Faktoren und Bereiche je Stunde: ", faktoren_dict)
-
+        # DB-Prognosewerte aufbereiten
         for zeit_str, wert, gewicht in rows:
             zeit = datetime.fromisoformat(zeit_str)
             akt_tag = zeit.strftime("%Y-%m-%d")
@@ -323,55 +252,48 @@ class WeatherData:
                 stundenwerte[stunde].extend([wert] * gewicht)
 
         result = {}
-        result_median = {}
+        result_basis = {}
         for stunde in sorted(stundenwerte):
             if stundenwerte.get(stunde):
                 zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
-                # Median immer speichern, wegen Medianoptimierung
-                result_median[zeit_str] = int(median(stundenwerte[stunde]))
 
                 # Statistische Auswertungen nach ForecastCalcMethod
-                if ( ForecastCalcMethod == 'median'):
+                if ( 'median' in ForecastCalcMethod):
                     result[zeit_str] = int(median(stundenwerte[stunde]))
-                if ( ForecastCalcMethod == 'mittel'):
+                elif ( 'mittel' in ForecastCalcMethod):
                     result[zeit_str] = int(mean(stundenwerte[stunde]))
-                if ( ForecastCalcMethod == 'min'):
+                elif ( 'min' in ForecastCalcMethod):
                     result[zeit_str] = int(min(stundenwerte[stunde]))
-                if ( ForecastCalcMethod == 'max'):
+                elif ( 'max' in ForecastCalcMethod):
                     result[zeit_str] = int(max(stundenwerte[stunde]))
+                else:
+                    print("ERROR: Es wurde keine zulässige ForecastCalcMethod gefunden!!!")
+                    exit()
 
-                # Hier Aufruf der Prognoseoptimierung
-                if ( ForecastCalcMethod == 'median_opt'):
-                    median_watt = int(median(stundenwerte[stunde]))
-                    hour = stunde.strftime("%H:00")
-
-                    # aus faktoren_dict den Faktor holen in dem der Wert median_watt liegt
-                    try:
-                        ranges = faktoren_dict[hour]
-                        # Versuche passenden Bereich zu finden
-                        factor_tmp = next(
-                            factor_tmp for (low, high),  factor_tmp in ranges.items()
-                            if low <= median_watt < high
-                        )
-                    except StopIteration:
-                        # Kein Bereich gefunden → nimm höchsten (letzten) Wert dieser Stunde
-                        factor_tmp = list(ranges.values())[-1]
-                    except KeyError:
-                        # Stunde nicht vorhanden → Standardwert
-                        factor_tmp = 1
-
-                    if print_level >= 3:
-                        print("DEBUG Std, Factor, Median, Factor * Median: ", zeit_str,  factor_tmp, median_watt, int( factor_tmp * median_watt))
-                    result[zeit_str] = int(factor_tmp * median_watt)
-
-        data = []
-        data.extend([(ts, 'Median', val, '0', '') for ts, val in result_median.items()])
-        data.extend([(ts, 'Prognose', val, '0', '') for ts, val in result.items()])
+        DB_data = []
+        Prognose = []
         # Produktion aus PV_Daten.sqlite holen
         Produktion = self.get_produktion_result(von_tag)
-        data.extend(Produktion)
-        # Speichern der Resultate 
-        self.storeWeatherData_SQL(data, 'Median, Prognose, Produktion')
+        DB_data.extend(Produktion)
+
+        loesche_quelle=''
+        if ( '+' in ForecastCalcMethod):
+            # Ermittelte Prognosedaten als Basis und Optimierung als Prognose speichern.
+            Basis = []
+            Basis.extend([(ts, 'Basis', val, '0', '') for ts, val in result.items()])
+            DB_data.extend(Basis)
+            # Hier Funktion zur Prognoseoptimierung aufrufen
+            Prognose = self.get_opt_prognose(Produktion, Basis)
+        else:
+            # Ermittelte Prognosedaten direkt als Prognose speichern.
+            Prognose.extend([(ts, 'Prognose', val, '0', '') for ts, val in result.items()])
+            loesche_quelle='Basis'
+
+        # Prognose immer in DB
+        DB_data.extend(Prognose)
+            
+        # Speichern der Resultate  in DB
+        self.storeWeatherData_SQL(DB_data, 'Basis, Prognose, Produktion', '-1', loesche_quelle)
         conn.close()
 
         return()
@@ -390,6 +312,7 @@ class WeatherData:
         return (currentDayProduction)
 
     def sum_pv_data(self, pvdaten_dict):
+        # Prognosedaten für mehrere Strings addieren
         # 1. Daten aus allen Blöcken zusammenfassen und Werte addieren
         daten_dict = {}
 

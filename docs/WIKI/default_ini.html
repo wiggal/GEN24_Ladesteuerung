@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -8,47 +8,50 @@
     <div class="markdown-body">
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <div class="markdown-heading">
-        <h2 class="heading-element">Grundsätzliche Einstellungen in <code>default_priv.ini</code>:</h2>
+        <h2 class="heading-element">Standard Einstellungen in <code>default_priv.ini</code>:</h2>
       </div>
-      <p><strong><code>[env]</code><br>
+      <p><strong><font size="+1"><code>[env]</code></font><br>
           Hier folgen einige grundlegende Einstellungen.</strong><br>
-        <code>filePathWeatherData = weatherData.json</code><br>
-        Hier wird die Datei bestimmt, in der die PV-Vorhersage
-        gespeichert ist.<br>
-        <code>Einfacher_PHP_Webserver = 0</code><br>
+        <font size="+1"> <code>Einfacher_PHP_Webserver = 0</code></font><br>
         Durch Einfacher_PHP_Webserver = 1 wird beim ersten Aufruf von
         start_PythonScript.sh der einfache PHP_Webserver auf Port 2424
-        gestartet. Wenn Apache Webserver benutzt werden soll
+        gestartet. <br>
+        Wenn Apache Webserver benutzt werden soll
         Einfacher_PHP_Webserver = 0 setzen.<br>
-        <code>print_level = 1</code><br>
+        <font size="+1"> <code>print_level = 1</code></font><br>
         print_level steuert die Ausgabe beim Lauf der Ladesteuerung
-        (http_SymoGen24Controller2.py) print_level 0=keine Ausgabe
-        1=Ausgabe 2=DEBUG Ausgabe</p>
-      <p><strong><code>[gen24]</code><br>
+        (http_SymoGen24Controller2.py) <br>
+        print_level 0=keine Ausgabe 1=Ausgabe 2=DEBUG Ausgabe</p>
+      <p><strong><font size="+1"><code>[gen24]</code></font><br>
           In diesem Block werden die Wechselrichter definiert.</strong><br>
-        <code>hostNameOrIp = 192.168.178.111</code><br>
+        <font size="+1"> <code>hostNameOrIp = 192.168.178.111</code></font><br>
         Hier wird die IP-Adressen des GEN24 Wechselrichter bestimmt.<br>
-        <code>IP_weitere_Gen24 = no</code> <code>IP_weitere_Symo = no</code><br>
+        <font size="+1"> <code>IP_weitere_Gen24 = no</code> </font><code><br>
+          <font size="+1"> IP_weitere_Symo = no</font></code><br>
         Hier können die IP-Adressen weiterer GEN24 bzw. Symos, durch
-        Komma getrennt, definiert werden, um deren Produktion in die
-        Steuerung bzw. ins Logging einzubeziehen.<br>
-        no = kein weiterer GEN24 bzw. Symos vorhanden. <code>user =
-          customer</code><br>
+        Komma getrennt, definiert werden, <br>
+        um deren Produktion in die Steuerung bzw. ins Logging
+        einzubeziehen. no = kein weiterer GEN24 bzw. Symos vorhanden.<br>
+        <font size="+1"> <code>user = customer</code></font><br>
         Benutzername zum Login am GEN24, wird in den meisten Fällen <code>customer</code>
         sein.<br>
-        <code>password = 'XXXXXXXX'</code><br>
-        Kennword für den Benutzer <code>customer</code>, das Kennwort
-        muss in einfache Hochkommas gesetzt werden, wegen evtl.
+        <font size="+1"> <code>password = 'XXXXXXXX'</code></font><br>
+        Kennword für den Benutzer z.B. <code>customer</code>, das
+        Kennwort muss in einfache Hochkommas gesetzt werden, wegen evtl.
         Sonderzeichen.<br>
         Sollte das Kennwort ein '%' Zeichen enthalten bitte zwei '%%'
-        eintragen.</p>
-      <p><strong><code>[messaging]</code><br>
+        eintragen.<br>
+        <font size="+1"> <code>battery_capacity_Wh = 11000</code></font><br>
+        Akkukapazität in Wh, wird benötigt, wenn Akku offline ist!!<br>
+        <br>
+        <strong><code>[messaging]</code><br>
           Hier Einstellungen zum Handypushup.</strong><br>
-        <code>Push_Message_EIN = 0</code><br>
+        <font size="+1"> <code>Push_Message_EIN = 0</code></font><br>
         Hier können Pushmessages zu den Schreibvorgängen über den Dienst
         ntfy.sh auf die Handyapp ntfy gesendet werden.<br>
         Push_Message_EIN (1=EIN/0=AUS)<br>
-        <code>Push_Message_Url = https://ntfy.sh/XXXXXXXXX</code><br>
+        <font size="+1"> <code>Push_Message_Url =
+            https://ntfy.sh/XXXXXXXXX</code></font><br>
         Hier muss die Adresse des über die App erstellten Themennamen
         eingetragen werden.</p>
     </div>

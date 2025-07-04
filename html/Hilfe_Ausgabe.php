@@ -6,7 +6,19 @@
     <title>GEN24 Ladesteuerung</title>
     <style>
         <?php
-        echo file_get_contents("../docs/style.css");
+        $style_contend = file_get_contents("../docs/style.css");
+        # Seitenvorschub für WIKI-Navigation entfernen
+        $style_contend = str_replace(
+            'scroll-padding-top: 65px;',
+            'scroll-padding-top: 0px;',
+            $style_contend
+            );
+        $style_contend = str_replace(
+            'padding-top: 35px;',
+            'padding-top: 0px;',
+            $style_contend
+            );
+        echo $style_contend;
         ?>
     </style>
     <style>
@@ -41,7 +53,7 @@ if (!function_exists('str_ends_with')) {
     }
 }
 
-// Markdown-Datei einlesen
+// Hilfe-Datei einlesen
 $filename = isset($_GET['file']) ? basename($_GET['file']) : null;
 $return_url = isset($_GET['return']) ? htmlspecialchars($_GET['return']) : null;
 # Alle Dokus unter /docs abgelegt
@@ -69,6 +81,7 @@ if (!$filename) {
             '<div class="hilfe" align="right"> <a href="'.$return_url.'"><b>Zurück</b></a></div>',
             $html_contend
             );
+
         echo $html;
     }
 }

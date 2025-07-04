@@ -31,6 +31,18 @@ select {
   font-size: 1.3em;
   background-color: #F5F5DC;
 }
+.button-container {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 8px; /* Abstand zwischen den Buttons */
+}
+
+button {
+  padding: 6px 12px;
+  font-size: 14px;
+}
 button {
   font-size: 1.3em;
   background-color: #4CAF50;
@@ -39,15 +51,11 @@ button.schreiben {
     position: fixed;
     bottom: 0;
 }
-button.dateiauswahl {
-    position: fixed;
-    top: 8px;
-}
 @media screen and (max-width: 64em) {
-body{ font-size: 160%; }
+body{ font-size: 140%; }
 input { font-size: 100%; }
 th { font-size: 1.5em; }
-td {font-size: 160%;
+td {font-size: 140%;
     width:48%;
 	max-width: 120px;
 	white-space: nowrap;
@@ -81,8 +89,8 @@ td {font-size: 160%;
 <!-- Hilfeaufruf ENDE -->
 
 <div class="version" align="center">
-<br>
-<b>  GEN24_Ladesteuerung Version: 0.30.4 </b>
+<br><br>
+<b>  GEN24_Ladesteuerung Version: 0.30.5 </b>
 </div>
 <?php
 include "config.php";
@@ -113,34 +121,50 @@ function config_lesen( $file, $readonly )
 {
     $myfile = fopen($file, "r") or die("Kann Datei ".$file." nicht öffnen!");
     $Zeilencounter = 0;
+    $KommentarBlock = '';
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
-        $Zeilencounter++;
+        $Zeile = rtrim($Zeile);
 
-        # Suche nach Kommentarzeilen
-        if ((strpos($Zeile, ';') !== false) AND (strpos($Zeile, ';') < 2)) {
-            $Zeile = rtrim($Zeile);
-            echo '<tr class="comment"><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
-        } else {
-            # Hier die Configblöcke suchen []
-            if ((strpos($Zeile, '[') !== false) AND (strpos($Zeile, '[') < 1)) {
-                $Zeile = rtrim($Zeile);
-                echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</th></tr>'."\n";
-            } else {
-                # Hier die Variablenbelegung suchen
-                if ((strpos($Zeile, '=') !== false)) {
-                    $Zeilenteil = explode("=", $Zeile);
-                    $Zeilenteil[0] = ltrim(rtrim($Zeilenteil[0]));
-                    $Zeilenteil[1] = ltrim(rtrim($Zeilenteil[1]));
-                    echo '<tr><td><input type="hidden" name="Zeile['.$Zeilencounter.'][0]" value=\''.$Zeilenteil[0].' = \'>'.$Zeilenteil[0].'</td>'."\n";
-                    echo '<td><input type="text" name="Zeile['.$Zeilencounter.'][1]" value="'.htmlentities($Zeilenteil[1]).'" '.$readonly.'></td></tr>'."\n";
-                } else {
-                    #hier noch die Leerzeilen behandeln
-                    $Zeile = rtrim($Zeile);
-                    echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
-                }
-            }
+        // Kommentarzeile
+        if ((strpos($Zeile, ';') !== false) && (strpos($Zeile, ';') < 2)) {
+            $KommentarZeilen[] = htmlspecialchars($Zeile);
+            continue;
         }
+
+        // Falls ein Kommentarblock fertig ist, jetzt ausgeben
+        if (!empty($KommentarZeilen)) {
+            $block = implode('<br>', $KommentarZeilen);
+            echo '<tr class="comment"><td colspan="2">
+                    <input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$block.'\' >'.$block.'
+                </td></tr>'."\n";
+            $Zeilencounter++;
+            $KommentarZeilen = [];
+        }
+    
+        // Rest wie gehabt...
+        if ((strpos($Zeile, '[') !== false) && (strpos($Zeile, '[') < 1)) {
+            echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</th></tr>'."\n";
+        }
+        elseif (strpos($Zeile, '=') !== false) {
+            $Zeilenteil = explode("=", $Zeile, 2);
+            $Zeilenteil[0] = trim($Zeilenteil[0]);
+            $Zeilenteil[1] = trim($Zeilenteil[1]);
+            echo '<tr><td><input type="hidden" name="Zeile['.$Zeilencounter.'][0]" value=\''.$Zeilenteil[0].' = \'>'.$Zeilenteil[0].'</td>'."\n";
+            echo '<td><input type="text" name="Zeile['.$Zeilencounter.'][1]" value="'.htmlentities($Zeilenteil[1]).'" '.$readonly.'></td></tr>'."\n";
+        } else {
+            echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$Zeile.'\' >'.$Zeile.'</td></tr>'."\n";
+        }
+
+        $Zeilencounter++;
+    }
+
+    // Falls Datei mit Kommentar endet
+    if (!empty($KommentarZeilen)) {
+        $block = implode('<br>', $KommentarZeilen);
+        echo '<tr class="comment"><td colspan="2">
+                <input type="hidden" name="Zeile['.$Zeilencounter.']" value=\''.$block.'\' >'.$block.'
+            </td></tr>'."\n";
     }
 }
 
@@ -172,7 +196,10 @@ echo '<br><br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
+echo '<div class="button-container">';
 echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
+echo '&nbsp;<button class="Kommentare" type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
+echo '</div>';
 echo '</form>'."\n";
 echo '<br>';
 
@@ -220,7 +247,10 @@ echo '<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$_POST["ini_file"].'">'."\n";
 echo '<input type="hidden" name="case" value="">'."\n";
+echo '<div class="button-container">';
 echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
+echo '&nbsp;<button type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
+echo '</div>';
 echo '</form>'."\n";
 echo '<br>';
 
@@ -244,15 +274,35 @@ echo '</form>';
 
     case 'schreiben':
 # SCHREIBEN DER INI-Datei
-$write = '';
-$Zeile = $_POST["Zeile"];
-foreach($Zeile AS $zeile_key => $zeile_value) {
- if(is_array($zeile_value)){
- $Zeile[$zeile_key] = $Zeile[$zeile_key]['0'].$Zeile[$zeile_key]['1'];
- }
- $Zeile[$zeile_key] = rtrim($Zeile[$zeile_key]);
+foreach($Zeile as $zeile_key => $zeile_value) {
+    if (is_array($zeile_value)) {
+        $Zeile[$zeile_key] = $zeile_value['0'] . $zeile_value['1'];
+    } else {
+        // Wieder zu einzelnen Zeilen machen
+        $Zeile[$zeile_key] = str_replace('<br>', "\n", $zeile_value);
+        $Zeile[$zeile_key] = rtrim($Zeile[$zeile_key]);
+    }
 }
-$write = implode("\n",$Zeile);
+// Jetzt alle Zeilen flach machen:
+$final_lines = [];
+
+foreach ($_POST['Zeile'] as $zeile_value) {
+    if (is_array($zeile_value)) {
+        // key = value
+        $final_lines[] = rtrim($zeile_value[0] . $zeile_value[1]);
+    } else {
+        // ggf. <br> durch \n ersetzen bei Kommentarblöcken
+        $zeile_value = str_replace('<br>', "\n", $zeile_value);
+        // in echte einzelne Zeilen splitten
+        $lines = explode("\n", $zeile_value);
+        foreach ($lines as $line) {
+            $final_lines[] = rtrim($line);
+        }
+    }
+}
+
+$write = implode("\n", $final_lines);
+
 if(is_writeable($_POST["ini_file"],)) {
     $handle = fopen($_POST["ini_file"],"w");
     if (fwrite($handle, $write)) {
@@ -270,6 +320,15 @@ exit();
     break;
 } # ENDE switch
 ?>
+<script>
+function toggleComments() {
+    const rows = document.querySelectorAll('.comment');
+    rows.forEach(row => {
+        row.style.display = (row.style.display === 'none') ? '' : 'none';
+    });
+}
+</script>
+
 
 </body>
 </html>

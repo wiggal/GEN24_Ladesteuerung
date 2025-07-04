@@ -48,7 +48,7 @@ ksort($structuredData);
 // Quellen sortieren: Produktion zuerst, Ergebnis an zweiter Stelle
 $quellenListe = array_keys($alleQuellen);
 // Manuell sortieren
-$priorisiert = ['Produktion', 'Prognose', 'Median'];
+$priorisiert = ['Produktion', 'Prognose', 'Basis'];
 // Nur priorisiert ausgeben, wenn auch vorhanden
 $existierendePriorisierte = array_intersect($priorisiert, $quellenListe);
 $rest = array_diff($quellenListe, $priorisiert);
@@ -123,7 +123,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         thead th {
             position: sticky;
             top: 0;
-            background-color: #4CAF50;
+            background-color: gray;
             color: white;
             z-index: 2;
         }
@@ -202,8 +202,10 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
                 foreach ($quellenListe as $row) {
                     $quellen[] = $row;
                     $Style_bg = '';
-                    if ($row != 'Produktion') {
-                        $Style_bg = 'style="background-color: orange;"';
+                    if ($row == 'Produktion') {
+                        $Style_bg = 'style="background-color: #4CAF50;"';
+                    } elseif (in_array($row, ['Prognose', 'Basis'])) {
+                      $Style_bg = 'style="background-color: red;"';
                     }
                     echo "<th {$Style_bg}>{$row}</th>";
                 }
@@ -261,13 +263,25 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 <form method="post" style="margin-top: 20px;">
     <fieldset>
         <legend><strong>Quellen zum Löschen auswählen:</strong></legend>
+        <span style="color: red;"><b>ACHTUNG!!</b></span><span> Es werden alle Daten der ausgewählten Spalte gelöscht, für <b>Prognosen</b> ist die Historie nicht wiederherstellbar!!!</span>
+        <br>
         <?php
         foreach ($quellen as $quelle) {
+            $quelle_bg = '';
+            if (!in_array($quelle, ['Produktion', 'Prognose', 'Basis'])) {
+              $quelle_bg = 'style="color: red;"';
+            }
             if ( $quelle != 'DUMMY') {
-                echo "<label><input type='checkbox' name='delete_quellen[]' value='$quelle'> $quelle</label><br>";
+                echo "<label><input type='checkbox' name='delete_quellen[]' value='$quelle'>\n";
+                echo "<span $quelle_bg><b> $quelle</b></span></label><br>";
             }
         }
         ?>
+        <label><input type="checkbox" id="selectAll" onclick="toggleAll(this)"> Alle Quellen auswählen</label><br>
+        <br>
+        <label for="tage">Alle Daten der gewählten Quellen bis auf die letzten</label><br>
+        <input type="number" name="tage" id="tage" value="8" min="0" max="35" required style="width: 30px; text-align: center;">
+        <label for="tage"> Tage <b>löschen!!</b></label>
         <br>
         <button type="submit" style="background-color: red; color: white;" name="submit_delete" 
         onclick="return confirm('&#128721; Prognosequellen können nicht hergestellt werden! &#128721; \n \
@@ -279,25 +293,34 @@ Das neue Gewicht wird bei der nächsten Anforderung der Prognosequelle gesetzt!\
 
 <?php
 // Quellen löschen, wenn Formular abgeschickt wurde
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !empty($_POST['delete_quellen'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !empty($_POST['delete_quellen']) && isset($_POST['tage'])) {
     $toDelete = $_POST['delete_quellen'];
-    $placeholders = implode(',', array_fill(0, count($toDelete), '?'));
+    $tage = intval($_POST['tage']);
+    $grenzeDatum = date('Y-m-d 00:00:00', strtotime("-$tage days"));
 
-    $stmt = $db->prepare("DELETE FROM weatherData WHERE Quelle IN ($placeholders)");
-    if ($stmt) {
-        for ($i = 0; $i < count($toDelete); $i++) {
-            $stmt->bindValue(($i + 1), $toDelete[$i], SQLITE3_TEXT); // Parameter 1-basiert binden
+    foreach ($toDelete as $quelle) {
+        $stmt = $db->prepare("DELETE FROM weatherData WHERE Quelle = ? AND Zeitpunkt < ?");
+        if ($stmt) {
+            $stmt->bindValue(1, $quelle, SQLITE3_TEXT);
+            $stmt->bindValue(2, $grenzeDatum, SQLITE3_TEXT);
+            $stmt->execute();
         }
-        $stmt->execute();
     }
 
-    // Nach dem Löschen neu laden, um Änderungen anzuzeigen
     echo "<script>window.location.href=window.location.href;</script>";
 }
 ?>
-
     </div>
-    <?php
+    <script>
+    function toggleAll(source) {
+        checkboxes = document.getElementsByName('delete_quellen[]');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+    </script>
+
+<?php
 # Daten für Chartjs bilden
 $chartData = []; // [datum][quelle] = array of [time, wert]
 
@@ -308,10 +331,12 @@ foreach ($data as $zeitpunkt => $werteProQuelle) {
 
     foreach ($quellenListe as $quelle) {
         $wert = isset($werteProQuelle[$quelle]) ? $werteProQuelle[$quelle]['wert'] : NULL;
+        $gewicht = isset($werteProQuelle[$quelle]['gewicht']) ? $werteProQuelle[$quelle]['gewicht']: '';
 
         $chartData[$datum][$quelle][] = [
             'time' => $uhrzeit,
-            'wert' => $wert
+            'wert' => $wert,
+            'gewicht' => $gewicht
         ];
     }
 }
@@ -328,7 +353,7 @@ let lineChart = null;
 // Definieren der Farbzuweisungen für jede Quelle
 const sourceColors = {
     'Prognose': '#FF3300', //  Rot für Prognosewert
-    'Median': '#FF3300', //  Rot für Prognosewert
+    'Basis': '#FF3300', //  Rot für Prognosewert
     'Produktion': '#4CAF50',    //  Grün für Produktion-Wert
     'solcast.com': '#3F51B5', // Blau
     'solarprognose': '#7B3F00', // Braun
@@ -347,17 +372,30 @@ function renderChart(date) {
         const data = dateData[quelle];
         const times = data.map(e => e.time);
         const werte = data.map(e => e.wert);
+        const gewicht_array = data.map(e => e.gewicht);
+        const gewicht = gewicht_array.find(e => typeof e === "number")
         times.forEach(t => allTimes.add(t));
 
         let fillOption = false;
         let backgroundColor = 'transparent';
+        let hidden = false;
         if (quelle === 'Produktion') {
             backgroundColor = 'rgba(200, 200, 200, 0.3)';
             fillOption = true;
-        } else if (quelle === 'Median') {
+        } else if (quelle === 'Basis') {
             backgroundColor = 'rgba(255, 51, 0, 0.1)';
             fillOption = '1';
         }
+        //Strichliert und blass bei Gewicht 0
+        let borderDash = [7, 7];
+        if (quelle === 'Produktion' || quelle === 'Prognose' ) {
+            borderDash = [0, 0];
+        } else if ((gewicht === 0) && (quelle !== 'Basis')) {
+            //sourceColors[quelle] = '#CCCCCC';
+            //borderDash = [5, 8];
+            hidden = true;
+        }
+
 
         datasets.push({
             label: quelle,
@@ -366,10 +404,11 @@ function renderChart(date) {
             borderColor: sourceColors[quelle] || '#CCCCCC', // Falls Quelle nicht definiert, Fallback-Farbe
             borderWidth: 3,
             // Anpassung der Strichart basierend auf Quelle
-            borderDash: quelle === 'Prognose' || quelle === 'Produktion'? [0, 0] : [5, 5],
+            borderDash: borderDash,
             pointRadius: 0,
             fill: fillOption,
             backgroundColor: backgroundColor,
+            hidden: hidden,
             tension: 0.1
         });
 

@@ -10,33 +10,30 @@
       <h1 class="heading-element">http_SymoGen24Controller2.py</h1>
       <p><strong>Programmfunktionen:</strong></p>
       <ul>
+        <li> Prognosebasierte Ladesteuerung für Fronius Symo GEN24 Plus
+          um eine Einspeisebegrenzung (bei mir 70%) zu umgehen, und eine
+          Produktion über der AC-Ausgangsleistungsgrenze des WR als DC
+          in die Batterie zu laden. Über die Tabelle <i><b>"LadeStrg"</b></i>
+          können große, geplante Verbräuche bei der Ladeplanung
+          berücksichtigt werden, siehe Batterieladesteuerung in der
+          README. </li>
         <li>
-          <p>Prognosebasierte Ladesteuerung für Fronius Symo GEN24 Plus
-            um eine Einspeisebegrenzung (bei mir 70%) zu umgehen, und
-            eine Produktion über der AC-Ausgangsleistungsgrenze des WR
-            als DC in die Batterie zu laden.<br>
-            Über die Tabelle <i><b>"LadeStrg"</b></i> können große,
-            geplante Verbräuche bei der Ladeplanung berücksichtigt
-            werden, siehe Batterieladesteuerung in der README. </p>
+          <p>Die Entladung der Batterie bei großen Verbrauchen steuern,
+            siehe BatterieENTladesteuerung in der README.</p>
         </li>
-        <li>
-          <p>Um die Entladung der Batterie bei großen Verbräuchen zu
-            steuern, siehe BatterieENTladesteuerung in der README.<br>
-          </p>
+        <li>Laden aus dem Netz usw. bei dynamischen Stromtarifen
+          steuern, siehe DynamicPriceCheck. <br>
         </li>
-        <li>
-          <p>Grafische Darstellung von Produktion und Verbrauch, siehe
-            Logging in der README.. </p>
+        <li>Notstromreserve je nach Prognose für den nächsten Tag
+          steuern. <br>
         </li>
-        <li>
-          <p>Akkuschonung: Um einen LFP-Akku zu schonen, kann die
-            Ladeleistung ab z.B. 80% auf 0,2C und ab 90% auf 0,1C
-            (optional ab 95% weniger) beschränkt werden (anpassbar). <br>
-            Zusätzlich kann auch die Maximale Ladung bei genügend
-            Prognose für den nächsten Tag auf z.B. 80% SOC beschränkt
-            werden.<br>
-          </p>
-        </li>
+        <li>Akkuschonung: Um den Akku zu schonen, kann die Ladeleistung
+          ab z.B. 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95%
+          weniger) beschränkt werden (anpassbar). Zusätzlich kann auch
+          die Maximale Ladung bei genügend Prognose für den nächsten Tag
+          auf z.B. 80% SOC beschränkt werden.</li>
+        <li> Grafische Darstellung von Produktion und Verbrauch,
+          Strompreisen und Prognosen, siehe Logging in der README. </li>
       </ul>
       <strong>Funktionsweise:</strong>
       <ul>
@@ -51,7 +48,7 @@
             Konfiguration für http_SymoGen24Controller2.py ausgeliefert.
             Wird die charge.ini nach charge_priv.ini kopiert, können
             dort die eigenen Parameter eingestellt werden, ohne dass sie
-            bei Updates überschrieben werden.</p>
+            bei Updates (mit git pull) überschrieben werden.</p>
         </li>
         <li>
           <p>In der <b>charge_priv.ini</b> können bestimmte Funktionen

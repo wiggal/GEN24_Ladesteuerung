@@ -21,6 +21,8 @@ html, body {
     color: #333;
     /* WICHTIG: Fügt Padding hinzu, um den Platz des fixierten Headers auszugleichen. */
     padding-top: 35px; /* Ausgleich für fixierten Header */
+    scroll-behavior: smooth;
+    scroll-padding-top: 65px;
 }
 
 /* 3. Header-Styling:
