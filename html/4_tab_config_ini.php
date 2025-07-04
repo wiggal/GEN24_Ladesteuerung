@@ -52,10 +52,10 @@ button.schreiben {
     bottom: 0;
 }
 @media screen and (max-width: 64em) {
-body{ font-size: 160%; }
+body{ font-size: 140%; }
 input { font-size: 100%; }
 th { font-size: 1.5em; }
-td {font-size: 160%;
+td {font-size: 140%;
     width:48%;
 	max-width: 120px;
 	white-space: nowrap;
@@ -89,7 +89,7 @@ td {font-size: 160%;
 <!-- Hilfeaufruf ENDE -->
 
 <div class="version" align="center">
-<br>
+<br><br>
 <b>  GEN24_Ladesteuerung Version: 0.30.5 </b>
 </div>
 <?php

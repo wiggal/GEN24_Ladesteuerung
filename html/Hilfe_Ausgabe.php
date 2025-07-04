@@ -6,7 +6,13 @@
     <title>GEN24 Ladesteuerung</title>
     <style>
         <?php
-        echo file_get_contents("../docs/style.css");
+        $style_contend_tmp = file_get_contents("../docs/style.css");
+        $style_contend = str_replace(
+            'scroll-padding-top: 65px;',
+            'scroll-padding-top: 0px;',
+            $style_contend_tmp
+            );
+        echo $style_contend;
         ?>
     </style>
     <style>
@@ -31,7 +37,6 @@
 
     </head>
 <body>
-    <div id = "top"></div>
     <main>
         <div id="content-container">
 <?php
@@ -42,11 +47,11 @@ if (!function_exists('str_ends_with')) {
     }
 }
 
-// Hilfe-Dateiname einlesen
-$teilname = isset($_GET['file']) ? basename($_GET['file']) : null;
+// Hilfe-Datei einlesen
+$filename = isset($_GET['file']) ? basename($_GET['file']) : null;
 $return_url = isset($_GET['return']) ? htmlspecialchars($_GET['return']) : null;
 # Alle Dokus unter /docs abgelegt
-$filename = '../docs/WIKI/' . $teilname;
+$filename = '../docs/WIKI/' . $filename;
 if ($filename && !str_ends_with($filename, '.html')) {
     $filename .= '.html';
 }
@@ -56,17 +61,8 @@ $html = '';
 
 if (!$filename) {
     $warning = '<p style="color:red;">Fehler: Es wurde keine Datei angegeben. Beispiel: ?file=Setup.md</p>';
-} elseif ($teilname == 'config') {
-    $html_contend = '<!--HIERZURUECK-->';
-    $config_list =['config_default.html', 'config_weather.html', 'config_charge.html', 'config_dynprice.html'];
-    foreach ($config_list as $teil_file) {
-        $html_contend .= file_get_contents('../docs/WIKI/' . $teil_file);
-        $html_contend .= '<br><br>';
-        $hr_zaehler++;
-    }
 } else {
     $html_contend = file_get_contents($filename);
-}
 
     if ($html_contend === false) {
         $warning = "<center><p style=\"color:red;\">Fehler: Die Datei <strong>$filename</strong> konnte nicht geladen werden.</p></center>";
@@ -74,18 +70,15 @@ if (!$filename) {
         exit();
     } else {
         // Tag ersetzen
-        $html1 = str_replace(
+        $html = str_replace(
             '<!--HIERZURUECK-->',
             '<div class="hilfe" align="right"> <a href="'.$return_url.'"><b>Zurück</b></a></div>',
             $html_contend
             );
-        $html = str_replace(
-            'scroll-margin-top: 95px;',
-            'scroll-margin-top: 5px;',
-            $html1
-            );
+
         echo $html;
     }
+}
 ?>
         </div>
     </main>

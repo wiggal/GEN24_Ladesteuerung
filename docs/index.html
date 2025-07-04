@@ -43,22 +43,5 @@
     <script src="marked.min.js"></script>
     
     <script src="script.js"></script>
-    <script type="module">
-        class HtmlLoader extends HTMLElement {
-        async connectedCallback() {
-            const src = this.getAttribute('src');
-            if (!src) return;
-
-            try {
-            const response = await fetch(src);
-            const html = await response.text();
-            this.innerHTML = html; // Kein Shadow DOM, sondern direkt im Element!
-            } catch {
-            this.innerHTML = `<p style="color:red;">Fehler beim Laden: ${src}</p>`;
-            }
-        }
-        }
-        customElements.define('html-loader', HtmlLoader);
-    </script>
 </body>
 </html>
