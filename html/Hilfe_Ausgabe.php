@@ -6,11 +6,17 @@
     <title>GEN24 Ladesteuerung</title>
     <style>
         <?php
-        $style_contend_tmp = file_get_contents("../docs/style.css");
+        $style_contend = file_get_contents("../docs/style.css");
+        # Seitenvorschub für WIKI-Navigation entfernen
         $style_contend = str_replace(
             'scroll-padding-top: 65px;',
             'scroll-padding-top: 0px;',
-            $style_contend_tmp
+            $style_contend
+            );
+        $style_contend = str_replace(
+            'padding-top: 35px;',
+            'padding-top: 0px;',
+            $style_contend
             );
         echo $style_contend;
         ?>
