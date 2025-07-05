@@ -85,16 +85,16 @@ button {
 <tr class="comment"><td colspan="2">; wp ist die Modulleistung des Strings in W </td></tr>
 <tr><td class="variablenname">wp</td>
 <td><input type="text" name="Zeile[11][1]" value="5550" readonly></td></tr>
-<tr class="comment"><td colspan="2">; az ist der Azimuth der Anlage, also in welche Himmelsrichtung die Module ausgerichtet sind. -180 und 180 = Norden, -90 = Osten, 0 = Sueden, 90 = Westen </td></tr>
+<tr class="comment"><td colspan="2">; az ist der Azimuth der Anlage, also in welche Himmelsrichtung die Module ausgerichtet sind. -180 und 180 = Norden, -90 = Osten, 0 = Süden, 90 = Westen </td></tr>
 <tr><td class="variablenname">az</td>
 <td><input type="text" name="Zeile[13][1]" value="0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; dec ist der Winkel, in dem die Module verbaut sind, wobei 0 waagerecht liegen und 90 senkrecht stehend bedeutet </td></tr>
 <tr><td class="variablenname">dec</td>
 <td><input type="text" name="Zeile[15][1]" value="30" readonly></td></tr>
-<tr class="comment"><td colspan="2">; horizon gibt mögliche Verschattungen pro String an, benutzt Akkudoktor und Forecast_solar mit api_key<br>; die 12 Zahlen werden in Grad angegeben und repräsentieren im Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den Horizont<br>; siehe https://doc.forecast.solar/horizon<br>; wenn zum Beipiel im Südwesten ein großer Baum Schatten wirft:<br>; 0,0,0,0,0,0,0,20,45,20,0,0 </td></tr>
+<tr class="comment"><td colspan="2">; horizon gibt mögliche Verschattungen pro String an, benutzt Akkudoktor und Forecast_solar mit api_key<br>; die 12 Zahlen werden in Grad angegeben und repräsentieren im Uhrzeigersinn in 30 Grad Schritten, beginnen bei Nord, den Horizont<br>; siehe https://doc.forecast.solar/horizon<br>; wenn zum Beispiel im Südwesten ein großer Baum Schatten wirft:<br>; 0,0,0,0,0,0,0,20,45,20,0,0 </td></tr>
 <tr><td class="variablenname">horizon</td>
 <td><input type="text" name="Zeile[17][1]" value="0,0,0,0,0,0,0,0,0,0,0,0" readonly></td></tr>
-<tr class="comment"><td colspan="2">; wenn es einen 2. String gibt, dann hier die Werte analog zum ersten anpassen: </td></tr>
+<tr class="comment"><td colspan="2">; wenn es einen 2. String gibt, dann hier die Werte analog zum ersten Anpassen: </td></tr>
 <tr><td class="variablenname">wp2</td>
 <td><input type="text" name="Zeile[19][1]" value="4440" readonly></td></tr>
 <tr><td class="variablenname">az2</td>
@@ -112,21 +112,21 @@ button {
 <tr class="comment"><td colspan="2">; wenn ein API key vorhanden ist, können die Forecasts mit aktuellen Ertragswerten des Tages (aus der DB) verbessert werden.<br>; &quot;ja&quot; nutzt diese Funktion der API, &quot;nein&quot; nicht.<br>; Siehe https://doc.forecast.solar/actual </td></tr>
 <tr><td class="variablenname">forecastactual</td>
 <td><input type="text" name="Zeile[29][1]" value="nein" readonly></td></tr>
-<tr class="comment"><td colspan="2">; wenn &quot;damping&quot; eingesetzt werden soll, hier die entsprechenden Werte einstellen. &quot;0,0&quot; ist Standardwert (kein Damping)<br>; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas damping am Morgen, hohes Damping am nachmittag.<br>; beide Werte müssen zwischen 0 und 1 sein<br>; Siehe https://doc.forecast.solar/damping </td></tr>
+<tr class="comment"><td colspan="2">; wenn &quot;damping&quot; eingesetzt werden soll, hier die entsprechenden Werte einstellen. &quot;0,0&quot; ist Standardwert (kein Damping)<br>; 0,0 bedeutet kein Damping, 0.25,0.75 bedeutet etwas damping am Morgen, hohes Damping am Nachmittag.<br>; beide Werte müssen zwischen 0 und 1 sein<br>; Siehe https://doc.forecast.solar/damping </td></tr>
 <tr><td class="variablenname">forecastdamping</td>
 <td><input type="text" name="Zeile[31][1]" value="0,0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Wenn ein api_pers_plus vorhanden ist (api_pers_plus = ja) können zwei Ausrichtungen in einer Abfrage behandelt werden. </td></tr>
 <tr><td class="variablenname">api_pers_plus</td>
 <td><input type="text" name="Zeile[33][1]" value="nein" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht) </td></tr>
 <tr><td class="variablenname">Gewicht</td>
 <td><input type="text" name="Zeile[35][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[36]" value='' ></td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[37]" value='[akkudoktor]' >[akkudoktor]</td></tr>
-<tr class="comment"><td colspan="2">; spezifische Werte für die API von Andreas Schmitz, dem Akkudoktor https://www.youtube.com/@Akkudoktor<br>; weitere Infos unter https://api.akkudoktor.net/<br>; der Zellkoeffizient wird fuer die Berechnung der Verluste im Kontext herrschender Temperaturen genutzt </td></tr>
+<tr class="comment"><td colspan="2">; spezifische Werte für die API von Andreas Schmitz, dem Akkudoktor https://www.youtube.com/@Akkudoktor<br>; weitere Infos unter https://api.akkudoktor.net/<br>; der Zellkoeffizient wird für die Berechnung der Verluste im Kontext herrschender Temperaturen genutzt </td></tr>
 <tr><td class="variablenname">cellco</td>
 <td><input type="text" name="Zeile[39][1]" value="-0.4" readonly></td></tr>
-<tr class="comment"><td colspan="2">; albedo ist der Rexlexionsgrad des Untergrunds, auf dem die Zellen montiert sind. Siehe https://pv-navi.de/pv-navi-abc/albedo/ </td></tr>
+<tr class="comment"><td colspan="2">; albedo ist der Reflexionsgrad des Untergrunds, auf dem die Zellen montiert sind. Siehe https://pv-navi.de/pv-navi-abc/albedo/ </td></tr>
 <tr><td class="variablenname">albedo</td>
 <td><input type="text" name="Zeile[41][1]" value="0.2" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Gesamtleistung des Wechselrichters </td></tr>
@@ -144,7 +144,7 @@ button {
 <td><input type="text" name="Zeile[49][1]" value="8000" readonly></td></tr>
 <tr><td class="variablenname">inverterEfficiency2</td>
 <td><input type="text" name="Zeile[50][1]" value="1" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht) </td></tr>
 <tr><td class="variablenname">Gewicht</td>
 <td><input type="text" name="Zeile[52][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[53]" value='' ></td></tr>
@@ -170,7 +170,7 @@ button {
 <tr class="comment"><td colspan="2">; falls die Anlagengröße in KWp nicht mit der Größe in Solarprognose übereinstimmt (z.B. Erweiterung) </td></tr>
 <tr><td class="variablenname">KW_Faktor</td>
 <td><input type="text" name="Zeile[67][1]" value="1.00" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht) </td></tr>
 <tr><td class="variablenname">Gewicht</td>
 <td><input type="text" name="Zeile[69][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[70]" value='' ></td></tr>
@@ -210,7 +210,7 @@ button {
 <tr class="comment"><td colspan="2">; Verwendetes Wettermodel, es können  auch mehrere angegeben werden, der Werte dann gemittelt werden.<br>; z.B. icon_d2,icon_eu </td></tr>
 <tr><td class="variablenname">weather_models</td>
 <td><input type="text" name="Zeile[94][1]" value="icon_d2" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht) </td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht) </td></tr>
 <tr><td class="variablenname">Gewicht</td>
 <td><input type="text" name="Zeile[96][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[97]" value='' ></td></tr>
@@ -223,11 +223,12 @@ button {
 <td><input type="text" name="Zeile[102][1]" value="+1" readonly></td></tr>
 <tr><td class="variablenname">KW_Faktor</td>
 <td><input type="text" name="Zeile[103][1]" value="1.00" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht) </td></tr>
 <tr><td class="variablenname">Gewicht</td>
-<td><input type="text" name="Zeile[104][1]" value="1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[105]" value='' ></td></tr>
+<td><input type="text" name="Zeile[105][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[106]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/weatherini"></div><br><center><a href="#Hilfezu/CONFIG/chargeini" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;<button type="submit">Hilfe zu ../CONFIG/charge.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Ladeberechnung]' >[Ladeberechnung]</td></tr>
-<tr class="comment"><td colspan="2">; Wenn die Variable &quot;FesteLadeleistung&quot; größer/gleich &quot;0&quot; Watt ist, wird der Wert geschrieben.<br>; FesteLadeleistung = -1, Ladesteuerung steht auf AUTO </td></tr>
+<tr class="comment"><td colspan="2">; Wenn die Variable &quot;FesteLadeleistung&quot; größer/gleich &quot;0&quot; Watt ist, wird der Wert geschrieben, und der Akku wird immer mit der eingestellten Leistung geladen.<br>; FesteLadeleistung = -1, die Ladesteuerung erfolgt mit den aus der Prognose und den Einstellungen hier, errechneten Werten, dynamisch. </td></tr>
 <tr><td class="variablenname">FesteLadeleistung</td>
 <td><input type="text" name="Zeile[2][1]" value="-1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[3]" value='' ></td></tr>
@@ -235,21 +236,21 @@ button {
 <tr><td class="variablenname">BattVollUm</td>
 <td><input type="text" name="Zeile[5][1]" value="-4" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[6]" value='' ></td></tr>
-<tr class="comment"><td colspan="2">; Faktor um mehr Batteriekapazität für später aufzusparen.<br>; Wenn BatSparFaktor &gt; 0: Berechnung nach [ (Batteriekapazität) / (Zeit bis BatVollUm) * BatSparFaktor ]<br>; Wenn BatSparFaktor == 0: Ladung an den Prognosespitzen (Netzdienlich) </td></tr>
+<tr class="comment"><td colspan="2">; Faktor um mehr Batteriekapazität für später aufzusparen.<br>; Wenn BatSparFaktor &gt; 0: Berechnung nach [ (Batteriekapazität) / (Zeit bis BatVollUm) * BatSparFaktor ]<br>; Wenn BatSparFaktor == 0: Ladung an den Prognosespitzen (netzdienlich) </td></tr>
 <tr><td class="variablenname">BatSparFaktor</td>
 <td><input type="text" name="Zeile[8][1]" value="0.5" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[9]" value='' ></td></tr>
 <tr class="comment"><td colspan="2">; Größter Batterieladewert, der im WR gesetzt werden soll, aber höchstens der maximale mögliche Ladewert!!! </td></tr>
 <tr><td class="variablenname">MaxLadung</td>
 <td><input type="text" name="Zeile[11][1]" value="3000" readonly></td></tr>
-<tr class="comment"><td colspan="2">; die Einspeisegrenze sollte der im GEN24 entsprechen. </td></tr>
+<tr class="comment"><td colspan="2">; Einspeisegrenze sollte der im GEN24 unter Sicherheits- und Netzanforderungen =&gt; Einspeisebegrenzung entsprechen. </td></tr>
 <tr><td class="variablenname">Einspeisegrenze</td>
 <td><input type="text" name="Zeile[13][1]" value="8000" readonly></td></tr>
-<tr class="comment"><td colspan="2">; AC Kapazität des Wechselrichters um den Überschuss in die Batterie zu laden) </td></tr>
+<tr class="comment"><td colspan="2">; AC Kapazität des Wechselrichters um den Überschuss in die Batterie zu laden.<br>; Da der GEN24 die Begrenzung selbständig regelt, wird der Wert nur für die Berechnung verwendet. </td></tr>
 <tr><td class="variablenname">WR_Kapazitaet</td>
 <td><input type="text" name="Zeile[15][1]" value="10000" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[16]" value='' ></td></tr>
-<tr class="comment"><td colspan="2">; PV-Leistung reellen Spitzenwert </td></tr>
+<tr class="comment"><td colspan="2">; PV-Leistung reellen Spitzenwert, wird für die Berechnung benötigt. </td></tr>
 <tr><td class="variablenname">PV_Leistung_Watt</td>
 <td><input type="text" name="Zeile[18][1]" value="11400" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[19]" value='' ></td></tr>
@@ -287,7 +288,7 @@ button {
 <td><input type="text" name="Zeile[41][1]" value="-1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[42]" value='' ></td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[43]" value='[monats_priv.ini]' >[monats_priv.ini]</td></tr>
-<tr class="comment"><td colspan="2">; hier können die Namen von zusätzlichen monatsabhängigen config.ini definiert werden.<br>; die Monate müssen immer zweistellig sein!!<br>; Dateiname (immer kleinbuchstaben) = GültigkeitsMonate<br>;winter_priv.ini = 11, 12, 01 </td></tr>
+<tr class="comment"><td colspan="2">; hier können die Namen von zusätzlichen monatsabhängigen config.ini definiert werden.<br>; die Monate müssen immer zweistellig sein!!<br>; Dateiname (immer Kleinbuchstaben) = GültigkeitsMonate<br>;winter_priv.ini = 11, 12, 01 </td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[45]" value='' ></td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[46]" value='[Entladung]' >[Entladung]</td></tr>
 <tr class="comment"><td colspan="2">; Konfigdaten für die Entladesteuerung<br>; Batterieentladung und Zwangsladung ein- bzw. ausschalten (1=ein, 0=aus, 2=Ein+Akkuschonung bei Zwangsladung) </td></tr>
@@ -306,7 +307,7 @@ button {
 <tr class="comment"><td colspan="2">; Notstromreservekapazität auf bestimmten Prozentsatz begrenzen (1=ein, 0=aus) </td></tr>
 <tr><td class="variablenname">Notstromreserve_steuern</td>
 <td><input type="text" name="Zeile[57][1]" value="0" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Notstromreservekapazität minimum normalerweise 5% kann hier höher gesetzt werden </td></tr>
+<tr class="comment"><td colspan="2">; Notstromreservekapazität Minimum normalerweise 5% kann hier höher gesetzt werden </td></tr>
 <tr><td class="variablenname">Notstromreserve_Min</td>
 <td><input type="text" name="Zeile[59][1]" value="5" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Notstrom_Werte = {&quot;PrognoseGrenzeMorgen/kWh&quot; : &quot;Notstromreservekapazität/%&quot;, ...} </td></tr>
