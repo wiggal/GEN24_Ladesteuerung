@@ -274,15 +274,6 @@ echo '</form>';
 
     case 'schreiben':
 # SCHREIBEN DER INI-Datei
-foreach($Zeile as $zeile_key => $zeile_value) {
-    if (is_array($zeile_value)) {
-        $Zeile[$zeile_key] = $zeile_value['0'] . $zeile_value['1'];
-    } else {
-        // Wieder zu einzelnen Zeilen machen
-        $Zeile[$zeile_key] = str_replace('<br>', "\n", $zeile_value);
-        $Zeile[$zeile_key] = rtrim($Zeile[$zeile_key]);
-    }
-}
 // Jetzt alle Zeilen flach machen:
 $final_lines = [];
 
