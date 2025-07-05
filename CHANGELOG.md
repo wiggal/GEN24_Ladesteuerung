@@ -1,9 +1,13 @@
+**[0.30.6] – 2025-XX-XX**  
+
+- Überarbeitung der Dokumentation abschließen.
+
 **[0.30.5] – 2025-07-04**  
 
 - Die Optimierung der Prognose mit gespeicherten Produktionsdaten kann nun für jede `ForecastCalcMethod` eingestellt werden.  
   **ACHTUNG:** `ForecastCalcMethod` `median_opt` nicht mehr gültig muss nun `median+` heißen.  
 
-- Im `ForecastMgr` können nun ältere Prognosedaten gelöschti werden, falls sie nicht mehr repräsentativ sind. 
+- Im `ForecastMgr` können nun ältere Prognosedaten gelöscht werden, falls sie nicht mehr repräsentativ sind. 
   Einträge die älter als 35 Tage sind, werden programmtechnisch gelöscht.
 
 **[0.30.4] – 2025-06-29**  
