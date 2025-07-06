@@ -137,7 +137,10 @@ if __name__ == '__main__':
                         i = 0
                         for key2 in reservierungdata_tmp[key]:
                             if(i<2):
-                                Res_Feld += reservierungdata_tmp[key][key2]
+                                try:
+                                    Res_Feld += int(reservierungdata_tmp[key][key2])
+                                except (ValueError, TypeError):
+                                    Res_Feld += 0
                             i += 1
                         reservierungdata[key] = Res_Feld
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
