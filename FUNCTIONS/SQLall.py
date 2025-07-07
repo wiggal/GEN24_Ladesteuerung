@@ -95,7 +95,12 @@ class sqlall:
         columns = [col[0] for col in zeiger.description]
         for row in rows:
             data[row[0]] = {}
-            data[row[0]][columns[1]] = row[1]
+            # Hier nur Zahlen zulassen
+            try:
+                data[row[0]][columns[1]] = float(row[1])
+            except (ValueError, TypeError):
+                data[row[0]][columns[1]] = 0
+            # Feld 2 kann String enthalten, wegen viertestündlichen Strompreisen
             data[row[0]][columns[2]] = row[2]
             data[row[0]][columns[3]] = row[3]
         record_json = json.dumps(data)

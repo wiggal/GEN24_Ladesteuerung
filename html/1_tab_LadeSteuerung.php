@@ -366,12 +366,16 @@ $(document).ready(function(){
    Options.push('');
    Tag_Zeit.push($(this).text());
   });
+  // Nur Zahlen in den Feldern Res_Feldx erlauben
   $('.Res_Feld1').each(function(){
-   Res_Feld1.push($(this).text().replace(",", ".")*1000);
+    let val = parseFloat($(this).text().replace(",", ".")) * 1000;
+    Res_Feld1.push(Number.isFinite(val) ? val : 0);
   });
   $('.Res_Feld2').each(function(){
-   Res_Feld2.push($(this).text().replace(",", ".")*1000);
+    let val = parseFloat($(this).text().replace(",", ".")) * 1000;
+    Res_Feld2.push(Number.isFinite(val) ? val : 0);
   });
+
   const modus = document.querySelector('select[name="hausakkuladung"]').value;
   let js_value = -1;
   let hours = 0;

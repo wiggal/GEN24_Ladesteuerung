@@ -273,8 +273,10 @@ $(document).ready(function(){
   $('.Options').each(function(){
    Options.push($(this).text());
   });
+  // Res_Feld1 darf nur Zahlen enthalten
   $('.Res_Feld1').each(function(){
-   Res_Feld1.push($(this).text().replace(",", ".")*1000);
+    let val = parseFloat($(this).text().replace(",", ".")) * 1000;
+    Res_Feld1.push(Number.isFinite(val) ? val : 0);
   });
   // Hier müssen evtl. viertelstündliche Werte aufgesplitet werden.
   $('.Res_Feld2').each(function() {
