@@ -1,6 +1,8 @@
-**[0.30.6] – 2025-XX-XX**  
+**[0.30.6] – 2025-07-07**  
 
 - Überarbeitung der Dokumentation abschließen.
+
+- FIX: unsupported operand type, wenn in CONFIG/Prog_Steuerung.sqlite keine Zahlen.
 
 **[0.30.5] – 2025-07-04**  
 
