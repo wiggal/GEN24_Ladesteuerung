@@ -13,6 +13,8 @@
   </head>
   <body lang="de-DE">
     <div class="weatherDataManager"> <a href="#weatherDataManager"><b>Hilfe
+
+
           ForecastMgr</b></a></div>
     <!--HIERZURUECK-->
     <center> <font style="font-size: 24pt"><b><span style="background:
@@ -66,6 +68,8 @@
     </center>
     <hr width="100%" size="2">
     <h2 class="western" align="center"> <a name="weatherDataManager"></a>Prognoseberechnung
+
+
       und ForecastMgr</h2>
     <p align="center"><br>
     </p>
@@ -78,30 +82,38 @@
       </li>
       <li>
         <p align="left">Bei jedem Aufruf eines Prognoseskriptes wird aus
-          allen gespeicherten Daten der Median, die Prognose und die
-          Produktion berechnet und neu gespeichert, dabei werden bereits
-          vorhandene Werte überschieben. Die Prognosedaten gehen mit dem
-          definierten Gewicht in die Berechnung ein, Daten mit Gewicht =
-          0 werden bei der Berechnung nicht berücksichtigt.</p>
-        <ul>
-          <li>
-            <p align="left">Der Median wird aus den gespeicherten
-              Prognosewerten gebildet und für die Visualisierung und als
-              Rechengrundlage gespeichert.</p>
-          </li>
-          <li> Die Prognose wird für alle gespeicherten Zeitpunkte je
-            nach Einstellung in CONFIG/weather_priv.ini (median |
-            median_opt | mittel | min | max ) als Median, Mittelwert,
-            kleinster oder größter Wert für jede Stunde berechnet und
-            gespeichert. <br>
-            Bei der Einstellung median_opt, wird der Median um eine
-            durchschnittliche Abweichung (Median) alle gespeicherten
-            Werte für die zu berechnende Stunde optimiert. </li>
-          <li> Die Produktion ist die in dieser Stunde produzierte
-            Energie (z.B.: 5:00-06:00 ist 05:00) und wird erst bei einem
-            Aufruf eines Skriptes nach Ablauf der vollen Stunde
-            gespeichert. </li>
-        </ul>
+          allen gespeicherten Daten, für alle gespeicherten Zeitpunkte,
+          also auch rückwirkend,&nbsp; mit der definierten
+          ForecastCalcMethod aus der CONFIG/weather_priv.ini (median |
+          mittel | min | max ) als Median, Mittelwert, kleinster oder
+          größter Wert für jede Stunde berechnet und als Prognose
+          gespeichert. Durch das rückwirkend neu berechnen der
+          Prognosedaten kann die ForecastCalcMethod jederzeit geändert
+          werden.<br>
+        </p>
+      </li>
+      <li>Mit einem "+" hinter der ForecastCalcMethod (z.B.: median+ |
+        mittel+ | min+ | max+) wird eine Verbesserung der Prognosewerte
+        mit den Differenzen aus Prognose und Produktion aller für die zu
+        berechnende Stunde gespeicherten Daten angebracht. Hierzu wird
+        die ursprüngliche Prognoseberechnung als Basis gespeichert, und
+        dann mit dem Median der Differenzen aus Prognose und Produktion
+        der Basiswert verbessert und als Prognose gespeichert.<br>
+        <br>
+      </li>
+      <li>Die Prognosedaten gehen mit dem definierten Gewicht in die
+        Berechnung ein, Daten mit Gewicht = 0 werden bei der Berechnung
+        nicht berücksichtigt.<br>
+        <br>
+      </li>
+      <li> Die Produktion ist die für dieser Stunde produzierte Energie
+        und wird erst bei einem Aufruf eines Prognoseskript nach Ablauf
+        der nächsten halben Stunde gespeichert. <br>
+        Beispiel: Die Produktion für die Stunde 08:00 wird aus den
+        Produktionsdaten von 07:30 bis 8:30 gebildet, und kann damit
+        erst nach dem Speichern der Daten für 08:30 gebildet und
+        gespeichert werden.<br>
+        <br>
       </li>
       <li> Der ForecastMgr stellt die gespeicherten Prognosedaten als
         Diagramm und als Tabelle dar. Die Daten können für weitere
