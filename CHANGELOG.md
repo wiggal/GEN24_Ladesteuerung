@@ -1,3 +1,7 @@
+**[0.30.7] – 2025-XX-XX**  
+
+- Hilfe für den TAB LadeStrg angepasst.
+
 **[0.30.6] – 2025-07-07**  
 
 - Überarbeitung der Dokumentation abschließen.
