@@ -15,6 +15,8 @@
     <div class="weatherDataManager"> <a href="#weatherDataManager"><b>Hilfe
 
 
+
+
           ForecastMgr</b></a></div>
     <!--HIERZURUECK-->
     <center> <font style="font-size: 24pt"><b><span style="background:
@@ -70,6 +72,8 @@
     <h2 class="western" align="center"> <a name="weatherDataManager"></a>Prognoseberechnung
 
 
+
+
       und ForecastMgr</h2>
     <p align="center"><br>
     </p>
@@ -106,12 +110,15 @@
         nicht berücksichtigt.<br>
         <br>
       </li>
-      <li> Die Produktion ist die für dieser Stunde produzierte Energie
-        und wird erst bei einem Aufruf eines Prognoseskript nach Ablauf
-        der nächsten halben Stunde gespeichert. <br>
-        Beispiel: Die Produktion für die Stunde 08:00 wird aus den
-        Produktionsdaten von 07:30 bis 8:30 gebildet, und kann damit
-        erst nach dem Speichern der Daten für 08:30 gebildet und
+      <li> Die Produktion ist die innerhalb einer Stunde erzeugte
+        Energie und wird bei jedem Aufruf eines Prognoseskript mit den
+        gespeicherten Zählerständen aus der PV_Daten.sqlite berechnet,
+        und in der weatherData.sqlite als Produktion gespeichert. Dabei
+        wird die erzeugte Energie, 30 Minuten vor und 30 Minuten nach
+        der Stunde verwendet.<br>
+        <i>Beispiel:</i> Die Produktion für die Stunde 08:00 wird aus
+        den Produktionsdaten von 07:30 bis 8:30 gebildet, und kann damit
+        erst nach dem Speichern der PV-Daten für 08:30 gebildet und
         gespeichert werden.<br>
         <br>
       </li>
