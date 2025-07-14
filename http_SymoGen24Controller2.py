@@ -111,14 +111,19 @@ if __name__ == '__main__':
                     if (Battery_Status == 2):
                         print()
                         print("*********** Batterie ist offline, aktueller Ladestand wird auf 5% gesetzt!!! *********\n")
-                        BattganzeKapazWatt = basics.getVarConf('gen24','battery_capacity_Wh', 'eval') # Kapazität in Wh aus dynprice.ini
+                        BattganzeKapazWatt = basics.getVarConf('gen24','battery_capacity_Wh', 'eval') # Kapazität in Wh aus default.ini
                         BattganzeLadeKapazWatt = BattganzeKapazWatt
                         BattStatusProz = 5
                         BattKapaWatt_akt = BattganzeKapazWatt * 0.95
                         aktuelleBatteriePower = 0
                     else:
-                        BattganzeLadeKapazWatt = (API['BattganzeLadeKapazWatt'])
                         BattganzeKapazWatt = (API['BattganzeKapazWatt'])
+                        BattganzeLadeKapazWatt_tmp = (API['BattganzeLadeKapazWatt'])
+                        LadeAmpere = 50
+                        # LadeAmpere bei HVM = 50A bei HVS = 25A
+                        if (BattganzeLadeKapazWatt_tmp / API['udc_mittel']) < 37: LadeAmpere = 25
+                        # LadeAmpere Gen24 = 22A
+                        BattganzeLadeKapazWatt = BattganzeLadeKapazWatt_tmp / LadeAmpere * 22
                         BattStatusProz = API['BattStatusProz']
                         BattKapaWatt_akt = API['BattKapaWatt_akt']
                         aktuelleBatteriePower = API['aktuelleBatteriePower']

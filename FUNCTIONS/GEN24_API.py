@@ -28,9 +28,9 @@ class gen24api:
                 attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
                 # BattganzeKapazWatt * Akku_Zustand
                 API['Akku_Zustand'] = data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16'] / 100
-                #API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'] * API['Akku_Zustand']) # API['Akku_Zustand'] nur geschätzt, daher nicht berücksichtigt
                 API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
                 API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
+                API['udc_mittel'] = int((attributes_nameplate['max_udc'] + attributes_nameplate['min_udc'])/2)
                 API['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
                 API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
                 API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
@@ -61,9 +61,9 @@ class gen24api:
                 attributes_nameplate = json.loads(data['Body']['Data']['16580608']['attributes']['nameplate'])
                 # BattganzeKapazWatt * Akku_Zustand
                 API['Akku_Zustand'] = data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16'] / 100
-                #API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'] * API['Akku_Zustand']) # API['Akku_Zustand'] nur geschätzt, daher nicht berücksichtigt
                 API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
                 API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
+                API['udc_mittel'] = int((attributes_nameplate['max_udc'] + attributes_nameplate['min_udc'])/2)
                 API['BattStatusProz'] =    round(data['Body']['Data']['16580608']['channels']['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
                 API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
                 API['aktuelleEinspeisung'] = int(data['Body']['Data']['16252928']['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
