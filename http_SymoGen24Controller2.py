@@ -283,7 +283,7 @@ if __name__ == '__main__':
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
-                                WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt_Akku, alterLadewert)
+                                WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
                         if ManuelleStrg_Akkuschon_aus == 1:
                             DEBUG_Ausgabe += "DEBUG Keine Akkuschonung, da FesteLadeleistung oder LadeStrg-Auswahl!\n"
