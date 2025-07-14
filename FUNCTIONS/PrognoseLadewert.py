@@ -222,14 +222,9 @@ class progladewert:
             return  Pro_Akt_Log, self.DEBUG_Ausgabe
     
     
-    def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert):
+    def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert):
             # Wegen ManuelleSteuerung nicht begrenzen auf MaxLadewert
             #fun_Ladewert = self.getLadewertinGrenzen(fun_Ladewert)
-    
-            LadungAus = basics.getVarConf('Ladeberechnung','LadungAus','eval')
-            newPercent = (int(fun_Ladewert/BattganzeLadeKapazWatt*10000))
-            if newPercent < LadungAus:
-                newPercent = LadungAus
     
             # Schaltvezögerung
             # mit altem Ladewert vergleichen
@@ -237,17 +232,17 @@ class progladewert:
             diffLadewert_nachUnten = int(alterLadewert - fun_Ladewert)
     
             # Wenn die Differenz in hundertstel Prozent kleiner als die Schreibgrenze nix schreiben
-            newPercent_schreiben = 0
+            ladewert_schreiben = 0
             if ( diffLadewert_nachOben > WRSchreibGrenze_nachOben ):
-                newPercent_schreiben = 1
+                ladewert_schreiben = 1
             if ( diffLadewert_nachUnten > WRSchreibGrenze_nachUnten ):
-                newPercent_schreiben = 1
+                ladewert_schreiben = 1
     
             # Wenn MaxLadung erstmals erreicht ist immer schreiben
             if (fun_Ladewert == self.MaxLadung) and (abs(diffLadewert_nachOben) > 3):
-                newPercent_schreiben = 1
+                ladewert_schreiben = 1
     
-            return(newPercent, newPercent_schreiben)
+            return(ladewert_schreiben)
     
     def getSonnenuntergang(self, PV_Leistung_Watt):
         i = 0

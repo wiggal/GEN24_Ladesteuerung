@@ -118,12 +118,12 @@ if __name__ == '__main__':
                         aktuelleBatteriePower = 0
                     else:
                         BattganzeKapazWatt = (API['BattganzeKapazWatt'])
-                        BattganzeLadeKapazWatt_tmp = (API['BattganzeLadeKapazWatt'])
+                        BattganzeLadeKapazWatt_Akku = (API['BattganzeLadeKapazWatt'])
                         LadeAmpere = 50
                         # LadeAmpere bei HVM = 50A bei HVS = 25A
-                        if (BattganzeLadeKapazWatt_tmp / API['udc_mittel']) < 37: LadeAmpere = 25
+                        if (BattganzeLadeKapazWatt_Akku / API['udc_mittel']) < 37: LadeAmpere = 25
                         # LadeAmpere Gen24 = 22A
-                        BattganzeLadeKapazWatt = BattganzeLadeKapazWatt_tmp / LadeAmpere * 22
+                        BattganzeLadeKapazWatt = BattganzeLadeKapazWatt_Akku / LadeAmpere * 22
                         BattStatusProz = API['BattStatusProz']
                         BattKapaWatt_akt = API['BattKapaWatt_akt']
                         aktuelleBatteriePower = API['aktuelleBatteriePower']
@@ -205,8 +205,7 @@ if __name__ == '__main__':
                     aktuellerLadewert = PrognoseUNDUeberschuss[2]
                     LadewertGrund = PrognoseUNDUeberschuss[3] + Ladelimit_80
                     # Ladewert auf Schreibgrenzen prüfen
-                    DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
-                    WR_schreiben = DATA[1]
+                    WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
 
                     # Aktuelle Prognose berechnen
                     AktuellenLadewert_Array = progladewert.getAktPrognose(BattKapaWatt_akt)
@@ -254,8 +253,7 @@ if __name__ == '__main__':
                     # Hier Volle Ladung, wenn BattVollUm erreicht ist oder Akku = 100%!
                     elif (int(datetime.strftime(now, "%H")) >= int(BattVollUm)) or (BattStatusProz == 100):
                          aktuellerLadewert = MaxLadung
-                         DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
-                         WR_schreiben = DATA[1]
+                         WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                          LadewertGrund = "BattVollUm oder Akkustand 100% erreicht!"
         
                     else:
@@ -267,13 +265,12 @@ if __name__ == '__main__':
                         if ((BattStatusProz < MindBattLad)):
                             # volle Ladung ;-)
                             aktuellerLadewert = MaxLadung
-                            DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
-                            WR_schreiben = DATA[1]
+                            WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
                     if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
-                        Akkuschonung_dict = progladewert.getAkkuschonWert(BattStatusProz, BattganzeLadeKapazWatt, alterLadewert, aktuellerLadewert)
+                        Akkuschonung_dict = progladewert.getAkkuschonWert(BattStatusProz, BattganzeLadeKapazWatt_Akku, alterLadewert, aktuellerLadewert)
                         AkkuschonungLadewert = Akkuschonung_dict[0]
                         HysteProdFakt = Akkuschonung_dict[1]
                         BattStatusProz_Grenze = Akkuschonung_dict[2]
@@ -286,8 +283,7 @@ if __name__ == '__main__':
                                 aktuellerLadewert = AkkuschonungLadewert
                                 WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
-                                DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
-                                WR_schreiben = DATA[1]
+                                WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt_Akku, alterLadewert)
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
                         if ManuelleStrg_Akkuschon_aus == 1:
                             DEBUG_Ausgabe += "DEBUG Keine Akkuschonung, da FesteLadeleistung oder LadeStrg-Auswahl!\n"
@@ -306,8 +302,7 @@ if __name__ == '__main__':
                     # Begrenzung nur wenn keine manuelle Steuerung bzw. FesterLadewert (ManuelleStrg_Akkuschon_aus == 0)
                     if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC and ManuelleStrg_Akkuschon_aus == 0:
                         aktuellerLadewert = 0
-                        DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, BattganzeLadeKapazWatt, alterLadewert)
-                        WR_schreiben = DATA[1]
+                        WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, alterLadewert)
                         LadewertGrund = "Akkuschonung: Ladebegrenzung auf 80% SOC"
                     if BattKapaWatt_akt_SOC != BattKapaWatt_akt and ManuelleStrg_Akkuschon_aus == 0:
                         DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(BattKapaWatt_akt)
@@ -321,8 +316,7 @@ if __name__ == '__main__':
                         # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
                         if alterLadewert < MaxLadung -10 and Akt_Std > 12:
                             aktuellerLadewert = MaxLadung
-                            DATA = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, BattganzeLadeKapazWatt, alterLadewert)
-                            WR_schreiben = DATA[1]
+                            WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                             LadewertGrund = "Auf MaxLadung stellen, da PVProduktion < 50 Watt!"
                         else:
                             WR_schreiben = 0
