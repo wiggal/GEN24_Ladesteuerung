@@ -2,7 +2,7 @@
 
 - Hilfe für den TAB LadeStrg angepasst.
 
-- Anpassung der prozentualen Ladeleistung bei Einstellung über den Slider an die tatsächliche Ladeleistung des Systems.
+- Anpassung der prozentualen Lade- und Entladeleistung bei Einstellung über den Slider an die tatsächliche Ladeleistung des Systems.
 
 **[0.30.6] – 2025-07-07**  
 
