@@ -1,6 +1,7 @@
-**[0.30.7] – 2025-XX-XX**  
+**[0.30.7] – 2025-07-16**  
 
 - Hilfe für den TAB LadeStrg angepasst.
+- Skript html/make_config_help.php um Hilfe zu den Configs automatisch zu erstellen.
 
 - Anpassung der prozentualen Lade- und Entladeleistung bei Einstellung über den Slider an die tatsächliche Ladeleistung des Systems.
 
