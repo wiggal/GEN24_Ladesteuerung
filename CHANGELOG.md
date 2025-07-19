@@ -1,3 +1,8 @@
+**[0.31.0] – 2025-XX-XX**  
+
+- **NEU** Updatefunktion in config-TAB:
+  damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.
+
 **[0.30.7] – 2025-07-16**  
 
 - Hilfe für den TAB LadeStrg angepasst.
