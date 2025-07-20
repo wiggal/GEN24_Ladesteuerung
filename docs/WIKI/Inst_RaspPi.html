@@ -25,8 +25,8 @@
     <h2 class="heading-element">Von folgenden Voraussetzungen wird
       ausgegangen:</h2>
     <ul>
-      <li>Die Grundinstallation des RaspberryPi-Betriebssytem auf der SD-Karte erfolgt
-        auf einem Debian-Linux.</li>
+      <li>Die Grundinstallation des RaspberryPi-Betriebssytem auf der
+        SD-Karte erfolgt auf einem Debian-Linux.</li>
       <li>Der Benutzer auf dem RaspberryPi ist der Standard-USER „pi“</li>
       <li>Die Scripte von <a
           href="https://github.com/wiggal/GEN24_Ladesteuerung">https://github.com/wiggal/GEN24_Ladesteuerung</a>
@@ -107,7 +107,10 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
           html/config.php nach html/config_priv.php kopieren.
           Anpassungen in den CONFIG/XY_priv.ini's und in
           html/config_priv.php machen, siehe auch die jeweils verlinkte
-          Hilfe in der WebUI, bzw. hier im Wiki</p>
+          Hilfe in der WebUI, bzw. hier im Wiki.<br>
+          Sind CONFIG/XY_priv.ini Dateien bei einem Programmlauf nicht
+          vorhanden, werden sie von CONFIG/XY.ini kopiert.<br>
+        </p>
       </li>
       <li>
         <p>Crontabeinträge<br>
@@ -172,6 +175,7 @@ sudo apt install php php-sqlite3
     </div>
     <p>Wenn PHP installiert ist, wird durch die Variable <code>Einfacher_PHP_Webserver
 
+
         = 1</code> (Standard) in der CONFIG/default_priv.ini beim ersten
       Start von <code>start_PythonScript.sh</code> automatisch der
       einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf
@@ -198,6 +202,7 @@ sudo apt install apache2
       <li>/etc/apache2/envvars <code>export APACHE_RUN_GROUP=www-data</code>
         nach <code>export APACHE_RUN_GROUP=pi</code> ändern.</li>
       <li>/etc/apache2/sites-enabled/000-default.conf <code>DocumentRoot
+
 
           /var/www/html</code> nach <code>DocumentRoot /home/GEN24/html</code>
         ändern.</li>

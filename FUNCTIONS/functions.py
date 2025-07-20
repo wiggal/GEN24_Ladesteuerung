@@ -29,8 +29,14 @@ class basics:
             for conf_file in conf_files:
                 c_file = 'CONFIG/'+conf_file+'_priv.ini'
                 try:
+                    try:
                         config.read_file(open(c_file))
                         config.read(c_file)
+                    except:
+                        # wenn _priv.ini fehlt, kopieren
+                        import shutil
+                        c_org_file = 'CONFIG/'+conf_file+'.ini'
+                        shutil.copyfile(c_org_file, c_file)
                 except Exception as e:
                         print("\nERROR: ", e, "\n")
             # Monatsabhängige ini lesen
