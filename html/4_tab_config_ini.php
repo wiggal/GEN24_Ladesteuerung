@@ -357,7 +357,7 @@ echo '<br>';
     case 'editieren_passwd':
 # EDITIEREN DER INI-Datei 
 # Erläuterungen zu Hintergrundfarben ausgeben
-echo "<br><table style='width: auto;'><tr><td style='border: 0; padding: 8px;'><b>&gt;&gt;&gt;&gt;&gt;&gt; ".$_POST["editcase"]." &lt;&lt;&lt;&lt;&lt;&lt;</b>";
+echo "<br><table style='width: auto;'><tr><td style='border: 1; padding: 8px;'><b>".$_POST["editcase"]."</b>";
 $SpeichernButton  = ' speichern!';
 if ($_POST["editcase"] == 'update') {
 # SpeichernButton unterschied edit/update

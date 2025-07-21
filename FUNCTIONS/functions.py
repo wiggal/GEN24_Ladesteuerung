@@ -37,6 +37,7 @@ class basics:
                         import shutil
                         c_org_file = 'CONFIG/'+conf_file+'.ini'
                         shutil.copyfile(c_org_file, c_file)
+                        print(">>>>>>>>> ",c_file, " angelegt!!")
                 except Exception as e:
                         print("\nERROR: ", e, "\n")
             # Monatsabhängige ini lesen
