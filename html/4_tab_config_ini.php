@@ -166,22 +166,19 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
         }
     } #ENDE foreach ($file_array
 
-    #print_r($all_ini_daten);  #entWIGGlung
-    #exit();  #entWIGGlung
-
     # Ab hier wierden die gesammelten Zeilen ausgegeben
     if ($edit_methode !== 'update') {
         $zeilenzaehler = 0;
         foreach ($all_ini_daten['_priv'] as $key1 => $element) {
-            echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$zeilenzaehler.']" value=\''.$key1.'\' >'.$key1.'</th></tr>'."\n";
+            echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$key1.'\' >'.$key1.'</th></tr>'."\n";
             $zeilenzaehler++;
             foreach ($element as $key2 => $subelement) {
                 if (substr($key2, 0, 9) === 'leerzeile') {
-                    echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$zeilenzaehler.']" value=\'\' ></td></tr>'."\n";
+                    echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\'\' ></td></tr>'."\n";
                 }
                 if ($subelement['comment'] !== '') {
                     echo '<tr class="comment"><td colspan="2">
-                            <input type="hidden" name="Zeile['.$zeilenzaehler.']" value=\''. $subelement['comment'] .'\' >'. $subelement['comment'] .'
+                            <input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''. $subelement['comment'] .'\' >'. $subelement['comment'] .'
                         </td></tr>'."\n";
                     $zeilenzaehler++;
                 }
@@ -199,12 +196,16 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
             $Zeilenhintergrund_block = '';
             $Zeilenhintergrund_comm = '';
             $Zeilenhintergrund_var = '';
+            $checkbox_group = '';
             if(!isset($all_ini_daten['_priv'][$key1])) $Zeilenhintergrund_block = 'style="background-color: #FFCCCC;"';  #rot
-            echo '<tr><th colspan="2"'.$Zeilenhintergrund_block.'><input type="hidden" name="Zeile['.$zeilenzaehler.']" value=\''.$key1.'\' >'.$key1.'</th></tr>'."\n";
+            $checkbox_group = str_replace(['[', ']','.','_'], '', $key1);
+            echo '<tr><th colspan="2"'.$Zeilenhintergrund_block.'><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$key1.'\' >'.$key1."\n";
+            echo '<input type="hidden" name="Zeile['.$zeilenzaehler.'][2]" value="off">'."\n";
+            echo '<input type="checkbox" name="Zeile['.$zeilenzaehler.'][2]" class="check-all" data-group="'.$checkbox_group.'" checked></th></tr>'."\n";
             $zeilenzaehler++;
             foreach ($element as $key2 => $subelement) {
                 if (substr($key2, 0, 9) === 'leerzeile') {
-                    echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$zeilenzaehler.']" value=\'\' ></td></tr>'."\n";
+                    echo '<tr><td colspan="2"><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\'\' ></td></tr>'."\n";
                 }
                 if ($subelement['comment'] !== '') {
                     if (!isset ($all_ini_daten['_priv'][$key1][$key2]['comment'])) {
@@ -215,7 +216,9 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                     if ($key1 === '[monats_priv.ini]') $Zeilenhintergrund_comm = '';
                         
                     echo '<tr class="comment" '.$Zeilenhintergrund_comm.'><td colspan="2">
-                           <input type="hidden" name="Zeile['.$zeilenzaehler.']" value=\''. $subelement['comment'] .'\' >'. $subelement['comment'];
+                           <input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''. $subelement['comment'] .'\' >'. $subelement['comment'];
+                    echo '<input type="hidden" name="Zeile['.$zeilenzaehler.'][2]" value="off">'."\n";
+                    echo '<input type="checkbox" name="Zeile['.$zeilenzaehler.'][2]" class="'.$checkbox_group.'" checked>'."\n";
                     echo '</td></tr>'."\n";
 
                     $Zeilenhintergrund_comm = '';
@@ -227,7 +230,10 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                         foreach ($all_ini_daten['_priv']['[monats_priv.ini]'] as $key_monats_priv => $value) {
                             if (strpos($key_monats_priv, '_priv.ini') !== false) {
                                 echo '<tr '.$Zeilenhintergrund_var.'><td><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$key_monats_priv.' = \'>'.$key_monats_priv.'</td>'."\n";
-                                echo '<td><input type="text" name="Zeile['.$zeilenzaehler.'][1]" value="'. htmlspecialchars($value['wert'], ENT_QUOTES) .'" '.$readonly.'></td></tr>'."\n";
+                                echo '<td><input type="text" name="Zeile['.$zeilenzaehler.'][1]" value="'. htmlspecialchars($value['wert'], ENT_QUOTES) .'" '.$readonly.">\n";
+                                echo '<input type="hidden" name="Zeile['.$zeilenzaehler.'][2]" value="off">'."\n";
+                                echo '<input type="checkbox" name="Zeile['.$zeilenzaehler.'][2]" class="'.$checkbox_group.'" checked>'."\n";
+                                echo '</td></tr>'."\n";
                             }
                         $zeilenzaehler++;
                         }
@@ -251,6 +257,8 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                    }
                     echo '<tr '.$Zeilenhintergrund_var.'><td><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$subelement['variable'].' = \'>'.$subelement['variable'].'</td>'."\n";
                     echo '<td><input type="text" '.$input_ueber_farbe.' name="Zeile['.$zeilenzaehler.'][1]" value="'. htmlspecialchars($subelement['wert'], ENT_QUOTES) .'" '.$readonly.'>';
+                    echo '<input type="hidden" name="Zeile['.$zeilenzaehler.'][2]" value="off">'."\n";
+                    echo '<input type="checkbox" name="Zeile['.$zeilenzaehler.'][2]" class="'.$checkbox_group.'" checked>'."\n";
                     echo '</td></tr>'."\n";
                 $Zeilenhintergrund_var = '';
                 $zeilenzaehler++;
@@ -318,7 +326,7 @@ if (file_exists($org_ini_file)) {
     echo '<input type="hidden" name="org_ini_file" value="'.$org_ini_file.'">'."\n";
     echo '<input type="hidden" name="case" value="editieren">'."\n";
     echo '<input type="hidden" name="editcase" value="update">'."\n";
-    echo '<button type="submit" style="background-color: #FFCCCC;">!BETA! Update mit '.basename($org_ini_file).'</button>';  #entWIGGlung
+    echo '<button type="submit" style="background-color: #FFCCCC;">!BETA! Update mit '.basename($org_ini_file).'</button>';
     echo '</form>'."\n";
     echo '</div>';
 }
@@ -403,16 +411,20 @@ echo '</form>';
 $final_lines = [];
 
 foreach ($_POST['Zeile'] as $zeile_value) {
-    if (is_array($zeile_value)) {
+    if (isset($zeile_value[1])) {
         // key = value
-        $final_lines[] = rtrim($zeile_value[0] . $zeile_value[1]);
+        if (!isset($zeile_value[2]) || $zeile_value[2] == 'on') {
+            $final_lines[] = rtrim($zeile_value[0] . $zeile_value[1]);
+        }
     } else {
-        // ggf. <br> durch \n ersetzen bei Kommentarblöcken
-        $zeile_value = str_replace('<br>', "\n", $zeile_value);
-        // in echte einzelne Zeilen splitten
-        $lines = explode("\n", $zeile_value);
-        foreach ($lines as $line) {
-            $final_lines[] = rtrim($line);
+        if (!isset($zeile_value[2]) || $zeile_value[2] == 'on') {
+            // ggf. <br> durch \n ersetzen bei Kommentarblöcken
+            $zeile_value_str = str_replace('<br>', "\n", $zeile_value[0]);
+            // in echte einzelne Zeilen splitten
+            $lines = explode("\n", $zeile_value_str);
+            foreach ($lines as $line) {
+                $final_lines[] = rtrim($line);
+            }
         }
     }
 }
@@ -468,6 +480,28 @@ function toggleComments() {
         row.style.display = (row.style.display === 'none') ? '' : 'none';
     });
 }
+</script>
+<script>
+  // checkboxgruppen auswählen
+  document.querySelectorAll('.check-all').forEach(masterCheckbox => {
+    const group = masterCheckbox.dataset.group;
+    const groupCheckboxes = document.querySelectorAll('.' + group);
+
+    // Wenn "Alle auswählen" geändert wird
+    masterCheckbox.addEventListener('change', () => {
+      groupCheckboxes.forEach(cb => {
+        cb.checked = masterCheckbox.checked;
+      });
+    });
+
+    // Wenn ein einzelnes Kontrollkästchen geändert wird
+    groupCheckboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        const allChecked = [...groupCheckboxes].every(c => c.checked);
+        masterCheckbox.checked = allChecked;
+      });
+    });
+  });
 </script>
 
 </body>
