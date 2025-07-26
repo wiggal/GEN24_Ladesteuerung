@@ -3,6 +3,7 @@
 - **NEU** Updatefunktion in config-TAB:
   damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.
 - `_priv.ini` Dateien werden nun bei einem Programmlauf von der `.ini` kopiert, wenn sie nicht vorhanden sind.
+- In LadeStrg kann für die Punkte Slider oder MaxLadung nun Akkuschonung aktiviert werden.
 
 **[0.30.7] – 2025-07-16**  
 

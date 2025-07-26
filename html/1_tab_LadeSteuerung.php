@@ -83,8 +83,10 @@
 
 /* CHECKBOX */
 input[type="checkbox"] {
-   width: 30px;
-   height: 35px;
+   position: relative;
+   width: 20px;
+   height: 25px;
+   top: +.5em;
    accent-color: #44c767;
 }
 .dropdown {
@@ -178,6 +180,7 @@ $DB_ManuelleSteuerung_wert = 0;
 $DB_Auto_selected = '';
 $DB_Slider_selected = '';
 $DB_MaxLadung_selected = '';
+$Akkuschon_check = '';
 # Prüfen, ob Einträge für ManuelleSteuerung schon abgelaufen
 date_default_timezone_set('Europe/Berlin');
 # Wenn Feld in DB keine Zahl
@@ -188,9 +191,12 @@ if ($EV_Reservierung['ManuelleSteuerung']['Options'] < time() OR $EV_Reservierun
     $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] = -1;
     $gueltig_bis = '';
     } else {
-    $gueltig_bis = "gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
+    $gueltig_bis = "&nbsp;gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
     }
-
+# Akkuschonung aus DB
+if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld2']) and ($EV_Reservierung['ManuelleSteuerung']['Res_Feld2']) == 1) {
+    $Akkuschon_check = 'checked';
+}
 if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
     $DB_ManuelleSteuerung_wert = $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'];
 
@@ -208,7 +214,7 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
 
 <!-- SLIDER -->
 <div style='text-align: center;'>
-  <p class="sliderbeschriftung">Ladegrenze: <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
+  <p class="sliderbeschriftung">Ladegrenze mit Akkuschonung: <input type="checkbox" name="akkuschonung"  <?php echo $Akkuschon_check ?>><span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
 <div class="flex-container">
     <div>
       <label for="modus" class="dropdown" ></label>
@@ -399,11 +405,17 @@ $(document).ready(function(){
       js_value = (modus === "MaxLadung") ? -2 : parseInt(document.querySelector('input[name="hausakkuladung"]').value);
     }
 
+  // Akkuschonung auslesen
+  let as_modus = 0;
+    if (document.querySelector('input[name="akkuschonung"]').checked) {
+    as_modus = 1;
+  }
+
   ID.push("23:59");
   Schluessel.push("Reservierung");
   Tag_Zeit.push("ManuelleSteuerung");
   Res_Feld1.push(js_value);
-  Res_Feld2.push(0);
+  Res_Feld2.push(as_modus);
   Options.push(Math.floor(Date.now() / 1000) + hours * 3600);
   //alert(js_value);
 

@@ -193,8 +193,11 @@ if __name__ == '__main__':
                     Sonnenuntergang = progladewert.getSonnenuntergang(PV_Leistung_Watt)
                     if BattVollUm <= 0:
                        BattVollUm = Sonnenuntergang + BattVollUm
+
+                    # Akkuschonung aus PV-Planung ermitteln
+                    ManuelleStrg_Akkuschon = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld2'])
                     # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
-                    if Akkuschonung > 0:
+                    if Akkuschonung > 0 or ManuelleStrg_Akkuschon == 1:
                         BattVollUm = BattVollUm - 1
 
 
@@ -218,7 +221,6 @@ if __name__ == '__main__':
 
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
-                    ManuelleStrg_Akkuschon_aus = 0
                     ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
                     # Prüfen, ob Einträge schon abgelaufen
                     try: 
@@ -228,18 +230,18 @@ if __name__ == '__main__':
                     if (Ablaufdatum > int(datetime.now().timestamp())):
                         if (ManuelleSteuerung >= 0):
                             FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
-                            ManuelleStrg_Akkuschon_aus = 1
                             MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
                         # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
                         if (ManuelleSteuerung == -2):
                             FesteLadeleistung = MaxLadung
-                            ManuelleStrg_Akkuschon_aus = 1
                             MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
+                    else:
+                        # Wenn Einträge abgelaufen, wieder die Akkuschoneinstellung aus charge_priv.ini
+                        ManuelleStrg_Akkuschon = Akkuschonung
 
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
                         aktuellerLadewert = FesteLadeleistung
-                        ManuelleStrg_Akkuschon_aus = 1
                         # wegen Rundung
                         if abs(aktuellerLadewert - alterLadewert) < 3:
                             WR_schreiben = 0
@@ -277,7 +279,7 @@ if __name__ == '__main__':
                         AkkuSchonGrund = Akkuschonung_dict[3]
                         DEBUG_Ausgabe += Akkuschonung_dict[4]
 
-                        if BattStatusProz >= BattStatusProz_Grenze and ManuelleStrg_Akkuschon_aus == 0:
+                        if BattStatusProz >= BattStatusProz_Grenze and ManuelleStrg_Akkuschon == 1:
                             # Um das setzen der Akkuschonung zu verhindern, wenn aktuellePVProduktion zu wenig oder der Akku wieder entladen wird.
                             if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert:
                                 aktuellerLadewert = AkkuschonungLadewert
@@ -285,8 +287,8 @@ if __name__ == '__main__':
                                 WRSchreibGrenze_nachOben = aktuellerLadewert / 5
                                 WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                                 LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
-                        if ManuelleStrg_Akkuschon_aus == 1:
-                            DEBUG_Ausgabe += "DEBUG Keine Akkuschonung, da FesteLadeleistung oder LadeStrg-Auswahl!\n"
+                        if ManuelleStrg_Akkuschon == 0:
+                            DEBUG_Ausgabe += "DEBUG Keine Akkuschonung, da in LadeStrg abgewählt!\n"
 
                     # Ladung des Akku auf XX% (SOC_Proz_Grenze) begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
                     # Hysterese anwenden
@@ -297,14 +299,14 @@ if __name__ == '__main__':
                         DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
                         DEBUG_Ausgabe += ", PrognoseLimit_SOC: " + str(PrognoseLimit_SOC)
                         DEBUG_Ausgabe += ", BattStatusProz_Grenze: " + str(SOC_Proz_Grenze)
-                    if ManuelleStrg_Akkuschon_aus == 1:
-                        DEBUG_Ausgabe += "\nDEBUG Keine Begrenzung, da FesteLadeleistung oder LadeStrg-Auswahl!"
-                    # Begrenzung nur wenn keine manuelle Steuerung bzw. FesterLadewert (ManuelleStrg_Akkuschon_aus == 0)
-                    if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC and ManuelleStrg_Akkuschon_aus == 0:
+                    if ManuelleStrg_Akkuschon == 0:
+                        DEBUG_Ausgabe += "\nDEBUG Keine Begrenzung, da Akkuschonung in LadeStrg abgewählt!"
+                    # Begrenzung nur wenn ManuelleStrg_Akkuschon == 1
+                    if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC and ManuelleStrg_Akkuschon == 1:
                         aktuellerLadewert = 0
                         WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, alterLadewert)
                         LadewertGrund = "Akkuschonung: Ladebegrenzung auf 80% SOC"
-                    if BattKapaWatt_akt_SOC != BattKapaWatt_akt and ManuelleStrg_Akkuschon_aus == 0:
+                    if BattKapaWatt_akt_SOC != BattKapaWatt_akt and ManuelleStrg_Akkuschon == 1:
                         DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(BattKapaWatt_akt)
                         DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt_SOC)
                         DEBUG_Ausgabe+="\nDEBUG <<<< SOC 80% für Ladeberechnung AKTIV!!! >>>>"
