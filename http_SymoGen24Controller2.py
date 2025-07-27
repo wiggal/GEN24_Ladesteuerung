@@ -221,7 +221,7 @@ if __name__ == '__main__':
 
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
-                    ManuelleSteuerung = reservierungdata.get('ManuelleSteuerung')
+                    ManuelleSteuerung = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld1'])
                     # Prüfen, ob Einträge schon abgelaufen
                     try: 
                         Ablaufdatum = int(reservierungdata_tmp['ManuelleSteuerung']['Options'])
