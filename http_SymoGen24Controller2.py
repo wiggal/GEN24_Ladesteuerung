@@ -133,21 +133,7 @@ if __name__ == '__main__':
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
                     # Reservierungsdatei lesen
-                    reservierungdata = {}
                     reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
-                    # Spalte 1 und 2 aufaddieren
-                    reservierungdata = dict()
-                    for key in reservierungdata_tmp:
-                        Res_Feld = 0
-                        i = 0
-                        for key2 in reservierungdata_tmp[key]:
-                            if(i<2):
-                                try:
-                                    Res_Feld += int(reservierungdata_tmp[key][key2])
-                                except (ValueError, TypeError):
-                                    Res_Feld += 0
-                            i += 1
-                        reservierungdata[key] = Res_Feld
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     WR_schreiben = 0
     
@@ -166,7 +152,7 @@ if __name__ == '__main__':
                     LadewertGrund = ""
 
                     # Klasse ProgLadewert initieren
-                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata, MaxLadung, Einspeisegrenze, aktuelleBatteriePower)
+                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower)
                     # evtl. Ladung des Akku auf SOC_Proz_Grenze begrenzen, und damit BattKapaWatt_akt reduzieren
                     Sdt_24H = datetime.now().hour
                     PrognoseMorgen = progladewert.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000

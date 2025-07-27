@@ -7,11 +7,11 @@ basics = FUNCTIONS.functions.basics()
 request = FUNCTIONS.httprequest.request()
     
 class progladewert:
-    def __init__(self, data, WR_Kapazitaet, reservierungdata, MaxLadung, Einspeisegrenze, aktuelleBatteriePower):
+    def __init__(self, data, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower):
         self.now = datetime.now()
         self.data = data
         self.WR_Kapazitaet = WR_Kapazitaet
-        self.reservierungdata = reservierungdata
+        self.reservierungdata_tmp = reservierungdata_tmp
         self.MaxLadung = MaxLadung
         self.Einspeisegrenze = Einspeisegrenze
         self.aktuelleBatteriePower = aktuelleBatteriePower
@@ -19,6 +19,22 @@ class progladewert:
         self.DEBUG_Ausgabe = ''
 
     def getPrognose(self, Stunde):
+            # Spalte 1 und 2 von self.reservierungdata_tmp aufaddieren
+            reservierungdata = dict()
+            for key in self.reservierungdata_tmp:
+                # hier nur die Reservierungsdaten der Stunden aufaddieren
+                # 'ManuelleSteuerung' enthält nur Steuercode
+                if (key != 'ManuelleSteuerung'):
+                    Res_Feld = 0
+                    i = 0
+                    for key2 in self.reservierungdata_tmp[key]:
+                        if(i<2):
+                            try:
+                                Res_Feld += int(self.reservierungdata_tmp[key][key2])
+                            except (ValueError, TypeError):
+                                Res_Feld += 0
+                        i += 1
+                    reservierungdata[key] = Res_Feld
             if self.data['result']['watts'].get(Stunde):
                 data_fun = self.data['result']['watts'][Stunde]
                 # Prognose ohne Abzug der Reservierung fürs Logging
@@ -27,8 +43,8 @@ class progladewert:
                 if (self.WR_Kapazitaet * 1.14 < data_fun): data_fun = int(self.WR_Kapazitaet * 1.14 )
                 # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
                 # NUR für berechnung Ladewert, nicht fürs Logging
-                if (self.reservierungdata.get(Stunde)):
-                    data_fun = self.data['result']['watts'][Stunde] - self.reservierungdata[Stunde]
+                if (reservierungdata.get(Stunde)):
+                    data_fun = self.data['result']['watts'][Stunde] - reservierungdata[Stunde]
                     # Minuswerte verhindern
                     if ( data_fun< 0): data_fun = 0
                 getPrognose = data_fun
