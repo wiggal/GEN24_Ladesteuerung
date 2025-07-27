@@ -187,16 +187,17 @@ date_default_timezone_set('Europe/Berlin');
 if (!is_numeric($EV_Reservierung['ManuelleSteuerung']['Options'])){
     $EV_Reservierung['ManuelleSteuerung']['Options'] = 0;
 }
-if ($EV_Reservierung['ManuelleSteuerung']['Options'] < time() OR $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == -1) {
-    $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] = -1;
-    $gueltig_bis = '';
-    } else {
-    $gueltig_bis = "&nbsp;gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
-    }
 # Akkuschonung aus DB
 if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld2']) and ($EV_Reservierung['ManuelleSteuerung']['Res_Feld2']) == 1) {
     $Akkuschon_check = 'checked';
 }
+if ($EV_Reservierung['ManuelleSteuerung']['Options'] < time() OR $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == -1) {
+    $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] = -1;
+    $gueltig_bis = '';
+    $Akkuschon_check = '';
+    } else {
+    $gueltig_bis = "&nbsp;gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
+    }
 if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
     $DB_ManuelleSteuerung_wert = $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'];
 
