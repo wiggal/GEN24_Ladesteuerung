@@ -1,4 +1,8 @@
 <?php
+include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 # Daten aus DB lesen
 $db = new SQLite3('../weatherData.sqlite');
 $result = $db->query("SELECT * FROM weatherData ORDER BY Zeitpunkt ASC");
@@ -467,6 +471,7 @@ function renderChart(date) {
                 }
             },
             y: {
+                max: <?php echo $PV_Leistung_KWp*1000; ?>,
                 title: { display: false, text: 'Prognosewert (W)' 
                 },
                 ticks: {
