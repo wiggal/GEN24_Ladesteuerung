@@ -302,6 +302,8 @@ class progladewert:
         Eigen_Opt_Std = Eigen_Opt_Std_arry[0]
         Eigen_Opt_auto = Eigen_Opt_Std_arry[1]
         Backup_Reserve = Eigen_Opt_Std_arry[2]
+        # Wenn  Eigen_Opt_auto = 0, Eigen_Opt_Std 0 setzen, da der GEN24 noch den alten Wert liefert
+        if Eigen_Opt_auto == 0: Eigen_Opt_Std = 0
     
         if Ende_Nacht_Std == 0 : Ende_Nacht_Std = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
         Dauer_Nacht = (datetime.strptime(Ende_Nacht_Std, '%Y-%m-%d %H:%M:%S') - (self.now  - timedelta(hours=1)))
