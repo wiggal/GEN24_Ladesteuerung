@@ -1,5 +1,9 @@
 <?php
-$SQLfile = '../CONFIG/Prog_Steuerung.sqlite';
+include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
+$SQLfile = $PythonDIR.'/CONFIG/Prog_Steuerung.sqlite';
 $EV = array();
 $ID = $_POST["ID"];
 $Schluessel = $_POST["Schluessel"];

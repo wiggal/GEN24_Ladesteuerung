@@ -6,7 +6,12 @@
     <title>GEN24 Ladesteuerung</title>
     <style>
         <?php
-        $style_contend = file_get_contents("../docs/style.css");
+        # $PythonDIR lesen
+        include "config.php";
+        if(file_exists("config_priv.php")){
+            include "config_priv.php";
+        }
+        $style_contend = file_get_contents($PythonDIR."/docs/style.css");
         # Seitenvorschub für WIKI-Navigation entfernen
         $style_contend = str_replace(
             'scroll-padding-top: 65px;',
@@ -57,7 +62,7 @@ if (!function_exists('str_ends_with')) {
 $filename = isset($_GET['file']) ? basename($_GET['file']) : null;
 $return_url = isset($_GET['return']) ? htmlspecialchars($_GET['return']) : null;
 # Alle Dokus unter /docs abgelegt
-$filename = '../docs/WIKI/' . $filename;
+$filename = $PythonDIR.'/docs/WIKI/' . $filename;
 if ($filename && !str_ends_with($filename, '.html')) {
     $filename .= '.html';
 }

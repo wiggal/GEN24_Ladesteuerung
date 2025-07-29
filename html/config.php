@@ -1,5 +1,5 @@
 <?php
-$PrognoseFile = "../weatherData.json";
+$PythonDIR = "..";
 $PV_Leistung_KWp = 11.4;
 $Faktor_PVLeistung_Prognose = 1.00;
 $Diagrammgrenze = 25000;

@@ -55,7 +55,7 @@ if(file_exists("config_priv.php")){
 include "8_funktion_Diagram.php";
 
 # Prüfen ob SQLite Voraussetzungen vorhanden sind
-$SQLite_file = "../PV_Daten.sqlite";
+$SQLite_file = $PythonDIR."/PV_Daten.sqlite";
 if (!file_exists($SQLite_file)) {
     echo "\nSQLitedatei $filename existiert nicht, keine Grafik verfügbar!";
     echo "</body></html>";

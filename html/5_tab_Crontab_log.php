@@ -40,19 +40,20 @@ a.ende{
 }
 </style>
 </head>
-<body onLoad="if (location.hash != '#bottom') location.hash = '#bottom';">
-<div class="download"> <a href="5_download_log.php?file=../Crontab.log"><b>Download</b></a></div>
-<div name="top"><div>
-<div class="headertop">
-<a href="#bottom">Ans Ende springen!</a>
-<br><br>
 <?php
 include "config.php";
 if(file_exists("config_priv.php")){
   include "config_priv.php";
 }
-$path_parts = pathinfo($PrognoseFile);
-$file = $path_parts['dirname'].'/Crontab.log';
+?>
+<body onLoad="if (location.hash != '#bottom') location.hash = '#bottom';">
+<div class="download"> <a href="5_download_log.php?file=<?php echo $PythonDIR ?>/Crontab.log"><b>Download</b></a></div>
+<div name="top"><div>
+<div class="headertop">
+<a href="#bottom">Ans Ende springen!</a>
+<br><br>
+<?php
+$file = $PythonDIR.'/Crontab.log';
 if(!file_exists($file)) {
   die("Datei ". $file ." ist nicht vorhanden!");
 } else {

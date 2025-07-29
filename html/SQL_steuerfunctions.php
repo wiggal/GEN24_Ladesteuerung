@@ -1,8 +1,13 @@
 <?php
+include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 
 function getSteuercodes($schluessel)
 {
-$SQLfile = '../CONFIG/Prog_Steuerung.sqlite';
+global $PythonDIR;
+$SQLfile = $PythonDIR.'/CONFIG/Prog_Steuerung.sqlite';
 $db = new SQLite3($SQLfile);
 $SQL = "SELECT
         Zeit, Res_Feld1, Res_Feld2, Options
@@ -57,10 +62,11 @@ function median($daten) {
 
 
 function getPrognose() {
+    global $PythonDIR;
     $watts = [];
 
     try {
-        $db = new SQLite3('../weatherData.sqlite');
+        $db = new SQLite3($PythonDIR.'/weatherData.sqlite');
 
         $sql = "
             SELECT Zeitpunkt, Prognose_W

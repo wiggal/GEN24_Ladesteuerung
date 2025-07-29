@@ -4,7 +4,14 @@ if(file_exists("config_priv.php")){
   include "config_priv.php";
 }
 # Daten aus DB lesen
-$db = new SQLite3('../weatherData.sqlite');
+$SQLite_file = $PythonDIR."/weatherData.sqlite";
+# Prüfen, ob DB-existiert
+if (!file_exists($SQLite_file)) {
+    echo "\nSQLitedatei $SQLite_file existiert nicht, keine Grafik verfügbar!";
+    echo "</body></html>";
+    exit();
+}
+$db = new SQLite3($SQLite_file);
 $result = $db->query("SELECT * FROM weatherData ORDER BY Zeitpunkt ASC");
 
 $data = [];

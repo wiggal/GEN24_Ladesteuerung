@@ -6,10 +6,9 @@ include "config.php";
 if(file_exists("config_priv.php")){
   include "config_priv.php";
 }
-$path_parts = pathinfo($PrognoseFile);
-$file = $path_parts['dirname'].'/CONFIG/default.ini';
-if(file_exists($path_parts['dirname'].'/CONFIG/default_priv.ini')){
-    $file = $path_parts['dirname'].'/CONFIG/default_priv.ini';
+$file = $PythonDIR.'/CONFIG/default.ini';
+if(file_exists($PythonDIR.'/CONFIG/default_priv.ini')){
+    $file = $PythonDIR.'/CONFIG/default_priv.ini';
 }
 
 $case = '';

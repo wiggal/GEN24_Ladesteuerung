@@ -285,7 +285,7 @@ switch ($case) {
 echo '<br><center>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<select name="ini_file">';
-echo getinifile('../CONFIG/');
+echo getinifile($PythonDIR.'/CONFIG/');
 echo '</select><br><br>';
 echo '<input type="hidden" name="case" value="lesen">'."\n";
 echo '<button type="submit">Auswahl lesen</button>';

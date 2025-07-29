@@ -88,9 +88,13 @@ function config_lesen( $file, $readonly )
 $config_ini_files = ['default.ini', 'weather.ini', 'charge.ini', 'dynprice.ini'];
 
 # AUSGEBEN aller *.ini
+include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
 
 foreach ($config_ini_files as $file) {
-    $filename = '../CONFIG/'.$file;
+    $filename = $PythonDIR.'/CONFIG/'.$file;
     $ankor_text = "Hilfezu".str_replace(['_', '.'], '', $filename);
     echo '<br><center><a href="#'.$ankor_text.'" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;';
     echo '<button type="submit">Hilfe zu '.$filename.'</button>';
