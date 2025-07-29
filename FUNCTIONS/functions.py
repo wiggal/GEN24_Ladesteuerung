@@ -21,17 +21,15 @@ class basics:
             for conf_file in conf_files:
                 c_file = 'CONFIG/'+conf_file+'.ini'
                 try:
-                        config.read_file(open(c_file))
-                        config.read(c_file)
+                    config.read_file(open(c_file, encoding='utf-8'))
                 except:
-                        print("\nERROR: ", e, "\n")
+                    print("\nERROR: ", e, "\n")
             # _priv_ini lesen
             for conf_file in conf_files:
                 c_file = 'CONFIG/'+conf_file+'_priv.ini'
                 try:
                     try:
-                        config.read_file(open(c_file))
-                        config.read(c_file)
+                        config.read_file(open(c_file, encoding='utf-8'))
                     except:
                         # wenn _priv.ini fehlt, kopieren
                         import shutil
@@ -39,7 +37,7 @@ class basics:
                         shutil.copyfile(c_org_file, c_file)
                         print(">>>>>>>>> ",c_file, " angelegt!!")
                 except Exception as e:
-                        print("\nERROR: ", e, "\n")
+                    print("\nERROR: ", e, "\n")
             # Monatsabhängige ini lesen
             if ( 'charge' in conf_files ):
                 aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
@@ -47,8 +45,7 @@ class basics:
                     if aktueller_Monat in monate:
                         c_file = 'CONFIG/'+c_file
                         try:
-                            config.read_file(open(c_file))
-                            config.read(c_file)
+                            config.read_file(open(c_file, encoding='utf-8'))
                         except Exception as e:
                             print("\nERROR: ", e, "\n")
                 return config
