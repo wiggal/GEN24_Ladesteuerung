@@ -34,10 +34,9 @@ Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu 
 
 Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
 ```
-sudo apt install python3
-sudo apt install python3-pip
-sudo pip install requests
+sudo apt install python3 python3-pip python3-requests 
 ```
+
 Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
 Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der DB weatherData.sqlite vorhanden sind!  
 

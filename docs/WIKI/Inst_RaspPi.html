@@ -54,12 +54,8 @@
     <h2 class="heading-element">Python Installationen</h2>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
-      <pre class="notranslate"><code>sudo apt install python3
-sudo apt install python3-pip
-sudo pip install requests
+      <pre class="notranslate"><code>sudo apt install python3 </code><code><code>python3-pip python3-requests</code>
 </code></pre>
-      <div class="zeroclipboard-container position-absolute right-0
-        top-0"> </div>
     </div>
     <h2 class="heading-element">Skripte GEN24_Ladesteuerung installieren</h2>
     <p>Am besten die Scripte mit <code>git</code> holen, dann könen sie
@@ -176,6 +172,7 @@ sudo apt install php php-sqlite3
     <p>Wenn PHP installiert ist, wird durch die Variable <code>Einfacher_PHP_Webserver
 
 
+
         = 1</code> (Standard) in der CONFIG/default_priv.ini beim ersten
       Start von <code>start_PythonScript.sh</code> automatisch der
       einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf
@@ -202,6 +199,7 @@ sudo apt install apache2
       <li>/etc/apache2/envvars <code>export APACHE_RUN_GROUP=www-data</code>
         nach <code>export APACHE_RUN_GROUP=pi</code> ändern.</li>
       <li>/etc/apache2/sites-enabled/000-default.conf <code>DocumentRoot
+
 
 
           /var/www/html</code> nach <code>DocumentRoot /home/GEN24/html</code>
