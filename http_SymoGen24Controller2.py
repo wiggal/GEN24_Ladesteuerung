@@ -26,6 +26,8 @@ if __name__ == '__main__':
         password = password[1:-1]
 
         try:
+            # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
+            reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
             WR_URL = 'http://'+host_ip
             response = requests.get(WR_URL)
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
@@ -132,8 +134,6 @@ if __name__ == '__main__':
                     aktuellePVProduktion = API['aktuellePVProduktion']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
 
-                    # Reservierungsdatei lesen
-                    reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
                     # 0 = nicht auf WR schreiben, 1 = auf WR schreiben
                     WR_schreiben = 0
     
