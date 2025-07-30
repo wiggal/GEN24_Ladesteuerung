@@ -41,7 +41,7 @@ class WeatherData:
                     UNIQUE(Zeitpunkt, Quelle)
                 );
             """)
-        print("DB wurde erstellt.")
+        print("DB",path,"wurde erstellt.")
 
 
     def storeWeatherData_SQL(self, data, quelle, gewicht_neu=-1, loesche_quelle=''):
