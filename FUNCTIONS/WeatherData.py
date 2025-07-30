@@ -27,7 +27,7 @@ class WeatherData:
         except sqlite3.DatabaseError:
             print("DB beschädigt oder ungültig. Neu erstellen.")
             os.remove(path)
-            create_database(path)
+            self.create_database(path)
 
     def create_database(self, path):
         with sqlite3.connect(path) as conn:
