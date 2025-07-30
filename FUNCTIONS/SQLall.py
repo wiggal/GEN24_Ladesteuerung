@@ -7,24 +7,8 @@ class sqlall:
     def __init__(self):
         self.now = datetime.now()
 
-    # Daten in SQLite_DB speichern (lifetime Zählerständer)
-    def save_SQLite(self, database, AC_Produktion, DC_Produktion, AC_to_DC, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus):
-        Zeitpunkt = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
-
-        verbindung = sqlite3.connect(database)
-        zeiger = verbindung.cursor()
-    
-        try:
-            # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
-            zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
-            # Versuch Daten in DB schreiben (geht nicht, wenn Spalte AC_to_DC noch fehlt)
-            zeiger.execute("""
-                    INSERT INTO pv_daten
-                           VALUES (?,?,?,?,?,?,?,?,?,?)
-                   """,
-                  (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC)
-                  )
-        except:
+    def create_database_PVDaten(self, path):
+        with sqlite3.connect(path) as zeiger:
             # Wenn Datenbanktabelle noch nicht existiert, anlegen
             zeiger.execute("""
             CREATE TABLE IF NOT EXISTS pv_daten (
@@ -42,6 +26,27 @@ class sqlall:
             zeiger.execute("""ALTER TABLE pv_daten ADD COLUMN AC_to_DC INT""")
             # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
             zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
+        print("DB",path,"wurde erstellt.")
+
+    def save_SQLite(self, database, AC_Produktion, DC_Produktion, AC_to_DC, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus):
+        # Daten in SQLite_DB speichern (lifetime Zählerständer)
+        Zeitpunkt = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
+        verbindung = sqlite3.connect(database)
+        zeiger = verbindung.cursor()
+    
+        try:
+            # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
+            zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
+            # Versuch Daten in DB schreiben (geht nicht, wenn Spalte AC_to_DC noch fehlt)
+            zeiger.execute("""
+                    INSERT INTO pv_daten
+                           VALUES (?,?,?,?,?,?,?,?,?,?)
+                   """,
+                  (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC)
+                  )
+        except:
+            # Wenn Datenbanktabelle noch nicht existiert, anlegen
+            self.create_database_PVDaten(database)
             # Daten in DB nochmal versuchen zu schreiben
             zeiger.execute("""
                     INSERT INTO pv_daten
@@ -66,16 +71,9 @@ class sqlall:
         DC_Produktion = row[0][1]
         return (AC_Produktion, DC_Produktion)
 
-    def getSQLsteuerdaten(self, schluessel):
-        verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
-        zeiger = verbindung.cursor()
-
-        try:
-            # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
-            sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
-            zeiger.execute(sql_anweisung)
-        except:
-            # Datenbanktabelle anlegen, wenn sie nicht existiert
+    def create_database_ProgSteuerung(self, path):
+        with sqlite3.connect(path) as zeiger:
+            # Wenn Datenbanktabelle noch nicht existiert, anlegen
             sql_anweisung = " CREATE TABLE IF NOT EXISTS steuercodes ( ID TEXT, Schluessel TEXT, Zeit TEXT, Res_Feld1 INT, Res_Feld2 INT, Options text);"
             zeiger.execute(sql_anweisung)
             sql_anweisung = 'CREATE UNIQUE INDEX IF NOT EXISTS idx_positions_title ON steuercodes (ID, Schluessel)'
@@ -86,6 +84,18 @@ class sqlall:
             zeiger.execute(sql_anweisung)
             sql_anweisung = " INSERT OR IGNORE INTO steuercodes (ID, Schluessel, Zeit, Res_Feld1, Res_Feld2, Options) VALUES  ('23:58','ENTLadeStrg','ManuelleEntladesteuerung','100','0','');"
             zeiger.execute(sql_anweisung)
+        print("DB",path,"wurde erstellt.")
+
+    def getSQLsteuerdaten(self, schluessel):
+        verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
+        zeiger = verbindung.cursor()
+
+        try:
+            # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
+            sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
+            zeiger.execute(sql_anweisung)
+        except:
+            self.create_database_ProgSteuerung('CONFIG/Prog_Steuerung.sqlite')
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
             sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
             zeiger.execute(sql_anweisung)
