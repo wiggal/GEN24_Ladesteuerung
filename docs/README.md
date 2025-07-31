@@ -14,6 +14,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 ![new](pics/new.png)  
 Ab Version: **0.31.0**  
 Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
+Installationsskript install_gen24.sh für eine automatische Installation.  
 Ab Version: **0.30.4**  
 Neues Prognoseskripte OpenMeteo_WeatherData.py für https://open-meteo.com.  
 Ab Version: **0.30.2**  
@@ -32,36 +33,10 @@ Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu 
 
 ## 💾 Installationshinweise: [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
-Folgende Installationen sind nötig, damit die Pythonskripte funktionieren  
-```
-sudo apt install python3 python3-pip python3-requests 
-```
+Ab Version: **0.31.0**  
+Die Installation kann mit dem Sktript install_gen24.sh nach einem Download automatisch durchgeführt werden.  
 
-Mit start_PythonScript.sh können Pythonskripte per Cronjobs oder auf der Shell gestartet werden, die Ausgabe erfolgt dann in die Datei "Crontab.log". 
-Als Erstes muss ein Prognoseskript aufgerufen werden, damit aktuelle Prognosedaten in der DB weatherData.sqlite vorhanden sind!  
-
-Beispiele für Crontabeinträge ("DIR" durch dein Installationsverzeichnis ersetzen).  
-Ausführrechte für das start_PythonScript.sh Skript setzen nicht vergessen (chmod +x start_PythonScript.sh).  
-http_SymoGen24Controller2.py durchgehend (wegen Logging) alle 10 Minuten starten  
-(Häufigerer Aufruf für Logging nicht sinnvoll, da der Gen24 die Zähler nur alle 5 Minuten aktualisiert!).  
-Da bei der HTTP-Methode der WR die Einspeisebegrenzung regelt, reicht hier auch ein Aufruf alle 10 Minuten (1-59/10).  
-
-```
-1-59/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
-```
-Es können nun alle Prognosen abgefragt werden, Speicherung in `weatherData.sqlite`.  
-Die Berechnung der zu erwartenden PV-Produktion erfolgt mit der eingestellten `ForecastCalcMethod` aus den Prognosewerten und Gewichten der DB.
-```
-33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
-8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
-0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
-0 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
-35 5,7,9,11,13,15,17,19 * * * /home/GEN24/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
-```
-**Crontab.log jeden Montag abräumen**
-```
-0 0 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
-```
+Für eine manuelle Installation, bzw. genauere Installationshinweise sie oben verlinktes Wiki.   
 
 ### 🌦️ Prognoseskripte in FORECAST/
 

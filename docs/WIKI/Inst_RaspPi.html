@@ -51,13 +51,19 @@
       <li>MicroSD in Raspberry einlegen und warten bis er hochgefahren
         ist</li>
     </ul>
-    <h2 class="heading-element">Python Installationen</h2>
+    <h2 class="heading-element">Automatische Installation:</h2>
+    <p>Nach einem Download und dem Ausführen von <code>install_gen24.sh</code> wird
+      eine automatische Installation versucht.<br>
+    </p>
+    <h2 class="heading-element">Manuelle Installation:<br>
+    </h2>
+    <h3 class="heading-element">Python Installationen</h3>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
       <pre class="notranslate"><code>sudo apt install python3 </code><code><code>python3-pip python3-requests</code>
 </code></pre>
     </div>
-    <h2 class="heading-element">Skripte GEN24_Ladesteuerung installieren</h2>
+    <h3 class="heading-element">Skripte GEN24_Ladesteuerung installieren</h3>
     <p>Am besten die Scripte mit <code>git</code> holen, dann könen sie
       einfach upgedatet werden, ohne geänderte Dateien zu überschreiben.</p>
     <div class="snippet-clipboard-content notranslate position-relative
@@ -136,8 +142,7 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
       Methode, aus den Werten und Gewichten der DB.</p>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
-      <pre class="notranslate"><code>
-33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
+      <pre class="notranslate"><code>33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
 8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
 0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
 0 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
@@ -173,6 +178,7 @@ sudo apt install php php-sqlite3
 
 
 
+
         = 1</code> (Standard) in der CONFIG/default_priv.ini beim ersten
       Start von <code>start_PythonScript.sh</code> automatisch der
       einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf
@@ -199,6 +205,7 @@ sudo apt install apache2
       <li>/etc/apache2/envvars <code>export APACHE_RUN_GROUP=www-data</code>
         nach <code>export APACHE_RUN_GROUP=pi</code> ändern.</li>
       <li>/etc/apache2/sites-enabled/000-default.conf <code>DocumentRoot
+
 
 
 
