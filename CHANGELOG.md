@@ -5,6 +5,8 @@
 - `_priv.ini` Dateien werden nun bei einem Programmlauf von der `.ini` kopiert, wenn sie nicht vorhanden sind.
 - In LadeStrg kann für die Punkte Slider oder MaxLadung nun Akkuschonung aktiviert werden.
 
+- **NEU/BETA** Mit dem install_gen24.sh kann GEN24_Ladesteuerung auf Debian- und Alpine-linuxsystemen insatlliert werden.  
+
 #### ACHTUNG Änderung in der html/config.php:  
 - in html/config.php wurde `$PrognoseFile = "../weatherData.json";` durch `$PythonDIR = "..";` ersetzt, evtl. auch in html/config_priv.php ersetzen.  
 
