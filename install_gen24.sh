@@ -20,14 +20,63 @@ SHELL="/bin/bash"
 REPO_URL="https://github.com/wiggal/GEN24_Ladesteuerung.git"
 REPO_DIR="/home/GEN24"
 
+# Funktion zur IP-Prüfung
+is_valid_ip() {
+    local ip=$1
+    local IFS='.'
+    local -a octets=($ip)
+
+    # Prüfen: Muss 4 Oktette haben
+    if [[ ${#octets[@]} -ne 4 ]]; then
+        return 1
+    fi
+
+    for octet in "${octets[@]}"; do
+        # Nur Ziffern erlauben
+        if ! [[ $octet =~ ^[0-9]+$ ]]; then
+            return 1
+        fi
+
+        # Wertebereich: 0-255
+        if ((octet < 0 || octet > 255)); then
+            return 1
+        fi
+    done
+
+    return 0
+}
+
 # BETA-Hinweis
 echo "Das Installationsskript ist noch BETA, Benutzung ohne Gewähr. Fortsetzen? (j/n)"
 read -r antwort1
 if [[ "$antwort1" == "j" || "$antwort1" == "J" ]]; then
-    echo "Installation wird fortgesetzt..."
+    echo "   Installation wird fortgesetzt..."
 else
-    echo "Installation abgebrochen."
+    echo "❌ Installation abgebrochen."
     exit 1
+fi
+
+# Ausführberechtigung prüfen
+# Funktion zum Beenden mit Fehlermeldung
+exit_with_error() {
+    echo "❌ Fehler: fehlende Berechtigung, Skript als root ausführen oder sudo verfügbar machen." >&2
+    exit 1
+}
+
+# Prüfen, ob das Skript als root läuft
+if [ "$EUID" -eq 0 ]; then
+    echo "✅ Skript wird als root ausgeführt, Berechtigungen vorhanden."
+    SUDO_IST=''
+    USER='root'
+else
+    # Prüfen, ob sudo verfügbar ist
+    if command -v sudo >/dev/null 2>&1 && \
+        id -nG $USER | grep -qw sudo; then
+        echo "✅ sudo ist vorhanden und Benutzer $USER hat sudo-Berechtigung, Kennwort wird vor Installation abgefragt!!"
+        SUDO_IST='sudo'
+    else
+        exit_with_error
+    fi
 fi
 
 
@@ -40,14 +89,11 @@ detect_distro(){
     # DEBIAN-Paketliste
     packages=(iputils-ping cron file git python3 python3-pip python3-requests php php-sqlite3)
     SYSTEM=DEBIAN
-    SUDO_IST='sudo'
   elif [ -f /etc/alpine-release ]; then
     PM="apk --update add"
     UPDATE=""
     packages=(shadow iputils-ping file git python3 py-pip py3-requests php php-sqlite3)
     SYSTEM=ALPINE
-    # In Alpine ist sudo nicht standardmäßig vorhanden
-    SUDO_IST=''
  # elif [ -f /etc/fedora-release ]; then
  #   PM="dnf install -y"
  #   UPDATE="dnf makecache"
@@ -58,7 +104,7 @@ detect_distro(){
  #   PM="pacman -S --noconfirm"
  #   UPDATE="pacman -Sy"
   else
-    echo "Distribution nicht erkannt – manuelle Installation erforderlich."
+    echo "❌ Distribution nicht erkannt – manuelle Installation erforderlich."
     exit 1
   fi
 }
@@ -67,13 +113,13 @@ detect_distro(){
 main(){
   detect_distro
   # Abfrage ob Pakete installiert werden sollen
-  echo -e "\nSystem $SYSTEM erkannt!"
+  echo -e "\n✅ System $SYSTEM erkannt!"
   echo -e "Folgende Pakete werden installiert ${packages[*]}.\nInstallation fortsetzen? (j/n)"
   read -r antwort1
   if [[ "$antwort1" == "j" || "$antwort1" == "J" ]]; then
       echo "Updating package database..."
   else
-      echo "Installation abgebrochen."
+      echo "❌ Installation abgebrochen."
       exit 1
   fi
 
@@ -81,7 +127,7 @@ main(){
 
   echo "Installing packages: ${packages[*]}"
   $SUDO_IST $PM "${packages[@]}"
-  echo -e "Installationen abgeschlossen.\n"
+  echo -e "✅ Paketinstallationen abgeschlossen.\n"
 }
 
 main "$@"
@@ -94,13 +140,18 @@ if [ ! -f "CONFIG/default_priv.ini" ]; then
     while true; do
         read -rp "Bitte geben Sie die IP-Adresse des GEN24 ein: " ip_adresse
     
-        echo "Prüfe Erreichbarkeit von $ip_adresse ..."
-        if ping -c 1 -W 1 "$ip_adresse" &>/dev/null; then
-            echo "Wechselrichter erreichbar."
-            break
+        if is_valid_ip "$ip_adresse"; then
+            echo "Prüfe Erreichbarkeit von $ip_adresse ..."
+            if ping -c 1 -W 1 "$ip_adresse" &>/dev/null; then
+                echo "✅ Wechselrichter erreichbar."
+                break
+            else
+                echo "❌ IP-Adresse nicht erreichbar. Erneut versuchen? (j/n)"
+                read -r erneut
+                [[ "$erneut" =~ ^[Nn]$ ]] && echo "Abbruch." && exit 1
+            fi
         else
-            echo "❌ IP-Adresse nicht erreichbar. Erneut versuchen? (j/n)"
-            read -r erneut
+            echo "❌ Ungültige IP-Adresse: $ip_adresse"
             [[ "$erneut" =~ ^[Nn]$ ]] && echo "Abbruch." && exit 1
         fi
     done
@@ -119,9 +170,8 @@ echo "Wollen Sie mit diesen Einstellungen installieren? (j/n)"
 read -r antwort
 if [[ "$antwort" == "j" || "$antwort" == "J" ]]; then
     echo "Installation wird gestartet..."
-    # Hier kommt dein Installationsbefehl hin
 else
-    echo "Installation abgebrochen."
+    echo "❌ Installation abgebrochen."
     exit 1
 fi
 
@@ -131,14 +181,17 @@ if id -u "$USERNAME" &>/dev/null; then
 else
   echo "Legt Benutzer $USERNAME an ..."
   # Benutzer samt Homeverzeichnis und Shell anlegen
-  useradd -m -d "$HOMEDIR" -s "$SHELL" "$USERNAME"
+  $SUDO_IST useradd -m -d "$HOMEDIR" -s "$SHELL" "$USERNAME"
   # Passwort setzen
-  echo "${USERNAME}:${PASSWORD}" | chpasswd
+  echo "${USERNAME}:${PASSWORD}" | $SUDO_IST chpasswd
   echo "Benutzer $USERNAME angelegt mit Home $HOMEDIR und Passwort gesetzt."
 fi
 
 # Prüfen, ob .git-Unterverzeichnis existiert
-mkdir -p $REPO_DIR
+$SUDO_IST mkdir -p $REPO_DIR
+# vorübergehend Eigentümer $USER auf /home/GEN24 setzten
+$SUDO_IST chown -R $USER $REPO_DIR
+
 cd $REPO_DIR
 if [ -d ".git" ]; then
   echo "Git-Repository vorhanden – führe git pull aus."
@@ -170,14 +223,16 @@ if [ ! -f "CONFIG/default_priv.ini" ]; then
     sed -e "s/^hostNameOrIp *= *.*/hostNameOrIp = $ip_adresse/" \
         -e "s/^password *= *.*/password = '$kennwort'/" \
         CONFIG/default.ini > CONFIG/default_priv.ini
+    cp CONFIG/charge.ini CONFIG/charge_priv.ini
+    cp CONFIG/weather.ini CONFIG/weather_priv.ini
 fi
 
-# Eigentümer gen24 auf /home/GEN24 setzten
-$SUDO_IST chown -R gen24:gen24 $REPO_DIR
+# Eigentümer $USERNAME auf /home/GEN24 setzten
+$SUDO_IST chown -R $USERNAME:$USERNAME $REPO_DIR
 
-# Cronjobs für gen24 anlegen
+# Cronjobs für $USERNAME anlegen
 # Prüfen, ob der User eine Crontab hat
-if crontab -u "$USERNAME" -l &>/dev/null; then
+if $SUDO_IST crontab -u "$USERNAME" -l &>/dev/null; then
   echo "Benutzer $USERNAME hat bereits eine Crontab – keine Änderungen."
   exit 0
 fi
@@ -195,6 +250,9 @@ EOF
 )
 
 # Crontab erstellen
-echo "$CRON_ENTRIES" | crontab -u "$USERNAME" -
+echo "$CRON_ENTRIES" | $SUDO_IST crontab -u "$USERNAME" -
 echo "Crontab für Benutzer $USERNAME wurde angelegt."
+echo -e "\n✅ Installation erfolgreich abgeschlossen!"
+echo -e "  Bitte noch die CONFIG/*_priv.ini anlegen bzw. anpassen!"
+
 
