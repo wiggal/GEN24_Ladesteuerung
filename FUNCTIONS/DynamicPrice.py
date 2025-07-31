@@ -59,7 +59,7 @@ class dynamic:
 			    ELSE CAST(SUM(Verbrauch * (Julianday('now') - Julianday(volle_stunde))) AS INTEGER) / CAST(SUM(Julianday('now') - Julianday(volle_stunde)) AS INTEGER)
             END AS Verbrauch,
             */
-            strftime('%s', 'now') AS Options
+            CAST(strftime('%s', 'now') AS INTEGER) AS Options
         FROM
             verbrauch
         GROUP BY
@@ -87,7 +87,7 @@ class dynamic:
             try:
                 timestamp_tmp = str(int(rows[1][5]))
             except:
-                timestamp_tmp = datetime.now().timestamp()
+                timestamp_tmp = int(datetime.now().timestamp())
             for Wochentag in range(7):
                 for Stunde in range(24):
                     index = f"{Wochentag}-{Stunde:02}"
