@@ -47,7 +47,7 @@ is_valid_ip() {
 }
 
 # BETA-Hinweis
-echo "Das Installationsskript ist noch BETA, Benutzung ohne Gewähr. Fortsetzen? (j/n)"
+echo "Das Installations-/Updateskript ist noch BETA, Benutzung ohne Gewähr. Fortsetzen? (j/n)"
 read -r antwort1
 if [[ "$antwort1" == "j" || "$antwort1" == "J" ]]; then
     echo "   Installation wird fortgesetzt..."
@@ -134,7 +134,7 @@ main "$@"
 
 
 # CONFIG/default_priv.ini mit Benutzereingaben erzeugen
-if [ ! -f "CONFIG/default_priv.ini" ]; then
+if [ ! -f "$REPO_DIR/CONFIG/default_priv.ini" ]; then
     # IP-Adresse Wechselrichter abfragen und prüfen
     echo "Daten zum Anlegen von CONFIG/default_priv.ini." 
     while true; do
@@ -158,21 +158,31 @@ if [ ! -f "CONFIG/default_priv.ini" ]; then
 
     # Kennwort abfragen
     read -rp "Bitte geben Sie das Kennwort ein: " kennwort
-fi
 
-echo ""
-echo "IP-Adresse des GEN24 ist $ip_adresse"
-echo "GEN24 Kennwort für customer ist $kennwort"
-echo "Es wird der User $USERNAME mit Homeverzeichnis $HOMEDIR angelegt!"
-echo "Die Skripte zur GEN24_Ladesteuerung werden in $REPO_DIR abgelegt und konfiguriert."
+    echo ""
+    echo "IP-Adresse des GEN24 ist $ip_adresse"
+    echo "GEN24 Kennwort für customer ist $kennwort"
+    echo "Es wird der User $USERNAME mit Homeverzeichnis $HOMEDIR angelegt!"
+    echo "Die Skripte zur GEN24_Ladesteuerung werden in $REPO_DIR abgelegt und konfiguriert."
 
-echo "Wollen Sie mit diesen Einstellungen installieren? (j/n)"
-read -r antwort
-if [[ "$antwort" == "j" || "$antwort" == "J" ]]; then
-    echo "Installation wird gestartet..."
-else
-    echo "❌ Installation abgebrochen."
-    exit 1
+    echo "Wollen Sie mit diesen Einstellungen installieren? (j/n)"
+    read -r antwort
+    if [[ "$antwort" == "j" || "$antwort" == "J" ]]; then
+        echo "Installation wird gestartet..."
+    else
+        echo "❌ Installation abgebrochen."
+        exit 1
+    fi
+
+else # Wenn CONFIG/default_priv.ini vorhanden nur git updaten
+    echo "GEN24/CONFIG Dateien sind vorhanden, wollen Sie aus dem Git-Repository updaten? (j/n)"
+    read -r antwort
+    if [[ "$antwort" == "j" || "$antwort" == "J" ]]; then
+        echo "Update wird gestartet..."
+    else
+        echo "❌ UPDATE Abgebrochen."
+        exit 1
+    fi
 fi
 
 # Prüfen, ob Benutzer existiert
