@@ -223,9 +223,12 @@ if [ ! -f "CONFIG/default_priv.ini" ]; then
     sed -e "s/^hostNameOrIp *= *.*/hostNameOrIp = $ip_adresse/" \
         -e "s/^password *= *.*/password = '$kennwort'/" \
         CONFIG/default.ini > CONFIG/default_priv.ini
-    cp CONFIG/charge.ini CONFIG/charge_priv.ini
-    cp CONFIG/weather.ini CONFIG/weather_priv.ini
 fi
+
+# *_priv.ini copieren, wenn sie nicht existieren (-n = no‑clobber)
+cp -n CONFIG/charge.ini CONFIG/charge_priv.ini
+cp -n CONFIG/weather.ini CONFIG/weather_priv.ini
+cp -n CONFIG/dynprice.ini CONFIG/dynprice_priv.ini
 
 # Eigentümer $USERNAME auf /home/GEN24 setzten
 $SUDO_IST chown -R $USERNAME:$USERNAME $REPO_DIR
