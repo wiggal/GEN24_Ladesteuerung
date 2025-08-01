@@ -208,8 +208,8 @@ if [ -d ".git" ]; then
   git pull
 else
   echo "Kein Git-Repository gefunden – clonen."
-  #git clone "$REPO_URL" .  #entWIGGlung
-  git clone --branch v0.31.0 "$REPO_URL" .  #entWIGGlung
+  git clone "$REPO_URL" .  # Hauptzweig
+  #git clone --branch v0.31.0 "$REPO_URL" .  #Entwicklungsbranch
 fi
 
 # Datenbanken anlegen, wenn nicht vorhanden!

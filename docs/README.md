@@ -14,7 +14,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 ![new](pics/new.png)  
 Ab Version: **0.31.0**  
 Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
-Installationsskript install_gen24.sh für eine automatische Installation.  
+Installationsskript install_gen24.sh für eine automatische Installation bzw. Updating.  
 Ab Version: **0.30.4**  
 Neues Prognoseskripte OpenMeteo_WeatherData.py für https://open-meteo.com.  
 Ab Version: **0.30.2**  
@@ -34,7 +34,7 @@ Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu 
 ## 💾 Installationshinweise: [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 Ab Version: **0.31.0**  
-Die Installation kann mit dem Sktript install_gen24.sh nach einem Download automatisch durchgeführt werden.  
+Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach einem Download automatisch durchgeführt werden.  
 
 Für eine manuelle Installation, bzw. genauere Installationshinweise sie oben verlinktes Wiki.   
 

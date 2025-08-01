@@ -1,11 +1,11 @@
-**[0.31.0] – 2025-08-04**  
+**[0.31.0] – 2025-08-01**  
 
 - **NEU** Updatefunktion in config-TAB:
   damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.
 - `_priv.ini` Dateien werden nun bei einem Programmlauf von der `.ini` kopiert, wenn sie nicht vorhanden sind.
 - In LadeStrg kann für die Punkte Slider oder MaxLadung nun Akkuschonung aktiviert werden.
 
-- **NEU** Mit dem install_gen24.sh kann GEN24_Ladesteuerung auf Debian- und Alpine-linuxsystemen installiert werden.  
+- **NEU** Mit dem install_gen24.sh kann GEN24_Ladesteuerung auf Debian- und Alpine-linuxsystemen installiert/upgedatet werden.  
 
 #### ACHTUNG Änderung in der html/config.php:  
 - in html/config.php wurde `$PrognoseFile = "../weatherData.json";` durch `$PythonDIR = "..";` ersetzt, evtl. auch in html/config_priv.php ersetzen.  
