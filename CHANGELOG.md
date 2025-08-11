@@ -1,6 +1,6 @@
 **[0.31.1] – 2025-XX-XX**  
 
-- Erstelle für jede Instanz eine UUID
+- Für jede Instanz eine UUID erstellen und speichern.
 
 **[0.31.0] – 2025-08-01**  
 
