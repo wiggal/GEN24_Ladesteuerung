@@ -1,29 +1,19 @@
 # Hier die Parameter aus der WebUI Settings lesen
 import json
+from datetime import date
 import FUNCTIONS.SQLall
     
 sqlall = FUNCTIONS.SQLall.sqlall()
 
 class readcontroldata:
 
-    def loadPVReservierung(self, controlfile):
-        self.controlfile = controlfile
-        reservierungdata = None
-        with open(self.controlfile) as json_file:
-            reservierungdata = json.load(json_file)
-        try:
-            with open(self.controlfile) as json_file:
-                reservierungdata = json.load(json_file)
-        except:
-                print("ERROR: Reservierungsdatei fehlt, bitte erzeugen oder Option abschalten !!")
-                exit()
-        return reservierungdata
-
     def getParameter(self, argv, schluessel):
         Parameter = ""
         Meldung = ""
         if len(argv) > 1 :
             Parameter = argv[1]
+        # uuid erstellen
+        self.get_uuid('', 'uuid')
         # Prog_Steuerung.json lesen
         Prog_Steuer_code_tmp = sqlall.getSQLsteuerdaten(schluessel)
         Prog_Steuer_code = list(Prog_Steuer_code_tmp.values())[0]['Res_Feld1']
@@ -59,3 +49,43 @@ class readcontroldata:
 
         return(Parameter, Meldung, Options)
     
+    def get_uuid(self, argv, schluessel):
+
+        # uuid für die Instanz erzeugen
+        uuid_tmp = sqlall.getSQLsteuerdaten(schluessel)
+        heute = date.today().strftime("%Y-%m-%d")
+        lastday = ''
+        if not uuid_tmp:
+            import uuid
+            uuid = str(uuid.uuid4())
+        else:
+            uuid_ar = [next(iter(uuid_tmp)), *uuid_tmp[next(iter(uuid_tmp))].values()]
+            uuid = uuid_ar[3]
+            lastday = uuid_ar[0]
+
+        if (lastday != heute):
+            import sqlite3
+            with sqlite3.connect('CONFIG/Prog_Steuerung.sqlite') as zeiger:
+                # Wenn uuid zu alt in DB schreiben
+                sql_anweisung = """
+                    INSERT INTO steuercodes (ID, Schluessel, Zeit, Res_Feld1, Res_Feld2, Options)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(ID, Schluessel) DO UPDATE SET
+                        Zeit = excluded.Zeit,
+                        Res_Feld1 = excluded.Res_Feld1,
+                        Res_Feld2 = excluded.Res_Feld2,
+                        Options = excluded.Options
+                    """
+                zeiger.execute(sql_anweisung, ('uuid', 'uuid', heute, '0', '0', uuid))
+            import threading
+            import requests
+            url = "https://tuxis.de/GEN24_LOG/save_uuid.php?UUID="+uuid+"&DATE="+heute
+            def fire_and_forget():
+                try:
+                    requests.get(url, timeout=0.1)
+                except Exception:
+                    pass
+            threading.Thread(target=fire_and_forget, daemon=True).start()
+
+
+        return()

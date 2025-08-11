@@ -1,3 +1,7 @@
+**[0.31.1] – 2025-XX-XX**  
+
+- Erstelle für jede Instanz eine UUID
+
 **[0.31.0] – 2025-08-01**  
 
 - **NEU** Updatefunktion in config-TAB:
