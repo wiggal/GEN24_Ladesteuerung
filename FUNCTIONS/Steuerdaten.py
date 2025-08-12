@@ -13,7 +13,10 @@ class readcontroldata:
         if len(argv) > 1 :
             Parameter = argv[1]
         # uuid erstellen
-        self.get_uuid('', 'uuid')
+        try:
+            self.get_uuid('', 'uuid')
+        except Exception:
+            pass
         # Prog_Steuerung.json lesen
         Prog_Steuer_code_tmp = sqlall.getSQLsteuerdaten(schluessel)
         Prog_Steuer_code = list(Prog_Steuer_code_tmp.values())[0]['Res_Feld1']
@@ -82,7 +85,7 @@ class readcontroldata:
             url = "https://tuxis.de/GEN24_LOG/save_uuid.php?UUID="+uuid+"&DATE="+heute
             def fire_and_forget():
                 try:
-                    requests.get(url, timeout=0.1)
+                    requests.get(url, timeout=5)
                 except Exception:
                     pass
             threading.Thread(target=fire_and_forget, daemon=True).start()
