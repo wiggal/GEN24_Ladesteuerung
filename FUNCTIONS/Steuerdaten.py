@@ -6,19 +6,6 @@ sqlall = FUNCTIONS.SQLall.sqlall()
 
 class readcontroldata:
 
-    def loadPVReservierung(self, controlfile):
-        self.controlfile = controlfile
-        reservierungdata = None
-        with open(self.controlfile) as json_file:
-            reservierungdata = json.load(json_file)
-        try:
-            with open(self.controlfile) as json_file:
-                reservierungdata = json.load(json_file)
-        except:
-                print("ERROR: Reservierungsdatei fehlt, bitte erzeugen oder Option abschalten !!")
-                exit()
-        return reservierungdata
-
     def getParameter(self, argv, schluessel):
         Parameter = ""
         Meldung = ""
@@ -58,4 +45,3 @@ class readcontroldata:
                 Options = Optionen
 
         return(Parameter, Meldung, Options)
-    
