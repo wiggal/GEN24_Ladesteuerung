@@ -114,7 +114,7 @@ main(){
   detect_distro
   # Abfrage ob Pakete installiert werden sollen
   echo -e "\n✅ System $SYSTEM erkannt!"
-  echo -e "Folgende Pakete werden installiert ${packages[*]}.\nInstallation fortsetzen? (j/n)"
+  echo -e "Folgende Pakete werden installiert/upgedatet ${packages[*]}.\nInstallation fortsetzen? (j/n)"
   read -r antwort1
   if [[ "$antwort1" == "j" || "$antwort1" == "J" ]]; then
       echo "Updating package database..."
