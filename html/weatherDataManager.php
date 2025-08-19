@@ -307,10 +307,14 @@ Das neue Gewicht wird bei der nächsten Anforderung der Prognosequelle gesetzt!\
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !empty($_POST['delete_quellen']) && isset($_POST['tage'])) {
     $toDelete = $_POST['delete_quellen'];
     $tage = intval($_POST['tage']);
-    $grenzeDatum = date('Y-m-d 00:00:00', strtotime("-$tage days"));
+    $grenzeDatum = date('Y-m-d 23:59:59', strtotime("-$tage days"));
+    #wenn Tage == 0 auch zukünftige Daten löschen
+    if ($tage == '0') {
+        $grenzeDatum = date('Y-m-d 23:59:59', strtotime("+100 days"));
+    }
 
     foreach ($toDelete as $quelle) {
-        $stmt = $db->prepare("DELETE FROM weatherData WHERE Quelle = ? AND Zeitpunkt < ?");
+        $stmt = $db->prepare("DELETE FROM weatherData WHERE Quelle = ? AND Zeitpunkt <= ?");
         if ($stmt) {
             $stmt->bindValue(1, $quelle, SQLITE3_TEXT);
             $stmt->bindValue(2, $grenzeDatum, SQLITE3_TEXT);
