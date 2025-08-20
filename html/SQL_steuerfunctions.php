@@ -33,34 +33,6 @@ $db->close();
 return $data;
 }
 
-function median($daten) {
-    $werte = [];
-
-    foreach ($daten as $eintrag) {
-        $wert = $eintrag[0];
-        $anzahl = $eintrag[1];
-
-        for ($i = 0; $i < $anzahl; $i++) {
-            $werte[] = $wert;
-        }
-    }
-
-    sort($werte);
-    $anzahl = count($werte);
-    $mitte = (int) floor($anzahl / 2);
-
-    if ($anzahl % 2 === 0) {
-        // Gerade Anzahl: Mittelwert der beiden mittleren Zahlen
-        $median = ($werte[$mitte - 1] + $werte[$mitte]) / 2;
-    } else {
-        // Ungerade Anzahl: Der mittlere Wert
-        $median = $werte[$mitte];
-    }
-
-    return $median;
-}
-
-
 function getPrognose() {
     global $PythonDIR;
     $watts = [];
