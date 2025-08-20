@@ -1,4 +1,4 @@
-**[0.31.1] – 2025-XX-XX**  
+**[0.31.1] – 2025-08-20**  
 
 FIX: Im `ForecastMgr` konnten Quellen nicht mehr vollständig gelöscht werden.
 
