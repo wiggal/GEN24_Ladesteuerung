@@ -40,6 +40,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
             try:
                 apiResponse2 = requests.get(url, timeout=99.50)
                 apiResponse2.raise_for_status()
+                print("DEBUG Wetter URL2: "+url)
                 if apiResponse2.status_code == 200:
                     json_data2 = dict(json.loads(apiResponse2.text))
                 else:
