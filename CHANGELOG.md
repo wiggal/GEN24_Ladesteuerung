@@ -1,3 +1,12 @@
+**[0.31.2] – 2025-XX-XX**  
+
+**Änderung in der LadeStrg:**
+- Die Spalten zur Reservierung von PV-Leistungen können nicht mehr frei benannt werden.  
+  Die Variablen $Res_Feld1 und $Res_Feld2 wurden aus der `html/config.php` entfernt und sollten auch aus der `html/config_priv.php` entfernt werden.  
+- Die Spalten heißen nun `einmal` und `laufend`  
+  - Die Werte der Spalte einmal gelten nur für den Tag, bei dem sie eingetragen wurden, und fallen dann weg.  
+  - Die Werte der Spalte laufend werden jeden Tag wiederholt, bis sie geändert oder gelöscht werden.  
+
 **[0.31.1] – 2025-08-20**  
 
 FIX: Im `ForecastMgr` konnten Quellen nicht mehr vollständig gelöscht werden.
