@@ -31,6 +31,9 @@
   font-weight: normal;
   text-align: right;
   }
+  th {
+    text-align: center;
+  }
 
   th, caption {
   background-color: #C1C0C0;
@@ -242,7 +245,7 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
 <br /> <div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>Prognose(KW)</th><th>Rest</th><th>$Res_Feld1</th><th>$Res_Feld2</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>&nbsp;Prognose(KW)&nbsp;</th><th>&nbsp;Rest&nbsp;</th><th>&nbsp;$Res_Feld1&nbsp;</th><th>&nbsp;$Res_Feld2&nbsp;</th></tr>";
 echo "\n";
 
 // Variablen definieren
