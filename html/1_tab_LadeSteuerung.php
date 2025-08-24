@@ -31,6 +31,9 @@
   font-weight: normal;
   text-align: right;
   }
+  th {
+    text-align: center;
+  }
 
   th, caption {
   background-color: #C1C0C0;
@@ -174,8 +177,11 @@ if(file_exists("config_priv.php")){
 }
 include 'SQL_steuerfunctions.php';
 $EV_Reservierung = getSteuercodes('Reservierung');
+$PrstLadeStd = getPrstLadeStd();
 $Prognose = getPrognose();
 
+$Res_Feld1 = 'einmal';
+$Res_Feld2 = 'laufend';
 $DB_ManuelleSteuerung_wert = 0;
 $DB_Auto_selected = '';
 $DB_Slider_selected = '';
@@ -239,7 +245,7 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
 <br /> <div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>Prognose(KW)</th><th>Rest</th><th>$Res_Feld1</th><th>$Res_Feld2</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>&nbsp;Prognose(KW)&nbsp;</th><th>&nbsp;Rest&nbsp;</th><th>&nbsp;$Res_Feld1&nbsp;</th><th>&nbsp;$Res_Feld2&nbsp;</th></tr>";
 echo "\n";
 
 // Variablen definieren
@@ -261,6 +267,14 @@ $Prognosewert_Sum = number_format($Prognosewert_Sum + $Prognosewert,1);
 $Rest_KW_Sum = number_format($Rest_KW_Sum + (float) $Rest_KW,1);
 $Res_Feld1_Watt_Sum = number_format($Res_Feld1_Watt_Sum + (float) $Res_Feld1_Watt,1);
 $Res_Feld2_Watt_Sum = number_format($Res_Feld2_Watt_Sum + (float) $Res_Feld2_Watt,1);
+// Stunde aus $date extrahieren
+$stunde = date('H:00:00', strtotime($date));
+$datum = date('Y-m-d', strtotime($date));
+$heute = date('Y-m-d');
+# Wenn  Res_Feld2 = 'laufend' gesetzt dann zuweisen
+if (isset($PrstLadeStd[$stunde]) and $datum == $heute) {
+    if ($PrstLadeStd[$stunde]['Res_Feld2'] !== '0') $EV_Reservierung[$date]['Res_Feld2'] = $PrstLadeStd[$stunde]['Res_Feld2'];
+}
 
 if (isset($EV_Reservierung[$date]['Res_Feld1'])){
     $Res_Feld1_wert = (float) $EV_Reservierung[$date]['Res_Feld1']/1000;

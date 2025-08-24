@@ -77,4 +77,38 @@ function getPrognose() {
     return ['result' => ['watts' => $watts]];
 }
 
+function getPrstLadeStd() {
+global $PythonDIR;
+$SQLfile = $PythonDIR.'/CONFIG/Prog_Steuerung.sqlite';
+$db = new SQLite3($SQLfile);
+$SQL = "
+        SELECT strftime('%H:00:00', Zeit) AS Stunde,
+            MIN(Res_Feld2) AS Res_Feld2
+        FROM steuercodes
+        WHERE Res_Feld2 != 0
+            AND Schluessel = 'Reservierung'
+            AND ID LIKE '1%'
+        GROUP BY strftime('%Y-%m-%d %H', Zeit)
+        ORDER BY Stunde;
+        ";
+
+
+        $results = $db->query($SQL);
+        $data = array();
+
+        // Fetch Associated Array
+        if($results != false){
+            while ($row = $results->fetchArray(SQLITE3_ASSOC))
+            {
+                $stunde = $row['Stunde'];
+                $data[$stunde] = array(
+                    'Res_Feld2' => $row['Res_Feld2']
+                );
+            }
+        }
+        
+$db->close();
+
+return $data;
+}
 ?>

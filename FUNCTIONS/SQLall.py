@@ -90,6 +90,26 @@ class sqlall:
         verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
         zeiger = verbindung.cursor()
 
+        # Wenn schluessel == Reservierung dann laufende Reservierungen auslesen
+        if (schluessel == 'Reservierung'):
+            # SQL-Abfrage
+            query = """
+            SELECT strftime('%H:00:00', Zeit) AS Stunde,
+                MIN(Res_Feld2) AS Res_Feld2
+            FROM steuercodes
+            WHERE Res_Feld2 != 0
+            AND ID LIKE '1%'
+            AND Schluessel = 'Reservierung'
+            GROUP BY strftime('%Y-%m-%d %H', Zeit)
+            ORDER BY Stunde;
+            """
+            # Abfrage ausführen
+            zeiger.execute(query)
+            
+            # Ergebnis in ein Array laden (Liste von Tupeln)
+            laufende_array = zeiger.fetchall()
+            if (laufende_array): print("DEBUG: ", laufende_array)  #entWIGGlung
+
         try:
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
             sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
@@ -110,9 +130,23 @@ class sqlall:
                 data[row[0]][columns[1]] = float(row[1])
             except (ValueError, TypeError):
                 data[row[0]][columns[1]] = 0
+
             # Feld 2 kann String enthalten, wegen viertestündlichen Strompreisen
             data[row[0]][columns[2]] = row[2]
             data[row[0]][columns[3]] = row[3]
+
+            # Wenn schluessel == Reservierung dann nach laufenden Reservierungen suchen und einfügen
+            if (schluessel == 'Reservierung' and row[0] != 'ManuelleSteuerung'):
+                # Stunde extrahieren
+                stunde = datetime.fromisoformat(row[0]).strftime("%H:00:00")
+                # Wert suchen
+                wert = None
+                for laufende_row in laufende_array:
+                    if laufende_row[0] == stunde:
+                        data[row[0]][columns[2]] = laufende_row[1]
+                        print("DEBUG: ",row[0],data[row[0]])  #entWIGGlung
+                        break
+
         record_json = json.dumps(data)
         record_json = json.loads(record_json)
 

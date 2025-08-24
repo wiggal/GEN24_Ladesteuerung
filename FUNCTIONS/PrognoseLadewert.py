@@ -322,6 +322,7 @@ class progladewert:
 
         # Eigen_Opt_Std_neu runden
         if MaxEinspeisung < RundungEinspeisewert: RundungEinspeisewert = MaxEinspeisung
+        if RundungEinspeisewert == 0: RundungEinspeisewert = 0.1
         Eigen_Opt_Std_neu = int(round(Eigen_Opt_Std_neu / RundungEinspeisewert) * RundungEinspeisewert)
         if Akku_Rest_Watt < 0 or Eigen_Opt_Std_neu < 0: Eigen_Opt_Std_neu = 0
         # Hier auf MaxEinspeisung begrenzen.
@@ -337,7 +338,7 @@ class progladewert:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen):
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-                    Eigen_Opt_Std_neu = 30
+                    Eigen_Opt_Std_neu = 0
                 else:
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei Prognose 24H+ > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
