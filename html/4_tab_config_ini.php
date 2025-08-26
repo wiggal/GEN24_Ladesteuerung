@@ -141,8 +141,20 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                 $KommentarZeilen = [];
             }
             if ((strpos($Zeile, '[') !== false) && (strpos($Zeile, '[') < 1)) {
-                    $block_key = $Zeile;
+                // vorherigen Kommentarblock anhängen (falls vorhanden)
+                if (!empty($block)) {
+                    $all_ini_daten[$schluessel][$block_key]['comment_'.$Zeilencounter] = [
+                        'comment' => $block,
+                        'variable' => '',
+                        'wert' => ''
+                    ];
+                    $block = '';
+                    }
+
+                // neuen Block beginnen
+                $block_key = $Zeile;
                 }
+
                 elseif (strpos($Zeile, '=') !== false) {
                     $Zeilenteil = explode("=", $Zeile, 2);
                     $Zeilenteil[0] = trim($Zeilenteil[0]);
@@ -159,6 +171,7 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                         'variable' => '',
                         'wert' => ''
                         ];
+                        $block = '';
                 }
     
             $Zeilencounter++;
@@ -166,7 +179,7 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
         }
     } #ENDE foreach ($file_array
 
-    # Ab hier wierden die gesammelten Zeilen ausgegeben
+    # Ab hier werden die gesammelten Zeilen ausgegeben
     if ($edit_methode !== 'update') {
         $zeilenzaehler = 0;
         foreach ($all_ini_daten['_priv'] as $key1 => $element) {
