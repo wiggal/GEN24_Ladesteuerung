@@ -101,7 +101,7 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
       <div class="zeroclipboard-container position-absolute right-0
         top-0"> </div>
     </div>
-    <p><strong>Konfiguration:</strong></p>
+    <p><strong>Konfiguration Ladesteuerung:</strong></p>
     <ul>
       <li>
         <p>Konfiguration der Ladesteuerung<br>
@@ -136,10 +136,18 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
     </div>
     <p>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      Es können alle Prognosen abgefragt werden, Speicherung in <code>weatherData.sqlite</code>.<br>
-      Die Berechnung der zu erwartenden PV-Produktion erfolgt als
-      Median, oder der in <code>weather_priv.ini</code> definierten
-      Methode, aus den Werten und Gewichten der DB.</p>
+      <b>PV-Prognosen:</b><br>
+      Damit die Ladesteuerung per http_SymoGen24Controller2.py
+      funktioniert, ist eine PV-Prognose erforderlich.<br>
+      Mit den Skripten XY_WeatherData.py im Verzeichnis FORECAST, können
+      Prognosen von verschiedenen Wetterdiensten abgerufen werden.<br>
+      Die Prognosen werde in <code>weatherData.sqlite</code>
+      gespeichert. Aus den einzelnen gespeicherten Prognosen wird mit
+      der in <code>weather_priv.ini</code> definierten Methode und
+      Gewichten die PV-Prognose berechnet.<br>
+      Nähere Informationen sie auch im WIKI unter "config", bzw. in der
+      Hilfe zum TAB "config"<br>
+    </p>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
       <pre class="notranslate"><code>33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
@@ -151,7 +159,16 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
       <div class="zeroclipboard-container position-absolute right-0
         top-0"> </div>
     </div>
-    <p><strong>Crontab.log jeden Montag abräumen</strong></p>
+    <p><strong><strong>Verwendung Dynamischer Strompreise:<br>
+        </strong></strong></p>
+    <p>Sollen Dynamischer Strompreise verwendet werden ist noch
+      folgender Crontabeintrag erforderlich:<strong><strong></strong></strong><br>
+      <br>
+      <code>58 * * * * /home/GEN24/start_PythonScript.sh -o</code><code>
+        LOG_DynamicPriceCheck.log DynamicPriceCheck.py schreiben</code></p>
+    <p>Weiter Informationen siehe Beschreibung unter DynamicPriceCheck<strong><strong>.<br>
+        </strong></strong></p>
+    <p><strong><strong></strong>Crontab.log jeden Montag abräumen</strong></p>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
       <pre class="notranslate"><code>0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
@@ -175,6 +192,9 @@ sudo apt install php php-sqlite3
         top-0"> </div>
     </div>
     <p>Wenn PHP installiert ist, wird durch die Variable <code>Einfacher_PHP_Webserver
+
+
+
 
 
 
@@ -207,6 +227,9 @@ sudo apt install apache2
       <li>/etc/apache2/envvars <code>export APACHE_RUN_GROUP=www-data</code>
         nach <code>export APACHE_RUN_GROUP=pi</code> ändern.</li>
       <li>/etc/apache2/sites-enabled/000-default.conf <code>DocumentRoot
+
+
+
 
 
 
