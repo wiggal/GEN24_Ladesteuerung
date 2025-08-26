@@ -7,7 +7,8 @@
   - Die Werte der Spalte einmal gelten nur für den Tag, bei dem sie eingetragen wurden, und fallen dann weg.  
   - Die Werte der Spalte laufend werden jeden Tag wiederholt, bis sie geändert oder gelöscht werden.  
 
-- Im install_gen24.sh kann nun das Installationsverzeichnis verändert werden.
+- Im install_gen24.sh kann nun das Installationsverzeichnis verändert werden.  
+- Fallback in GEN24_API, falls die Nodenummern 1 und 3 anders sind.  
 
 **[0.31.1] – 2025-08-20**  
 
