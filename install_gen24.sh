@@ -8,7 +8,7 @@ set -e
 # - erfordeliche Pakete installieren
 # - IP und Kennwort GEN24 abfragen und default_priv.ini anlegen
 # - USER gen24 mit $HOME=/home/gen24 anlegen
-# - /home/GEN24 anlegen und Skripte von github.com pullen
+# - /home/GEN24 oder gewähltes Verzeichnis anlegen und Skripte von github.com pullen
 # - cronjobs erstellen
 ####################################################################
 
@@ -87,7 +87,7 @@ detect_distro(){
     PM="apt-get install -y"
     UPDATE="apt-get update -y"
     # DEBIAN-Paketliste
-    packages=(iputils-ping cron file git python3 python3-pip python3-requests php php-sqlite3)
+    packages=(passwd iputils-ping cron file git python3 python3-pip python3-requests php php-sqlite3)
     SYSTEM=DEBIAN
   elif [ -f /etc/alpine-release ]; then
     PM="apk --update add"
@@ -132,6 +132,20 @@ main(){
 
 main "$@"
 
+# Installationsverzeichnis abfragen:
+echo "Standard-Installationsverzeichnis ist: $REPO_DIR"
+read -p "Möchten Sie ein anderes Verzeichnis angeben? (j/n) " answer
+
+if [[ "$answer" =~ ^[JjYy]$ ]]; then
+    read -p "Bitte neues Verzeichnis eingeben: " new_dir
+    # Falls nichts eingegeben wird, bleibt das alte Verzeichnis
+    if [[ -n "$new_dir" ]]; then
+        REPO_DIR="$new_dir"
+    fi
+fi
+
+echo "Installationsverzeichnis: $REPO_DIR"
+echo ""
 
 # CONFIG/default_priv.ini mit Benutzereingaben erzeugen
 if [ ! -f "$REPO_DIR/CONFIG/default_priv.ini" ]; then
@@ -199,7 +213,7 @@ fi
 
 # Prüfen, ob .git-Unterverzeichnis existiert
 $SUDO_IST mkdir -p $REPO_DIR
-# vorübergehend Eigentümer $USER auf /home/GEN24 setzten
+# vorübergehend Eigentümer $USER setzten
 $SUDO_IST chown -R $USER $REPO_DIR
 
 cd $REPO_DIR
@@ -214,18 +228,18 @@ fi
 
 # Datenbanken anlegen, wenn nicht vorhanden!
 cd $REPO_DIR
-export PYTHONPATH=/home/GEN24/FUNCTIONS
+export PYTHONPATH="$REPO_DIR/FUNCTIONS"
 # weatherData.sqlite
 if [ ! -s "weatherData.sqlite" ]; then
-    python3 -c "from WeatherData import WeatherData; WeatherData().create_database('/home/GEN24/weatherData.sqlite')"
+    python3 -c "from WeatherData import WeatherData; WeatherData().create_database('$REPO_DIR/weatherData.sqlite')"
 fi
 #PV_Daten.sqlite
 if [ ! -s "PV_Daten.sqlite" ]; then
-    python3 -c "from SQLall import sqlall; sqlall().create_database_PVDaten('/home/GEN24/PV_Daten.sqlite')"
+    python3 -c "from SQLall import sqlall; sqlall().create_database_PVDaten('$REPO_DIR/PV_Daten.sqlite')"
 fi
 #CONFIG/Prog_Steuerung.sqlite
 if [ ! -s "CONFIG/Prog_Steuerung.sqlite" ]; then
-    python3 -c "from SQLall import sqlall; sqlall().create_database_ProgSteuerung('/home/GEN24/CONFIG/Prog_Steuerung.sqlite')"
+    python3 -c "from SQLall import sqlall; sqlall().create_database_ProgSteuerung('$REPO_DIR/CONFIG/Prog_Steuerung.sqlite')"
 fi
 
 # CONFIG/default_priv.ini mit Benutzereingaben erzeugen
@@ -240,7 +254,7 @@ cp -n CONFIG/charge.ini CONFIG/charge_priv.ini
 cp -n CONFIG/weather.ini CONFIG/weather_priv.ini
 cp -n CONFIG/dynprice.ini CONFIG/dynprice_priv.ini
 
-# Eigentümer $USERNAME auf /home/GEN24 setzten
+# Eigentümer $USERNAME setzten
 $SUDO_IST chown -R $USERNAME:$USERNAME $REPO_DIR
 
 # Cronjobs für $USERNAME anlegen
@@ -251,14 +265,14 @@ if $SUDO_IST crontab -u "$USERNAME" -l &>/dev/null; then
 fi
 
 # Neue Crontab definieren
-CRON_ENTRIES=$(cat <<'EOF'
-1-56/10 * * * * /home/GEN24/start_PythonScript.sh http_SymoGen24Controller2.py logging
-2 3-21 * * * /home/GEN24/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
-3 3,7,9,11,13,15,17,19 * * * /home/GEN24/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
-# 4 3,7,9,11,13,15,17,19 * * * /home/GEN24/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
-32 * * * * /home/GEN24/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
-# 7 3,7,9,11,13,15,17,19 * * * /home/GEN24/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
-0 0 * * 1 mv /home/GEN24/Crontab.log /home/GEN24/Crontab.log_weg
+CRON_ENTRIES=$(cat <<EOF
+1-56/10 * * * * $REPO_DIR/start_PythonScript.sh http_SymoGen24Controller2.py logging
+2 3-21 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
+3 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
+# 4 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
+32 * * * * $REPO_DIR/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
+# 7 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
+0 0 * * 1 mv $REPO_DIR/Crontab.log $REPO_DIR/home/GEN24/Crontab.log_weg
 EOF
 )
 

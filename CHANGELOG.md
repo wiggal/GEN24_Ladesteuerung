@@ -7,6 +7,8 @@
   - Die Werte der Spalte einmal gelten nur für den Tag, bei dem sie eingetragen wurden, und fallen dann weg.  
   - Die Werte der Spalte laufend werden jeden Tag wiederholt, bis sie geändert oder gelöscht werden.  
 
+- Im install_gen24.sh kann nun das Installationsverzeichnis verändert werden.
+
 **[0.31.1] – 2025-08-20**  
 
 FIX: Im `ForecastMgr` konnten Quellen nicht mehr vollständig gelöscht werden.
