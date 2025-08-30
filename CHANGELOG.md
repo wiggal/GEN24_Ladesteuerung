@@ -1,3 +1,7 @@
+**[0.31.3] – 2025-08-30**  
+
+FIX: Bei neuen Installationen wird die DB CONFIG/Prog_Steuerung.sqlite nicht mehr angelegt.
+
 **[0.31.2] – 2025-08-30**  
 
 **Änderung in der LadeStrg:**

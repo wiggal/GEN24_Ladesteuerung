@@ -90,27 +90,27 @@ class sqlall:
         verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
         zeiger = verbindung.cursor()
 
-        # Wenn schluessel == Reservierung dann laufende Reservierungen auslesen
-        if (schluessel == 'Reservierung'):
-            # SQL-Abfrage
-            query = """
-            SELECT strftime('%H:00:00', Zeit) AS Stunde,
-                MIN(Res_Feld2) AS Res_Feld2
-            FROM steuercodes
-            WHERE Res_Feld2 != 0
-            AND ID LIKE '1%'
-            AND Schluessel = 'Reservierung'
-            GROUP BY strftime('%Y-%m-%d %H', Zeit)
-            ORDER BY Stunde;
-            """
-            # Abfrage ausführen
-            zeiger.execute(query)
-            
-            # Ergebnis in ein Array laden (Liste von Tupeln)
-            laufende_array = zeiger.fetchall()
-            if (laufende_array): print("DEBUG: ", laufende_array)  #entWIGGlung
-
         try:
+            # Wenn schluessel == Reservierung dann laufende Reservierungen auslesen
+            if (schluessel == 'Reservierung'):
+                # SQL-Abfrage
+                query = """
+                SELECT strftime('%H:00:00', Zeit) AS Stunde,
+                    MIN(Res_Feld2) AS Res_Feld2
+                FROM steuercodes
+                WHERE Res_Feld2 != 0
+                AND ID LIKE '1%'
+                AND Schluessel = 'Reservierung'
+                GROUP BY strftime('%Y-%m-%d %H', Zeit)
+                ORDER BY Stunde;
+                """
+                # Abfrage ausführen
+                zeiger.execute(query)
+            
+                # Ergebnis in ein Array laden (Liste von Tupeln)
+                laufende_array = zeiger.fetchall()
+                if (laufende_array): print("DEBUG: ", laufende_array)  #entWIGGlung
+
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
             sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
             zeiger.execute(sql_anweisung)
