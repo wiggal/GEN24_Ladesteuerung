@@ -1,3 +1,7 @@
+**[0.31.4] – 2025-08-30**  
+
+FIX DynamicPriceCheck: TypeError: get_API() missing 1 required positional argument: 'self'
+
 **[0.31.3] – 2025-08-30**  
 
 FIX: Bei neuen Installationen wird die DB CONFIG/Prog_Steuerung.sqlite nicht mehr angelegt.

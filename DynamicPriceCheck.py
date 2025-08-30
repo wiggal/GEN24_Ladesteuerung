@@ -109,7 +109,7 @@ if(dyn_print_level >= 3):
     dynamic.listAStable(headers, pv_data)
 
 # Akku-Kapazität und aktuelle Parameter
-api = FUNCTIONS.GEN24_API.gen24api
+api = FUNCTIONS.GEN24_API.gen24api()
 API = api.get_API()
 # Wenn Batterie offline, battery_capacity_Wh = 5%
 Battery_Status = API['BAT_MODE']
