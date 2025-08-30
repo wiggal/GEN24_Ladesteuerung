@@ -104,7 +104,7 @@ if __name__ == '__main__':
                             print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
                             Grundlast = 0
 
-                    api = FUNCTIONS.GEN24_API.gen24api
+                    api = FUNCTIONS.GEN24_API.gen24api()
                     API = api.get_API()
                     Battery_Status = API['BAT_MODE']
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS

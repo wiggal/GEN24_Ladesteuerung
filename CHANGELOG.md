@@ -1,4 +1,4 @@
-**[0.31.2] – 2025-08-31**  
+**[0.31.2] – 2025-08-30**  
 
 **Änderung in der LadeStrg:**
 - Die Spalten zur Reservierung von PV-Leistungen können nicht mehr frei benannt werden.  

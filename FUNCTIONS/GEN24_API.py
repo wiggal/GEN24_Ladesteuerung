@@ -7,10 +7,10 @@ sqlall = FUNCTIONS.SQLall.sqlall()
 
 class gen24api:
     def __init__(self):
-        self.now = datetime.now()
+        self.dummy = 'dummmy'
 
     # API für die aktuellen Werte zur Berechnung , bei http Zugriff ohne Modbus
-    def get_API():
+    def get_API(self):
         IP = basics.getVarConf('gen24','hostNameOrIp','str')
         gen24url = "http://"+IP+"/components/readable"
         url = requests.get(gen24url)
