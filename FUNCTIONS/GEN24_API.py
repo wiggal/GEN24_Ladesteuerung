@@ -43,12 +43,14 @@ class gen24api:
                 API['aktuelleBatteriePower'] = int(data['Body']['Data'][first_node]['channels']['BAT_POWERACTIVE_MEAN_F32'])
                 API['BatteryMaxDischargePercent'] = ''
                 # Zählerstände fürs Logging
-                API['AC_Produktion'] =  int((data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64']+data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64']+\
-                    data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
-                API['DC_Produktion'] =  int((data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64']+ data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
+                API['AC_Produktion'] =  int((data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_01_U64'] +\
+                                             data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_02_U64'] +\
+                                             data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_03_U64'])/3600)
+                API['DC_Produktion'] =  int((data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_01_U64'] +\
+                                             data['Body']['Data'][first_node]['channels']['PV_ENERGYACTIVE_ACTIVE_SUM_02_U64'])/3600)
                 API['AC_to_DC'] = int((data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_01_U64'] +\
-                    data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_02_U64'] +\
-                    data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_03_U64'])/3600)
+                                       data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_02_U64'] +\
+                                       data['Body']['Data'][first_node]['channels']['ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_03_U64'])/3600)
                 API['Batterie_IN'] =    int(data['Body']['Data'][first_node]['channels']['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
                 API['Batterie_OUT'] =   int(data['Body']['Data'][first_node]['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
                 API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
@@ -80,7 +82,42 @@ class gen24api:
                 API['Batterie_OUT'] =   int(data['Body']['Data']['393216']['channels']['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
                 API['Netzverbrauch'] =  int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
                 API['Einspeisung'] =    int(data['Body']['Data']['16252928']['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
-    
+
+        # Daten von weiteren Erzeuger Smartmetern
+        ID_weitere_SM = basics.getVarConf('gen24','ID_weitere_SM','str')
+        Verlust_weitere_SM = basics.getVarConf('gen24','SM_AC_DC_Verlust','str')
+        if(ID_weitere_SM != 'no'):
+            ID_weitere_SM = ID_weitere_SM.replace(" ", "")
+            ID_weitere_SM = ID_weitere_SM.split(",")
+            Verlust_weitere_SM = Verlust_weitere_SM.replace(" ", "")
+            Verlust_weitere_SM = Verlust_weitere_SM.split(",")
+            # Wenn beide Arrays nicht gleich lang sind wird beim Verlust nur Eintrag 0 verwendet
+            if (len(ID_weitere_SM) == len(Verlust_weitere_SM)):
+                benutzeIndex = True
+            else:
+                benutzeIndex = False
+
+            for index, weitereID in enumerate(ID_weitere_SM):
+                try:
+                    API_SM_MEAN = data['Body']['Data'][weitereID]['channels']['SMARTMETER_POWERACTIVE_MEAN_SUM_F64']
+                except:
+                    API_SM_MEAN = 0
+                # SUM Value
+                try:
+                    API_SM_SUM = data['Body']['Data'][weitereID]['channels']['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64']
+                except:
+                    API_SM_SUM = 0
+                if (benutzeIndex):
+                    VerlustWR = int(Verlust_weitere_SM[index])
+                else:
+                    VerlustWR = int(Verlust_weitere_SM[0])
+
+                API['aktuellePVProduktion'] += int(API_SM_MEAN/(1-VerlustWR/100))
+                # Zählerstände fürs Logging
+                API['AC_Produktion'] += int(API_SM_SUM)
+                API['DC_Produktion'] += int(API_SM_SUM/(1-VerlustWR/100))
+                API['AC_to_DC'] += int(API_SM_SUM*VerlustWR/100)
+
         # Daten von weiteren GEN24 lesen
         IP_weitere_Gen24 = basics.getVarConf('gen24','IP_weitere_Gen24','str')
         if(IP_weitere_Gen24 != 'no'):
