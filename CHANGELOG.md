@@ -1,3 +1,9 @@
+**[0.31.5] – 2025-XX-XX**  
+
+Neukonzipierung von FUNCTIONS/GEN24_API.py:
+Nachdem sich die Node-Nummern der components/readable API auf verschiedenen Systemen bzw. Firmwareversionen unterscheiden,
+werden nun die benötigten API-Schlüssel unabhängig der Node-Nummern bzw. Ebenen gelesen.
+
 **[0.31.4] – 2025-08-30**  
 
 FIX DynamicPriceCheck: TypeError: get_API() missing 1 required positional argument: 'self'
