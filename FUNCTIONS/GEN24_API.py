@@ -10,25 +10,6 @@ class gen24api:
     def __init__(self):
         self.dummy = 'dummmy'
 
-    def old_extract_API_values(self, obj, keys):
-        """
-        Durchsucht obj nach den Schlüsseln aus 'keys' und gibt ein dict zurück.
-        """
-        results = {}
-        def recurse(o):
-            if isinstance(o, dict):
-                for k, v in o.items():
-                    if k in keys:
-                        results[k] = v
-                    if isinstance(v, (dict, list)):
-                        recurse(v)
-            elif isinstance(o, list):
-                for item in o:
-                    recurse(item)
-
-        recurse(obj)
-        return results
-
     def extract_API_values(self, obj, key_patterns):
         """
         Extrahiert nur Keys aus obj, die in key_patterns definiert sind.
