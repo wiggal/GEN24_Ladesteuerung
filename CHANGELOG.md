@@ -1,4 +1,4 @@
-**[0.31.5] – 2025-XX-XX**  
+**[0.31.5] – 2025-09-02**  
 
 Neukonzipierung von FUNCTIONS/GEN24_API.py:
 Nachdem sich die Node-Nummern der components/readable API auf verschiedenen Systemen bzw. Firmwareversionen unterscheiden,

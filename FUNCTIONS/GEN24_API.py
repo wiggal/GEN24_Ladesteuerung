@@ -111,11 +111,11 @@ class gen24api:
             # Zählerstände fürs Logging
             API['AC_Produktion'] =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
             API['DC_Produktion'] =  int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
-            API['AC_to_DC'] =       int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
-            API['Batterie_IN'] =    int(API_result['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
-            API['Batterie_OUT'] =   int(API_result['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
+            API['AC_to_DC']      =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
+            API['Batterie_IN']   =  int(API_result['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
+            API['Batterie_OUT']  =  int(API_result['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
             API['Netzverbrauch'] =  int(API_result['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
-            API['Einspeisung'] =    int(API_result['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
+            API['Einspeisung']   =  int(API_result['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
 
 
         # Daten von weiteren GEN24 lesen
@@ -163,8 +163,8 @@ class gen24api:
                     API_result = self.extract_API_values(data, SYMO_API_schluessel)
                     # Benötigte Werte mit den geholten API-Werten API zuweisen
                     API_Sym['aktuellePVProduktion'] += int(API_result['PowerReal_PAC_Sum'])
-                    API_Sym['AC_Produktion'] +=  int(API_result['EnergyReal_WAC_Sum_EverSince'])
-                    API_Sym['DC_Produktion'] += int(API_result['EnergyReal_WAC_Sum_EverSince'])
+                    API_Sym['AC_Produktion']        += int(API_result['EnergyReal_WAC_Sum_EverSince'])
+                    API_Sym['DC_Produktion']        += int(API_result['EnergyReal_WAC_Sum_EverSince'])
                 except:
                     print("API von Symo-WR ", weitereIP, " nicht verfügbar, Ersatz-AC-Wert loggen!")
                     API['aktuellePVProduktion'] += 0
