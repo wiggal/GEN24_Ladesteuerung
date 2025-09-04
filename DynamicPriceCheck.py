@@ -11,7 +11,7 @@ import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.GEN24_API
-import FUNCTIONS.httprequest
+import FUNCTIONS.GEN24_httprequest
 import FUNCTIONS.Steuerdaten
 
 
@@ -20,7 +20,6 @@ if __name__ == '__main__':
     config = basics.loadConfig(['default', 'charge', 'dynprice'])
     sqlall = FUNCTIONS.SQLall.sqlall()
     dynamic = FUNCTIONS.DynamicPrice.dynamic()
-    request = FUNCTIONS.httprequest.request()
     now = datetime.now()
     format = "%Y-%m-%d %H:%M:%S"
 
@@ -128,8 +127,11 @@ user = basics.getVarConf('gen24','user', 'str')
 password = basics.getVarConf('gen24','password', 'str')
 # Hier Hochkommas am Anfang und am Ende enternen
 password = password[1:-1]
-BAT_M0_SOC_MIN = request.get_batteries(host_ip, user, password)[3]
-HYB_BACKUP_RESERVED = request.get_batteries(host_ip, user, password)[2]
+#  Klasse FroniusGEN24 initiieren
+request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password)
+batteries_array = request.get_batteries()
+BAT_M0_SOC_MIN = batteries_array[3]
+HYB_BACKUP_RESERVED = batteries_array[2]
 minimum_batterylevel_Prozent = BAT_M0_SOC_MIN
 if HYB_BACKUP_RESERVED > BAT_M0_SOC_MIN: minimum_batterylevel_Prozent = HYB_BACKUP_RESERVED
 

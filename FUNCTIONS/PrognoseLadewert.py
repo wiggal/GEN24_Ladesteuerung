@@ -1,10 +1,9 @@
 from datetime import datetime, timedelta
 import json
 import FUNCTIONS.functions
-import FUNCTIONS.httprequest
+import FUNCTIONS.GEN24_httprequest
 
 basics = FUNCTIONS.functions.basics()
-request = FUNCTIONS.httprequest.request()
     
 class progladewert:
     def __init__(self, data, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower):
@@ -290,6 +289,7 @@ class progladewert:
         return(Prognose_Summe, Ende_Nacht_Std)
         
     def getEigenverbrauchOpt(self, host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung=0):
+        request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password)
         DEBUG_Eig_opt ="\nDEBUG\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>"
         GrundlastNacht = basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
         AkkuZielProz = basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
@@ -298,7 +298,7 @@ class progladewert:
         PrognoseMorgen_arr = self.getPrognoseMorgen(MaxEinspeisung)
         PrognoseMorgen = PrognoseMorgen_arr[0]/1000
         Ende_Nacht_Std = PrognoseMorgen_arr[1]
-        Eigen_Opt_Std_arry = request.get_batteries(host_ip, user, password)
+        Eigen_Opt_Std_arry = request.get_batteries()
         Eigen_Opt_Std = Eigen_Opt_Std_arry[0]
         Eigen_Opt_auto = Eigen_Opt_Std_arry[1]
         Backup_Reserve = Eigen_Opt_Std_arry[2]

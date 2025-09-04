@@ -7,15 +7,16 @@ import FUNCTIONS.Steuerdaten
 import FUNCTIONS.functions
 import FUNCTIONS.GEN24_API
 import FUNCTIONS.SQLall
-import FUNCTIONS.httprequest
+import FUNCTIONS.GEN24_httprequest
 
 
 if __name__ == '__main__':
         basics = FUNCTIONS.functions.basics()
         config = basics.loadConfig(['default', 'charge'])
-        request = FUNCTIONS.httprequest.request()
         sqlall = FUNCTIONS.SQLall.sqlall()
         now = datetime.now()
+        # Präfix für http_request Pfade
+        http_request_path = '/api/'
         format = "%Y-%m-%d %H:%M:%S"
 
 
@@ -24,6 +25,8 @@ if __name__ == '__main__':
         password = basics.getVarConf('gen24','password', 'str')
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
+        #  Klasse FroniusGEN24 initiieren
+        request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password)
 
         try:
             # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
@@ -32,10 +35,9 @@ if __name__ == '__main__':
             response = requests.get(WR_URL)
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             alterLadewert = 0
-            # Auf Firmware 1.36.5-1 prüfen und evtl. Pfad anpassen
-            result_get_time_of_use_array = request.get_time_of_use(host_ip, user, password)
+            # alten Ladewert lesen
+            result_get_time_of_use_array = request.get_time_of_use()
             result_get_time_of_use = result_get_time_of_use_array[0]
-            http_request_path = result_get_time_of_use_array[1]
             for element in result_get_time_of_use:
                 if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
                     alterLadewert = element['Power']
