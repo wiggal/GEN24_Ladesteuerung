@@ -4,11 +4,14 @@ import os
 import time
 
 # Neue Klasse für http-request nach Umstellungen im Zugriff seit Firmware 1.38.6-1
-# Firmwareversionen kleiner 1.36.6-1 werden nicht mehr unterstützt
-# Für ältere Versionen muss hier und in DynamicPriceCheck.py anpassen (/api wegnehmen)
+# Firmwareversionen kleiner 1.36.6-1 wurden nicht getestet
+#
+# Beispiel zum prüfen der Version
+# Changelog => Zeus 3.4.3-21683 = 1.37.6-1 => API PS2.rev-sw = "3.4.3-21683" 
+
 
 class FroniusGEN24:
-    def __init__(self, host: str, user: str, password: str, debug: bool = False):
+    def __init__(self, host: str, user: str, password: str, Version = '3.4.3-21683', debug: bool = False):
         self.host = host
         self.user = user
         self.password = password
@@ -20,9 +23,21 @@ class FroniusGEN24:
         self.algorithm = "MD5"
         self.nc = 0
         self.debug = debug
-        self.login_path = "/api/commands/Login"
-        self.batterie_path = "/api/config/batteries"
-        self.timeofuse_path = "/api/config/timeofuse"
+        # Ab Version 1.36.5-1 => Zeus 3.3.2-20659 Präfix /api/
+        if(self.is_less_than(Version, "3.3.2-20659")):
+            self.login_path = "/commands/Login"
+            self.batterie_path = "/config/batteries"
+            self.timeofuse_path = "/config/timeofuse"
+        else:
+            self.login_path = "/api/commands/Login"
+            self.batterie_path = "/api/config/batteries"
+            self.timeofuse_path = "/api/config/timeofuse"
+
+    def is_less_than(self, version: str, threshold: str) -> bool:
+        def parse_version(v: str):
+            main = v.split("-")[0]   # nur Major.Minor.Patch beachten
+            return [int(x) for x in main.split(".")]
+        return parse_version(version) < parse_version(threshold)
 
     def _debug(self, msg: str):
         if self.debug:

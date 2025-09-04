@@ -81,14 +81,13 @@ class gen24api:
             ("BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64", False),
             ("BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64", False),
             ("SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64", False),
-            ("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", False)
+            ("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", False),
+            ("PS2.rev-sw", False)
         ]
         API_result = self.extract_API_values(data, GEN24_API_schluessel)
 
-        #print(API_result)  #entWIGGlung
-        #exit()  #entWIGGlung
-
         API['BAT_MODE'] = API_result['BAT_MODE_ENFORCED_U16']
+        API['Version'] = API_result['PS2.rev-sw']
         # "BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
         # "BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
         if API['BAT_MODE'] != 2:

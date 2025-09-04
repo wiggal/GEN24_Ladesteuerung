@@ -186,16 +186,6 @@ class WeatherData:
                     faktor = 1.0
                 faktoren_nach_stunde[uhrzeit].append(faktor)
         
-        #entWIGGlung CSV AUSGABE DER FAKTOREN
-        # print(zeit, produktion_dict[zeit], prognose_dict[zeit], faktor)  #entWIGGlung
-        #import csv
-        #import sys
-        #for uhrzeit, faktoren in faktoren_nach_stunde.items():
-            #faktoren_als_text = [str(round(f, 4)).replace('.', ',') for f in faktoren]
-            #zeile = [uhrzeit] + faktoren_als_text
-            #print(";".join(zeile))
-        #entWIGGlung
-
         # 3. Median-Faktor je Uhrzeit berechnen
         median_faktoren = {
             uhrzeit: median(faktoren)

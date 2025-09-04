@@ -25,8 +25,11 @@ if __name__ == '__main__':
         password = basics.getVarConf('gen24','password', 'str')
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
+        # API lesen, Versionsnummer
+        api = FUNCTIONS.GEN24_API.gen24api()
+        API = api.get_API()
         #  Klasse FroniusGEN24 initiieren
-        request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password)
+        request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'])
 
         try:
             # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
@@ -106,8 +109,6 @@ if __name__ == '__main__':
                             print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
                             Grundlast = 0
 
-                    api = FUNCTIONS.GEN24_API.gen24api()
-                    API = api.get_API()
                     Battery_Status = API['BAT_MODE']
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
                     # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN

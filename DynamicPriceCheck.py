@@ -128,7 +128,7 @@ password = basics.getVarConf('gen24','password', 'str')
 # Hier Hochkommas am Anfang und am Ende enternen
 password = password[1:-1]
 #  Klasse FroniusGEN24 initiieren
-request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password)
+request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'])
 batteries_array = request.get_batteries()
 BAT_M0_SOC_MIN = batteries_array[3]
 HYB_BACKUP_RESERVED = batteries_array[2]
