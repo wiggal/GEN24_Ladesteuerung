@@ -2,7 +2,7 @@
 
 **Umfangreiche Änderungen durch Firmwareupdate auf 1.38.6-1**  
 - Firmwareversionen kleiner 1.36.6-1 werden zwar unterstützt, sind aber noch nicht getestet.  
-- Nach einem Firmwareupdate auf 1.38.6-1 muss das Kennwort  für `customer` neu gesetzt werden.  
+- Nach einem Firmwareupdate auf 1.38.6-1 muss das Kennwort für `customer` neu gesetzt werden.  
 
 **[0.31.5] – 2025-09-02**  
 
