@@ -32,6 +32,7 @@ class FroniusGEN24:
             self.login_path = "/api/commands/Login"
             self.batterie_path = "/api/config/batteries"
             self.timeofuse_path = "/api/config/timeofuse"
+        self._debug("HTTP_Pfade: " + self.login_path+","+self.batterie_path+","+self.timeofuse_path)
 
     def is_less_than(self, version: str, threshold: str) -> bool:
         def parse_version(v: str):
@@ -41,7 +42,7 @@ class FroniusGEN24:
 
     def _debug(self, msg: str):
         if self.debug:
-            print("[DEBUG]", msg)
+            print("DEBUG ", msg)
 
     def _get_auth_params(self, url: str):
         """Fordert 401 an, um die Digest-Parameter zu bekommen"""
@@ -61,8 +62,9 @@ class FroniusGEN24:
         self.qop = params.get("qop")
         self.opaque = params.get("opaque")
         self.algorithm = params.get("algorithm", "MD5")
+        self._debug("Header_GET: " + header)
         self._debug(
-            f"Auth-Params: realm={self.realm}, nonce={self.nonce}, qop={self.qop}, algorithm={self.algorithm}, opaque={self.opaque}"
+            f"Auth-Params_neu: realm={self.realm}, nonce={self.nonce}, qop={self.qop}, algorithm={self.algorithm}, opaque={self.opaque}"
         )
 
     def _hash(self, data: str) -> str:

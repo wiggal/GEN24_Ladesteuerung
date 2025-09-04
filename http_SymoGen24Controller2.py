@@ -28,8 +28,11 @@ if __name__ == '__main__':
         # API lesen, Versionsnummer
         api = FUNCTIONS.GEN24_API.gen24api()
         API = api.get_API()
+        print_level = basics.getVarConf('env','print_level','eval')
+        DEBUG_httprequest = False
+        if(print_level == 5): DEBUG_httprequest = True
         #  Klasse FroniusGEN24 initiieren
-        request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'])
+        request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'], DEBUG_httprequest)
 
         try:
             # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
@@ -47,7 +50,6 @@ if __name__ == '__main__':
 
             # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
             SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
-            print_level = basics.getVarConf('env','print_level','eval')
             Parameter = SettingsPara.getParameter(argv, 'ProgrammStrg')
             Options = Parameter[2]
         
