@@ -25,10 +25,12 @@ class FroniusGEN24:
         self.debug = debug
         # Ab Version 1.36.5-1 => Zeus 3.3.2-20659 Präfix /api/
         if(self.is_less_than(Version, "3.3.2-20659")):
+            self.http_request_path_praefix = "/"
             self.login_path = "/commands/Login"
             self.batterie_path = "/config/batteries"
             self.timeofuse_path = "/config/timeofuse"
         else:
+            self.http_request_path_praefix = "/api/"
             self.login_path = "/api/commands/Login"
             self.batterie_path = "/api/config/batteries"
             self.timeofuse_path = "/api/config/timeofuse"
@@ -113,11 +115,14 @@ class FroniusGEN24:
         r.raise_for_status()
         return r
 
-    def send_request(self, path, method='GET', payload=None, params=None, headers=None):
+    def send_request(self, path, method='GET', payload=None, params=None, headers=None, add_praefix=False):
         """Sendet Request mit Digest-Auth """
         if headers is None:
             headers = {}
         last_error = None
+        # Hier http_request_path_praefix wenn add_praefix=True
+        if (add_praefix):
+            path = self.http_request_path_praefix + path
         try:
             r = self._request(method, path, headers=headers, data=payload, params=params)
             if r.status_code == 200:

@@ -15,8 +15,6 @@ if __name__ == '__main__':
         config = basics.loadConfig(['default', 'charge'])
         sqlall = FUNCTIONS.SQLall.sqlall()
         now = datetime.now()
-        # Präfix für http_request Pfade
-        http_request_path = '/api/'
         format = "%Y-%m-%d %H:%M:%S"
 
 
@@ -59,7 +57,7 @@ if __name__ == '__main__':
                 if(Parameter[0] == "exit0"):
                     # Batteriemangement zurücksetzen
                     if result_get_time_of_use != []:
-                        response = request.send_request(http_request_path + 'config/timeofuse', method='POST', payload ='{"timeofuse":[]}')
+                        response = request.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[]}', add_praefix=True)
                         print("Batteriemanagementeinträge gelöscht!")
                     # Ende Programm
                 if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
@@ -157,7 +155,8 @@ if __name__ == '__main__':
                     LadewertGrund = ""
 
                     # Klasse ProgLadewert initieren
-                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower)
+                    Eigen_Opt_Std_arry = request.get_batteries()
+                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry)
                     # evtl. Ladung des Akku auf SOC_Proz_Grenze begrenzen, und damit BattKapaWatt_akt reduzieren
                     Sdt_24H = datetime.now().hour
                     PrognoseMorgen = progladewert.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000
@@ -486,7 +485,7 @@ if __name__ == '__main__':
                             Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
                         # Wenn payload_text NICHT leer dann schreiben
                         if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
-                            response = request.send_request(http_request_path + 'config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}')
+                            response = request.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}', add_praefix=True)
                             bereits_geschrieben = 1
                             if ('laden' in Options) and WR_schreiben == 1:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
@@ -541,7 +540,7 @@ if __name__ == '__main__':
 
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
-                                    response = request.send_request(http_request_path + 'config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":'+str(HYB_EM_MODE)+'}')
+                                    response = request.send_request('config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":'+str(HYB_EM_MODE)+'}', add_praefix=True)
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
@@ -575,7 +574,7 @@ if __name__ == '__main__':
                                 ProgGrenzeMorgen = int(Notstrom_item)
 
                         if HYB_BACKUP_RESERVED == None:
-                            HYB_BACKUP_RESERVED = request.get_batteries(host_ip, user, password)[2]
+                            HYB_BACKUP_RESERVED = Eigen_Opt_Std_arry[2]
                         # Hysterese wenn Notstrom bereits eingeschaltet
                         if HYB_BACKUP_RESERVED == EntladeGrenze_Max:
                             ProgGrenzeMorgen = int(ProgGrenzeMorgen * 1.2)
@@ -600,7 +599,7 @@ if __name__ == '__main__':
 
                         if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
                             if ('notstrom' in Options):
-                                response = request.send_request(http_request_path + 'config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}')
+                                response = request.send_request('config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}', add_praefix=True)
                                 bereits_geschrieben = 1
                                 DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)
                                 Schreib_Ausgabe = Schreib_Ausgabe + str(Neu_HYB_BACKUP_RESERVED) + "% Notstromreserve geschrieben.\n"

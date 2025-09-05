@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
-import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.GEN24_API
 import FUNCTIONS.GEN24_httprequest
 import FUNCTIONS.Steuerdaten
