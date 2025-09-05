@@ -86,35 +86,43 @@ class gen24api:
         ]
         API_result = self.extract_API_values(data, GEN24_API_schluessel)
 
-        API['BAT_MODE'] = API_result['BAT_MODE_ENFORCED_U16']
-        API['Version'] = API_result['PS2.rev-sw']
-        # "BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
-        # "BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
-        if API['BAT_MODE'] != 2:
-            # Benötigte Werte mit den geholten API-Werten rechnen und API zuweisen
-            # Aktuelle Werte für Prognoseberechung
-            attributes_nameplate = json.loads(API_result['nameplate'])
-            API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
-            API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
-            API['udc_mittel'] = int((attributes_nameplate['max_udc'] + attributes_nameplate['min_udc'])/2)
-            API['BattStatusProz'] =    round(API_result['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
-            API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
-            API['aktuelleEinspeisung'] = int(API_result['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
-            # PV_POWERACTIVE_MEAN_02_F32 existiert nicht, wenn nur ein String am GEN24 hängt
-            try:
-                API_STRING2 = API_result['PV_POWERACTIVE_MEAN_02_F32']
-            except:
-                API_STRING2 = 0
-            API['aktuellePVProduktion'] = int(API_result['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
-            API['aktuelleBatteriePower'] = int(API_result['BAT_POWERACTIVE_MEAN_F32'])
-            # Zählerstände fürs Logging
-            API['AC_Produktion'] =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
-            API['DC_Produktion'] =  int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
-            API['AC_to_DC']      =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
-            API['Batterie_IN']   =  int(API_result['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
-            API['Batterie_OUT']  =  int(API_result['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
-            API['Netzverbrauch'] =  int(API_result['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
-            API['Einspeisung']   =  int(API_result['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
+        try:
+            API['BAT_MODE'] = API_result['BAT_MODE_ENFORCED_U16']
+            API['Version'] = API_result['PS2.rev-sw']
+            # "BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
+            # "BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
+            if API['BAT_MODE'] != 2:
+                # Benötigte Werte mit den geholten API-Werten rechnen und API zuweisen
+                # Aktuelle Werte für Prognoseberechung
+                attributes_nameplate = json.loads(API_result['nameplate'])
+                API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
+                API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
+                API['udc_mittel'] = int((attributes_nameplate['max_udc'] + attributes_nameplate['min_udc'])/2)
+                API['BattStatusProz'] =    round(API_result['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
+                API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
+                API['aktuelleEinspeisung'] = int(API_result['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
+                # PV_POWERACTIVE_MEAN_02_F32 existiert nicht, wenn nur ein String am GEN24 hängt
+                try:
+                    API_STRING2 = API_result['PV_POWERACTIVE_MEAN_02_F32']
+                except:
+                    API_STRING2 = 0
+                API['aktuellePVProduktion'] = int(API_result['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
+                API['aktuelleBatteriePower'] = int(API_result['BAT_POWERACTIVE_MEAN_F32'])
+                # Zählerstände fürs Logging
+                API['AC_Produktion'] =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
+                API['DC_Produktion'] =  int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
+                API['AC_to_DC']      =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
+                API['Batterie_IN']   =  int(API_result['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
+                API['Batterie_OUT']  =  int(API_result['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
+                API['Netzverbrauch'] =  int(API_result['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
+                API['Einspeisung']   =  int(API_result['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
+        except Exception as e:
+            print("\nERROR: Ein API-Wert konnte nicht gelesen werden, bitte prüfen!")
+            print("Fehlerursache:", e)
+            print("\nAPI_URL zur Fehlersuche: ", gen24url)
+            print("\nBenötigte Werte:\n", GEN24_API_schluessel)
+            print("\nVorhandene Werte:\n", API_result)
+            exit()
 
 
         # Daten von weiteren GEN24 lesen
@@ -138,7 +146,8 @@ class gen24api:
                     API['DC_Produktion']        += int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
                     API['AC_to_DC']             += int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
                 except Exception as e:
-                    print("API von WR", weitereIP, "nicht erreichbar")
+                    print("API von WR", weitereIP, "nicht erreichbar, oder fehlerhaft")
+                    print("API_URL zur Fehlersuche: ", gen24url)
                     print("Fehlerursache:", e)
 
         # Daten von Symos lesen und addieren
@@ -156,16 +165,18 @@ class gen24api:
             API_Sym['DC_Produktion'] = 0
             for weitereIP in IP_weitere_Symo:
                 try:
-                    gen24url = "http://"+weitereIP+"/components/readable"
-                    url = requests.get(gen24url, timeout=2)
+                    symo_url = "http://"+weitereIP+"/components/readable"
+                    url = requests.get(symo_url, timeout=2)
                     data = json.loads(url.text)
                     API_result = self.extract_API_values(data, SYMO_API_schluessel)
                     # Benötigte Werte mit den geholten API-Werten API zuweisen
                     API_Sym['aktuellePVProduktion'] += int(API_result['PowerReal_PAC_Sum'])
                     API_Sym['AC_Produktion']        += int(API_result['EnergyReal_WAC_Sum_EverSince'])
                     API_Sym['DC_Produktion']        += int(API_result['EnergyReal_WAC_Sum_EverSince'])
-                except:
-                    print("API von Symo-WR ", weitereIP, " nicht verfügbar, Ersatz-AC-Wert loggen!")
+                except Exception as e:
+                    print("\nAPI von Symo-WR ", weitereIP, " nicht verfügbar, Ersatz-AC-Wert loggen!")
+                    print("Fehlerursache:", e)
+                    print("\nAPI_URL zur Fehlersuche: ", symo_url)
                     API['aktuellePVProduktion'] += 0
                     Produktion_MAX_DB = sqlall.getSQLlastProduktion('PV_Daten.sqlite')
                     DB_AC = Produktion_MAX_DB[0]
@@ -173,9 +184,8 @@ class gen24api:
                     Offline_AC_DIFF = ((DB_DC - DB_AC) - (API['DC_Produktion'] - API['AC_Produktion']))
                     print("Offline_AC_DIFF: ", Offline_AC_DIFF)
                     if(Offline_AC_DIFF < 0): Offline_AC_DIFF = 0
-                    print("Offline_AC_DIFF nicht kleiner 0: ", Offline_AC_DIFF)
+                    print("Offline_AC_DIFF nicht kleiner 0: ", Offline_AC_DIFF, "\n")
                     Offline_AC = (DB_AC + Offline_AC_DIFF)
-                    #print(DB_DC, Offline_AC, API['DC_Produktion'], API['AC_Produktion'])
                     API['AC_Produktion'] = Offline_AC
                     API['DC_Produktion'] = DB_DC
                     return(API)

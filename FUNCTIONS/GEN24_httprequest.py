@@ -125,6 +125,8 @@ class FroniusGEN24:
         except Exception as e:
             last_error = e
             self._debug(f"Request auf {path} fehlgeschlagen: {e}")
+            print("\nLogin fehlgeschlagen: Kennword prüfen, nach Umstieg auf 1.38.6-1 neu setzen!!\n")
+            exit()
 
     def login(self) -> bool:
         """Login über Digest-Auth"""
