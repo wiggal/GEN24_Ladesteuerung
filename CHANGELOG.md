@@ -1,3 +1,8 @@
+**[0.38.1] – 2025-XX-XX**  
+
+- Parameter für Abschattungen in Akkudoktor__WeatherData.py angepasst.  
+
+
 **[0.38.0] – 2025-09-07**  
 
 **Umfangreiche Änderungen durch Firmwareupdate auf 1.38.6-1**  

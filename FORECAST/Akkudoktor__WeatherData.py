@@ -44,7 +44,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
         # Unterscheidung zwischen Free, Personal und Personal Plus
         url_anfang ='https://api.akkudoktor.net'
         url = (
-        url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&past_days=0&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizone={}'
+        url_anfang+'/forecast?lat={}&lon={}&power={}&azimuth={}&tilt={}&past_days=0&timecycle=hourly&cellCoEff={}&albedo={}&powerInverter={}&inverterEfficiency={}&horizont={}'
         .format(lat, lon, wp, az, dec, cellco, albedo, powerInv, inverterEff, horizon)
         )
         # Hier werden die Prognosen angefordert (evtl auch für zusätzliche Strings
