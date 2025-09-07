@@ -12,6 +12,8 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.38.0**  
+Update auf Firmware 1.38.6-1.  
 Ab Version: **0.31.0**  
 Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
 Installationsskript install_gen24.sh für eine automatische Installation bzw. Updating.  
