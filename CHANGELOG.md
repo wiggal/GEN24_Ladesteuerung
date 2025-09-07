@@ -1,4 +1,4 @@
-**[0.38.0] – 2025-XX-XX**  
+**[0.38.0] – 2025-09-07**  
 
 **Umfangreiche Änderungen durch Firmwareupdate auf 1.38.6-1**  
 - Firmwareversionen kleiner 1.36.6-1 werden zwar unterstützt, sind aber noch nicht getestet.  

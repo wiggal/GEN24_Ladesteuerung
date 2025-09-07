@@ -516,7 +516,7 @@ if __name__ == '__main__':
                         HYB_BACKUP_RESERVED = EigenOptERG[6]
                         aktuellePVProduktion_tmp = aktuellePVProduktion
 
-                        # Wenn der Akku unter MindBattLad Optimierung auf 0 setzen
+                        # Wenn der Akku unter MindBattLad Optimierung auf 30 setzen
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
                         if (BattStatusProz <= MindBattLad) and Eigen_Opt_Std_neu > 30:
                             Dauer_Nacht_Std = 1

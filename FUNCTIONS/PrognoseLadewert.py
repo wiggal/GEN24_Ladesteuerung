@@ -335,7 +335,7 @@ class progladewert:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen):
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-                    Eigen_Opt_Std_neu = 0
+                    Eigen_Opt_Std_neu = 30
                 else:
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei Prognose 24H+ > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
