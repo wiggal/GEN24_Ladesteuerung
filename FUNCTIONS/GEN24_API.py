@@ -72,8 +72,7 @@ class gen24api:
             ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),
             ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16", False),
             ("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", False),
-            ("PV_POWERACTIVE_MEAN_01_F32", False),
-            ("PV_POWERACTIVE_MEAN_02_F32", False),
+            ("PV_POWERACTIVE_MEAN_0[1-2]_F32", True),
             ("BAT_POWERACTIVE_MEAN_F32", False),
             ("ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0[1-3]_U64", True),
             ("PV_ENERGYACTIVE_ACTIVE_SUM_0[1-2]_U64", True),
@@ -101,12 +100,7 @@ class gen24api:
                 API['BattStatusProz'] =    round(API_result['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
                 API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
                 API['aktuelleEinspeisung'] = int(API_result['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
-                # PV_POWERACTIVE_MEAN_02_F32 existiert nicht, wenn nur ein String am GEN24 hängt
-                try:
-                    API_STRING2 = API_result['PV_POWERACTIVE_MEAN_02_F32']
-                except:
-                    API_STRING2 = 0
-                API['aktuellePVProduktion'] = int(API_result['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
+                API['aktuellePVProduktion'] = int(API_result['SUM_PV_POWERACTIVE_MEAN_0_F32'])
                 API['aktuelleBatteriePower'] = int(API_result['BAT_POWERACTIVE_MEAN_F32'])
                 # Zählerstände fürs Logging
                 API['AC_Produktion'] =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
@@ -136,12 +130,7 @@ class gen24api:
                     url = requests.get(gen24url)
                     data = json.loads(url.text)
                     API_result = self.extract_API_values(data, GEN24_API_schluessel)
-                    # PV_POWERACTIVE_MEAN_02_F32 existiert nicht, wenn nur ein String am GEN24 hängt
-                    try:
-                        API_STRING2 = API_result['PV_POWERACTIVE_MEAN_02_F32']
-                    except:
-                        API_STRING2 = 0
-                    API['aktuellePVProduktion'] += int(API_result['PV_POWERACTIVE_MEAN_01_F32'] + API_STRING2)
+                    API['aktuellePVProduktion'] += int(API_result['SUM_PV_POWERACTIVE_MEAN_0_F32'])
                     API['AC_Produktion']        += int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
                     API['DC_Produktion']        += int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
                     API['AC_to_DC']             += int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
