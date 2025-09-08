@@ -43,7 +43,9 @@ class gen24api:
                             if sum_flag:
                                 sums[sum_names[pattern]] += v
                             else:
-                                results[k] = v
+                                # nur den ersten Treffer behalten
+                                if k not in results:
+                                    results[k] = v
                             break  # Key wurde verarbeitet, nicht weiter prüfen
                     if isinstance(v, (dict, list)):
                         recurse(v)
@@ -183,6 +185,16 @@ class gen24api:
             API['AC_Produktion'] += API_Sym['AC_Produktion']
             API['DC_Produktion'] += API_Sym['DC_Produktion']
 
+
+        # Hier individuelles Skript Fremd_API_priv.py aus ADDONS aufrufen und Werte addieren
+        try:
+            import ADDONS.Fremd_API_priv
+            API_ADDDON = ADDONS.Fremd_API_priv.get_API()
+            for key in API:
+                if key in API_ADDDON:
+                    API[key] += API_ADDDON[key]
+        except:
+            pass
 
         return(API)
     

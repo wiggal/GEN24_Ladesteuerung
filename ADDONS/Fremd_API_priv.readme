@@ -1,0 +1,33 @@
+# Hiermit können Produktionswerte von fremden Erzeugern geholt und der GEN24_API.py übergeben werden.
+# Die Werte werden dann zu den Werten der GEN24_API.py addiert.
+#
+# Die Datei muss hier liegen und zwingend 'Fremd_API_priv.py' heißen
+# Das Skript muss folgendermaßen aufgebaut sein:
+
+def get_API():  # zwingende Benennung
+    Fremd_API=[]
+    Fremd_API['aktuellePVProduktion'] = 1000
+    Fremd_API['aktuelleBatteriePower'] = 500
+
+    return(Fremd_API)
+
+
+# Werte mit folgenden API-Schlüssel können übergeben werden
+# 
+['BattganzeKapazWatt']
+['BattganzeLadeKapazWatt']
+['BattStatusProz']
+['BattKapaWatt_akt']
+['aktuelleEinspeisung']
+['aktuellePVProduktion']
+['aktuelleBatteriePower']
+['AC_Produktion']
+['DC_Produktion']
+['AC_to_DC']
+['Batterie_IN']
+['Batterie_OUT']
+['Netzverbrauch']
+['Einspeisung']
+
+
+
