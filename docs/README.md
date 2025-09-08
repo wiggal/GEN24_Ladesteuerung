@@ -13,6 +13,8 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
 ![new](pics/new.png)  
+Ab Version: **0.38.1**  
+Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die GEN24_Ladesteuerung übergeben werden.  
 Ab Version: **0.38.0**  
 Update auf Firmware 1.38.6-1.  
 Ab Version: **0.31.0**  

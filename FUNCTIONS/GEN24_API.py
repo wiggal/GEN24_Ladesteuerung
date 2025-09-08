@@ -187,14 +187,21 @@ class gen24api:
 
 
         # Hier individuelles Skript Fremd_API_priv.py aus ADDONS aufrufen und Werte addieren
+        import traceback
         try:
             import ADDONS.Fremd_API_priv
             API_ADDDON = ADDONS.Fremd_API_priv.get_API()
             for key in API:
                 if key in API_ADDDON:
                     API[key] += API_ADDDON[key]
-        except:
+        except ModuleNotFoundError:
+            # Wenn Modul/Datei fehlt still ignorieren
             pass
+        except Exception:
+            # Alle anderen Fehler mit Traceback zur Fehlersuche ausgeben
+            print("\nERROR: Folgender Fehler ist in ADDONS.Fremd_API_priv.py aufgetreten!!")
+            traceback.print_exc()
+            print("\n")
 
         return(API)
     
