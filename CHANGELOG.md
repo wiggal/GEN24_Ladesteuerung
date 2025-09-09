@@ -5,6 +5,8 @@
 - Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und der GEN24_API.py übergeben werden.  
   Die Werte werden dann zu den Werten der GEN24_API.py addiert (siehe auch ADDONS/Fremd_API_priv.readme).  
 
+- Dockerdateien ins Verzeichnis DOCKER übernommen.
+
 **[0.38.0] – 2025-09-07**  
 
 **Umfangreiche Änderungen durch Firmwareupdate auf 1.38.6-1**  

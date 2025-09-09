@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+    gen24:
+        image: wiggal/gen24_ladesteuerung_php:latest
+        container_name: gen24_ladesteuerung
+        restart: always
+        ports:
+            - 2424:2424
+        volumes:
+            - ./CONFIGS/CONFIG/default_priv.ini:/home/GEN24/CONFIG/default_priv.ini
+            - ./CONFIGS/CONFIG/charge_priv.ini:/home/GEN24/CONFIG/charge_priv.ini
+            - ./CONFIGS/CONFIG/weather_priv.ini:/home/GEN24/CONFIG/weather_priv.ini
+            - ./CONFIGS/CONFIG/dynprice_priv.ini:/home/GEN24/CONFIG/dynprice_priv.ini
+            - ./CONFIGS/CONFIG/Prog_Steuerung.sqlite:/home/GEN24/CONFIG/Prog_Steuerung.sqlite
+            - ./CONFIGS/config_priv.php:/home/GEN24/html/config_priv.php
+            - ./CONFIGS/Crontab.log:/home/GEN24/Crontab.log
+            - ./CONFIGS/PV_Daten.sqlite:/home/GEN24/PV_Daten.sqlite
+            - ./CONFIGS/weatherData.sqlite:/home/GEN24/weatherData.sqlite
+            - ./CONFIGS/crontab:/var/tmp/www-data
