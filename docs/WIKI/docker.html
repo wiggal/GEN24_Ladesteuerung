@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>GEN24_Ladesteuerung Installation</title>
+  </head>
+  <body>
+    <div id="wiki-content" class="mt-4">
+      <div data-view-component="true" class="Layout
+        Layout--flowRow-until-md Layout--sidebarPosition-end
+        Layout--sidebarPosition-flowRow-end">
+        <div data-view-component="true" class="Layout-main">
+          <div id="wiki-body" class="gollum-markdown-content">
+            <div class="markdown-body">
+              <h1 class="heading-element">🐳
+                <meta http-equiv="content-type" content="text/html;
+                  charset=UTF-8">
+                Infos zur Docker Nutzung</h1>
+              <h3 tabindex="-1" class="heading-element" dir="auto">-
+                Beispiel docker-compose siehe DOCKER/docker-compose.yml<br>
+              </h3>
+              <p>
+                <meta http-equiv="content-type" content="text/html;
+                  charset=UTF-8">
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="markdown-heading">
+      <h2 class="heading-element">💾 Installation Dockerimage
+        Gen24-Ladesteuerung im Synology-Docker:</h2>
+      <a
+id="user-content-installation-dockerimage-von-gen24-ladesteuerung-im-synology-docker"
+        class="anchor" aria-label="Permalink: Installation Dockerimage
+        von Gen24-Ladesteuerung im Synology-Docker:"
+href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Dockerimage-von-Gen24%E2%80%90Ladesteuerung-im-Synology%E2%80%90Docker#installation-dockerimage-von-gen24-ladesteuerung-im-synology-docker"></a>(Inhalte
+      von <a href="https://github.com/jaydee73">@jaydee73</a> danke 👍)
+      Stand: 2025-06-11</div>
+    <div class="markdown-heading">
+      <h3 class="heading-element">Ordner für Docker-Container anlegen
+        und Dateien bereitstellen</h3>
+      <a
+id="user-content-ordner-für-docker-container-anlegen-und-dateien-bereitstellen"
+        class="anchor" aria-label="Permalink: Ordner für
+        Docker-Container anlegen und Dateien bereitstellen"
+href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Dockerimage-von-Gen24%E2%80%90Ladesteuerung-im-Synology%E2%80%90Docker#ordner-für-docker-container-anlegen-und-dateien-bereitstellen"></a></div>
+    <p>In einem Ordner nach Wahl auf der Synology einen entsprechenden
+      Ordner für den gen24-Container anlegen.<br>
+      Am besten unter dem bereits vorhandenen Root-Ordner „docker“ evtl.
+      in einem Verzeichnis <code>gen24_ladesteuerung</code>.
+      Aus dem gen24-Github-Repo folgende Dateien in den angelegten
+      Ordner kopieren:</p>
+    <p><code>XY_priv.ini</code> Dateien nach eigenen Bedürfnissen
+      anpassen (siehe 4_Hilfe.html und allgemeine Installationshinweise)<br>
+      <code>config_priv.php</code> (aus dem Unterordner html), nach
+      eigenen Bedürfnissen anpassen (zumindest KWp-Wert anpassen, ggf.
+      auch die Kfz-Namen)</p>
+    <p>Datei <code>crontab</code> neu erzeugen (keine Dateiendung!) die
+      für die eigene Installation angepassten Crontab-Einträge (siehe
+      allgemeine Anleitung) hier einfügen.<br>
+      Datei <code>Crontab.log</code> neu erzeugen (bleibt zunächst
+      leer, wird dann vom Script gefüllt).</p>
+    <div class="markdown-heading">
+      <h3 class="heading-element">Container erstellen</h3>
+      <a id="user-content-container-erstellen" class="anchor"
+        aria-label="Permalink: Container erstellen"
+href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Dockerimage-von-Gen24%E2%80%90Ladesteuerung-im-Synology%E2%80%90Docker#container-erstellen"><svg
+          class="octicon octicon-link" viewBox="0 0 16 16" version="1.1"
+          width="16" height="16" aria-hidden="true"></svg></a></div>
+    <p>Container-Manager starten --&gt; Container --&gt; Erstellen</p>
+    <ul>
+      <li>Fenster: Allgemeine Einstellungen</li>
+    </ul>
+    <p>Als Image „Image hinzufügen“ auswählen<br>
+      Nach wiggal/gen24_ladesteuerung suchen -&gt; Download --&gt; Tag
+      auswählen: latest<br>
+      Container-Name frei wählen z.B.: GEN24_ladesteuerung<br>
+      Automatischen Neustart aktivieren --&gt; WEITER</p>
+    <ul>
+      <li>Fenster: Erweiterte Einstellungen</li>
+    </ul>
+    <p>Porteinstellungen -&gt;&gt; <code>+ Hinzufügen</code> lokaler
+      Port <code>2424</code> Container-Port <code>2424</code> TCP<br>
+      In den Volume-Einstellungen folgende Dateien mappen:<br>
+      <code>+ Datei hinzufügen</code> --&gt; <code>QUELLE</code>
+      auswählen --&gt; <code>ZIEL</code> eingeben<br>
+      <strong>ACHTUNG:</strong> Alle Quelldateien müssen als Datei
+      existieren!!</p>
+    <table role="table">
+      <thead>
+        <tr>
+          <th><code>QUELLE</code></th>
+          <th><code>ZIEL</code></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>xy_priv.ini</code></td>
+          <td><code>/home/GEN24/CONFIG/xy_priv.ini</code></td>
+        </tr>
+        <tr>
+          <td><code>Prog_Steuerung.sqlite</code></td>
+          <td><code>/home/GEN24/CONFIG/Prog_Steuerung.sqlite</code></td>
+        </tr>
+        <tr>
+          <td><code>config_priv.php</code></td>
+          <td><code>/home/GEN24/html/config_priv.php</code></td>
+        </tr>
+        <tr>
+          <td><code>crontab</code></td>
+          <td><code>/var/tmp/www-data</code></td>
+        </tr>
+        <tr>
+          <td><code>Crontab.log</code></td>
+          <td><code>/home/GEN24/Crontab.log</code></td>
+        </tr>
+        <tr>
+          <td><code>PV_Daten.sqlite</code></td>
+          <td><code>/home/GEN24/PV_Daten.sqlite</code></td>
+        </tr>
+        <tr>
+          <td><code>weatherData.sqlite</code></td>
+          <td><code>/home/GEN24/weatherData.sqlite</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Im Bereich Netzwerk noch <code>bridge</code> auswählen, sofern
+      nicht schon voreingestellt.<br>
+      Alle anderen Einstellungen bleiben unverändert.<br>
+      WEITER</p>
+    <ul>
+      <li>Fenster: Zusammenfassung</li>
+    </ul>
+    <p>Alles nochmal prüfen.
+      Container beim Erstellen starten auswählen.<br>
+      FERTIG</p>
+    <p>Nach dem Start im Protokoll nachschauen, ob Fehlereinträge
+      auftauchen.</p>
+    <p>Aufruf der Oberfläche im Browser unter:<br>
+      Synology_name_oder_ip:2424</p>
+    <div class="markdown-heading">
+      <h3 class="heading-element">Update (wird im Container-Manager
+        angezeigt)</h3>
+      <a id="user-content-update-wird-im-container-manager-angezeigt"
+        class="anchor" aria-label="Permalink: Update (wird im
+        Container-Manager angezeigt)"
+href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Dockerimage-von-Gen24%E2%80%90Ladesteuerung-im-Synology%E2%80%90Docker#update-wird-im-container-manager-angezeigt"><svg
+          class="octicon octicon-link" viewBox="0 0 16 16" version="1.1"
+          width="16" height="16" aria-hidden="true"></svg></a></div>
+    <p>Wenn eine gemappte Datei (config.ini, config.php oder crontab)
+      geändert werden muss:</p>
+    <ul>
+      <li>Container stoppen</li>
+      <li>Gemappte Datei ändern</li>
+      <li>Updateprozess des Container-Images über den Container Manager
+        anstoßen</li>
+      <li>Container starten</li>
+    </ul>
+    <p>Wenn sich nur das Image geändert hat:<br>
+      Dann klickt man einfach auf <code>updaten</code>.</p>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <br>
+  </body>
+</html>

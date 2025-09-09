@@ -5,7 +5,8 @@
 - Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und der GEN24_API.py übergeben werden.  
   Die Werte werden dann zu den Werten der GEN24_API.py addiert (siehe auch ADDONS/Fremd_API_priv.readme).  
 
-- Dockerdateien ins Verzeichnis DOCKER übernommen.
+- Dockerdateien ins Verzeichnis DOCKER übernommen.  
+  **ACHTUNG:** das Dockerrepository ändert sich ab dieser Version von `wiggal/gen24_ladesteuerung_php` auf `wiggal/gen24_ladesteuerung`  
 
 **[0.38.0] – 2025-09-07**  
 

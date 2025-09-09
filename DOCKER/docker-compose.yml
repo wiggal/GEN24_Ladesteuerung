@@ -2,7 +2,7 @@ version: "3"
 
 services:
     gen24:
-        image: wiggal/gen24_ladesteuerung_php:latest
+        image: wiggal/gen24_ladesteuerung:latest
         container_name: gen24_ladesteuerung
         restart: always
         ports:
