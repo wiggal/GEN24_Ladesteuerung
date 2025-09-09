@@ -1,6 +1,7 @@
 
 ## ☀️ GEN24_Ladesteuerung 🔋 
-  
+## [📚 Wiki 📚](https://wiggal.github.io/GEN24_Ladesteuerung/)
+
 **Programmfunktionen:**  
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
 und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Batterie zu laden.  
@@ -71,6 +72,7 @@ Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines 
 Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben.  
 Hier das Diagramm zu den dynamischen Strompreisen:
 ![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
+*Einzelne Linien und Balken im Diagramm können durch Anklicken des entsprechenden Legendeneintrags ein- oder ausgeblendet werden.* 
 
 ## Webserver Installation (WebUI):  
 
@@ -90,8 +92,9 @@ automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann a
 Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
 Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung. 
 Beim `logging` werden Zählerstände und ermittelte Werte in die SQLite-Datei `PV_Daten.sqlite` gespeichert, 
-aus der wird dann durch html/8_tab_Diagram.php ein Diagramm nach Quelle (wo kommt die Energie her) und Ziel (wo geht die Energie hin) erzeugt. 
+aus der wird dann durch html/8_tab_Diagram.php das Diagramm **QZ**-Bilanz nach **Q**uelle (wo kommt die Energie her) und **Z**iel (wo geht die Energie hin) erzeugt. 
 ![Grafik zur Quelle/Ziel](pics/QZ_Tag.png)
+*Einzelne Linien und Balken im Diagramm können durch Anklicken des entsprechenden Legendeneintrags ein- oder ausgeblendet werden.*
 
 ### Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
 
