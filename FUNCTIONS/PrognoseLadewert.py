@@ -144,21 +144,21 @@ class progladewert:
             Prognose_Std_nach_BattVollUm = self.getPrognose(Std)
             BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ladung
             BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
+            if Stunden_sum < 0.1: Stunden_sum = 0.1
 
             # Wenn BatSparFaktor <= 0 Ladeberechnung durch Prognosekappung
             if (BatSparFaktor <= 0):
                 self.DEBUG_Ausgabe += "DEBUG >>>>>>>>>Prognosekappung >> Progn_aktuell, Progn_ueber_aktuell: " + str(Progn_aktuell) + " " + str(Progn_ueber_aktuell) + "\n"
-                if (Progn_ueber_aktuell > BattKapaWatt_akt):
+                if (Progn_ueber_aktuell > BattKapaWatt_akt_fun):
                     aktuellerLadewert = 0
                 else:
-                    aktuellerLadewert = (BattKapaWatt_akt - Progn_ueber_aktuell)/Stunden_sum
+                    aktuellerLadewert = (BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum
 
                 LadewertGrund = "Prognoseberechnung Prognosekappung"
 
             # Wenn BatSparFaktor > 0 Ladeberechnung durch BatSparFaktor
             else:
                 if (BattKapaWatt_akt_fun < 0): BattKapaWatt_akt_fun = 0
-                if Stunden_sum < 0.1: Stunden_sum = 0.1
     
                 # Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird
                 aktuellerLadewert_1 = int(BattKapaWatt_akt_fun / Stunden_sum)

@@ -1,3 +1,5 @@
+**[0.38.2] – 2025-XX-XX**  
+
 **[0.38.1] – 2025-09-10**  
 
 - Parameter für Abschattungen in Akkudoktor__WeatherData.py angepasst.  

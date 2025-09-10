@@ -445,11 +445,11 @@ if __name__ == '__main__':
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
                             print("Feste Entladegrenze Table: ", FesteEntladegrenze, "W")
                             if (Ladetype == "DISCHARGE_MAX") and (EntladeEintragloeschen == "nein"):
-                                print("Batterieentladegrenze ALT: ", BatteryMaxDischarge, "W")
-                                print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischarge, "W")
+                                print("Batterieentladegrenze ALT: ", int(BatteryMaxDischarge), "W")
+                                print("Batterieentladegrenze NEU: ", int(Neu_BatteryMaxDischarge), "W")
                             if (Ladetype == "CHARGE_MIN") and (EntladeEintragloeschen == "nein"):
-                                print("Zwangsladung ALT:          ", BatteryMaxDischarge, "W")
-                                print("Zwangsladung NEU:          ", Neu_BatteryMaxDischarge, "W")
+                                print("Zwangsladung ALT:          ", int(BatteryMaxDischarge), "W")
+                                print("Zwangsladung NEU:          ", int(Neu_BatteryMaxDischarge), "W")
                                 print("Ladewert >= Zwangsladung:   ", aktuellerLadewert, "W")
                             if (EntladeEintragloeschen == "ja"):
                                 print(">> Entladeeintrag löschen!")
@@ -518,7 +518,7 @@ if __name__ == '__main__':
 
                         # Wenn der Akku unter MindBattLad Optimierung auf 30 setzen
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
-                        if (BattStatusProz <= MindBattLad) and Eigen_Opt_Std_neu > 30:
+                        if (BattStatusProz <= MindBattLad) and Eigen_Opt_Std_neu >= 30:
                             Dauer_Nacht_Std = 1
                             aktuellePVProduktion_tmp = 0
                             Eigen_Opt_Std_neu = 30
