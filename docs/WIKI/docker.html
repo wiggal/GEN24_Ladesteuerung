@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>GEN24_Ladesteuerung Installation</title>
+    <title>Infos zur Docker Nutzung</title>
   </head>
   <body>
     <div id="wiki-content" class="mt-4">
@@ -17,8 +17,11 @@
                   charset=UTF-8">
                 Infos zur Docker Nutzung</h1>
               <h3 tabindex="-1" class="heading-element" dir="auto">-
-                Beispiel docker-compose siehe DOCKER/docker-compose.yml<br>
-              </h3>
+                Beispieldatei für Docker-compose siehe
+                DOCKER/docker-compose.yml<br>
+                - Beispieldatei für Dockerbuilt siehe DOCKER/Dockerfile</h3>
+              <p><br>
+              </p>
               <p>
                 <meta http-equiv="content-type" content="text/html;
                   charset=UTF-8">
@@ -31,27 +34,18 @@
     <div class="markdown-heading">
       <h2 class="heading-element">💾 Installation Dockerimage
         Gen24-Ladesteuerung im Synology-Docker:</h2>
-      <a
-id="user-content-installation-dockerimage-von-gen24-ladesteuerung-im-synology-docker"
-        class="anchor" aria-label="Permalink: Installation Dockerimage
-        von Gen24-Ladesteuerung im Synology-Docker:"
-href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Dockerimage-von-Gen24%E2%80%90Ladesteuerung-im-Synology%E2%80%90Docker#installation-dockerimage-von-gen24-ladesteuerung-im-synology-docker"></a>(Inhalte
-      von <a href="https://github.com/jaydee73">@jaydee73</a> danke 👍)
-      Stand: 2025-06-11</div>
+      (Inhalte von <a href="https://github.com/jaydee73">@jaydee73</a>
+      danke 👍) Stand: 2025-06-11</div>
     <div class="markdown-heading">
       <h3 class="heading-element">Ordner für Docker-Container anlegen
         und Dateien bereitstellen</h3>
-      <a
-id="user-content-ordner-für-docker-container-anlegen-und-dateien-bereitstellen"
-        class="anchor" aria-label="Permalink: Ordner für
-        Docker-Container anlegen und Dateien bereitstellen"
-href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Dockerimage-von-Gen24%E2%80%90Ladesteuerung-im-Synology%E2%80%90Docker#ordner-für-docker-container-anlegen-und-dateien-bereitstellen"></a></div>
+    </div>
     <p>In einem Ordner nach Wahl auf der Synology einen entsprechenden
       Ordner für den gen24-Container anlegen.<br>
       Am besten unter dem bereits vorhandenen Root-Ordner „docker“ evtl.
-      in einem Verzeichnis <code>gen24_ladesteuerung</code>.
-      Aus dem gen24-Github-Repo folgende Dateien in den angelegten
-      Ordner kopieren:</p>
+      in einem Verzeichnis <code>gen24_ladesteuerung</code>. Aus dem
+      gen24-Github-Repo folgende Dateien in den angelegten Ordner
+      kopieren:</p>
     <p><code>XY_priv.ini</code> Dateien nach eigenen Bedürfnissen
       anpassen (siehe 4_Hilfe.html und allgemeine Installationshinweise)<br>
       <code>config_priv.php</code> (aus dem Unterordner html), nach
@@ -89,13 +83,11 @@ href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Doc
       <strong>ACHTUNG:</strong> Alle Quelldateien müssen als Datei
       existieren!!</p>
     <table role="table">
-      <thead>
-        <tr>
+      <thead> <tr>
           <th><code>QUELLE</code></th>
           <th><code>ZIEL</code></th>
         </tr>
-      </thead>
-      <tbody>
+      </thead> <tbody>
         <tr>
           <td><code>xy_priv.ini</code></td>
           <td><code>/home/GEN24/CONFIG/xy_priv.ini</code></td>
@@ -133,8 +125,7 @@ href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Doc
     <ul>
       <li>Fenster: Zusammenfassung</li>
     </ul>
-    <p>Alles nochmal prüfen.
-      Container beim Erstellen starten auswählen.<br>
+    <p>Alles nochmal prüfen. Container beim Erstellen starten auswählen.<br>
       FERTIG</p>
     <p>Nach dem Start im Protokoll nachschauen, ob Fehlereinträge
       auftauchen.</p>
