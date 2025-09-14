@@ -80,6 +80,7 @@ class progladewert:
             # aktuelle Stunde und aktuelle Minute
             Akt_Std = int(datetime.strftime(self.now, "%H"))
             Akt_Minute = int(datetime.strftime(self.now, "%M"))
+            BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
     
             # Gesamte Tagesprognose, Tagesüberschuß aus Prognose ermitteln
             i = Akt_Std
@@ -128,9 +129,13 @@ class progladewert:
                 Zwangs_Ladung_fun2 = (Prognose - self.Einspeisegrenze - Grundlast)
                 if ( Zwangs_Ladung_fun2 > Zwangs_Ladung_fun): Zwangs_Ladung_fun = Zwangs_Ladung_fun2
 
-                # Alles über aktueller Prognose aufsummieren für Ladung durch Prognosekappung
-                if ( Prognose > Progn_aktuell ):
-                    Progn_ueber_aktuell += Prognose - Progn_aktuell
+                # aktuelle Prognose bzw. Grundlast wenn größer von jeweiliger Prognose abziehen und aufsummieren, für Ladungwertberechnung durch Prognosekappung
+                # PrognAbzug = Progn_aktuell * evtl. Minutenfaktor
+                PrognAbzug = Progn_aktuell * (Grundlast_fun/Grundlast)
+                if (PrognAbzug < Grundlast_fun): PrognAbzug = Grundlast_fun
+                Progn_ueber_aktuell += Prognose_fun - PrognAbzug
+                if (BatSparFaktor <= 0):
+                    print("DEBUG: Prognose, PrognAbzug, Grundlast, ", Prognose_fun, round(PrognAbzug, 2), Grundlast_fun)  #entWIGGlung
     
                 Zwangs_Ladung += Zwangs_Ladung_fun
                 Stunden_sum += Stunden_fun
@@ -143,17 +148,25 @@ class progladewert:
             Std = datetime.strftime(self.now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
             Prognose_Std_nach_BattVollUm = self.getPrognose(Std)
             BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ladung
-            BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
             if Stunden_sum < 0.1: Stunden_sum = 0.1
+
+            #ENTWIGGLUNG
+            if (BatSparFaktor <= 0):
+                if(BatSparFaktor == 0): BatSparFaktor = -1 # historisch
+                BatSparFaktor_kapp = abs(BatSparFaktor)
+                aktuellerLadewert_entw = int(((BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum)*BatSparFaktor_kapp)
+                print("DEBUG: >>>>Kapp: Std, Progn_ueber, abs(BatSparFaktor), Ladewert: ", round(Stunden_sum, 2), round(Progn_ueber_aktuell, 2), BatSparFaktor_kapp, round(aktuellerLadewert_entw, 2), "\n")
+            #ENDE ENTWIGGLUNG
 
             # Wenn BatSparFaktor <= 0 Ladeberechnung durch Prognosekappung
             if (BatSparFaktor <= 0):
-                self.DEBUG_Ausgabe += "DEBUG >>>>>>>>>Prognosekappung >> Progn_aktuell, Progn_ueber_aktuell: " + str(Progn_aktuell) + " " + str(Progn_ueber_aktuell) + "\n"
-                if (Progn_ueber_aktuell > BattKapaWatt_akt_fun):
-                    aktuellerLadewert = 0
-                else:
-                    aktuellerLadewert = (BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum
+                if(BatSparFaktor == 0): BatSparFaktor = -1 # historisch
+                BatSparFaktor_kapp = abs(BatSparFaktor)
+                aktuellerLadewert = int(((BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum)*BatSparFaktor_kapp)
+                if(aktuellerLadewert < 0): aktuellerLadewert = 0
 
+                self.DEBUG_Ausgabe += "DEBUG >>>>Prognosekappung >> Progn_ueber_aktuell, Stunden_sum: " + str(Progn_ueber_aktuell) +  " " + str(round(Stunden_sum, 2)) +"\n"
+                self.DEBUG_Ausgabe += "DEBUG >>>>Prognosekappung >> BattKapaWatt_akt_fun, aktuellerLadewert: " + str(BattKapaWatt_akt_fun) + " " + str(aktuellerLadewert) + "\n"
                 LadewertGrund = "Prognoseberechnung Prognosekappung"
 
             # Wenn BatSparFaktor > 0 Ladeberechnung durch BatSparFaktor

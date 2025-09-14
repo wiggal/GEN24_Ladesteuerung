@@ -95,10 +95,6 @@ if __name__ == '__main__':
                     EigenverbOpt_steuern = basics.getVarConf('EigenverbOptimum','EigenverbOpt_steuern','eval')
                     MaxEinspeisung = basics.getVarConf('EigenverbOptimum','MaxEinspeisung','eval')
 
-                    # um Divison durch Null zu verhindern kleinsten Wert setzen
-                    if BatSparFaktor < 0.1:
-                        BatSparFaktor = 0.1
-                                       
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
@@ -220,11 +216,11 @@ if __name__ == '__main__':
                     if (Ablaufdatum > int(datetime.now().timestamp())):
                         if (ManuelleSteuerung >= 0):
                             FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
-                            MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
+                            MaxladungDurchPV_Planung = "Sliderwert in PV-Planung gewählt."
                         # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
                         if (ManuelleSteuerung == -2):
                             FesteLadeleistung = MaxLadung
-                            MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
+                            MaxladungDurchPV_Planung = "MaxLadung in PV-Planung gewählt."
                     else:
                         # Wenn Einträge abgelaufen, wieder die Akkuschoneinstellung aus charge_priv.ini
                         ManuelleStrg_Akkuschon = Akkuschonung
@@ -332,7 +328,7 @@ if __name__ == '__main__':
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
                             print("Bisheriger Ladewert/Watt:   ", alterLadewert)
-                            print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
+                            print(f"Neuer Ladewert/Watt({BatSparFaktor: .1f}):   {aktuellerLadewert}")
                             print()
                         except Exception as e:
                             print()

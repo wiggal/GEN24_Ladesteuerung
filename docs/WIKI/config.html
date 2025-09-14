@@ -242,7 +242,7 @@ button {
 <tr><td class="variablenname">BattVollUm</td>
 <td><input type="text" name="Zeile[7][1]" value="-4" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[8]" value='' ></td></tr>
-<tr class="comment"><td colspan="2">; Faktor um mehr Batteriekapazität für später aufzusparen.<br>; Wenn BatSparFaktor &gt; 0: Berechnung nach [ (Batteriekapazität) / (Zeit bis BatVollUm) * BatSparFaktor ]<br>; Wenn BatSparFaktor == 0: Ladung an den Prognosespitzen (netzdienlich) </td></tr>
+<tr class="comment"><td colspan="2">; Faktor um den Batterieladezeitpunkt zu steuern:<br>; BatSparFaktor &gt; 0: Ladung erfolgt hauptsächlich nach Batteriekapazität<br>;       Berechnung: [(Batteriekapazität) / (Zeit bis BatVollUm) * BatSparFaktor ]<br>; BatSparFaktor &lt; 0 (0=-1): Ladung hauptsächlich an den Prognosespitzen (netzdienlich)<br>;       Berechnung: [(Batteriekapazität - Prognoseüberschuss) / (Zeit bis BatVollUm) * abs(BatSparFaktor)] </td></tr>
 <tr><td class="variablenname">BatSparFaktor</td>
 <td><input type="text" name="Zeile[10][1]" value="0.5" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[11]" value='' ></td></tr>
@@ -389,6 +389,6 @@ button {
 <tr><td class="variablenname">MwSt</td>
 <td><input type="text" name="Zeile[35][1]" value="1.19" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[36]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 26.08.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 13.09.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>
