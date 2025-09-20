@@ -1,3 +1,8 @@
+**[0.38.2] – 2025-XX-XX**  
+
+- BatSparFaktor < 0 (0=-1): Ladung hauptsächlich an den Prognosespitzen kann nun durch den Faktor beeinflusst werden.  
+  Der errechnete Ladewert wird nun mit dem absoluten BatSparFaktor multipliziert.  
+
 **[0.38.1] – 2025-09-10**  
 
 - Parameter für Abschattungen in Akkudoktor__WeatherData.py angepasst.  

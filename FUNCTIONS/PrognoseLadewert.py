@@ -80,6 +80,7 @@ class progladewert:
             # aktuelle Stunde und aktuelle Minute
             Akt_Std = int(datetime.strftime(self.now, "%H"))
             Akt_Minute = int(datetime.strftime(self.now, "%M"))
+            BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
     
             # Gesamte Tagesprognose, Tagesüberschuß aus Prognose ermitteln
             i = Akt_Std
@@ -128,9 +129,11 @@ class progladewert:
                 Zwangs_Ladung_fun2 = (Prognose - self.Einspeisegrenze - Grundlast)
                 if ( Zwangs_Ladung_fun2 > Zwangs_Ladung_fun): Zwangs_Ladung_fun = Zwangs_Ladung_fun2
 
-                # Alles über aktueller Prognose aufsummieren für Ladung durch Prognosekappung
-                if ( Prognose > Progn_aktuell ):
-                    Progn_ueber_aktuell += Prognose - Progn_aktuell
+                # aktuelle Prognose bzw. Grundlast wenn größer von jeweiliger Prognose abziehen und aufsummieren, für Ladungwertberechnung durch Prognosekappung
+                # PrognAbzug = Progn_aktuell * evtl. Minutenfaktor
+                PrognAbzug = Progn_aktuell * (Grundlast_fun/Grundlast)
+                if (PrognAbzug < Grundlast_fun): PrognAbzug = Grundlast_fun
+                Progn_ueber_aktuell += Prognose_fun - PrognAbzug
     
                 Zwangs_Ladung += Zwangs_Ladung_fun
                 Stunden_sum += Stunden_fun
@@ -143,22 +146,27 @@ class progladewert:
             Std = datetime.strftime(self.now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
             Prognose_Std_nach_BattVollUm = self.getPrognose(Std)
             BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ladung
-            BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
+            if Stunden_sum < 0.1: Stunden_sum = 0.1
+
+            if (BatSparFaktor <= 0):
+                if(BatSparFaktor == 0): BatSparFaktor = -1 # historisch bedingt 
+                BatSparFaktor_kapp = abs(BatSparFaktor)
+                aktuellerLadewert_entw = int(((BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum)*BatSparFaktor_kapp)
 
             # Wenn BatSparFaktor <= 0 Ladeberechnung durch Prognosekappung
             if (BatSparFaktor <= 0):
-                self.DEBUG_Ausgabe += "DEBUG >>>>>>>>>Prognosekappung >> Progn_aktuell, Progn_ueber_aktuell: " + str(Progn_aktuell) + " " + str(Progn_ueber_aktuell) + "\n"
-                if (Progn_ueber_aktuell > BattKapaWatt_akt):
-                    aktuellerLadewert = 0
-                else:
-                    aktuellerLadewert = (BattKapaWatt_akt - Progn_ueber_aktuell)/Stunden_sum
+                if(BatSparFaktor == 0): BatSparFaktor = -1 # historisch
+                BatSparFaktor_kapp = abs(BatSparFaktor)
+                aktuellerLadewert = int(((BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum)*BatSparFaktor_kapp)
+                if(aktuellerLadewert < 0): aktuellerLadewert = 0
 
+                self.DEBUG_Ausgabe += "DEBUG >>>>Prognosekappung >> Progn_ueber_aktuell, Stunden_sum: " + str(round(Progn_ueber_aktuell)) +  " " + str(round(Stunden_sum, 2)) +"\n"
+                self.DEBUG_Ausgabe += "DEBUG >>>>Prognosekappung >> BattKapaWatt_akt_fun, aktuellerLadewert: " + str(BattKapaWatt_akt_fun) + " " + str(aktuellerLadewert) + "\n"
                 LadewertGrund = "Prognoseberechnung Prognosekappung"
 
             # Wenn BatSparFaktor > 0 Ladeberechnung durch BatSparFaktor
             else:
                 if (BattKapaWatt_akt_fun < 0): BattKapaWatt_akt_fun = 0
-                if Stunden_sum < 0.1: Stunden_sum = 0.1
     
                 # Wenn Ladewert ohne BatSparFaktor größer MaxLadung = MaxLadung, damit der Akku auch voll wird
                 aktuellerLadewert_1 = int(BattKapaWatt_akt_fun / Stunden_sum)
@@ -331,11 +339,11 @@ class progladewert:
         if Dauer_Nacht_Std < 1:
             # Die aktuelle Einspeisung nicht mehr verändern
             Eigen_Opt_Std_neu = Eigen_Opt_Std
-            if BattStatusProz > AkkuZielProz:
+            if Eigen_Opt_Std_neu <= RundungEinspeisewert:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen):
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-                    Eigen_Opt_Std_neu = 30
+                    Eigen_Opt_Std_neu = RundungEinspeisewert
                 else:
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei Prognose 24H+ > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 

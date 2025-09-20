@@ -95,10 +95,6 @@ if __name__ == '__main__':
                     EigenverbOpt_steuern = basics.getVarConf('EigenverbOptimum','EigenverbOpt_steuern','eval')
                     MaxEinspeisung = basics.getVarConf('EigenverbOptimum','MaxEinspeisung','eval')
 
-                    # um Divison durch Null zu verhindern kleinsten Wert setzen
-                    if BatSparFaktor < 0.1:
-                        BatSparFaktor = 0.1
-                                       
                     # Grundlast je Wochentag, wenn Grundlast == 0
                     if (Grundlast == 0):
                         try:
@@ -220,11 +216,11 @@ if __name__ == '__main__':
                     if (Ablaufdatum > int(datetime.now().timestamp())):
                         if (ManuelleSteuerung >= 0):
                             FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
-                            MaxladungDurchPV_Planung = "Sliderwert in PV-Planung ausgewählt."
+                            MaxladungDurchPV_Planung = "Sliderwert in PV-Planung gewählt."
                         # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
                         if (ManuelleSteuerung == -2):
                             FesteLadeleistung = MaxLadung
-                            MaxladungDurchPV_Planung = "MaxLadung in PV-Planung ausgewählt."
+                            MaxladungDurchPV_Planung = "MaxLadung in PV-Planung gewählt."
                     else:
                         # Wenn Einträge abgelaufen, wieder die Akkuschoneinstellung aus charge_priv.ini
                         ManuelleStrg_Akkuschon = Akkuschonung
@@ -332,7 +328,7 @@ if __name__ == '__main__':
                             print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
                             print("LadewertGrund: ", LadewertGrund)
                             print("Bisheriger Ladewert/Watt:   ", alterLadewert)
-                            print("Neuer Ladewert/Watt:        ", aktuellerLadewert)
+                            print(f"Neuer Ladewert/Watt({BatSparFaktor: .1f}):   {aktuellerLadewert}")
                             print()
                         except Exception as e:
                             print()
@@ -445,11 +441,11 @@ if __name__ == '__main__':
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
                             print("Feste Entladegrenze Table: ", FesteEntladegrenze, "W")
                             if (Ladetype == "DISCHARGE_MAX") and (EntladeEintragloeschen == "nein"):
-                                print("Batterieentladegrenze ALT: ", BatteryMaxDischarge, "W")
-                                print("Batterieentladegrenze NEU: ", Neu_BatteryMaxDischarge, "W")
+                                print("Batterieentladegrenze ALT: ", int(BatteryMaxDischarge), "W")
+                                print("Batterieentladegrenze NEU: ", int(Neu_BatteryMaxDischarge), "W")
                             if (Ladetype == "CHARGE_MIN") and (EntladeEintragloeschen == "nein"):
-                                print("Zwangsladung ALT:          ", BatteryMaxDischarge, "W")
-                                print("Zwangsladung NEU:          ", Neu_BatteryMaxDischarge, "W")
+                                print("Zwangsladung ALT:          ", int(BatteryMaxDischarge), "W")
+                                print("Zwangsladung NEU:          ", int(Neu_BatteryMaxDischarge), "W")
                                 print("Ladewert >= Zwangsladung:   ", aktuellerLadewert, "W")
                             if (EntladeEintragloeschen == "ja"):
                                 print(">> Entladeeintrag löschen!")
@@ -518,7 +514,7 @@ if __name__ == '__main__':
 
                         # Wenn der Akku unter MindBattLad Optimierung auf 30 setzen
                         # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
-                        if (BattStatusProz <= MindBattLad) and Eigen_Opt_Std_neu > 30:
+                        if (BattStatusProz <= MindBattLad) and Eigen_Opt_Std_neu >= 30:
                             Dauer_Nacht_Std = 1
                             aktuellePVProduktion_tmp = 0
                             Eigen_Opt_Std_neu = 30
@@ -528,7 +524,7 @@ if __name__ == '__main__':
                         if (Eigen_Opt_Std_neu == 0):
                             HYB_EM_MODE = 0
 
-                        if (Dauer_Nacht_Std > 0.5 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:
+                        if (Dauer_Nacht_Std > 0.5 or BattStatusProz < MindBattLad):
                             if print_level >= 1:
                                 print("## Eigenverbrauchs-Optimierung ##")
                                 print("Prognose nächste 24Std: ", Prognose_24H, "KW")
