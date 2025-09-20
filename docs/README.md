@@ -21,16 +21,6 @@ Update auf Firmware 1.38.6-1.
 Ab Version: **0.31.0**  
 Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
 Installationsskript install_gen24.sh für eine automatische Installation bzw. Updating.  
-Ab Version: **0.30.4**  
-Neues Prognoseskripte OpenMeteo_WeatherData.py für https://open-meteo.com.  
-Ab Version: **0.30.2**  
-Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/) nach GitHub/Pages übernommen.  
-Ab Version: **0.30.0**  
-Speicherung der Prognosedaten in `weatherData.sqlite`, Berechnung der Prognose mit gespeicherten Werten.  
-Mit dem verlinkten  `ForecastMgr` können die Prognosedaten gesichtet und gelöscht werden.  
-Ab Version: **0.29.0**  
-Zur Akkuschonung kann der Akku bei entprechender Prognose auch nur bis 80% geladen werden.  
-Vorbereitung des DynamicPriceCheck auf viertelstündliche Strompreise.  
 ![new](pics/new2.png)  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
@@ -141,6 +131,16 @@ Eine [Beschreibung](../GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddat
 ----------
 
 **News History:**  
+Ab Version: **0.30.4**  
+Neues Prognoseskripte OpenMeteo_WeatherData.py für https://open-meteo.com.  
+Ab Version: **0.30.2**  
+Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/) nach GitHub/Pages übernommen.  
+Ab Version: **0.30.0**  
+Speicherung der Prognosedaten in `weatherData.sqlite`, Berechnung der Prognose mit gespeicherten Werten.  
+Mit dem verlinkten  `ForecastMgr` können die Prognosedaten gesichtet und gelöscht werden.  
+Ab Version: **0.29.0**  
+Zur Akkuschonung kann der Akku bei entprechender Prognose auch nur bis 80% geladen werden.  
+Vorbereitung des DynamicPriceCheck auf viertelstündliche Strompreise.  
 Ab Version: **0.28.1**  
 Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/ von @tz8  
 **ACHTUNG:** Umfangreiche Änderungen in CONFIG/weather_priv.ini nötig!!  

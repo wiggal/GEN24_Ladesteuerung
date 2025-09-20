@@ -134,8 +134,6 @@ class progladewert:
                 PrognAbzug = Progn_aktuell * (Grundlast_fun/Grundlast)
                 if (PrognAbzug < Grundlast_fun): PrognAbzug = Grundlast_fun
                 Progn_ueber_aktuell += Prognose_fun - PrognAbzug
-                if (BatSparFaktor <= 0):
-                    print("DEBUG: Prognose, PrognAbzug, Grundlast, ", Prognose_fun, round(PrognAbzug, 2), Grundlast_fun)  #entWIGGlung
     
                 Zwangs_Ladung += Zwangs_Ladung_fun
                 Stunden_sum += Stunden_fun
@@ -150,13 +148,10 @@ class progladewert:
             BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ladung
             if Stunden_sum < 0.1: Stunden_sum = 0.1
 
-            #ENTWIGGLUNG
             if (BatSparFaktor <= 0):
-                if(BatSparFaktor == 0): BatSparFaktor = -1 # historisch
+                if(BatSparFaktor == 0): BatSparFaktor = -1 # historisch bedingt 
                 BatSparFaktor_kapp = abs(BatSparFaktor)
                 aktuellerLadewert_entw = int(((BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum)*BatSparFaktor_kapp)
-                print("DEBUG: >>>>Kapp: Std, Progn_ueber, abs(BatSparFaktor), Ladewert: ", round(Stunden_sum, 2), round(Progn_ueber_aktuell, 2), BatSparFaktor_kapp, round(aktuellerLadewert_entw, 2), "\n")
-            #ENDE ENTWIGGLUNG
 
             # Wenn BatSparFaktor <= 0 Ladeberechnung durch Prognosekappung
             if (BatSparFaktor <= 0):
@@ -165,7 +160,7 @@ class progladewert:
                 aktuellerLadewert = int(((BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum)*BatSparFaktor_kapp)
                 if(aktuellerLadewert < 0): aktuellerLadewert = 0
 
-                self.DEBUG_Ausgabe += "DEBUG >>>>Prognosekappung >> Progn_ueber_aktuell, Stunden_sum: " + str(Progn_ueber_aktuell) +  " " + str(round(Stunden_sum, 2)) +"\n"
+                self.DEBUG_Ausgabe += "DEBUG >>>>Prognosekappung >> Progn_ueber_aktuell, Stunden_sum: " + str(round(Progn_ueber_aktuell)) +  " " + str(round(Stunden_sum, 2)) +"\n"
                 self.DEBUG_Ausgabe += "DEBUG >>>>Prognosekappung >> BattKapaWatt_akt_fun, aktuellerLadewert: " + str(BattKapaWatt_akt_fun) + " " + str(aktuellerLadewert) + "\n"
                 LadewertGrund = "Prognoseberechnung Prognosekappung"
 
@@ -344,11 +339,11 @@ class progladewert:
         if Dauer_Nacht_Std < 1:
             # Die aktuelle Einspeisung nicht mehr verändern
             Eigen_Opt_Std_neu = Eigen_Opt_Std
-            if BattStatusProz > AkkuZielProz:
+            if Eigen_Opt_Std_neu <= RundungEinspeisewert:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen):
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
-                    Eigen_Opt_Std_neu = 30
+                    Eigen_Opt_Std_neu = RundungEinspeisewert
                 else:
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei Prognose 24H+ > PrognoseGrenzeMorgen MaxEinspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
