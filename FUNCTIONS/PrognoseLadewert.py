@@ -202,46 +202,34 @@ class progladewert:
     
             return int(Pro_Ertrag_Tag), Grundlast_Sum, aktuellerLadewert, LadewertGrund
     
-    def getAktPrognose(self, BattKapaWatt_akt):
+    def getLoggingPrognose(self, BattKapaWatt_akt):
     
             format_Tag = "%Y-%m-%d"
-            PrognoseGlaettung = 1
             Akt_Std = int(datetime.strftime(self.now, "%H"))
             Akt_Minute = int(datetime.strftime(self.now, "%M"))
-            Pro_Akt = 0
             Pro_Akt_Log = 0
-            i = Akt_Std - PrognoseGlaettung
+            i = Akt_Std
             loop = 0
-            while i <= Akt_Std + PrognoseGlaettung:
+            self.DEBUG_Ausgabe += "DEBUG"
+            while i <= Akt_Std + 1:
                 Std = datetime.strftime(self.now, format_Tag)+" "+ str('%0.2d' %(i)) +":00:00"
                 Prognose_tmp = self.getPrognose(Std)
-                Prognose = Prognose_tmp[0]
                 # Prognose_Log = ohne Abzug der Reservierung
                 Prognose_Log = Prognose_tmp[1]
                 Pro_Akt_fun_Log = Prognose_Log
-                Pro_Akt_fun = Prognose
-                self.DEBUG_Ausgabe += "DEBUG\nDEBUG *************** Ladewertmittel LOOP: " + str(loop)
+                self.DEBUG_Ausgabe += "\nDEBUG *************** Prognosemittel LOOP: " + str(loop)
                 if loop == 0:
                     Pro_Akt_fun_Log = Prognose_Log * (60 - Akt_Minute) / 60
-                    Pro_Akt_fun = Prognose * (60 - Akt_Minute) / 60
-                    self.DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " REST_Akt_Minute: " + str(round(((60 - Akt_Minute) / 60),3))
-                if loop == PrognoseGlaettung * 2:
+                    self.DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt: " + str(int(Pro_Akt_fun_Log)) + " REST_Akt_Minute: " + str(round(((60 - Akt_Minute) / 60),2))
+                if loop == 1:
                     Pro_Akt_fun_Log = Prognose_Log * (Akt_Minute) / 60
-                    Pro_Akt_fun = Prognose * (Akt_Minute) / 60
-                    self.DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Akt_Minute: " + str(round(((Akt_Minute) / 60),3))
+                    self.DEBUG_Ausgabe += "\nDEBUG ########### Pro_Akt: " + str(int(Pro_Akt_fun_Log)) + " Akt_Minute: " + str(round(((Akt_Minute) / 60),2))
                 Pro_Akt_Log += Pro_Akt_fun_Log
-                Pro_Akt += Pro_Akt_fun
-                self.DEBUG_Ausgabe += "\nDEBUG  " + str(Std) + " Pro_Akt_fun: " + str(round(Pro_Akt_fun,2)) + " Prognose_gesamt: " + str(round(Pro_Akt,2)) + "\n"
                 loop += 1
                 i += 1
-            Pro_Akt_Log = int(Pro_Akt_Log / PrognoseGlaettung / 2 )
-            Pro_Akt = int(Pro_Akt / PrognoseGlaettung / 2 )
+            self.DEBUG_Ausgabe += "\nDEBUG  " + str(Std) + " Pro_Akt: " + str(int(Pro_Akt_fun_Log)) + " Prognose_gesamt: " + str(int(Pro_Akt_Log)) + "\n"
     
-            self.DEBUG_Ausgabe += "DEBUG\nDEBUG AktPrognose-Reservierung: " + str(Pro_Akt)
-            self.DEBUG_Ausgabe += ", Batteriekapazität: " + str(BattKapaWatt_akt) 
-    
-            ### Prognose ENDE
-            return  Pro_Akt_Log, self.DEBUG_Ausgabe
+            return  int(Pro_Akt_Log), self.DEBUG_Ausgabe
     
     
     def setLadewert(self, fun_Ladewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert):
@@ -339,9 +327,14 @@ class progladewert:
         if Dauer_Nacht_Std < 1:
             # Die aktuelle Einspeisung nicht mehr verändern
             Eigen_Opt_Std_neu = Eigen_Opt_Std
+            # if BattStatusProz > AkkuZielProz:  #entWIGGlung
             if Eigen_Opt_Std_neu <= RundungEinspeisewert:
-                if (PrognoseMorgen < PrognoseGrenzeMorgen):
-                    DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, keine Einspeisung während des Tages"
+                if (PrognoseMorgen < PrognoseGrenzeMorgen / 2):
+                    DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen / 2, keine Einspeisung während des Tages"
+                    DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
+                    Eigen_Opt_Std_neu = 0
+                elif (PrognoseMorgen < PrognoseGrenzeMorgen):
+                    DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen, RundungEinspeisewert = Einspeisewert während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = RundungEinspeisewert
                 else:
