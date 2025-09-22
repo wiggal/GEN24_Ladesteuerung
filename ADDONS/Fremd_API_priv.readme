@@ -4,7 +4,7 @@
 # Die Datei muss hier (ADDONS/) liegen und zwingend 'Fremd_API_priv.py' heißen
 # Das Skript muss folgendermaßen aufgebaut sein:
 
-def get_API():  # zwingende Benennung
+def get_API(API_data):  # zwingend get_API, API_data = API-Daten des ersten GEN24
     Fremd_API=[]
     # hier müssen die Werte vom Fremderzeuger heholt und zugewiesen werden, z.B.:
     Fremd_API['aktuellePVProduktion'] = 1000

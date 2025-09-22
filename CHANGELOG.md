@@ -3,6 +3,9 @@
 - BatSparFaktor < 0 (0=-1): Ladung hauptsächlich an den Prognosespitzen kann nun durch den Faktor beeinflusst werden.  
   Der errechnete Ladewert wird nun mit dem absoluten BatSparFaktor multipliziert.  
 
+- GEN24_API.py liest die API-Daten nun vom Smartmeter mit label="<primary>".  
+- An ADDONS/Fremd_API_priv.py werden nun die API-Daten des GEN24 übergeben (`def get_API(API_data)`).  
+
 **[0.38.1] – 2025-09-10**  
 
 - Parameter für Abschattungen in Akkudoktor__WeatherData.py angepasst.  

@@ -10,54 +10,63 @@ class gen24api:
     def __init__(self):
         self.dummy = 'dummmy'
 
+    import re
+
     def extract_API_values(self, obj, key_patterns):
-        """
-        Extrahiert nur Keys aus obj, die in key_patterns definiert sind.
-        Berechnet Summen für Keys mit sum_flag=True.
-        key_patterns: Liste von Tuples (pattern, sum_flag)
-            - pattern: Regex oder exakter Key
-            - sum_flag: True = Werte summieren, False = einzeln zurückgeben
-    
-        Rückgabe: dict mit allen Keys aus key_patterns und Summen für markierte Keys.
-        """
         results = {}
         sums = {}
 
-        # Summen-Namen genau aus Pattern erzeugen oder individuell anpassen
+        # Summen vorbereiten
         sum_names = {}
-        for pattern, sum_flag in key_patterns:
+        for entry in key_patterns:
+            pattern, sum_flag, *maybe = entry
             if sum_flag:
-                # Beispiel: SUM_<Pattern> ohne Regex-Zeichen
-                # [1-3] bzw. [1-2] entfernen
                 clean_pattern = re.sub(r'\[\d+-\d+\]', '', pattern)
-                # Sonderzeichen durch '_' ersetzen
                 sum_name = "SUM_" + re.sub(r'[^A-Za-z0-9_]', '_', clean_pattern)
                 sums[sum_name] = 0
                 sum_names[pattern] = sum_name
 
-        def recurse(o):
+        def recurse(o, inherited_attributes=None):
             if isinstance(o, dict):
+                # attributes aus diesem Knoten merken
+                current_attributes = o.get("attributes", {})
+                if inherited_attributes:
+                    # falls bereits Attribute vom Elternknoten vorhanden → übernehmen
+                    merged_attributes = inherited_attributes.copy()
+                    merged_attributes.update(current_attributes)
+                    current_attributes = merged_attributes
+
                 for k, v in o.items():
-                    for pattern, sum_flag in key_patterns:
+                    for entry in key_patterns:
+                        pattern, sum_flag, *maybe = entry
+                        attr_condition = maybe[0] if maybe else None
+
+                        # Prüfen, ob Attribute passen
+                        if attr_condition:
+                            attr_key, attr_value = attr_condition
+                            if current_attributes.get(attr_key) != attr_value:
+                                continue  # passt nicht → nächsten key_pattern prüfen
+
+                        # Key prüfen
                         if re.fullmatch(pattern, k):
                             if sum_flag:
                                 sums[sum_names[pattern]] += v
                             else:
-                                # nur den ersten Treffer behalten
                                 if k not in results:
                                     results[k] = v
-                            break  # Key wurde verarbeitet, nicht weiter prüfen
+                            break
+
+                    # Rekursion, Attribute weitergeben
                     if isinstance(v, (dict, list)):
-                        recurse(v)
+                        recurse(v, current_attributes)
+
             elif isinstance(o, list):
                 for item in o:
-                    recurse(item)
+                    recurse(item, inherited_attributes)
 
         recurse(obj)
         results.update(sums)
         return results
-
-
 
     # API-Werte lesen unabhängig von den Node-Nummern
     def get_API(self):
@@ -68,22 +77,23 @@ class gen24api:
         API = {}
         # relevante API-Schlüssel definieren: 
         # schluessel [1-3] bei mehrfachschlussel, True für Summenbildung
+        # ("label", "<primary>") = attributes.key, Value zur Identifizierung der Hardware, hier des SM am Stromzähler
         GEN24_API_schluessel = [
-            ("BAT_MODE_ENFORCED_U16", False),
-            ("nameplate", False),
-            ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),
-            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16", False),
-            ("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", False),
-            ("PV_POWERACTIVE_MEAN_0[1-2]_F32", True),
-            ("BAT_POWERACTIVE_MEAN_F32", False),
-            ("ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0[1-3]_U64", True),
-            ("PV_ENERGYACTIVE_ACTIVE_SUM_0[1-2]_U64", True),
-            ("ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0[1-3]_U64", True),
-            ("BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64", False),
-            ("BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64", False),
-            ("SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64", False),
-            ("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", False),
-            ("PS2.rev-sw", False)
+            ("nameplate", False),                                                           #BYD
+            ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),                              #BYD
+            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16", False),                              #BYD
+            ("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", False, ("label", "<primary>")),         #SM <primary>
+            ("SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
+            ("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
+            ("BAT_MODE_ENFORCED_U16", False),                                               #WR
+            ("PV_POWERACTIVE_MEAN_0[1-2]_F32", True),                                       #WR
+            ("BAT_POWERACTIVE_MEAN_F32", False),                                            #WR
+            ("ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0[1-3]_U64", True),                        #WR
+            ("PV_ENERGYACTIVE_ACTIVE_SUM_0[1-2]_U64", True),                                #WR
+            ("ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0[1-3]_U64", True),                  #WR
+            ("BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64", False),                            #WR
+            ("BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64", False),                         #WR
+            ("PS2.rev-sw", False)                                                           #WR
         ]
         API_result = self.extract_API_values(data, GEN24_API_schluessel)
 
@@ -130,8 +140,8 @@ class gen24api:
                 try:
                     gen24url = "http://"+weitereIP+"/components/readable"
                     url = requests.get(gen24url)
-                    data = json.loads(url.text)
-                    API_result = self.extract_API_values(data, GEN24_API_schluessel)
+                    data2 = json.loads(url.text)
+                    API_result = self.extract_API_values(data2, GEN24_API_schluessel)
                     API['aktuellePVProduktion'] += int(API_result['SUM_PV_POWERACTIVE_MEAN_0_F32'])
                     API['AC_Produktion']        += int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
                     API['DC_Produktion']        += int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
@@ -158,8 +168,8 @@ class gen24api:
                 try:
                     symo_url = "http://"+weitereIP+"/components/readable"
                     url = requests.get(symo_url, timeout=2)
-                    data = json.loads(url.text)
-                    API_result = self.extract_API_values(data, SYMO_API_schluessel)
+                    data_Sy = json.loads(url.text)
+                    API_result = self.extract_API_values(data_Sy, SYMO_API_schluessel)
                     # Benötigte Werte mit den geholten API-Werten API zuweisen
                     API_Sym['aktuellePVProduktion'] += int(API_result['PowerReal_PAC_Sum'])
                     API_Sym['AC_Produktion']        += int(API_result['EnergyReal_WAC_Sum_EverSince'])
@@ -190,7 +200,8 @@ class gen24api:
         import traceback
         try:
             import ADDONS.Fremd_API_priv
-            API_ADDDON = ADDONS.Fremd_API_priv.get_API()
+            # mit data werden die API-Daten des erste GEN24 übergeben
+            API_ADDDON = ADDONS.Fremd_API_priv.get_API(data)
             for key in API:
                 if key in API_ADDDON:
                     API[key] += API_ADDDON[key]
