@@ -13,7 +13,7 @@ import time
 class FroniusGEN24:
     def __init__(self, host: str, user: str, password: str, Version = '3.4.3-21683', debug: bool = False):
         self.host = host
-        self.user = user
+        self.user = user.lower() # user muss klein geschrieben sein
         self.password = password
         self.session = requests.Session()
         self.realm = None
@@ -130,7 +130,7 @@ class FroniusGEN24:
         except Exception as e:
             last_error = e
             self._debug(f"Request auf {path} fehlgeschlagen: {e}")
-            print("\nLogin fehlgeschlagen: Kennword prüfen, nach Umstieg auf 1.38.6-1 neu setzen!!\n")
+            print("\nLogin fehlgeschlagen: Kennword prüfen, oder nach Umstieg auf 1.38.6-1 Kennwort am GEN24 neu setzen!!\n")
             exit()
 
     def login(self) -> bool:
