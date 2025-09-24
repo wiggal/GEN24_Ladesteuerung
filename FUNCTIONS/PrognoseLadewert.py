@@ -327,7 +327,6 @@ class progladewert:
         if Dauer_Nacht_Std < 1:
             # Die aktuelle Einspeisung nicht mehr verändern
             Eigen_Opt_Std_neu = Eigen_Opt_Std
-            # if BattStatusProz > AkkuZielProz:  #entWIGGlung
             if Eigen_Opt_Std_neu <= RundungEinspeisewert:
                 if (PrognoseMorgen < PrognoseGrenzeMorgen / 2):
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen / 2, keine Einspeisung während des Tages"

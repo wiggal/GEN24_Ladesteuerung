@@ -109,7 +109,7 @@ class sqlall:
             
                 # Ergebnis in ein Array laden (Liste von Tupeln)
                 laufende_array = zeiger.fetchall()
-                if (laufende_array): print("DEBUG: ", laufende_array)  #entWIGGlung
+                # if (laufende_array): print("DEBUG: ", laufende_array)  #entWIGGlung Aufgeraeumt am 25.09.2025
 
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
             sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
@@ -144,7 +144,7 @@ class sqlall:
                 for laufende_row in laufende_array:
                     if laufende_row[0] == stunde:
                         data[row[0]][columns[2]] = laufende_row[1]
-                        print("DEBUG: ",row[0],data[row[0]])  #entWIGGlung
+                        # print("DEBUG: ",row[0],data[row[0]])  #entWIGGlung Aufgeraeumt am 25.09.2025
                         break
 
         record_json = json.dumps(data)

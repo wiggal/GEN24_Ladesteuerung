@@ -1,4 +1,4 @@
-**[0.38.2] – 2025-XX-XX**  
+**[0.38.2] – 2025-09-25**  
 
 - BatSparFaktor < 0 (0=-1): Ladung hauptsächlich an den Prognosespitzen kann nun durch den Faktor beeinflusst werden.  
   Der errechnete Ladewert wird nun mit dem absoluten BatSparFaktor multipliziert.  

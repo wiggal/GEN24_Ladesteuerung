@@ -508,22 +508,11 @@ if __name__ == '__main__':
                         HYB_BACKUP_RESERVED = EigenOptERG[6]
                         aktuellePVProduktion_tmp = aktuellePVProduktion
 
-                        #  #entWIGGlung
-                        # Wenn der Akku unter MindBattLad Optimierung auf 30 setzen
-                        # Bereich ermoeglicht die Optimierung fuer den Tag zu setzen
-                        #if (BattStatusProz <= MindBattLad) and Eigen_Opt_Std_neu >= 30:
-                        #    Dauer_Nacht_Std = 1
-                        #    aktuellePVProduktion_tmp = 0
-                        #    Eigen_Opt_Std_neu = 30
-                        #    DEBUG_Ausgabe += "DEBUG ##  Akku unter MindBattLad Optimierung auf 30 gesetzt!!!\n"
-                        #  END #entWIGGlung
-
                         # Bei Eigen_Opt_Std_neu == 0 auf HYB_EM_MODE = 0, Eigenverbrauchs-Optimierung = Automatisch schalten
                         HYB_EM_MODE = 1
                         if (Eigen_Opt_Std_neu == 0):
                             HYB_EM_MODE = 0
 
-                        #if (Dauer_Nacht_Std > 0.5 or BattStatusProz < AkkuZielProz) and aktuellePVProduktion_tmp < (Grundlast + MaxEinspeisung) * 1.5:  #entWIGGlung
                         if (Dauer_Nacht_Std > 0.5 or BattStatusProz < MindBattLad):
                             if print_level >= 1:
                                 print("## Eigenverbrauchs-Optimierung ##")

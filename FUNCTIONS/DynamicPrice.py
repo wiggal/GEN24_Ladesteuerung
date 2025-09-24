@@ -608,10 +608,10 @@ class dynamic:
                 Boersenpreis = excluded.Boersenpreis
             ''', entry)
 
-        #Vorübergehend: Alte Tabelle löschen, wenn existiert.   #entWIGGlung
-        zeiger.execute("""
-        DROP TABLE IF EXISTS priceforecast
-        """)
+        #Vorübergehend: Alte Tabelle löschen, wenn existiert.   #entWIGGlung Aufgeraeumt 24.09.2025
+        # zeiger.execute("""
+        # DROP TABLE IF EXISTS priceforecast
+        # """)
 
         # Wenn Datenbanktabelle priceforecast noch nicht existiert, anlegen
         zeiger.execute("""
@@ -623,10 +623,11 @@ class dynamic:
         PrognBattStatus FLOAT
         )""")
 
-        # Alte Daten abräumen und neu Daten speichern  #entWIGGlung
+        # Alte Daten abräumen und neu Daten speichern  #entWIGGlung Aufgeraeumt 24.09.2025
         #zeiger.execute("""
         #DELETE FROM priceforecast
         #""")
+
         zeiger.executemany("""
         INSERT INTO priceforecast (Zeitpunkt, PV_Prognose, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
         VALUES (?, ?, ?, ?, ?);
