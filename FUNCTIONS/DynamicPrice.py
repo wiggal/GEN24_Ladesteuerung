@@ -608,10 +608,10 @@ class dynamic:
                 Boersenpreis = excluded.Boersenpreis
             ''', entry)
 
-        #Vorübergehend: Alte Tabelle löschen, wenn existiert.   #entWIGGlung Aufgeraeumt 24.09.2025
-        # zeiger.execute("""
-        # DROP TABLE IF EXISTS priceforecast
-        # """)
+        #Vorübergehend: Alte Tabelle löschen, wenn existiert. Hier müssten die Alten Werte gelöscht werden!!!
+        zeiger.execute("""
+        DROP TABLE IF EXISTS priceforecast
+        """)
 
         # Wenn Datenbanktabelle priceforecast noch nicht existiert, anlegen
         zeiger.execute("""
