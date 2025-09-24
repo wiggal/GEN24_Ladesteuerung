@@ -1,6 +1,7 @@
 **[0.38.3] – 2025-XX-XX**  
 
 - FIX: Login schlägt fehl, wenn der USER groß geschrieben wird.  
+- FIX: DynamicPrice wird nicht mehr geloggt.  
 
 **[0.38.2] – 2025-09-25**  
 
