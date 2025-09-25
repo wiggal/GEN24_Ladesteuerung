@@ -188,11 +188,30 @@ return $SQL;
     break; # ENDE case 'SUM_Netzverbrauch'
 
     case 'daten':
-# Anpassung an viertestündliche Strompreise
+# Anpassung stündliche / viertelstündliche Strompreise
+// Schritt 1: prüfen, ob Viertelstunden vorkommen
+global $db;
+$checkSQL = "
+    SELECT COUNT(*) AS cnt
+    FROM strompreise
+    WHERE Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
+      AND strftime('%M', Zeitpunkt) IN ('15','30','45')
+";
+$results1 = $db->query($checkSQL);
+$check = $results1->fetchArray(SQLITE3_ASSOC); 
+if ($check['cnt'] > 0) {
+    // Viertelstundenwerte
+    $PreisSector = 15;
+} else {
+    // Stundendaten
+    $PreisSector = 60;
+}
+
+// Schritt 2: eigentliche Abfrage mit dynamischem Zeitbucket
 $SQL = "WITH Alle_PVDaten AS (
     SELECT
         STRFTIME('%Y-%m-%d %H:', Zeitpunkt) ||
-    printf('%02d:00', (CAST(STRFTIME('%M', Zeitpunkt) AS INTEGER) / 15) * 15) AS Zeitraum_15min,
+    printf('%02d:00', (CAST(STRFTIME('%M', Zeitpunkt) AS INTEGER) / '".$PreisSector."') * '".$PreisSector."') AS Zeitraum_15min,
         LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
         LEAD(AC_to_DC) OVER (ORDER BY Zeitpunkt) - AC_to_DC AS Netzladen,
         BattStatus,
