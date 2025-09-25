@@ -1,3 +1,7 @@
+**[0.38.4] – 2025-XX-XX**  
+
+- Änderung der API `components/readable` wenn der Akku aus oder in Standby ist.  
+
 **[0.38.3] – 2025-09-25**  
 
 - FIX: Login schlägt fehl, wenn der USER groß geschrieben wird.  
