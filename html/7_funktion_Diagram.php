@@ -532,7 +532,7 @@ echo "    }]
              size: 20,
            },
            callback: function(value, index, values) {
-              return value >= 0 ? value.toFixed(0) + 'W' : '';
+              return value >= 0 ? value.toFixed(0) + '' : ''; //Einheit Wh weggelassen
            }
         },
       },
