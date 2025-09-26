@@ -110,15 +110,8 @@ if(dyn_print_level >= 3):
 api = FUNCTIONS.GEN24_API.gen24api()
 API = api.get_API()
 # Wenn Batterie offline, battery_capacity_Wh = 5%
-Battery_Status = API['BAT_MODE']
-if (Battery_Status == 2):
-    print()
-    print("******** Batterie ist offline, aktueller Ladestand wird auf 5% gesetzt!!! **********\n")
-    battery_capacity_Wh = basics.getVarConf('gen24','battery_capacity_Wh', 'eval') # Kapazität in Wh aus dynprice.ini
-    current_charge_Wh = battery_capacity_Wh * 0.05 # aktueller Ladestand in Wh, 500Wh geschätzt
-else:
-    battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
-    current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
+battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
+current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
 
 # Mindest-Ladestand in Prozent vom GEN24 lesen
 host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')

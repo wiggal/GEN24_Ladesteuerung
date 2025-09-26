@@ -80,48 +80,51 @@ class gen24api:
         # ("label", "<primary>") = attributes.key, Value zur Identifizierung der Hardware, hier des SM am Stromzähler
         GEN24_API_schluessel = [
             ("nameplate", False),                                                           #BYD
-            ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),                              #BYD
-            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16", False),                              #BYD
+            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16", False),                              #BYD  Nur vorhanden, wenn Akku an/standby
             ("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", False, ("label", "<primary>")),         #SM <primary>
             ("SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
             ("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
-            ("BAT_MODE_ENFORCED_U16", False),                                               #WR
+            ("BAT_POWERACTIVE_MEAN_F32", False),                                            #WR   Nur vorhanden, wenn Akku an/standby
+            ("BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64", False),                            #WR
+            ("BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64", False),                         #WR
             ("PV_POWERACTIVE_MEAN_0[1-2]_F32", True),                                       #WR
-            ("BAT_POWERACTIVE_MEAN_F32", False),                                            #WR
             ("ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0[1-3]_U64", True),                        #WR
             ("PV_ENERGYACTIVE_ACTIVE_SUM_0[1-2]_U64", True),                                #WR
             ("ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0[1-3]_U64", True),                  #WR
-            ("BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64", False),                            #WR
-            ("BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64", False),                         #WR
             ("PS2.rev-sw", False)                                                           #WR
         ]
         API_result = self.extract_API_values(data, GEN24_API_schluessel)
 
         try:
-            API['BAT_MODE'] = API_result['BAT_MODE_ENFORCED_U16']
             API['Version'] = API_result['PS2.rev-sw']
-            # "BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
-            # "BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
-            if API['BAT_MODE'] != 2:
-                # Benötigte Werte mit den geholten API-Werten rechnen und API zuweisen
-                # Aktuelle Werte für Prognoseberechung
-                attributes_nameplate = json.loads(API_result['nameplate'])
-                API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
-                API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
-                API['udc_mittel'] = int((attributes_nameplate['max_udc'] + attributes_nameplate['min_udc'])/2)
+            # Benötigte Werte mit den geholten API-Werten errechnen und API zuweisen
+            # Aktuelle Werte für Prognoseberechung
+            # Folgende Werte sind nur vorhanden, wenn Akku an/standby
+            try:
                 API['BattStatusProz'] =    round(API_result['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
-                API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
-                API['aktuelleEinspeisung'] = int(API_result['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
-                API['aktuellePVProduktion'] = int(API_result['SUM_PV_POWERACTIVE_MEAN_0_F32'])
+            except:
+                API['BattStatusProz'] =    5
+                print("*********** Batterie ist evtl. offline, aktueller Ladestand wird auf 5% gesetzt!!! *********")
+            try:
                 API['aktuelleBatteriePower'] = int(API_result['BAT_POWERACTIVE_MEAN_F32'])
-                # Zählerstände fürs Logging
-                API['AC_Produktion'] =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
-                API['DC_Produktion'] =  int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
-                API['AC_to_DC']      =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
-                API['Batterie_IN']   =  int(API_result['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
-                API['Batterie_OUT']  =  int(API_result['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
-                API['Netzverbrauch'] =  int(API_result['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
-                API['Einspeisung']   =  int(API_result['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
+            except:
+                API['aktuelleBatteriePower'] = 0
+                print("*********** Batterie ist evtl. offline, aktuelle BatteriePower wird auf 0 gesetzt!!! *********")
+            attributes_nameplate = json.loads(API_result['nameplate'])
+            API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
+            API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
+            API['udc_mittel'] = int((attributes_nameplate['max_udc'] + attributes_nameplate['min_udc'])/2)
+            API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
+            API['aktuelleEinspeisung'] = int(API_result['SMARTMETER_POWERACTIVE_MEAN_SUM_F64'])
+            API['aktuellePVProduktion'] = int(API_result['SUM_PV_POWERACTIVE_MEAN_0_F32'])
+            # Zählerstände fürs Logging
+            API['AC_Produktion'] =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
+            API['DC_Produktion'] =  int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
+            API['AC_to_DC']      =  int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
+            API['Batterie_IN']   =  int(API_result['BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64']/3600)
+            API['Batterie_OUT']  =  int(API_result['BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64']/3600)
+            API['Netzverbrauch'] =  int(API_result['SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64'])
+            API['Einspeisung']   =  int(API_result['SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64'])
         except Exception as e:
             print("\nERROR: Ein API-Wert konnte nicht gelesen werden, bitte prüfen!")
             print("Fehlerursache:", e)

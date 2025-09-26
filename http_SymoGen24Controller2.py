@@ -17,16 +17,17 @@ if __name__ == '__main__':
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
-
+        print_level = basics.getVarConf('env','print_level','eval')
+        if print_level >= 1:
+            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
         host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
         user = basics.getVarConf('gen24','user', 'str')
         password = basics.getVarConf('gen24','password', 'str')
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
-        # API lesen, Versionsnummer
+        # API lesen, wegen Versionsnummer
         api = FUNCTIONS.GEN24_API.gen24api()
         API = api.get_API()
-        print_level = basics.getVarConf('env','print_level','eval')
         DEBUG_httprequest = False
         if(print_level == 5): DEBUG_httprequest = True
         #  Klasse FroniusGEN24 initiieren
@@ -105,30 +106,16 @@ if __name__ == '__main__':
                             print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
                             Grundlast = 0
 
-                    Battery_Status = API['BAT_MODE']
-                    # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 2.0, AKKU AUS
-                    # "393216 -  channels - BAT_MODE_ENFORCED_U16" : 0.0, AKKU EIN
-                    # Angenommene Werte, wenn AKKU offline
-                    if (Battery_Status == 2):
-                        print()
-                        print("*********** Batterie ist offline, aktueller Ladestand wird auf 5% gesetzt!!! *********\n")
-                        BattganzeKapazWatt = basics.getVarConf('gen24','battery_capacity_Wh', 'eval') # Kapazität in Wh aus default.ini
-                        BattganzeLadeKapazWatt = BattganzeKapazWatt
-                        BattStatusProz = 5
-                        BattKapaWatt_akt = BattganzeKapazWatt * 0.95
-                        aktuelleBatteriePower = 0
-                    else:
-                        BattganzeKapazWatt = (API['BattganzeKapazWatt'])
-                        BattganzeLadeKapazWatt_Akku = (API['BattganzeLadeKapazWatt'])
-                        LadeAmpere = 50
-                        # LadeAmpere bei HVM = 50A bei HVS = 25A
-                        if (BattganzeLadeKapazWatt_Akku / API['udc_mittel']) < 37: LadeAmpere = 25
-                        # LadeAmpere Gen24 = 22A
-                        BattganzeLadeKapazWatt = BattganzeLadeKapazWatt_Akku / LadeAmpere * 22
-                        BattStatusProz = API['BattStatusProz']
-                        BattKapaWatt_akt = API['BattKapaWatt_akt']
-                        aktuelleBatteriePower = API['aktuelleBatteriePower']
-
+                    BattganzeKapazWatt = (API['BattganzeKapazWatt'])
+                    BattganzeLadeKapazWatt_Akku = (API['BattganzeLadeKapazWatt'])
+                    LadeAmpere = 50
+                    # LadeAmpere bei HVM = 50A bei HVS = 25A
+                    if (BattganzeLadeKapazWatt_Akku / API['udc_mittel']) < 37: LadeAmpere = 25
+                    # LadeAmpere Gen24 = 22A
+                    BattganzeLadeKapazWatt = BattganzeLadeKapazWatt_Akku / LadeAmpere * 22
+                    BattStatusProz = API['BattStatusProz']
+                    BattKapaWatt_akt = API['BattKapaWatt_akt']
+                    aktuelleBatteriePower = API['aktuelleBatteriePower']
                     aktuelleEinspeisung = API['aktuelleEinspeisung'] * -1
                     aktuellePVProduktion = API['aktuellePVProduktion']
                     GesamtverbrauchHaus = aktuellePVProduktion - aktuelleEinspeisung + aktuelleBatteriePower
@@ -311,7 +298,6 @@ if __name__ == '__main__':
 
                     if print_level >= 1:
                         try:
-                            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognose - BattVollUm: ", TagesPrognoseGesamt,"-", BattVollUm)
