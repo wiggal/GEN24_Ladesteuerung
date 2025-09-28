@@ -1,4 +1,4 @@
-**[0.38.4] – 2025-XX-XX**  
+**[0.38.4] – 2025-09-28**  
 
 - FIX: Änderung der API `components/readable` wenn der Akku aus oder in Standby ist.  
 - FIX: In den Strompreischarts wurde der Verbrauch bei stündlichen Strompreisen nur viertelstündlich berechnet.  
