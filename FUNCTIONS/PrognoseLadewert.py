@@ -287,6 +287,7 @@ class progladewert:
         DEBUG_Eig_opt ="\nDEBUG\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>"
         GrundlastNacht = basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
         AkkuZielProz = basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
+        MindBattLad = basics.getVarConf('Ladeberechnung','MindBattLad','eval')
         RundungEinspeisewert = basics.getVarConf('EigenverbOptimum','RundungEinspeisewert','eval')
         PrognoseGrenzeMorgen = basics.getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
         PrognoseMorgen_arr = self.getPrognoseMorgen(MaxEinspeisung)
@@ -328,7 +329,7 @@ class progladewert:
             # Die aktuelle Einspeisung nicht mehr verändern
             Eigen_Opt_Std_neu = Eigen_Opt_Std
             if Eigen_Opt_Std_neu <= RundungEinspeisewert:
-                if (PrognoseMorgen < PrognoseGrenzeMorgen / 2):
+                if ((PrognoseMorgen < PrognoseGrenzeMorgen / 2) or (BattStatusProz < MindBattLad * 0.85 )):
                     DEBUG_Eig_opt_tmp = "\nDEBUG ## >>> Bei PrognoseMorgen < PrognoseGrenzeMorgen / 2, keine Einspeisung während des Tages"
                     DEBUG_Eig_opt_tmp += "\nDEBUG ## >>> Prognose 24H+: " + str(PrognoseMorgen) + ", PrognoseGrenzeMorgen: " + str(PrognoseGrenzeMorgen) 
                     Eigen_Opt_Std_neu = 0

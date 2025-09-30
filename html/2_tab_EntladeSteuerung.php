@@ -214,7 +214,7 @@ if (isset($Akku_EntLadung[$date]['Res_Feld2']) and $Akku_EntLadung[$date]['Res_F
         $ergebnisse = [];
         foreach ($teile as $wert) {
             if($wert == 0){
-                $ergebnis = $wert;
+                $ergebnis = 0;
             }else{
                 $ergebnis = $wert/1000;
                 # Immer mindestens eine Nachkommastelle, auch wenn Null
@@ -225,7 +225,8 @@ if (isset($Akku_EntLadung[$date]['Res_Feld2']) and $Akku_EntLadung[$date]['Res_F
             $ergebnisse[] = $ergebnis;
         }
         $Res_Feld2_Watt = implode(";", $ergebnisse);
-        if($Res_Feld2_Watt == 0) $Res_Feld2_Watt = "";
+        # damit es sowohl in php7 alsuch in php8 funktioniert
+        if(is_numeric($Res_Feld2_Watt) && (float)$Res_Feld2_Watt == 0)$Res_Feld2_Watt = "";
 }
 
 if (isset($Akku_EntLadung[$date]['Options']) and $Akku_EntLadung[$date]['Options'] <> ""){
