@@ -361,34 +361,37 @@ button {
 <tr class="comment"><td colspan="2">; Ladeverluste beim Laden und Abschreibungsverluste des Hausakkus </td></tr>
 <tr><td class="variablenname">Akku_Verlust_Prozent</td>
 <td><input type="text" name="Zeile[17][1]" value="15" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Hier kann ein MindestSOC des Akku definiert werden, wenn er höher als der am GEN24 eingestellte sein soll. </td></tr>
+<tr><td class="variablenname">Akku_MindestSOC</td>
+<td><input type="text" name="Zeile[19][1]" value="5" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Ladung anpassen durch Pufferfaktor, der auf den Verbrauch aus dem Lastprofil angewendet wird </td></tr>
 <tr><td class="variablenname">Lade_Verbrauchs_Faktor</td>
-<td><input type="text" name="Zeile[19][1]" value="1.1" readonly></td></tr>
+<td><input type="text" name="Zeile[21][1]" value="1.1" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Um den Wert Gewinnerwartung_kWh muss der Preis in EURO/kWh bei<br>; Speicherung in den Akku nach Abzug von Akku_Verlust_Prozent mindestens niedriger sein. </td></tr>
 <tr><td class="variablenname">Gewinnerwartung_kW</td>
-<td><input type="text" name="Zeile[21][1]" value="0.05" readonly></td></tr>
+<td><input type="text" name="Zeile[23][1]" value="0.05" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Bis zu wieviel Prozent darf der Akku aus dem Netz geladen werden </td></tr>
 <tr><td class="variablenname">max_batt_dyn_ladung</td>
-<td><input type="text" name="Zeile[23][1]" value="99" readonly></td></tr>
+<td><input type="text" name="Zeile[25][1]" value="99" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Bruttopreis, in EURO unter dem der Akku immer zwangsgeladen wird (kann auch Minuswert sein) </td></tr>
 <tr><td class="variablenname">netzlade_preisschwelle</td>
-<td><input type="text" name="Zeile[25][1]" value="0.00" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[26]" value='' ></td></tr>
+<td><input type="text" name="Zeile[27][1]" value="0.00" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[28]" value='' ></td></tr>
 <tr class="comment"><td colspan="2">; Strompreisquellen<br>; energycharts (https://api.energy-charts.info/)<br>; ACHTUNG: smart_api liefert viertestündliche Strompreise, Aktuell nur zu Testzwecken verwenden<br>; smart_api (https://smard.api.bund.dev/) </td></tr>
 <tr><td class="variablenname">Preisquelle</td>
-<td><input type="text" name="Zeile[28][1]" value="energycharts" readonly></td></tr>
+<td><input type="text" name="Zeile[30][1]" value="energycharts" readonly></td></tr>
 <tr><td class="variablenname">LAND</td>
-<td><input type="text" name="Zeile[29][1]" value="DE-LU" readonly></td></tr>
+<td><input type="text" name="Zeile[31][1]" value="DE-LU" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Tageszeitabhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a)<br>; Hier die Stundenbereiche mit den Nettopreisen in der Form {&quot;Std&quot;:&quot;Nettopreis&quot;, ...} angeben,<br>; Std. muss mit &quot;00&quot; beginnen und immer zweistellig sein.<br>; Beispiel: { &quot;00&quot;:&quot;0.027&quot;,&quot;09&quot;:&quot;0.1105&quot;,&quot;16&quot;:&quot;0.1937&quot;} </td></tr>
 <tr><td class="variablenname">Tageszeit_Preisanteil</td>
-<td><input type="text" name="Zeile[31][1]" value="{ &quot;00&quot;:&quot;0.000&quot;,&quot;12&quot;:&quot;0.000&quot;}" readonly></td></tr>
+<td><input type="text" name="Zeile[33][1]" value="{ &quot;00&quot;:&quot;0.000&quot;,&quot;12&quot;:&quot;0.000&quot;}" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Nettoaufschlag EURO/kWh </td></tr>
 <tr><td class="variablenname">Nettoaufschlag</td>
-<td><input type="text" name="Zeile[33][1]" value="0.1528" readonly></td></tr>
+<td><input type="text" name="Zeile[35][1]" value="0.1528" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Prozentualer Aufschlag z.B. MwSt </td></tr>
 <tr><td class="variablenname">MwSt</td>
-<td><input type="text" name="Zeile[35][1]" value="1.19" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[36]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 23.09.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+<td><input type="text" name="Zeile[37][1]" value="1.19" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[38]" value='' ></td></tr>
+</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 02.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>
