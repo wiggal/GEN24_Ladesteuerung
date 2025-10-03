@@ -163,20 +163,25 @@ class dynamic:
 
         Tageszeit_Preisanteil = {}
 
-        for i in range(len(time_points)):
-            start_time, value = time_points[i]
-            if i + 1 < len(time_points):
-                end_time = time_points[i + 1][0]
-            else:
-                # Ende des Tages → 00:00 am Folgetag
-                end_time = datetime.strptime("00:00", "%H:%M") + timedelta(days=1)
+        # 15-Minuten Raster über den ganzen Tag
+        current = datetime.strptime("00:00", "%H:%M")
+        end_of_day = current + timedelta(days=1)
 
-            # Alle 15 Minuten vom Start bis kurz vor Ende
-            current = start_time
-            while current < end_time:
-                key = current.strftime("%H:%M")
-                Tageszeit_Preisanteil[key] = value
-                current += timedelta(minutes=15)
+        while current < end_of_day:
+            # letzten gültigen Eintrag finden
+            value = None
+            for t, v in time_points:
+                if t <= current:
+                    value = v
+                else:
+                    break
+
+            # falls noch kein gültiger Startwert (z.B. Raster < erstem Eintrag) → nimm letzten Wert vom Vortag
+            if value is None:
+                value = time_points[-1][1]
+
+            Tageszeit_Preisanteil[current.strftime("%H:%M")] = value
+            current += timedelta(minutes=15)
 
         # DEBUG
         if(self.dyn_print_level >= 4): print("++ Tageszeit_Preisanteil: ", Tageszeit_Preisanteil, "\n")
