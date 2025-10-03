@@ -3,6 +3,10 @@
 - FIX: Eintrag viertelstündlicher Werte aus DynamicPriceCheck.py mit führender Null wird in PHP7 nicht richtig ausgelesen.  
 - `Akku_MindestSOC = 5` in CONFIG/dynprice.ini eingefügt, damit kann ein höherer MIN-SOC als im GEN24 eingestellt werden, um mehr Reserve zu haben.   
 
+**NEU** Nachdem nun die Strompreise viertelstündlich kommen, wurde auch der Tageszeit abhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a BRD)  
+        auf viertelstündlich umgestellt. 
+        Anpassung auf Minutentakt in ´CONFIG/dynprice_priv.ini´ und ´CONFIG/dynprice_priv.ini´ an ´Tageszeit_Preisanteil´ nötig.  
+
 **[0.38.4] – 2025-09-28**  
 
 - FIX: Änderung der API `components/readable` wenn der Akku aus oder in Standby ist.  

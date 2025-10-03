@@ -382,9 +382,9 @@ button {
 <td><input type="text" name="Zeile[30][1]" value="energycharts" readonly></td></tr>
 <tr><td class="variablenname">LAND</td>
 <td><input type="text" name="Zeile[31][1]" value="DE-LU" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Tageszeitabhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a)<br>; Hier die Stundenbereiche mit den Nettopreisen in der Form {&quot;Std&quot;:&quot;Nettopreis&quot;, ...} angeben,<br>; Std. muss mit &quot;00&quot; beginnen und immer zweistellig sein.<br>; Beispiel: { &quot;00&quot;:&quot;0.027&quot;,&quot;09&quot;:&quot;0.1105&quot;,&quot;16&quot;:&quot;0.1937&quot;} </td></tr>
+<tr class="comment"><td colspan="2">; Tageszeit abhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a BRD)<br>; Hier die Zeitbereiche mit den Nettopreisen in der Form {&quot;Std:Min&quot;:&quot;Nettopreis&quot;, ...} angeben,<br>; Std. muss mit &quot;00:00&quot; beginnen und immer jeweils zweistellig sein.<br>; Das Minutenintervall muss wie die Strompreise im 15-Minutentakt sein.<br>; Beispiel: { &quot;00:00&quot;:&quot;0.027&quot;,&quot;09:30&quot;:&quot;0.1105&quot;,&quot;16:15&quot;:&quot;0.1937&quot;} </td></tr>
 <tr><td class="variablenname">Tageszeit_Preisanteil</td>
-<td><input type="text" name="Zeile[33][1]" value="{ &quot;00&quot;:&quot;0.000&quot;,&quot;12&quot;:&quot;0.000&quot;}" readonly></td></tr>
+<td><input type="text" name="Zeile[33][1]" value="{ &quot;00:00&quot;:&quot;0.000&quot;,&quot;12:30&quot;:&quot;0.000&quot;}" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Nettoaufschlag EURO/kWh </td></tr>
 <tr><td class="variablenname">Nettoaufschlag</td>
 <td><input type="text" name="Zeile[35][1]" value="0.1528" readonly></td></tr>
@@ -392,6 +392,6 @@ button {
 <tr><td class="variablenname">MwSt</td>
 <td><input type="text" name="Zeile[37][1]" value="1.19" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[38]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 02.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 03.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>

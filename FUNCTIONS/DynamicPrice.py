@@ -149,28 +149,75 @@ class dynamic:
             i  += 1
         return(Prognosen_24H)
         
-    def getPrice_smart_api(self, BZN):
-        # Aufschläge zum reinen Börsenpreis, return muss immer Bruttoendpreis liefern
+    def get_pricelist_date_viertel(self, json_data1):
         Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
         MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
-        # Tageszeitabhängiger Preisanteil (z.B. $14a Netzentgelte)
+
+        # Tageszeitabhängiger Preisanteil viertelstündlich (z.B. $14a Netzentgelte)
         Tageszeit_Preisanteil_tmp = json.loads(basics.getVarConf('dynprice','Tageszeit_Preisanteil', 'str')) 
-        Tageszeit_Preisanteil_tmp = dict(sorted(Tageszeit_Preisanteil_tmp.items(), key=lambda item: int(item[0])))
+        # Zeitpunkte auf Minutenwerte prüfen, evtl. ergänzen und Werte sortieren
+        time_points = sorted(
+            (datetime.strptime(k if ":" in k else f"{k.zfill(2)}:00", "%H:%M"), float(v))
+            for k, v in Tageszeit_Preisanteil_tmp.items()
+        )
 
-        # Schlüssel und Werte in numerische Form umwandeln
-        sorted_hours = sorted(int(k) for k in Tageszeit_Preisanteil_tmp.keys())  # Sortierte Stunden
-        values = [float(Tageszeit_Preisanteil_tmp[str(h).zfill(2)]) for h in sorted_hours]  # Sortierte Werte
-
-        # Dictionary für alle Stunden füllen
         Tageszeit_Preisanteil = {}
-        for i in range(len(sorted_hours)):
-            start = sorted_hours[i]
-            end = sorted_hours[i + 1] if i + 1 < len(sorted_hours) else 24  # Bis zum nächsten oder 24 Uhr
-            for h in range(start, end):
-                Tageszeit_Preisanteil[str(h).zfill(2)] = values[i]  # Konstanter Wert
+
+        for i in range(len(time_points)):
+            start_time, value = time_points[i]
+            if i + 1 < len(time_points):
+                end_time = time_points[i + 1][0]
+            else:
+                # Ende des Tages → 00:00 am Folgetag
+                end_time = datetime.strptime("00:00", "%H:%M") + timedelta(days=1)
+
+            # Alle 15 Minuten vom Start bis kurz vor Ende
+            current = start_time
+            while current < end_time:
+                key = current.strftime("%H:%M")
+                Tageszeit_Preisanteil[key] = value
+                current += timedelta(minutes=15)
+
         # DEBUG
         if(self.dyn_print_level >= 4): print("++ Tageszeit_Preisanteil: ", Tageszeit_Preisanteil, "\n")
 
+        try:
+            # viertelstündliche Netzentgelte addieren
+            price = json_data1
+            pricelist = list(zip(price['unix_seconds'], price['price']))
+            pricelist_date = []
+            for row in zip(price['unix_seconds'], price['price']):
+                if row[1] is not None:
+                    dt = datetime.fromtimestamp(row[0])
+                    # Uhrzeit gerundet auf 15 Minuten
+                    minutes = (dt.minute // 15) * 15
+                    quarter_time = dt.replace(minute=minutes, second=0, microsecond=0).strftime("%H:%M")
+
+                    time_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+                    brutto_preis = round((row[1] / 1000 + Nettoaufschlag + Tageszeit_Preisanteil[quarter_time]) * MwSt, 4)
+
+                    # Zeitpunkt, Bruttopreis, Börsenpreis
+                    pricelist_date.append((time_str, brutto_preis, round(row[1] / 1000, 3)))
+
+        except Exception as e:
+            #entWIGGlung BEGINN
+            print("Fehler aufgetreten:", type(e).__name__, "-", e)
+            import traceback
+            traceback.print_exc()
+            #entWIGGlung END
+            print("### ERROR: Keine Daten von api.energy-charts.info, deshalb die Preise aus DB verwenden!\n")
+            verbindung = sqlite3.connect('PV_Daten.sqlite')
+            zeiger = verbindung.cursor()
+            sql_anweisung = "SELECT * from strompreise WHERE DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day');"
+            zeiger.execute(sql_anweisung)
+            pricelist_date = zeiger.fetchall()
+            if pricelist_date == []:
+                print("### ERROR: In der DB sind auch keine aktuellen Strompreise vorhanden, Programmabbruch:")
+                exit()
+
+        return(pricelist_date)
+
+    def getPrice_smart_api(self, BZN):
         # Aktuelles Datum und Uhrzeit
         jetzt = datetime.now()
         # Wochentag berechnen (Montag = 0, Sonntag = 6)
@@ -189,14 +236,22 @@ class dynamic:
 
         #  viertestündliche Strompreise
         url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_quarterhour_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, montag_timestamp)
-        timeout_sec = 10
+        timeout_sec = 30
         Push_Schreib_Ausgabe = ''
         
         try:
             apiResponse = requests.get(url, timeout=timeout_sec)
             apiResponse.raise_for_status()
             if apiResponse.status_code != 204:
-                json_data1 = dict(json.loads(apiResponse.text))
+                raw = dict(json.loads(apiResponse.text))
+                # Format für Funktion get_pricelist_date_viertel erzeugen
+                unix_seconds = [ts // 1000 for ts, val in raw["series"]]
+                prices = [val for ts, val in raw["series"]]
+                json_data1 = {
+                    "license_info": "CC BY 4.0 (creativecommons.org/licenses/by/4.0) from Bundesnetzagentur | SMARD.de",
+                    "unix_seconds": unix_seconds,
+                    "price": prices
+                }
             else:
                 Ausgabe = "### ERROR:  Keine Strompreise von api.energy-charts.info"
                 print(Ausgabe)
@@ -221,55 +276,12 @@ class dynamic:
             apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
             print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
-        try:
-            json_data1['series'] = [
-            [timestamp, value]
-            for timestamp, value in json_data1['series']
-            if not (timestamp < heute_timestamp_ms or value is None)
-                ]
-            pricelist = json_data1
-            pricelist_date = []
-            for row in pricelist['series']:
-                if row[1] is not None:
-                    Std = datetime.fromtimestamp(row[0]/1000).strftime("%H")
-                    time = datetime.fromtimestamp(row[0]/1000).strftime("%Y-%m-%d %H:%M:%S")
-                    price = round((row[1]/1000 + Nettoaufschlag + Tageszeit_Preisanteil[Std]) * MwSt, 4)
-                    # Zeitunkt, Bruttopreis, Börsenpreis
-                    pricelist_date.append((time, price, round(row[1]/1000, 3)))
-        except:
-            print("### ERROR: Keine Daten von api.energy-charts.info, deshalb die Preise aus DB verwenden!\n")
-            verbindung = sqlite3.connect('PV_Daten.sqlite')
-            zeiger = verbindung.cursor()
-            sql_anweisung = "SELECT * from strompreise WHERE DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day');"
-            zeiger.execute(sql_anweisung)
-            pricelist_date = zeiger.fetchall()
-            if pricelist_date == []:
-                print("### ERROR: In der DB sind auch keine aktuellen Strompreise vorhanden, Programmabbruch:")
-                exit()
+        # viertelstündliche Netzentgelte addieren
+        pricelist_date = self.get_pricelist_date_viertel(json_data1)
+
         return(pricelist_date)
 
     def getPrice_energycharts(self, BZN):
-        # Aufschläge zum reinen Börsenpreis, return muss immer Bruttoendpreis liefern
-        Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
-        MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
-        # Tageszeitabhängiger Preisanteil (z.B. $14a Netzentgelte)
-        Tageszeit_Preisanteil_tmp = json.loads(basics.getVarConf('dynprice','Tageszeit_Preisanteil', 'str')) 
-        Tageszeit_Preisanteil_tmp = dict(sorted(Tageszeit_Preisanteil_tmp.items(), key=lambda item: int(item[0])))
-
-        # Schlüssel und Werte in numerische Form umwandeln
-        sorted_hours = sorted(int(k) for k in Tageszeit_Preisanteil_tmp.keys())  # Sortierte Stunden
-        values = [float(Tageszeit_Preisanteil_tmp[str(h).zfill(2)]) for h in sorted_hours]  # Sortierte Werte
-
-        # Dictionary für alle Stunden füllen
-        Tageszeit_Preisanteil = {}
-        for i in range(len(sorted_hours)):
-            start = sorted_hours[i]
-            end = sorted_hours[i + 1] if i + 1 < len(sorted_hours) else 24  # Bis zum nächsten oder 24 Uhr
-            for h in range(start, end):
-                Tageszeit_Preisanteil[str(h).zfill(2)] = values[i]  # Konstanter Wert
-        # DEBUG
-        if(self.dyn_print_level >= 4): print("++ Tageszeit_Preisanteil: ", Tageszeit_Preisanteil, "\n")
-
         # Definiere den heutigen Tag (für 0:00 Uhr) und morgen (für 23:00 Uhr)
         heute = datetime.now()
         morgen = heute + timedelta(days=1)
@@ -280,7 +292,7 @@ class dynamic:
 
         # API-URL mit Parameter
         url = "https://api.energy-charts.info/price?bzn={}&start={}&end={}".format(BZN, start_time, end_time)
-        timeout_sec = 10
+        timeout_sec = 30
         Push_Schreib_Ausgabe = ''
         
         try:
@@ -312,27 +324,9 @@ class dynamic:
             apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
             print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
-        try:
-            price = json_data1
-            pricelist = list(zip(price['unix_seconds'], price['price']))
-            pricelist_date = []
-            for row in pricelist:
-                if row[1] is not None:
-                    Std = datetime.fromtimestamp(row[0]).strftime("%H")
-                    time = datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S")
-                    price = round((row[1]/1000 + Nettoaufschlag + Tageszeit_Preisanteil[Std]) * MwSt, 4)
-                    # Zeitunkt, Bruttopreis, Börsenpreis
-                    pricelist_date.append((time, price, round(row[1]/1000, 3)))
-        except:
-            print("### ERROR: Keine Daten von api.energy-charts.info, deshalb die Preise aus DB verwenden!\n")
-            verbindung = sqlite3.connect('PV_Daten.sqlite')
-            zeiger = verbindung.cursor()
-            sql_anweisung = "SELECT * from strompreise WHERE DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day');"
-            zeiger.execute(sql_anweisung)
-            pricelist_date = zeiger.fetchall()
-            if pricelist_date == []:
-                print("### ERROR: In der DB sind auch keine aktuellen Strompreise vorhanden, Programmabbruch:")
-                exit()
+        # viertelstündliche Netzentgelte addieren
+        pricelist_date = self.get_pricelist_date_viertel(json_data1)
+
         return(pricelist_date)
 
     def listAStable(self, headers, data, Vorspann='' ):
