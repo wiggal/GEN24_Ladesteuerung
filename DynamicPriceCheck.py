@@ -109,14 +109,15 @@ if(dyn_print_level >= 3):
 # Akku-Kapazität und aktuelle Parameter
 api = FUNCTIONS.GEN24_API.gen24api()
 API = api.get_API()
-# Wenn Batterie offline, battery_capacity_Wh = 5%
+# Wenn Batterie offline, battery_capacity_Wh = 5% => in GEN24_API.gen24api()
 battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
 current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
 
-# Mindest-Ladestand in Prozent vom GEN24 lesen
+# Mindest-Ladestand in Prozent vom GEN24 und aus der dynprice.ini lesen
 host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
 user = basics.getVarConf('gen24','user', 'str')
 password = basics.getVarConf('gen24','password', 'str')
+Akku_MindestSOC = basics.getVarConf('dynprice','Akku_MindestSOC', 'eval')
 # Hier Hochkommas am Anfang und am Ende enternen
 password = password[1:-1]
 #  Klasse FroniusGEN24 initiieren
@@ -126,6 +127,8 @@ BAT_M0_SOC_MIN = batteries_array[3]
 HYB_BACKUP_RESERVED = batteries_array[2]
 minimum_batterylevel_Prozent = BAT_M0_SOC_MIN
 if HYB_BACKUP_RESERVED > BAT_M0_SOC_MIN: minimum_batterylevel_Prozent = HYB_BACKUP_RESERVED
+# größeren Wert als minimum_batterylevel_Prozent definieren
+minimum_batterylevel_Prozent = max(minimum_batterylevel_Prozent, Akku_MindestSOC)
 
 minimum_batterylevel_kWh =  int(battery_capacity_Wh / 100 * minimum_batterylevel_Prozent)     # Mindest-Ladestand in Wh
 Prozent5_batterylevel_kWh =  battery_capacity_Wh / 100 * 5     # 5_Prozent-Ladestand in Wh
