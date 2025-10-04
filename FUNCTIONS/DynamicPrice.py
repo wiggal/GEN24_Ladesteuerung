@@ -239,8 +239,9 @@ class dynamic:
         Gebietsfilter = 4169 # für DE-LU 
         if(BZN == 'AT'): Gebietsfilter = 4170
 
-        #  viertestündliche Strompreise
-        url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_quarterhour_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, montag_timestamp)
+        #  stündliche oder viertestündliche Strompreise
+        resolution = basics.getVarConf('dynprice','resolution', 'str') 
+        url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_{}_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, resolution, montag_timestamp)
         timeout_sec = 30
         Push_Schreib_Ausgabe = ''
         
