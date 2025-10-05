@@ -61,6 +61,15 @@ if (!file_exists($SQLite_file)) {
     echo "</body></html>";
     exit();
 }
+# Datenbankverbindung herstellen
+$db = new SQLite3($SQLite_file);
+// Abfrage der internen sqlite_master Tabelle
+$result = $db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='pv_daten'");
+if (!$result) {
+    echo "SQLitetabelle pv_daten existiert nicht, keine Grafik verfügbar!<br>";
+    echo "Die Tabelle wird durch das Logging von http_SymoGen24Controller2.py erzeugt!";
+    exit();
+}
 
 # Variablendefinitionen
 $labels = '';
@@ -100,8 +109,6 @@ switch ($Zeitraum) {
     case 'jahre': $groupSTR = '%Y'; break;
 }
 
-# Datenbankverbindung herstellen
-$db = new SQLite3($SQLite_file);
 $DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from pv_daten');
 
 #$Footer_groupSTR = str_replace(" ","\T",$groupSTR);
