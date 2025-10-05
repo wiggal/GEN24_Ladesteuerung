@@ -205,11 +205,6 @@ class dynamic:
                     pricelist_date.append((time_str, brutto_preis, round(row[1] / 1000, 3)))
 
         except Exception as e:
-            #entWIGGlung BEGINN
-            print("Fehler aufgetreten:", type(e).__name__, "-", e)
-            import traceback
-            traceback.print_exc()
-            #entWIGGlung END
             print("### ERROR: Keine Daten von api.energy-charts.info, deshalb die Preise aus DB verwenden!\n")
             verbindung = sqlite3.connect('PV_Daten.sqlite')
             zeiger = verbindung.cursor()
@@ -598,6 +593,23 @@ class dynamic:
         # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
         zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_strompreise_zeitpunkt ON strompreise(Zeitpunkt)""")
 
+        # Löschen aller Einträge für heute und morgen
+        # damit Umstellung von viert- auf stündlich funktioniert
+        heute = datetime.today()
+        morgen = heute + timedelta(days=1)
+        zeiger.execute(
+            "DELETE FROM strompreise WHERE Zeitpunkt BETWEEN ? AND ?",
+            (heute.strftime('%Y-%m-%d 00:00:00'),
+             morgen.strftime('%Y-%m-%d 23:59:59'))
+        )
+
+        # auch in priceforecast Werte von heute und morgen loeschen
+        zeiger.execute(
+            "DELETE FROM priceforecast WHERE Zeitpunkt BETWEEN ? AND ?",
+            (heute.strftime('%Y-%m-%d 00:00:00'),
+             morgen.strftime('%Y-%m-%d 23:59:59'))
+        )
+
         # Daten einfügen oder aktualisieren
         for entry in strompreise:
             zeiger.execute('''
@@ -608,11 +620,6 @@ class dynamic:
                 Boersenpreis = excluded.Boersenpreis
             ''', entry)
 
-        #Vorübergehend: Alte Tabelle löschen, wenn existiert. Hier müssten die Alten Werte gelöscht werden!!!
-        zeiger.execute("""
-        DROP TABLE IF EXISTS priceforecast
-        """)
-
         # Wenn Datenbanktabelle priceforecast noch nicht existiert, anlegen
         zeiger.execute("""
         CREATE TABLE IF NOT EXISTS priceforecast (
@@ -622,11 +629,6 @@ class dynamic:
         PrognNetzladen INT,
         PrognBattStatus FLOAT
         )""")
-
-        # Alte Daten abräumen und neu Daten speichern  #entWIGGlung Aufgeraeumt 24.09.2025
-        #zeiger.execute("""
-        #DELETE FROM priceforecast
-        #""")
 
         zeiger.executemany("""
         INSERT INTO priceforecast (Zeitpunkt, PV_Prognose, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
