@@ -229,8 +229,8 @@ SELECT
     sp.Boersenpreis * 100 AS Boersenpreis,
     sp.Bruttopreis * 100 AS Bruttopreis,
 	pfc.PV_Prognose,
-	pfc.PrognNetzverbrauch,
-	pfc.PrognNetzladen,
+	pfc.PrognNetzverbrauch /60 * '".$PreisSector."' AS PrognNetzverbrauch,
+	pfc.PrognNetzladen /60 * '".$PreisSector."' AS PrognNetzladen,
 	pfc.PrognBattStatus
 FROM strompreise AS sp
 LEFT JOIN Alle_PVDaten AS pv
