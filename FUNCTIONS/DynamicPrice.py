@@ -228,7 +228,6 @@ class dynamic:
         heute = jetzt.replace(hour=0, minute=0, second=0, microsecond=0)
         # Unix-Timestamp berechnen
         montag_timestamp = int(montag.timestamp())
-        heute_timestamp_ms = int(heute.timestamp() * 1000)
 
         # API-URL mit Parameter
         Gebietsfilter = 4169 # für DE-LU 
@@ -282,6 +281,29 @@ class dynamic:
 
         return(pricelist_date)
 
+    def get_stuendliches_mittel(self, data):
+        from collections import defaultdict
+        import statistics
+
+        # Daten nach Stunden gruppieren
+        groups = defaultdict(lambda: {"val1": [], "val2": []})
+
+        for t_str, v1, v2 in data:
+            dt = datetime.strptime(t_str, "%Y-%m-%d %H:%M:%S")
+            hour_key = dt.replace(minute=0, second=0, microsecond=0)  # nur volle Stunde
+            groups[hour_key]["val1"].append(v1)
+            groups[hour_key]["val2"].append(v2)
+
+        # Mittelwerte berechnen
+        hourly_means = []
+        for hour, vals in sorted(groups.items()):
+            mean_v1 = round(statistics.mean(vals["val1"]), 4)
+            mean_v2 = round(statistics.mean(vals["val2"]), 4)
+            hour_str = hour.strftime("%Y-%m-%d %H:%M:%S")  # zurück in String
+            hourly_means.append((hour_str, mean_v1, mean_v2))
+
+        return(hourly_means)
+
     def getPrice_energycharts(self, BZN):
         # Definiere den heutigen Tag (für 0:00 Uhr) und morgen (für 23:00 Uhr)
         heute = datetime.now()
@@ -292,6 +314,7 @@ class dynamic:
         end_time = morgen.strftime('%Y-%m-%d')
 
         # API-URL mit Parameter
+        resolution = basics.getVarConf('dynprice','resolution', 'str') 
         url = "https://api.energy-charts.info/price?bzn={}&start={}&end={}".format(BZN, start_time, end_time)
         timeout_sec = 30
         Push_Schreib_Ausgabe = ''
@@ -327,6 +350,9 @@ class dynamic:
 
         # viertelstündliche Netzentgelte addieren
         pricelist_date = self.get_pricelist_date_viertel(json_data1)
+        # wenn resolution == hour Mittelwerte bilden
+        if(resolution == 'hour'):
+            pricelist_date = self.get_stuendliches_mittel(pricelist_date)
 
         return(pricelist_date)
 

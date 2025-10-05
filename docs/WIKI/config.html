@@ -377,21 +377,25 @@ button {
 <tr><td class="variablenname">netzlade_preisschwelle</td>
 <td><input type="text" name="Zeile[27][1]" value="0.00" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[28]" value='' ></td></tr>
-<tr class="comment"><td colspan="2">; Strompreisquellen<br>; energycharts (https://api.energy-charts.info/)<br>; ACHTUNG: smart_api liefert viertestündliche Strompreise, Aktuell nur zu Testzwecken verwenden<br>; smart_api (https://smard.api.bund.dev/) </td></tr>
+<tr class="comment"><td colspan="2">; Strompreisquellen<br>; energycharts (https://api.energy-charts.info/)<br>; energycharts liefert viertelstündliche Preise, bei resolution = hour wird ein Mittelwert berechnet.<br>;<br>; smart_api (https://smard.api.bund.dev/) (beta)<br>; smart_api liefert aktuell bei resolution = quarterhour  nur viermal den stündlichen Wert. </td></tr>
 <tr><td class="variablenname">Preisquelle</td>
 <td><input type="text" name="Zeile[30][1]" value="energycharts" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Zeitliche Auflösung, resolution: mögliche Werte hour quarterhour </td></tr>
+<tr><td class="variablenname">resolution</td>
+<td><input type="text" name="Zeile[32][1]" value="hour" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Mögliche Ländercodes siehe jeweilige Internetseite der Preisquelle </td></tr>
 <tr><td class="variablenname">LAND</td>
-<td><input type="text" name="Zeile[31][1]" value="DE-LU" readonly></td></tr>
+<td><input type="text" name="Zeile[34][1]" value="DE-LU" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Tageszeit abhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a BRD)<br>; Hier die Zeitbereiche mit den Nettopreisen in der Form {&quot;Std:Min&quot;:&quot;Nettopreis&quot;, ...} angeben,<br>; Std. muss mit &quot;00:00&quot; beginnen und immer jeweils zweistellig sein.<br>; Das Minutenintervall muss wie die Strompreise im 15-Minutentakt sein.<br>; Beispiel: { &quot;00:00&quot;:&quot;0.027&quot;,&quot;09:30&quot;:&quot;0.1105&quot;,&quot;16:15&quot;:&quot;0.1937&quot;} </td></tr>
 <tr><td class="variablenname">Tageszeit_Preisanteil</td>
-<td><input type="text" name="Zeile[33][1]" value="{ &quot;00:00&quot;:&quot;0.000&quot;,&quot;12:30&quot;:&quot;0.000&quot;}" readonly></td></tr>
+<td><input type="text" name="Zeile[36][1]" value="{ &quot;00:00&quot;:&quot;0.000&quot;,&quot;12:30&quot;:&quot;0.000&quot;}" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Nettoaufschlag EURO/kWh </td></tr>
 <tr><td class="variablenname">Nettoaufschlag</td>
-<td><input type="text" name="Zeile[35][1]" value="0.1528" readonly></td></tr>
+<td><input type="text" name="Zeile[38][1]" value="0.1528" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Prozentualer Aufschlag z.B. MwSt </td></tr>
 <tr><td class="variablenname">MwSt</td>
-<td><input type="text" name="Zeile[37][1]" value="1.19" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[38]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 03.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+<td><input type="text" name="Zeile[40][1]" value="1.19" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[41]" value='' ></td></tr>
+</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 05.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>
