@@ -629,11 +629,9 @@ class dynamic:
              morgen.strftime('%Y-%m-%d 23:59:59'))
         )
 
-        # auch in priceforecast Werte von heute und morgen loeschen
+        # in priceforecast alle Werte loeschen, wenn es länger nicht gelaufen ist...
         zeiger.execute(
-            "DELETE FROM priceforecast WHERE Zeitpunkt BETWEEN ? AND ?",
-            (heute.strftime('%Y-%m-%d 00:00:00'),
-             morgen.strftime('%Y-%m-%d 23:59:59'))
+            "DELETE FROM priceforecast"
         )
 
         # Daten einfügen oder aktualisieren
