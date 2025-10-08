@@ -1,3 +1,7 @@
+**[0.38.6] – 2025-XX-XX**  
+
+- https://smard.api.bund.dev/ liefert nun auch viertelstündliche Strompreise.  
+
 **[0.38.5] – 2025-10-06**  
 
 - FIX: Eintrag viertelstündlicher Werte aus DynamicPriceCheck.py mit führender Null wird in PHP7 nicht richtig ausgelesen.  
