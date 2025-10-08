@@ -183,8 +183,7 @@ class dynamic:
             Tageszeit_Preisanteil[current.strftime("%H:%M")] = value
             current += timedelta(minutes=15)
 
-        # DEBUG
-        if(self.dyn_print_level >= 4): print("++ Tageszeit_Preisanteil: ", Tageszeit_Preisanteil, "\n")
+        if(self.dyn_print_level >= 3): print("++ Tageszeit_Preisanteil: ", Tageszeit_Preisanteil, "\n") #DEBUG
 
         try:
             # viertelstündliche Netzentgelte addieren
@@ -236,6 +235,12 @@ class dynamic:
         #  stündliche oder viertestündliche Strompreise
         resolution = basics.getVarConf('dynprice','resolution', 'str') 
         url = "https://smard.api.proxy.bund.dev/app/chart_data/{}/{}/{}_{}_{}_{}000.json".format(Gebietsfilter, BZN, Gebietsfilter, BZN, resolution, montag_timestamp)
+
+        #DEBUG
+        if(self.dyn_print_level >= 2): 
+            print("++ ", url)
+            print("++  BZN = ", BZN, "; Gebietsfilter = ", Gebietsfilter, "; resolution = ", resolution, "\n")
+
         timeout_sec = 30
         Push_Schreib_Ausgabe = ''
         
@@ -316,6 +321,12 @@ class dynamic:
         # API-URL mit Parameter
         resolution = basics.getVarConf('dynprice','resolution', 'str') 
         url = "https://api.energy-charts.info/price?bzn={}&start={}&end={}".format(BZN, start_time, end_time)
+
+        #DEBUG
+        if(self.dyn_print_level >= 2): 
+            print("++ ", url)
+            print("++  BZN = ", BZN, "; resolution = ", resolution, "\n")
+
         timeout_sec = 30
         Push_Schreib_Ausgabe = ''
         
