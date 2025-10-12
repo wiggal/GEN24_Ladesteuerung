@@ -1,6 +1,7 @@
 **[0.38.6] – 2025-XX-XX**  
 
 - https://smard.api.bund.dev/ liefert nun auch viertelstündliche Strompreise.  
+- Bei Batteriekapazität den STATE_OF_HEALTH anbringen.
 
 **[0.38.5] – 2025-10-06**  
 

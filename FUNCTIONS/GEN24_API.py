@@ -80,6 +80,7 @@ class gen24api:
         # ("label", "<primary>") = attributes.key, Value zur Identifizierung der Hardware, hier des SM am Stromzähler
         GEN24_API_schluessel = [
             ("nameplate", False),                                                           #BYD
+            ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),                              #BYD
             ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16", False),                              #BYD  Nur vorhanden, wenn Akku an/standby
             ("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", False, ("label", "<primary>")),         #SM <primary>
             ("SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
@@ -111,7 +112,8 @@ class gen24api:
                 API['aktuelleBatteriePower'] = 0
                 print("*********** Batterie ist evtl. offline, aktuelle BatteriePower wird auf 0 gesetzt!!! *********")
             attributes_nameplate = json.loads(API_result['nameplate'])
-            API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'])
+            # Batterikapazität / Zustand der Batterie
+            API['BattganzeKapazWatt'] = int(attributes_nameplate['capacity_wh'] * API_result['BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16']/100)
             API['BattganzeLadeKapazWatt'] = attributes_nameplate['max_power_charge_w']
             API['udc_mittel'] = int((attributes_nameplate['max_udc'] + attributes_nameplate['min_udc'])/2)
             API['BattKapaWatt_akt'] = int((100 - API['BattStatusProz'])/100 * API['BattganzeKapazWatt']) 
