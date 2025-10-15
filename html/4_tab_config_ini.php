@@ -101,17 +101,10 @@ if(file_exists("config_priv.php")){
 function getinifile($dir) 
 {
 	$files = '';
-	$i = 0;
-	// Read all items
-    $entry = scandir($dir);
+    $entry = glob($dir . '*_priv.ini');
     foreach ($entry as $element) {
-		if ($element != '.' && $element != '..') {
-			// Filter only files mit priv.ini
-			if ((is_file($dir . '/' . $element)) and strpos($element, '_priv.ini')) {
-                $files .= "<option value=\"$dir$element\"> $element </option>";
-				$i++;
-			}
-		}
+        $filename = basename($element);
+        $files .= "<option value=\"$element\"> $filename </option>";
 	}
 return $files;
 }
