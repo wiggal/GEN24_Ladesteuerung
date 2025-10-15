@@ -3,7 +3,7 @@
 - https://smard.api.bund.dev/ liefert nun auch viertelstündliche Strompreise.  
 - Bei Batteriekapazität den STATE_OF_HEALTH anbringen.
 
-**NEU:** Alle in DIR vorhandenen `.log` Dateien anzeigen bzw. downloaden.
+**NEU:** Alle in DIR vorhandenen `.log` Dateien zum Anzeigen bzw. Downloaden verlinken.
 
 **[0.38.5] – 2025-10-06**  
 

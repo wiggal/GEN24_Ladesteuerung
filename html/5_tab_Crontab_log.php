@@ -58,7 +58,7 @@ if(file_exists("config_priv.php")){
 <div name="top"><div>
 <?php
 // --- Datei auswählen ---
-$file_name = isset($_GET['file']) ? basename($_GET['file']) : 'Crontab.log';
+$file_name = isset($_REQUEST['file']) ? basename($_REQUEST['file']) : 'Crontab.log';
 $file = $PythonDIR . '/' . $file_name;
 if(!file_exists($file)) {
   die("Datei ". $file ." ist nicht vorhanden!");
@@ -104,6 +104,7 @@ if($TAGE == 'ein') $Ausgabe = 1;
 switch ($case) {
     case '':
     echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+    echo '<input type="hidden" name="file" value="'.$file_name.'">'."\n";
     echo '<input type="hidden" name="case" value="filter">'."\n";
     echo '<input type="input" name="suchstring" value="geschrieben" size="10">'."\n";
     echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
@@ -164,15 +165,14 @@ switch ($case) {
     }
     break;
 }
+
+echo '<br><a class="ende" name="bottom" href="#top">An den Anfang springen!</a><br><br>';
+echo '<form method="post" action="#bottom" enctype="multipart/form-data">';
+echo '<div class="checkbox" ><input type="checkbox" name="DEBUG" value="ein"> DEBUG-Zeilen anzeigen</div>';
+echo '<div class="checkbox" ><input type="checkbox" name="TAGE" value="ein"> Alle Tage anzeigen</div>';
+echo '<input type="hidden" name="file" value="'.$file_name.'">'."\n";
+echo '<button type="submit">Neu laden</button></form>';
 ?>
 
-<br>
-<a class="ende" name="bottom" href="#top">An den Anfang springen!</a>
-<br><br>
-<form method="post" action="#bottom" enctype="multipart/form-data">
-<div class="checkbox" ><input type="checkbox" name="DEBUG" value="ein"> DEBUG-Zeilen anzeigen</div>
-<div class="checkbox" ><input type="checkbox" name="TAGE" value="ein"> Alle Tage anzeigen</div>
-<button type="submit">Neu laden</button>
-</form>
 </body>
 </html>
