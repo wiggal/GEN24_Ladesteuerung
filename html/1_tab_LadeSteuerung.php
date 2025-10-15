@@ -26,6 +26,11 @@
   margin: 0 0 1em;
   table-layout: auto;
   }
+  th {
+  position: sticky;
+  top: 65px;
+  z-index: 101; /* soll vor dem Button liegen */
+  }
   th, td {
   font-size: 200%;
   font-weight: normal;
@@ -56,6 +61,7 @@
     position: fixed;
     top: 0;
     transform: translate(-50%, 0);
+    z-index: 100;  /* <-- sorgt dafür, dass der Button oben bleibt */
   }
   .speichern:hover {
 	background-color:#5cbf2a;
