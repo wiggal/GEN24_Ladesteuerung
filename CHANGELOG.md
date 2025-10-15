@@ -3,6 +3,8 @@
 - https://smard.api.bund.dev/ liefert nun auch viertelstündliche Strompreise.  
 - Bei Batteriekapazität den STATE_OF_HEALTH anbringen.
 
+**NEU** Alle in DIR vorhabenen `.log` Dateien anzeigen bzw. downloaden.
+
 **[0.38.5] – 2025-10-06**  
 
 - FIX: Eintrag viertelstündlicher Werte aus DynamicPriceCheck.py mit führender Null wird in PHP7 nicht richtig ausgelesen.  

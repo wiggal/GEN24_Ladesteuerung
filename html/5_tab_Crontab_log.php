@@ -12,6 +12,7 @@ input { font-size: 1.3em; }
 body{ font-size: 160%; }
 input { font-size: 140%; }
 a{
+  text-decoration: none;
   font-family:Arial;
   font-size: 180%;
 }
@@ -25,6 +26,8 @@ input[type="checkbox"] {
 }
 }
 a.ende{
+  display: inline-block;
+  text-decoration: none !important;
   font-family:Arial;
   font-size: 110%;
 }
@@ -38,6 +41,11 @@ a.ende{
   position: fixed;
   right: 8px
 }
+table a {
+  display: inline-block;           /* wichtig, sonst unterstrich bei <span> */
+  text-decoration: none !important;
+  color: #007bff;
+}
 </style>
 </head>
 <?php
@@ -47,18 +55,41 @@ if(file_exists("config_priv.php")){
 }
 ?>
 <body onLoad="if (location.hash != '#bottom') location.hash = '#bottom';">
-<div class="download"> <a href="5_download_log.php?file=<?php echo $PythonDIR ?>/Crontab.log"><b>Download</b></a></div>
 <div name="top"><div>
-<div class="headertop">
-<a href="#bottom">Ans Ende springen!</a>
-<br><br>
 <?php
-$file = $PythonDIR.'/Crontab.log';
+// --- Datei auswählen ---
+$file_name = isset($_GET['file']) ? basename($_GET['file']) : 'Crontab.log';
+$file = $PythonDIR . '/' . $file_name;
 if(!file_exists($file)) {
   die("Datei ". $file ." ist nicht vorhanden!");
 } else {
   $myfile = fopen($file, "r");
 }
+
+// --- Logdateien im Verzeichnis auslesen ---
+$logFiles = glob($PythonDIR . '/*.log');
+
+// --- Tabelle mit Download-Symbol & Anzeige-Link ---
+echo '<div class="download">';
+echo '<table>';
+foreach ($logFiles as $log) {
+    $basename = basename($log);
+    $nameWithoutExt = preg_replace('/\.log$/', '', $basename); // ".log" entfernen
+    $downloadLink = '5_download_log.php?file=' . urlencode($log);
+    $viewLink = '?file=' . urlencode($basename);
+
+    echo '<tr>';
+    echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '">' . htmlspecialchars($nameWithoutExt) . '</a></td>';
+    echo '<td style="text-align:center;"><a class="ende" href="' . htmlspecialchars($downloadLink) . '" title="Download"><span class="icon">💾</span></a></td>';
+    echo '</tr>';
+}
+echo '</table><br>';
+echo '</div>';
+
+echo '<div class="headertop">';
+echo '<a class="ende" href="#bottom">Ans Ende springen!</a>';
+echo '<br><br>';
+
 $Ausgabe = 0;
 $datum = date("Y-m-d", time());
 
@@ -66,6 +97,9 @@ $case = '';
 if (isset($_POST["case"])) $case = $_POST["case"];
 $DEBUG = 'aus';
 if (isset($_POST["DEBUG"])) $DEBUG = $_POST["DEBUG"];
+$TAGE = 'aus';
+if (isset($_POST["TAGE"])) $TAGE = $_POST["TAGE"];
+if($TAGE == 'ein') $Ausgabe = 1;
 
 switch ($case) {
     case '':
@@ -137,6 +171,7 @@ switch ($case) {
 <br><br>
 <form method="post" action="#bottom" enctype="multipart/form-data">
 <div class="checkbox" ><input type="checkbox" name="DEBUG" value="ein"> DEBUG-Zeilen anzeigen</div>
+<div class="checkbox" ><input type="checkbox" name="TAGE" value="ein"> Alle Tage anzeigen</div>
 <button type="submit">Neu laden</button>
 </form>
 </body>

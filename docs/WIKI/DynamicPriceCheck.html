@@ -36,9 +36,10 @@
             schreiben erfolgt nur eine Analyse, und es wird nichts in
             die Tabelle ENTLadeStrg geschrieben.<br>
             Beispiel für Crontabeintrag mit einem alternativen Logfile:<br>
-            <br>
             <code>58 * * * * /home/GEN24/start_PythonScript.sh -o
-              LOG_DynamicPriceCheck.log DynamicPriceCheck.py schreiben</code></p>
+              DynPriceCheck.log DynamicPriceCheck.py schreiben</code></p>
+            Aufräumen des Logfiles am Montag:<br>
+            <code>0 5 * * 1 mv /DIR/DynPriceCheck.log /DIR/old_DynPriceCheck.log</code></p>
         </li>
         <li>Arbeitsweise von DynamicPriceCheck.py:<br>
           <ul>

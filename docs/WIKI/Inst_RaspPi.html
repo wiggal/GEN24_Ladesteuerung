@@ -169,13 +169,14 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
       folgender Crontabeintrag erforderlich:<strong><strong></strong></strong><br>
       <br>
       <code>58 * * * * /home/GEN24/start_PythonScript.sh -o</code><code>
-        LOG_DynamicPriceCheck.log DynamicPriceCheck.py schreiben</code></p>
+        DynPriceCheck.log DynamicPriceCheck.py schreiben</code></p>
     <p>Weiter Informationen siehe Beschreibung unter DynamicPriceCheck<strong><strong>.<br>
         </strong></strong></p>
-    <p><strong><strong></strong>Crontab.log jeden Montag abräumen</strong></p>
+    <p><strong><strong></strong>Logdateien jeden Montag abräumen</strong></p>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
-      <pre class="notranslate"><code>0 5 * * 1 mv /DIR/Crontab.log /DIR/Crontab.log_weg
+      <pre class="notranslate"><code>0 5 * * 1 mv /DIR/Crontab.log /DIR/old_Crontab.log
+0 5 * * 1 mv /DIR/DynPriceCheck.log /DIR/old_DynPriceCheck.log
 </code></pre>
       <div class="zeroclipboard-container position-absolute right-0
         top-0"> </div>
@@ -254,7 +255,7 @@ sudo apt install apache2
       Eintrag in Tabelle und feste manuelle Entladesteuerung<br>
       4_tab_config_ini.php ==&gt;&gt; Anzeigen und Editieren der
       CONFIG/XY_priv.ini's<br>
-      5_tab_Crontab_log.php ==&gt;&gt; Anzeigen der Logdatei Crontab.log<br>
+      5_tab_Crontab_log.php ==&gt;&gt; Anzeigen und Downloaden der Logdateien, z.B. Crontab.log<br>
       6_tab_GEN24.php ==&gt;&gt; lokaler Aufruf des GEN24<br>
       7_tab_Diagram.php ==&gt;&gt; Diagramme der Strompreise (nur wenn
       DynamicPriceCheck.py läuft)<br>

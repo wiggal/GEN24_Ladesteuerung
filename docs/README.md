@@ -57,7 +57,7 @@ da dies das Batteriemanagement des GEN24 selber regelt (auch über der definiert
 Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
 **Crontab Beispiel** (-o = alternatives Logfile):
 ```
-58 * * * * /DIR/start_PythonScript.sh -o LOG_DynamicPriceCheck.log DynamicPriceCheck.py schreiben
+58 * * * * /DIR/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py schreiben
 ```
 Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben.  
 Hier das Diagramm zu den dynamischen Strompreisen:
