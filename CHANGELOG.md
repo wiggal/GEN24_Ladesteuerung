@@ -1,7 +1,9 @@
-**[0.38.6] – 2025-XX-XX**  
+**[0.38.6] – 2025-10-17**  
 
 - https://smard.api.bund.dev/ liefert nun auch viertelstündliche Strompreise.  
-- Bei Batteriekapazität den STATE_OF_HEALTH anbringen.
+  In CONFIG/dynprice.ini entsprechend beschrieben.
+
+- Bei Batteriekapazität den STATE_OF_HEALTH (Akku-Degradation) anbringen.
 
 **NEU:** Alle in DIR vorhandenen `.log` Dateien zum Anzeigen bzw. Downloaden verlinken.
 
