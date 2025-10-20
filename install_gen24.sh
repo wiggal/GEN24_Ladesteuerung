@@ -266,13 +266,19 @@ fi
 
 # Neue Crontab definieren
 CRON_ENTRIES=$(cat <<EOF
-1-56/10 * * * * $REPO_DIR/start_PythonScript.sh http_SymoGen24Controller2.py logging
+# Prognoseskripte
 2 3-21 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
 3 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
 # 4 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
 32 * * * * $REPO_DIR/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
 # 7 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
-0 0 * * 1 mv $REPO_DIR/Crontab.log $REPO_DIR/home/GEN24/Crontab.log_weg
+# Steuerskript http_SymoGen24Controller2.py mindestens alle 10 Minuten, bei viertelstündlichen Strompriesen alle 5 Minuten (1-56/5)
+1-56/10 * * * * $REPO_DIR/start_PythonScript.sh http_SymoGen24Controller2.py logging
+# Dynamischer Strompreise logging = nur beobachten, schreiben = mit Steuerung, wenn Batterieentlandung_steuern = 1
+58 * * * * $REPO_DIR/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py logging
+# Logfiles aufraeumen
+0 5 * * 1 mv $REPO_DIR/Crontab.log $REPO_DIR/old_Crontab.log
+0 5 * * 1 mv $REPO_DIR/DynPriceCheck.log $REPO_DIR/old_DynPriceCheck.log
 EOF
 )
 

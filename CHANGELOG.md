@@ -1,3 +1,8 @@
+**[0.38.7] – 2025-XX-XX**  
+
+- FIX: sqlite3.OperationalError: no such table: priceforecast, FUNCTIONS/DynamicPrice.py", line 644
+- FIX: install_gen24.sh Cronjob für DynamicPriceCheck.py fehlte
+
 **[0.38.6] – 2025-10-17**  
 
 - https://smard.api.bund.dev/ liefert nun auch viertelstündliche Strompreise.  
