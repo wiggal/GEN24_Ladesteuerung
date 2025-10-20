@@ -640,11 +640,6 @@ class dynamic:
              morgen.strftime('%Y-%m-%d 23:59:59'))
         )
 
-        # in priceforecast alle Werte loeschen, wenn es länger nicht gelaufen ist...
-        zeiger.execute(
-            "DELETE FROM priceforecast"
-        )
-
         # Daten einfügen oder aktualisieren
         for entry in strompreise:
             zeiger.execute('''
@@ -664,6 +659,11 @@ class dynamic:
         PrognNetzladen INT,
         PrognBattStatus FLOAT
         )""")
+
+        # in priceforecast alle Werte loeschen, wenn es länger nicht gelaufen ist...
+        zeiger.execute(
+            "DELETE FROM priceforecast"
+        )
 
         zeiger.executemany("""
         INSERT INTO priceforecast (Zeitpunkt, PV_Prognose, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
