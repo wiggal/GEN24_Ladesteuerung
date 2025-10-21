@@ -144,24 +144,24 @@ class FroniusGEN24:
             self._debug(f"Login fehlgeschlagen: {e}")
             return False
 
-    def get_batteries(self):
-        """Batterie-Konfig auslesen"""
-        path = self.batterie_path
-        r = self.send_request(path)
-        data = r.json()
-        HYB_EM_POWER = data.get("HYB_EM_POWER")
-        HYB_EM_MODE = data.get("HYB_EM_MODE")
-        HYB_BACKUP_RESERVED = data.get("HYB_BACKUP_RESERVED")
-        BAT_M0_SOC_MIN = data.get("BAT_M0_SOC_MIN")
-        return HYB_EM_POWER, HYB_EM_MODE, HYB_BACKUP_RESERVED, BAT_M0_SOC_MIN
-
-    def get_time_of_use(self):
+    def get_http_data(self):
         """Time-of-Use-Konfiguration """
-        path = self.timeofuse_path
-        r = self.send_request(path)
-        data = r.json()
-        return data.get("timeofuse", {}), r.url
-
+        ToU = self.send_request(self.timeofuse_path)
+        data_ToU_tmp = ToU.json()
+        data_ToU = data_ToU_tmp.get("timeofuse", {})
+        ToU_data = {}
+        ToU_data['Active'] = data_ToU[0].get("Active")
+        ToU_data['Power'] = data_ToU[0].get("Power")
+        ToU_data['ScheduleType'] = data_ToU[0].get("ScheduleType")
+        """Batterie-Konfig auslesen"""
+        BK = self.send_request(self.batterie_path)
+        data_BK = BK.json()
+        BK_data = {}
+        BK_data['HYB_EM_POWER'] = data_BK.get("HYB_EM_POWER")
+        BK_data['HYB_EM_MODE'] = data_BK.get("HYB_EM_MODE")
+        BK_data['HYB_BACKUP_RESERVED'] = data_BK.get("HYB_BACKUP_RESERVED")
+        BK_data['BAT_M0_SOC_MIN'] = data_BK.get("BAT_M0_SOC_MIN")
+        return ToU_data, BK_data
 
 # -------------------------------------------------
 # Beispiel

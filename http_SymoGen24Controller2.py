@@ -41,11 +41,11 @@ if __name__ == '__main__':
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             alterLadewert = 0
             # alten Ladewert lesen
-            result_get_time_of_use_array = request.get_time_of_use()
-            result_get_time_of_use = result_get_time_of_use_array[0]
-            for element in result_get_time_of_use:
-                if element['Active'] == True and element['ScheduleType'] == 'CHARGE_MAX':
-                    alterLadewert = element['Power']
+            request_data = request.get_http_data()
+            Eigen_Opt_Std_arry = request_data[1]
+            result_get_time_of_use = request_data[0]
+            if result_get_time_of_use['Active'] == True and result_get_time_of_use['ScheduleType'] == 'CHARGE_MAX':
+                alterLadewert = result_get_time_of_use['Power']
 
             # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
             SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
@@ -138,7 +138,6 @@ if __name__ == '__main__':
                     LadewertGrund = ""
 
                     # Klasse ProgLadewert initieren
-                    Eigen_Opt_Std_arry = request.get_batteries()
                     progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry)
                     # evtl. Ladung des Akku auf SOC_Proz_Grenze begrenzen, und damit BattKapaWatt_akt reduzieren
                     Sdt_24H = datetime.now().hour
@@ -337,14 +336,13 @@ if __name__ == '__main__':
                         MaxEntladung = BattganzeLadeKapazWatt
 
                         DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
-                        for element in result_get_time_of_use:
-                            if element['Active'] == True and element['ScheduleType'] == 'DISCHARGE_MAX':
-                                BatteryMaxDischarge = element['Power']
-                                BatteryMaxDischarge_Zwangsladung = 0
-                                EntladeEintragDa = "ja"
-                            elif element['Active'] == True and element['ScheduleType'] == 'CHARGE_MIN':
-                                BatteryMaxDischarge_Zwangsladung = element['Power']
-                                EntladeEintragDa = "ja"
+                        if result_get_time_of_use['Active'] == True and result_get_time_of_use['ScheduleType'] == 'DISCHARGE_MAX':
+                            BatteryMaxDischarge = result_get_time_of_use['Power']
+                            BatteryMaxDischarge_Zwangsladung = 0
+                            EntladeEintragDa = "ja"
+                        elif result_get_time_of_use['Active'] == True and result_get_time_of_use['ScheduleType'] == 'CHARGE_MIN':
+                            BatteryMaxDischarge_Zwangsladung = result_get_time_of_use['Power']
+                            EntladeEintragDa = "ja"
 
                         # EntladeSteuerungdaten lesen
                         entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
@@ -545,7 +543,7 @@ if __name__ == '__main__':
                                 ProgGrenzeMorgen = int(Notstrom_item)
 
                         if HYB_BACKUP_RESERVED == None:
-                            HYB_BACKUP_RESERVED = Eigen_Opt_Std_arry[2]
+                            HYB_BACKUP_RESERVED = Eigen_Opt_Std_arry['HYB_BACKUP_RESERVED']
                         # Hysterese wenn Notstrom bereits eingeschaltet
                         if HYB_BACKUP_RESERVED == EntladeGrenze_Max:
                             ProgGrenzeMorgen = int(ProgGrenzeMorgen * 1.2)

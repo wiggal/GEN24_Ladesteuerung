@@ -293,9 +293,9 @@ class progladewert:
         PrognoseMorgen_arr = self.getPrognoseMorgen(MaxEinspeisung)
         PrognoseMorgen = PrognoseMorgen_arr[0]/1000
         Ende_Nacht_Std = PrognoseMorgen_arr[1]
-        Eigen_Opt_Std = self.Eigen_Opt_Std_arry[0]
-        Eigen_Opt_auto = self.Eigen_Opt_Std_arry[1]
-        Backup_Reserve = self.Eigen_Opt_Std_arry[2]
+        Eigen_Opt_Std = self.Eigen_Opt_Std_arry['HYB_EM_POWER']
+        Eigen_Opt_auto = self.Eigen_Opt_Std_arry['HYB_EM_MODE']
+        Backup_Reserve = self.Eigen_Opt_Std_arry['HYB_BACKUP_RESERVED']
         # Wenn  Eigen_Opt_auto = 0, Eigen_Opt_Std 0 setzen, da der GEN24 noch den alten Wert liefert
         if Eigen_Opt_auto == 0: Eigen_Opt_Std = 0
     

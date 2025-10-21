@@ -122,9 +122,9 @@ Akku_MindestSOC = basics.getVarConf('dynprice','Akku_MindestSOC', 'eval')
 password = password[1:-1]
 #  Klasse FroniusGEN24 initiieren
 request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'])
-batteries_array = request.get_batteries()
-BAT_M0_SOC_MIN = batteries_array[3]
-HYB_BACKUP_RESERVED = batteries_array[2]
+batteries_array = request.get_http_data()
+BAT_M0_SOC_MIN = batteries_array[1]['BAT_M0_SOC_MIN']
+HYB_BACKUP_RESERVED = batteries_array[1]['HYB_BACKUP_RESERVED']
 minimum_batterylevel_Prozent = BAT_M0_SOC_MIN
 if HYB_BACKUP_RESERVED > BAT_M0_SOC_MIN: minimum_batterylevel_Prozent = HYB_BACKUP_RESERVED
 # größeren Wert als minimum_batterylevel_Prozent definieren
