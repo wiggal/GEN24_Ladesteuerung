@@ -330,6 +330,7 @@ class dynamic:
         timeout_sec = 30
         Push_Schreib_Ausgabe = ''
         
+        json_data1 = {}
         try:
             apiResponse = requests.get(url, timeout=timeout_sec)
             apiResponse.raise_for_status()
