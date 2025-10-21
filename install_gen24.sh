@@ -20,6 +20,11 @@ SHELL="/bin/bash"
 REPO_URL="https://github.com/wiggal/GEN24_Ladesteuerung.git"
 REPO_DIR="/home/GEN24"
 
+# Für Update gespeichertes REPO_DIR lesen
+if [ -f "${HOMEDIR}/REPO_DIR.cfg" ]; then
+    . ${HOMEDIR}/REPO_DIR.cfg
+fi
+
 # Funktion zur IP-Prüfung
 is_valid_ip() {
     local ip=$1
@@ -45,16 +50,6 @@ is_valid_ip() {
 
     return 0
 }
-
-# BETA-Hinweis
-echo "Das Installations-/Updateskript ist noch BETA, Benutzung ohne Gewähr. Fortsetzen? (j/n)"
-read -r antwort1
-if [[ "$antwort1" == "j" || "$antwort1" == "J" ]]; then
-    echo "   Installation wird fortgesetzt..."
-else
-    echo "❌ Installation abgebrochen."
-    exit 1
-fi
 
 # Ausführberechtigung prüfen
 # Funktion zum Beenden mit Fehlermeldung
@@ -132,23 +127,29 @@ main(){
 
 main "$@"
 
-# Installationsverzeichnis abfragen:
-echo "Standard-Installationsverzeichnis ist: $REPO_DIR"
-read -p "Möchten Sie ein anderes Verzeichnis angeben? (j/n) " answer
+# CONFIG/default_priv.ini mit Benutzereingaben erzeugen wenn nicht vorhaanden
+if [ ! -f "$REPO_DIR/CONFIG/default_priv.ini" ]; then
 
-if [[ "$answer" =~ ^[JjYy]$ ]]; then
-    read -p "Bitte neues Verzeichnis eingeben: " new_dir
-    # Falls nichts eingegeben wird, bleibt das alte Verzeichnis
-    if [[ -n "$new_dir" ]]; then
-        REPO_DIR="$new_dir"
+    # Installationsverzeichnis abfragen:
+    echo "Standard-Installationsverzeichnis ist: $REPO_DIR"
+    read -p "Möchten Sie ein anderes Verzeichnis angeben? (j/n) " answer
+
+    if [[ "$answer" =~ ^[JjYy]$ ]]; then
+        read -p "Bitte neues Verzeichnis eingeben: " new_dir
+        # Falls nichts eingegeben wird, bleibt das alte Verzeichnis
+        if [[ -n "$new_dir" ]]; then
+            REPO_DIR="$new_dir"
+            REPO_DIR_extra="$new_dir"
+        fi
     fi
+
+    echo "Installationsverzeichnis: $REPO_DIR"
+    echo ""
 fi
 
-echo "Installationsverzeichnis: $REPO_DIR"
-echo ""
-
-# CONFIG/default_priv.ini mit Benutzereingaben erzeugen
+# CONFIG/default_priv.ini mit Benutzereingaben erzeugen wenn nicht vorhaanden
 if [ ! -f "$REPO_DIR/CONFIG/default_priv.ini" ]; then
+
     # IP-Adresse Wechselrichter abfragen und prüfen
     echo "Daten zum Anlegen von CONFIG/default_priv.ini." 
     while true; do
@@ -209,6 +210,11 @@ else
   # Passwort setzen
   echo "${USERNAME}:${PASSWORD}" | $SUDO_IST chpasswd
   echo "Benutzer $USERNAME angelegt mit Home $HOMEDIR und Passwort gesetzt."
+fi
+
+# Wenn ein abweichendes REPO_DIR zur Insatllation gewählt, für update merken
+if [ -n "${REPO_DIR_extra}" ]; then
+    echo "REPO_DIR=\"${REPO_DIR_extra}\"" > ${HOMEDIR}/REPO_DIR.cfg
 fi
 
 # Prüfen, ob .git-Unterverzeichnis existiert
