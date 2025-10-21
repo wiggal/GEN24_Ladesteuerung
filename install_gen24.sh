@@ -266,6 +266,8 @@ fi
 
 # Neue Crontab definieren
 CRON_ENTRIES=$(cat <<EOF
+# WebUI nach einem Boot starten
+@reboot $REPO_DIR/start_PythonScript.sh
 # Prognoseskripte
 2 3-21 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
 3 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py

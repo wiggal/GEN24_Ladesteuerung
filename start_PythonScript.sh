@@ -55,15 +55,15 @@ done
 shift $((OPTIND - 1))
 if (( $# == 0))
 then
-    echo " Bitte Pythonscript als Parameter angeben!"
+    echo " Bitte Pythonscript als Parameter angeben!" >> ${GEN24_Pfad}/Crontab.log
     exit
 elif [[ ! -f "$1" ]]
 then
-    echo " Pythonscript \"$1\" existiert nicht!"
+    echo " Pythonscript \"$1\" existiert nicht!" >> ${GEN24_Pfad}/Crontab.log
     exit
 elif [[ "`file $1`" != *"Python script"* ]]
 then
-    echo "\"$1\" ist kein Pythonscript!"
+    echo "\"$1\" ist kein Pythonscript!" >> ${GEN24_Pfad}/Crontab.log
     exit
 fi
 
