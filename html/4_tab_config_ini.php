@@ -82,22 +82,23 @@ td {font-size: 140%;
 
 <!-- Hilfeaufruf ANFANG -->
 <?php
+include "config.php";
+if(file_exists("config_priv.php")){
+  include "config_priv.php";
+}
   $current_url = urlencode($_SERVER['REQUEST_URI']);
   $hilfe_link = "Hilfe_Ausgabe.php?file=config&return=$current_url";
+    $config = parse_ini_file($PythonDIR.'/version.ini', true);
+    $prg_version = $config['Programm']['version'];
 ?>
   <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <!-- Hilfeaufruf ENDE -->
 
 <div class="version" align="center">
 <br><br>
-<b>  GEN24_Ladesteuerung Version: 0.38.7 </b>
+<b>  GEN24_Ladesteuerung Version: <?php echo $prg_version; ?> </b>
 </div>
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
-
 function getinifile($dir) 
 {
 	$files = '';

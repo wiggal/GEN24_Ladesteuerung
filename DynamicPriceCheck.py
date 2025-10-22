@@ -7,6 +7,7 @@
 from sys import argv
 from datetime import datetime, timedelta
 import requests
+import configparser
 import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
@@ -16,6 +17,11 @@ import FUNCTIONS.Steuerdaten
 
 
 if __name__ == '__main__':
+    #Versionsnummer lesen
+    config_v = configparser.ConfigParser()
+    config_v.read('version.ini')
+    prg_version = (config_v['Programm']['version'])
+
     basics = FUNCTIONS.functions.basics()
     config = basics.loadConfig(['default', 'charge', 'dynprice'])
     sqlall = FUNCTIONS.SQLall.sqlall()
@@ -32,7 +38,7 @@ if __name__ == '__main__':
     Lade_Verbrauchs_Faktor = basics.getVarConf('dynprice','Lade_Verbrauchs_Faktor', 'eval')
     Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
     weatherdata = basics.loadWeatherData()
-    if(dyn_print_level >= 1): print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"***\n")
+    if(dyn_print_level >= 1): print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"), prg_version, "***\n")
 
     # Lastprofile holen
     Lastprofil = dynamic.getLastprofil()

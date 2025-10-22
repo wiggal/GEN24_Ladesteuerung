@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 from sys import argv
 import requests
+import configparser
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
 import FUNCTIONS.functions
@@ -11,6 +12,11 @@ import FUNCTIONS.GEN24_httprequest
 
 
 if __name__ == '__main__':
+        #Versionsnummer lesen
+        config_v = configparser.ConfigParser()
+        config_v.read('version.ini')
+        prg_version = (config_v['Programm']['version'])
+
         basics = FUNCTIONS.functions.basics()
         config = basics.loadConfig(['default', 'charge'])
         sqlall = FUNCTIONS.SQLall.sqlall()
@@ -298,6 +304,7 @@ if __name__ == '__main__':
                     if print_level >= 1:
                         try:
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
+                            print("Programmversion:            ", prg_version)
                             print("aktuellePrognose:           ", aktuelleVorhersage)
                             print("TagesPrognose - BattVollUm: ", TagesPrognoseGesamt,"-", BattVollUm)
                             print("Grundlast_Summe für Tag:    ", Grundlast_Summe)
