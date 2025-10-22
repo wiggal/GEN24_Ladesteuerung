@@ -6,6 +6,7 @@
 # Jeden Monat neues Lastprofil ermitteln und in CONFIG/Prog_Steuerung.sqlite speichern
 from sys import argv
 from datetime import datetime, timedelta
+import requests
 import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
@@ -101,10 +102,21 @@ for key in pricelist_date:
         if key_neu == key2[0]:
             pv_data.append([key[0], key2[1], key2[2], key[1]])
 
+host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
 # Werte als Tabelle ausgeben
 if(dyn_print_level >= 3):
     headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch*"+str(Lade_Verbrauchs_Faktor)+"(W)", "Strompreis (€/kWh)"]
     dynamic.listAStable(headers, pv_data)
+
+try:
+    # Ping Ersatz, prüft ob WR online
+    response = requests.get('http://'+host_ip)
+    response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
+except requests.exceptions.RequestException as e:
+    print(datetime.now())
+    print(f"Fehler bei der Verbindung: {e}")
+    print(">>>>>>>>>> WR offline")
+    exit()
 
 # Akku-Kapazität und aktuelle Parameter
 api = FUNCTIONS.GEN24_API.gen24api()
@@ -114,7 +126,6 @@ battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
 current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
 
 # Mindest-Ladestand in Prozent vom GEN24 und aus der dynprice.ini lesen
-host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
 user = basics.getVarConf('gen24','user', 'str')
 password = basics.getVarConf('gen24','password', 'str')
 Akku_MindestSOC = basics.getVarConf('dynprice','Akku_MindestSOC', 'eval')

@@ -25,20 +25,20 @@ if __name__ == '__main__':
         password = basics.getVarConf('gen24','password', 'str')
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
-        # API lesen, wegen Versionsnummer
-        api = FUNCTIONS.GEN24_API.gen24api()
-        API = api.get_API()
-        DEBUG_httprequest = False
-        if(print_level == 5): DEBUG_httprequest = True
-        #  Klasse FroniusGEN24 initiieren
-        request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'], DEBUG_httprequest)
 
         try:
+            # Ping Ersatz, prüft ob WR online
+            response = requests.get('http://'+host_ip)
+            response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
+            # API lesen, wegen Versionsnummer
+            api = FUNCTIONS.GEN24_API.gen24api()
+            API = api.get_API()
+            DEBUG_httprequest = False
+            if(print_level == 5): DEBUG_httprequest = True
+            #  Klasse FroniusGEN24 initiieren
+            request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'], DEBUG_httprequest)
             # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
             reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
-            WR_URL = 'http://'+host_ip
-            response = requests.get(WR_URL)
-            response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             alterLadewert = 0
             # alten Ladewert lesen
             request_data = request.get_http_data()
