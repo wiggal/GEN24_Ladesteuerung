@@ -50,8 +50,10 @@ if __name__ == '__main__':
             request_data = request.get_http_data()
             Eigen_Opt_Std_arry = request_data[1]
             result_get_time_of_use = request_data[0]
-            if result_get_time_of_use['Active'] == True and result_get_time_of_use['ScheduleType'] == 'CHARGE_MAX':
-                alterLadewert = result_get_time_of_use['Power']
+            for eintrag in result_get_time_of_use:
+                if eintrag.get('Active') and eintrag.get('ScheduleType') == 'CHARGE_MAX':
+                    alterLadewert = int(eintrag.get('Power'))
+                    break
 
             # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
             SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
@@ -343,13 +345,14 @@ if __name__ == '__main__':
                         MaxEntladung = BattganzeLadeKapazWatt
 
                         DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
-                        if result_get_time_of_use['Active'] == True and result_get_time_of_use['ScheduleType'] == 'DISCHARGE_MAX':
-                            BatteryMaxDischarge = result_get_time_of_use['Power']
-                            BatteryMaxDischarge_Zwangsladung = 0
-                            EntladeEintragDa = "ja"
-                        elif result_get_time_of_use['Active'] == True and result_get_time_of_use['ScheduleType'] == 'CHARGE_MIN':
-                            BatteryMaxDischarge_Zwangsladung = result_get_time_of_use['Power']
-                            EntladeEintragDa = "ja"
+                        for eintrag in result_get_time_of_use:
+                            if eintrag.get('Active') and eintrag.get('ScheduleType') == 'DISCHARGE_MAX':
+                                BatteryMaxDischarge = int(eintrag.get('Power'))
+                                BatteryMaxDischarge_Zwangsladung = 0
+                                EntladeEintragDa = "ja"
+                            elif eintrag.get('Active') and eintrag.get('ScheduleType') == 'CHARGE_MIN':
+                                BatteryMaxDischarge_Zwangsladung = int(eintrag.get('Power'))
+                                EntladeEintragDa = "ja"
 
                         # EntladeSteuerungdaten lesen
                         entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')

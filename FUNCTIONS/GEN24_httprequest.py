@@ -149,10 +149,12 @@ class FroniusGEN24:
         ToU = self.send_request(self.timeofuse_path)
         data_ToU_tmp = ToU.json()
         data_ToU = data_ToU_tmp.get("timeofuse", {})
-        ToU_data = {}
-        ToU_data['Active'] = data_ToU[0].get("Active")
-        ToU_data['Power'] = data_ToU[0].get("Power")
-        ToU_data['ScheduleType'] = data_ToU[0].get("ScheduleType")
+        #print(data_ToU)  #entWIGGlung
+        ToU_data = [{}, {}, {}]
+        for i, entry in enumerate(data_ToU):
+            ToU_data[i]['Active'] = entry['Active']
+            ToU_data[i]['Power'] = str(entry['Power'])
+            ToU_data[i]['ScheduleType'] = entry['ScheduleType']
         """Batterie-Konfig auslesen"""
         BK = self.send_request(self.batterie_path)
         data_BK = BK.json()
