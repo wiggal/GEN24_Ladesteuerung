@@ -289,7 +289,7 @@ button {
 <tr class="comment"><td colspan="2">; Akkuschonung_Werte = {&quot;Ladestand%&quot; : &quot;LadewertC&quot;, ...} </td></tr>
 <tr><td class="variablenname">Akkuschonung_Werte</td>
 <td><input type="text" name="Zeile[41][1]" value="{&quot;80&quot;: &quot;0.2&quot;, &quot;90&quot;: &quot;0.1&quot;, &quot;95&quot;: &quot;0.05&quot;}" readonly></td></tr>
-<tr class="comment"><td colspan="2">; bei Prognosemorgen über diesem Wert in kW, wird die Akkuladung auf X% begrenzt, wenn keine manuelle Strg ausgewählt ist.<br>; X ist der erste Wert aus dem String Akkuschonung_Werte<br>; bei einem Wert -1 ist die Funktion abgeschaltet </td></tr>
+<tr class="comment"><td colspan="2">; bei Prognosemorgen über diesem Wert in kW, wird die Akkuladung auf X% begrenzt,<br>; wenn nicht manuelle Strg ohne Akkuschonung ausgewählt ist.<br>; X ist der erste Wert aus dem String Akkuschonung_Werte<br>; bei einem Wert -1 ist die Funktion abgeschaltet </td></tr>
 <tr><td class="variablenname">PrognoseLimit_SOC</td>
 <td><input type="text" name="Zeile[43][1]" value="-1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[44]" value='' ></td></tr>
@@ -377,7 +377,7 @@ button {
 <tr><td class="variablenname">netzlade_preisschwelle</td>
 <td><input type="text" name="Zeile[27][1]" value="0.00" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[28]" value='' ></td></tr>
-<tr class="comment"><td colspan="2">; Strompreisquellen<br>; energycharts (https://api.energy-charts.info/)<br>; energycharts liefert viertelstündliche Preise, bei resolution = hour wird ein Mittelwert berechnet.<br>;<br>; smart_api (https://smard.api.bund.dev/)<br>; smart_api liefert  hour und quarterhour Preise, je nach resolution. </td></tr>
+<tr class="comment"><td colspan="2">; Strompreisquellen<br>; energycharts (https://api.energy-charts.info/)<br>; energycharts liefert viertelstündliche Preise, bei resolution = hour wird ein Mittelwert berechnet.<br>;<br>; smard_api (https://smard.api.bund.dev/)<br>; smard_api liefert  hour und quarterhour Preise, je nach resolution. </td></tr>
 <tr><td class="variablenname">Preisquelle</td>
 <td><input type="text" name="Zeile[30][1]" value="energycharts" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Zeitliche Auflösung, resolution: mögliche Werte hour quarterhour </td></tr>
@@ -396,6 +396,6 @@ button {
 <tr><td class="variablenname">MwSt</td>
 <td><input type="text" name="Zeile[40][1]" value="1.19" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[41]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 08.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 23.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>

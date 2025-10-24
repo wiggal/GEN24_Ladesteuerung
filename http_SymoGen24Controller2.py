@@ -159,7 +159,7 @@ if __name__ == '__main__':
                     BattKapaWatt_akt_SOC = BattKapaWatt_akt
                     if PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
                         BattKapaWatt_akt_SOC = int(BattKapaWatt_akt - BattganzeKapazWatt*((100-SOC_Proz_Grenze)/100))
-                        Ladelimit_80 = ' (80%)'
+                        Ladelimit_80 = '('+str(SOC_Proz_Grenze)+'%)'
 
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
                     if ( BattStatusProz > 90 ):

@@ -216,7 +216,7 @@ class dynamic:
 
         return(pricelist_date)
 
-    def getPrice_smart_api(self, BZN):
+    def getPrice_smard_api(self, BZN):
         # Aktuelles Datum und Uhrzeit
         jetzt = datetime.now()
         # Wochentag berechnen (Montag = 0, Sonntag = 6)
