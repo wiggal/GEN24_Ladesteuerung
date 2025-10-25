@@ -644,7 +644,7 @@ class dynamic:
         # Daten einfügen oder aktualisieren
         for entry in strompreise:
             zeiger.execute('''
-                INSERT INTO strompreise (Zeitpunkt, Bruttopreis, Boersenpreis)
+                INSERT OR REPLACE INTO strompreise (Zeitpunkt, Bruttopreis, Boersenpreis)
                 VALUES (?, ?, ?)
                 ON CONFLICT(Zeitpunkt) DO UPDATE SET
                 Bruttopreis = excluded.Bruttopreis,
@@ -667,7 +667,7 @@ class dynamic:
         )
 
         zeiger.executemany("""
-        INSERT INTO priceforecast (Zeitpunkt, PV_Prognose, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
+        INSERT OR REPLACE INTO priceforecast (Zeitpunkt, PV_Prognose, PrognNetzverbrauch, PrognNetzladen, PrognBattStatus)
         VALUES (?, ?, ?, ?, ?);
         """, priceforecast)
 
