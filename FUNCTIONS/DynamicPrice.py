@@ -149,7 +149,8 @@ class dynamic:
             i  += 1
         return(Prognosen_24H)
         
-    def get_pricelist_date_viertel(self, json_data1):
+
+    def get_pricelist_date_viertel(self, json_data1, provider):
         Nettoaufschlag = basics.getVarConf('dynprice','Nettoaufschlag', 'eval')
         MwSt = basics.getVarConf('dynprice','MwSt', 'eval')
 
@@ -204,7 +205,7 @@ class dynamic:
                     pricelist_date.append((time_str, brutto_preis, round(row[1] / 1000, 3)))
 
         except Exception as e:
-            print("### ERROR: Keine Daten von api.energy-charts.info, deshalb die Preise aus DB verwenden!\n")
+            print(f"### ERROR: Keine Daten von {provider}, deshalb die Preise aus DB verwenden!\n")
             verbindung = sqlite3.connect('PV_Daten.sqlite')
             zeiger = verbindung.cursor()
             sql_anweisung = "SELECT * from strompreise WHERE DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day');"
@@ -282,7 +283,7 @@ class dynamic:
             print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
         # viertelstündliche Netzentgelte addieren
-        pricelist_date = self.get_pricelist_date_viertel(json_data1)
+        pricelist_date = self.get_pricelist_date_viertel(json_data1, 'smard.api')
 
         return(pricelist_date)
 
@@ -361,7 +362,7 @@ class dynamic:
             print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
         # viertelstündliche Netzentgelte addieren
-        pricelist_date = self.get_pricelist_date_viertel(json_data1)
+        pricelist_date = self.get_pricelist_date_viertel(json_data1, 'api.energy-charts.info')
         # wenn resolution == hour Mittelwerte bilden
         if(resolution == 'hour'):
             pricelist_date = self.get_stuendliches_mittel(pricelist_date)
@@ -421,6 +422,99 @@ class dynamic:
             Akkustatus[4] = akku_soc
 
         return(pv_data_charge)
+
+    def getPrice_awattar(self, BZN):
+        import yaml
+        resolution = basics.getVarConf('dynprice','resolution', 'str') 
+        # --- Gebietsfilter bestimmen ---
+        if BZN.upper() == 'DE-LU':
+            Gebietsfilter = 'de'
+        elif BZN.upper() == 'AT':
+            Gebietsfilter = 'at'
+        else:
+            raise ValueError(f"Fehlerhaftes BZN '{BZN}'. Erlaubt sind 'AT' oder 'DE-LU'.")
+
+        url = f"https://api.awattar.{Gebietsfilter}/v1/marketdata/current.yaml?tomorrow=include"
+
+        if(self.dyn_print_level >= 2): 
+            print("++ ", url)
+            print("++  BZN = ", BZN, "; Gebietsfilter = ", Gebietsfilter, "; resolution = ", resolution, "\n")
+
+        data = {}
+        result = {}
+        Push_Schreib_Ausgabe = ""
+        try:
+            # --- API-Abruf ---
+            r = requests.get(url)
+            r.raise_for_status()
+            if r.status_code != 204:
+                # --- YAML statt JSON laden ---
+                data = yaml.safe_load(r.text)
+                # --- Aktuelle Stunde bestimmen ---
+                date_now = data.get("date_now")
+                if not isinstance(date_now, datetime):
+                    date_now = datetime.strptime(str(date_now), "%Y-%m-%d %H:%M:%S")
+                current_hour = date_now.replace(minute=0, second=0, microsecond=0)
+
+                # --- Viertelstundenpreise aus relativen Werten ---
+                unix_seconds = []
+                prices = []
+
+                # Verwende range, um großzügig heutige + morgige Stunden zu erfassen
+                for offset in range(-24, 48):
+                    key = f"data_price_hour_rel_{offset:+03d}_amount"
+                    if key in data:
+                        price_eur_per_kwh = data[key] / 100.0  # Cent/kWh → €/kWh
+                        hour_time = current_hour + timedelta(hours=offset)
+                        # 4 Viertelstunden pro Stunde
+                        for q in range(4):
+                            ts = hour_time + timedelta(minutes=15*q)
+                            unix_seconds.append(int(ts.timestamp()))
+                            prices.append(round(price_eur_per_kwh * 1000, 2))  # €/MWh
+
+                result = {
+                    'license_info': 'CC BY 4.0 (creativecommons.org/licenses/by/4.0) from Bundesnetzagentur | SMARD.de',
+                    'unix_seconds': unix_seconds,
+                    'price': prices,
+                    'unit': 'EUR / MWh',
+                    'deprecated': False
+                }
+            else:
+                Ausgabe = "### ERROR:  Keine Strompreise von api.awattar"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.Timeout:
+                Ausgabe = "### ERROR: Timeout, keine Strompreise von api.awattar"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.HTTPError as http_err:
+                Ausgabe = (f"### ERROR: HTTP-Fehler: {http_err} (Status Code: {apiResponse.status_code})")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except Exception as e:
+            Ausgabe = f"### ERROR: Verbindungsfehler oder andere Probleme: {e}"
+            print(Ausgabe)
+            Push_Schreib_Ausgabe += Ausgabe
+
+
+        # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+        Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
+        if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
+            Push_Message_Url = basics.getVarConf('messaging','Push_Message_Url','str')
+            apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
+            print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
+            #DEBUG
+
+
+        # viertelstündliche Netzentgelte addieren
+        pricelist_date = self.get_pricelist_date_viertel(result, 'awattar')
+
+        # wenn resolution == hour Mittelwerte bilden
+        if(resolution == 'hour'):
+            pricelist_date = self.get_stuendliches_mittel(pricelist_date)
+
+        return (pricelist_date)
+
 
     def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile=1):
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')

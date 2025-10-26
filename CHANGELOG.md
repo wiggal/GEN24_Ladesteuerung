@@ -3,6 +3,7 @@
 - CONFIG/dynprice.ini und evtl. CONFIG/dynprice_priv.ini tippfehler beseitigt: smart_api => smard_api
 
 - FIX: sqlite3.IntegrityError: UNIQUE constraint failed: priceforecast.Zeitpunkt Durch Zeitumstellung entstehen doppelte Zeitpunkte.
+- AWATTAR als Strompreisquelle für Börsenpreise hinzugefügt.
 
 **[0.38.7] – 2025-10-23**  
 
