@@ -67,7 +67,7 @@ if __name__ == '__main__':
                     # Batteriemangement zurücksetzen
                     if result_get_time_of_use != []:
                         #response = inverter_interface.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[]}', add_praefix=True)  #entWIGGlung
-                        response = inverter_interface.test_update_inverter_config("remove_timeofuse")
+                        response = inverter_interface.update_inverter_config("remove_timeofuse")
                         print("Batteriemanagementeinträge gelöscht!")
                     # Ende Programm
                 if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
@@ -486,7 +486,7 @@ if __name__ == '__main__':
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
                                     #response = inverter_interface.send_request('config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":'+str(HYB_EM_MODE)+'}', add_praefix=True)  #entWIGGlung
-                                    response = inverter_interface.test_update_inverter_config( "eigenverbrauchsoptimierung", Eigen_Opt_Std_neu=str(Eigen_Opt_Std_neu), HYB_EM_MODE=str(HYB_EM_MODE))
+                                    response = inverter_interface.update_inverter_config( "eigenverbrauchsoptimierung", Eigen_Opt_Std_neu=str(Eigen_Opt_Std_neu), HYB_EM_MODE=str(HYB_EM_MODE))
 
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
@@ -547,7 +547,7 @@ if __name__ == '__main__':
                         if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
                             if ('notstrom' in Options):
                                 #response = inverter_interface.send_request('config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}', add_praefix=True)  #entWIGGlung
-                                response = inverter_interface.test_update_inverter_config("BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED))
+                                response = inverter_interface.update_inverter_config("BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED))
 
                                 bereits_geschrieben = 1
                                 DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)

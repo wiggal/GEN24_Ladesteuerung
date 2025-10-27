@@ -282,47 +282,6 @@ class InverterInterface:
         return response
 
 
-    def test_update_inverter_config(self, mode, **kwargs):
-        """
-        Führt je nach Modus den passenden Request aus.
-        Statt send_request wird zum Test ein print ausgegeben.
-        """
-
-        if mode == "remove_timeofuse":
-            payload = '{"timeofuse":[]}'
-            endpoint = 'config/timeofuse'
-    
-        elif mode == "eigenverbrauchsoptimierung":
-            Eigen_Opt_Std_neu = kwargs.get("Eigen_Opt_Std_neu")
-            HYB_EM_MODE = kwargs.get("HYB_EM_MODE")
-            if Eigen_Opt_Std_neu is None or HYB_EM_MODE is None:
-                raise ValueError("Für 'eigenverbrauchsoptimierung' werden 'Eigen_Opt_Std_neu' und 'HYB_EM_MODE' benötigt.")
-        
-            payload = '{"HYB_EM_POWER":' + str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":' + str(HYB_EM_MODE) + '}'
-            endpoint = 'config/batteries'
-
-        elif mode == "BACKUP_RESERVE":
-            Neu_HYB_BACKUP_RESERVED = kwargs.get("Neu_HYB_BACKUP_RESERVED")
-            if Neu_HYB_BACKUP_RESERVED is None:
-                raise ValueError("Für 'BACKUP_RESERVE' wird 'Neu_HYB_BACKUP_RESERVED' benötigt.")
-        
-            payload = '{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":' + str(Neu_HYB_BACKUP_RESERVED) + '}'
-            endpoint = 'config/batteries'
-
-        else:
-            raise ValueError(f"Unbekannter Modus: {mode}")
-
-        # Zum Test: print statt send_request
-        print(f"[TEST] Endpoint: {endpoint}")
-        print(f"[TEST] Payload: {payload}")
-        print(f"[TEST] Methode: POST, add_praefix=True")
-
-        # Rückgabe-Simulation
-        return {"status": "test_success", "mode": mode, "payload": payload}
-
-
-
-
 # -------------------------------------------------
 # Beispiel
 # -------------------------------------------------
