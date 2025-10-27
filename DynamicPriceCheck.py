@@ -11,9 +11,9 @@ import configparser
 import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
-import FUNCTIONS.GEN24_API
-import FUNCTIONS.GEN24_httprequest
 import FUNCTIONS.Steuerdaten
+import FUNCTIONS.GEN24_API as inverter_api_class
+import FUNCTIONS.GEN24_interface as inverter_interface_class
 
 
 if __name__ == '__main__':
@@ -43,7 +43,6 @@ if __name__ == '__main__':
     if(dyn_print_level >= 1):
         print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"), prg_version, "***")
         print("*** Strompreisprovider: ", Preisquelle, "***")
-
 
     # Lastprofile holen
     Lastprofil = dynamic.getLastprofil()
@@ -128,8 +127,8 @@ except requests.exceptions.RequestException as e:
     exit()
 
 # Akku-Kapazität und aktuelle Parameter
-api = FUNCTIONS.GEN24_API.gen24api()
-API = api.get_API()
+inverter_api = inverter_api_class.inverter_api()
+API = inverter_api.get_API()
 # Wenn Batterie offline, battery_capacity_Wh = 5% => in GEN24_API.gen24api()
 battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
 current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
@@ -141,8 +140,8 @@ Akku_MindestSOC = basics.getVarConf('dynprice','Akku_MindestSOC', 'eval')
 # Hier Hochkommas am Anfang und am Ende enternen
 password = password[1:-1]
 #  Klasse FroniusGEN24 initiieren
-request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'])
-batteries_array = request.get_http_data()
+inverter_interface = inverter_interface_class.InverterInterface(host_ip, user, password, API['Version'])
+batteries_array = inverter_interface.get_http_data()
 BAT_M0_SOC_MIN = batteries_array[1]['BAT_M0_SOC_MIN']
 HYB_BACKUP_RESERVED = batteries_array[1]['HYB_BACKUP_RESERVED']
 minimum_batterylevel_Prozent = BAT_M0_SOC_MIN

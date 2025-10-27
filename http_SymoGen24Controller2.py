@@ -6,9 +6,9 @@ import configparser
 import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
 import FUNCTIONS.functions
-import FUNCTIONS.GEN24_API
 import FUNCTIONS.SQLall
-import FUNCTIONS.GEN24_httprequest
+import FUNCTIONS.GEN24_API as inverter_api_class
+import FUNCTIONS.GEN24_interface as inverter_interface_class
 
 
 if __name__ == '__main__':
@@ -37,17 +37,17 @@ if __name__ == '__main__':
             response = requests.get('http://'+host_ip)
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             # API lesen, wegen Versionsnummer
-            api = FUNCTIONS.GEN24_API.gen24api()
-            API = api.get_API()
-            DEBUG_httprequest = False
-            if(print_level == 5): DEBUG_httprequest = True
+            inverter_api = inverter_api_class.inverter_api()
+            API = inverter_api.get_API()
+            DEBUG_interface = False
+            if(print_level == 5): DEBUG_interface = True
             #  Klasse FroniusGEN24 initiieren
-            request = FUNCTIONS.GEN24_httprequest.FroniusGEN24(host_ip, user, password, API['Version'], DEBUG_httprequest)
+            inverter_interface = inverter_interface_class.InverterInterface(host_ip, user, password, API['Version'], DEBUG_interface)
             # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
             reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
             alterLadewert = 0
             # alten Ladewert lesen
-            request_data = request.get_http_data()
+            request_data = inverter_interface.get_http_data()
             Eigen_Opt_Std_arry = request_data[1]
             result_get_time_of_use = request_data[0]
             for eintrag in result_get_time_of_use:
@@ -66,7 +66,8 @@ if __name__ == '__main__':
                 if(Parameter[0] == "exit0"):
                     # Batteriemangement zurücksetzen
                     if result_get_time_of_use != []:
-                        response = request.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[]}', add_praefix=True)
+                        #response = inverter_interface.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[]}', add_praefix=True)  #entWIGGlung
+                        response = inverter_interface.test_update_inverter_config("remove_timeofuse")
                         print("Batteriemanagementeinträge gelöscht!")
                     # Ende Programm
                 if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
@@ -146,10 +147,10 @@ if __name__ == '__main__':
                     LadewertGrund = ""
 
                     # Klasse ProgLadewert initieren
-                    progladewert = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry)
+                    progladewert_inst = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry)
                     # evtl. Ladung des Akku auf SOC_Proz_Grenze begrenzen, und damit BattKapaWatt_akt reduzieren
                     Sdt_24H = datetime.now().hour
-                    PrognoseMorgen = progladewert.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000
+                    PrognoseMorgen = progladewert_inst.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000
                     PrognoseLimit_SOC = basics.getVarConf('Ladeberechnung','PrognoseLimit_SOC','eval')
                     Akkuschonung_Werte = basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str')
                     # Akkuschonung_Werte in ein Dictionary umwandeln, ersten Wert extrahieren und in float umwandeln
@@ -170,7 +171,7 @@ if __name__ == '__main__':
 
                     # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
                     BattVollUm = basics.getVarConf('Ladeberechnung','BattVollUm','eval')
-                    Sonnenuntergang = progladewert.getSonnenuntergang(PV_Leistung_Watt)
+                    Sonnenuntergang = progladewert_inst.getSonnenuntergang(PV_Leistung_Watt)
                     if BattVollUm <= 0:
                        BattVollUm = Sonnenuntergang + BattVollUm
 
@@ -182,18 +183,16 @@ if __name__ == '__main__':
 
 
                     # Geamtprognose und Ladewert berechnen mit Funktion getLadewert
-                    PrognoseUNDUeberschuss = progladewert.getLadewert(BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt)
+                    PrognoseUNDUeberschuss = progladewert_inst.getLadewert(BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt)
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[0]
                     Grundlast_Summe = PrognoseUNDUeberschuss[1]
                     aktuellerLadewert = PrognoseUNDUeberschuss[2]
                     LadewertGrund = PrognoseUNDUeberschuss[3] + Ladelimit_80
                     # Ladewert auf Schreibgrenzen prüfen
-                    WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
+                    WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
 
                     # Aktuelle Prognose berechnen
-                    AktuellenLadewert_Array = progladewert.getLoggingPrognose(BattKapaWatt_akt)
-                    aktuelleVorhersage = AktuellenLadewert_Array[0]
-                    DEBUG_Ausgabe += AktuellenLadewert_Array[1]
+                    (aktuelleVorhersage, DEBUG_Ausgabe) = progladewert_inst.getLoggingPrognose(BattKapaWatt_akt)
 
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
@@ -231,7 +230,7 @@ if __name__ == '__main__':
                     # Hier Volle Ladung, wenn BattVollUm erreicht ist oder Akku = 100%!
                     elif (int(datetime.strftime(now, "%H")) >= int(BattVollUm)) or (BattStatusProz == 100):
                          aktuellerLadewert = MaxLadung
-                         WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
+                         WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                          LadewertGrund = "BattVollUm oder Akkustand 100% erreicht!"
         
                     else:
@@ -243,49 +242,32 @@ if __name__ == '__main__':
                         if ((BattStatusProz < MindBattLad)):
                             # volle Ladung ;-)
                             aktuellerLadewert = MaxLadung
-                            WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
+                            WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
-                    if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
-                        Akkuschonung_dict = progladewert.getAkkuschonWert(BattStatusProz, BattganzeLadeKapazWatt_Akku, alterLadewert, aktuellerLadewert)
-                        AkkuschonungLadewert = Akkuschonung_dict[0]
-                        HysteProdFakt = Akkuschonung_dict[1]
-                        BattStatusProz_Grenze = Akkuschonung_dict[2]
-                        AkkuSchonGrund = Akkuschonung_dict[3]
-                        DEBUG_Ausgabe += Akkuschonung_dict[4]
-
-                        if BattStatusProz >= BattStatusProz_Grenze and ManuelleStrg_Akkuschon == 1:
-                            # Um das setzen der Akkuschonung zu verhindern, wenn aktuellePVProduktion zu wenig oder der Akku wieder entladen wird.
-                            if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert:
-                                aktuellerLadewert = AkkuschonungLadewert
-                                WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
-                                WRSchreibGrenze_nachOben = aktuellerLadewert / 5
-                                WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
-                                LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
-                        if ManuelleStrg_Akkuschon == 0:
-                            DEBUG_Ausgabe += "DEBUG Keine Akkuschonung, da in LadeStrg abgewählt!\n"
-
-                    # Ladung des Akku auf XX% (SOC_Proz_Grenze) begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
-                    # Hysterese anwenden
-                    if (alterLadewert == 0): SOC_Proz_Grenze = SOC_Proz_Grenze - 3
-                    # Wenn ein DEBUG
-                    if PrognoseLimit_SOC >= 0:
-                        DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< Ladebegrenzung auf 80% SOC >>>>>>>>>>>>>"
-                        DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
-                        DEBUG_Ausgabe += ", PrognoseLimit_SOC: " + str(PrognoseLimit_SOC)
-                        DEBUG_Ausgabe += ", BattStatusProz_Grenze: " + str(SOC_Proz_Grenze)
-                    if ManuelleStrg_Akkuschon == 0:
-                        DEBUG_Ausgabe += "\nDEBUG Keine Begrenzung, da Akkuschonung in LadeStrg abgewählt!"
-                    # Begrenzung nur wenn ManuelleStrg_Akkuschon == 1
-                    if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC and ManuelleStrg_Akkuschon == 1:
-                        aktuellerLadewert = 0
-                        WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, alterLadewert)
-                        LadewertGrund = "Akkuschonung: Ladebegrenzung auf 80% SOC"
-                    if BattKapaWatt_akt_SOC != BattKapaWatt_akt and ManuelleStrg_Akkuschon == 1:
-                        DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(BattKapaWatt_akt)
-                        DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt_SOC)
-                        DEBUG_Ausgabe+="\nDEBUG <<<< SOC 80% für Ladeberechnung AKTIV!!! >>>>"
+                    (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, 
+                    WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, SOC_Proz_Grenze, AkkuschonungLadewert) = \
+                        progladewert_inst.ladeanpassung_akkuschonung(
+                            Akkuschonung, 
+                            Batterieentlandung_steuern, 
+                            BattStatusProz, 
+                            BattganzeLadeKapazWatt_Akku, 
+                            alterLadewert, 
+                            aktuellerLadewert, 
+                            ManuelleStrg_Akkuschon, 
+                            aktuellePVProduktion, 
+                            SOC_Proz_Grenze, 
+                            PrognoseLimit_SOC, 
+                            PrognoseMorgen, 
+                            BattKapaWatt_akt_SOC, 
+                            BattKapaWatt_akt, 
+                            WRSchreibGrenze_nachOben, # Übergabe der aktuellen Werte
+                            WRSchreibGrenze_nachUnten, # Übergabe der aktuellen Werte
+                            DEBUG_Ausgabe, 
+                            LadewertGrund,
+                            WR_schreiben
+                    )
 
                     # Wenn die aktuellePVProduktion < 50 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!
@@ -294,7 +276,7 @@ if __name__ == '__main__':
                         # da sonst mogends evtl nicht auf 0 gestelltwerden kann, wegen WRSchreibGrenze_nachUnten
                         if alterLadewert < MaxLadung -10 and Akt_Std > 12:
                             aktuellerLadewert = MaxLadung
-                            WR_schreiben = progladewert.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
+                            WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                             LadewertGrund = "Auf MaxLadung stellen, da PVProduktion < 50 Watt!"
                         else:
                             WR_schreiben = 0
@@ -340,6 +322,7 @@ if __name__ == '__main__':
                     BatteryMaxDischarge_Zwangsladung = 0
                     EntladeEintragloeschen = "nein"
                     EntladeEintragDa = "nein"
+                    Ladetype = ""
 
                     if  Batterieentlandung_steuern > 0:
                         MaxEntladung = BattganzeLadeKapazWatt
@@ -372,7 +355,7 @@ if __name__ == '__main__':
                         # Feste Entladegrenze aus Tabelle  ENTLadeStrg lesen
                         if (entladesteurungsdata.get(aktStd)):
                             # Funktion aufrufen, die eine evtl. viertelstündliche zuteilung macht
-                            FesteEntladegrenze_tmp = progladewert.get_FesteEntladegrenze(str(entladesteurungsdata[aktStd]['Res_Feld2']))
+                            FesteEntladegrenze_tmp = progladewert_inst.get_FesteEntladegrenze(str(entladesteurungsdata[aktStd]['Res_Feld2']))
                             FesteEntladegrenze = FesteEntladegrenze_tmp[0]
                             DEBUG_Ausgabe += FesteEntladegrenze_tmp[1]
                         else:
@@ -446,43 +429,26 @@ if __name__ == '__main__':
 
                     ### AB HIER SCHARF wenn Argument "schreiben" übergeben
                     ######## Ladeleistung und Entladeleistung in WR Batteriemanagement schreiben 
-
-                    bereits_geschrieben = 0
                     Schreib_Ausgabe = ""
                     Push_Schreib_Ausgabe = ""
-                    # Neuen Ladewert als HTTP_Request schreiben, wenn WR_schreiben == 1 
-                    if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":
-                        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
-                        DEBUG_Ausgabe+="\nDEBUG Folgender MAX_Ladewert neu zum Schreiben: " + str(aktuellerLadewert)
-                        DEBUG_Ausgabe+="\nDEBUG Folgender MAX_ENT_Ladewert neu zum Schreiben: " + str(Neu_BatteryMaxDischarge)
-                        payload_text = ''
-                        trenner_komma = ''
-                        if ('laden' in Options):
-                            trenner_komma = ','
-                            payload_text = '{"Active":true,"Power":' + str(aktuellerLadewert) + \
-                            ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                        elif WR_schreiben == 1 :
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Ladesteuerung NICHT geschrieben, da Option \"laden\" NICHT gesetzt!\n"
-                        if  ('entladen' in Options) and (Batterieentlandung_steuern > 0) and (EntladeEintragloeschen == "nein"):
-                            if(Neu_BatteryMaxDischarge != BatteryMaxDischarge or (payload_text != '' and EntladeEintragDa == "ja")):
-                                payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
-                                ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-                        elif ('entladen' not in Options and (Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja")):
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
-                        # Wenn payload_text NICHT leer dann schreiben
-                        if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
-                            response = request.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}', add_praefix=True)
-                            bereits_geschrieben = 1
-                            if ('laden' in Options) and WR_schreiben == 1:
-                                Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
-                            if ('entladen' in Options) and Neu_BatteryMaxDischarge != BatteryMaxDischarge and (EntladeEintragloeschen == "nein"):
-                                Schreib_Ausgabe = Schreib_Ausgabe + Ladetype + " geschrieben: " + str(Neu_BatteryMaxDischarge) + "W\n"
-                            if ('entladen' in Options) and (EntladeEintragloeschen == "ja"):
-                                Schreib_Ausgabe = Schreib_Ausgabe + "Entladeeintrag wurde gelöscht.\n"
-                            Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
-                            DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
+
+                    if WR_schreiben == 11 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":  #entWIGGlung
+                        (bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe) = \
+                            inverter_interface.write_battery_limits(
+                                WR_schreiben,
+                                aktuellerLadewert,
+                                Neu_BatteryMaxDischarge,
+                                BatteryMaxDischarge,
+                                EntladeEintragloeschen,
+                                Options,
+                                Batterieentlandung_steuern,
+                                EntladeEintragDa,
+                                Ladetype,
+                                print_level,
+                                DEBUG_Ausgabe
+                            )
                     else:
-                        Schreib_Ausgabe = Schreib_Ausgabe + "Änderungen kleiner Schreibgrenze!\n"
+                        Schreib_Ausgabe = Schreib_Ausgabe + "Keine Änderung der Lade-/Entladewerte notwendig.\n"
 
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
@@ -492,7 +458,7 @@ if __name__ == '__main__':
                     ######## Eigenverbrauchs-Optimierung  ab hier wenn eingeschaltet!
                     HYB_BACKUP_RESERVED = None
                     if  EigenverbOpt_steuern > 0:
-                        EigenOptERG = progladewert.getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung)
+                        EigenOptERG = progladewert_inst.getEigenverbrauchOpt(host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung)
                         Prognose_24H = EigenOptERG[0]
                         Eigen_Opt_Std = EigenOptERG[1]
                         Eigen_Opt_Std_neu = EigenOptERG[2]
@@ -519,7 +485,9 @@ if __name__ == '__main__':
 
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
-                                    response = request.send_request('config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":'+str(HYB_EM_MODE)+'}', add_praefix=True)
+                                    #response = inverter_interface.send_request('config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":'+str(HYB_EM_MODE)+'}', add_praefix=True)  #entWIGGlung
+                                    response = inverter_interface.test_update_inverter_config( "eigenverbrauchsoptimierung", Eigen_Opt_Std_neu=str(Eigen_Opt_Std_neu), HYB_EM_MODE=str(HYB_EM_MODE))
+
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
@@ -543,7 +511,7 @@ if __name__ == '__main__':
                         # Notstromreserve_Min kann nicht kleiner 5% sein
                         if Notstromreserve_Min < 5:
                             Notstromreserve_Min = 5
-                        Prognose_24H = progladewert.getPrognoseMorgen()[0]/1000
+                        Prognose_24H = progladewert_inst.getPrognoseMorgen()[0]/1000
                         # Aktuelle EntladeGrenze_Max und ProgGrenzeMorgen aus Notstrom_Werte ermitteln
                         EntladeGrenze_Max = Notstromreserve_Min
                         ProgGrenzeMorgen = 0
@@ -578,7 +546,9 @@ if __name__ == '__main__':
 
                         if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
                             if ('notstrom' in Options):
-                                response = request.send_request('config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}', add_praefix=True)
+                                #response = inverter_interface.send_request('config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}', add_praefix=True)  #entWIGGlung
+                                response = inverter_interface.test_update_inverter_config("BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED))
+
                                 bereits_geschrieben = 1
                                 DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)
                                 Schreib_Ausgabe = Schreib_Ausgabe + str(Neu_HYB_BACKUP_RESERVED) + "% Notstromreserve geschrieben.\n"
