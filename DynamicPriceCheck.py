@@ -37,8 +37,13 @@ if __name__ == '__main__':
     Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
     Lade_Verbrauchs_Faktor = basics.getVarConf('dynprice','Lade_Verbrauchs_Faktor', 'eval')
     Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
+    LAND = basics.getVarConf('dynprice','LAND', 'str')
+    Preisquelle = basics.getVarConf('dynprice','Preisquelle', 'str')
     weatherdata = basics.loadWeatherData()
-    if(dyn_print_level >= 1): print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"), prg_version, "***\n")
+    if(dyn_print_level >= 1):
+        print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"), prg_version, "***")
+        print("*** Strompreisprovider: ", Preisquelle, "***")
+
 
     # Lastprofile holen
     Lastprofil = dynamic.getLastprofil()
@@ -89,8 +94,6 @@ for key in Prognose_24H:
 
 # Aktuelle Strompreise holen
 # Variabler Funktionsaufruf
-LAND = basics.getVarConf('dynprice','LAND', 'str')
-Preisquelle = basics.getVarConf('dynprice','Preisquelle', 'str')
 funktion_string = 'getPrice_'+Preisquelle
 funktion = getattr(dynamic, funktion_string)
 pricelist_date = funktion(LAND)
@@ -237,7 +240,7 @@ max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
 dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
 
 if(dyn_print_level >= 1):
-    print("\n>>>>>>>> Batteriestand und Ladezeitpunkte")
+    print(">>>>>>>> Batteriestand und Ladezeitpunkte")
     headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
     dynamic.listAStable(headers, pv_data_charge)
 

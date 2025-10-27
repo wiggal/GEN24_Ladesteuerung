@@ -326,7 +326,7 @@ class dynamic:
 
         #DEBUG
         if(self.dyn_print_level >= 2): 
-            print("++ ", url)
+            print("\n++ ", url)
             print("++  BZN = ", BZN, "; resolution = ", resolution, "\n")
 
         timeout_sec = 30
