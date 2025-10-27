@@ -1,4 +1,4 @@
-**[0.38.8] – 2025-XX-XX**  
+**[0.38.8] – 2025-10-27**  
 
 - CONFIG/dynprice.ini und evtl. CONFIG/dynprice_priv.ini tippfehler beseitigt: smart_api => smard_api
 
