@@ -432,7 +432,7 @@ if __name__ == '__main__':
                     Schreib_Ausgabe = ""
                     Push_Schreib_Ausgabe = ""
 
-                    if WR_schreiben == 11 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":  #entWIGGlung
+                    if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":  #entWIGGlung
                         (bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe) = \
                             inverter_interface.write_battery_limits(
                                 WR_schreiben,
