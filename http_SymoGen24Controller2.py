@@ -65,10 +65,12 @@ if __name__ == '__main__':
                 Ausgabe_Parameter = "DEBUG Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
                 if(Parameter[0] == "exit0"):
                     # Batteriemangement zurücksetzen
-                    if result_get_time_of_use != []:
-                        #response = inverter_interface.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[]}', add_praefix=True)  #entWIGGlung
-                        response = inverter_interface.update_inverter_config("remove_timeofuse")
-                        print("Batteriemanagementeinträge gelöscht!")
+                    if 'laden' in Options or 'entladen' in Options:
+                        if result_get_time_of_use != []:
+                            bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(mode="remove_timeofuse")
+                            print("Batteriemanagementeinträge gelöscht!")
+                    else:
+                        print('Batteriemanagementeinträge NICHT gelöscht, da Option "laden" oder "entladen" NICHT gesetzt!\n')
                     # Ende Programm
                 if(Parameter[0] == "exit0") or (Parameter[0] == "exit1"):
                     print(now, "ProgrammSTOPP durch WebUI-Settings: ", Parameter[1])
@@ -432,23 +434,25 @@ if __name__ == '__main__':
                     Schreib_Ausgabe = ""
                     Push_Schreib_Ausgabe = ""
 
-                    if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":  #entWIGGlung
-                        (bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe) = \
-                            inverter_interface.write_battery_limits(
-                                WR_schreiben,
-                                aktuellerLadewert,
-                                Neu_BatteryMaxDischarge,
-                                BatteryMaxDischarge,
-                                EntladeEintragloeschen,
-                                Options,
-                                Batterieentlandung_steuern,
-                                EntladeEintragDa,
-                                Ladetype,
-                                print_level,
-                                DEBUG_Ausgabe
-                            )
+                    if 'laden' in Options or 'entladen' in Options:
+                        if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":
+                            (bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe) = \
+                                inverter_interface.update_inverter_settings(
+                                    mode="timeofuse",
+                                    WR_schreiben = WR_schreiben,
+                                    aktuellerLadewert = aktuellerLadewert,
+                                    Neu_BatteryMaxDischarge = Neu_BatteryMaxDischarge,
+                                    BatteryMaxDischarge = BatteryMaxDischarge,
+                                    EntladeEintragloeschen = EntladeEintragloeschen,
+                                    Options = Options,
+                                    Batterieentlandung_steuern = Batterieentlandung_steuern,
+                                    EntladeEintragDa = EntladeEintragDa,
+                                    Ladetype = Ladetype,
+                                    print_level = print_level,
+                                    DEBUG_Ausgabe = DEBUG_Ausgabe
+                                )
                     else:
-                        Schreib_Ausgabe = Schreib_Ausgabe + "Keine Änderung der Lade-/Entladewerte notwendig.\n"
+                        Schreib_Ausgabe += 'Zeitabhängige Batteriesteuerung NICHT geschrieben,\n  da Option "laden" oder "entladen" NICHT gesetzt!\n'
 
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
@@ -485,8 +489,9 @@ if __name__ == '__main__':
 
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
-                                    #response = inverter_interface.send_request('config/batteries', method='POST', payload ='{"HYB_EM_POWER":'+ str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":'+str(HYB_EM_MODE)+'}', add_praefix=True)  #entWIGGlung
-                                    response = inverter_interface.update_inverter_config( "eigenverbrauchsoptimierung", Eigen_Opt_Std_neu=str(Eigen_Opt_Std_neu), HYB_EM_MODE=str(HYB_EM_MODE))
+                                    bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(
+                                        mode="eigenverbrauchsoptimierung", Eigen_Opt_Std_neu = Eigen_Opt_Std_neu, HYB_EM_MODE=HYB_EM_MODE )
+
 
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
@@ -546,8 +551,9 @@ if __name__ == '__main__':
 
                         if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
                             if ('notstrom' in Options):
-                                #response = inverter_interface.send_request('config/batteries', method='POST', payload ='{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":'+ str(Neu_HYB_BACKUP_RESERVED) + '}', add_praefix=True)  #entWIGGlung
-                                response = inverter_interface.update_inverter_config("BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED))
+                                bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(
+                                    mode="BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED))
+
 
                                 bereits_geschrieben = 1
                                 DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)

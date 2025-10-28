@@ -149,7 +149,6 @@ class InverterInterface:
         ToU = self.send_request(self.timeofuse_path)
         data_ToU_tmp = ToU.json()
         data_ToU = data_ToU_tmp.get("timeofuse", {})
-        #print(data_ToU)  #entWIGGlung
         ToU_data = [{}, {}, {}]
         for i, entry in enumerate(data_ToU):
             ToU_data[i]['Active'] = entry['Active']
@@ -165,121 +164,139 @@ class InverterInterface:
         BK_data['BAT_M0_SOC_MIN'] = data_BK.get("BAT_M0_SOC_MIN")
         return ToU_data, BK_data
 
-    def write_battery_limits(self, WR_schreiben, aktuellerLadewert, Neu_BatteryMaxDischarge,
-                             BatteryMaxDischarge, EntladeEintragloeschen, Options,
-                             Batterieentlandung_steuern, EntladeEintragDa, Ladetype, print_level,
-                             DEBUG_Ausgabe, Schreib_Ausgabe="", Push_Schreib_Ausgabe=""):
-
-        # Initialisierung der lokalen Variablen
-        bereits_geschrieben = 0
-
-        # Neuen Ladewert als HTTP_Request schreiben, wenn WR_schreiben == 1 oder Entladeleistung sich ändert
-        DEBUG_Ausgabe+="\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
-        DEBUG_Ausgabe+="\nDEBUG Folgender MAX_Ladewert neu zum Schreiben: " + str(aktuellerLadewert)
-        DEBUG_Ausgabe+="\nDEBUG Folgender MAX_ENT_Ladewert neu zum Schreiben: " + str(Neu_BatteryMaxDischarge)
-
-        payload_text = ''
-        trenner_komma = ''
-
-        # 1. Ladesteuerung (CHARGE_MAX)
-        if ('laden' in Options):
-            trenner_komma = ','
-            payload_text = '{"Active":true,"Power":' + str(aktuellerLadewert) + \
-                           ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-        elif WR_schreiben == 1 :
-            Schreib_Ausgabe = Schreib_Ausgabe + "Ladesteuerung NICHT geschrieben, da Option \"laden\" NICHT gesetzt!\n"
-
-        # 2. Entladesteuerung (z.B. DISCHARGE_MAX)
-        if ('entladen' in Options) and (Batterieentlandung_steuern > 0) and (EntladeEintragloeschen == "nein"):
-            # Nur schreiben, wenn sich Entladewert ändert ODER ein Ladewert geschrieben wird (und Entladeeintrag existiert)
-            if(Neu_BatteryMaxDischarge != BatteryMaxDischarge or (payload_text != '' and EntladeEintragDa == "ja")):
-                payload_text += str(trenner_komma) + '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) + \
-                                ',"ScheduleType":"'+Ladetype+'","TimeTable":{"Start":"00:00","End":"23:59"},"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
-        elif ('entladen' not in Options and (Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja")):
-            Schreib_Ausgabe = Schreib_Ausgabe + "Entladesteuerung NICHT geschrieben, da Option \"entladen\" NICHT gesetzt!\n"
-
-        # 3. HTTP-Request senden
-        if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
-            response = self.send_request('config/timeofuse', method='POST', payload ='{"timeofuse":[' + str(payload_text) + ']}', add_praefix=True)
-
-            bereits_geschrieben = 1
-
-            if ('laden' in Options) and WR_schreiben == 1:
-                Schreib_Ausgabe = Schreib_Ausgabe + "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
-            if ('entladen' in Options) and Neu_BatteryMaxDischarge != BatteryMaxDischarge and (EntladeEintragloeschen == "nein"):
-                Schreib_Ausgabe = Schreib_Ausgabe + Ladetype + " geschrieben: " + str(Neu_BatteryMaxDischarge) + "W\n"
-            if ('entladen' in Options) and (EntladeEintragloeschen == "ja"):
-                Schreib_Ausgabe = Schreib_Ausgabe + "Entladeeintrag wurde gelöscht.\n"
-
-            Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe
-            DEBUG_Ausgabe+="\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
-        else:
-            Schreib_Ausgabe = Schreib_Ausgabe + "Änderungen kleiner Schreibgrenze!\n"
-
-        # Rückgabe der aktualisierten Werte
-        return (bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe)
-
-    def update_inverter_config(self, mode, **kwargs):
+    def update_inverter_settings(
+        self,
+        mode,
+        WR_schreiben=None,
+        aktuellerLadewert=None,
+        Neu_BatteryMaxDischarge=None,
+        BatteryMaxDischarge=None,
+        EntladeEintragloeschen=None,
+        Options=None,
+        Batterieentlandung_steuern=None,
+        EntladeEintragDa=None,
+        Ladetype=None,
+        print_level=None,
+        DEBUG_Ausgabe="",
+        Schreib_Ausgabe="",
+        Push_Schreib_Ausgabe="",
+        **kwargs
+    ):
         """
-        Führt je nach Modus den passenden self.send_request() aus.
+        Methode zur Aktualisierung von WR-/Batterie-Parametern.
     
         Parameter:
-            mode: str – einer von ['remove_timeofuse', 'eigenverbrauchsoptimierung', 'BACKUP_RESERVE']
-            kwargs: zusätzliche Parameter für die jeweiligen Modi
-
+            mode: str – einer von ['timeofuse', 'remove_timeofuse', 'eigenverbrauchsoptimierung', 'BACKUP_RESERVE']
+            WR_schreiben, aktuellerLadewert, ... – Parameter für Lade-/Entlade-Logik 
+            kwargs – zusätzliche Parameter für andere Modi
+    
         Rückgabe:
-            response (vom Inverter)
+            Tuple (bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe)
         """
-
-        if mode == "remove_timeofuse":
+    
+        response = None
+        bereits_geschrieben = 0
+    
+        # ---------------------------
+        # MODE 1: TIME-OF-USE / Ladegrenzen
+        # ---------------------------
+        if mode == "timeofuse":
+            DEBUG_Ausgabe += "\nDEBUG <<<<<<<< LADEWERTE >>>>>>>>>>>>>"
+            DEBUG_Ausgabe += "\nDEBUG Folgender MAX_Ladewert neu zum Schreiben: " + str(aktuellerLadewert)
+            DEBUG_Ausgabe += "\nDEBUG Folgender MAX_ENT_Ladewert neu zum Schreiben: " + str(Neu_BatteryMaxDischarge)
+    
+            payload_text = ''
+            trenner_komma = ''
+    
+            # 1. Laden
+            if 'laden' in Options:
+                trenner_komma = ','
+                payload_text = (
+                    '{"Active":true,"Power":' + str(aktuellerLadewert) +
+                    ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},'
+                    '"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
+                )
+            #elif WR_schreiben == 1:  #entWIGGlung
+                #Schreib_Ausgabe += 'Ladesteuerung NICHT geschrieben, da Option "laden" NICHT gesetzt!\n'  #entWIGGlung
+    
+            # 2. Entladen
+            if ('entladen' in Options) and (Batterieentlandung_steuern > 0) and (EntladeEintragloeschen == "nein"):
+                if Neu_BatteryMaxDischarge != BatteryMaxDischarge or (payload_text != '' and EntladeEintragDa == "ja"):
+                    payload_text += str(trenner_komma) + (
+                        '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) +
+                        ',"ScheduleType":"' + str(Ladetype) + '","TimeTable":{"Start":"00:00","End":"23:59"},'
+                        '"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
+                    )
+            #elif ('entladen' not in Options and (Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja")):  #entWIGGlung
+                #Schreib_Ausgabe += 'Entladesteuerung NICHT geschrieben, da Option "entladen" NICHT gesetzt!\n'  #entWIGGlung
+    
+            # 3. Request senden
+            if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
+                response = self.send_request(
+                    'config/timeofuse',
+                    method='POST',
+                    payload='{"timeofuse":[' + str(payload_text) + ']}',
+                    add_praefix=True
+                )
+                bereits_geschrieben = 1
+    
+                if ('laden' in Options) and WR_schreiben == 1:
+                    Schreib_Ausgabe += "CHARGE_MAX geschrieben: " + str(aktuellerLadewert) + "W\n"
+                if ('entladen' in Options) and Neu_BatteryMaxDischarge != BatteryMaxDischarge and (EntladeEintragloeschen == "nein"):
+                    Schreib_Ausgabe += Ladetype + " geschrieben: " + str(Neu_BatteryMaxDischarge) + "W\n"
+                if ('entladen' in Options) and (EntladeEintragloeschen == "ja"):
+                    Schreib_Ausgabe += "Entladeeintrag wurde gelöscht.\n"
+    
+                Push_Schreib_Ausgabe += Schreib_Ausgabe
+                DEBUG_Ausgabe += "\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
+            else:
+                Schreib_Ausgabe += "Änderungen kleiner Schreibgrenze!\n"
+    
+        # ---------------------------
+        # MODE 2: Entferne Time-of-Use
+        # ---------------------------
+        elif mode == "remove_timeofuse":
             payload = '{"timeofuse":[]}'
-            response = self.send_request(
-                'config/timeofuse',
-                method='POST',
-                payload=payload,
-                add_praefix=True
-            )
-
+            response = self.send_request('config/timeofuse', method='POST', payload=payload, add_praefix=True)
+            bereits_geschrieben = 1
+            Schreib_Ausgabe += "Time-of-Use Einträge gelöscht.\n"
+    
+        # ---------------------------
+        # MODE 3: Eigenverbrauchsoptimierung
+        # ---------------------------
         elif mode == "eigenverbrauchsoptimierung":
-            # Erwartet Parameter: Eigen_Opt_Std_neu, HYB_EM_MODE
             Eigen_Opt_Std_neu = kwargs.get("Eigen_Opt_Std_neu")
             HYB_EM_MODE = kwargs.get("HYB_EM_MODE")
-
+    
             if Eigen_Opt_Std_neu is None or HYB_EM_MODE is None:
                 raise ValueError("Für 'eigenverbrauchsoptimierung' werden 'Eigen_Opt_Std_neu' und 'HYB_EM_MODE' benötigt.")
-
-            payload = (
-                '{"HYB_EM_POWER":' + str(Eigen_Opt_Std_neu) +
-                ',"HYB_EM_MODE":' + str(HYB_EM_MODE) + '}'
-            )
-            response = self.send_request(
-                'config/batteries',
-                method='POST',
-                payload=payload,
-                add_praefix=True
-            )
-
+    
+            payload = '{"HYB_EM_POWER":' + str(Eigen_Opt_Std_neu) + ',"HYB_EM_MODE":' + str(HYB_EM_MODE) + '}'
+            response = self.send_request('config/batteries', method='POST', payload=payload, add_praefix=True)
+            bereits_geschrieben = 1
+            Schreib_Ausgabe += f"Eigenverbrauchsoptimierung gesetzt: Power={Eigen_Opt_Std_neu}, Mode={HYB_EM_MODE}\n"
+    
+        # ---------------------------
+        # MODE 4: Backup Reserve
+        # ---------------------------
         elif mode == "BACKUP_RESERVE":
-            # Erwartet Parameter: Neu_HYB_BACKUP_RESERVED
             Neu_HYB_BACKUP_RESERVED = kwargs.get("Neu_HYB_BACKUP_RESERVED")
             if Neu_HYB_BACKUP_RESERVED is None:
                 raise ValueError("Für 'BACKUP_RESERVE' wird 'Neu_HYB_BACKUP_RESERVED' benötigt.")
-
-            payload = (
-                '{"HYB_BACKUP_CRITICALSOC":5,'
-                '"HYB_BACKUP_RESERVED":' + str(Neu_HYB_BACKUP_RESERVED) + '}'
-            )
-            response = self.send_request(
-                'config/batteries',
-                method='POST',
-                payload=payload,
-                add_praefix=True
-            )
-
+    
+            payload = '{"HYB_BACKUP_CRITICALSOC":5,"HYB_BACKUP_RESERVED":' + str(Neu_HYB_BACKUP_RESERVED) + '}'
+            response = self.send_request('config/batteries', method='POST', payload=payload, add_praefix=True)
+            bereits_geschrieben = 1
+            Schreib_Ausgabe += f"Backup-Reserve auf {Neu_HYB_BACKUP_RESERVED}% gesetzt.\n"
+    
+        # ---------------------------
+        # Unbekannter Modus
+        # ---------------------------
         else:
             raise ValueError(f"Unbekannter Modus: {mode}")
-
-        return response
+    
+        return bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe
+    
 
 
 # -------------------------------------------------
