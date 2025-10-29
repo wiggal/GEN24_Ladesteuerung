@@ -118,7 +118,7 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
         <p>Crontabeinträge<br>
           <code>crontab -e</code> # Editor wählen und folgende Einträge
           machen.<br>
-          http_SymoGen24Controller2.py immer eine Minute nach vollen
+          EnergyController.py immer eine Minute nach vollen
           zehn Minuten ausführen (1-56/10), da der GEN24 die Daten immer
           etwa zur vollen fünften Minute bereitstellt. Da das Smartmeter
           die Daten aktuell hat, kann beim Ausführen zur vollen fünften
@@ -133,7 +133,7 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
     </ul>
     <div class="snippet-clipboard-content notranslate position-relative
       overflow-auto">
-      <pre class="notranslate"><code>1-56/10 * * * * /DIR/start_PythonScript.sh http_SymoGen24Controller2.py schreiben
+      <pre class="notranslate"><code>1-56/10 * * * * /DIR/start_PythonScript.sh EnergyController.py schreiben
 </code></pre>
       <div class="zeroclipboard-container position-absolute right-0
         top-0"> </div>
@@ -141,7 +141,7 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
     <p>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <b>PV-Prognosen:</b><br>
-      Damit die Ladesteuerung per http_SymoGen24Controller2.py
+      Damit die Ladesteuerung per EnergyController.py
       funktioniert, ist eine PV-Prognose erforderlich.<br>
       Mit den Skripten XY_WeatherData.py im Verzeichnis FORECAST, können
       Prognosen von verschiedenen Wetterdiensten abgerufen werden.<br>

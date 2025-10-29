@@ -45,10 +45,10 @@ Besonderheiten:
 - Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
 - Bei open-meteo.com können verschiedene Wetterdienste konfiguriert werden, kein Account nötig.  
 
-### 📉 http_SymoGen24Controller2.py
+### 📉 EnergyController.py
 
 Berechnet den aktuell besten Ladewert aufgrund der Prognose in weatherData.sqlite und dem Akkustand und gibt sie aus. 
-Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh http_SymoGen24Controller2.py **schreiben**) setzt es die `Maximale Ladeleistung` **per HTTP-Request** 
+Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh EnergyController.py **schreiben**) setzt es die `Maximale Ladeleistung` **per HTTP-Request** 
 im Batteriemanagement des Wechselrichters. 
 Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
@@ -59,7 +59,7 @@ Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines 
 ```
 58 * * * * /DIR/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py schreiben
 ```
-Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von http_SymoGen24Controller2.py auf den GEN24 geschrieben.  
+Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von EnergyController.py auf den GEN24 geschrieben.  
 Hier das Diagramm zu den dynamischen Strompreisen:
 ![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
 *Einzelne Linien und Balken im Diagramm können durch Anklicken des entsprechenden Legendeneintrags ein- oder ausgeblendet werden.* 
@@ -79,7 +79,7 @@ automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann a
 
 ### 📊 Logging
 
-Beim Aufruf von `http_SymoGen24Controller2.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
+Beim Aufruf von `EnergyController.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
 Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung. 
 Beim `logging` werden Zählerstände und ermittelte Werte in die SQLite-Datei `PV_Daten.sqlite` gespeichert, 
 aus der wird dann durch html/8_tab_Diagram.php das Diagramm **QZ**-Bilanz nach **Q**uelle (wo kommt die Energie her) und **Z**iel (wo geht die Energie hin) erzeugt. 
@@ -93,11 +93,11 @@ aus der wird dann durch html/8_tab_Diagram.php das Diagramm **QZ**-Bilanz nach *
 
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
-Ist **AUTO** eingestellt, wird die Reservierung von http_SymoGen24Controller2.py in der Ladeberechnung berücksichtigt.
+Ist **AUTO** eingestellt, wird die Reservierung von EnergyController.py in der Ladeberechnung berücksichtigt.
 
 Bei Einstellung **Slider**, wird mit der eingestellten Prozentzahl der **maximalen Ladeleistung des GEN24**,  
 bei **MaxLadung** mit der in CONFIG/charge_priv.ini unter MaxLadung definierten Ladeleistung,  
-ab dem nächsten Aufruf von http_SymoGen24Controller2.py geladen.  
+ab dem nächsten Aufruf von EnergyController.py geladen.  
 Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder Auto angewendet.  
 
 ### ForecastMgr

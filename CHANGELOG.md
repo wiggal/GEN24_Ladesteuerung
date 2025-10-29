@@ -3,6 +3,10 @@
 - Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.
   **Umfangreiche Änderungen, längere Testes erforderlich**
 
+- **ACHTUNG:**  
+  Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`
+  Die **Cronjobs** müssen angepasst werden!!
+
 **[0.38.8] – 2025-10-27**  
 
 - CONFIG/dynprice.ini und evtl. CONFIG/dynprice_priv.ini tippfehler beseitigt: smart_api => smard_api

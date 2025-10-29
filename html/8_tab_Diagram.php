@@ -67,7 +67,7 @@ $db = new SQLite3($SQLite_file);
 $result = $db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='pv_daten'");
 if (!$result) {
     echo "SQLitetabelle pv_daten existiert nicht, keine Grafik verfügbar!<br>";
-    echo "Die Tabelle wird durch das Logging von http_SymoGen24Controller2.py erzeugt!";
+    echo "Die Tabelle wird durch das Logging von EnergyController.py erzeugt!";
     exit();
 }
 

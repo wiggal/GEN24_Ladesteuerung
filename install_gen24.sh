@@ -280,8 +280,8 @@ CRON_ENTRIES=$(cat <<EOF
 # 4 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
 32 * * * * $REPO_DIR/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
 # 7 3,7,9,11,13,15,17,19 * * * $REPO_DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
-# Steuerskript http_SymoGen24Controller2.py mindestens alle 10 Minuten, bei viertelstündlichen Strompriesen alle 5 Minuten (1-56/5)
-1-56/10 * * * * $REPO_DIR/start_PythonScript.sh http_SymoGen24Controller2.py logging
+# Steuerskript EnergyController.py mindestens alle 10 Minuten, bei viertelstündlichen Strompriesen alle 5 Minuten (1-56/5)
+1-56/10 * * * * $REPO_DIR/start_PythonScript.sh EnergyController.py logging
 # Dynamischer Strompreise logging = nur beobachten, schreiben = mit Steuerung, wenn Batterieentlandung_steuern = 1
 58 * * * * $REPO_DIR/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py logging
 # Logfiles aufraeumen

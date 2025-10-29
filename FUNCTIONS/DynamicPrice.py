@@ -78,7 +78,7 @@ class dynamic:
                 headers = ["Index", "Datenart", "Stunde", "Wochentag", "Verbrauch", "Timestamp"]
                 self.listAStable(headers, rows)
         except:
-            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, zum Erzeugen http_SymoGen24Controller2.py aufrufen, Programmende!!")
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, zum Erzeugen EnergyController.py aufrufen, Programmende!!")
             exit()
 
         if (len(rows) < 168):
@@ -129,7 +129,7 @@ class dynamic:
             zeiger.execute(sql_anweisung)
             rows = zeiger.fetchall()
         except:
-            print("CONFIG/Prog_Steuerung.sqlite fehlt oder ist defekt,\n bitte http_SymoGen24Controller2.py ausführen!")
+            print("CONFIG/Prog_Steuerung.sqlite fehlt oder ist defekt,\n bitte EnergyController.py ausführen!")
             print(">>> Programmabbruch >>>>")
             exit()
 
