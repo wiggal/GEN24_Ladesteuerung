@@ -103,7 +103,7 @@ header {
 
 /* Navigations-Listenelemente innerhalb des Menüs */
 .nav-links li {
-    margin: 10px 0; /* Vertikalen Abstand reduziert */
+    margin: 6px 0; /* Vertikalen Abstand reduziert */
     padding-top: 5px;
     padding-bottom: 5px;
     opacity: 0; /* Hidden by default for animation */
@@ -248,7 +248,7 @@ main {
 }
 
 .content {
-    background: #f4f4f4;
+    background: #fff;
     padding: 30px 20px;
     margin-bottom: 20px;
     border-radius: 8px;
