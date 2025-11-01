@@ -245,28 +245,29 @@ if __name__ == '__main__':
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
                     # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
-                    (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, 
-                    WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, SOC_Proz_Grenze, AkkuschonungLadewert) = \
-                        progladewert_inst.ladeanpassung_akkuschonung(
-                            Akkuschonung, 
-                            Batterieentlandung_steuern, 
-                            BattStatusProz, 
-                            BattganzeLadeKapazWatt_Akku, 
-                            alterLadewert, 
-                            aktuellerLadewert, 
-                            ManuelleStrg_Akkuschon, 
-                            aktuellePVProduktion, 
-                            SOC_Proz_Grenze, 
-                            PrognoseLimit_SOC, 
-                            PrognoseMorgen, 
-                            BattKapaWatt_akt_SOC, 
-                            BattKapaWatt_akt, 
-                            WRSchreibGrenze_nachOben, # Übergabe der aktuellen Werte
-                            WRSchreibGrenze_nachUnten, # Übergabe der aktuellen Werte
-                            DEBUG_Ausgabe, 
-                            LadewertGrund,
-                            WR_schreiben
-                    )
+                    if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
+                        (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, 
+                        WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, SOC_Proz_Grenze, AkkuschonungLadewert) = \
+                            progladewert_inst.ladeanpassung_akkuschonung(
+                                Akkuschonung, 
+                                Batterieentlandung_steuern, 
+                                BattStatusProz, 
+                                BattganzeLadeKapazWatt_Akku, 
+                                alterLadewert, 
+                                aktuellerLadewert, 
+                                ManuelleStrg_Akkuschon, 
+                                aktuellePVProduktion, 
+                                SOC_Proz_Grenze, 
+                                PrognoseLimit_SOC, 
+                                PrognoseMorgen, 
+                                BattKapaWatt_akt_SOC, 
+                                BattKapaWatt_akt, 
+                                WRSchreibGrenze_nachOben, # Übergabe der aktuellen Werte
+                                WRSchreibGrenze_nachUnten, # Übergabe der aktuellen Werte
+                                DEBUG_Ausgabe, 
+                                LadewertGrund,
+                                WR_schreiben
+                        )
 
                     # Wenn die aktuellePVProduktion < 50 Watt ist, nicht schreiben, 
                     # um 0:00Uhr wird sonst immer Ladewert 0 geschrieben!
