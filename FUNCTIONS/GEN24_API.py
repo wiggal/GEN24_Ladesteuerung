@@ -6,7 +6,7 @@ import re
 basics = FUNCTIONS.functions.basics()
 sqlall = FUNCTIONS.SQLall.sqlall()
 
-class gen24api:
+class inverter_api:
     def __init__(self):
         self.dummy = 'dummmy'
 

@@ -78,7 +78,7 @@ class dynamic:
                 headers = ["Index", "Datenart", "Stunde", "Wochentag", "Verbrauch", "Timestamp"]
                 self.listAStable(headers, rows)
         except:
-            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, zum Erzeugen http_SymoGen24Controller2.py aufrufen, Programmende!!")
+            print("Die Datei PV_Daten.sqlite fehlt oder ist leer, zum Erzeugen EnergyController.py aufrufen, Programmende!!")
             exit()
 
         if (len(rows) < 168):
@@ -129,7 +129,7 @@ class dynamic:
             zeiger.execute(sql_anweisung)
             rows = zeiger.fetchall()
         except:
-            print("CONFIG/Prog_Steuerung.sqlite fehlt oder ist defekt,\n bitte http_SymoGen24Controller2.py ausführen!")
+            print("CONFIG/Prog_Steuerung.sqlite fehlt oder ist defekt,\n bitte EnergyController.py ausführen!")
             print(">>> Programmabbruch >>>>")
             exit()
 
@@ -284,7 +284,12 @@ class dynamic:
             print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
 
         # viertelstündliche Netzentgelte addieren
-        pricelist_date = self.get_pricelist_date_viertel(json_data1, 'smard.api')
+        heute_start = datetime.now().date()
+        pricelist_date_tmp = self.get_pricelist_date_viertel(json_data1, 'smard.api')
+        # neue Liste mit allen Einträgen ab heute
+        pricelist_date = [
+                    entry for entry in pricelist_date_tmp
+                    if datetime.strptime(entry[0], "%Y-%m-%d %H:%M:%S").date() >= heute_start ]
 
         return(pricelist_date)
 

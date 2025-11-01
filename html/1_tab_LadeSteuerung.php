@@ -210,6 +210,8 @@ if ($EV_Reservierung['ManuelleSteuerung']['Options'] < time() OR $EV_Reservierun
     } else {
     $gueltig_bis = "&nbsp;gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
     }
+$std_diff = ($EV_Reservierung['ManuelleSteuerung']['Options'] - time())/3600;
+$std_diff = ($std_diff <= 0) ? 24 : round($std_diff,2);
 if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
     $DB_ManuelleSteuerung_wert = $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'];
 
@@ -281,7 +283,6 @@ $heute = date('Y-m-d');
 if (isset($PrstLadeStd[$stunde]) and $datum == $heute) {
     if ($PrstLadeStd[$stunde]['Res_Feld2'] !== '0') $EV_Reservierung[$date]['Res_Feld2'] = $PrstLadeStd[$stunde]['Res_Feld2'];
 }
-
 if (isset($EV_Reservierung[$date]['Res_Feld1'])){
     $Res_Feld1_wert = (float) $EV_Reservierung[$date]['Res_Feld1']/1000;
 } else {
@@ -406,11 +407,12 @@ $(document).ready(function(){
   const modus = document.querySelector('select[name="hausakkuladung"]').value;
   let js_value = -1;
   let hours = 0;
+  let std_diff = <?php echo $std_diff; ?>;
 
   if (modus == "Auto") {
       js_value = -1;
     } else if (modus == "MaxLadung" || modus == "Slider") {
-      let input = prompt(`Bitte gib die Gültigkeitsstunden für "${modus}" ein:`, "24");
+      let input = prompt(`Bitte gib die Gültigkeitsstunden für "${modus}" ein:`, std_diff);
       if (input === null) {
         // Nutzer hat auf Abbrechen geklickt -> Funktion beenden
         return;

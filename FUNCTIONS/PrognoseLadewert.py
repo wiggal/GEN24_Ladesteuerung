@@ -390,3 +390,62 @@ class progladewert:
             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
             DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
         return AkkuschonungLadewert, HysteProdFakt, BattStatusProz_Grenze, AkkuSchonGrund, DEBUG_Ausgabe 
+
+
+    def ladeanpassung_akkuschonung(self, Akkuschonung, Batterieentlandung_steuern, BattStatusProz, BattganzeLadeKapazWatt_Akku,
+                                   alterLadewert, aktuellerLadewert, ManuelleStrg_Akkuschon, aktuellePVProduktion,
+                                   SOC_Proz_Grenze, PrognoseLimit_SOC, PrognoseMorgen, BattKapaWatt_akt_SOC, BattKapaWatt_akt,
+                                   WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten,
+                                   DEBUG_Ausgabe, LadewertGrund, WR_schreiben):
+
+        # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
+        if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
+            # Aufruf mit self.
+            Akkuschonung_dict = self.getAkkuschonWert(BattStatusProz, BattganzeLadeKapazWatt_Akku, alterLadewert, aktuellerLadewert)
+            AkkuschonungLadewert = Akkuschonung_dict[0]
+            HysteProdFakt = Akkuschonung_dict[1]
+            BattStatusProz_Grenze_AkkuSchon = Akkuschonung_dict[2] # Umbenannt, um Verwechslung mit SOC_Proz_Grenze zu vermeiden
+            AkkuSchonGrund = Akkuschonung_dict[3]
+            DEBUG_Ausgabe += Akkuschonung_dict[4]
+
+            if BattStatusProz >= BattStatusProz_Grenze_AkkuSchon and ManuelleStrg_Akkuschon == 1:
+                # Um das setzen der Akkuschonung zu verhindern, wenn aktuellePVProduktion zu wenig oder der Akku wieder entladen wird.
+                if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert:
+                    aktuellerLadewert = AkkuschonungLadewert
+                    WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
+                    WRSchreibGrenze_nachOben = aktuellerLadewert / 5
+                    # Aufruf mit self.
+                    WR_schreiben = self.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
+                    LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
+            if ManuelleStrg_Akkuschon == 0:
+                DEBUG_Ausgabe += "DEBUG Keine Akkuschonung, da in LadeStrg abgewählt!\n"
+
+        # Ladung des Akku auf XX% (SOC_Proz_Grenze) begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
+        # Hysterese anwenden
+        # ACHTUNG: SOC_Proz_Grenze wird hier in der Methode geändert!
+        if (alterLadewert == 0):
+            SOC_Proz_Grenze = SOC_Proz_Grenze - 3
+
+        # Wenn ein DEBUG
+        if PrognoseLimit_SOC >= 0:
+            DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< Ladebegrenzung auf 80% SOC >>>>>>>>>>>>>"
+            DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
+            DEBUG_Ausgabe += ", PrognoseLimit_SOC: " + str(PrognoseLimit_SOC)
+            DEBUG_Ausgabe += ", BattStatusProz_Grenze: " + str(SOC_Proz_Grenze)
+        if ManuelleStrg_Akkuschon == 0:
+            DEBUG_Ausgabe += "\nDEBUG Keine Begrenzung, da Akkuschonung in LadeStrg abgewählt!"
+
+        # Begrenzung nur wenn ManuelleStrg_Akkuschon == 1
+        if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC and ManuelleStrg_Akkuschon == 1:
+            aktuellerLadewert = 0
+            # Aufruf mit self.
+            WR_schreiben = self.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, alterLadewert)
+            LadewertGrund = "Akkuschonung: Ladebegrenzung auf 80% SOC"
+
+        if BattKapaWatt_akt_SOC != BattKapaWatt_akt and ManuelleStrg_Akkuschon == 1:
+            DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(BattKapaWatt_akt)
+            DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt_SOC)
+            DEBUG_Ausgabe+="\nDEBUG <<<< SOC 80% für Ladeberechnung AKTIV!!! >>>>"
+
+        # Rückgabe der geänderten Variablen als Tupel
+        return (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, SOC_Proz_Grenze, AkkuschonungLadewert)
