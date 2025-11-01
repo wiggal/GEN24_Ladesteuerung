@@ -1,11 +1,10 @@
 **[0.40.0] – 2025-XX-XX**  
 
-- Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.
-  **Umfangreiche Änderungen, längere Testes erforderlich**
-
+- Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
+  **Umfangreiche Änderungen, längere Testes erforderlich**  
 - **ACHTUNG:**  
-  Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`
-  Die **Cronjobs** müssen angepasst werden!!
+  Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
+  Die **Cronjobs** müssen angepasst werden!!  
 
 **[0.38.8] – 2025-10-27**  
 
