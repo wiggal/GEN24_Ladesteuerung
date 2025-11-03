@@ -174,10 +174,9 @@ if __name__ == '__main__':
                     if BattVollUm <= 0:
                        BattVollUm = Sonnenuntergang + BattVollUm
 
-                    # Akkuschonung aus PV-Planung ermitteln
-                    ManuelleStrg_Akkuschon = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld2'])
-                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen
-                    if Akkuschonung > 0 or ManuelleStrg_Akkuschon == 1:
+                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen, nur für Prognoseberechnung,
+                    # für Akkuschonung aus PV-Planung nicht erforderlich
+                    if Akkuschonung > 0:
                         BattVollUm = BattVollUm - 1
 
 
@@ -196,6 +195,8 @@ if __name__ == '__main__':
                     # Wenn über die PV-Planung manuelle Ladung angewählt wurde
                     MaxladungDurchPV_Planung = ""
                     ManuelleSteuerung = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld1'])
+                    # Akkuschonung aus PV-Planung ermitteln
+                    ManuelleStrg_Akkuschon = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld2'])
                     # Prüfen, ob Einträge schon abgelaufen
                     try: 
                         Ablaufdatum = int(reservierungdata_tmp['ManuelleSteuerung']['Options'])

@@ -151,5 +151,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 diff_git_PI.sh
-CONFIG/default_priv.ini
+CONFIG/SIC/
 from_raspberrypi.sh
