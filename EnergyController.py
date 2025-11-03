@@ -432,8 +432,8 @@ if __name__ == '__main__':
                     Schreib_Ausgabe = ""
                     Push_Schreib_Ausgabe = ""
 
-                    if 'laden' in Options or 'entladen' in Options:
-                        if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":
+                    if WR_schreiben == 1 or Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja":
+                        if 'laden' in Options or 'entladen' in Options:
                             (bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe) = \
                                 inverter_interface.update_inverter_settings(
                                     mode="timeofuse",
@@ -449,8 +449,10 @@ if __name__ == '__main__':
                                     print_level = print_level,
                                     DEBUG_Ausgabe = DEBUG_Ausgabe
                                 )
+                        else:
+                            Schreib_Ausgabe += 'Batteriesteuerung NICHT geschrieben,\nda Option "laden/entladen" NICHT gesetzt!\n'
                     else:
-                        Schreib_Ausgabe += 'Zeitabhängige Batteriesteuerung NICHT geschrieben,\n  da Option "laden" oder "entladen" NICHT gesetzt!\n'
+                        Schreib_Ausgabe += "Batteriesteuerung: Änderungen kleiner Schreibgrenzen!\n"
 
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
@@ -489,7 +491,6 @@ if __name__ == '__main__':
                                 if ('optimierung' in Options):
                                     bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(
                                         mode="eigenverbrauchsoptimierung", Eigen_Opt_Std_neu = Eigen_Opt_Std_neu, HYB_EM_MODE=HYB_EM_MODE )
-
 
                                     bereits_geschrieben = 1
                                     DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
@@ -560,7 +561,7 @@ if __name__ == '__main__':
                             else:
                                 Schreib_Ausgabe = Schreib_Ausgabe + "Notstromreserve NICHT geschrieben, da Option \"notstrom\" NICHT gesetzt!\n"
                         else:
-                            Schreib_Ausgabe = Schreib_Ausgabe + "Notstromreserve, NICHTS zu schreiben!!\n"
+                            Schreib_Ausgabe = Schreib_Ausgabe + "Notstromreserve, Keine Änderung!\n"
 
                         if print_level >= 1:
                             print(Schreib_Ausgabe)

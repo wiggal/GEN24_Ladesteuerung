@@ -216,8 +216,6 @@ class InverterInterface:
                     ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},'
                     '"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
                 )
-            #elif WR_schreiben == 1:  #entWIGGlung
-                #Schreib_Ausgabe += 'Ladesteuerung NICHT geschrieben, da Option "laden" NICHT gesetzt!\n'  #entWIGGlung
     
             # 2. Entladen
             if ('entladen' in Options) and (Batterieentlandung_steuern > 0) and (EntladeEintragloeschen == "nein"):
@@ -227,8 +225,6 @@ class InverterInterface:
                         ',"ScheduleType":"' + str(Ladetype) + '","TimeTable":{"Start":"00:00","End":"23:59"},'
                         '"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
                     )
-            #elif ('entladen' not in Options and (Neu_BatteryMaxDischarge != BatteryMaxDischarge or EntladeEintragloeschen == "ja")):  #entWIGGlung
-                #Schreib_Ausgabe += 'Entladesteuerung NICHT geschrieben, da Option "entladen" NICHT gesetzt!\n'  #entWIGGlung
     
             # 3. Request senden
             if (payload_text != '' or ('entladen' in Options and EntladeEintragloeschen == "ja")):
@@ -249,8 +245,6 @@ class InverterInterface:
     
                 Push_Schreib_Ausgabe += Schreib_Ausgabe
                 DEBUG_Ausgabe += "\nDEBUG Meldung bei Ladegrenze schreiben: " + str(response)
-            else:
-                Schreib_Ausgabe += "Änderungen kleiner Schreibgrenze!\n"
     
         # ---------------------------
         # MODE 2: Entferne Time-of-Use
