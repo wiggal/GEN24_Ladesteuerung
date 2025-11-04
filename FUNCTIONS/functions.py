@@ -3,7 +3,8 @@ from datetime import datetime
 import json
 import configparser
 import sqlite3
-
+import importlib
+from typing import Type
     
 class basics:
     def __init__(self):
@@ -49,6 +50,43 @@ class basics:
                         except Exception as e:
                             print("\nERROR: ", e, "\n")
                 return config
+
+
+    def get_inverter_class(self, class_type) -> Type:
+        """
+        Lädt dynamisch das Inverter-Modul und gibt die Klasse zurück.
+
+        :param InverterTyp: Name des Inverters, z.B. 'gen24' oder 'interface'
+        :param class_type: "API" oder "Interface"
+        :return: Klasse (nicht Instanz)
+        """
+        InverterTyp = self.getVarConf('inverter','InverterTyp', 'str')
+        # Modul und Klassennamen bestimmen
+        if class_type.lower() == "api":
+            module_name = f"FUNCTIONS.{InverterTyp.lower()}_api"
+            class_name = "InverterApi"
+        else:
+            module_name = f"FUNCTIONS.{InverterTyp.lower()}_interface"
+            class_name = "InverterInterface"
+
+        # Modul dynamisch importieren
+        try:
+            mod = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            raise ImportError(
+                f"⚠️ Modul '{module_name}' für InverterTyp '{InverterTyp}' nicht gefunden."
+            ) from None
+
+        # Klasse aus Modul holen
+        try:
+            cls: Type = getattr(mod, class_name)
+        except AttributeError:
+            raise ImportError(
+                f"⚠️ Klasse '{class_name}' nicht im Modul '{module_name}' gefunden."
+            ) from None
+
+        return cls
+
 
     def getVarConf(self, var_block, var, Type):
         error_type = ' in den ini-Dateien '

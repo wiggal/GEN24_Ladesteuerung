@@ -7,8 +7,6 @@ import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
 import FUNCTIONS.functions
 import FUNCTIONS.SQLall
-from FUNCTIONS.gen24_api import InverterApi
-from FUNCTIONS.gen24_interface import InverterInterface
 
 
 if __name__ == '__main__':
@@ -22,6 +20,14 @@ if __name__ == '__main__':
         sqlall = FUNCTIONS.SQLall.sqlall()
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
+
+        # Klassen dynamisch laden
+        try:
+            InverterApi = basics.get_inverter_class(class_type="Api")
+            InverterInterface = basics.get_inverter_class(class_type="Interface")
+        except ImportError as e:
+            print(e)  # nur die kurze, selbst definierte Fehlermeldung
+            exit(1) 
 
         print_level = basics.getVarConf('env','print_level','eval')
         if print_level >= 1:

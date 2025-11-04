@@ -12,8 +12,6 @@ import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
 import FUNCTIONS.Steuerdaten
-from FUNCTIONS.gen24_api import InverterApi
-from FUNCTIONS.gen24_interface import InverterInterface
 
 
 if __name__ == '__main__':
@@ -28,6 +26,14 @@ if __name__ == '__main__':
     dynamic = FUNCTIONS.DynamicPrice.dynamic()
     now = datetime.now()
     format = "%Y-%m-%d %H:%M:%S"
+
+    # Klassen dynamisch laden
+    try:
+        InverterApi = basics.get_inverter_class(class_type="Api")
+        InverterInterface = basics.get_inverter_class(class_type="Interface")
+    except ImportError as e:
+        print(e)  # nur die kurze, selbst definierte Fehlermeldung
+        exit(1) 
 
     Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
     dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
