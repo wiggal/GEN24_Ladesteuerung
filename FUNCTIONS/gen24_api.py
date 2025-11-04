@@ -6,11 +6,9 @@ import re
 basics = FUNCTIONS.functions.basics()
 sqlall = FUNCTIONS.SQLall.sqlall()
 
-class inverter_api:
+class InverterApi:
     def __init__(self):
         self.dummy = 'dummmy'
-
-    import re
 
     def extract_API_values(self, obj, key_patterns):
         results = {}
@@ -70,7 +68,7 @@ class inverter_api:
 
     # API-Werte lesen unabhängig von den Node-Nummern
     def get_API(self):
-        IP = basics.getVarConf('gen24','hostNameOrIp','str')
+        IP = basics.getVarConf('inverter','hostNameOrIp','str')
         gen24url = "http://"+IP+"/components/readable"
         url = requests.get(gen24url)
         data = json.loads(url.text)
@@ -137,7 +135,7 @@ class inverter_api:
 
 
         # Daten von weiteren GEN24 lesen
-        IP_weitere_Gen24 = basics.getVarConf('gen24','IP_weitere_Gen24','str')
+        IP_weitere_Gen24 = basics.getVarConf('inverter','IP_weitere_Gen24','str')
         if(IP_weitere_Gen24 != 'no'):
             IP_weitere_Gen24 = IP_weitere_Gen24.replace(" ", "")
             IP_weitere_Gen24 = IP_weitere_Gen24.split(",")
@@ -157,7 +155,7 @@ class inverter_api:
                     print("Fehlerursache:", e)
 
         # Daten von Symos lesen und addieren
-        IP_weitere_Symo = basics.getVarConf('gen24','IP_weitere_Symo','str')
+        IP_weitere_Symo = basics.getVarConf('inverter','IP_weitere_Symo','str')
         if(IP_weitere_Symo != 'no'):
             IP_weitere_Symo = IP_weitere_Symo.replace(" ", "")
             IP_weitere_Symo = IP_weitere_Symo.split(",")

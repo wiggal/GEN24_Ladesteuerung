@@ -7,8 +7,8 @@ import FUNCTIONS.PrognoseLadewert
 import FUNCTIONS.Steuerdaten
 import FUNCTIONS.functions
 import FUNCTIONS.SQLall
-import FUNCTIONS.GEN24_API as inverter_api_class
-import FUNCTIONS.GEN24_interface as inverter_interface_class
+from FUNCTIONS.gen24_api import InverterApi
+from FUNCTIONS.gen24_interface import InverterInterface
 
 
 if __name__ == '__main__':
@@ -26,9 +26,9 @@ if __name__ == '__main__':
         print_level = basics.getVarConf('env','print_level','eval')
         if print_level >= 1:
             print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
-        host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
-        user = basics.getVarConf('gen24','user', 'str')
-        password = basics.getVarConf('gen24','password', 'str')
+        host_ip = basics.getVarConf('inverter','hostNameOrIp', 'str')
+        user = basics.getVarConf('inverter','user', 'str')
+        password = basics.getVarConf('inverter','password', 'str')
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
 
@@ -37,12 +37,12 @@ if __name__ == '__main__':
             response = requests.get('http://'+host_ip)
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             # API lesen, wegen Versionsnummer
-            inverter_api = inverter_api_class.inverter_api()
+            inverter_api = InverterApi()
             API = inverter_api.get_API()
             DEBUG_interface = False
             if(print_level == 5): DEBUG_interface = True
             #  Klasse FroniusGEN24 initiieren
-            inverter_interface = inverter_interface_class.InverterInterface(host_ip, user, password, API['Version'], DEBUG_interface)
+            inverter_interface = InverterInterface(host_ip, user, password, API['Version'], DEBUG_interface)
             # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
             reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
             alterLadewert = 0

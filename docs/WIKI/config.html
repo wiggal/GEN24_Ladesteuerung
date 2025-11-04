@@ -44,32 +44,35 @@ button {
 <tr><td class="variablenname">print_level</td>
 <td><input type="text" name="Zeile[6][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[7]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[8]" value='[gen24]' >[gen24]</td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[8]" value='[inverter]' >[inverter]</td></tr>
+<tr class="comment"><td colspan="2">; InverterTyp für Fronius Gen24 und Verto = gen24 </td></tr>
+<tr><td class="variablenname">InverterTyp</td>
+<td><input type="text" name="Zeile[10][1]" value="gen24" readonly></td></tr>
 <tr class="comment"><td colspan="2">; IP Wechselrichter </td></tr>
 <tr><td class="variablenname">hostNameOrIp</td>
-<td><input type="text" name="Zeile[10][1]" value="192.168.178.111" readonly></td></tr>
+<td><input type="text" name="Zeile[12][1]" value="192.168.178.111" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Hier können die IP-Adressen weiterer GEN24 bzw. Symos, durch Komma getrennt,<br>; definiert werden, um deren Produktion in die Steuerung bzw. ins Logging einzubeziehen.<br>; no = kein weiterer GEN24 bzw. Symos vorhanden. </td></tr>
 <tr><td class="variablenname">IP_weitere_Gen24</td>
-<td><input type="text" name="Zeile[12][1]" value="no" readonly></td></tr>
+<td><input type="text" name="Zeile[14][1]" value="no" readonly></td></tr>
 <tr><td class="variablenname">IP_weitere_Symo</td>
-<td><input type="text" name="Zeile[13][1]" value="no" readonly></td></tr>
+<td><input type="text" name="Zeile[15][1]" value="no" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Benutzername zum Login am GEN24, wird in den meisten Fällen customer sein. </td></tr>
 <tr><td class="variablenname">user</td>
-<td><input type="text" name="Zeile[15][1]" value="customer" readonly></td></tr>
+<td><input type="text" name="Zeile[17][1]" value="customer" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Das Kennwort muss in einfache Hochkommas gesetzt werden, wegen evtl. Sonderzeichen<br>; sollte das Kennwort ein % enthalten bitte zwei %% eintragen. </td></tr>
 <tr><td class="variablenname">password</td>
-<td><input type="text" name="Zeile[17][1]" value="&#039;XXXXXXXX&#039;" readonly></td></tr>
+<td><input type="text" name="Zeile[19][1]" value="&#039;XXXXXXXX&#039;" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Akkukapazität in Wh, wird benötigt, wenn Akku offline ist!! </td></tr>
 <tr><td class="variablenname">battery_capacity_Wh</td>
-<td><input type="text" name="Zeile[19][1]" value="11000" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[20]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[21]" value='[messaging]' >[messaging]</td></tr>
+<td><input type="text" name="Zeile[21][1]" value="11000" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[22]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[23]" value='[messaging]' >[messaging]</td></tr>
 <tr class="comment"><td colspan="2">; Hier können Pushmessages zu den Schreibvorgängen über den Dienst ntfy.sh auf die Handyapp ntfy gesendet werden.<br>; Push_Message_EIN (1=EIN/0=AUS)<br>; Die Adresse des über die App erstellten Themennamen eintragen. </td></tr>
 <tr><td class="variablenname">Push_Message_EIN</td>
-<td><input type="text" name="Zeile[23][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[25][1]" value="0" readonly></td></tr>
 <tr><td class="variablenname">Push_Message_Url</td>
-<td><input type="text" name="Zeile[24][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[25]" value='' ></td></tr>
+<td><input type="text" name="Zeile[26][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[27]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/defaultini"></div><br><center><a href="#Hilfezu/CONFIG/weatherini" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;<button type="submit">Hilfe zu ../CONFIG/weather.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
 <tr class="comment"><td colspan="2">; Bitte die original weather.ini nicht ändern, da sie bei Updates überschrieben wird.<br>; Persönliche Anpassungen stattdessen in einer Kopie als weather_priv.ini ablegen. </td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[env]' >[env]</td></tr>
@@ -396,6 +399,6 @@ button {
 <tr><td class="variablenname">MwSt</td>
 <td><input type="text" name="Zeile[40][1]" value="1.19" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[41]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 26.10.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 04.11.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>

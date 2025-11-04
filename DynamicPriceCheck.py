@@ -12,8 +12,8 @@ import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
 import FUNCTIONS.SQLall
 import FUNCTIONS.Steuerdaten
-import FUNCTIONS.GEN24_API as inverter_api_class
-import FUNCTIONS.GEN24_interface as inverter_interface_class
+from FUNCTIONS.gen24_api import InverterApi
+from FUNCTIONS.gen24_interface import InverterInterface
 
 
 if __name__ == '__main__':
@@ -110,7 +110,7 @@ for key in pricelist_date:
         if key_neu == key2[0]:
             pv_data.append([key[0], key2[1], key2[2], key[1]])
 
-host_ip = basics.getVarConf('gen24','hostNameOrIp', 'str')
+host_ip = basics.getVarConf('inverter','hostNameOrIp', 'str')
 # Werte als Tabelle ausgeben
 if(dyn_print_level >= 3):
     headers = ["Zeitpunkt", "PV_Prognose (W)", "Verbrauch*"+str(Lade_Verbrauchs_Faktor)+"(W)", "Strompreis (€/kWh)"]
@@ -127,20 +127,20 @@ except requests.exceptions.RequestException as e:
     exit()
 
 # Akku-Kapazität und aktuelle Parameter
-inverter_api = inverter_api_class.inverter_api()
+inverter_api = InverterApi()
 API = inverter_api.get_API()
 # Wenn Batterie offline, battery_capacity_Wh = 5% => in GEN24_API.gen24api()
 battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
 current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
 
 # Mindest-Ladestand in Prozent vom GEN24 und aus der dynprice.ini lesen
-user = basics.getVarConf('gen24','user', 'str')
-password = basics.getVarConf('gen24','password', 'str')
+user = basics.getVarConf('inverter','user', 'str')
+password = basics.getVarConf('inverter','password', 'str')
 Akku_MindestSOC = basics.getVarConf('dynprice','Akku_MindestSOC', 'eval')
 # Hier Hochkommas am Anfang und am Ende enternen
 password = password[1:-1]
 #  Klasse FroniusGEN24 initiieren
-inverter_interface = inverter_interface_class.InverterInterface(host_ip, user, password, API['Version'])
+inverter_interface = InverterInterface(host_ip, user, password, API['Version'])
 batteries_array = inverter_interface.get_http_data()
 BAT_M0_SOC_MIN = batteries_array[1]['BAT_M0_SOC_MIN']
 HYB_BACKUP_RESERVED = batteries_array[1]['HYB_BACKUP_RESERVED']
