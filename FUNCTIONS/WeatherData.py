@@ -148,11 +148,9 @@ class WeatherData:
         try:
             verbindung.execute(sql_anweisung)
             DB_data = verbindung.fetchall()
-        except Exception as e:
-            print("Fehler:", e)
-            import traceback
-            traceback.print_exc()
-            print("Die Datei PV_Daten.sqlite fehlt oder ist leer!")
+        except:
+            print("\nDie Datei PV_Daten.sqlite fehlt oder ist leer!")
+            print("Bitte 'python EnergyController.py logging' ausführen\n")
             DB_data = []
             DB_data.append((aktuelle_Std, 0),)
             # Schließe die Verbindung
