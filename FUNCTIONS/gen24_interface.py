@@ -149,11 +149,14 @@ class InverterInterface:
         ToU = self.send_request(self.timeofuse_path)
         data_ToU_tmp = ToU.json()
         data_ToU = data_ToU_tmp.get("timeofuse", {})
-        ToU_data = [{}, {}, {}]
-        for i, entry in enumerate(data_ToU):
-            ToU_data[i]['Active'] = entry['Active']
-            ToU_data[i]['Power'] = str(entry['Power'])
-            ToU_data[i]['ScheduleType'] = entry['ScheduleType']
+        ToU_data = []
+        for entry in data_ToU:
+            ToU_data.append({
+                'Active': entry['Active'],
+                'Power': str(entry['Power']),
+                'ScheduleType': entry['ScheduleType']
+            })
+
         """Batterie-Konfig auslesen"""
         BK = self.send_request(self.batterie_path)
         data_BK = BK.json()

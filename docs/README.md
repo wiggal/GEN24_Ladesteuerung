@@ -15,16 +15,21 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 
 ![new](pics/new.png)  
 Ab Version: **0.40.0**  
-Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
+- Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
 Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
 Die **Cronjobs** müssen angepasst werden!!  
+- [WikiExtension_Gen24_Ladesteuerung von @killwack](https://github.com/killwack/WikiExtension_Gen24_Ladesteuerung/wiki)  
+
 Ab Version: **0.38.1**  
-Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die GEN24_Ladesteuerung übergeben werden.  
+- Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die GEN24_Ladesteuerung übergeben werden.  
+
 Ab Version: **0.38.0**  
-Update auf Firmware 1.38.6-1.  
+- Update auf Firmware 1.38.6-1.  
+
 Ab Version: **0.31.0**  
-Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
+- Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
 Installationsskript install_gen24.sh für eine automatische Installation bzw. Updating.  
+
 ![new](pics/new2.png)  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  

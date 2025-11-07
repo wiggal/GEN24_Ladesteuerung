@@ -8,8 +8,8 @@
   Die **Cronjobs** müssen angepasst werden!!  
 
 - **Änderung in default.ini** Block `[gen24]` in `[inverter]` umbenannt.  
-  **Neuer Parameter in default.ini [inverter]** `InverterTyp`, definiert nun den Inverter und dessen Klassen (aktuelle nur gen24).  
-  Die Klassen InverterApi und InverterInterface werden nun dynamisch in Abhängigkeit von `InverterTyp` geladen.  
+  **Neuer Parameter in default.ini [inverter]** `InverterTyp`, definiert nun den Inverter und dessen Klassen (aktuell nur gen24).  
+  Die Klassen `InverterApi` und `InverterInterface` werden nun dynamisch in Abhängigkeit von `InverterTyp` geladen.  
 
 **[0.38.8] – 2025-10-27**  
 
