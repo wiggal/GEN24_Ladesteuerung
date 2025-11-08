@@ -1,4 +1,4 @@
-**[0.40.0] – 2025-XX-XX**  
+**[0.40.0] – 2025-11-08**  
 
 - Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
   **Umfangreiche Änderungen, längere Testes erforderlich**  
