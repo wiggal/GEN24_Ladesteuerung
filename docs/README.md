@@ -17,7 +17,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 Ab Version: **0.40.0**  
 - Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
 Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
-Die **Cronjobs** müssen angepasst werden!!  
+⚠️ Die **Cronjobs** und die **default_priv.ini** müssen angepasst werden!!  
 - [WikiExtension_Gen24_Ladesteuerung von @killwack](https://github.com/killwack/WikiExtension_Gen24_Ladesteuerung/wiki)  
 
 Ab Version: **0.38.1**  
