@@ -1,15 +1,17 @@
-**[0.40.0] – 2025-11-08**  
+**[0.40.0] – 2025-11-08 ⚠️  ACHTUNG: umfangreiche Änderungen ⚠️ **  
 
 - Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
   **Umfangreiche Änderungen, längere Testes erforderlich**  
 
-- **ACHTUNG:**  
+- **⚠️  ACHTUNG:**  
   Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
   Die **Cronjobs** müssen angepasst werden!!  
 
 - **Änderung in default.ini** Block `[gen24]` in `[inverter]` umbenannt.  
   **Neuer Parameter in default.ini [inverter]** `InverterTyp`, definiert nun den Inverter und dessen Klassen (aktuell nur gen24).  
   Die Klassen `InverterApi` und `InverterInterface` werden nun dynamisch in Abhängigkeit von `InverterTyp` geladen.  
+
+  **⚠️  ACHTUNG: defaulti_priv.ini anpassen!!**  
 
 **[0.38.8] – 2025-10-27**  
 
