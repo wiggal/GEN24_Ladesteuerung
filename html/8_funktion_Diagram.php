@@ -121,12 +121,25 @@ while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
     $rows[] = $row; // Alle Zeilen speichern
 }
 
+# Wenn Jahre und erster Zeitpunkt ist nicht XXXX-01-01 00:00:00, dann setzen
+// Prüfen, ob $rows mindestens einen Datensatz hat
+if (!empty($rows) && $XScaleEinheit === 'jahre') {
+    // Erstes Element
+    $first = &$rows[0];  // Referenz, damit Änderung direkt im Array passiert
+
+    // Jahr aus dem aktuellen Zeitpunkt extrahieren
+    $jahr = date('Y', strtotime($first['Zeitpunkt']));
+
+    // Zeitpunkt auf Jahresanfang setzen
+    $first['Zeitpunkt'] = $jahr . '-01-01 00:00:00';
+}
+
 foreach ($rows as $row) {
         $first = true;
         foreach($row as $x => $val) {
         if ( $first ){
-            # Datum zuschneiden 
-            $label_element = substr($val, $cut_von, $cut_anzahl);
+            # Datum nicht mehr zuschneiden, da time als X-Achse
+            $label_element = $val;
             $labels = $labels.$trenner.'"'.$label_element.'"';
             $first = false;
         } else {
@@ -413,7 +426,7 @@ window.onload = function() { zeitsetzer(1); };
 ";
 } # END function Optionenausgabe
 
-function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit, $Diagrammgrenze)
+function Diagram_ausgabe($Footer, $Diatype, $labels, $daten, $optionen, $EnergieEinheit, $Diagrammgrenze, $X_Achse)
 {
 $Nachkommastellen = 2;
 if ($EnergieEinheit == 'W') $Nachkommastellen = 0;
@@ -465,6 +478,7 @@ echo "    }]
             }
         },
         tooltip: {
+            titleAlign: 'center',  // zentriert die Überschrift!
             titleFont: { size: 20 },
             bodyFont: { size: 20 },
             footerFont: { size: 20 },
@@ -516,6 +530,17 @@ echo "    }]
     },
     scales: {
       x: {
+        type: 'time',       // Zeitachse
+        time: {
+            parser: 'yyyy-MM-dd HH:mm:ss',
+            unit: '". $X_Achse['unit'] ."',
+            displayFormats: {
+                ". $X_Achse['displayFormat'] ."
+        },
+        tooltipFormat: '". $X_Achse['tooltipFormat'] ."' // Format für den Tooltip-Titel
+        },
+        min: '". $X_Achse['min'] ."',   // Startzeit
+        max: '". $X_Achse['max'] ."',   // Endzeit
         ticks: {
           font: {
              size: 20,

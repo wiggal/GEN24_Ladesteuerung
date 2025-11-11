@@ -3,6 +3,7 @@
     <head>
     <title>Diagramme</title>
     <script src="chart.js"></script>
+    <script src="chartjs-adapter-date-fns.js"></script>
     <style>
     html, body {
         height: 98%;
@@ -101,12 +102,42 @@ $Zeitraum = 'stunden';
 if (!empty($_POST["Zeitraum"])) $Zeitraum = $_POST["Zeitraum"];
 
 # ProduktionsSQL und Daten holen
+# X-Achsen konfiguration je nach Diagramm
+$X_ACHSE_min_day = date('Y-m-d', strtotime($DiaDatenVon));
 $groupSTR = '%Y-%m-%d';
 switch ($Zeitraum) {
-    case 'stunden': $groupSTR = '%Y-%m-%d %H'; break;
-    case 'tage': $groupSTR = '%Y-%m-%d'; break;
-    case 'monate': $groupSTR = '%Y-%m'; break;
-    case 'jahre': $groupSTR = '%Y'; break;
+    case 'stunden':
+        $groupSTR = '%Y-%m-%d %H';
+        $X_Achse['unit'] = 'hour';
+        $X_Achse['displayFormat'] = "hour: 'HH:mm'";
+        $X_Achse['tooltipFormat'] = 'HH:mm dd.MM.yy';
+        $X_Achse['min'] = $X_ACHSE_min_day.' 00:00:00';
+        $X_Achse['max'] = date('Y-m-d 23:59:59', strtotime('-1 day', strtotime($DiaDatenBis)));
+        break;
+    case 'tage':
+        $groupSTR = '%Y-%m-%d';
+        $X_Achse['unit'] = 'day';
+        $X_Achse['displayFormat'] = "day: 'dd'";
+        $X_Achse['tooltipFormat'] = 'dd.MM.yy';
+        $X_Achse['min'] = $X_ACHSE_min_day.' 00:00:00';
+        $X_Achse['max'] = date('Y-m-d 00:00:00', strtotime('-1 day', strtotime($DiaDatenBis)));
+        break;
+    case 'monate':
+        $groupSTR = '%Y-%m';
+        $X_Achse['unit'] = 'month';
+        $X_Achse['displayFormat'] = "month: 'MMM'";
+        $X_Achse['tooltipFormat'] = 'MMM yyyy';
+        $X_Achse['min'] = $X_ACHSE_min_day.' 00:00:00';
+        $X_Achse['max'] = date('Y-m-d 00:00:00', strtotime('-1 month', strtotime($DiaDatenBis)));
+        break;
+    case 'jahre':
+        $groupSTR = '%Y';
+        $X_Achse['unit'] = 'year';
+        $X_Achse['displayFormat'] = "year: 'yyyy'";
+        $X_Achse['tooltipFormat'] = 'yyyy';
+        $X_Achse['min'] = $X_ACHSE_min_day.' 00:00:00';
+        $X_Achse['max'] = '';
+        break;
 }
 
 $DBersterTag = $GLOBALS['db']->querySingle('SELECT MIN(Zeitpunkt) from pv_daten');
@@ -157,7 +188,7 @@ if ($diagramtype == 'line') {
     echo "<div class='container'>
         <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
     </div>";
-Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenze);
+Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenze, $X_Achse);
 } else {  # Dann bar = Balkendiagramm
 
     # Funktion Schalter aufrufen
@@ -175,7 +206,7 @@ Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenz
     echo "<div class='container'>
         <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
     </div>";
-    Diagram_ausgabe($Footer, 'bar', $labels, $daten, $optionen, 'kWh', $Diagrammgrenze);
+    Diagram_ausgabe($Footer, 'bar', $labels, $daten, $optionen, 'kWh', $Diagrammgrenze, $X_Achse);
 
 } # END if ($diagramtype == 
     $db->close();

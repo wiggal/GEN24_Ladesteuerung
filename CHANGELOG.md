@@ -1,3 +1,7 @@
+**[0.40.1] – 2025-XX-XX**  
+
+- Anpassung Diagramm QZ-Bilanz, immer ganzen Wertebereich (z.B. ganzen Monat) darstellen, auch ohne Daten.  
+
 **[0.40.0] – 2025-11-08 ⚠️  ACHTUNG: umfangreiche Änderungen ⚠️**  
 
 - Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
