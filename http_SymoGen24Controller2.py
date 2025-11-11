@@ -7,8 +7,9 @@ import os
 import runpy
 
 print(
-    "\n[WARNUNG] Das Skript 'http_SymoGen24Controller2.py' ist veraltet.\n"
-    "Bitte verwende zukünftig 'EnergyController.py'.\n",
+    "\n⚠️  [WARNUNG] Das Skript 'http_SymoGen24Controller2.py' ist veraltet.\n"
+    "⚠️  [WARNUNG] Bitte verwende zukünftig 'EnergyController.py'.\n"
+    "⚠️  [WARNUNG] Cronjob anpassen nicht vergessen!!\n",
     file=sys.stderr
 )
 

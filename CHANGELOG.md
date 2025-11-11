@@ -1,6 +1,6 @@
 **[0.40.1] – 2025-XX-XX**  
 
-- Anpassung Diagramm QZ-Bilanz, immer ganzen Wertebereich (z.B. ganzen Monat) darstellen, auch ohne Daten.  
+- Anpassung Diagramm QZ-Bilanz: Immer ganzen Wertebereich (z.B. ganzen Monat) darstellen, auch ohne Daten.  
 
 **[0.40.0] – 2025-11-08 ⚠️  ACHTUNG: umfangreiche Änderungen ⚠️**  
 
