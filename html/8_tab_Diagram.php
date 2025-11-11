@@ -118,7 +118,7 @@ switch ($Zeitraum) {
         $groupSTR = '%Y-%m-%d';
         $X_Achse['unit'] = 'day';
         $X_Achse['displayFormat'] = "day: 'dd'";
-        $X_Achse['tooltipFormat'] = 'dd.MM.yy';
+        $X_Achse['tooltipFormat'] = 'EEE dd.MM.yy';
         $X_Achse['min'] = $X_ACHSE_min_day.' 00:00:00';
         $X_Achse['max'] = date('Y-m-d 00:00:00', strtotime('-1 day', strtotime($DiaDatenBis)));
         break;
