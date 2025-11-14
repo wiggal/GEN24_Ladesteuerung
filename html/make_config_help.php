@@ -85,13 +85,25 @@ function config_lesen( $file, $readonly )
     }
 }
 
-$config_ini_files = ['default.ini', 'weather.ini', 'charge.ini', 'dynprice.ini'];
-
 # AUSGEBEN aller *.ini
 include "config.php";
 if(file_exists("config_priv.php")){
   include "config_priv.php";
 }
+
+// config_head.html einlesen
+$config_head = file_get_contents($PythonDIR.'/docs/WIKI/config_head.html');
+
+// Inhalt zwischen <body> und </body> extrahieren
+if (preg_match('/<body[^>]*>(.*)<\/body>/is', $config_head, $match)) {
+    $config_head_bodyContent = $match[1];   // alles im body
+} else {
+    $config_head_bodyContent = ''; // Falls nichts gefunden wird
+}
+
+echo $config_head_bodyContent;
+
+$config_ini_files = ['default.ini', 'weather.ini', 'charge.ini', 'dynprice.ini'];
 
 foreach ($config_ini_files as $file) {
     $filename = $PythonDIR.'/CONFIG/'.$file;

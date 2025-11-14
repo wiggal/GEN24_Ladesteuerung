@@ -126,6 +126,7 @@ function get_updatebutton($repoPath, $logFile, $prg_version) {
     // --- Prüfen, ob Git-Repository vorhanden ist ---
     if (!is_dir($repoPath . '/.git') || !is_readable($repoPath . '/.git')) {
         // Kein gültiges Git-Repo => Funktion ohne Log beenden
+        echo '</div>';
         return;
     }
 
@@ -207,7 +208,7 @@ function get_updatebutton($repoPath, $logFile, $prg_version) {
         echo '<button type="submit" style="' . htmlspecialchars($buttonStyle) . '" ' . $buttonDisabled . '>';
         echo htmlspecialchars($buttonText);
         echo '</button>';
-        echo '</form><br>';
+        echo '</form>';
         echo "</div>\n";
     } else {
         // ❌ Fehler vorhanden → ins Log schreiben
@@ -429,6 +430,8 @@ switch ($case) {
 
 if ($updatecheck == 'ja') {
     get_updatebutton($PythonDIR, $logFile, $prg_version);
+} else {
+echo '</div>';
 }
 echo '<br><center>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
@@ -436,7 +439,7 @@ echo '<select name="ini_file">';
 echo getinifile($PythonDIR.'/CONFIG/');
 echo '</select><br><br>';
 echo '<input type="hidden" name="case" value="lesen">'."\n";
-echo '<button type="submit">Auswahl lesen</button>';
+echo '<button type="submit">Auswahl anzeigen</button>';
 echo '</form>'."\n";
 echo '<br><br>';
     break;
