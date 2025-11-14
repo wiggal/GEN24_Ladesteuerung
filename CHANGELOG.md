@@ -1,3 +1,9 @@
+**[0.40.2] – 2025-XX-XX**  
+
+**NEU**  
+- Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist, also mit `git clone ..` erzeugt wurde,  
+  und sich auf dem Hauptzweig `main` befindet. Updatemeldungen werden in `Update.log` geschrieben.  
+
 **[0.40.1] – 2025-11-13**  
 
 - Anpassung Diagramm QZ-Bilanz: Immer ganzen Wertebereich (z.B. ganzen Monat) darstellen, auch ohne Daten.  

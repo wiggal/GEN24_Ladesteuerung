@@ -14,6 +14,9 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - **NEU:** [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
 ![new](pics/new.png)  
+Ab Version: **0.40.2**  
+- 🔄 Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist.  
+
 Ab Version: **0.40.0**  
 - Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
 Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  

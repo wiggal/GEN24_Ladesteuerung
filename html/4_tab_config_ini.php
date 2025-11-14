@@ -90,15 +90,135 @@ if(file_exists("config_priv.php")){
   $hilfe_link = "Hilfe_Ausgabe.php?file=config&return=$current_url";
     $config = parse_ini_file($PythonDIR.'/version.ini', true);
     $prg_version = $config['Programm']['version'];
-?>
-  <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
-<!-- Hilfeaufruf ENDE -->
 
-<div class="version" align="center">
-<br><br>
-<b>  GEN24_Ladesteuerung Version: <?php echo $prg_version; ?> </b>
-</div>
-<?php
+# Pfade und Logdatei für Updatefunktion
+$repoPath = realpath($PythonDIR);
+$logFile = $repoPath . '/Update.log';
+
+echo '<div class="hilfe"> <a href="' . $hilfe_link . '"><b>Hilfe</b></a></div>';
+# <!-- Hilfeaufruf ENDE -->
+
+echo '<div style="text-align:center;">';
+echo '<span class="version">';
+echo '<b>Ladesteuerung: ' .  htmlspecialchars($prg_version) . '</b>';
+echo '</span>';
+
+// --- Hilfsfunktion fürs Logging ---
+function writeLog($file, $message) {
+    $timestamp = '';
+    if($message != ''){
+        $timestamp = date('[Y-m-d H:i:s] ');
+    }
+    $entry = $timestamp . trim($message) . "\n";
+    if ($fh = fopen($file, 'a')) {
+        flock($fh, LOCK_EX);
+        fwrite($fh, $entry);
+        flock($fh, LOCK_UN);
+        fclose($fh);
+    }
+}
+
+function get_updatebutton($repoPath, $logFile, $prg_version) {
+    $originalDir = getcwd();
+    $error = 'nein';
+    $meldungen[] = "=== BEGINN Update-Check ===\n";
+
+    // --- Prüfen, ob Git-Repository vorhanden ist ---
+    if (!is_dir($repoPath . '/.git') || !is_readable($repoPath . '/.git')) {
+        // Kein gültiges Git-Repo => Funktion ohne Log beenden
+        return;
+    }
+
+    // --- Logging erst ab hier ---
+
+    $localVersion = $prg_version ?? 'unbekannt';
+    $remoteVersion = null;
+    $compare = null;
+
+    // --- Prüfen, ob Git verfügbar ist ---
+    exec('git --version 2>&1', $gitCheckOut, $gitCheckCode);
+    if ($gitCheckCode !== 0) {
+        $meldungen[] = "Git ist nicht installiert oder nicht im PATH verfügbar.";
+        $error = 'ja';
+    }
+
+    if ($error == 'nein') {
+        // --- In Repo wechseln ---
+        if (!chdir($repoPath)) {
+            $meldungen[] = "Fehler: Konnte nicht ins Repository wechseln (Zugriffsrechte?).";
+            $error = 'ja';
+        } else {
+            // --- Aktuellen Branch prüfen ---
+            exec('git rev-parse --abbrev-ref HEAD 2>&1', $branchOut, $branchCode);
+            $currentBranch = $branchOut[0] ?? '';
+            if ($branchCode !== 0 || $currentBranch !== 'main') {
+                $meldungen[] = "Aktueller Branch ist '$currentBranch'. Erwartet wird 'main'.";
+                $error = 'ja';
+            } else {
+                // --- Git fetch ---
+                exec('git fetch origin main 2>&1', $fetchOut, $fetchCode);
+                $meldungen[] = "git fetch origin main -> Exit $fetchCode\n" . implode("\n", $fetchOut);
+
+                // --- Git show version.ini ---
+                exec('git show origin/main:version.ini 2>&1', $remoteIni, $retCode);
+                $meldungen[] =  "git show origin/main:version.ini -> Exit $retCode";
+
+                if ($fetchCode !== 0 || $retCode !== 0 || empty($remoteIni)) {
+                    $meldungen[] = "Git-Fehler: Fetch/Show fehlgeschlagen.";
+                    $meldungen[] = implode("\n", $remoteIni ?: $fetchOut);
+                    $error = 'ja';
+                } else {
+                    // --- Remote-Version parsen ---
+                    $tmp = tmpfile();
+                    fwrite($tmp, implode("\n", $remoteIni));
+                    $meta = stream_get_meta_data($tmp);
+                    $parsed = @parse_ini_file($meta['uri'], true);
+                    fclose($tmp);
+
+                    if ($parsed && isset($parsed['Programm']['version'])) {
+                        $remoteVersion = $parsed['Programm']['version'];
+                        $compare = version_compare(ltrim($localVersion, 'vV'), ltrim($remoteVersion, 'vV'));
+                        $meldungen[] = "Remote-Version gelesen: $remoteVersion (lokal: $localVersion)";
+                    } else {
+                        $meldungen[] = "Remote version.ini konnte nicht gelesen oder geparst werden.";
+                        $error = 'ja';
+                    }
+                }
+            }
+            chdir($originalDir);
+        }
+    }
+
+    // --- Button oder Fehlerausgabe ---
+    if ($error == 'nein') {
+        // ✅ Alles ok => Button erzeugen
+        $buttonText = '✅ Aktuell';
+        $buttonStyle = 'background-color: #44c767; cursor: not-allowed;';
+        $buttonDisabled = 'disabled';
+
+        if ($compare !== null && $compare < 0) {
+            $buttonText = "🔄 $remoteVersion";
+            $buttonStyle = 'background-color: #FF5555; cursor: pointer;';
+            $buttonDisabled = '';
+        }
+
+        echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" style="display:inline;">' . "\n";
+        echo '<input type="hidden" name="case" value="git_update">';
+        echo '<button type="submit" style="' . htmlspecialchars($buttonStyle) . '" ' . $buttonDisabled . '>';
+        echo htmlspecialchars($buttonText);
+        echo '</button>';
+        echo '</form><br>';
+        echo "</div>\n";
+    } else {
+        // ❌ Fehler vorhanden → ins Log schreiben
+        $meldungen[] = "=== FEHLER beim Update-Check ===";
+        $meldungen[] = "=== ENDE Update-Check ===";
+        $meldungen[] = "";
+        foreach ($meldungen as $msg) writeLog($logFile, $msg);
+    }
+
+} #ENDE  get_updatebutton
+
 function getinifile($dir) 
 {
 	$files = '';
@@ -276,11 +396,29 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
 }
 }
 
+function Dateiauswahl_button($Anzahl, $ini_file, $updatecheck = 'ja'){
+    echo "</div>\n";
+    echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+    echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
+    echo '<input type="hidden" name="case" value="">'."\n";
+    echo '<input type="hidden" name="updatecheck" value="'.$updatecheck.'">'."\n";
+    echo '<div class="button-container">';
+    echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
+    if ($Anzahl == 2){ 
+        echo '&nbsp;<button class="Kommentare" type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
+    }
+    echo '</div>';
+    echo '</form>'."\n";
+    echo '<br>';
+}
+
 $case = '';
 $org_ini_file = '';
+$updatecheck = 'ja';
 if (isset($_POST["case"])) $case = $_POST["case"];
 if (isset($_POST["ini_file"])) $ini_file = $_POST["ini_file"];
 if (isset($ini_file)) $org_ini_file = str_replace('_priv', '', $ini_file);
+if (isset($_POST["updatecheck"])) $updatecheck = $_POST["updatecheck"];
 $nachricht = '';
 if (isset($_GET["nachricht"])) $nachricht = $_GET["nachricht"];
 if ($nachricht != '') echo $nachricht . "<br><br>";
@@ -289,6 +427,9 @@ switch ($case) {
     case '':
 # AUSWAEHLEN  _priv.ini
 
+if ($updatecheck == 'ja') {
+    get_updatebutton($PythonDIR, $logFile, $prg_version);
+}
 echo '<br><center>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<select name="ini_file">';
@@ -304,15 +445,7 @@ echo '<br><br>';
     case 'lesen':
 # AUSGEBEN DER gewählten _priv.ini
 
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
-echo '<input type="hidden" name="case" value="">'."\n";
-echo '<div class="button-container">';
-echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
-echo '&nbsp;<button class="Kommentare" type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
-echo '</div>';
-echo '</form>'."\n";
-echo '<br>';
+Dateiauswahl_button('2', $ini_file, 'nein');
 
 echo '<div style="display:inline-block; margin-right: 10px;">';
 echo '<b>"'.basename($ini_file).'" hier nur lesbar! <br>Zum editieren Button klicken!</b>';
@@ -333,7 +466,7 @@ if (file_exists($org_ini_file)) {
     echo '<input type="hidden" name="org_ini_file" value="'.$org_ini_file.'">'."\n";
     echo '<input type="hidden" name="case" value="editieren">'."\n";
     echo '<input type="hidden" name="editcase" value="update">'."\n";
-    echo '<button type="submit" style="background-color: #FFCCCC;">!BETA! Update mit '.basename($org_ini_file).'</button>';
+    echo '<button type="submit" style="background-color: #FFCCCC;">Update mit '.basename($org_ini_file).'</button>';
     echo '</form>'."\n";
     echo '</div>';
 }
@@ -348,12 +481,8 @@ echo '</table>';
 
     case 'editieren':
 # PASSWORDABFRAGE 
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
-echo '<input type="hidden" name="case" value="">'."\n";
-echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
-echo '</form>'."\n";
-echo '<br><br>';
+
+Dateiauswahl_button('1', $ini_file, 'nein');
 
 echo '<br><br>';
 echo 'Kennwort um '.basename($ini_file).' zu editieren oder upzudaten:<br>';
@@ -372,6 +501,7 @@ echo '<br>';
     case 'editieren_passwd':
 # EDITIEREN DER INI-Datei 
 # Erläuterungen zu Hintergrundfarben ausgeben
+echo "<br><br></div>\n";
 echo "<br><table style='width: auto;'><tr><td style='border: 1; padding: 8px;'><b>".$_POST["editcase"]."</b>";
 $SpeichernButton  = ' speichern!';
 if ($_POST["editcase"] == 'update') {
@@ -383,15 +513,7 @@ echo "</td><td style='border: 0; padding: 8px; background-color: #FFCCCC;'>Fehle
 }
 echo "</td></tr></table>";
 # Button
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
-echo '<input type="hidden" name="case" value="">'."\n";
-echo '<div class="button-container">';
-echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
-echo '&nbsp;<button type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
-echo '</div>';
-echo '</form>'."\n";
-echo '<br>';
+Dateiauswahl_button('2', $ini_file, 'nein');
 
 if ($_POST["password"] == $passwd_configedit) {
 
@@ -477,6 +599,44 @@ if (!copy($ini_file, $backup_file)) {
 header('location: '.$_SERVER["PHP_SELF"].'?nachricht='.$nachricht);
 exit();
     break;
+
+        case 'git_update':
+
+$originalDir = getcwd();
+// ins lokales Repo wechseln
+chdir($PythonDIR);
+
+Dateiauswahl_button('1', '', 'ja');
+// Pull durchführen
+exec('git pull 2>&1', $output, $returnCode);
+
+echo '<center>';
+echo "<h2>🔄 Update durchgeführt</h2>";
+echo "<pre>" . htmlspecialchars(implode("\n", $output)) . "</pre>";
+echo "<p><b>Exit-Code:</b> $returnCode</p>";
+
+// Logfile schreiben
+$output_str = htmlspecialchars(implode("\n\t\t", $output));
+writeLog($logFile, "=== BEGINN Update mit git pull ===");
+writeLog($logFile, $output_str);
+writeLog($logFile, "Exit-Code: $returnCode");
+writeLog($logFile, "=== END Update mit git pull ===");
+writeLog($logFile, "");
+
+// Neue Version anzeigen (falls version.ini geändert wurde)
+$iniFile = $repoPath . '/version.ini';
+if (file_exists($iniFile) and $returnCode == 0) {
+    $ini = parse_ini_file($iniFile, true);
+    $newVersion = $ini['Programm']['version'] ?? 'unbekannt';
+    echo "<p><b>Neue Version:</b> " . htmlspecialchars($newVersion) . "</p>";
+}
+echo '</center>';
+
+//wieder zurück wechseln
+chdir($originalDir);
+
+break;
+
 } # ENDE switch
 ?>
 <script>
