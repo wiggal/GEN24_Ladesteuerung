@@ -613,6 +613,20 @@ Dateiauswahl_button('1', '', 'ja');
 // Pull durchführen
 exec('git pull 2>&1', $output, $returnCode);
 
+if($returnCode == 0){
+    exec(
+    "git diff -U0 HEAD@{1} HEAD -- CONFIG/ "
+    . "| grep -v -e '^diff --git' -e '^index ' -e '^@@ ' -e '^+++ ' "
+    . "| sed -e 's/^--- /\t&/' -e 't' -e 's/^/\t\t/' 2>&1",
+    $gitdiff,
+    $gitdiff2
+    );
+    $diff_str = "\n\tDifferenzen in den Configdateien seit dem letzten Update.
+        evtl. die entsprechenden _priv.ini-Dateien ergänzen!\n\n";
+    $diff_str .= htmlspecialchars(implode("\n", $gitdiff));
+    echo "<pre>" . $diff_str . "</pre>";
+}
+
 echo '<center>';
 echo "<h2>🔄 Update durchgeführt</h2>";
 echo "<pre>" . htmlspecialchars(implode("\n", $output)) . "</pre>";
@@ -620,10 +634,12 @@ echo "<p><b>Exit-Code:</b> $returnCode</p>";
 
 // Logfile schreiben
 $output_str = htmlspecialchars(implode("\n\t\t", $output));
-writeLog($logFile, "=== BEGINN Update mit git pull ===");
+writeLog($logFile, "=== BEGINN Update mit git pull ===\n");
+writeLog($logFile, "$diff_str");
+writeLog($logFile, "");
 writeLog($logFile, $output_str);
 writeLog($logFile, "Exit-Code: $returnCode");
-writeLog($logFile, "=== END Update mit git pull ===");
+writeLog($logFile, "=== ENE Update mit git pull ===");
 writeLog($logFile, "");
 
 // Neue Version anzeigen (falls version.ini geändert wurde)
@@ -634,6 +650,11 @@ if (file_exists($iniFile) and $returnCode == 0) {
     echo "<p><b>Neue Version:</b> " . htmlspecialchars($newVersion) . "</p>";
 }
 echo '</center>';
+
+# Wieder auf v0.38.X zurückwechseln   #entWIGGlung
+#exec('git reset --hard 29013b6 2>&1', $gitdiff, $gitdiff2);  #entWIGGlung 29013b6 (tag: v0.38.8) 
+#exec('git reset --hard 20424ae 2>&1', $gitdiff, $gitdiff2);  #entWIGGlung 20424ae (tag: v0.38.2)
+#echo "ENDE WIGGAL";  #entWIGGlung
 
 //wieder zurück wechseln
 chdir($originalDir);
