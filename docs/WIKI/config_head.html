@@ -16,6 +16,7 @@
 
 
 
+
           Config-Parameter</b></a></div>
     <center> <font style="font-size: 24pt"><b><span>TAB</span>--&gt;
           config</b></font> <br>
@@ -25,7 +26,7 @@
           <tr>
             <td>
               <p>In der Überschrift wird die installierte Version der
-                Ladesteuerung angezeigt. <br>
+                Ladesteuerung angezeigt.<br>
                 Wenn das Quellverzeichnis ein Git-Repository ist, also
                 mit `git clone
                 https://github.com/wiggal/GEN24_Ladesteuerung.git .`
@@ -40,28 +41,29 @@
               <div style="text-align:center;"><span class="version">
                   <p><b>Neue Version: v0.40.1</b></p>
                 </span></div>
-              <pre>	Differenzen in den Configdateien seit dem letzten Update.
-        evtl. die entsprechenden _priv.ini-Dateien ergänzen!
+              <pre>	
+Differenzen in den Configdateien seit dem letzten Update.
+evtl. die entsprechenden _priv.ini-Dateien ergänzen!
 
-	&gt;&gt;&gt; CONFIG/default.ini
-		-; print_level steuert die Ausgabe beim Lauf der Ladesteuerung (http_SymoGen24Controller2.py)
-		+; print_level steuert die Ausgabe beim Lauf der Ladesteuerung (EnergyController.py)
-		-[gen24]
-		+[inverter]
-		+; InverterTyp für Fronius Gen24 und Verto = gen24
-		+InverterTyp = gen24</pre>
+&gt;&gt;&gt; CONFIG/default.ini
+  -; print_level steuert .... (http_SymoGen24Controller2.py)
+  +; print_level steuert .... (EnergyController.py)
+  -[gen24]
+  +[inverter]
+  +; InverterTyp für Fronius Gen24 und Verto = gen24
+  +InverterTyp = gen24</pre>
               <center>
                 <h2>🔄 Updatemeldungen</h2>
-                <pre>Updating 29013b6..95f3e0c
-Fast-forward
- .gitignore                                         |   2 +-
- CHANGELOG.md                                       |  19 +
- CONFIG/default.ini                                 |   6 +-
- DOCKER/Dockerfile                                  |   2 +-
- DOCKER/docker-entrypoint.sh                        |   2 +-
- DynamicPriceCheck.py                               |  25 +-</pre>
-                <p><b>Exit-Code:</b> 0</p>
               </center>
+              <pre>Updating 29013b6..95f3e0c
+Fast-forward
+ .gitignore                                 |   2 +-
+ CHANGELOG.md                               |  19 +
+ CONFIG/default.ini                         |   6 +-
+ DOCKER/Dockerfile                          |   2 +-
+ DOCKER/docker-entrypoint.sh                |   2 +-
+ DynamicPriceCheck.py                       |  25 +-</pre>
+              <p><b>Exit-Code:</b> 0</p>
               <i> Die Ausgeben werden auch in das Logfile Update.log
                 geschrieben, und können in dem TAB Logfiles aufgerufen
                 werde.</i><br>
