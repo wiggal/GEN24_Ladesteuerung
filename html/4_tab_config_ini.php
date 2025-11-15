@@ -13,9 +13,6 @@ td, th {
   padding: 4px;
 }
 
-/*
-tr:nth-child(even){background-color: #f2f2f2;}
-*/
 .comment {background-color: #f2f2f2;}
 
 tr:hover {background-color: #ddd;}
@@ -196,27 +193,34 @@ function get_updatebutton($repoPath, $logFile, $prg_version) {
         $buttonText = '✅ Aktuell';
         $buttonStyle = 'background-color: #44c767; cursor: not-allowed;';
         $buttonDisabled = 'disabled';
+        $buttontitle = ' title="Version '.$prg_version.' ist aktuell" ';
 
         if ($compare !== null && $compare < 0) {
             $buttonText = "🔄 $remoteVersion";
-            $buttonStyle = 'background-color: #FF5555; cursor: pointer;';
+            $buttonStyle = 'background-color: #90CAF9; cursor: pointer;';
             $buttonDisabled = '';
+            $buttontitle = ' title="Update auf Github-Version '.$remoteVersion.'" ';
         }
-
-        echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" style="display:inline;">' . "\n";
-        echo '<input type="hidden" name="case" value="git_update">';
-        echo '<button type="submit" style="' . htmlspecialchars($buttonStyle) . '" ' . $buttonDisabled . '>';
-        echo htmlspecialchars($buttonText);
-        echo '</button>';
-        echo '</form>';
-        echo "</div>\n";
     } else {
         // ❌ Fehler vorhanden → ins Log schreiben
+        $buttonText = '❌ OFF';
+        $buttonStyle = 'background-color: #FF5555; cursor: not-allowed;';
+        $buttonDisabled = 'disabled';
+        $buttontitle = ' title="Fehler bei der Updateprüfung, siehe Update.log!!" ';
+
         $meldungen[] = "=== FEHLER beim Update-Check ===";
         $meldungen[] = "=== ENDE Update-Check ===";
         $meldungen[] = "";
         foreach ($meldungen as $msg) writeLog($logFile, $msg);
     }
+
+    echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" style="display:inline;">' . "\n";
+    echo '<input type="hidden" name="case" value="git_update">'."\n";
+    echo '<button type="submit" style="' . htmlspecialchars($buttonStyle) . '" '.$buttontitle . $buttonDisabled . '>';
+    echo htmlspecialchars($buttonText) . "\n";
+    echo '</button>';
+    echo '</form>';
+    echo "</div>\n";
 
 } #ENDE  get_updatebutton
 
@@ -613,27 +617,38 @@ Dateiauswahl_button('1', '', 'ja');
 // Pull durchführen
 exec('git pull 2>&1', $output, $returnCode);
 
+// Neue Version anzeigen (falls version.ini geändert wurde)
+$iniFile = $repoPath . '/version.ini';
+if (file_exists($iniFile) and $returnCode == 0) {
+    $ini = parse_ini_file($iniFile, true);
+    $newVersion = $ini['Programm']['version'] ?? 'unbekannt';
+    echo '<div style="text-align:center;"><span class="version">';
+    echo "<p><b>Neue Version: " . htmlspecialchars($newVersion) . "</b></p>";
+    echo '</span></div>';
+}
+
 if($returnCode == 0){
     exec(
-    "git diff -U0 HEAD@{1} HEAD -- CONFIG/ "
+    "git diff -U0 HEAD@{1} HEAD -- CONFIG/ html/config.php"
     . "| grep -v -e '^diff --git' -e '^index ' -e '^@@ ' -e '^+++ ' "
-    . "| sed -e 's/^--- /\t&/' -e 't' -e 's/^/\t\t/' 2>&1",
+    . "| sed -e 's/^--- a\//>>> /' -e 's/^>>> /\t&/' -e 't' -e 's/^/\t\t/' 2>&1",
     $gitdiff,
     $gitdiff2
     );
     $diff_str = "\n\tDifferenzen in den Configdateien seit dem letzten Update.
         evtl. die entsprechenden _priv.ini-Dateien ergänzen!\n\n";
-    $diff_str .= htmlspecialchars(implode("\n", $gitdiff));
-    echo "<pre>" . $diff_str . "</pre>";
+    $diff_str .= implode("\n", $gitdiff);
+    $diff_html_str .= htmlspecialchars($diff_str);
+    echo "<pre>" . $diff_html_str . "</pre>";
 }
 
 echo '<center>';
-echo "<h2>🔄 Update durchgeführt</h2>";
+echo "<h2>🔄 Updatemeldungen</h2>";
 echo "<pre>" . htmlspecialchars(implode("\n", $output)) . "</pre>";
 echo "<p><b>Exit-Code:</b> $returnCode</p>";
 
 // Logfile schreiben
-$output_str = htmlspecialchars(implode("\n\t\t", $output));
+$output_str = "Updatemeldungen:\n\t\t" . htmlspecialchars(implode("\n\t\t", $output));
 writeLog($logFile, "=== BEGINN Update mit git pull ===\n");
 writeLog($logFile, "$diff_str");
 writeLog($logFile, "");
@@ -642,19 +657,7 @@ writeLog($logFile, "Exit-Code: $returnCode");
 writeLog($logFile, "=== ENE Update mit git pull ===");
 writeLog($logFile, "");
 
-// Neue Version anzeigen (falls version.ini geändert wurde)
-$iniFile = $repoPath . '/version.ini';
-if (file_exists($iniFile) and $returnCode == 0) {
-    $ini = parse_ini_file($iniFile, true);
-    $newVersion = $ini['Programm']['version'] ?? 'unbekannt';
-    echo "<p><b>Neue Version:</b> " . htmlspecialchars($newVersion) . "</p>";
-}
 echo '</center>';
-
-# Wieder auf v0.38.X zurückwechseln   #entWIGGlung
-#exec('git reset --hard 29013b6 2>&1', $gitdiff, $gitdiff2);  #entWIGGlung 29013b6 (tag: v0.38.8) 
-#exec('git reset --hard 20424ae 2>&1', $gitdiff, $gitdiff2);  #entWIGGlung 20424ae (tag: v0.38.2)
-#echo "ENDE WIGGAL";  #entWIGGlung
 
 //wieder zurück wechseln
 chdir($originalDir);
