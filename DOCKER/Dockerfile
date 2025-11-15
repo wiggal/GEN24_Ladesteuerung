@@ -10,7 +10,9 @@ ENV CONTAINER_TIMEZONE="Europe/Berlin" \
     LANGUAGE=de_DE:de \
     LC_ALL=de_DE.UTF-8
 
-COPY GEN24_Ladesteuerung-main/ /home/GEN24
+RUN apk add --update-cache git
+#git clon_Ladesteuerung-main/ nach /home/GEN24
+RUN git clone -b main https://github.com/wiggal/GEN24_Ladesteuerung.git /home/GEN24
 
 RUN apk add --update-cache \
     php \
