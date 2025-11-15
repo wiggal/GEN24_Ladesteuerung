@@ -35,7 +35,11 @@ button {
 <!--HIERZURUECK-->
 
 
-    <div class="weatherDataManager"> <a href="#ConfigParameter"><b>Beschreibung Config-Parameter</b></a></div>
+    <div class="weatherDataManager"> <a href="#ConfigParameter"><b>Beschreibung
+
+
+
+          Config-Parameter</b></a></div>
     <center> <font style="font-size: 24pt"><b><span>TAB</span>--&gt;
           config</b></font> <br>
       <br>
@@ -48,21 +52,53 @@ button {
                 Wenn das Quellverzeichnis ein Git-Repository ist, also
                 mit `git clone
                 https://github.com/wiggal/GEN24_Ladesteuerung.git .`
-                erzeugt wurde (siehe install im WIKI),
-                wird nach der Überschrift ein Updatebutton angezeigt.
-                Wenn eine neuere Version auf Github vorhanden ist, kann
-                über diesen Button ein Update gemacht werden.
+                erzeugt wurde (siehe install im WIKI), wird nach der
+                Überschrift ein Updatebutton angezeigt. Wenn eine neuere
+                Version auf Github vorhanden ist, kann über diesen
+                Button ein Update gemacht werden. <br>
               </p>
+              <p><u><i> Beispielausgaben währen des Update:</i></u><br>
+                <br>
+              </p>
+              <div style="text-align:center;"><span class="version">
+                  <p><b>Neue Version: v0.40.1</b></p>
+                </span></div>
+              <pre>	Differenzen in den Configdateien seit dem letzten Update.
+        evtl. die entsprechenden _priv.ini-Dateien ergänzen!
+
+	&gt;&gt;&gt; CONFIG/default.ini
+		-; print_level steuert die Ausgabe beim Lauf der Ladesteuerung (http_SymoGen24Controller2.py)
+		+; print_level steuert die Ausgabe beim Lauf der Ladesteuerung (EnergyController.py)
+		-[gen24]
+		+[inverter]
+		+; InverterTyp für Fronius Gen24 und Verto = gen24
+		+InverterTyp = gen24</pre>
+              <center>
+                <h2>🔄 Updatemeldungen</h2>
+                <pre>Updating 29013b6..95f3e0c
+Fast-forward
+ .gitignore                                         |   2 +-
+ CHANGELOG.md                                       |  19 +
+ CONFIG/default.ini                                 |   6 +-
+ DOCKER/Dockerfile                                  |   2 +-
+ DOCKER/docker-entrypoint.sh                        |   2 +-
+ DynamicPriceCheck.py                               |  25 +-</pre>
+                <p><b>Exit-Code:</b> 0</p>
+              </center>
+              <i> Die Ausgeben werden auch in das Logfile Update.log
+                geschrieben, und können in dem TAB Logfiles aufgerufen
+                werde.</i><br>
             </td>
           </tr>
           <tr>
             <td>
               <p>In dem Dropdown können alle vorhandenen
                 _priv.ini-Dateien ausgewählt und mit dem Button
-                angezeigt werden. 
-                Anschließend kann die ausgewählte _priv.ini-Datei
-                editiert oder wenn weine original ini-Datei vorhanden
-                ist mit dieser verglichen und auf deren Stand upgedatet
+                angezeigt werden. Anschließend kann die ausgewählte
+                _priv.ini-Datei editiert oder wenn eine original
+                ini-Datei vorhanden ist mit dieser verglichen und auf
+                deren Stand upgedatet werden. Die Datei
+                html/config_priv.ini muß in einem Editor angepasst
                 werden.<br>
               </p>
             </td>
@@ -72,8 +108,10 @@ button {
       <br>
     </center>
     <hr width="100%" size="2">
-    <h2 class="western" align="center"> <a name="ConfigParameter"></a>Beschreibung
-      der Config-Parameter<br>
+    <h2 class="western" align="center"><br>
+    </h2>
+    <h2 class="western" align="center"><a name="ConfigParameter"></a></h2>
+    <h2 class="western" align="center">Beschreibung der Config-Parameter<br>
     </h2>
     <br>
   <br><center><a href="#Hilfezu/CONFIG/defaultini" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;<button type="submit">Hilfe zu ../CONFIG/default.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
@@ -441,6 +479,6 @@ button {
 <tr><td class="variablenname">MwSt</td>
 <td><input type="text" name="Zeile[40][1]" value="1.19" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[41]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 14.11.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+</table><div id="Hilfezu/CONFIG/dynpriceini"></div><br /><br /><hr />Hilfe erzeugt am 15.11.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>
