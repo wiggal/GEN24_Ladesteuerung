@@ -5,7 +5,6 @@
 table {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
-  width: 100%;
 }
 
 td, th {
@@ -100,7 +99,7 @@ echo '<span class="version">';
 echo '<b>Ladesteuerung: ' .  htmlspecialchars($prg_version) . '</b>';
 echo '</span>';
 
-// --- Hilfsfunktion fürs Logging ---
+// --- Hilfsfunktionen fürs Update-Logging ---
 function writeLog($file, $message) {
     $timestamp = '';
     if($message != ''){
@@ -114,6 +113,53 @@ function writeLog($file, $message) {
         fclose($fh);
     }
 }
+
+/**
+ * Entfernt alle Zeilen am Anfang eines Logfiles,
+ * bis die erste Zeile erreicht wird, deren Datum (im Format [Y-m-d H:i:s])
+ * höchstens 1 Monat alt ist.
+ */
+function filterLogByAge(string $filePath): array
+{
+    // Datei existiert nicht → nichts tun
+    if (!file_exists($filePath)) {
+        return [];
+    }
+
+    $lines = file($filePath, FILE_IGNORE_NEW_LINES);
+    $originalCount = count($lines);
+
+    $now   = new DateTime();
+    $limit = (clone $now)->modify('-1 month');
+
+    $result = [];
+    $keep = false;
+
+    foreach ($lines as $line) {
+
+        // Datum extrahieren
+        if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/', $line, $m)) {
+            $date = DateTime::createFromFormat('Y-m-d H:i:s', $m[1]);
+
+            // Sobald erste gültige Zeile gefunden wurde → Rest behalten
+            if ($date && $date >= $limit) {
+                $keep = true;
+            }
+        }
+
+        if ($keep) {
+            $result[] = $line;
+        }
+    }
+
+    // Wenn Zeilen entfernt wurden → Datei neu schreiben
+    if (count($result) < $originalCount) {
+        file_put_contents($filePath, implode("\n", $result));
+    }
+
+    return $result;
+}
+
 
 function get_updatebutton($repoPath, $logFile, $prg_version) {
     $originalDir = getcwd();
@@ -232,6 +278,8 @@ function getinifile($dir)
         $filename = basename($element);
         $files .= "<option value=\"$element\"> $filename </option>";
 	}
+    # html/config_priv.ini einfügen
+    $files .= "<option value=\"config_priv.ini\">html/config_priv.ini</option>";
 return $files;
 }
 		
@@ -609,6 +657,9 @@ exit();
 
         case 'git_update':
 
+# Logfiledaten löschen, die älter als ein Monat sind
+$gefiltert = filterLogByAge($logFile);
+
 $originalDir = getcwd();
 // ins lokales Repo wechseln
 chdir($PythonDIR);
@@ -631,15 +682,22 @@ if($returnCode == 0){
     exec(
     "git diff -U0 HEAD@{1} HEAD -- CONFIG/ html/config.php"
     . "| grep -v -e '^diff --git' -e '^index ' -e '^@@ ' -e '^+++ ' "
-    . "| sed -e 's/^--- a\//>>> /' -e 's/^>>> /\t&/' -e 't' -e 's/^/\t\t/' 2>&1",
+    . "| sed -e 's/^--- a\//>>> /' -e 's/^>>> /&/' -e 't' -e 's/^/\t/' 2>&1",
     $gitdiff,
     $gitdiff2
     );
-    $diff_str = "\n\tDifferenzen in den Configdateien seit dem letzten Update.
-        evtl. die entsprechenden _priv.ini-Dateien ergänzen!\n\n";
-    $diff_str .= implode("\n", $gitdiff);
+    $CENTER_tag_on = '<center>';
+    $CENTER_tag_off = '</center>';
+    $Diff_header ='<h3>⚠️ Differenzen in den Configdateien seit dem letzten Update<br>evtl. die entsprechenden _priv.ini-Dateien anpassen!⚠️ </h3>';
+    $Diff_header .= '<!-- Tabelle zentriert und mit rotem Rahmen -->
+                    <table border="2" bordercolor="red" ><tr> <td align="left">';
+    $diff_str = implode("\n", $gitdiff);
     $diff_html_str .= htmlspecialchars($diff_str);
+    $diff_str = str_replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $diff_str);
+    echo $CENTER_tag_on . $Diff_header;
     echo "<pre>" . $diff_html_str . "</pre>";
+    echo '</td> </tr> </table>';
+    echo $CENTER_tag_off;
 }
 
 echo '<center>';
@@ -649,13 +707,16 @@ echo "<p><b>Exit-Code:</b> $returnCode</p>";
 
 // Logfile schreiben
 $output_str = "Updatemeldungen:\n\t\t" . htmlspecialchars(implode("\n\t\t", $output));
-writeLog($logFile, "=== BEGINN Update mit git pull ===\n");
-writeLog($logFile, "$diff_str");
-writeLog($logFile, "");
-writeLog($logFile, $output_str);
-writeLog($logFile, "Exit-Code: $returnCode");
-writeLog($logFile, "=== ENE Update mit git pull ===");
-writeLog($logFile, "");
+writeLog($logFile,
+    "=== BEGINN Update mit git pull ===\n" .
+    $Diff_header . " " . $diff_str . "\n" .
+    "</td> </tr> </table>\n" .
+    "\n" .
+    $output_str . "\n" .
+    "Exit-Code: $returnCode\n" .
+    "\n"
+);
+writeLog($logFile, "=== ENE Update mit git pull ===<br>");
 
 echo '</center>';
 

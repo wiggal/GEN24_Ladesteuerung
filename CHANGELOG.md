@@ -1,8 +1,13 @@
-**[0.40.2] – 2025-XX-XX**  
+**[0.40.2] – 2025-11-17**  
 
 **NEU**  
 - Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist, also mit `git clone ..` erzeugt wurde,  
   und sich auf dem Hauptzweig `main` befindet. Updatemeldungen werden in `Update.log` geschrieben.  
+
+- **Änderung in der html/config.php** Bezeichnung des TAB `Logfile` in `Logfiles` geändert, evtl. in **html/config_priv.php**.  
+
+- 🐳 Die Quellen im Dockerimage sind nun auch ein Clone des Repo. Damit kann ein Update auch im TAB `config` gemacht werden.  
+  Neue Dockerimages wird es daher nur mehr für größere Release geben.  
 
 **[0.40.1] – 2025-11-13**  
 
