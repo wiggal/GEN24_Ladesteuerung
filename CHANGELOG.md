@@ -2,7 +2,7 @@
 
 **NEU**  
 - Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist, also mit `git clone ..` erzeugt wurde,  
-  und sich auf dem Hauptzweig `main` befindet. Updatemeldungen werden in `Update.log` geschrieben.  
+  und sich auf dem Hauptzweig `main` befindet. Updatemeldungen werden in `Update.log` geschrieben, Einträge älter 1 Monat werden automatisch gelöscht.  
 
 - **Änderung in der html/config.php** Bezeichnung des TAB `Logfile` in `Logfiles` geändert, evtl. in **html/config_priv.php**.  
 
