@@ -101,13 +101,15 @@ if (preg_match('/<body[^>]*>(.*)<\/body>/is', $config_head, $match)) {
 
 echo $config_head_bodyContent;
 
-$config_ini_files = ['default.ini', 'weather.ini', 'charge.ini', 'dynprice.ini'];
+$config_ini_files = ['default.ini', 'weather.ini', 'charge.ini', 'dynprice.ini', '../html/config.ini'];
 
 foreach ($config_ini_files as $file) {
     $filename = $PythonDIR.'/CONFIG/'.$file;
+    $filename_button = preg_replace('#^(\.\./)?CONFIG/#', '', $filename);
+    $filename_button = preg_replace('#^(\.\./)+#', '', $filename_button);
     $ankor_text = "Hilfezu".str_replace(['_', '.'], '', $filename);
     echo '<br><center><a href="#'.$ankor_text.'" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;';
-    echo '<button type="submit">Hilfe zu '.$filename.'</button>';
+    echo '<button type="submit">Hilfe zu '.$filename_button.'</button>';
     echo '&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center>';
     echo '<br><br>';
     echo '<table>';
