@@ -6,11 +6,9 @@
     <title>GEN24 Ladesteuerung</title>
     <style>
         <?php
-        # $PythonDIR lesen
-        include "config.php";
-        if(file_exists("config_priv.php")){
-            include "config_priv.php";
-        }
+        # config.ini parsen
+        require_once "config_parser.php";
+
         $style_contend = file_get_contents($PythonDIR."/docs/style.css");
         # Seitenvorschub für WIKI-Navigation entfernen
         $style_contend = str_replace(

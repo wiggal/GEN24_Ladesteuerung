@@ -49,10 +49,21 @@
 
 
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
+# config.ini parsen
+require_once "config_parser.php";
+
+# Optionen für das Strompreisdiagramm
+$Strompreis_Dia_optionen['BattStatus']=['Farbe'=>'rgba(72,118,255,1)','fill'=>'false','stack'=>'1','linewidth'=>'4','order'=>'0','yAxisID'=>'y2','hidden'=>'false','type'=>'line','unit'=>'%','showLabel'=>'false','decimals'=>'1'];
+$Strompreis_Dia_optionen['Boersenpreis']=['Farbe'=>'rgba(255,51,51,0.4)','fill'=>'true','stack'=>'3','linewidth'=>'0','order'=>'0','yAxisID'=>'y3','hidden'=>'false','type'=>'line','unit'=>'ct','showLabel'=>'false','decimals'=>'1'];
+$Strompreis_Dia_optionen['Bruttopreis']=['Farbe'=>'rgba(255,51,51,1)','fill'=>'false','stack'=>'32','linewidth'=>'0','order'=>'0','yAxisID'=>'y3','hidden'=>'false','type'=>'bar','unit'=>'','showLabel'=>'false','decimals'=>'1'];
+$Strompreis_Dia_optionen['Netzladen']=['Farbe'=>'rgba(60,215,60,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'4','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'Wh','showLabel'=>'false','decimals'=>'0'];
+$Strompreis_Dia_optionen['Netzverbrauch']=['Farbe'=>'rgba(110,110,110,1)','fill'=>'true','stack'=>'2','linewidth'=>'0','order'=>'2','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'Wh','showLabel'=>'false','decimals'=>'0'];
+$Strompreis_Dia_optionen['Vorhersage']=['Farbe'=>'rgba(255,140,05,1)','fill'=>'false','stack'=>'0','linewidth'=>'4','order'=>'0','yAxisID'=>'y','hidden'=>'false','type'=>'line','unit'=>'Wh','showLabel'=>'false','decimals'=>'0'];
+$Strompreis_Dia_optionen['PV_Prognose']=['Farbe'=>'rgba(255,140,05,0.6)','fill'=>'false','stack'=>'10','linewidth'=>'4','order'=>'0','yAxisID'=>'y','hidden'=>'false','type'=>'line','unit'=>'Wh','showLabel'=>'false','decimals'=>'0'];
+$Strompreis_Dia_optionen['PrognBattStatus']=['Farbe'=>'rgba(72,118,255,0.6)','fill'=>'false','stack'=>'11','linewidth'=>'4','order'=>'0','yAxisID'=>'y2','hidden'=>'false','type'=>'line','unit'=>'%','showLabel'=>'false','decimals'=>'1'];
+$Strompreis_Dia_optionen['PrognNetzladen']=['Farbe'=>'rgba(60,215,60,0.6)','fill'=>'true','stack'=>'12','linewidth'=>'0','order'=>'4','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'Wh','showLabel'=>'false','decimals'=>'0'];
+$Strompreis_Dia_optionen['PrognNetzverbrauch']=['Farbe'=>'rgba(110,110,110,0.6)','fill'=>'true','stack'=>'12','linewidth'=>'0','order'=>'2','yAxisID'=>'y','hidden'=>'false','type'=>'bar','unit'=>'Wh','showLabel'=>'false','decimals'=>'0'];
+
 include "7_funktion_Diagram.php";
 
 # Prüfen ob SQLite Voraussetzungen vorhanden sind

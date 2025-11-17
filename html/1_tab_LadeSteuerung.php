@@ -177,10 +177,9 @@ input.slider {
    <br />
 
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
+# config.ini parsen
+require_once "config_parser.php";
+
 include 'SQL_steuerfunctions.php';
 $EV_Reservierung = getSteuercodes('Reservierung');
 $PrstLadeStd = getPrstLadeStd();

@@ -2,10 +2,9 @@
 <html>
 <body>
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
+# config.ini parsen
+require_once "config_parser.php";
+
 $file = $PythonDIR.'/CONFIG/default.ini';
 if(file_exists($PythonDIR.'/CONFIG/default_priv.ini')){
     $file = $PythonDIR.'/CONFIG/default_priv.ini';

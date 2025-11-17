@@ -49,10 +49,9 @@ table a {
 </style>
 </head>
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
+# config.ini parsen
+require_once "config_parser.php";
+
 ?>
 <body onLoad="if (location.hash != '#bottom') location.hash = '#bottom';">
 <div name="top"><div>

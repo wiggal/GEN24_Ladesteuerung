@@ -86,10 +86,8 @@ function config_lesen( $file, $readonly )
 }
 
 # AUSGEBEN aller *.ini
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
+# config.ini parsen
+require_once "config_parser.php";
 
 // config_head.html einlesen
 $config_head = file_get_contents($PythonDIR.'/docs/WIKI/config_head.html');

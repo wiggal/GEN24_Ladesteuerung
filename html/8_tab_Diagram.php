@@ -49,10 +49,9 @@
 
 
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
+# config.ini parsen
+require_once "config_parser.php";
+
 include "8_funktion_Diagram.php";
 
 # Prüfen ob SQLite Voraussetzungen vorhanden sind

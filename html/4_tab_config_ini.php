@@ -78,14 +78,13 @@ td {font-size: 140%;
 
 <!-- Hilfeaufruf ANFANG -->
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
-  $current_url = urlencode($_SERVER['REQUEST_URI']);
-  $hilfe_link = "Hilfe_Ausgabe.php?file=config&return=$current_url";
-    $config = parse_ini_file($PythonDIR.'/version.ini', true);
-    $prg_version = $config['Programm']['version'];
+# config.ini parsen
+require_once "config_parser.php";
+
+$current_url = urlencode($_SERVER['REQUEST_URI']);
+$hilfe_link = "Hilfe_Ausgabe.php?file=config&return=$current_url";
+$config = parse_ini_file($PythonDIR.'/version.ini', true);
+$prg_version = $config['Programm']['version'];
 
 # Pfade und Logdatei für Updatefunktion
 $repoPath = realpath($PythonDIR);
@@ -279,7 +278,7 @@ function getinifile($dir)
         $files .= "<option value=\"$element\"> $filename </option>";
 	}
     # html/config_priv.ini einfügen
-    # $files .= "<option value=\"config_priv.ini\">html/config_priv.ini</option>";  #entWIGGlung
+    $files .= "<option value=\"config_priv.ini\">html/config_priv.ini</option>";
 return $files;
 }
 		
@@ -541,7 +540,7 @@ Dateiauswahl_button('1', $ini_file, 'nein');
 
 echo '<br><br>';
 echo 'Kennwort um '.basename($ini_file).' zu editieren oder upzudaten:<br>';
-echo '(Kennwortänderung in html/config.php)<br>';
+echo '(Kennwortänderung in html/config_priv.ini)<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="editieren_passwd">'."\n";
@@ -618,7 +617,7 @@ $write = implode("\n", $final_lines)."\n";
 // Basisname ohne Pfad und ohne Erweiterung ermitteln
 $basename = pathinfo($ini_file, PATHINFO_FILENAME);
 $timestamp = date("Ymd_His");
-$DIR = dirname($ini_file) . "/SIC/";
+$DIR = $PythonDIR . "/CONFIG/SIC/";
 $backup_file = $DIR . $basename . "_" . $timestamp . ".sic";
 // Nur die 2 neuesten Backups behalten
 $backup_pattern = $DIR . $basename . "_*.sic";
@@ -680,7 +679,7 @@ if (file_exists($iniFile) and $returnCode == 0) {
 
 if($returnCode == 0){
     exec(
-    "git diff -U0 HEAD@{1} HEAD -- CONFIG/ html/config.php"
+    "git diff -U0 HEAD@{1} HEAD -- CONFIG/ html/config.ini"
     . "| grep -v -e '^diff --git' -e '^index ' -e '^@@ ' -e '^+++ ' "
     . "| sed -e 's/^--- a\//>>> /' -e 's/^>>> /&/' -e 't' -e 's/^/\t/' 2>&1",
     $gitdiff,

@@ -1,3 +1,9 @@
+**[0.40.3] – 2025-XX-XX**  
+
+- **Änderung html/config.php in html/config.ini** 
+  Bitte html/config.ini nach html/config_priv.ini kopieren und eventuell eigene Einstellungen übernehmen.  
+  Durch die Änderung können nun auch die Einstellungen der html/config_priv.ini im TAB config editiert werden.  
+
 **[0.40.2] – 2025-11-17**  
 
 **NEU**  

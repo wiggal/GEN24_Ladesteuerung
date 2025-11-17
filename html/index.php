@@ -85,12 +85,11 @@ body {
 <body>
 
 <?php
-include "config.php";
-if(file_exists("config_priv.php")){
-  include "config_priv.php";
-}
+# config.ini parsen
+require_once "config_parser.php";
+
 if (!isset($TAB_config) OR !is_array($TAB_config)) {
-    echo '</br><center>ACHTUNG: Die Variable "TAB_config" ist in der config.php nicht (richtig) gesetzt!!</center></body></html>';
+    echo '</br><center>ACHTUNG: Die Variable "TAB_config" ist in der config.ini oder config_priv.ini nicht (richtig) gesetzt!!</center></body></html>';
     exit();
 }
 $class_link='';
