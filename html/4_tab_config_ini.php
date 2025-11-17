@@ -279,7 +279,7 @@ function getinifile($dir)
         $files .= "<option value=\"$element\"> $filename </option>";
 	}
     # html/config_priv.ini einfügen
-    $files .= "<option value=\"config_priv.ini\">html/config_priv.ini</option>";
+    # $files .= "<option value=\"config_priv.ini\">html/config_priv.ini</option>";  #entWIGGlung
 return $files;
 }
 		
