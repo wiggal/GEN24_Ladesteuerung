@@ -103,9 +103,9 @@ header {
 
 /* Navigations-Listenelemente innerhalb des Menüs */
 .nav-links li {
-    margin: 6px 0; /* Vertikalen Abstand reduziert */
-    padding-top: 5px;
-    padding-bottom: 5px;
+    margin: 3px 0; /* Vertikalen Abstand reduziert */
+    padding-top: 3px;
+    padding-bottom: 3px;
     opacity: 0; /* Hidden by default for animation */
     width: 100%;
     text-align: center;
