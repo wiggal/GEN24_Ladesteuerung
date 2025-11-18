@@ -1,4 +1,4 @@
-**[0.40.3] – 2025-XX-XX**  
+**[0.40.3] – 2025-11-18**  
 
 - **Änderung html/config.php in html/config.ini** 
   Bitte html/config.ini nach html/config_priv.ini kopieren und eventuell eigene Einstellungen übernehmen.  

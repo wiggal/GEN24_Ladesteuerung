@@ -567,9 +567,9 @@ $SpeichernButton  = ' speichern!';
 if ($_POST["editcase"] == 'update') {
 # SpeichernButton unterschied edit/update
 $SpeichernButton  = ' updaten!';
-echo "</td><td style='border: 0; padding: 8px; background-color: #FFF5CC;'>Werte aus ".$ini_file;
-echo "</td><td style='border: 0; padding: 8px; background-color: #CCE5FF;'>Veränderte Werte aus ".$org_ini_file;
-echo "</td><td style='border: 0; padding: 8px; background-color: #FFCCCC;'>Fehlende Werte aus ".$org_ini_file;
+echo "</td><td style='border: 0; padding: 8px; background-color: #FFF5CC;'>Werte aus ".basename($ini_file);
+echo "</td><td style='border: 0; padding: 8px; background-color: #CCE5FF;'>Veränderte Werte aus ".basename($org_ini_file);
+echo "</td><td style='border: 0; padding: 8px; background-color: #FFCCCC;'>Fehlende Variablen aus ".basename($org_ini_file);
 }
 echo "</td></tr></table>";
 # Button
