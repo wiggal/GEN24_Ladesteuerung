@@ -5,6 +5,7 @@
 table {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
+  width: 100%;
 }
 
 td, th {
@@ -71,6 +72,11 @@ td {font-size: 140%;
     font-size:150%;
     color: #000000;
     }
+/* Tabelle für Updateausgabe */
+.flex-table {
+  width: auto;      /* passt sich dem Inhalt an */
+  display: inline-table; /* optional – verhindert Strecken auf 100% */
+}
 
 </style>
 </head>
@@ -689,7 +695,7 @@ if($returnCode == 0){
     $CENTER_tag_off = '</center>';
     $Diff_header ='<h3>⚠️ Differenzen in den Configdateien seit dem letzten Update<br>evtl. die entsprechenden _priv.ini-Dateien anpassen!⚠️ </h3>';
     $Diff_header .= '<!-- Tabelle zentriert und mit rotem Rahmen -->
-                    <table border="2" bordercolor="red" ><tr> <td align="left">';
+                    <table class="flex-table" border="2" bordercolor="red" ><tr> <td align="left">';
     $diff_str = implode("\n", $gitdiff);
     $diff_html_str .= htmlspecialchars($diff_str);
     $diff_str = str_replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $diff_str);
