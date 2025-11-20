@@ -304,7 +304,7 @@ $Res_Feld2_Watt = number_format($Res_Feld2_wert, 1);
 } else  { 
 $Res_Feld2_Watt = "" ;
 }
-$Prognosewert =number_format($Watt/1000*$Faktor_PVLeistung_Prognose, 1);
+$Prognosewert =number_format($Watt/1000, 1);
 $Rest_KW = number_format($Prognosewert - (float) $Res_Feld2_Watt - (float) $Res_Feld1_Watt, 1);
 
 // Hintergrund heute bzw. morgen 

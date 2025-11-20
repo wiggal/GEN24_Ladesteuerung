@@ -1,3 +1,7 @@
+**[0.40.4] – 2025-XX-XX**  
+
+- **Änderung in html/config.ini** Überflüssige Varaible `Faktor_PVLeistung_Prognose` entfernt, in html/config_priv.ini nachziehen.  
+
 **[0.40.3] – 2025-11-18**  
 
 - **Änderung html/config.php in html/config.ini** 
