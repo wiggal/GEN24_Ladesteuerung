@@ -72,6 +72,9 @@ class InverterApi:
         gen24url = "http://"+IP+"/components/readable"
         url = requests.get(gen24url)
         data = json.loads(url.text)
+        # Lokale Datei öffnen und JSON laden  #entWIGGlung
+        #with open("readable.json", "r", encoding="utf-8") as f:
+        #    data = json.load(f)
         API = {}
         # relevante API-Schlüssel definieren: 
         # schluessel [1-3] bei mehrfachschlussel, True für Summenbildung

@@ -1,6 +1,7 @@
-**[0.40.5] – 2025-XX-XX**  
+**[0.40.5] – 2025-11-22**  
 
-- API-Anpassung ab Firmware 1.39.5-1 `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16´ nun `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_F32`.  
+- API-Anpassung ab Firmware 1.39.5-1 `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16` nun `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_F32`.  
+  Die API components/readable wurde umfangreich geändert, die Konten wurden mit aussagekräftigen Namen versehen anstelle von Nummern (z.B. 0 => Fronius_Inverter_8e31d3b462cd).  
 
 **[0.40.4] – 2025-11-21**  
 
