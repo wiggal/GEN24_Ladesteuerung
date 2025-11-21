@@ -79,7 +79,7 @@ class InverterApi:
         GEN24_API_schluessel = [
             ("nameplate", False),                                                           #BYD
             ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),                              #BYD
-            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16", False),                              #BYD  Nur vorhanden, wenn Akku an/standby
+            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_(U16|F32)", False),                              #BYD  Nur vorhanden, wenn Akku an/standby
             ("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", False, ("label", "<primary>")),         #SM <primary>
             ("SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
             ("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
@@ -99,11 +99,19 @@ class InverterApi:
             # Benötigte Werte mit den geholten API-Werten errechnen und API zuweisen
             # Aktuelle Werte für Prognoseberechung
             # Folgende Werte sind nur vorhanden, wenn Akku an/standby
+            # Folgende Werte sind nur vorhanden, wenn Akku an/standby
             try:
-                API['BattStatusProz'] =    round(API_result['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
-            except:
-                API['BattStatusProz'] =    5
-                print("*********** Batterie ist evtl. offline, aktueller Ladestand wird auf 5% gesetzt!!! *********")
+                # 1. Versuch: F32 (ab FW 1.39.5-1)
+                API['BattStatusProz'] = round(API_result['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_F32'], 1)
+            except KeyError:
+                try:
+                    # 2. Versuch: U16 (bis FW 1.39.5-1)
+                    API['BattStatusProz'] = round(API_result['BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16'], 1)
+                except KeyError:
+                    # 3. Fallback, wenn Akku komplett offline
+                    API['BattStatusProz'] = 5
+                    print("*********** Batterie ist evtl. offline, aktueller Ladestand wird auf 5% gesetzt!!! *********")
+
             try:
                 API['aktuelleBatteriePower'] = int(API_result['BAT_POWERACTIVE_MEAN_F32'])
             except:

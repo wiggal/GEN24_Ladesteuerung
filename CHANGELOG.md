@@ -1,3 +1,7 @@
+**[0.40.5] – 2025-XX-XX**  
+
+- API-Anpassung ab Firmware 1.39.5-1 `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16´ nun `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_F32`.  
+
 **[0.40.4] – 2025-11-21**  
 
 - **Änderung in html/config.ini** Überflüssige Varaible `Faktor_PVLeistung_Prognose` entfernt, in html/config_priv.ini nachziehen.  
