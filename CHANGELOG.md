@@ -1,12 +1,19 @@
-**[0.40.4] – 2025-XX-XX**  
+**[0.40.4] – 2025-11-21**  
 
 - **Änderung in html/config.ini** Überflüssige Varaible `Faktor_PVLeistung_Prognose` entfernt, in html/config_priv.ini nachziehen.  
+
+- **DOCKER**
+  Umstellung von html/config.php auf html/config.ini auch für Docker dokumentiert und `DOCKER/docker-compose.yml` angepasst
 
 **[0.40.3] – 2025-11-18**  
 
 - **Änderung html/config.php in html/config.ini** 
   Bitte html/config.ini nach html/config_priv.ini kopieren und eventuell eigene Einstellungen übernehmen.  
   Durch die Änderung können nun auch die Einstellungen der html/config_priv.ini im TAB config editiert werden.  
+
+- **DOCKER**
+  in `docker-compose.yml` die html/config.ini bereitstellen,
+  `./CONFIGS/config_priv.ini:/home/GEN24/html/config_priv.ini`
 
 **[0.40.2] – 2025-11-17**  
 

@@ -70,8 +70,8 @@
       overflow-auto">
       <pre class="notranslate"><code># Erstinstallation Verzeichnis /home/GEN24 erzeugen:
 git clone https://github.com/wiggal/GEN24_Ladesteuerung.git .
-# Die CONFIG/XY.ini's nach CONFIG/XY_priv.ini's und die html/config.php nach html/config_priv.php kopieren.
-# Anpassungen in den CONFIG/XY_priv.ini's und in html/config_priv.php machen.
+# Die CONFIG/XY.ini's nach CONFIG/XY_priv.ini's und die html/config.ini nach html/config_priv.ini kopieren.
+# Anpassungen in den CONFIG/XY_priv.ini's und in html/config_priv.ini machen.
 # Nun können die Neuerungen immer mit git geholt werden, ohne die Änderungen zu überschreiben
 # Update mit git
 git pull
@@ -106,9 +106,9 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
       <li>
         <p>Konfiguration der Ladesteuerung<br>
           Die jeweilige CONFIG/XY.ini nach CONFIG/XY_priv.ini und die
-          html/config.php nach html/config_priv.php kopieren.
+          html/config.ini nach html/config_priv.ini kopieren.
           Anpassungen in den CONFIG/XY_priv.ini's und in
-          html/config_priv.php machen, siehe auch die jeweils verlinkte
+          html/config_priv.ini machen, siehe auch die jeweils verlinkte
           Hilfe in der WebUI, bzw. hier im Wiki.<br>
           Sind CONFIG/XY_priv.ini Dateien bei einem Programmlauf nicht
           vorhanden, werden sie von CONFIG/XY.ini kopiert.<br>
@@ -118,10 +118,10 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
         <p>Crontabeinträge<br>
           <code>crontab -e</code> # Editor wählen und folgende Einträge
           machen.<br>
-          EnergyController.py immer eine Minute nach vollen
-          zehn Minuten ausführen (1-56/10), da der GEN24 die Daten immer
-          etwa zur vollen fünften Minute bereitstellt. Da das Smartmeter
-          die Daten aktuell hat, kann beim Ausführen zur vollen fünften
+          EnergyController.py immer eine Minute nach vollen zehn Minuten
+          ausführen (1-56/10), da der GEN24 die Daten immer etwa zur
+          vollen fünften Minute bereitstellt. Da das Smartmeter die
+          Daten aktuell hat, kann beim Ausführen zur vollen fünften
           Minute passieren, dass die Daten vom GEN24 noch nicht zur
           Verfügung stehen. Dadurch entstehen unschöne Zacken in der
           Tagesgrafik.<br>
@@ -141,8 +141,8 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
     <p>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <b>PV-Prognosen:</b><br>
-      Damit die Ladesteuerung per EnergyController.py
-      funktioniert, ist eine PV-Prognose erforderlich.<br>
+      Damit die Ladesteuerung per EnergyController.py funktioniert, ist
+      eine PV-Prognose erforderlich.<br>
       Mit den Skripten XY_WeatherData.py im Verzeichnis FORECAST, können
       Prognosen von verschiedenen Wetterdiensten abgerufen werden.<br>
       Die Prognosen werde in <code>weatherData.sqlite</code>
@@ -207,6 +207,7 @@ sudo apt install php php-sqlite3
 
 
 
+
         = 1</code> (Standard) in der CONFIG/default_priv.ini beim ersten
       Start von <code>start_PythonScript.sh</code> automatisch der
       einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf
@@ -243,6 +244,7 @@ sudo apt install apache2
 
 
 
+
           /var/www/html</code> nach <code>DocumentRoot /home/GEN24/html</code>
         ändern.</li>
     </ul>
@@ -255,14 +257,15 @@ sudo apt install apache2
       Eintrag in Tabelle und feste manuelle Entladesteuerung<br>
       4_tab_config_ini.php ==&gt;&gt; Anzeigen und Editieren der
       CONFIG/XY_priv.ini's<br>
-      5_tab_Crontab_log.php ==&gt;&gt; Anzeigen und Downloaden der Logdateien, z.B. Crontab.log<br>
+      5_tab_Crontab_log.php ==&gt;&gt; Anzeigen und Downloaden der
+      Logdateien, z.B. Crontab.log<br>
       6_tab_GEN24.php ==&gt;&gt; lokaler Aufruf des GEN24<br>
       7_tab_Diagram.php ==&gt;&gt; Diagramme der Strompreise (nur wenn
       DynamicPriceCheck.py läuft)<br>
       8_tab_Diagram.php ==&gt;&gt; Diagramm Quelle und Ziel der Energie<br>
       9_tab_settigs.php ==&gt;&gt; Settings, ändern der Startparameter
       der Ladesteuerung</p>
-    <p>In der <code>html/config_priv.php</code> können die tab_Skripte
+    <p>In der <code>html/config_priv.ini</code> können die tab_Skripte
       unter <code>$TAB_config</code> konfiguriert werden. Man kann den
       Namen ändern, Tab's die nicht benötigt werden ausblenden, den Tab
       der beim Start geladen wird auswählen und eigene Skripts als "Tab"

@@ -13,7 +13,7 @@ services:
             - ./CONFIGS/CONFIG/weather_priv.ini:/home/GEN24/CONFIG/weather_priv.ini
             - ./CONFIGS/CONFIG/dynprice_priv.ini:/home/GEN24/CONFIG/dynprice_priv.ini
             - ./CONFIGS/CONFIG/Prog_Steuerung.sqlite:/home/GEN24/CONFIG/Prog_Steuerung.sqlite
-            - ./CONFIGS/config_priv.php:/home/GEN24/html/config_priv.php
+            - ./CONFIGS/config_priv.ini:/home/GEN24/html/config_priv.ini
             - ./CONFIGS/Crontab.log:/home/GEN24/Crontab.log
             - ./CONFIGS/PV_Daten.sqlite:/home/GEN24/PV_Daten.sqlite
             - ./CONFIGS/weatherData.sqlite:/home/GEN24/weatherData.sqlite

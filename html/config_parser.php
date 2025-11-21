@@ -39,7 +39,7 @@ function build_tab_config(array $ini_section) {
         if (preg_match('/^(\d+)(?:[_\-]?(\d+|[A-Za-z]+))?$/', $idx, $m)) {
             $main = (int)$m[1];
             $suffix = isset($m[2]) ? $m[2] : null;
-            $isSuffixNumeric = $suffix !== null && ctype_digit($suffix);
+            $isSuffixNumeric = $suffix !== null && preg_match('/^[0-9]+$/', $suffix);
         } else {
             // kein führendes nummerisches Präfix — setze große Hauptnummer, sortiere nach idx string
             $main = PHP_INT_MAX;

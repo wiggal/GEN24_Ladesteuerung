@@ -95,7 +95,7 @@ if (!isset($TAB_config) OR !is_array($TAB_config)) {
 $class_link='';
 # Breite der Tabs in % rechnen
 $anzahl_tabs = array_count_values(array_column($TAB_config, 'sichtbar'))['ein'] + 1; // wegen WIKI-Link
-$Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs+1);
+$Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs);
 $class_tab = '';
 
 echo '<div class="tabs">';
