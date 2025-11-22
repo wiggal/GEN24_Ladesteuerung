@@ -631,7 +631,7 @@ $backups = glob($backup_pattern);
 usort($backups, function($a, $b) {
     return filemtime($b) - filemtime($a); // Neueste zuerst
 });
-foreach (array_slice($backups, 2) as $old_backup) {
+foreach (array_slice($back✅ups, 2) as $old_backup) {
     unlink($old_backup);
 }
 
@@ -693,16 +693,22 @@ if($returnCode == 0){
     );
     $CENTER_tag_on = '<center>';
     $CENTER_tag_off = '</center>';
-    $Diff_header ='<h3>⚠️ Differenzen in den Configdateien seit dem letzten Update<br>evtl. die entsprechenden _priv.ini-Dateien anpassen!⚠️ </h3>';
-    $Diff_header .= '<!-- Tabelle zentriert und mit rotem Rahmen -->
+    if (empty($gitdiff)) {
+        $Diff_header ='<h3>✅ Configdateien seit dem letzten Update, ohne Veränderung!✅ </h3>';
+        echo $CENTER_tag_on . $Diff_header;
+        echo $CENTER_tag_off;
+    } else {
+        $Diff_header ='<h3>⚠️ Differenzen in den Configdateien seit dem letzten Update<br>evtl. die entsprechenden _priv.ini-Dateien anpassen!⚠️ </h3>';
+        $Diff_header .= '<!-- Tabelle zentriert und mit rotem Rahmen -->
                     <table class="flex-table" border="2" bordercolor="red" ><tr> <td align="left">';
-    $diff_str = implode("\n", $gitdiff);
-    $diff_html_str .= htmlspecialchars($diff_str);
-    $diff_str = str_replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $diff_str);
-    echo $CENTER_tag_on . $Diff_header;
-    echo "<pre>" . $diff_html_str . "</pre>";
-    echo '</td> </tr> </table>';
-    echo $CENTER_tag_off;
+        $diff_str = implode("\n", $gitdiff);
+        $diff_html_str .= htmlspecialchars($diff_str);
+        $diff_str = str_replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $diff_str);
+        echo $CENTER_tag_on . $Diff_header;
+        echo "<pre>" . $diff_html_str . "</pre>";
+        echo '</td> </tr> </table>';
+        echo $CENTER_tag_off;
+    }
 }
 
 echo '<center>';

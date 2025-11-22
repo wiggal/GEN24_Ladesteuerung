@@ -1,3 +1,8 @@
+**[0.40.6] – 2025-XX-XX**  
+
+- Updatemeldung, wenn keine ini_Dateien verändert wurden angepasst.
+  ✅ Configdateien seit dem letzten Update, ohne Veränderung!✅ 
+
 **[0.40.5] – 2025-11-22**  
 
 - API-Anpassung ab Firmware 1.39.5-1 `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_U16` nun `BAT_VALUE_STATE_OF_CHARGE_RELATIVE_F32`.  
