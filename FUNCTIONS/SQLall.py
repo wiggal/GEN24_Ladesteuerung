@@ -86,8 +86,8 @@ class sqlall:
             zeiger.execute(sql_anweisung)
         print("DB",path,"wurde erstellt.")
 
-    def getSQLsteuerdaten(self, schluessel):
-        verbindung = sqlite3.connect('CONFIG/Prog_Steuerung.sqlite')
+    def getSQLsteuerdaten(self, schluessel, DB='CONFIG/Prog_Steuerung.sqlite'):
+        verbindung = sqlite3.connect(DB)
         zeiger = verbindung.cursor()
 
         try:
@@ -115,7 +115,7 @@ class sqlall:
             sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
             zeiger.execute(sql_anweisung)
         except:
-            self.create_database_ProgSteuerung('CONFIG/Prog_Steuerung.sqlite')
+            self.create_database_ProgSteuerung(DB)
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
             sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
             zeiger.execute(sql_anweisung)

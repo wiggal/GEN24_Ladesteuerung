@@ -7,6 +7,7 @@ services:
         restart: always
         ports:
             - 2424:2424
+            - 8887:8887
         volumes:
             - ./CONFIGS/CONFIG/default_priv.ini:/home/GEN24/CONFIG/default_priv.ini
             - ./CONFIGS/CONFIG/charge_priv.ini:/home/GEN24/CONFIG/charge_priv.ini

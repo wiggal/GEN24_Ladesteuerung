@@ -23,6 +23,8 @@ RUN apk add --update-cache \
     py-pip \
     bash \
     file \
+    py3-aiohttp \
+    py3-websockets \
     py3-requests \
   && rm -rf /var/cache/apk/* \
 && cp /usr/share/zoneinfo/Europe/Berlin /etc/localtime \
