@@ -128,14 +128,14 @@ if (isset($_GET['ajax'])) {
 <style>
 body{font-family:Arial;background:#f2f2f2;padding:20px;}
 .card{background:white;padding:20px;margin-bottom:20px;border-radius:8px;}
-button{padding:10px 20px;border:none;background:#007bff;color:white;border-radius:6px;cursor:pointer;margin-right:10px;}
-button[disabled]{opacity:0.5;cursor:not-allowed;}
+button { padding: 6px 12px; font-size: 14px; font-size: 1.3em; background-color: #4CAF50; }
+select { font-size: 1.1em; background-color: #F5F5DC; }
 .red{background:#d9534f;}
 .green{background:#5cb85c;}
 .info{background:#e9f7ef;padding:10px;border-radius:6px;margin-bottom:10px;}
 .small{font-size:0.9em;color:#666;}
 form { display: inline-block; margin-right:6px; }
-pre{background:#f8f8f8;padding:10px;border-radius:6px;overflow:auto;max-height:300px;}
+p, label { color:#000000; font-family:Arial; font-size: 150%; padding:6px 11px; }
 .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle;}
 </style>
 </head>
@@ -194,6 +194,7 @@ pre{background:#f8f8f8;padding:10px;border-radius:6px;overflow:auto;max-height:3
                 <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3 Phasen</option>
             </select>
         </label>
+        <br><br><br>
         <label>Stromstärke MIN:
             <select id="ampMin" name="amp_min">
                 <?php for($i=6;$i<=16;$i++): ?>
