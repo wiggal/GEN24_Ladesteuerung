@@ -5,7 +5,7 @@
 
 $API = "http://127.0.0.1:8080"; // OCPP Server API
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
-$PYTHON_SERVER_CMD = "nohup python3 ../FUNCTIONS/ocpp_legacy_server.py > /tmp/ocpp.log 2>&1 & echo $!";
+$PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 & echo $!";
 $CHARGE_POINT_ID = "32162088";
 
 include 'SQL_steuerfunctions.php';
