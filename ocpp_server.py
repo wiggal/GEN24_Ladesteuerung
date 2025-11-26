@@ -44,6 +44,27 @@ except Exception:
     print("Using LEGACY websockets.asyncio.server.serve API")
 
 # ----------------------------
+# Konfiguration Variablen
+# ----------------------------
+# zukünftig evtl. aus INI-Datei oder DB  #entWIGGlung
+# Auto-sync interval in Sekunden
+AUTO_SYNC_INTERVAL = 30
+# NEUE GUARDS FÜR STABILITÄT
+MIN_PHASE_DURATION_S = 180   # 3 Minuten (180 Sekunden) Phase halten
+MIN_CHARGE_DURATION_S = 600  #10 Minuten (600 Sekunden) Laden halten
+# Ports
+WS_PORT = 8887
+HTTP_PORT = 8080
+
+# Feste Programminteren Variablen ??  #entWIGGlung
+# leichte zeitliche Vorverlegung der Zeitstempel, die Ihr OCPP-Server an die Wallbox sendet
+TIME_SHIFT_SECONDS = 5
+DEFAULT_CONNECTOR_ID = 1
+DEFAULT_IDTAG = "WattpilotUser"
+# OCPP Subprotocols (wird an ws_serve übergeben)
+OCPP_PROTOCOLS = ['ocpp1.6', 'ocpp2.0.1', 'ocpp1.5']
+
+# ----------------------------
 # Auffälliges Console-Logging
 # ----------------------------
 class Color:
@@ -65,25 +86,6 @@ def cnote(msg):  print(f"{Color.MAGENTA}{Color.BOLD}🟨 NOTE:{Color.RESET} {msg
 # zusätzlich normales logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("OCPP-Legacy")
-
-# ----------------------------
-# Konfiguration
-# ----------------------------
-# leichte zeitliche Vorverlegung der Zeitstempel, die Ihr OCPP-Server an die Wallbox sendet
-TIME_SHIFT_SECONDS = 5
-DEFAULT_CONNECTOR_ID = 1
-DEFAULT_IDTAG = "WattpilotUser"
-# OCPP Subprotocols (wird an ws_serve übergeben)
-OCPP_PROTOCOLS = ['ocpp1.6', 'ocpp2.0.1', 'ocpp1.5']
-# Ports
-WS_PORT = 8887
-HTTP_PORT = 8080
-# Auto-sync interval in Sekunden
-AUTO_SYNC_INTERVAL = 30
-
-# NEUE GUARDS FÜR STABILITÄT
-MIN_PHASE_DURATION_S = 180   # 3 Minuten (180 Sekunden) Phase halten
-MIN_CHARGE_DURATION_S = 600  #10 Minuten (600 Sekunden) Laden halten
 
 
 # ----------------------------

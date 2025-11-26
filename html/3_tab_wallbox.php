@@ -59,9 +59,9 @@ if (isset($_POST['action'])) {
     }
 
     // API calls (optional, falls gewünscht)
-    if ($action === 'set_amp') api_post('/set_charging_profile', ['charge_point_id'=>$CHARGE_POINT_ID,'amp_min'=>intval($_POST['amp_min']),'amp_max'=>intval($_POST['amp_max'])]);
-    if ($action === 'set_phases') api_post('/set_charging_profile', ['charge_point_id'=>$CHARGE_POINT_ID,'phases'=>$_POST['phases']]);
-    if ($action === 'set_pv_mode') api_post('/set_pv_mode', ['charge_point_id'=>$CHARGE_POINT_ID,'mode'=>$_POST['pv_mode']]);
+    // if ($action === 'set_amp') api_post('/set_charging_profile', ['charge_point_id'=>$CHARGE_POINT_ID,'amp_min'=>intval($_POST['amp_min']),'amp_max'=>intval($_POST['amp_max'])]);
+    // if ($action === 'set_phases') api_post('/set_charging_profile', ['charge_point_id'=>$CHARGE_POINT_ID,'phases'=>$_POST['phases']]);
+    // if ($action === 'set_pv_mode') api_post('/set_pv_mode', ['charge_point_id'=>$CHARGE_POINT_ID,'mode'=>$_POST['pv_mode']]);
 
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit;
@@ -135,7 +135,7 @@ select { font-size: 1.1em; background-color: #F5F5DC; }
 .info{background:#e9f7ef;padding:10px;border-radius:6px;margin-bottom:10px;}
 .small{font-size:0.9em;color:#666;}
 form { display: inline-block; margin-right:6px; }
-p, label { color:#000000; font-family:Arial; font-size: 150%; padding:6px 11px; }
+p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
 .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle;}
 </style>
 </head>
@@ -154,7 +154,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:6px 11px; 
             <strong style="color:red">Server gestoppt</strong>
         <?php endif; ?>
     </p>
-    <p id="clientStatus" class="small">
+    <p id="clientStatus">
         <?php if ($client_connected): ?>
             <span class="status-dot" style="background:green"></span>
             <strong style="color:green">OCPP-Client <?php echo htmlspecialchars($CHARGE_POINT_ID); ?>: Verbunden</strong>
