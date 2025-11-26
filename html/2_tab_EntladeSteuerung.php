@@ -188,7 +188,13 @@ echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none
 echo "\n";
 
 // Alle Stunden in Array
-for ($i = 0; $i < 24; $i++) { $Uhrzeiten[] = str_pad($i, 2, "0", STR_PAD_LEFT) . ":00"; }
+$Uhrzeiten= [];
+$start_std = new DateTime();   // aktuelle Uhrzeit
+$start_std->setTimezone(new DateTimeZone('Europe/Berlin'));
+for ($i = 0; $i < 24; $i++) {
+    $Uhrzeiten[] = $start_std->format('H').':00'; // nur Stunde extrahieren
+    $start_std->modify('+1 hour');          // eine Stunde weiter
+}
 
 foreach($Uhrzeiten AS $date) {
 
