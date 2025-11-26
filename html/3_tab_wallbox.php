@@ -1,12 +1,11 @@
 <?php
 // ================================================
-// Wattpilot OCPP Control – Single File PHP UI (angepasst)
+// Wattpilot OCPP Control – Single File PHP UI (angepasst: Kein Fallback-ID, DB-Werte immer anzeigen)
 // ================================================
 
 $API = "http://127.0.0.1:8080"; // OCPP Server API
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
 $PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 & echo $!";
-$CHARGE_POINT_ID = "32162088";
 
 include 'SQL_steuerfunctions.php';
 
@@ -16,6 +15,7 @@ include 'SQL_steuerfunctions.php';
 function server_is_running($pidfile) {
     if (!file_exists($pidfile)) return false;
     $pid = intval(@file_get_contents($pidfile));
+    // Überprüfen, ob die PID gültig ist und der Prozess noch läuft
     return $pid > 0 && function_exists('posix_kill') && @posix_kill($pid, 0);
 }
 
@@ -49,7 +49,7 @@ if (isset($_POST['action'])) {
             $pid = intval(@file_get_contents($GLOBALS['SERVER_PID_FILE']));
             if ($pid > 0) {
                 if (function_exists('posix_kill')) {
-                    @posix_kill($pid, 9);
+                    @posix_kill($pid, 9); // SIGKILL
                 } else {
                     @shell_exec("kill -9 $pid");
                 }
@@ -58,12 +58,13 @@ if (isset($_POST['action'])) {
         }
     }
 
-    // API calls (optional, falls gewünscht)
-    // if ($action === 'set_amp') api_post('/set_charging_profile', ['charge_point_id'=>$CHARGE_POINT_ID,'amp_min'=>intval($_POST['amp_min']),'amp_max'=>intval($_POST['amp_max'])]);
-    // if ($action === 'set_phases') api_post('/set_charging_profile', ['charge_point_id'=>$CHARGE_POINT_ID,'phases'=>$_POST['phases']]);
-    // if ($action === 'set_pv_mode') api_post('/set_pv_mode', ['charge_point_id'=>$CHARGE_POINT_ID,'mode'=>$_POST['pv_mode']]);
-
-    header('Location: ' . $_SERVER['PHP_SELF']);
+    // Beim Weiterleiten die aktuelle Client-ID beibehalten
+    $redirect_url = $_SERVER['PHP_SELF'];
+    if (isset($_POST['cp_id']) && !empty($_POST['cp_id'])) {
+        $redirect_url .= '?cp_id=' . $_POST['cp_id'];
+    }
+    
+    header('Location: ' . $redirect_url);
     exit;
 }
 
@@ -73,17 +74,14 @@ if (isset($_POST['action'])) {
 $server_running = server_is_running($SERVER_PID_FILE);
 $status = null;
 $meter_values = null;
+$connected_list = [];
 
 if ($server_running) {
     $status_json = @file_get_contents($API . "/list");
     $status = $status_json ? @json_decode($status_json, true) : null;
-
-    $meter_values_json = @file_get_contents($API . "/meter_values?charge_point_id=$CHARGE_POINT_ID");
-    $meter_values = $meter_values_json ? @json_decode($meter_values_json, true) : null;
 }
 
 // Connected client check
-$connected_list = [];
 if (is_array($status)) {
     if (isset($status['connected']) && is_array($status['connected'])) {
         $connected_list = $status['connected'];
@@ -91,16 +89,36 @@ if (is_array($status)) {
         $connected_list = $status;
     }
 }
-$client_connected = in_array($CHARGE_POINT_ID, $connected_list, true);
+
+// --- Aktuell ausgewählten Client bestimmen ---
+$selected_charge_point_id = null;
+$client_connected = !empty($connected_list);
+
+if ($client_connected) {
+    if (isset($_GET['cp_id']) && in_array($_GET['cp_id'], $connected_list, true)) {
+        // 1. Priorität: Client-ID aus dem GET-Parameter, falls sie in der Liste ist
+        $selected_charge_point_id = $_GET['cp_id'];
+    } else {
+        // 2. Priorität: Nimm den ersten Client in der Liste als Standard
+        $selected_charge_point_id = reset($connected_list);
+    }
+    
+    // Meter Values für den aktuell ausgewählten Client abfragen
+    if ($server_running) {
+        $meter_values_json = @file_get_contents($API . "/meter_values?charge_point_id=$selected_charge_point_id");
+        $meter_values = $meter_values_json ? @json_decode($meter_values_json, true) : null;
+    }
+} 
 
 // -------------------------
-// DB: Werte laden
+// DB: Werte laden (immer laden, da es die Konfiguration ist)
 // -------------------------
-$EV_Reservierung = getSteuercodes('wallbox');
+$EV_Reservierung = getSteuercodes('wallbox'); // Fester DB-Schlüssel
 // Die Werte aus dem Unterarray auslesen
-$pv_mode = $EV_Reservierung['1']['Res_Feld1'];
-$phases = $EV_Reservierung['1']['Res_Feld2'];
-list($amp_min, $amp_max) = explode(",", $EV_Reservierung['1']['Options']);
+$pv_mode = $EV_Reservierung['1']['Res_Feld1'] ?? 0;
+$phases  = $EV_Reservierung['1']['Res_Feld2'] ?? 1;
+$amp_options = $EV_Reservierung['1']['Options'] ?? '6,6';
+list($amp_min, $amp_max) = explode(",", $amp_options);
 
 // -------------------------
 // AJAX poll
@@ -113,7 +131,7 @@ if (isset($_GET['ajax'])) {
         'connected_list' => array_values($connected_list),
         'client_connected' => $client_connected,
         'meter_values' => $meter_values ?? new stdClass(),
-        'charge_point_id' => $CHARGE_POINT_ID,
+        'charge_point_id' => $selected_charge_point_id,
         'timestamp' => time()
     ]);
     exit;
@@ -154,15 +172,35 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
             <strong style="color:red">Server gestoppt</strong>
         <?php endif; ?>
     </p>
+
+    <?php if (count($connected_list) > 1): ?>
+    <p>
+        <label>
+            **OCPP Client auswählen:**
+            <select id="chargePointSelect" onchange="window.location.href='<?php echo $_SERVER['PHP_SELF']; ?>?cp_id=' + this.value">
+                <?php foreach ($connected_list as $cp_id): ?>
+                    <option value="<?php echo htmlspecialchars($cp_id); ?>" <?php if ($cp_id === $selected_charge_point_id) echo 'selected'; ?>>
+                        <?php echo htmlspecialchars($cp_id); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+    </p>
+    <?php endif; ?>
+
     <p id="clientStatus">
         <?php if ($client_connected): ?>
             <span class="status-dot" style="background:green"></span>
-            <strong style="color:green">OCPP-Client <?php echo htmlspecialchars($CHARGE_POINT_ID); ?>: Verbunden</strong>
+            <strong style="color:green">OCPP-Client <?php echo htmlspecialchars($selected_charge_point_id); ?>: Verbunden</strong>
+            <?php if (count($connected_list) > 1): ?>
+                <span class="small">(Ausgewählt)</span>
+            <?php endif; ?>
         <?php else: ?>
             <span class="status-dot" style="background:red"></span>
-            <strong style="color:red">OCPP-Client <?php echo htmlspecialchars($CHARGE_POINT_ID); ?>: Nicht verbunden</strong>
+            <strong style="color:red">Kein OCPP-Client verbunden</strong>
         <?php endif; ?>
     </p>
+    
     <div style="margin-top:10px;">
         <?php if ($server_running): ?>
             <form method="post"><input type="hidden" name="action" value="stop_server"><button class="red" id="btnStopServer">Server stoppen</button></form>
@@ -173,13 +211,20 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
 </div>
 
 <div class="card">
-    <h2>Optionen konfigurieren</h2>
-     <!-- Aktuelle Werte von der Wallbox -->
-    <p>Aktuelle Stromstärke: <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
-    <p>Aktive Phasen: <strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
+    <h2>Optionen konfigurieren (DB-Werte) <?php if ($client_connected) echo 'für Client: ' . htmlspecialchars($selected_charge_point_id); ?></h2>
+    
+    <?php if ($client_connected): ?>
+        <p>Aktuelle Stromstärke Wallbox: <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
+        <p>Aktive Phasen Wallbox: <strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
+        <hr>
+    <?php else: ?>
+        <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>
+    <?php endif; ?>
 
     <form id="formOptions">
-        <label>PV-Modus:
+        <input type="hidden" id="selectedCpId" name="cp_id" value="<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>">
+        
+        <label>PV-Modus (DB):
             <select id="pvMode" name="pv_mode">
                 <option value="0" <?php if($pv_mode=='0') echo 'selected'; ?>>Aus</option>
                 <option value="1" <?php if($pv_mode=='1') echo 'selected'; ?>>PV</option>
@@ -187,7 +232,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
                 <option value="3" <?php if($pv_mode=='3') echo 'selected'; ?>>MAX</option>
             </select>
         </label>
-        <label>Phasen:
+        <label>Phasen (DB):
             <select id="phases" name="phases">
                 <option value="0" <?php if($phases=='0') echo 'selected'; ?>>Auto</option>
                 <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1 Phase</option>
@@ -195,14 +240,14 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
             </select>
         </label>
         <br><br><br>
-        <label>Stromstärke MIN:
+        <label>Stromstärke MIN (DB):
             <select id="ampMin" name="amp_min">
                 <?php for($i=6;$i<=16;$i++): ?>
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_min) echo 'selected'; ?>><?php echo $i; ?> A</option>
                 <?php endfor; ?>
             </select>
         </label>
-        <label>Stromstärke MAX:
+        <label>Stromstärke MAX (DB):
             <select id="ampMax" name="amp_max">
                 <?php for($i=6;$i<=16;$i++): ?>
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_max) echo 'selected'; ?>><?php echo $i; ?> A</option>
@@ -211,6 +256,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
         </label>
         <br><br>
         <button type="button" id="btnSave" class="green">Speichern</button>
+        <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von Ihrer Steuerung verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
     </form>
 </div>
 
@@ -218,45 +264,54 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
 <script>
 // Einträge Prog_Steuerung.sqlite
 //ID,Schluessel,Zeit,Res_Feld1,Res_Feld2,Options
-//  ,          ,    ,PV-Modus ,Phasen   ,A-MIN;MAX
-//1 ,   wallbox,  1 ,AUS=0    ,AUTO=0   ,6,16
-//  ,          ,    ,PV=1     ,1        ,
-//  ,          ,    ,MIN+PV=2 ,3        ,
-//  ,          ,    ,MAX=3    ,         ,
+//  ,          ,    ,PV-Modus ,Phasen   ,A-MIN;MAX
+//1 ,   wallbox,  1 ,AUS=0    ,AUTO=0   ,6,16
+//  ,          ,    ,PV=1     ,1        ,
+//  ,          ,    ,MIN+PV=2 ,3        ,
+//  ,          ,    ,MAX=3    ,         ,
 $(document).ready(function(){
     $('#btnSave').click(function(){
         var amp_min = $('#ampMin').val();
         var amp_max = $('#ampMax').val();
         var phases = $('#phases').val();
         var pv_mode = $('#pvMode').val();
+        var cp_id = $('#selectedCpId').val(); // Ausgewählte Client-ID (kann leer sein)
 
         $.ajax({
             url: "SQL_speichern.php",
             method: "post",
             data: {
-                ID: ["1"],
-                Schluessel: ["wallbox"],
+                ID: ["1"], // Speichern auf dem festen Eintrag 1
+                Schluessel: ["wallbox"], 
                 Tag_Zeit: ["1"],
                 Res_Feld1: [pv_mode],
                 Res_Feld2: [phases],
                 Options: [amp_min + "," + amp_max]
             },
             success: function(data){
-                //alert("Optionen gespeichert!");
-                location.reload();
+                // Nach dem Speichern auf die Seite des ausgewählten Clients neu laden
+                var redirect_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
+                if (cp_id) {
+                     redirect_url += '?cp_id=' + cp_id;
+                }
+                location.href = redirect_url; 
             }
         });
     });
 });
 </script>
 <script>
-// Seite alle 30 Sekunden automatisch neu laden
+// Seite alle 30 Sekunden automatisch neu laden (Behält die Client-ID bei, falls gesetzt)
 setInterval(function() {
-    location.reload();
-}, 10000); // 10000 ms = 10 Sekunden
+    var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
+    var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
+    if (current_cp_id) {
+        reload_url += '?cp_id=' + current_cp_id;
+    }
+    window.location.href = reload_url;
+}, 30000); // 30000 ms = 30 Sekunden
 </script>
 
 
 </body>
 </html>
-
