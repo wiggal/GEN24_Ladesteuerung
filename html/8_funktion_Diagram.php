@@ -160,137 +160,184 @@ $trenner = ",";
 return array($daten, $labels);
 } #END function diagrammdaten
 
-
-function getSQL($SQLType, $DiaDatenVon, $DiaDatenBis, $groupSTR)
+function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, string $groupSTR = null): string  #KI optimiert
 {
-# SQL nach $SQLType wählen
-switch ($SQLType) {
-    case 'SUM_DC_Produktion':
-$SQL = "SELECT 
-        MAX(DC_Produktion)- MIN(DC_Produktion)
-        AS DC_Produktion
-from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'";
-return $SQL;
-    break; # ENDE case 'SUM_DC_Produktion'
+    // Gemeinsame WHERE-Bedingung
+    $where = "Zeitpunkt BETWEEN '$DiaDatenVon' AND '$DiaDatenBis'";
 
-    case 'line':
-$SQL = "
-WITH Alle_PVDaten AS (
-select *
-from pv_daten
-where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-group by STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 10 )
-, Alle_PVDaten1 AS (
-        select  Zeitpunkt,
-		ROUND((JULIANDAY(Zeitpunkt) - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
-		(DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) AS DC_Produktion,
-		(Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzbezug,
-        ((DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS Direktverbrauch,
-		((Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt))) AS VonBatterie,
-		((Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt))) AS InBatterie,
-        (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
-        Vorhersage *-1 AS Vorhersage,
-        BattStatus
-from Alle_PVDaten)
- , Alle_PVDaten2 AS (
-	SELECT Zeitpunkt,
-    DC_Produktion*60/ Zeitabstand  AS Produktion,
-	Netzbezug*60/ Zeitabstand      AS Netzbezug,
-    Direktverbrauch*60/Zeitabstand AS Direktverbrauch,
-	VonBatterie*60/ Zeitabstand    AS VonBatterie,
-    InBatterie*60/ Zeitabstand     AS InBatterie,
-	Einspeisung*60/ Zeitabstand    AS Einspeisung,
-	Vorhersage,
-    BattStatus
-FROM Alle_PVDaten1)
-, Netzladen AS (
-select Zeitpunkt,
-		Produktion * -1 AS Produktion,
-		Netzbezug * -1 AS Netzbezug,
-		Direktverbrauch,
-		VonBatterie,
-		InBatterie,
-		Einspeisung,
-		Produktion + Netzbezug - Einspeisung - InBatterie - Direktverbrauch AS Netzverbrauch,
-		Produktion + Netzbezug - Einspeisung + VonBatterie - InBatterie AS Gesamtverbrauch,
-		Vorhersage,
-		BattStatus
-FROM Alle_PVDaten2)
-SELECT 	Zeitpunkt,
-		Produktion,
-		Netzbezug,
-        (CASE WHEN Direktverbrauch > 0 THEN Direktverbrauch ELSE 0 END)Direktverbrauch,
-        VonBatterie,
-        InBatterie,
-        Einspeisung,
-		(CASE WHEN Direktverbrauch > 0 THEN Netzverbrauch ELSE Netzverbrauch + Direktverbrauch END) AS Netzverbrauch,
-		Gesamtverbrauch,
-		Vorhersage,
-		BattStatus
-FROM Netzladen
-";
-return $SQL;
-    break; # ENDE case 'line'
+    switch ($SQLType) {
 
-    case 'SUM_AC_Verbrauch':
-# AC Verbrauch
-$SQL = "SELECT 
-        (MAX(Netzverbrauch)- MIN(Netzverbrauch)) + 
-        (MAX(AC_Produktion) - MIN(AC_Produktion)) - 
-        (MAX (Einspeisung) - MIN (Einspeisung)) 
-        AS AC_Produktion
-from pv_daten where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'";
-return $SQL;
-    break; # ENDE case 'SUM_AC_Verbrauch'
+        /* -------------------------------------------------------------
+         * SUMME DC PRODUKTION
+         * ------------------------------------------------------------- */
+        case 'SUM_DC_Produktion':
+            return "
+                SELECT 
+                    MAX(DC_Produktion) - MIN(DC_Produktion) AS DC_Produktion
+                FROM pv_daten
+                WHERE $where
+            ";
 
-    case 'bar':
-$SQL = "WITH Alle_PVDaten AS (
-SELECT
-    MIN(Zeitpunkt) AS Zeitpunkt,
-    DC_Produktion,
-    Netzverbrauch,
-    Batterie_IN,
-    Batterie_OUT,
-    Einspeisung
-FROM pv_daten
-where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-group by STRFTIME('".$groupSTR."', Zeitpunkt)
-UNION
-SELECT
-	MAX(Zeitpunkt) AS Zeitpunkt,
-    DC_Produktion,
-    Netzverbrauch,
-    Batterie_IN,
-    Batterie_OUT,
-    Einspeisung
-FROM pv_daten
-where Zeitpunkt BETWEEN '".$DiaDatenVon."' AND '".$DiaDatenBis."'
-ORDER BY Zeitpunkt)
-, Alle_PVDaten2 AS (
-SELECT
-Zeitpunkt,
-LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Produktion,
-LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Netzbezug,
-LEAD(Batterie_IN) OVER (ORDER BY Zeitpunkt) - Batterie_IN AS InBatterie,
-LEAD(Batterie_OUT) OVER (ORDER BY Zeitpunkt) - Batterie_OUT AS AusBatterie,
-LEAD(Einspeisung) OVER (ORDER BY Zeitpunkt) - Einspeisung AS Einspeisung
-from Alle_PVDaten)
-SELECT Zeitpunkt,
-    Produktion * -1 as Produktion,
-    Netzbezug * -1 as Netzbezug,
-	Einspeisung,
-	Netzbezug AS Netzverbrauch,
-	InBatterie,
-    AusBatterie AS VonBatterie,
-    Produktion - InBatterie - Einspeisung  AS Direktverbrauch
-FROM Alle_PVDaten2
-WHERE AusBatterie IS NOT NULL
-ORDER BY Zeitpunkt";
 
-return $SQL;
-    break; # ENDE case 'Produktion_bar'
-} # ENDE switch
-} # END function getSQL
+        /* -------------------------------------------------------------
+         * LINE – Zeitreihen-Auswertung
+         * ------------------------------------------------------------- */
+        case 'line':
+            return "
+                WITH Alle_PVDaten AS (
+                    SELECT *
+                    FROM pv_daten
+                    WHERE $where
+                    GROUP BY STRFTIME('%Y%m%d%H%M', Zeitpunkt) / 10
+                ),
+                Alle_PVDaten1 AS (
+                    SELECT 
+                        Zeitpunkt,
+                        ROUND((JULIANDAY(Zeitpunkt) 
+                               - JULIANDAY(LAG(Zeitpunkt) OVER(ORDER BY Zeitpunkt))) * 1440) AS Zeitabstand,
+
+                        (DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt)) AS DC_Produktion,
+                        (Netzverbrauch - LAG(Netzverbrauch) OVER(ORDER BY Zeitpunkt)) AS Netzbezug,
+
+                        ( (DC_Produktion - LAG(DC_Produktion) OVER(ORDER BY Zeitpunkt))
+                        - (Einspeisung - LAG(Einspeisung) OVER(ORDER BY Zeitpunkt))
+                        - (Batterie_IN - LAG(Batterie_IN) OVER(ORDER BY Zeitpunkt)) ) AS Direktverbrauch,
+
+                        (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) AS VonBatterie,
+                        (Batterie_IN  - LAG(Batterie_IN)  OVER(ORDER BY Zeitpunkt)) AS InBatterie,
+                        (Einspeisung  - LAG(Einspeisung)  OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
+
+                        Vorhersage * -1 AS Vorhersage,
+                        BattStatus
+                    FROM Alle_PVDaten
+                ),
+                Alle_PVDaten2 AS (
+                    SELECT 
+                        Zeitpunkt,
+                        DC_Produktion   * 60 / Zeitabstand AS Produktion,
+                        Netzbezug       * 60 / Zeitabstand AS Netzbezug,
+                        Direktverbrauch * 60 / Zeitabstand AS Direktverbrauch,
+                        VonBatterie     * 60 / Zeitabstand AS VonBatterie,
+                        InBatterie      * 60 / Zeitabstand AS InBatterie,
+                        Einspeisung     * 60 / Zeitabstand AS Einspeisung,
+                        Vorhersage,
+                        BattStatus
+                    FROM Alle_PVDaten1
+                ),
+                Netzladen AS (
+                    SELECT 
+                        Zeitpunkt,
+                        Produktion * -1 AS Produktion,
+                        Netzbezug  * -1 AS Netzbezug,
+                        Direktverbrauch,
+                        VonBatterie,
+                        InBatterie,
+                        Einspeisung,
+
+                        Produktion + Netzbezug - Einspeisung - InBatterie - Direktverbrauch AS Netzverbrauch,
+                        Produktion + Netzbezug - Einspeisung + VonBatterie - InBatterie AS Gesamtverbrauch,
+
+                        Vorhersage,
+                        BattStatus
+                    FROM Alle_PVDaten2
+                )
+                SELECT 
+                    Zeitpunkt,
+                    Produktion,
+                    Netzbezug,
+                    CASE WHEN Direktverbrauch > 0 THEN Direktverbrauch ELSE 0 END AS Direktverbrauch,
+                    VonBatterie,
+                    InBatterie,
+                    Einspeisung,
+                    CASE 
+                        WHEN Direktverbrauch > 0 THEN Netzverbrauch
+                        ELSE Netzverbrauch + Direktverbrauch
+                    END AS Netzverbrauch,
+                    Gesamtverbrauch,
+                    Vorhersage,
+                    BattStatus
+                FROM Netzladen
+            ";
+
+
+        /* -------------------------------------------------------------
+         * SUMME AC VERBRAUCH
+         * ------------------------------------------------------------- */
+        case 'SUM_AC_Verbrauch':
+            return "
+                SELECT 
+                    (MAX(Netzverbrauch) - MIN(Netzverbrauch)) +
+                    (MAX(AC_Produktion) - MIN(AC_Produktion)) -
+                    (MAX(Einspeisung)   - MIN(Einspeisung)) 
+                    AS AC_Produktion
+                FROM pv_daten
+                WHERE $where
+            ";
+
+
+        /* -------------------------------------------------------------
+         * BAR – Balkendiagramm-Auswertung
+         * ------------------------------------------------------------- */
+        case 'bar':
+
+            // Sicherheits-Check: groupSTR darf keine Quotes enthalten
+            $group = preg_replace('/[^%a-zA-Z0-9]/', '', $groupSTR);
+
+            return "
+                WITH Alle_PVDaten AS (
+                    SELECT
+                        MIN(Zeitpunkt) AS Zeitpunkt,
+                        DC_Produktion,
+                        Netzverbrauch,
+                        Batterie_IN,
+                        Batterie_OUT,
+                        Einspeisung
+                    FROM pv_daten
+                    WHERE $where
+                    GROUP BY STRFTIME('$group', Zeitpunkt)
+
+                    UNION
+
+                    SELECT
+                        MAX(Zeitpunkt) AS Zeitpunkt,
+                        DC_Produktion,
+                        Netzverbrauch,
+                        Batterie_IN,
+                        Batterie_OUT,
+                        Einspeisung
+                    FROM pv_daten
+                    WHERE $where
+                    ORDER BY Zeitpunkt
+                ),
+                Alle_PVDaten2 AS (
+                    SELECT 
+                        Zeitpunkt,
+                        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt)  - DC_Produktion  AS Produktion,
+                        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt)  - Netzverbrauch  AS Netzbezug,
+                        LEAD(Batterie_IN)   OVER (ORDER BY Zeitpunkt)  - Batterie_IN    AS InBatterie,
+                        LEAD(Batterie_OUT)  OVER (ORDER BY Zeitpunkt)  - Batterie_OUT   AS AusBatterie,
+                        LEAD(Einspeisung)   OVER (ORDER BY Zeitpunkt)  - Einspeisung    AS Einspeisung
+                    FROM Alle_PVDaten
+                )
+                SELECT 
+                    Zeitpunkt,
+                    Produktion * -1 AS Produktion,
+                    Netzbezug  * -1 AS Netzbezug,
+                    Einspeisung,
+                    Netzbezug AS Netzverbrauch,
+                    InBatterie,
+                    AusBatterie AS VonBatterie,
+                    Produktion - InBatterie - Einspeisung AS Direktverbrauch
+                FROM Alle_PVDaten2
+                WHERE AusBatterie IS NOT NULL
+                ORDER BY Zeitpunkt
+            ";
+
+
+        default:
+            throw new InvalidArgumentException("Unbekannter SQLType: $SQLType");
+    }
+}
 
 function Dia_Options($Diatype)
 {
