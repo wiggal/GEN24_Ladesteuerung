@@ -283,8 +283,13 @@ function getinifile($dir)
         $filename = basename($element);
         $files .= "<option value=\"$element\"> $filename </option>";
 	}
-    # html/config_priv.ini einfügen
-    $files .= "<option value=\"config_priv.ini\">html/config_priv.ini</option>";
+    if (file_exists('config.ini')) {
+        if (!file_exists('config_priv.ini')) {
+            copy('config.ini', 'config_priv.ini');
+        }
+        # html/config_priv.ini einfügen
+        $files .= "<option value=\"config_priv.ini\">html/config_priv.ini</option>";
+    }
 return $files;
 }
 		
