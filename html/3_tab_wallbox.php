@@ -191,13 +191,13 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
     <p id="clientStatus">
         <?php if ($client_connected): ?>
             <span class="status-dot" style="background:green"></span>
-            <strong style="color:green">OCPP-Client <?php echo htmlspecialchars($selected_charge_point_id); ?>: Verbunden</strong>
+            <strong style="color:green">Client <?php echo htmlspecialchars($selected_charge_point_id); ?>: Verbunden</strong>
             <?php if (count($connected_list) > 1): ?>
                 <span class="small">(Ausgewählt)</span>
             <?php endif; ?>
         <?php else: ?>
             <span class="status-dot" style="background:red"></span>
-            <strong style="color:red">Kein OCPP-Client verbunden</strong>
+            <strong style="color:red">Kein Client verbunden</strong>
         <?php endif; ?>
     </p>
     
@@ -256,7 +256,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
         </label>
         <br><br>
         <button type="button" id="btnSave" class="green">Speichern</button>
-        <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von Ihrer Steuerung verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
+        <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von der Steuerung (ocpp_server.py) verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
     </form>
 </div>
 

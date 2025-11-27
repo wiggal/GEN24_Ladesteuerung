@@ -1,7 +1,11 @@
-**[0.40.6] – 2025-XX-XX**  
+**[0.40.6] – 2025-11-27**  
 
-- Updatemeldung, wenn keine ini_Dateien verändert wurden angepasst.
-  ✅ Configdateien seit dem letzten Update, ohne Veränderung!✅ 
+- Updatemeldung, wenn keine ini_Dateien verändert wurden angepasst.  
+  ✅ Configdateien seit dem letzten Update, ohne Veränderung!✅   
+
+Im ENTLadeStrg-TAb immer aktuelle Stunde oben anzeigen.  
+
+- SQLs für Diagramme mit KI optimiert, da Strompreistatistik zu lange Laufzeit hatte.  
 
 **[0.40.5] – 2025-11-22**  
 
