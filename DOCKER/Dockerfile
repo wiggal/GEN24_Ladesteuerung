@@ -18,6 +18,9 @@ RUN apk add --update-cache \
     php \
     php-json \
     php-sqlite3 \
+    php-cli \
+    php-posix \
+    php-curl \
     tzdata \
     python3 \
     py-pip \
