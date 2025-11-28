@@ -214,8 +214,8 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
     <h2>Optionen konfigurieren (DB-Werte) <?php if ($client_connected) echo 'für Client: ' . htmlspecialchars($selected_charge_point_id); ?></h2>
     
     <?php if ($client_connected): ?>
-        <p>Aktuelle Stromstärke Wallbox: <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
-        <p>Aktive Phasen Wallbox: <strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
+        <p>Stromstärke Wallbox (0=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
+        <p>Aktive Phasen Wallbox:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>
@@ -224,7 +224,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
     <form id="formOptions">
         <input type="hidden" id="selectedCpId" name="cp_id" value="<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>">
         
-        <label>PV-Modus (DB):
+        <label>PV-Modus (DB=<?php echo($pv_mode); ?>):
             <select id="pvMode" name="pv_mode">
                 <option value="0" <?php if($pv_mode=='0') echo 'selected'; ?>>Aus</option>
                 <option value="1" <?php if($pv_mode=='1') echo 'selected'; ?>>PV</option>
@@ -232,7 +232,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
                 <option value="3" <?php if($pv_mode=='3') echo 'selected'; ?>>MAX</option>
             </select>
         </label>
-        <label>Phasen (DB):
+        <label>Phasen (DB=<?php echo($phases); ?>):
             <select id="phases" name="phases">
                 <option value="0" <?php if($phases=='0') echo 'selected'; ?>>Auto</option>
                 <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1 Phase</option>
@@ -240,14 +240,14 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
             </select>
         </label>
         <br><br><br>
-        <label>Stromstärke MIN (DB):
+        <label>Stromstärke MIN (DB=<?php echo($amp_min); ?>):
             <select id="ampMin" name="amp_min">
                 <?php for($i=6;$i<=16;$i++): ?>
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_min) echo 'selected'; ?>><?php echo $i; ?> A</option>
                 <?php endfor; ?>
             </select>
         </label>
-        <label>Stromstärke MAX (DB):
+        <label>Stromstärke MAX (DB=<?php echo($amp_max); ?>):
             <select id="ampMax" name="amp_max">
                 <?php for($i=6;$i<=16;$i++): ?>
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_max) echo 'selected'; ?>><?php echo $i; ?> A</option>
@@ -269,7 +269,38 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
 //  ,          ,    ,PV=1     ,1        ,
 //  ,          ,    ,MIN+PV=2 ,3        ,
 //  ,          ,    ,MAX=3    ,         ,
+
+// --- FUNKTIONEN ZUM SPEICHERN/LADEN MIT localStorage ---
+
+// Speichert den aktuellen Wert eines Select-Elements im localStorage
+function saveToLocalStorage(id) {
+    localStorage.setItem(id, $('#' + id).val());
+}
+
+// Lädt den Wert aus dem localStorage und setzt ihn im Select-Element,
+// wenn ein gespeicherter Wert existiert.
+function loadFromLocalStorage(id) {
+    var storedValue = localStorage.getItem(id);
+    if (storedValue !== null) {
+        $('#' + id).val(storedValue);
+    }
+}
+
 $(document).ready(function(){
+    
+    // 1. Dropdown-Werte aus localStorage laden, um Änderungen beim Reload zu erhalten
+    loadFromLocalStorage('pvMode');
+    loadFromLocalStorage('phases');
+    loadFromLocalStorage('ampMin');
+    loadFromLocalStorage('ampMax');
+    
+    // 2. Event-Listener hinzufügen, um Änderungen sofort im localStorage zu speichern
+    $('#pvMode').on('change', function() { saveToLocalStorage('pvMode'); });
+    $('#phases').on('change', function() { saveToLocalStorage('phases'); });
+    $('#ampMin').on('change', function() { saveToLocalStorage('ampMin'); });
+    $('#ampMax').on('change', function() { saveToLocalStorage('ampMax'); });
+
+
     $('#btnSave').click(function(){
         var amp_min = $('#ampMin').val();
         var amp_max = $('#ampMax').val();
@@ -289,6 +320,13 @@ $(document).ready(function(){
                 Options: [amp_min + "," + amp_max]
             },
             success: function(data){
+                // WICHTIG: NACH ERFOLGREICHEM SPEICHERN DIE LOKALEN WERTE LÖSCHEN
+                // damit beim nächsten Neuladen die NEUEN DB-Werte angezeigt werden.
+                localStorage.removeItem('pvMode');
+                localStorage.removeItem('phases');
+                localStorage.removeItem('ampMin');
+                localStorage.removeItem('ampMax');
+
                 // Nach dem Speichern auf die Seite des ausgewählten Clients neu laden
                 var redirect_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
                 if (cp_id) {
@@ -309,7 +347,7 @@ setInterval(function() {
         reload_url += '?cp_id=' + current_cp_id;
     }
     window.location.href = reload_url;
-}, 30000); // 30000 ms = 30 Sekunden
+}, 10000); // 10000 ms = 10 Sekunden
 </script>
 
 
