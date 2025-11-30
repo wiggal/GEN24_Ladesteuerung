@@ -40,8 +40,14 @@ if (isset($_POST['action'])) {
     $action = $_POST['action'];
 
     if ($action === 'start_server') {
-        $pid = shell_exec($GLOBALS['PYTHON_SERVER_CMD']);
-        file_put_contents($GLOBALS['SERVER_PID_FILE'], trim($pid));
+        // Nur starten, wenn der Server noch nicht läuft
+        if (!server_is_running($SERVER_PID_FILE)) {
+            $pid = shell_exec($GLOBALS['PYTHON_SERVER_CMD']);
+            $pid = trim($pid);
+            if ($pid !== '') {
+                file_put_contents($GLOBALS['SERVER_PID_FILE'], $pid);
+            }
+        }
     }
 
     if ($action === 'stop_server') {
@@ -144,7 +150,7 @@ if (isset($_GET['ajax'])) {
 <meta charset="utf-8">
 <title>Wattpilot – OCPP Steuerung</title>
 <style>
-body{font-family:Arial;background:#f2f2f2;padding:20px;}
+body{font-family:Arial;background:white;padding:20px;}
 .card{background:white;padding:20px;margin-bottom:20px;border-radius:8px;}
 button { padding: 6px 12px; font-size: 14px; font-size: 1.3em; background-color: #4CAF50; }
 select { font-size: 1.1em; background-color: #F5F5DC; }
@@ -216,6 +222,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
     <?php if ($client_connected): ?>
         <p>Stromstärke Wallbox (0=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
         <p>Aktive Phasen Wallbox:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
+        <p>Ladedauer in Std:Min:Sek: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo gmdate("H:i:s", htmlspecialchars($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>
