@@ -12,20 +12,26 @@ if (!file_exists($filePath)) {
     die('Datei nicht gefunden.');
 }
 
-// MIME-Typ ermitteln
-$fileType = "log/txt";
-$fileSize = filesize($filePath);
+$log = file_get_contents($filePath);
+
+// --- HTML → ASCII Wandlung ---
+// 1) <br> durch echte Zeilenumbrüche ersetzen
+$log = preg_replace('/<br\s*\/?>/i', "\n", $log);
+// 2) HTML-Tags entfernen
+$log = strip_tags($log);
+// 3) HTML-Entities (&nbsp; &gt; &lt; …) decodieren
+$log = html_entity_decode($log, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 // Header für den Download
 header('Content-Description: File Transfer');
-header('Content-Type: ' . $fileType);
+header('Content-Type: text/plain; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $fileName . '"');
-header('Content-Length: ' . $fileSize);
+header('Content-Length: ' . strlen($log));
 header('Cache-Control: must-revalidate');
 header('Pragma: public');
 
-// Datei ausgeben
-readfile($filePath);
+// Dateiinhalt ausgeben
+echo $log;
 
 // Skript beenden
 exit;
