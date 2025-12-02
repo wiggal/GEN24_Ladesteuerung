@@ -1,5 +1,7 @@
-**[0.40.7] – 2025-XX-XX**  
+**[0.40.7] – 2025-12-02**  
 
+- Logfiles vor Download von HTML in ASCII umwandeln.  
+- FIX: priv.ini wurde aus dem TAB-config nach dem Editieren/Updaten nicht mehr geschrieben.  
 
 **[0.40.6] – 2025-11-27**  
 

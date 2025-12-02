@@ -151,16 +151,33 @@ if (isset($_GET['ajax'])) {
 <title>Wattpilot – OCPP Steuerung</title>
 <style>
 body{font-family:Arial;background:white;padding:20px;}
-.card{background:white;padding:20px;margin-bottom:20px;border-radius:8px;}
+.card{background:white;padding:10px;margin-bottom:10px;border-radius:8px;}
+.card h2 {
+    margin-bottom: 6px;   /* kleiner Abstand unter der Überschrift */
+}
+.card p {
+    margin: 4px 0;        /* Abstand zwischen den Zeilen stark reduziert */
+    line-height: 1.1;     /* engerer Zeilenabstand */
+}
 button { padding: 6px 12px; font-size: 14px; font-size: 1.3em; background-color: #4CAF50; }
+button.schreiben {
+    position: fixed;
+    bottom: 0;
+}
 select { font-size: 1.1em; background-color: #F5F5DC; }
 .red{background:#d9534f;}
 .green{background:#5cb85c;}
 .info{background:#e9f7ef;padding:10px;border-radius:6px;margin-bottom:10px;}
 .small{font-size:0.9em;color:#666;}
 form { display: inline-block; margin-right:6px; }
-p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
-.status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle;}
+p, label { color:#000000;
+    font-family:Arial;
+    font-size:150%;
+    padding:2px 1px;
+    line-height:0.9;   /* engerer Zeilenabstand */
+}
+
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -217,17 +234,18 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
 </div>
 
 <div class="card">
-    <h2>Optionen konfigurieren (DB-Werte) <?php if ($client_connected) echo 'für Client: ' . htmlspecialchars($selected_charge_point_id); ?></h2>
     
     <?php if ($client_connected): ?>
-        <p>Stromstärke Wallbox (0=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
-        <p>Aktive Phasen Wallbox:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
+        <h2>Wallboxwerte:</h2>
+        <p>Stromstärke (0=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
+        <p>Aktive Phasen:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
         <p>Ladedauer in Std:Min:Sek: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo gmdate("H:i:s", htmlspecialchars($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>
     <?php endif; ?>
 
+    <h2>Optionen einstellen und in DB speichern!</h2>
     <form id="formOptions">
         <input type="hidden" id="selectedCpId" name="cp_id" value="<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>">
         
@@ -246,7 +264,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
                 <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3 Phasen</option>
             </select>
         </label>
-        <br><br><br>
+        <br><br>
         <label>Stromstärke MIN (DB=<?php echo($amp_min); ?>):
             <select id="ampMin" name="amp_min">
                 <?php for($i=6;$i<=16;$i++): ?>
@@ -262,7 +280,7 @@ p, label { color:#000000; font-family:Arial; font-size: 150%; padding:2px 1px; }
             </select>
         </label>
         <br><br>
-        <button type="button" id="btnSave" class="green">Speichern</button>
+        <button type="button" id="btnSave" class="schreiben">Speichern</button>
         <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von der Steuerung (ocpp_server.py) verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
     </form>
 </div>
