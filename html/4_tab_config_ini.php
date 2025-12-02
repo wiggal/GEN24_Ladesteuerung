@@ -636,7 +636,7 @@ $backups = glob($backup_pattern);
 usort($backups, function($a, $b) {
     return filemtime($b) - filemtime($a); // Neueste zuerst
 });
-foreach (array_slice($back✅ups, 2) as $old_backup) {
+foreach (array_slice($backups, 2) as $old_backup) {
     unlink($old_backup);
 }
 
