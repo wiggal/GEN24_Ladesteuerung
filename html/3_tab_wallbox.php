@@ -240,6 +240,8 @@ p, label { color:#000000;
         <p>Stromstärke (0=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
         <p>Aktive Phasen:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
         <p>Ladedauer in Std:Min:Sek: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo gmdate("H:i:s", htmlspecialchars($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
+        <p>Geladene kWh: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
+                Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh']); ?></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>

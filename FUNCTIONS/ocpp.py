@@ -18,13 +18,15 @@ logger.setLevel(logging.ERROR)
 
 # Konstanten   #entWIGGlung Werte später aus INI-Dateien oder DB
 AUTO_SYNC_INTERVAL = 20
-MIN_PHASE_DURATION_S = 180   # 3 Minuten (Cooldown nach einem Phasenwechsel)
+MIN_PHASE_DURATION_S = 180   # 3 Minuten 
 MIN_CHARGE_DURATION_S = 600  # 10 Minuten
 # Print-Levels ähnlich wie Logging
 print_level = 3   # 0=ERROR, 1=WARN, 2=INFO, 3=NOTE/OK/alles
 # Verzögerung/Hysterese nur für Phasenwechsel: gewünschte Phase muss X Sekunden stabil sein
 PHASE_CHANGE_CONFIRM_S = 30  # z.B. 30 Sekunden Bestätigungszeit für Phasenwechsel
 residualPower = -300  # Watt +Netzeinspeisung -Netzbezug
+DEFAULT_TARGET_KWH = 0.0  # Lade-Ziel in kWh, Laden stoppt, wenn Wert erreicht ist
+
 WS_PORT = 8887
 HTTP_PORT = 8080
 TIME_SHIFT_SECONDS = 5
@@ -118,6 +120,12 @@ class ChargePointHandler:
         self.manager.transaction_id_store[self.cp_id] = None
         self.manager.debug_store[self.cp_id] = []
 
+        # Neue Stores für Energiemessung/Target
+        # Default-Ziel nutzen
+        self.manager.target_energy_kwh_store.setdefault(self.cp_id, DEFAULT_TARGET_KWH)
+        self.manager.charged_energy_wh_store.setdefault(self.cp_id, 0.0)
+        self.manager.last_energy_wh_store.setdefault(self.cp_id, None)
+
         # Setze Zeitstempel zurück so der erste Wechsel erlaubt ist
         self.manager.last_phase_change_timestamp[self.cp_id] = datetime.now() - timedelta(seconds=MIN_PHASE_DURATION_S + 10)
         self.manager.transaction_start_timestamp[self.cp_id] = None
@@ -174,12 +182,19 @@ class ChargePointHandler:
                     self.manager.transaction_id_store[self.cp_id] = payload["transactionId"]
                 self.manager.meter_values_store[self.cp_id] = payload
                 await self.send_call_result(unique_id)
+                # Verarbeite MeterValues asynchron (update charged energy, evtl. stop)
+                asyncio.create_task(self.manager.update_charged_energy_from_meter(self.cp_id, payload))
 
             elif action == "StartTransaction":
                 tx_id = int(datetime.now(timezone.utc).timestamp())
                 self.manager.transaction_id_store[self.cp_id] = tx_id
                 self.manager.status_store[self.cp_id] = "Charging"
                 self.manager.transaction_start_timestamp[self.cp_id] = datetime.now()
+                # Reset charged energy for new transaction, set baseline last energy if available
+                try:
+                    await self.manager.start_transaction_setup(self.cp_id)
+                except Exception as e:
+                    cwarn(f"StartTransaction setup failed for {self.cp_id}: {e}")
                 await self.send_call_result(unique_id, {"idTagInfo": {"status": "Accepted"}, "transactionId": tx_id})
                 logger.info(f"[{self.cp_id}] StartTransaction accepted tx={tx_id}")
 
@@ -187,6 +202,7 @@ class ChargePointHandler:
                 self.manager.transaction_id_store[self.cp_id] = None
                 self.manager.status_store[self.cp_id] = "Available"
                 self.manager.transaction_start_timestamp[self.cp_id] = None
+                # Optionally keep charged energy as-is (useful for frontend). Do not reset automatically.
                 await self.send_call_result(unique_id, {"idTagInfo": {"status": "Accepted"}})
                 logger.info(f"[{self.cp_id}] StopTransaction accepted")
 
@@ -218,6 +234,14 @@ class OCPPManager:
         self.transaction_id_store = {}
         self.last_phase_change_timestamp = {}
         self.transaction_start_timestamp = {}
+
+        # Neue Stores für Energie-Zielverfolgung
+        # target_energy_kwh_store: cp_id -> float (kWh)
+        self.target_energy_kwh_store = {}
+        # charged_energy_wh_store: cp_id -> float (Wh)
+        self.charged_energy_wh_store = {}
+        # last_energy_wh_store: cp_id -> float or None (kumulativer Zähler, Wh)
+        self.last_energy_wh_store = {}
 
         # Phase-change candidate store to implement hysteresis/timer only for phase changes
         # cp_id -> {'requested': <phase>, 'since': datetime}
@@ -366,6 +390,11 @@ class OCPPManager:
         self.transaction_start_timestamp.setdefault(cp_id, None)
         self.phase_change_candidate.setdefault(cp_id, None)
 
+        # Ensure energy stores exist
+        self.target_energy_kwh_store.setdefault(cp_id, DEFAULT_TARGET_KWH)
+        self.charged_energy_wh_store.setdefault(cp_id, 0.0)
+        self.last_energy_wh_store.setdefault(cp_id, None)
+
         curr_limit = self.current_limit_store.get(cp_id)
         phase_limit = self.phase_limit_store.get(cp_id)
 
@@ -416,6 +445,13 @@ class OCPPManager:
                 cnote(f"[{ '..' + cp_id[-4:] }] pv_mode==2: Vermeide Abschaltung, setze Minimum {amp_min}A statt {amp_allowed}A.")
                 amp_allowed = max(amp_allowed, amp_min)
 
+        # Zusätzlich: wenn ein Ziel gesetzt ist und bereits erreicht, zwinge Stop (0A)
+        target_kwh = self.target_energy_kwh_store.get(cp_id, DEFAULT_TARGET_KWH)
+        charged_wh = self.charged_energy_wh_store.get(cp_id, 0.0)
+        if target_kwh and (charged_wh >= target_kwh * 1000.0):
+            cnote(f"[{ '..' + cp_id[-4:] }] Ziel erreicht ({charged_wh/1000.0:.3f} kWh >= {target_kwh} kWh). Stoppe Laden.")
+            amp_allowed = 0.0
+
         # Laden starten/stoppen (use amp_allowed)
         status = self.status_store.get(cp_id)
         active_tx_id = self.transaction_id_store.get(cp_id)
@@ -440,6 +476,11 @@ class OCPPManager:
                         cnote(f"[{ '..' + cp_id[-4:] }] ✅ STOP Laden erlaubt. (Ladedauer={round(charging_duration)}s)")
             else:
                 cnote(f"[{ '..' + cp_id[-4:] }] Stop (0A) gewünscht durch pv_mode={pv_mode_val}. Guard übersprungen, da PV-Steuerung inaktiv.")
+
+            # Wenn Ziel erreicht, ignorieren Guard und stoppe trotzdem (Ziel überträgt Priorität)
+            if target_kwh and (charged_wh >= target_kwh * 1000.0):
+                cnote(f"[{ '..' + cp_id[-4:] }] Ziel erreicht -> stoppe ungeachtet des Guards.")
+                can_stop_by_guard = True
 
             if not can_stop_by_guard:
                 fallback_limit = amp_min or 6.0
@@ -540,6 +581,106 @@ class OCPPManager:
         return True
 
     # ----------------------------
+    # Energie-Target / MeterValues Verarbeitung
+    # ----------------------------
+    async def start_transaction_setup(self, cp_id):
+        """Reset charged energy for a new transaction and set baseline last meter reading if available."""
+        self.charged_energy_wh_store[cp_id] = 0.0
+        # set baseline if we have a meter reading
+        baseline = self._extract_energy_wh_from_meter_store(cp_id)
+        if baseline is not None:
+            self.last_energy_wh_store[cp_id] = baseline
+            cnote(f"[{ '..' + cp_id[-4:] }] StartTransaction: baseline energy set to {baseline}Wh")
+        else:
+            self.last_energy_wh_store[cp_id] = None
+            cnote(f"[{ '..' + cp_id[-4:] }] StartTransaction: no baseline energy available")
+
+    def _extract_energy_wh_from_meter_store(self, cp_id, meter_payload=None):
+        """Hilfsroutine: extrahiere aktuellen kumulativen Energy-Wert (Wh) aus meter_values_store oder aus gegebenem payload."""
+        payload = meter_payload or self.meter_values_store.get(cp_id)
+        if not payload or 'meterValue' not in payload:
+            return None
+        for meter_value in payload['meterValue']:
+            if 'sampledValue' in meter_value:
+                for sample in meter_value['sampledValue']:
+                    meas = sample.get('measurand', '')
+                    if meas.startswith('Energy.'):
+                        try:
+                            val = float(sample.get('value', 0))
+                            unit = (sample.get('unit') or '').lower()
+                            if unit == 'kwh':
+                                return val * 1000.0
+                            else:
+                                # assume Wh
+                                return val
+                        except Exception:
+                            continue
+        return None
+
+    async def update_charged_energy_from_meter(self, cp_id, meter_payload):
+        """Berechnet Delta der kumulativen Energy-Messung und addiert auf charged_energy_wh_store.
+           Wenn ein Ziel gesetzt ist und erreicht wird -> stoppe Laden automatisch.
+        """
+        try:
+            energy_wh = self._extract_energy_wh_from_meter_store(cp_id, meter_payload)
+            if energy_wh is None:
+                return
+            last = self.last_energy_wh_store.get(cp_id)
+            # Wenn kein letzte Messung vorhanden, initialisieren und nichts buchen
+            if last is None:
+                self.last_energy_wh_store[cp_id] = energy_wh
+                return
+            delta = energy_wh - last
+            if delta < 0:
+                # Zähler-Rollover oder Messsprung -> setze baseline neu
+                cwarn(f"[{ '..' + cp_id[-4:] }] Energy counter decreased ({last} -> {energy_wh}). Reset baseline.")
+                self.last_energy_wh_store[cp_id] = energy_wh
+                return
+
+            # Zähle nur während aktiver Transaktion bzw. Status Charging
+            if self.transaction_id_store.get(cp_id) or self.status_store.get(cp_id) == "Charging":
+                self.charged_energy_wh_store[cp_id] = self.charged_energy_wh_store.get(cp_id, 0.0) + delta
+                self.last_energy_wh_store[cp_id] = energy_wh
+                cinfo(f"[{ '..' + cp_id[-4:] }] Geladene Energie erhöht um {round(delta,2)}Wh -> total {round(self.charged_energy_wh_store[cp_id],2)}Wh")
+                # Prüfe Ziel
+                target_kwh = self.target_energy_kwh_store.get(cp_id, DEFAULT_TARGET_KWH)
+                if target_kwh and (self.charged_energy_wh_store[cp_id] >= target_kwh * 1000.0):
+                    cinfo(f"[{ '..' + cp_id[-4:] }] Ziel erreicht ({self.charged_energy_wh_store[cp_id]/1000.0:.3f} kWh >= {target_kwh} kWh). Stoppe Laden.")
+                    # Stoppen: wie remote_stop
+                    active_tx_id = self.transaction_id_store.get(cp_id)
+                    if active_tx_id:
+                        await self.connected_charge_points[cp_id].send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
+                        self.transaction_id_store[cp_id] = None
+                        self.status_store[cp_id] = "AvailableRequested"
+                        self.transaction_start_timestamp[cp_id] = None
+                    else:
+                        ocpp_phases_value = self.phase_limit_store.get(cp_id) or 3
+                        payload_stop_zero_amp = {
+                            "connectorId": DEFAULT_CONNECTOR_ID,
+                            "csChargingProfiles": {
+                                "chargingProfileId": 1,
+                                "stackLevel": 1,
+                                "chargingProfilePurpose": "TxDefaultProfile",
+                                "chargingProfileKind": "Absolute",
+                                "recurrencyKind": "Daily",
+                                "chargingSchedule": {
+                                    "chargingRateUnit": "A",
+                                    "chargingSchedulePeriod": [{"startPeriod": 0, "limit": 0.0, "numberPhases": ocpp_phases_value}]
+                                }
+                            }
+                        }
+                        await self.connected_charge_points[cp_id].send_call("SetChargingProfile", payload_stop_zero_amp)
+                        self.current_limit_store[cp_id] = 0.0
+                        self.phase_limit_store[cp_id] = ocpp_phases_value
+                        self.status_store[cp_id] = "AvailableRequested"
+                        self.transaction_start_timestamp[cp_id] = None
+            else:
+                # Nicht laden: nur baseline aktualisieren
+                self.last_energy_wh_store[cp_id] = energy_wh
+        except Exception as e:
+            cwarn(f"Fehler in update_charged_energy_from_meter für {cp_id}: {e}")
+
+    # ----------------------------
     # WebSocket on_connect
     # ----------------------------
     async def on_connect(self, websocket, path):
@@ -567,6 +708,10 @@ class OCPPManager:
             self.last_phase_change_timestamp.pop(cp_id, None)
             self.transaction_start_timestamp.pop(cp_id, None)
             self.phase_change_candidate.pop(cp_id, None)
+            # cleanup energy stores
+            self.target_energy_kwh_store.pop(cp_id, None)
+            self.charged_energy_wh_store.pop(cp_id, None)
+            self.last_energy_wh_store.pop(cp_id, None)
             cinfo(f"Verbindung beendet: { '..' + cp_id[-4:] }")
 
     # ----------------------------
@@ -590,6 +735,12 @@ class OCPPManager:
             elapsed = (datetime.now() - candidate['since']).total_seconds()
             candidate_info = {"requested": candidate['requested'], "since": candidate['since'].isoformat(), "elapsed_s": round(elapsed,1), "confirm_after_s": PHASE_CHANGE_CONFIRM_S}
 
+        charged_wh = self.charged_energy_wh_store.get(cp_id, 0.0)
+        target_kwh = self.target_energy_kwh_store.get(cp_id, DEFAULT_TARGET_KWH)
+        remaining_kwh = None
+        if target_kwh and target_kwh > 0:
+            remaining_kwh = max(0.0, target_kwh - charged_wh / 1000.0)
+
         return web.json_response({
             "meter": self.meter_values_store.get(cp_id, {}),
             "status": self.status_store.get(cp_id, "Unknown"),
@@ -600,7 +751,11 @@ class OCPPManager:
             "charging_duration_s": round(duration, 1),
             "phase_stable_s": round(phase_duration, 1),
             "debug_messages": self.debug_store.get(cp_id, []),
-            "phase_change_candidate": candidate_info
+            "phase_change_candidate": candidate_info,
+            # Energie-Infos für Frontend
+            "target_energy_kwh": target_kwh,
+            "charged_energy_kwh": round(charged_wh / 1000.0, 4),
+            "remaining_kwh": round(remaining_kwh, 4) if remaining_kwh is not None else None
         })
 
     async def remote_start(self, request):
@@ -692,6 +847,34 @@ class OCPPManager:
         await self.apply_wallbox_settings(cp_id, amp, phases, pv_mode_val, is_pv_controlled, amp_min)
         return web.json_response({"success": True, "mode": mode})
 
+    async def set_target_energy(self, request):
+        """HTTP POST: set target energy in kWh for a charge point.
+           JSON: {"charge_point_id": "<id>", "target_kwh": 20.0}
+        """
+        try:
+            data = await request.json()
+        except Exception:
+            return web.json_response({"success": False, "error": "Invalid JSON"}, status=400)
+
+        cp_id = data.get("charge_point_id")
+        try:
+            target_kwh = float(data.get("target_kwh", DEFAULT_TARGET_KWH))
+        except Exception:
+            return web.json_response({"success": False, "error": "Invalid target_kwh"}, status=400)
+
+        if not cp_id:
+            return web.json_response({"success": False, "error": "Missing charge_point_id"}, status=400)
+
+        # create stores if needed
+        self.target_energy_kwh_store.setdefault(cp_id, DEFAULT_TARGET_KWH)
+        self.charged_energy_wh_store.setdefault(cp_id, 0.0)
+        self.last_energy_wh_store.setdefault(cp_id, None)
+
+        self.target_energy_kwh_store[cp_id] = target_kwh
+        cinfo(f"[{ '..' + (cp_id[-4:] if cp_id else cp_id) }] Target energy set to {target_kwh} kWh")
+
+        return web.json_response({"success": True, "target_kwh": target_kwh})
+
     # ----------------------------
     # AutoSync background task
     # ----------------------------
@@ -730,6 +913,7 @@ class OCPPManager:
             web.post('/remote_start', self.remote_start),
             web.post('/remote_stop', self.remote_stop),
             web.post('/set_pv_mode', self.set_pv_mode),
+            web.post('/set_target_energy', self.set_target_energy),
         ])
 
         runner = web.AppRunner(app)
