@@ -58,7 +58,7 @@ td {font-size: 140%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-}
+    }
 }
 .hilfe{
     font-family:Arial;
@@ -77,12 +77,10 @@ td {font-size: 140%;
   width: auto;      /* passt sich dem Inhalt an */
   display: inline-table; /* optional – verhindert Strecken auf 100% */
 }
-
 </style>
 </head>
 <body>
 
-<!-- Hilfeaufruf ANFANG -->
 <?php
 # config.ini parsen
 require_once "config_parser.php";
@@ -96,13 +94,12 @@ $prg_version = $config['Programm']['version'];
 $repoPath = realpath($PythonDIR);
 $logFile = $repoPath . '/Update.log';
 
-echo '<div class="hilfe"> <a href="' . $hilfe_link . '"><b>Hilfe</b></a></div>';
-# <!-- Hilfeaufruf ENDE -->
+echo '<div class="hilfe"> <a href="https://github.com/wiggal/GEN24_Ladesteuerung/blob/main/CHANGELOG.md" target="_blank"><b>Changelog</b></a><br>';
+echo '&nbsp;&nbsp;<a href="' . $hilfe_link . '"><b>Hilfe</b></a></div>';
 
 echo '<div style="text-align:center;">';
 echo '<span class="version">';
-echo '<b>Ladesteuerung: ' .  htmlspecialchars($prg_version) . '</b>';
-echo '</span>';
+echo '<b>Ladesteuerung: ' .  htmlspecialchars($prg_version) . '</b></span>';
 
 // --- Hilfsfunktionen fürs Update-Logging ---
 function writeLog($file, $message) {

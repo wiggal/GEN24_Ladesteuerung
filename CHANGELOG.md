@@ -1,3 +1,7 @@
+**[0.40.8] – 2025-XX-XX**  
+
+- CHANGELOG.md im Tab config und im WIKI verlinkt.  
+
 **[0.40.7] – 2025-12-02**  
 
 - Logfiles vor Download von HTML in ASCII umwandeln.  
