@@ -1,9 +1,10 @@
 <?php
 // ================================================
 // Wattpilot OCPP Control – Single File PHP UI (angepasst: Kein Fallback-ID, DB-Werte immer anzeigen)
+// Erweiterung: zusätzliche Wallbox-Parameter (IDs 2 und 3) editierbar und in DB speicherbar
+// Änderungen: Details-Bereich "Mehr Optionen" behält manuell gesetzten geöffnet/geschlossen-Status in localStorage
 // ================================================
-
-$API = "http://127.0.0.1:8080"; // OCPP Server API
+$API = "http://127.0.0.1:8886"; // OCPP Server API
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
 $PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 & echo $!";
 
@@ -120,11 +121,22 @@ if ($client_connected) {
 // DB: Werte laden (immer laden, da es die Konfiguration ist)
 // -------------------------
 $EV_Reservierung = getSteuercodes('wallbox'); // Fester DB-Schlüssel
-// Die Werte aus dem Unterarray auslesen
+
+// Bestehende ID=1 (bestehende Einstellungen)
 $pv_mode = $EV_Reservierung['1']['Res_Feld1'] ?? 0;
 $phases  = $EV_Reservierung['1']['Res_Feld2'] ?? 1;
-$amp_options = $EV_Reservierung['1']['Options'] ?? '6,6';
-list($amp_min, $amp_max) = explode(",", $amp_options);
+$amp_options = $EV_Reservierung['1']['Options'] ?? '6,16';
+list($amp_min, $amp_max) = array_map('trim', explode(",", $amp_options . ","));
+
+// Neue Einstellungen ID=2
+$min_phase_duration_s = $EV_Reservierung['2']['Res_Feld1'] ?? 180;       // MIN_PHASE_DURATION_S
+$min_charge_duration_s = $EV_Reservierung['2']['Res_Feld2'] ?? 600;       // MIN_CHARGE_DURATION_S
+$auto_sync_interval   = $EV_Reservierung['2']['Options']    ?? 20;        // AUTO_SYNC_INTERVAL
+
+// Neue Einstellungen ID=3
+$residualPower        = $EV_Reservierung['3']['Res_Feld1'] ?? -300;      // residualPower (Watt)
+$default_target_kwh   = $EV_Reservierung['3']['Res_Feld2'] ?? 0.0;        // DEFAULT_TARGET_KWH
+$phase_change_confirm_s = $EV_Reservierung['3']['Options'] ?? 30;        // PHASE_CHANGE_CONFIRM_S
 
 // -------------------------
 // AJAX poll
@@ -153,18 +165,19 @@ if (isset($_GET['ajax'])) {
 body{font-family:Arial;background:white;padding:20px;}
 .card{background:white;padding:10px;margin-bottom:10px;border-radius:8px;}
 .card h2 {
-    margin-bottom: 6px;   /* kleiner Abstand unter der Überschrift */
+    margin-bottom: 6px;
 }
 .card p {
-    margin: 4px 0;        /* Abstand zwischen den Zeilen stark reduziert */
-    line-height: 1.1;     /* engerer Zeilenabstand */
+    margin: 4px 0;
+    line-height: 1.1;
 }
-button { padding: 6px 12px; font-size: 14px; font-size: 1.3em; background-color: #4CAF50; }
+button { padding: 6px 12px; font-size: 14px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor:pointer;}
 button.schreiben {
     position: fixed;
-    bottom: 0;
+    bottom: 10px;
+    left: 40px;
 }
-select { font-size: 1.1em; background-color: #F5F5DC; }
+select, input[type="number"], input[type="text"] { font-size: 1.1em; background-color: #F5F5DC; padding:4px; border-radius:4px; border:1px solid #ccc;}
 .red{background:#d9534f;}
 .green{background:#5cb85c;}
 .info{background:#e9f7ef;padding:10px;border-radius:6px;margin-bottom:10px;}
@@ -172,12 +185,14 @@ select { font-size: 1.1em; background-color: #F5F5DC; }
 form { display: inline-block; margin-right:6px; }
 p, label { color:#000000;
     font-family:Arial;
-    font-size:150%;
+    font-size:120%;
     padding:2px 1px;
-    line-height:0.9;   /* engerer Zeilenabstand */
+    line-height:1.1;
 }
-
-.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle;}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle;}
+.row { margin-bottom:8px; }
+.label-inline { display:inline-block; width:320px; vertical-align:middle; }
+.input-inline { display:inline-block; vertical-align:middle; }
 </style>
 </head>
 <body>
@@ -199,7 +214,7 @@ p, label { color:#000000;
     <?php if (count($connected_list) > 1): ?>
     <p>
         <label>
-            **OCPP Client auswählen:**
+            OCPP Client auswählen:
             <select id="chargePointSelect" onchange="window.location.href='<?php echo $_SERVER['PHP_SELF']; ?>?cp_id=' + this.value">
                 <?php foreach ($connected_list as $cp_id): ?>
                     <option value="<?php echo htmlspecialchars($cp_id); ?>" <?php if ($cp_id === $selected_charge_point_id) echo 'selected'; ?>>
@@ -238,10 +253,10 @@ p, label { color:#000000;
     <?php if ($client_connected): ?>
         <h2>Wallboxwerte:</h2>
         <p>Stromstärke (0=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
-        <p>Aktive Phasen:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
-        <p>Ladedauer in Std:Min:Sek: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo gmdate("H:i:s", htmlspecialchars($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
-        <p>Geladene kWh: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong id="currentPhases"><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
-                Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh']); ?></p>
+        <p>Aktive Phasen: <strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
+        <p>Ladedauer (Std:Min:Sek): <strong id="chargingDuration"><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
+        <p>Geladene kWh: <strong id="chargedEnergy"><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
+            &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>
@@ -251,37 +266,91 @@ p, label { color:#000000;
     <form id="formOptions">
         <input type="hidden" id="selectedCpId" name="cp_id" value="<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>">
         
-        <label>PV-Modus (DB=<?php echo($pv_mode); ?>):
+        <div class="row">
+            <span class="label-inline">PV-Modus (DB=<?php echo htmlspecialchars($pv_mode); ?>):</span>
+            <span class="input-inline">
             <select id="pvMode" name="pv_mode">
                 <option value="0" <?php if($pv_mode=='0') echo 'selected'; ?>>Aus</option>
                 <option value="1" <?php if($pv_mode=='1') echo 'selected'; ?>>PV</option>
                 <option value="2" <?php if($pv_mode=='2') echo 'selected'; ?>>MIN+PV</option>
                 <option value="3" <?php if($pv_mode=='3') echo 'selected'; ?>>MAX</option>
             </select>
-        </label>
-        <label>Phasen (DB=<?php echo($phases); ?>):
+            </span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Phasen (DB=<?php echo htmlspecialchars($phases); ?>):</span>
+            <span class="input-inline">
             <select id="phases" name="phases">
                 <option value="0" <?php if($phases=='0') echo 'selected'; ?>>Auto</option>
                 <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1 Phase</option>
                 <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3 Phasen</option>
             </select>
-        </label>
-        <br><br>
-        <label>Stromstärke MIN (DB=<?php echo($amp_min); ?>):
+            </span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Stromstärke MIN (DB=<?php echo htmlspecialchars($amp_min); ?>):</span>
+            <span class="input-inline">
             <select id="ampMin" name="amp_min">
                 <?php for($i=6;$i<=16;$i++): ?>
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_min) echo 'selected'; ?>><?php echo $i; ?> A</option>
                 <?php endfor; ?>
             </select>
-        </label>
-        <label>Stromstärke MAX (DB=<?php echo($amp_max); ?>):
+            </span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Stromstärke MAX (DB=<?php echo htmlspecialchars($amp_max); ?>):</span>
+            <span class="input-inline">
             <select id="ampMax" name="amp_max">
                 <?php for($i=6;$i<=16;$i++): ?>
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_max) echo 'selected'; ?>><?php echo $i; ?> A</option>
                 <?php endfor; ?>
             </select>
-        </label>
-        <br><br>
+            </span>
+        </div>
+
+        <hr>
+        <details id="moreOptions">
+            <summary>Mehr Optionen:</summary>
+        <h3>Timing / Sync Einstellungen (DB: ID=2)</h3>
+
+        <div class="row">
+            <span class="label-inline">Wallboxaktualisierung(s) (DB=<?php echo htmlspecialchars($auto_sync_interval); ?>):</span>
+            <span class="input-inline"><input id="autoSyncInterval" type="number" min="1" step="1" value="<?php echo htmlspecialchars($auto_sync_interval); ?>"></span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Phasenumschaltintervall(s) (DB=<?php echo htmlspecialchars($min_phase_duration_s); ?>):</span>
+            <span class="input-inline"><input id="minPhaseDur" type="number" min="1" step="1" value="<?php echo htmlspecialchars($min_phase_duration_s); ?>"></span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Mindestladezeit(s) (DB=<?php echo htmlspecialchars($min_charge_duration_s); ?>):</span>
+            <span class="input-inline"><input id="minChargeDur" type="number" min="1" step="1" value="<?php echo htmlspecialchars($min_charge_duration_s); ?>"></span>
+        </div>
+
+        <hr>
+        <h3>Phasenwechsel / Zielwerte (DB: ID=3)</h3>
+
+        <div class="row">
+            <span class="label-inline">Phasenumschaltverzögerung(s) (DB=<?php echo htmlspecialchars($phase_change_confirm_s); ?>):</span>
+            <span class="input-inline"><input id="phaseChangeConfirm" type="number" min="0" step="1" value="<?php echo htmlspecialchars($phase_change_confirm_s); ?>"></span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Verbleibende Leistung(W) (DB=<?php echo htmlspecialchars($residualPower); ?>):</span>
+            <span class="input-inline"><input id="residualPower" type="number" step="1" value="<?php echo htmlspecialchars($residualPower); ?>"></span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Lademenge(kWh) (DB=<?php echo htmlspecialchars($default_target_kwh); ?>):</span>
+            <span class="input-inline"><input id="defaultTargetKwh" type="number" step="1" min="0" value="<?php echo htmlspecialchars($default_target_kwh); ?>"></span>
+        </div>
+
+        </details>
+        <br>
         <button type="button" id="btnSave" class="schreiben">Speichern</button>
         <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von der Steuerung (ocpp_server.py) verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
     </form>
@@ -289,23 +358,13 @@ p, label { color:#000000;
 
 <script src="jquery.min.js"></script>
 <script>
-// Einträge Prog_Steuerung.sqlite
-//ID,Schluessel,Zeit,Res_Feld1,Res_Feld2,Options
-//  ,          ,    ,PV-Modus ,Phasen   ,A-MIN;MAX
-//1 ,   wallbox,  1 ,AUS=0    ,AUTO=0   ,6,16
-//  ,          ,    ,PV=1     ,1        ,
-//  ,          ,    ,MIN+PV=2 ,3        ,
-//  ,          ,    ,MAX=3    ,         ,
-
 // --- FUNKTIONEN ZUM SPEICHERN/LADEN MIT localStorage ---
 
-// Speichert den aktuellen Wert eines Select-Elements im localStorage
 function saveToLocalStorage(id) {
-    localStorage.setItem(id, $('#' + id).val());
+    var el = $('#' + id);
+    if (el.length) localStorage.setItem(id, el.val());
 }
 
-// Lädt den Wert aus dem localStorage und setzt ihn im Select-Element,
-// wenn ein gespeicherter Wert existiert.
 function loadFromLocalStorage(id) {
     var storedValue = localStorage.getItem(id);
     if (storedValue !== null) {
@@ -314,19 +373,37 @@ function loadFromLocalStorage(id) {
 }
 
 $(document).ready(function(){
-    
-    // 1. Dropdown-Werte aus localStorage laden, um Änderungen beim Reload zu erhalten
-    loadFromLocalStorage('pvMode');
-    loadFromLocalStorage('phases');
-    loadFromLocalStorage('ampMin');
-    loadFromLocalStorage('ampMax');
-    
-    // 2. Event-Listener hinzufügen, um Änderungen sofort im localStorage zu speichern
-    $('#pvMode').on('change', function() { saveToLocalStorage('pvMode'); });
-    $('#phases').on('change', function() { saveToLocalStorage('phases'); });
-    $('#ampMin').on('change', function() { saveToLocalStorage('ampMin'); });
-    $('#ampMax').on('change', function() { saveToLocalStorage('ampMax'); });
+    // IDs, die wir im localStorage zwischenhalten möchten
+    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minPhaseDur','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh'];
 
+    // Load saved values
+    ls_ids.forEach(function(id){ loadFromLocalStorage(id); });
+
+    // Save on change
+    ls_ids.forEach(function(id){ 
+        $('#' + id).on('change input', function(){ saveToLocalStorage(id); });
+    });
+
+    // --- Details "Mehr Optionen" öffnen/geschlossen Zustand persistieren ---
+    var moreOptionsKey = 'moreOptionsOpen';
+    var moreOptionsEl = document.getElementById('moreOptions');
+    if (moreOptionsEl) {
+        // Bei Laden wiederherstellen
+        var stored = localStorage.getItem(moreOptionsKey);
+        if (stored === '1') {
+            moreOptionsEl.setAttribute('open', 'open');
+        } else {
+            moreOptionsEl.removeAttribute('open');
+        }
+        // Auf Toggle reagieren und Zustand speichern (Details-Element feuert 'toggle' Event)
+        moreOptionsEl.addEventListener('toggle', function(){
+            try {
+                localStorage.setItem(moreOptionsKey, this.open ? '1' : '0');
+            } catch(e) {
+                // ignore storage errors
+            }
+        });
+    }
 
     $('#btnSave').click(function(){
         var amp_min = $('#ampMin').val();
@@ -335,46 +412,84 @@ $(document).ready(function(){
         var pv_mode = $('#pvMode').val();
         var cp_id = $('#selectedCpId').val(); // Ausgewählte Client-ID (kann leer sein)
 
+        // Neue Parameter (ID=2)
+        var auto_sync_interval = $('#autoSyncInterval').val();
+        var min_phase_dur = $('#minPhaseDur').val();
+        var min_charge_dur = $('#minChargeDur').val();
+
+        // Neue Parameter (ID=3)
+        var phase_change_confirm = $('#phaseChangeConfirm').val();
+        var residual_power = $('#residualPower').val();
+        var default_target_kwh = $('#defaultTargetKwh').val();
+
         $.ajax({
             url: "SQL_speichern.php",
             method: "post",
             data: {
-                ID: ["1"], // Speichern auf dem festen Eintrag 1
-                Schluessel: ["wallbox"], 
-                Tag_Zeit: ["1"],
-                Res_Feld1: [pv_mode],
-                Res_Feld2: [phases],
-                Options: [amp_min + "," + amp_max]
+                ID: ["1","2","3"],
+                Schluessel: ["wallbox","wallbox","wallbox"],
+                Tag_Zeit: ["1","2","3"],
+                // Res_Feld1 for each ID:
+                // ID=1 -> pv_mode
+                // ID=2 -> MIN_PHASE_DURATION_S
+                // ID=3 -> residualPower
+                Res_Feld1: [pv_mode, min_phase_dur, residual_power],
+                // Res_Feld2 for each ID:
+                // ID=1 -> phases
+                // ID=2 -> MIN_CHARGE_DURATION_S
+                // ID=3 -> DEFAULT_TARGET_KWH
+                Res_Feld2: [phases, min_charge_dur, default_target_kwh],
+                // Options for each ID:
+                // ID=1 -> amp_min,amp_max
+                // ID=2 -> AUTO_SYNC_INTERVAL
+                // ID=3 -> PHASE_CHANGE_CONFIRM_S
+                Options: [amp_min + "," + amp_max, auto_sync_interval, phase_change_confirm]
             },
             success: function(data){
-                // WICHTIG: NACH ERFOLGREICHEM SPEICHERN DIE LOKALEN WERTE LÖSCHEN
+                // Nach erfolgreichem Speichern die lokalen Werte löschen,
                 // damit beim nächsten Neuladen die NEUEN DB-Werte angezeigt werden.
-                localStorage.removeItem('pvMode');
-                localStorage.removeItem('phases');
-                localStorage.removeItem('ampMin');
-                localStorage.removeItem('ampMax');
+                ls_ids.forEach(function(id){ localStorage.removeItem(id); });
+
+                // Hinweis: Den Zustand von "Mehr Optionen" NICHT löschen, damit Benutzer-Einstellung erhalten bleibt.
 
                 // Nach dem Speichern auf die Seite des ausgewählten Clients neu laden
                 var redirect_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
                 if (cp_id) {
-                     redirect_url += '?cp_id=' + cp_id;
+                     redirect_url += '?cp_id=' + encodeURIComponent(cp_id);
                 }
                 location.href = redirect_url; 
+            },
+            error: function(xhr, status, err) {
+                alert("Fehler beim Speichern: " + err);
             }
         });
     });
 });
 </script>
 <script>
-// Seite alle 30 Sekunden automatisch neu laden (Behält die Client-ID bei, falls gesetzt)
+// Seite alle 10 Sekunden automatisch neu laden (Behält die Client-ID bei, falls gesetzt)
 setInterval(function() {
     var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
     var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
     if (current_cp_id) {
-        reload_url += '?cp_id=' + current_cp_id;
+        reload_url += '?cp_id=' + encodeURIComponent(current_cp_id);
     }
     window.location.href = reload_url;
-}, 10000); // 10000 ms = 10 Sekunden
+}, 20000); // 20000 ms = 20 Sekunden
+</script>
+<script>
+  // Scroll-Position speichern
+  window.addEventListener("beforeunload", () => {
+    sessionStorage.setItem("scrollPos", window.scrollY);
+  });
+
+  // Scroll-Position nach dem Laden wiederherstellen
+  window.addEventListener("load", () => {
+    const scrollPos = sessionStorage.getItem("scrollPos");
+    if (scrollPos !== null) {
+      window.scrollTo(0, parseInt(scrollPos));
+    }
+  });
 </script>
 
 

@@ -66,6 +66,7 @@ td {font-size: 140%;
     color: #000000;
     position: fixed;
     right: 8px;
+    text-align: right;
     }
 .version{
     font-family:Arial;
@@ -94,8 +95,9 @@ $prg_version = $config['Programm']['version'];
 $repoPath = realpath($PythonDIR);
 $logFile = $repoPath . '/Update.log';
 
-echo '<div class="hilfe"> <a href="https://github.com/wiggal/GEN24_Ladesteuerung/blob/main/CHANGELOG.md" target="_blank"><b>Changelog</b></a><br>';
-echo '&nbsp;&nbsp;<a href="' . $hilfe_link . '"><b>Hilfe</b></a></div>';
+echo '<div class="hilfe">';
+echo '<a href="' . $hilfe_link . '"><b>Hilfe</b></a><br>';
+echo '<a href="https://github.com/wiggal/GEN24_Ladesteuerung/blob/main/CHANGELOG.md" target="_blank"><b>Changelog</b></a></div>';
 
 echo '<div style="text-align:center;">';
 echo '<span class="version">';
