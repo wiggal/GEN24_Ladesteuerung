@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>EnergyController</title>
+  </head>
+  <body>
+    <div class="markdown-body">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <h1 class="heading-element">TAB --&gt;&gt; Wallbox<br>
+      </h1>
+      <p><strong>Stand: 05.12.2025<br>
+        </strong></p>
+      <p>Das Tool stellt durch einen OCPP-Server bereit, zu dem die
+        Wallbox eine Verbindung als Client herstellt.<br>
+        Einstellungen für Fronius Wattpilot in der App siehe
+        Konfiguration.<br>
+        <strong></strong></p>
+      <p><strong>Programmfunktionen:</strong></p>
+      <ul>
+        <li>Ladung mit fester Leistung</li>
+        <li>PV-Überschußladung<br>
+        </li>
+      </ul>
+      <strong>Funktionsweise:</strong>
+      <ul>
+        <li> Es wird ein OCPP-Server gestartet, zudem eine Wallbox
+          Verbindung aufnimmt.&nbsp;</li>
+        <li>Über die WebUI kann der OCPP-Server gestartet und gestoppt
+          werden, sie stellt auch den Status des OCPP-Server dar.</li>
+        <li>Über die WebUI können die Ladeoptionen eingestellt und in
+          die DB CONFIG/Prog_Steuerung.sqlite gespeichert werden.</li>
+        <li>Der OCPP-Server liest die Optionen in dem eingestellten
+          Zeitintervall (<span class="label-inline">
+            <meta http-equiv="content-type" content="text/html;
+              charset=UTF-8">
+            <span class="label-inline">Wallboxaktualisierung) aus der DB
+              und sendet sie wenn nötig an die Wallbox.</span></span></li>
+      </ul>
+      <p> <strong>Clientkonfiguration:<br>
+        </strong></p>
+      <ul>
+        <li>In der Wattpilotapp sind folgende Einstellungen zu machen.<br>
+          Modus: Eco Mode AUS<br>
+          Einstellungen, Fahrzeug PHASENUMSCHALTUNG: Automatisch<br>
+          Internet, OCPP =&gt; aktiviert<br>
+          Auf das Klippboard klicken und folgendes eintragen (xxx =
+          IP-Adresse des OCPP-Servers) :<br>
+          &nbsp; ws://xxx.xxx.xxx.xx:8887 <br>
+          Füge SN (seriennummer) zur URL<br>
+          <br>
+        </li>
+      </ul>
+      <blockquote><br>
+      </blockquote>
+    </div>
+  </body>
+</html>

@@ -183,19 +183,22 @@ select, input[type="number"], input[type="text"] { font-size: 1.1em; background-
 .info{background:#e9f7ef;padding:10px;border-radius:6px;margin-bottom:10px;}
 .small{font-size:0.9em;color:#666;}
 form { display: inline-block; margin-right:6px; }
-p, label { color:#000000;
-    font-family:Arial;
-    font-size:120%;
-    padding:2px 1px;
-    line-height:1.1;
-}
+p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; line-height:1.1; }
 .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle;}
 .row { margin-bottom:8px; }
 .label-inline { display:inline-block; width:320px; vertical-align:middle; }
 .input-inline { display:inline-block; vertical-align:middle; }
+.hilfe{ font-family:Arial; font-size:150%; color: #000000; position: fixed; right: 8px; }
 </style>
 </head>
 <body>
+<!-- Hilfeaufruf ANFANG -->
+<?php
+  $current_url = urlencode($_SERVER['REQUEST_URI']);
+  $hilfe_link = "Hilfe_Ausgabe.php?file=Wallbox&return=$current_url";
+?>
+  <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
+<!-- Hilfeaufruf ENDE -->
 <h1>Wattpilot – OCPP Steuerung</h1>
 
 <div class="card">
