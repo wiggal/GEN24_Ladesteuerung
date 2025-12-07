@@ -859,6 +859,34 @@ class OCPPManager:
             "remaining_kwh": round(remaining_kwh, 4) if remaining_kwh is not None else None
         })
 
+    async def reset_counter(self, request):
+        """HTTP-Handler zum Zurücksetzen des Lade-Zählers für einen Charge Point."""
+        cp_id = request.query.get("charge_point_id")
+        if not cp_id:
+            return web.json_response({"error": "Missing charge_point_id"}, status=400)
+
+        success = await self.reset_charged_energy_counter(cp_id)
+
+        if success:
+            return web.json_response({"status": "success", "charge_point_id": cp_id, "message": "Charged energy counter reset to 0"})
+        else:
+            return web.json_response({"status": "error", "charge_point_id": cp_id, "message": "Charge point not found or reset failed"}, status=404)
+
+    # ----------------------------
+    # Zähler-Reset-Logik
+    # ----------------------------
+    async def reset_charged_energy_counter(self, cp_id):
+        """Setzt die geladene Energie (charged_energy_wh_store) und die letzte Zählerablesung (last_energy_wh_store) zurück."""
+        if cp_id not in self.connected_charge_points:
+            cwarn(f"Reset-Zähler: Charge Point { '..' + cp_id[-4:] } ist nicht verbunden.")
+            return False
+
+        # Setze die Stores zurück
+        self.charged_energy_wh_store[cp_id] = 0.0
+        self.last_energy_wh_store[cp_id] = None
+
+        cnote(f"[{ '..' + cp_id[-4:] }] ✅ Geladene Energie und Zähler-Baseline erfolgreich zurückgesetzt.")
+        return True
 
     # ----------------------------
     # AutoSync background task
@@ -896,6 +924,7 @@ class OCPPManager:
         app.add_routes([
             web.get('/list', self.list_cp),
             web.get('/meter_values', self.meter_values),
+            web.post('/reset_counter', self.reset_counter),
         ])
 
         runner = web.AppRunner(app)

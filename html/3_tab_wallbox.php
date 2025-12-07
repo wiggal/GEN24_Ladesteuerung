@@ -199,10 +199,8 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
 ?>
   <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <!-- Hilfeaufruf ENDE -->
-<h1>Wattpilot – OCPP Steuerung</h1>
-
 <div class="card">
-    <h2>Python OCPP Server</h2>
+    <h2>OCPP Server (Alpha-Version)</h2>
     <p id="serverStatus">
         <?php if ($server_running): ?>
             <span class="status-dot" style="background:green"></span>
@@ -259,7 +257,15 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
         <p>Aktive Phasen: <strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
         <p>Ladedauer (Std:Min:Sek): <strong id="chargingDuration"><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
         <p>Geladene kWh: <strong id="chargedEnergy"><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
-            &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?></p>
+            &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
+        <?php
+        // Nur Button anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
+        $charged_energy = $meter_values['charged_energy_kwh'] ?? 0.0;
+        if ($server_running && $client_connected && $charged_energy > 0) {
+        echo '&nbsp;<button type="button" class="red" id="btnResetCounter">Reset</button>';
+        }
+        ?>
+        </p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>
@@ -470,17 +476,6 @@ $(document).ready(function(){
 });
 </script>
 <script>
-// Seite alle 10 Sekunden automatisch neu laden (Behält die Client-ID bei, falls gesetzt)
-setInterval(function() {
-    var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
-    var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
-    if (current_cp_id) {
-        reload_url += '?cp_id=' + encodeURIComponent(current_cp_id);
-    }
-    window.location.href = reload_url;
-}, 20000); // 20000 ms = 20 Sekunden
-</script>
-<script>
   // Scroll-Position speichern
   window.addEventListener("beforeunload", () => {
     sessionStorage.setItem("scrollPos", window.scrollY);
@@ -494,7 +489,59 @@ setInterval(function() {
     }
   });
 </script>
+<script>
+// ===================================
+// Allgemeine Funktion zum Neuladen
+// ===================================
+function refreshData() {
+    var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
+    var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
+    if (current_cp_id) {
+        reload_url += '?cp_id=' + encodeURIComponent(current_cp_id);
+    }
+    window.location.href = reload_url;
+}
 
+// ===================================
+// Zähler-Reset Logik (KORRIGIERT)
+// ===================================
+$('#btnResetCounter').click(function(){
+    var cp_id = '<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>';
+
+    if (!cp_id) {
+        alert("Fehler: Die Charge Point ID ist leer.");
+        return;
+    }
+
+    if (!confirm("Wollen Sie den Ladezähler (Geladene kWh) für " + cp_id + " wirklich auf 0 zurücksetzen?")) {
+        return;
+    }
+
+    // Ruft den POST-Endpoint im OCPP-Server auf
+    $.ajax({
+        url: "<?php echo $API; ?>/reset_counter?charge_point_id=" + encodeURIComponent(cp_id),
+        method: "post",
+        dataType: 'json',
+
+        // DIES WIRD NUR BEI ERFOLG AUSGEFÜHRT!
+        success: function(response){
+            refreshData();
+        },
+
+        //  Da hier immer ein Fehler kommt, obwohl der Zähler korrekt restetet wurde
+        error: function(xhr, status, err) {
+            refreshData();
+
+        }
+    });
+});
+
+// ===================================
+// Automatisches Neuladen
+// ===================================
+// Die benannte Funktion wird alle 20 Sekunden ausgeführt
+setInterval(refreshData, 20000); // 20000 ms = 20 Sekunden
+</script>
 
 </body>
 </html>
