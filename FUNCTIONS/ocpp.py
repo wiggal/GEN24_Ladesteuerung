@@ -26,28 +26,24 @@ OCPP_PROTOCOLS = ['ocpp1.6', 'ocpp2.0.1', 'ocpp1.5']
 # ----------------------------
 # Auffälliges Console-Logging
 # ----------------------------
-LEVEL_ERROR = 0
-LEVEL_WARN  = 1
-LEVEL_INFO  = 2
-LEVEL_NOTE  = 3
-
+# 0=ERROR/WARN, 1=+/OK 2=+INFO, 3=+NOTE
 def clog(level, prefix, msg):
-    if print_level >= level:
+    if log_level >= level:
         ts = datetime.now().strftime("%y%m%d %H:%M:%S")
         print(f"{ts} {prefix} {msg}")
 
 def cerr(msg):   clog(0, "❌ ERROR:", msg)
-def cwarn(msg):  clog(1, "⚠️ WARN:", msg)
+def cwarn(msg):  clog(0, "⚠️ WARN:", msg)
+def cok(msg):    clog(1, "✅ OK:", msg)
 def cinfo(msg):  clog(2, "ℹ️ INFO:", msg)
-def cok(msg):    clog(3, "✅ OK:", msg)
 def cnote(msg):  clog(3, "✏️ NOTE:", msg)
 
 # Import basics/config zum Lesen der INI-Dateien
 import FUNCTIONS.functions
 basics = FUNCTIONS.functions.basics()
 config = basics.loadConfig(['default'])
-# soll aus ini-file kommen
-print_level = 3   # 0=ERROR, 1=WARN, 2=INFO, 3=NOTE/OK/alles
+# Logginglevel auf default.ini
+log_level = basics.getVarConf('wallbox','log_level', 'eval')
 
 # Hybrid Import für websockets (neu/alt)
 try:
@@ -255,6 +251,9 @@ class OCPPManager:
         self.wb_pv_mode = 0.0
         self.wb_amp = self.wb_amp_max
         self.wb_is_pv_controlled = False
+        self.Netzbezug = 0.0
+        self.Produktion = 0.0
+        self.Batteriebezug = 0.0
 
         # Die früheren Modul-Constants jetzt als Instanzattribute (können aus DB überschrieben werden)
         self.AUTO_SYNC_INTERVAL = auto_sync_interval
@@ -296,8 +295,173 @@ class OCPPManager:
     # ----------------------------
     # DB Helper (ausgelagert)
     # ----------------------------
-
     def get_wallbox_steuerdaten(self, cp_id=None):
+        """
+        Liest aus der Datenbank mittels FUNCTIONS.SQLall.sqlall().getSQLsteuerdaten('wallbox')
+        Rückgabe: (amp: float, phases: str, pv_mode: float, is_pv_controlled: bool, amp_min: float)
+        ...
+        """
+        # Versuche DB-Lesen
+        try:
+            sqlall = FUNCTIONS.SQLall.sqlall()
+            data = sqlall.getSQLsteuerdaten('wallbox', 'CONFIG/Prog_Steuerung.sqlite')
+        except Exception as e:
+            cwarn(f"DB-Zugriff fehlgeschlagen oder FUNCTIONS nicht vorhanden: {e}")
+            # Return current instance values as fallback
+            return getattr(self, 'wb_amp', 0.0), getattr(self, 'wb_phases', "3"), getattr(self, 'wb_pv_mode', 0.0), False, getattr(self, 'wb_amp_min', 6.0)
+
+        # Wenn keine Daten vorhanden sind -> Instanzwerte zurückgeben
+        if not data or '1' not in data:
+            cwarn("Keine Wallbox-Daten in DB gefunden → Verwende Instanz-Defaults")
+            return getattr(self, 'wb_amp', 0.0), getattr(self, 'wb_phases', "3"), getattr(self, 'wb_pv_mode', 0.0), False, getattr(self, 'wb_amp_min', 6.0)
+
+        # Parse Haupt-Zeile (ID=1)
+        try:
+            row = data.get('1') or data.get(1)
+            if row:
+                parts = row.get('Options', '').split(',')
+
+                # amp_min aus Options[0]
+                try:
+                    amp_min_val = float(parts[0])
+                except (ValueError, IndexError):
+                    amp_min_val = getattr(self, 'wb_amp_min', 6.0)
+                if amp_min_val < 6:
+                    amp_min_val = 6.0
+
+                # amp_max aus Options[1]
+                try:
+                    amp_max_val = float(parts[1])
+                except (ValueError, IndexError):
+                    amp_max_val = getattr(self, 'wb_amp_max', 16.0)
+                if amp_max_val < amp_min_val:
+                    amp_max_val = amp_min_val
+                if amp_max_val > 16:
+                    amp_max_val = 16.0
+
+                # phases / pv_mode aus Res_Feld2 / Res_Feld1
+                self.wb_phases = str(row.get('Res_Feld2', self.wb_phases))
+                try:
+                    self.wb_pv_mode = float(row.get('Res_Feld1', self.wb_pv_mode))
+                except Exception:
+                    # leave existing value
+                    pass
+
+                # setze die berechneten Ampere-Grenzen
+                self.wb_amp_max = amp_max_val
+                self.wb_amp_min = amp_min_val
+
+                cinfo(f"DB-Steuerdaten geladen (ID=1): amp_max={self.wb_amp_max}A, phases={self.wb_phases}, pv_mode={self.wb_pv_mode}, amp_min={self.wb_amp_min}A")
+        except Exception as e:
+            cwarn(f"Fehler beim Parsen der DB-Daten (ID=1): {e} → Instanz-Defaults verwendet")
+            # leave existing wb_* values
+
+        # ---- Lese zusätzliche Steuer-Parameter wie gewünscht (ID=2, ID=3) ----
+        try:
+            # ID=2: Res_Feld1 = MIN_PHASE_DURATION_S, Res_Feld2 = MIN_CHARGE_DURATION_S, Options = AUTO_SYNC_INTERVAL
+            row2 = data.get('2') or data.get(2)
+            if row2:
+                try:
+                    self.MIN_PHASE_DURATION_S = int(float(row2.get('Res_Feld1', self.MIN_PHASE_DURATION_S)))
+                except Exception:
+                    pass
+                try:
+                    self.MIN_CHARGE_DURATION_S = int(float(row2.get('Res_Feld2', self.MIN_CHARGE_DURATION_S)))
+                except Exception:
+                    pass
+                try:
+                    opt = row2.get('Options', None)
+                    if opt is not None and str(opt).strip() != "":
+                        self.AUTO_SYNC_INTERVAL = int(float(opt))
+                except Exception:
+                    pass
+
+            # ID=3: Res_Feld1 residualPower, Res_Feld2 DEFAULT_TARGET_KWH, Options PHASE_CHANGE_CONFIRM_S
+            row3 = data.get('3') or data.get(3)
+            if row3:
+                try:
+                    self.residualPower = float(row3.get('Res_Feld1', self.residualPower))
+                except Exception:
+                    pass
+                try:
+                    self.DEFAULT_TARGET_KWH = float(row3.get('Res_Feld2', self.DEFAULT_TARGET_KWH))
+                except Exception:
+                    pass
+                try:
+                    opt3 = row3.get('Options', None)
+                    if opt3 is not None and str(opt3).strip() != "":
+                        self.PHASE_CHANGE_CONFIRM_S = int(float(opt3))
+                except Exception:
+                    pass
+
+            # Nach DB-Lesen auto_sync_interval für Hintergrundtask updaten
+            self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
+
+            cinfo(f"DB-Steuerdaten geladen (ID=2): AUTO_SYNC_INTERVAL={getattr(self,'AUTO_SYNC_INTERVAL',None)}, MIN_PHASE_DURATION_S={getattr(self,'MIN_PHASE_DURATION_S',None)}, MIN_CHARGE_DURATION_S={getattr(self,'MIN_CHARGE_DURATION_S',None)}")
+            cinfo(f"DB-Steuerdaten geladen (ID=3): PHASE_CHANGE_CONFIRM_S={getattr(self,'PHASE_CHANGE_CONFIRM_S',None)}, residualPower={getattr(self,'residualPower',None)}, DEFAULT_TARGET_KWH={getattr(self,'DEFAULT_TARGET_KWH',None)}")
+        except Exception as e:
+            cwarn(f"Fehler beim Lesen der Konfiguration aus DB: {e} → Instanz-Defaults verwendet")
+
+        # ---- Berechne zulässigen Ampere-Wert basierend auf PV-Modus und Inverter ----
+        amp = self.wb_amp_max
+        is_pv_controlled = False
+
+        # Inverter API immer aufrufen, um Netzbezug zu erhalten und in Instanzattribut speichern
+        self.Netzbezug = 0.0 # Default-Wert
+        self.Produktion = 0.0
+        self.Batteriebezug = 0.0
+        try:
+            InverterApi = basics.get_inverter_class(class_type="Api")
+            inverter_api = InverterApi()
+            API = inverter_api.get_API()
+            # Der Wert wird direkt im Instanzattribut gespeichert
+            self.Netzbezug = API.get('aktuelleEinspeisung', 0)
+            self.Produktion = API.get('aktuellePVProduktion', 0)
+            self.Batteriebezug = API.get('aktuelleBatteriePower', 0)
+        except Exception as e:
+            cwarn(f"Inverter API konnte nicht geladen werden: {e} → Netzbezug wird auf 0 gesetzt.")
+            self.Netzbezug = 0.0 # Sicherstellen, dass der Wert numerisch ist
+
+        current_charge_power = 0
+        if cp_id and cp_id in self.connected_charge_points:
+            current_charge_power = self.get_current_power(cp_id)
+
+        # Überschuss-Berechnung nutzt jetzt self.Netzbezug
+        ueberschuss = max(0, (-self.Netzbezug + current_charge_power - self.residualPower))
+        cinfo(f"Aktuelle Einspeisung (negativ=Netzbezug): {-self.Netzbezug}W, Ladestrom ({current_charge_power}W), residualPower ({self.residualPower}W). Überschuss (inkl. Ladung): {ueberschuss}W")
+
+        # PV-Steuerlogik nur ausführen, wenn der Modus 1 oder 2 ist
+        if self.wb_pv_mode == 1 or self.wb_pv_mode == 2:
+            is_pv_controlled = True
+
+            amp = 0
+            amp_1 = int(ueberschuss / 230 / 1) if ueberschuss else 0
+            amp_3 = int(ueberschuss / 230 / 3) if ueberschuss else 0
+
+            if self.wb_phases == "1":
+                amp = min(amp_1, self.wb_amp_max) if amp_1 >= 6 else 0
+            elif self.wb_phases == "3" or self.wb_phases == "0":
+                if amp_3 >= 6:
+                    self.wb_phases = "3"
+                    amp = min(amp_3, self.wb_amp_max)
+                elif amp_1 >= 6:
+                    self.wb_phases = "1"
+                    amp = min(amp_1, self.wb_amp_max)
+                else:
+                    amp = 0
+
+        # pv_mode == 2: niemals vollständig abschalten, sondern Minimum erzwingen
+        if self.wb_pv_mode == 2:
+            if amp < self.wb_amp_min:
+                amp = min(self.wb_amp_min, self.wb_amp_max)
+
+        # Werte in Instanzattribute speichern
+        self.wb_amp = amp
+        self.wb_is_pv_controlled = is_pv_controlled
+
+        return self.wb_amp, self.wb_phases, self.wb_pv_mode, is_pv_controlled, self.wb_amp_min
+
+    def WIGGAL_get_wallbox_steuerdaten(self, cp_id=None):
         """
         Liest aus der Datenbank mittels FUNCTIONS.SQLall.sqlall().getSQLsteuerdaten('wallbox')
         Rückgabe: (amp: float, phases: str, pv_mode: float, is_pv_controlled: bool, amp_min: float)
@@ -409,6 +573,17 @@ class OCPPManager:
         # ---- Berechne zulässigen Ampere-Wert basierend auf PV-Modus und Inverter ----
         amp = self.wb_amp_max
         is_pv_controlled = False
+
+        Netzbezug = 0 # Default-Wert
+        current_charge_power = 0
+        try:
+            InverterApi = basics.get_inverter_class(class_type="Api")
+            inverter_api = InverterApi()
+            API = inverter_api.get_API()
+            Netzbezug = API.get('aktuelleEinspeisung', 0)
+        except Exception as e:
+            cwarn(f"Inverter API konnte nicht geladen werden: {e} → Netzbezug wird auf 0 gesetzt.")
+            # self.wb_amp / self.wb_is_pv_controlled bleiben unverändert (Default-Werte)
     
         if self.wb_pv_mode == 1 or self.wb_pv_mode == 2:
             is_pv_controlled = True
@@ -499,7 +674,6 @@ class OCPPManager:
         self.target_energy_kwh_store.setdefault(cp_id, self.DEFAULT_TARGET_KWH)
         self.charged_energy_wh_store.setdefault(cp_id, 0.0)
         self.last_energy_wh_store.setdefault(cp_id, None)
-
         curr_limit = self.current_limit_store.get(cp_id)
         phase_limit = self.phase_limit_store.get(cp_id)
 
@@ -854,6 +1028,9 @@ class OCPPManager:
             "debug_messages": self.debug_store.get(cp_id, []),
             "phase_change_candidate": candidate_info,
             # Energie-Infos für Frontend
+            "Netzbezug_W": self.Netzbezug,
+            "Produktion_W": self.Produktion,
+            "Batteriebezug_W": self.Batteriebezug,
             "target_energy_kwh": target_kwh,
             "charged_energy_kwh": round(charged_wh / 1000.0, 4),
             "remaining_kwh": round(remaining_kwh, 4) if remaining_kwh is not None else None

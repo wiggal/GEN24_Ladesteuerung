@@ -9,6 +9,7 @@ $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
 $PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 & echo $!";
 
 include 'SQL_steuerfunctions.php';
+require_once '3_funktion_wallbox.php';
 
 // -------------------------
 // Helper Functions
@@ -249,12 +250,21 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
     </div>
 </div>
 
+<?php  #entWIGGlung
+        // Definieren der Werte
+        $solar_current = max(0.0, round(($meter_values['Produktion_W'] ?? 0)/1000,1));
+        $battery_current = max(0.0, round(($meter_values['Batteriebezug_W'] ?? 0)/1000,1));
+        $grid_current = max(0.0, round(($meter_values['Netzbezug_W'] ?? 0)/1000,1));
+
+        // Funktion aufrufen und Ergebnis ausgeben (echo)
+        echo generateLoadBar($solar_current, $battery_current, $grid_current);
+    ?>
 <div class="card">
     
     <?php if ($client_connected): ?>
-        <h2>Wallboxwerte:</h2>
-        <p>Stromstärke (0=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); ?> A</strong></p>
-        <p>Aktive Phasen: <strong id="currentPhases"><?php echo htmlspecialchars($meter_values['phases'] ?? '—'); ?></strong></p>
+        <p>Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
+            echo 'A / ';
+            echo htmlspecialchars($meter_values['phases'] ?? '—'); ?>PH</strong></p>
         <p>Ladedauer (Std:Min:Sek): <strong id="chargingDuration"><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
         <p>Geladene kWh: <strong id="chargedEnergy"><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
@@ -364,12 +374,13 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
         <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von der Steuerung (ocpp_server.py) verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
     </form>
 </div>
+ <pre><?php print_r($meter_values); #WIGGAL?></pre>
 
 <script src="jquery.min.js"></script>
 <script>
 // --- FUNKTIONEN ZUM SPEICHERN/LADEN MIT localStorage ---
 
-function saveToLocalStorage(id) {
+function saveToLocalStorage(id) {self.Netzbezug
     var el = $('#' + id);
     if (el.length) localStorage.setItem(id, el.val());
 }
