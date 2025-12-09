@@ -356,17 +356,17 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
 
         <div class="row">
             <span class="label-inline">Wallboxaktualisierung(s) (DB=<?php echo htmlspecialchars($auto_sync_interval); ?>):</span>
-            <span class="input-inline"><input id="autoSyncInterval" type="number" min="1" step="1" value="<?php echo htmlspecialchars($auto_sync_interval); ?>"></span>
+            <span class="input-inline"><input id="autoSyncInterval" type="number" min="10" step="10" value="<?php echo htmlspecialchars($auto_sync_interval); ?>"></span>
         </div>
 
         <div class="row">
             <span class="label-inline">Phasenumschaltintervall(s) (DB=<?php echo htmlspecialchars($min_phase_duration_s); ?>):</span>
-            <span class="input-inline"><input id="minPhaseDur" type="number" min="1" step="1" value="<?php echo htmlspecialchars($min_phase_duration_s); ?>"></span>
+            <span class="input-inline"><input id="minPhaseDur" type="number" min="60" step="60" value="<?php echo htmlspecialchars($min_phase_duration_s); ?>"></span>
         </div>
 
         <div class="row">
             <span class="label-inline">Mindestladezeit(s) (DB=<?php echo htmlspecialchars($min_charge_duration_s); ?>):</span>
-            <span class="input-inline"><input id="minChargeDur" type="number" min="1" step="1" value="<?php echo htmlspecialchars($min_charge_duration_s); ?>"></span>
+            <span class="input-inline"><input id="minChargeDur" type="number" min="60" step="60" value="<?php echo htmlspecialchars($min_charge_duration_s); ?>"></span>
         </div>
 
         <hr>
@@ -374,12 +374,12 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
 
         <div class="row">
             <span class="label-inline">Phasenumschaltverzögerung(s) (DB=<?php echo htmlspecialchars($phase_change_confirm_s); ?>):</span>
-            <span class="input-inline"><input id="phaseChangeConfirm" type="number" min="0" step="1" value="<?php echo htmlspecialchars($phase_change_confirm_s); ?>"></span>
+            <span class="input-inline"><input id="phaseChangeConfirm" type="number" min="0" step="30" value="<?php echo htmlspecialchars($phase_change_confirm_s); ?>"></span>
         </div>
 
         <div class="row">
             <span class="label-inline">Verbleibende Leistung(W) (DB=<?php echo htmlspecialchars($residualPower); ?>):</span>
-            <span class="input-inline"><input id="residualPower" type="number" step="1" value="<?php echo htmlspecialchars($residualPower); ?>"></span>
+            <span class="input-inline"><input id="residualPower" type="number" step="100" value="<?php echo htmlspecialchars($residualPower); ?>"></span>
         </div>
 
         <div class="row">

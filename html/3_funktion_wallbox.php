@@ -11,7 +11,7 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
 
     $in_battery = max(0.0, -$battery);
     $in_grid = max(0.0, -$grid);
-    $in_haus = $total - $in_battery - $in_grid - $in_auto;
+    $in_haus = round(($total - $in_battery - $in_grid - $in_auto),2);
 
 
 

@@ -425,10 +425,14 @@ class OCPPManager:
         current_charge_power = 0
         if cp_id and cp_id in self.connected_charge_points:
             current_charge_power = self.get_current_power(cp_id)
+        
 
         # Überschuss-Berechnung nutzt jetzt self.Netzbezug
-        ueberschuss = max(0, (-self.Netzbezug + current_charge_power - self.residualPower))
-        cinfo(f"Aktuelle Einspeisung (negativ=Netzbezug): {-self.Netzbezug}W, Ladestrom ({current_charge_power}W), residualPower ({self.residualPower}W). Überschuss (inkl. Ladung): {ueberschuss}W")
+        aus_batterie = max(0.0, self.Batteriebezug)
+        in_batterie = max(0.0, -self.Batteriebezug)
+        hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power )
+        ueberschuss = max(0, (self.Produktion - hausverbrauch + self.Batteriebezug - self.residualPower))  #entWIGGlung FEHLER in der Berechnung??
+        cinfo(f"Überschuss: PV: {self.Produktion}, AKKU {self.Batteriebezug}, Netz: {self.Netzbezug}W, Hausverbrauch {hausverbrauch}, Wallbox ({current_charge_power}W), Überschuss: {ueberschuss}W")
 
         # PV-Steuerlogik nur ausführen, wenn der Modus 1 oder 2 ist
         if self.wb_pv_mode == 1 or self.wb_pv_mode == 2:
