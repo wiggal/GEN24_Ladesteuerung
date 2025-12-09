@@ -156,6 +156,24 @@ if (isset($_GET['ajax'])) {
     exit;
 }
 
+# Ladeleistung aus meter_values extrahieren
+$total_power = 0; // Initialisierung der Zielvariable
+// 1. Sichere Navigation zum 'sampledValue' Array
+$sampled_values = [];
+if (isset($meter_values['meter']['meterValue'][0]['sampledValue'])) {
+    $sampled_values = $meter_values['meter']['meterValue'][0]['sampledValue'];
+}
+// 2. Iteration über alle Messwerte
+foreach ($sampled_values as $item) {
+    // Prüfen, ob der Messwert 'Power.Active.Import' ist UND das 'phase'-Feld NICHT gesetzt ist.
+    if (($item['measurand'] ?? '') === 'Power.Active.Import' && !isset($item['phase'])) {
+        // Wert vorbereiten
+        $total_power = (float)($item['value'] ?? 0.00);
+        // Wert gefunden, Schleife beenden, da wir nur den Gesamtwert suchen
+        break;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -250,14 +268,15 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
     </div>
 </div>
 
-<?php  #entWIGGlung
+<?php
         // Definieren der Werte
-        $solar_current = max(0.0, round(($meter_values['Produktion_W'] ?? 0)/1000,1));
-        $battery_current = max(0.0, round(($meter_values['Batteriebezug_W'] ?? 0)/1000,1));
-        $grid_current = max(0.0, round(($meter_values['Netzbezug_W'] ?? 0)/1000,1));
+        $solar_current = round(($meter_values['Produktion_W'] ?? 0)/1000,2);
+        $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0)/1000,2);
+        $grid_current = round(($meter_values['Netzbezug_W'] ?? 0)/1000,2);
+        $total_power = round(($total_power/1000),2);
 
         // Funktion aufrufen und Ergebnis ausgeben (echo)
-        echo generateLoadBar($solar_current, $battery_current, $grid_current);
+        echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power);
     ?>
 <div class="card">
     
@@ -374,7 +393,6 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
         <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von der Steuerung (ocpp_server.py) verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
     </form>
 </div>
- <pre><?php print_r($meter_values); #WIGGAL?></pre>
 
 <script src="jquery.min.js"></script>
 <script>

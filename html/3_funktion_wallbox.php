@@ -1,61 +1,100 @@
 <?php
-
 /**
  * Generiert den HTML-Code für den Ladebalken basierend auf den übergebenen Werten.
- * Generiert zwei Zeilen mit spezifischen Klassen:
- * 1. Obere Zeile (class="load-bar-icons") mit Emojis, die als Trennlinien dienen.
- * 2. Untere Zeile (class="load-bar-values") mit den farbigen Segmenten und Werten.
- * Lässt Zellen weg, wenn der zugehörige Wert 0 ist.
- *
- * @param float $solar Wert der Solarenergie (z.B. 8.4)
- * @param float $battery Wert der Batterieenergie (z.B. 0.4)
- * @param float $grid Wert der Netzenergie (z.B. 2.8)
- * @return string Der komplette HTML-Code des Ladebalkens (inklusive CSS)
  */
-function generateLoadBar(float $solar, float $battery, float $grid): string
+function generateLoadBar(float $solar, float $battery, float $grid, float $in_auto): string
 {
-    // 1. Berechnung der Gesamtenergie und der Prozentsätze
-    $total = $solar + $battery + $grid;
+    // 1. Berechnung der Energiewerte
+    $aus_battery = max(0.0, $battery);
+    $aus_grid = max(0.0, $grid);
+    $total = $solar + $aus_battery + $aus_grid;
+
+    $in_battery = max(0.0, -$battery);
+    $in_grid = max(0.0, -$grid);
+    $in_haus = $total - $in_battery - $in_grid - $in_auto;
+
+
 
     if ($total === 0.0) {
         return '<p class="small">Keine Energiequelle aktiv (Total = 0)</p>';
     }
 
-    // 2. Erstellung eines Arrays für die Daten
-    $data = [
+    // 2. Erstellung eines Arrays für die Daten der Quellen
+    $data_quelle = [
         'solar' => [
             'value' => $solar,
             'class' => 'solar',
             'label' => '☀️'
         ],
         'battery' => [
-            'value' => $battery,
-            'class' => 'battery',
-            'label' => '🔋'
+            'value' => $aus_battery,
+            'class' => 'aus_battery',
+            'label' => '🪫'
         ],
         'grid' => [
-            'value' => $grid,
-            'class' => 'grid',
-            'label' => '🔌'
+            'value' => $aus_grid,
+            'class' => 'aus_grid',
+            'label' => '⬇️'
         ]
     ];
 
-    $emoji_cells = ''; 
-    $value_cells = ''; 
+    // 3. Erstellung eines Arrays für die Daten Ziele
+    $data_ziel = [
+        'haus' => [
+            'value' => $in_haus,
+            'class' => 'in_haus',
+            'label' => '🏠'
+        ],
+        'auto' => [
+            'value' => $in_auto,
+            'class' => 'in_auto',
+            'label' => '🚘'
+        ],
+        'battery' => [
+            'value' => $in_battery,
+            'class' => 'in_battery',
+            'label' => '🔋'
+        ],
+        'grid' => [
+            'value' => $in_grid,
+            'class' => 'in_grid',
+            'label' => '⬆️'
+        ]
+    ];
 
-    // 3. Dynamische Generierung der Zellen
-    foreach ($data as $item) {
+    $quelle_emoji_cells = ''; 
+    $quelle_value_cells = ''; 
+    $ziel_emoji_cells = ''; 
+    $ziel_value_cells = ''; 
+
+    // 3. Dynamische Generierung der Zellen Quelle
+    foreach ($data_quelle as $item) {
         if ($item['value'] > 0) {
             $pct = ($item['value'] / $total) * 100;
             $width_style = "width: {$pct}%";
             
             // Emoji Zelle (Obere Reihe)
-            $emoji_cells .= "<td style=\"{$width_style}\">{$item['label']}</td>";
+            $quelle_emoji_cells .= "<td style=\"{$width_style}\">{$item['label']}</td>";
 
             // Zelle für den Wert (Untere Reihe)
-            $value_cells .= "<td class=\"{$item['class']}\" style=\"{$width_style}\">{$item['value']}</td>";
+            $quelle_value_cells .= "<td class=\"{$item['class']}\" style=\"{$width_style}\">{$item['value']}</td>";
         }
     }
+
+    // 4. Dynamische Generierung der Zellen Ziel
+    foreach ($data_ziel as $item) {
+        if ($item['value'] > 0) {
+            $pct = ($item['value'] / $total) * 100;
+            $width_style = "width: {$pct}%";
+            
+            // Emoji Zelle (Obere Reihe)
+            $ziel_emoji_cells .= "<td style=\"{$width_style}\">{$item['label']}</td>";
+
+            // Zelle für den Wert (Untere Reihe)
+            $ziel_value_cells .= "<td class=\"{$item['class']}\" style=\"{$width_style}\">{$item['value']}</td>";
+        }
+    }
+
 
     // 4. Erzeugung des HTML-Strings mit den integrierten CSS-Styles
     $html = <<<HTML
@@ -63,7 +102,7 @@ function generateLoadBar(float $solar, float $battery, float $grid): string
 
     .wrapper {
         width: 90%;
-        margin: 30px 0;
+        margin: 10px 0;
         font-family: sans-serif;
     }
     
@@ -75,7 +114,7 @@ function generateLoadBar(float $solar, float $battery, float $grid): string
     
     /* Stil für die obere Emoji-Zeile */
     .load-bar-icons td {
-        padding: 5px 0;
+        padding: 0px 0;
         text-align: center;
         vertical-align: middle;
         font-size: 1.2em;
@@ -86,15 +125,19 @@ function generateLoadBar(float $solar, float $battery, float $grid): string
     
     /* Stil für die untere Wert-Zeile */
     .load-bar-values td {
-        padding: 10px;
+        padding: 2px;
         text-align: center;
         font-weight: 600;
     }
 
     /* Farbschemas */
-    .solar { background: #00e639; color: black; }
-    .battery { background: #48e68b; color: black; }
-    .grid { background: #1e2130; color: white; }
+    .solar { background: #FFC800; color: black; }
+    .aus_battery { background: #2DB42D; color: black; }
+    .aus_grid { background: #6E6E6E; color: black; }
+    .in_haus { background: #d9534f; color: black; }
+    .in_auto { background: #FB5555; color: black; }
+    .in_battery { background: #3CD73C; color: black; }
+    .in_grid { background: #949494; color: black; }
 
     </style>
 
@@ -102,13 +145,21 @@ function generateLoadBar(float $solar, float $battery, float $grid): string
 
         <table class="bar-table">
             <tr class="load-bar-icons">
-                {$emoji_cells}
+                {$quelle_emoji_cells}
             </tr>
             <tr class="load-bar-values">
-                {$value_cells}
+                {$quelle_value_cells}
             </tr>
         </table>
 
+        <table class="bar-table">
+            <tr class="load-bar-values">
+                {$ziel_value_cells}
+            </tr>
+            <tr class="load-bar-icons">
+                {$ziel_emoji_cells}
+            </tr>
+        </table>
     </div>
     HTML;
 
