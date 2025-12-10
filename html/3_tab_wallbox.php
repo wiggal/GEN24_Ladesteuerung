@@ -156,21 +156,54 @@ if (isset($_GET['ajax'])) {
     exit;
 }
 
-# Ladeleistung aus meter_values extrahieren
-$total_power = 0; // Initialisierung der Zielvariable
-// 1. Sichere Navigation zum 'sampledValue' Array
-$sampled_values = [];
-if (isset($meter_values['meter']['meterValue'][0]['sampledValue'])) {
-    $sampled_values = $meter_values['meter']['meterValue'][0]['sampledValue'];
-}
-// 2. Iteration über alle Messwerte
-foreach ($sampled_values as $item) {
-    // Prüfen, ob der Messwert 'Power.Active.Import' ist UND das 'phase'-Feld NICHT gesetzt ist.
-    if (($item['measurand'] ?? '') === 'Power.Active.Import' && !isset($item['phase'])) {
-        // Wert vorbereiten
-        $total_power = (float)($item['value'] ?? 0.00);
-        // Wert gefunden, Schleife beenden, da wir nur den Gesamtwert suchen
-        break;
+$total_power = 0.0; // WICHTIG: Startet immer bei 0.0 (vom Typ float)
+$unit = 'W';
+$MAX_AGE_SECONDS = 20; // Konfigurierbare Toleranz: Messwert darf maximal 90s alt sein.
+
+// 1. Sichere Navigation zum 'meterValue' Block
+$meter_value_block = $meter_values['meter']['meterValue'][0] ?? null;
+
+if ($meter_value_block) {
+
+    // 2. Zeitstempel-Prüfung: Ist der Wert zu alt?
+    $timestamp_str = $meter_value_block['timestamp'] ?? null;
+
+    $is_data_current = false;
+    if ($timestamp_str) {
+        // Konvertiere den ISO 8601-Zeitstempel in einen UNIX-Timestamp
+        $measurement_time = strtotime($timestamp_str);
+        $current_time = time();
+
+        $age_seconds = $current_time - $measurement_time;
+
+        if ($age_seconds <= $MAX_AGE_SECONDS) {
+            // Die Daten sind aktuell, wir können sie verwenden
+            $is_data_current = true;
+        }
+        // Wenn der Wert zu alt ist, bleibt $is_data_current = false.
+    }
+
+
+    // 3. Nur Werte extrahieren, wenn der Zeitstempel aktuell ist
+    if ($is_data_current) {
+
+        $sampled_values = $meter_value_block['sampledValue'] ?? [];
+
+        // 4. Iteration über alle Messwerte
+        foreach ($sampled_values as $item) {
+
+            // Prüfen: Power.Active.Import UND KEINE Phase (Gesamtwert)
+            if (($item['measurand'] ?? '') === 'Power.Active.Import' && !isset($item['phase'])) {
+
+                // Wert als reinen Float speichern
+                // Dies ist der einzige Ort, an dem $total_power aktualisiert wird.
+                $total_power = (float)($item['value'] ?? 0.0);
+                $unit = $item['unit'] ?? 'W'; // Einheit für die optionale Anzeige speichern
+
+                // Wert gefunden, Schleife beenden
+                break;
+            }
+        }
     }
 }
 
@@ -219,7 +252,7 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
   <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <!-- Hilfeaufruf ENDE -->
 <div class="card">
-    <h2>OCPP Server (Alpha-Version)</h2>
+    <h2>OCPP Server (Beta-Version)</h2>
     <p id="serverStatus">
         <?php if ($server_running): ?>
             <span class="status-dot" style="background:green"></span>
@@ -283,7 +316,9 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
     <?php if ($client_connected): ?>
         <p>Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
             echo 'A / ';
-            echo htmlspecialchars($meter_values['phases'] ?? '—'); ?>PH</strong></p>
+            echo htmlspecialchars($meter_values['phases'] ?? '—'); 
+            echo 'PH / ';
+            echo htmlspecialchars($meter_values['phases'] * $meter_values['current_limit'] * 230 / 1000); ?>kW</strong></p>
         <p>Ladedauer (Std:Min:Sek): <strong id="chargingDuration"><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
         <p>Geladene kWh: <strong id="chargedEnergy"><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
@@ -351,7 +386,7 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
 
         <hr>
         <details id="moreOptions">
-            <summary>Mehr Optionen:</summary>
+            <summary>Erweiterte Optionen:</summary>
         <h3>Timing / Sync Einstellungen (DB: ID=2)</h3>
 
         <div class="row">
