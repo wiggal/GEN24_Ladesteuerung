@@ -216,19 +216,10 @@ if ($meter_value_block) {
 <style>
 body{font-family:Arial;background:white;padding:20px;}
 .card{background:white;padding:10px;margin-bottom:10px;border-radius:8px;}
-.card h2 {
-    margin-bottom: 6px;
-}
-.card p {
-    margin: 4px 0;
-    line-height: 1.1;
-}
+.card h2 { margin-bottom: 6px; }
+.card p { margin: 4px 0; line-height: 1.1; }
 button { padding: 6px 12px; font-size: 14px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor:pointer;}
-button.schreiben {
-    position: fixed;
-    bottom: 10px;
-    left: 40px;
-}
+button.schreiben { position: sticky; bottom: 10px; left: 40px; }
 select, input[type="number"], input[type="text"] { font-size: 1.1em; background-color: #F5F5DC; padding:4px; border-radius:4px; border:1px solid #ccc;}
 .red{background:#d9534f;}
 .green{background:#5cb85c;}
@@ -303,10 +294,10 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
 
 <?php
         // Definieren der Werte
-        $solar_current = round(($meter_values['Produktion_W'] ?? 0)/1000,2);
-        $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0)/1000,2);
-        $grid_current = round(($meter_values['Netzbezug_W'] ?? 0)/1000,2);
-        $total_power = round(($total_power/1000),2);
+        $solar_current = round(($meter_values['Produktion_W'] ?? 0)/1000,1);
+        $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0)/1000,1);
+        $grid_current = round(($meter_values['Netzbezug_W'] ?? 0)/1000,1);
+        $total_power = round(($total_power/1000),1);
 
         // Funktion aufrufen und Ergebnis ausgeben (echo)
         echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power);

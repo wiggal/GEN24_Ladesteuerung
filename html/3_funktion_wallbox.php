@@ -11,7 +11,7 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
 
     $in_battery = max(0.0, -$battery);
     $in_grid = max(0.0, -$grid);
-    $in_haus = round(($total - $in_battery - $in_grid - $in_auto),2);
+    $in_haus = round(($total - $in_battery - $in_grid - $in_auto),1);
 
 
 
@@ -69,7 +69,7 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
 
     // 3. Dynamische Generierung der Zellen Quelle
     foreach ($data_quelle as $item) {
-        if ($item['value'] > 0) {
+        if ($item['value'] >= 0.1) {
             $pct = ($item['value'] / $total) * 100;
             $width_style = "width: {$pct}%";
             
@@ -83,7 +83,7 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
 
     // 4. Dynamische Generierung der Zellen Ziel
     foreach ($data_ziel as $item) {
-        if ($item['value'] > 0) {
+        if ($item['value'] >= 0.1) {
             $pct = ($item['value'] / $total) * 100;
             $width_style = "width: {$pct}%";
             
@@ -100,18 +100,9 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
     $html = <<<HTML
     <style>
 
-    .wrapper {
-        width: 90%;
-        margin: 10px 0;
-        font-family: sans-serif;
-    }
-    
+    .wrapper { width: 90%; margin: 10px 0; font-family: sans-serif; }
     /* ---------- BALKENTABELLE ---------- */
-    .bar-table {
-        width: 100%;
-        border-collapse: collapse; 
-    }
-    
+    .bar-table { width: 100%; border-collapse: collapse; }
     /* Stil für die obere Emoji-Zeile */
     .load-bar-icons td {
         padding: 0px 0;
@@ -122,14 +113,8 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
         border-left: 2px solid #999;
         border-right: 2px solid #999;
     }
-    
     /* Stil für die untere Wert-Zeile */
-    .load-bar-values td {
-        padding: 2px;
-        text-align: center;
-        font-weight: 600;
-    }
-
+    .load-bar-values td { padding: 2px; text-align: center; font-weight: 600; }
     /* Farbschemas */
     .solar { background: #FFC800; color: black; }
     .aus_battery { background: #2DB42D; color: black; }
