@@ -378,7 +378,7 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
         <hr>
         <details id="moreOptions">
             <summary>Erweiterte Optionen:</summary>
-        <h3>Timing / Sync Einstellungen (DB: ID=2)</h3>
+        <h3>Timing Einstellungen:</h3>
 
         <div class="row">
             <span class="label-inline">Wallboxaktualisierung(s) (DB=<?php echo htmlspecialchars($auto_sync_interval); ?>):</span>
@@ -395,13 +395,13 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
             <span class="input-inline"><input id="minChargeDur" type="number" min="60" step="60" value="<?php echo htmlspecialchars($min_charge_duration_s); ?>"></span>
         </div>
 
-        <hr>
-        <h3>Phasenwechsel / Zielwerte (DB: ID=3)</h3>
-
         <div class="row">
             <span class="label-inline">Phasenumschaltverzögerung(s) (DB=<?php echo htmlspecialchars($phase_change_confirm_s); ?>):</span>
             <span class="input-inline"><input id="phaseChangeConfirm" type="number" min="0" step="30" value="<?php echo htmlspecialchars($phase_change_confirm_s); ?>"></span>
         </div>
+
+        <hr>
+        <h3>Sonstige Zielwerte:</h3>
 
         <div class="row">
             <span class="label-inline">Verbleibende Leistung(W) (DB=<?php echo htmlspecialchars($residualPower); ?>):</span>

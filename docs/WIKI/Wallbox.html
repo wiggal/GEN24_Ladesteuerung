@@ -1,58 +1,213 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>EnergyController</title>
+    <meta name="viewport" content="width=device-width">
+    <title>Wallbox</title>
   </head>
-  <body>
-    <div class="markdown-body">
+  <body lang="de-DE">
+    <!--HIERZURUECK--><br>
+    <p> <font style="font-size: 24pt"><b>TAB --&gt;&gt; Wallbox </b></font></p>
+    <p><strong>Stand: 11.12.2025<br>
+      </strong></p>
+    <p>Das Tool stellt durch einen OCPP-Server bereit, zu dem eine
+      Wallbox eine Verbindung als Client herstellt.<br>
+      Einstellungen für Fronius Wattpilot in der App siehe
+      Konfiguration.<br>
+      <strong></strong></p>
+    <p><strong>Programmfunktionen:</strong></p>
+    <ul>
+      <li>Ladung mit fester Leistung</li>
+      <li>PV-Überschussladung<br>
+      </li>
+    </ul>
+    <strong>Funktionsweise:</strong>
+    <ul>
+      <li> Es wird ein OCPP-Server gestartet, zu dem eine Wallbox
+        Verbindung aufnimmt.&nbsp;</li>
+      <li>Über die WebUI kann der OCPP-Server gestartet und gestoppt
+        werden, sie stellt auch den Status des OCPP-Server dar.</li>
+      <li> Der OCPP-Server kann auch automatisch durch die Einstellung
+        wallboxsteuerung = 1 in CONFIG/default_priv.ini gestrtet werden.<br>
+      </li>
+      <li>Über die WebUI können die Ladeoptionen eingestellt und in die
+        DB CONFIG/Prog_Steuerung.sqlite gespeichert werden.</li>
+      <li>Der OCPP-Server liest die Optionen in dem eingestellten
+        Zeitintervall (<span class="label-inline">
+          <meta http-equiv="content-type" content="text/html;
+            charset=UTF-8">
+          <span class="label-inline">Wallboxaktualisierung) aus der DB
+            und sendet sie wenn nötig an die Wallbox.</span></span></li>
+    </ul>
+    <p> <strong>Optionen:<br>
+      </strong></p>
+    Die numerischen Werte in Klammern sind die Einstellungen aus der DB,<br>
+    zur Unterscheidung der im WebUI eingestellten aber noch nicht
+    gesicherten Werte.<br>
+    <ul>
+      <li>PV-Modus (DB=0): <strong><br>
+        </strong>
+        <ul>
+          <li>Aus =&gt; Laden wird/ist gestoppt</li>
+          <li>PV =&gt;&nbsp; Reines Überschussladen</li>
+          <li>MIN+PV =&gt; Mit der kleinsten eingestellte Lademenge wird
+            immer&nbsp; geladen. <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Ist der PV-Überschuss größer, wird mit diesem geladen.</li>
+          <li>MAX =&gt; Es wird immer mit der größten eingestellten
+            Lademenge geladen.<br>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <div class="row">
+          <meta http-equiv="content-type" content="text/html;
+            charset=UTF-8">
+          <span class="label-inline">Phasen (DB=0):<br>
+          </span>
+          <ul>
+            <li>Auto =&gt; Die Phase wird automatisch je nach PV-Modus
+              gewählt.</li>
+            <li>1 Phase =&lt; Nur mit Phase 1 laden. <br>
+            </li>
+            <li>3 Phase =&lt; Nur mit Phase 3 laden. <br>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li><span class="label-inline"><span class="label-inline"><span
+              class="label-inline">Stromstärke MIN (DB=6):<br>
+            </span></span></span>
+        <ul>
+          <li>Mit einer geringeren Stromstärke wird in den PV-Modi nicht
+            geladen.<br>
+          </li>
+        </ul>
+      </li>
+      <li><span class="label-inline"><span class="label-inline"><span
+              class="label-inline"><span class="label-inline"><span
+                  class="label-inline">Stromstärke MAX (DB=16):<br>
+                </span></span></span></span></span>
+        <ul>
+          <li>Mit einer höheren Stromstärke wird nicht geladen.</li>
+        </ul>
+      </li>
+    </ul>
+    <summary>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      <h1 class="heading-element">TAB --&gt;&gt; Wallbox<br>
-      </h1>
-      <p><strong>Stand: 05.12.2025<br>
-        </strong></p>
-      <p>Das Tool stellt durch einen OCPP-Server bereit, zu dem die
-        Wallbox eine Verbindung als Client herstellt.<br>
-        Einstellungen für Fronius Wattpilot in der App siehe
-        Konfiguration.<br>
-        <strong></strong></p>
-      <p><strong>Programmfunktionen:</strong></p>
+      <strong>Erweiterte Optionen:<br>
+      </strong>
       <ul>
-        <li>Ladung mit fester Leistung</li>
-        <li>PV-Überschußladung<br>
-        </li>
-      </ul>
-      <strong>Funktionsweise:</strong>
-      <ul>
-        <li> Es wird ein OCPP-Server gestartet, zudem eine Wallbox
-          Verbindung aufnimmt.&nbsp;</li>
-        <li>Über die WebUI kann der OCPP-Server gestartet und gestoppt
-          werden, sie stellt auch den Status des OCPP-Server dar.</li>
-        <li>Über die WebUI können die Ladeoptionen eingestellt und in
-          die DB CONFIG/Prog_Steuerung.sqlite gespeichert werden.</li>
-        <li>Der OCPP-Server liest die Optionen in dem eingestellten
-          Zeitintervall (<span class="label-inline">
+        <li><span class="label-inline">
             <meta http-equiv="content-type" content="text/html;
               charset=UTF-8">
-            <span class="label-inline">Wallboxaktualisierung) aus der DB
-              und sendet sie wenn nötig an die Wallbox.</span></span></li>
-      </ul>
-      <p> <strong>Clientkonfiguration:<br>
-        </strong></p>
-      <ul>
-        <li>In der Wattpilotapp sind folgende Einstellungen zu machen.<br>
-          Modus: Eco Mode AUS<br>
-          Einstellungen, Fahrzeug PHASENUMSCHALTUNG: Automatisch<br>
-          Internet, OCPP =&gt; aktiviert<br>
-          Auf das Klippboard klicken und folgendes eintragen (xxx =
-          IP-Adresse des OCPP-Servers) :<br>
-          &nbsp; ws://xxx.xxx.xxx.xx:8887 <br>
-          Füge SN (seriennummer) zur URL<br>
-          <br>
+          </span>Timing Einstellungen<span class="label-inline"></span><span
+            class="label-inline"><span class="label-inline"> (s =
+              Sekunden) <br>
+            </span></span>
+          <ul>
+            <li><span class="label-inline">
+                <meta http-equiv="content-type" content="text/html;
+                  charset=UTF-8">
+                <span class="label-inline">Wallboxaktualisierung =&gt;
+                  In diesem Intervall werden die errechneten
+                  Steuerungswerte an die Wallbox gesendet.</span></span></li>
+            <li><span class="label-inline"><span class="label-inline"><span
+                    class="label-inline"><span class="label-inline">Phasenumschaltintervall
+                      =&gt; Mindestladezeit auf einer Phase, bevor sie
+                      wieder umgeschaltet werden darf.</span></span></span></span></li>
+            <li><span class="label-inline"><span class="label-inline"><span
+                    class="label-inline"><span class="label-inline"><span
+                        class="label-inline"><span class="label-inline">Mindestladezeit&nbsp;
+                          =&gt; </span></span></span></span></span></span><span
+                class="label-inline"><span class="label-inline"><span
+                    class="label-inline"><span class="label-inline"><span
+                        class="label-inline"><span class="label-inline"><span
+                            class="label-inline"><span
+                              class="label-inline"><span
+                                class="label-inline"><span
+                                  class="label-inline">Mindestladezeit,
+                                  bevor die Ladung wieder gestoppt
+                                  werden darf.</span></span></span></span></span></span></span></span></span></span></li>
+            <li><span class="label-inline"><span class="label-inline"><span
+                    class="label-inline"><span class="label-inline"><span
+                        class="label-inline"><span class="label-inline"><span
+                            class="label-inline"><span
+                              class="label-inline"><span
+                                class="label-inline"><span
+                                  class="label-inline"><span
+                                    class="label-inline"><span
+                                      class="label-inline">Phasenumschaltverzögerung
+                                      =&gt; Die Bedingungen für einen
+                                      Phasenwechsel müssen für diesen
+                                      Zeitraum vorliegen. <br>
+                                    </span></span></span></span></span></span></span></span></span></span></span></span></li>
+          </ul>
         </li>
       </ul>
-      <blockquote><br>
-      </blockquote>
-    </div>
+    </summary>
+    <ul>
+      <li>Sonstige Zielwerte<br>
+        <ul>
+          <li><span class="label-inline">
+              <meta http-equiv="content-type" content="text/html;
+                charset=UTF-8">
+              <span class="label-inline">Verbleibende Leistung =&gt;
+                Legt den Sollwert für die im System verbleibende Energie
+                fest.<br>
+              </span></span><span class="label-inline"><span
+                class="label-inline">Es ist dabei zu beachten, dass nur
+                in ganzen Ampere geschaltet werden kann, und die Werte
+                nicht genau erreich werden können, zum Beispiel:</span></span><br>
+            <span class="label-inline"><span class="label-inline"></span></span><span
+              class="label-inline"><span class="label-inline">(+)300
+                =&gt; es sollen 300 Watt im Sytem verbleiben, die
+                entweder in den Akku oder ins Netz fließen.</span></span><br>
+            <span class="label-inline"><span class="label-inline"><span
+                  class="label-inline"><span class="label-inline">- 300
+                    &nbsp; =&gt; es sollen 300 Watt mehr geladen werden,
+                    als im Sytem vorhanden sind, die entweder aus dem
+                    Akku oder aus dem Netz gezogen werden.</span></span></span></span></li>
+          <li><span class="label-inline"><span class="label-inline"><span
+                  class="label-inline"><span class="label-inline"><span
+                      class="label-inline"><span class="label-inline">Lademenge
+                        (kWh) =&gt; Hier kann eine feste Lademenge
+                        eingestellt werden, ist sie erreicht, wird das
+                        Laden beendet.<br>
+                      </span></span></span></span></span></span></li>
+        </ul>
+      </li>
+    </ul>
+    <ul>
+    </ul>
+    <p><strong>Clientkonfiguration =&gt; </strong><strong>Wattpilot
+        App:<br>
+      </strong></p>
+    <ul>
+      <li>In der Wattpilot App ist folgendes einzustellen, damit sich
+        der Wattpilot mit dem OCPP-Server verbindet.<br>
+        <ul>
+          <li> Modus: Eco Mode und Next Tripp Mode müssen <b>AUS</b>
+            sein.<br>
+          </li>
+        </ul>
+        <ul>
+          <li> Einstellungen, Fahrzeug PHASENUMSCHALTUNG: <b>Automatisch</b></li>
+        </ul>
+        <ul>
+          <li> Internet, OCPP 1.6J =&gt; <b>aktiviert</b></li>
+        </ul>
+        <ul>
+          <li> Auf das Klippboard klicken und folgendes eintragen (xxx =
+            IP-Adresse des OCPP-Servers) :<br>
+            ws://xxx.xxx.xxx.xx:8887 <br>
+          </li>
+        </ul>
+        <ul>
+          <li> Füge SN (seriennummer) zur URL =&gt; <b>aktiviert</b></li>
+        </ul>
+        <br>
+      </li>
+    </ul>
   </body>
 </html>
