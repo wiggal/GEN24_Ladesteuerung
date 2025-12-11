@@ -465,178 +465,6 @@ class OCPPManager:
 
         return self.wb_amp, self.wb_phases, self.wb_pv_mode, is_pv_controlled, self.wb_amp_min
 
-    def WIGGAL_get_wallbox_steuerdaten(self, cp_id=None):
-        """
-        Liest aus der Datenbank mittels FUNCTIONS.SQLall.sqlall().getSQLsteuerdaten('wallbox')
-        Rückgabe: (amp: float, phases: str, pv_mode: float, is_pv_controlled: bool, amp_min: float)
-    
-        Hinweis: diese Variante verwendet KEINE lokalen Start-Kopien der wb_-Attribute,
-        sondern greift direkt auf die Instanzattribute (self.wb_*) zu und aktualisiert sie.
-        """
-        # Versuche DB-Lesen
-        try:
-            sqlall = FUNCTIONS.SQLall.sqlall()
-            data = sqlall.getSQLsteuerdaten('wallbox', 'CONFIG/Prog_Steuerung.sqlite')
-        except Exception as e:
-            cwarn(f"DB-Zugriff fehlgeschlagen oder FUNCTIONS nicht vorhanden: {e}")
-            # Return current instance values as fallback
-            return getattr(self, 'wb_amp', 0.0), getattr(self, 'wb_phases', "3"), getattr(self, 'wb_pv_mode', 0.0), False, getattr(self, 'wb_amp_min', 6.0)
-    
-        # Wenn keine Daten vorhanden sind -> Instanzwerte zurückgeben
-        if not data or '1' not in data:
-            cwarn("Keine Wallbox-Daten in DB gefunden → Verwende Instanz-Defaults")
-            return getattr(self, 'wb_amp', 0.0), getattr(self, 'wb_phases', "3"), getattr(self, 'wb_pv_mode', 0.0), False, getattr(self, 'wb_amp_min', 6.0)
-    
-        # Parse Haupt-Zeile (ID=1)
-        try:
-            row = data.get('1') or data.get(1)
-            if row:
-                parts = row.get('Options', '').split(',')
-    
-                # amp_min aus Options[0]
-                try:
-                    amp_min_val = float(parts[0])
-                except (ValueError, IndexError):
-                    amp_min_val = getattr(self, 'wb_amp_min', 6.0)
-                if amp_min_val < 6:
-                    amp_min_val = 6.0
-    
-                # amp_max aus Options[1]
-                try:
-                    amp_max_val = float(parts[1])
-                except (ValueError, IndexError):
-                    amp_max_val = getattr(self, 'wb_amp_max', 16.0)
-                if amp_max_val < amp_min_val:
-                    amp_max_val = amp_min_val
-                if amp_max_val > 16:
-                    amp_max_val = 16.0
-    
-                # phases / pv_mode aus Res_Feld2 / Res_Feld1
-                self.wb_phases = str(row.get('Res_Feld2', self.wb_phases))
-                try:
-                    self.wb_pv_mode = float(row.get('Res_Feld1', self.wb_pv_mode))
-                except Exception:
-                    # leave existing value
-                    pass
-    
-                # setze die berechneten Ampere-Grenzen
-                self.wb_amp_max = amp_max_val
-                self.wb_amp_min = amp_min_val
-    
-                cinfo(f"DB-Steuerdaten geladen (ID=1): amp_max={self.wb_amp_max}A, phases={self.wb_phases}, pv_mode={self.wb_pv_mode}, amp_min={self.wb_amp_min}A")
-        except Exception as e:
-            cwarn(f"Fehler beim Parsen der DB-Daten (ID=1): {e} → Instanz-Defaults verwendet")
-            # leave existing wb_* values
-    
-        # ---- Lese zusätzliche Steuer-Parameter wie gewünscht (ID=2, ID=3) ----
-        try:
-            # ID=2: Res_Feld1 = MIN_PHASE_DURATION_S, Res_Feld2 = MIN_CHARGE_DURATION_S, Options = AUTO_SYNC_INTERVAL
-            row2 = data.get('2') or data.get(2)
-            if row2:
-                try:
-                    self.MIN_PHASE_DURATION_S = int(float(row2.get('Res_Feld1', self.MIN_PHASE_DURATION_S)))
-                except Exception:
-                    pass
-                try:
-                    self.MIN_CHARGE_DURATION_S = int(float(row2.get('Res_Feld2', self.MIN_CHARGE_DURATION_S)))
-                except Exception:
-                    pass
-                try:
-                    opt = row2.get('Options', None)
-                    if opt is not None and str(opt).strip() != "":
-                        self.AUTO_SYNC_INTERVAL = int(float(opt))
-                except Exception:
-                    pass
-    
-            # ID=3: Res_Feld1 residualPower, Res_Feld2 DEFAULT_TARGET_KWH, Options PHASE_CHANGE_CONFIRM_S
-            row3 = data.get('3') or data.get(3)
-            if row3:
-                try:
-                    self.residualPower = float(row3.get('Res_Feld1', self.residualPower))
-                except Exception:
-                    pass
-                try:
-                    self.DEFAULT_TARGET_KWH = float(row3.get('Res_Feld2', self.DEFAULT_TARGET_KWH))
-                except Exception:
-                    pass
-                try:
-                    opt3 = row3.get('Options', None)
-                    if opt3 is not None and str(opt3).strip() != "":
-                        self.PHASE_CHANGE_CONFIRM_S = int(float(opt3))
-                except Exception:
-                    pass
-    
-            # Nach DB-Lesen auto_sync_interval für Hintergrundtask updaten
-            self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
-    
-            cinfo(f"DB-Steuerdaten geladen (ID=2): AUTO_SYNC_INTERVAL={getattr(self,'AUTO_SYNC_INTERVAL',None)}, MIN_PHASE_DURATION_S={getattr(self,'MIN_PHASE_DURATION_S',None)}, MIN_CHARGE_DURATION_S={getattr(self,'MIN_CHARGE_DURATION_S',None)}")
-            cinfo(f"DB-Steuerdaten geladen (ID=3): PHASE_CHANGE_CONFIRM_S={getattr(self,'PHASE_CHANGE_CONFIRM_S',None)}, residualPower={getattr(self,'residualPower',None)}, DEFAULT_TARGET_KWH={getattr(self,'DEFAULT_TARGET_KWH',None)}")
-        except Exception as e:
-            cwarn(f"Fehler beim Lesen der Konfiguration aus DB: {e} → Instanz-Defaults verwendet")
-    
-        # ---- Berechne zulässigen Ampere-Wert basierend auf PV-Modus und Inverter ----
-        amp = self.wb_amp_max
-        is_pv_controlled = False
-
-        Netzbezug = 0 # Default-Wert
-        current_charge_power = 0
-        try:
-            InverterApi = basics.get_inverter_class(class_type="Api")
-            inverter_api = InverterApi()
-            API = inverter_api.get_API()
-            Netzbezug = API.get('aktuelleEinspeisung', 0)
-        except Exception as e:
-            cwarn(f"Inverter API konnte nicht geladen werden: {e} → Netzbezug wird auf 0 gesetzt.")
-            # self.wb_amp / self.wb_is_pv_controlled bleiben unverändert (Default-Werte)
-    
-        if self.wb_pv_mode == 1 or self.wb_pv_mode == 2:
-            is_pv_controlled = True
-            try:
-                InverterApi = basics.get_inverter_class(class_type="Api")
-                inverter_api = InverterApi()
-                API = inverter_api.get_API()
-                Netzbezug = API.get('aktuelleEinspeisung', 0)
-            except Exception as e:
-                cwarn(f"Inverter API konnte nicht geladen werden: {e}")
-                # setze aktuellen wb_amp und returne Fallback
-                self.wb_amp = amp
-                self.wb_is_pv_controlled = False
-                return self.wb_amp, self.wb_phases, self.wb_pv_mode, False, self.wb_amp_min
-    
-            current_charge_power = 0
-            if cp_id and cp_id in self.connected_charge_points:
-                current_charge_power = self.get_current_power(cp_id)
-    
-            ueberschuss = max(0, (-Netzbezug + current_charge_power - self.residualPower))
-            cinfo(f"Aktuelle Einspeisung (negativ=Netzbezug): {-Netzbezug}W, Ladestrom ({current_charge_power}W), residualPower ({self.residualPower}W). Überschuss (inkl. Ladung): {ueberschuss}W")
-    
-            amp = 0
-            amp_1 = int(ueberschuss / 230 / 1) if ueberschuss else 0
-            amp_3 = int(ueberschuss / 230 / 3) if ueberschuss else 0
-    
-            if self.wb_phases == "1":
-                amp = min(amp_1, self.wb_amp_max) if amp_1 >= 6 else 0
-            elif self.wb_phases == "3" or self.wb_phases == "0":
-                if amp_3 >= 6:
-                    self.wb_phases = "3"
-                    amp = min(amp_3, self.wb_amp_max)
-                elif amp_1 >= 6:
-                    self.wb_phases = "1"
-                    amp = min(amp_1, self.wb_amp_max)
-                else:
-                    amp = 0
-    
-        # pv_mode == 2: niemals vollständig abschalten, sondern Minimum erzwingen
-        if self.wb_pv_mode == 2:
-            if amp < self.wb_amp_min:
-                amp = min(self.wb_amp_min, self.wb_amp_max)
-    
-        # Werte in Instanzattribute speichern
-        self.wb_amp = amp
-        self.wb_is_pv_controlled = is_pv_controlled
-    
-        return self.wb_amp, self.wb_phases, self.wb_pv_mode, is_pv_controlled, self.wb_amp_min
-
     def get_current_power(self, cp_id):
         """Extrahiert Power.Active.Import aus meter_values_store."""
         meter_data = self.meter_values_store.get(cp_id)
@@ -685,37 +513,50 @@ class OCPPManager:
         requested_phase = ocpp_phases_value
         phase_changed = (phase_limit != requested_phase)
 
-        final_ocpp_phases_value = phase_limit if phase_limit is not None else requested_phase
+        # KORREKTUR: Bei Initialisierung (phase_limit is None) sofort den gewünschten Wert übernehmen.
+        is_initial_change = phase_limit is None
+        final_ocpp_phases_value = phase_limit if not is_initial_change else requested_phase
 
         cinfo(f"[{ '..' + cp_id[-4:] }] Prüfe Sync: PV-Mode={pv_mode_val}, PV-Steuerung={is_pv_controlled}, Wunsch: {amp_desired}A/{requested_phase}P. Aktuell: {curr_limit}A/{phase_limit}P")
 
         # -----------------------
         # PHASE-ONLY HYSTERESE/TIMER
         # -----------------------
-        is_initial_change = phase_limit is None
-        if phase_changed and not is_initial_change:
+        is_charging_requested = amp_desired > 0.0
+
+        # Wenden Sie die Hysterese NUR an, wenn eine Phasenänderung gewünscht ist
+        # UND keine Initialisierung vorliegt UND eine Ladung mit > 0A gewünscht wird.
+        if phase_changed and not is_initial_change and is_charging_requested:
             candidate = self.phase_change_candidate.get(cp_id)
             now = datetime.now()
 
             # New candidate or different requested phase -> start timer
             if not candidate or candidate.get('requested') != requested_phase:
                 self.phase_change_candidate[cp_id] = {'requested': requested_phase, 'since': now}
-                phase_changed = False
+                phase_changed = False # Blockiere Wechsel
                 cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Neuer Phasenwunsch {requested_phase} erkannt, starte Bestätigungs-Timer ({self.PHASE_CHANGE_CONFIRM_S}s).")
             else:
                 elapsed = (now - candidate['since']).total_seconds()
                 if elapsed >= self.PHASE_CHANGE_CONFIRM_S:
-                    phase_changed = True
+                    phase_changed = True # Erlaube Wechsel
                     final_ocpp_phases_value = requested_phase
                     self.phase_change_candidate[cp_id] = None
                     cnote(f"{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Phasenwechsel {requested_phase} bestätigt nach {int(elapsed)}s.")
                 else:
-                    phase_changed = False
+                    phase_changed = False # Blockiere Wechsel
                     cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Warte {self.PHASE_CHANGE_CONFIRM_S - int(elapsed)}s bis Phasenwechsel möglich.")
         else:
+            # Fall: Phase geändert, aber amp_desired == 0.0 (oder Initialisierung)
+            # -> Wechsel sofort erlauben, da keine aktive Ladung betroffen ist.
+            if phase_changed and not is_initial_change and not is_charging_requested:
+                final_ocpp_phases_value = requested_phase
+                phase_changed = True # Wechsel erlauben
+                cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Umgangen (0A Wunsch). Phase auf {requested_phase}P gesetzt.")
+
+            # Timer cleanup logic (Timer zurücksetzen, falls er lief und eine der oben genannten Bedingungen eintrat)
             if self.phase_change_candidate.get(cp_id):
                 self.phase_change_candidate[cp_id] = None
-                cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Phasenwunsch entfällt, Timer zurückgesetzt.")
+                cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Phasenwunsch entfällt/Initialisierung/0A-Wunsch, Timer zurückgesetzt.")
 
         # pv_mode==2 should not fully stop
         amp_allowed = amp_desired
@@ -782,7 +623,7 @@ class OCPPManager:
         # Wenn Ampere oder Phase geändert => senden
         if amp_changed or phase_changed:
             # Bei Phase wechsel: ggf. 0A Limit senden bevor neue Phase
-            if phase_changed and not is_initial_change:
+            if phase_changed and not is_initial_change: # Phase nur ändern, wenn nicht initial
                 cinfo(f"[{ '..' + cp_id[-4:] }] Phase Änderung erkannt: {self.phase_limit_store.get(cp_id)} -> {final_ocpp_phases_value}. Starte 0A-Stop Prozedur.")
                 current_power = self.get_current_power(cp_id)
                 if current_power > 50:
@@ -821,6 +662,10 @@ class OCPPManager:
                         cwarn(f"[{ '..' + cp_id[-4:] }] WARNUNG: Leistung ist nach 15s noch hoch ({current_power}W). Sende finales Limit.")
                 else:
                     cnote(f"[{ '..' + cp_id[-4:] }] Aktive Leistung {current_power}W. Kein 0A-Stop notwendig.")
+            elif phase_changed and is_initial_change:
+                 # Nur Logging, da final_ocpp_phases_value bereits requested_phase ist
+                 cnote(f"[{ '..' + cp_id[-4:] }] Initiales Phasenlimit auf {final_ocpp_phases_value}P gesetzt (Phase war None).")
+
 
             # Sende finales Limit (amp_allowed)
             cinfo(f"[{ '..' + cp_id[-4:] }] Sende finales Limit: {amp_allowed}A an Phase {final_ocpp_phases_value}.")
@@ -849,7 +694,9 @@ class OCPPManager:
             self.current_limit_store[cp_id] = amp_allowed
             self.phase_limit_store[cp_id] = final_ocpp_phases_value
 
+            # last_phase_change_timestamp nur bei tatsächlichem Phasenwechsel aktualisieren
             if phase_changed:
+                self.last_phase_change_timestamp[cp_id] = datetime.now()
                 cnote(f"[{ '..' + cp_id[-4:] }] ⏳ COOLDOWN: Warte 3 Sekunden nach Phasenwechsel ({final_ocpp_phases_value}P).")
                 await asyncio.sleep(3)
 
