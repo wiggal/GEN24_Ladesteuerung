@@ -98,34 +98,6 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
 
     // 4. Erzeugung des HTML-Strings mit den integrierten CSS-Styles
     $html = <<<HTML
-    <style>
-
-    .wrapper { width: 90%; margin: 10px 0; font-family: sans-serif; }
-    /* ---------- BALKENTABELLE ---------- */
-    .bar-table { width: 100%; border-collapse: collapse; }
-    /* Stil für die obere Emoji-Zeile */
-    .load-bar-icons td {
-        padding: 0px 0;
-        text-align: center;
-        vertical-align: middle;
-        font-size: 1.2em;
-        /* Senkrechte Trennlinie Emoji */
-        border-left: 2px solid #999;
-        border-right: 2px solid #999;
-    }
-    /* Stil für die untere Wert-Zeile */
-    .load-bar-values td { padding: 2px; text-align: center; font-weight: 600; }
-    /* Farbschemas */
-    .solar { background: #FFC800; color: black; }
-    .aus_battery { background: #2DB42D; color: black; }
-    .aus_grid { background: #6E6E6E; color: black; }
-    .in_haus { background: #d9534f; color: black; }
-    .in_auto { background: #FB5555; color: black; }
-    .in_battery { background: #3CD73C; color: black; }
-    .in_grid { background: #949494; color: black; }
-
-    </style>
-
     <div class="wrapper">
 
         <table class="bar-table">

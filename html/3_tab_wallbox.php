@@ -214,34 +214,174 @@ if ($meter_value_block) {
 <meta charset="utf-8">
 <title>Wattpilot – OCPP Steuerung</title>
 <style>
-body{font-family:Arial;background:white;padding:20px;}
-.card{background:white;padding:10px;margin-bottom:10px;border-radius:8px;}
+/* --- Grundlayout --- */
+body {
+    font-family: Arial;
+    background: white;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
 .card h2 { margin-bottom: 6px; }
 .card p { margin: 4px 0; line-height: 1.1; }
-button { padding: 6px 12px; font-size: 14px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor:pointer;}
+
+button {
+    padding: 6px 12px;
+    font-size: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button.red { background: #d9534f; }
 button.schreiben { position: sticky; bottom: 10px; left: 40px; }
-select, input[type="number"], input[type="text"] { font-size: 1.1em; background-color: #F5F5DC; padding:4px; border-radius:4px; border:1px solid #ccc;}
-.red{background:#d9534f;}
-.green{background:#5cb85c;}
-.info{background:#e9f7ef;padding:10px;border-radius:6px;margin-bottom:10px;}
-.small{font-size:0.9em;color:#666;}
-form { display: inline-block; margin-right:6px; }
-p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; line-height:1.1; }
-.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle;}
-.row { margin-bottom:8px; }
-.label-inline { display:inline-block; width:320px; vertical-align:middle; }
-.input-inline { display:inline-block; vertical-align:middle; }
-.hilfe{ font-family:Arial; font-size:150%; color: #000000; position: fixed; right: 8px; }
+
+select,
+input[type="number"],
+input[type="text"] {
+    font-size: 1.1em;
+    background-color: #F5F5DC;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.info {
+    background: #e9f7ef;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.small {
+    font-size: 0.9em;
+    color: #666;
+}
+
+p, label {
+    color: #000;
+    font-family: Arial;
+    font-size: 120%;
+    padding: 2px 1px;
+    line-height: 1.1;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.hilfe {
+    font-family: Arial;
+    font-size: 150%;
+    color: #000;
+    position: fixed;
+    right: 8px;
+}
+
+/* --- Flexbox für Einstellungszeilen --- */
+.row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.label-inline {
+    width: 320px;     /* Einheitliche Label-Spalte */
+    flex-shrink: 0;   /* verhindert Zusammenstauchen */
+}
+
+.input-inline {
+    flex: 1;
+}
+
+.input-inline select,
+.input-inline input {
+    width: 120px;     /* oder auto / oder 100% – wie du möchtest */
+    max-width: 100%;
+}
+
+/* --- Smartphone Layout --- 600px*/
+@media screen and (max-width: 64em) {
+    body { font-size: 140%; }
+    td { font-size: 120%; }
+
+    .row { gap: 6px; }
+
+    .label-inline {
+        width: 420px;     /* Einheitliche Label-Spalte */
+        flex-shrink: 0;   /* verhindert Zusammenstauchen */
+    }
+
+    .input-inline {
+        flex: 0 0 auto;
+        max-width: 35%;
+    }
+
+    .input-inline select,
+    .input-inline input {
+        width: 80px;
+        max-width: 100%;
+    }
+}
+
+/* --- Balkentabelle (PV/Lastenanzeige) --- */
+.wrapper {
+    width: 99%;
+    margin: 10px 0;
+    font-family: sans-serif;
+}
+
+.bar-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.load-bar-icons td {
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1.2em;
+    border-left: 2px solid #999;
+    border-right: 2px solid #999;
+}
+
+.load-bar-values td {
+    padding: 2px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Farben für Energiefluss */
+.solar         { background: #FFC800; color: black; }
+.aus_battery   { background: #2DB42D; color: black; }
+.aus_grid      { background: #6E6E6E; color: black; }
+.in_haus       { background: #d9534f; color: black; }
+.in_auto       { background: #FB5555; color: black; }
+.in_battery    { background: #3CD73C; color: black; }
+.in_grid       { background: #949494; color: black; }
+
 </style>
 </head>
 <body>
-<!-- Hilfeaufruf ANFANG -->
 <?php
   $current_url = urlencode($_SERVER['REQUEST_URI']);
   $hilfe_link = "Hilfe_Ausgabe.php?file=Wallbox&return=$current_url";
 ?>
   <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
-<!-- Hilfeaufruf ENDE -->
 <div class="card">
     <h2>OCPP Server (Beta-Version)</h2>
     <p id="serverStatus">
@@ -361,7 +501,7 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_min) echo 'selected'; ?>><?php echo $i; ?> A</option>
                 <?php endfor; ?>
             </select>
-            </span>
+            <span id="powerMin" class="small" style="margin-left: 10px;">(— kW)</span> </span>
         </div>
 
         <div class="row">
@@ -372,7 +512,7 @@ p, label { color:#000000; font-family:Arial; font-size:120%; padding:2px 1px; li
                     <option value="<?php echo $i; ?>" <?php if($i==$amp_max) echo 'selected'; ?>><?php echo $i; ?> A</option>
                 <?php endfor; ?>
             </select>
-            </span>
+            <span id="powerMax" class="small" style="margin-left: 10px;">(— kW)</span> </span>
         </div>
 
         <hr>
@@ -447,6 +587,55 @@ $(document).ready(function(){
     ls_ids.forEach(function(id){ 
         $('#' + id).on('change input', function(){ saveToLocalStorage(id); });
     });
+    
+// ===================================
+// NEU: Berechnung der Leistung bei Änderung
+// ===================================
+/**
+ * Berechnet die Leistung (P = U * I * n_Phase) basierend auf den
+ * ausgewählten Phasen (phases) und Stromstärken (ampMin/ampMax) und 
+ * aktualisiert die Anzeigefelder.
+ */
+function calculatePower() {
+    // Standard-Spannung
+    const VOLTAGE = 230; // Volt
+    
+    // Aktuell ausgewählte Werte
+    let phases_selection = parseInt($('#phases').val());
+    let amp_min = parseFloat($('#ampMin').val());
+    let amp_max = parseFloat($('#ampMax').val());
+    
+    let phases_min;
+    let phases_max;
+    
+    if (phases_selection === 0) {
+        // 'Auto' ist gewählt: MIN gilt für 1 Phase, MAX gilt für 3 Phasen
+        phases_min = 1;
+        phases_max = 3;
+    } else {
+        // 1 oder 3 Phasen sind fest gewählt
+        phases_min = phases_selection;
+        phases_max = phases_selection;
+    }
+    
+    // Berechnung der Leistung (Watt)
+    let power_min_w = VOLTAGE * amp_min * phases_min;
+    let power_max_w = VOLTAGE * amp_max * phases_max;
+    
+    // Umwandlung in kW und Runden auf 2 Dezimalstellen
+    let power_min_kw = (power_min_w / 1000).toFixed(2);
+    let power_max_kw = (power_max_w / 1000).toFixed(2);
+    
+    // Aktualisierung der Anzeige
+    $('#powerMin').text('(' + power_min_kw + ' kW)');
+    $('#powerMax').text('(' + power_max_kw + ' kW)');
+}
+
+    // Listener hinzufügen: Führt die Berechnung aus, sobald einer der Werte geändert wird
+    $('#phases, #ampMin, #ampMax').on('change', calculatePower);
+    
+    // Einmalige Berechnung beim Laden der Seite
+    calculatePower();
 
     // --- Details "Mehr Optionen" öffnen/geschlossen Zustand persistieren ---
     var moreOptionsKey = 'moreOptionsOpen';
