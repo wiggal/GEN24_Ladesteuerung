@@ -445,10 +445,20 @@ class OCPPManager:
             if self.wb_phases == "1":
                 amp = min(amp_1, self.wb_amp_max) if amp_1 >= 6 else 0
             elif self.wb_phases == "3" or self.wb_phases == "0":
-                if amp_3 >= 6:
+                # Anpassung für "Phase 0" (Auto): Die Phasenwechsel-Schwellen werden an Min/Max Ampere gebunden.
+                if self.wb_phases == "0":
+                    # Benutzerwunsch: 1P Start nur mit wb_amp_min und 3P Start nur mit wb_amp_max (pro Phase).
+                    required_amp_for_1P = self.wb_amp_min
+                    required_amp_for_3P = self.wb_amp_max
+                else:
+                    # Standard Logik für wb_phases == "3": 6A Minimum
+                    required_amp_for_1P = 6.0
+                    required_amp_for_3P = 6.0
+
+                if amp_3 >= required_amp_for_3P:
                     self.wb_phases = "3"
                     amp = min(amp_3, self.wb_amp_max)
-                elif amp_1 >= 6:
+                elif amp_1 >= required_amp_for_1P:
                     self.wb_phases = "1"
                     amp = min(amp_1, self.wb_amp_max)
                 else:
