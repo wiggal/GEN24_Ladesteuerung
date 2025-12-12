@@ -1,4 +1,4 @@
-**[0.40.8] – 2025-XX-XX**  
+**[0.40.8] – 2025-12-12**  
 
 - CHANGELOG.md im Tab config und im WIKI verlinkt.  
 - **Änderung in CONFIG/default.ini** Block `[wallbox]` für die Tests der Wattpilotanbindung eingefügt.  

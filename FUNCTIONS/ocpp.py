@@ -418,6 +418,7 @@ class OCPPManager:
             self.Netzbezug = API.get('aktuelleEinspeisung', 0)
             self.Produktion = API.get('aktuellePVProduktion', 0)
             self.Batteriebezug = API.get('aktuelleBatteriePower', 0)
+            self.BattStatusProz = API.get('BattStatusProz', 5)
         except Exception as e:
             cwarn(f"Inverter API konnte nicht geladen werden: {e} → Netzbezug wird auf 0 gesetzt.")
             self.Netzbezug = 0.0 # Sicherstellen, dass der Wert numerisch ist
@@ -892,6 +893,7 @@ class OCPPManager:
             "Netzbezug_W": self.Netzbezug,
             "Produktion_W": self.Produktion,
             "Batteriebezug_W": self.Batteriebezug,
+            "BattStatusProz": self.BattStatusProz,
             "target_energy_kwh": target_kwh,
             "charged_energy_kwh": round(charged_wh / 1000.0, 4),
             "remaining_kwh": round(remaining_kwh, 4) if remaining_kwh is not None else None

@@ -300,7 +300,7 @@ p, label {
 }
 
 .label-inline {
-    width: 320px;     /* Einheitliche Label-Spalte */
+    width: 300px;     /* Einheitliche Label-Spalte */
     flex-shrink: 0;   /* verhindert Zusammenstauchen */
 }
 
@@ -314,7 +314,7 @@ p, label {
     max-width: 100%;
 }
 
-/* --- Smartphone Layout --- 600px*/
+/* --- Smartphone Layout --- */
 @media screen and (max-width: 64em) {
     body { font-size: 140%; }
     td { font-size: 120%; }
@@ -322,7 +322,8 @@ p, label {
     .row { gap: 6px; }
 
     .label-inline {
-        width: 420px;     /* Einheitliche Label-Spalte */
+        font-size: 120%;
+        width: 440px;     /* Einheitliche Label-Spalte */
         flex-shrink: 0;   /* verhindert Zusammenstauchen */
     }
 
@@ -333,9 +334,18 @@ p, label {
 
     .input-inline select,
     .input-inline input {
-        width: 80px;
+        font-size: 120%;
+        width: 99px;
         max-width: 100%;
     }
+    /* Buttons größer */
+    button {
+        font-size: 120%;
+        padding: 12px 20px;
+    }
+    details summary {
+        font-size: 140%;
+        }
 }
 
 /* --- Balkentabelle (PV/Lastenanzeige) --- */
@@ -450,9 +460,11 @@ p, label {
             echo htmlspecialchars($meter_values['phases'] ?? '—'); 
             echo 'PH / ';
             echo htmlspecialchars($meter_values['phases'] * $meter_values['current_limit'] * 230 / 1000); ?>kW</strong></p>
-        <p>Ladedauer (Std:Min:Sek): <strong id="chargingDuration"><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
-        <p>Geladene kWh: <strong id="chargedEnergy"><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
+        <p>Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
+        <p>Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
+        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
+
         <?php
         // Nur Button anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
         $charged_energy = $meter_values['charged_energy_kwh'] ?? 0.0;
@@ -463,7 +475,7 @@ p, label {
         </p>
         <hr>
     <?php else: ?>
-        <p class="small">Live-Daten der Wallbox (Aktuelle Stromstärke/Phasen) sind nur sichtbar, wenn ein Client verbunden ist.</p>
+        <p class="small">Live-Daten sind nicht vorhanden, da kein OCPP-Client (Wallbox) verbunden ist.</p>
     <?php endif; ?>
 
     <h2>Optionen einstellen und in DB speichern!</h2>
@@ -487,8 +499,8 @@ p, label {
             <span class="input-inline">
             <select id="phases" name="phases">
                 <option value="0" <?php if($phases=='0') echo 'selected'; ?>>Auto</option>
-                <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1 Phase</option>
-                <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3 Phasen</option>
+                <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1Ph</option>
+                <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3Ph</option>
             </select>
             </span>
         </div>
@@ -517,7 +529,7 @@ p, label {
 
         <hr>
         <details id="moreOptions">
-            <summary>Erweiterte Optionen:</summary>
+            <summary><b>Erweiterte Optionen:</b></summary>
         <h3>Timing Einstellungen:</h3>
 
         <div class="row">
@@ -526,7 +538,7 @@ p, label {
         </div>
 
         <div class="row">
-            <span class="label-inline">Phasenumschaltintervall(s) (DB=<?php echo htmlspecialchars($min_phase_duration_s); ?>):</span>
+            <span class="label-inline">Phasen-Intervall(s) (DB=<?php echo htmlspecialchars($min_phase_duration_s); ?>):</span>
             <span class="input-inline"><input id="minPhaseDur" type="number" min="60" step="60" value="<?php echo htmlspecialchars($min_phase_duration_s); ?>"></span>
         </div>
 
@@ -536,7 +548,7 @@ p, label {
         </div>
 
         <div class="row">
-            <span class="label-inline">Phasenumschaltverzögerung(s) (DB=<?php echo htmlspecialchars($phase_change_confirm_s); ?>):</span>
+            <span class="label-inline">Phasen-Delay(s) (DB=<?php echo htmlspecialchars($phase_change_confirm_s); ?>):</span>
             <span class="input-inline"><input id="phaseChangeConfirm" type="number" min="0" step="30" value="<?php echo htmlspecialchars($phase_change_confirm_s); ?>"></span>
         </div>
 

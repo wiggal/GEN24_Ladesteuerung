@@ -16,7 +16,8 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
 
 
     if ($total === 0.0) {
-        return '<p class="small">Keine Energiequelle aktiv (Total = 0)</p>';
+        #return '<p class="small">Keine Energiequelle aktiv (Total = 0)</p>';
+        return '';
     }
 
     // 2. Erstellung eines Arrays für die Daten der Quellen
