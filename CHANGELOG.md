@@ -1,7 +1,8 @@
 **[0.40.8] – 2025-12-12**  
 
 - CHANGELOG.md im Tab config und im WIKI verlinkt.  
-- **Änderung in CONFIG/default.ini** Block `[wallbox]` für die Tests der Wattpilotanbindung eingefügt.  
+- **Änderung in CONFIG/default.ini** Block `[wallbox]` für die Tests der Wattpilotanbindung eingefügt, in `priv.ini` nachziehen.  
+- **Änderung in html/config.ini**  Block für Wallbox eingefügt, in `priv.ini` nachziehen.  
 - In start_PythonScript.sh Start des OCPP_Servers eingefügt.  
 
 **[0.40.7] – 2025-12-02**  
