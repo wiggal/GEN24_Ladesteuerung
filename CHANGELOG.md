@@ -1,3 +1,7 @@
+**[0.40.9] – 202X-XX-XX**  
+
+- Stabilisierung des OCPP-Servers, hauptsächlich im PV-Überschussladen.  
+
 **[0.40.8] – 2025-12-12**  
 
 - CHANGELOG.md im Tab config und im WIKI verlinkt.  

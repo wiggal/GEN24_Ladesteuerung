@@ -426,13 +426,13 @@ class OCPPManager:
         current_charge_power = 0
         if cp_id and cp_id in self.connected_charge_points:
             current_charge_power = self.get_current_power(cp_id)
-        
 
         # Überschuss-Berechnung nutzt jetzt self.Netzbezug
         aus_batterie = max(0.0, self.Batteriebezug)
         in_batterie = max(0.0, -self.Batteriebezug)
+        # + self.Netzbezug = Aus dem Netz bezogen
         hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power )
-        ueberschuss = max(0, (self.Produktion - hausverbrauch + self.Batteriebezug - self.residualPower))  #entWIGGlung FEHLER in der Berechnung??
+        ueberschuss = max(0, (self.Produktion - hausverbrauch + self.Batteriebezug - self.residualPower))  #entWIGGlung Berechnung richtig ?????
         cinfo(f"Überschuss: PV: {self.Produktion}, AKKU {self.Batteriebezug}, Netz: {self.Netzbezug}W, Hausverbrauch {hausverbrauch}, Wallbox ({current_charge_power}W), Überschuss: {ueberschuss}W")
 
         # PV-Steuerlogik nur ausführen, wenn der Modus 1 oder 2 ist
@@ -477,20 +477,15 @@ class OCPPManager:
         return self.wb_amp, self.wb_phases, self.wb_pv_mode, is_pv_controlled, self.wb_amp_min
 
     def get_current_power(self, cp_id):
-        """Extrahiert Power.Active.Import aus meter_values_store."""
-        meter_data = self.meter_values_store.get(cp_id)
-        if not meter_data or 'meterValue' not in meter_data:
-            return 0
-        for meter_value in meter_data['meterValue']:
-            if 'sampledValue' in meter_value:
-                for sample in meter_value['sampledValue']:
-                    if sample.get('measurand') == 'Power.Active.Import' and 'phase' not in sample:
-                        try:
-                            return float(sample.get('value', 0))
-                        except (ValueError, TypeError):
-                            return 0
-        return 0
+        # Aktuelle Leistung der Wallbox mit Stromstärke und Phase berechnen
+        curr_limit = 0
+        phase_limit = 0
+        curr_aktuell = self.current_limit_store.get(cp_id) or 0
+        phase_aktuell = self.phase_limit_store.get(cp_id) or 0
+        current_charge_power =  curr_aktuell * phase_aktuell * 230 #entWIGGlung
 
+        return current_charge_power
+        
     async def apply_wallbox_settings(self, cp_id, amp, phases, pv_mode_val, is_pv_controlled, amp_min=None):
         """Wendet Ampere- und Phasen-Werte an (SetChargingProfile / RemoteStart/Stop).
            Hysterese/Timer wird ausschließlich auf Phasenwechsel angewendet (self.PHASE_CHANGE_CONFIRM_S).
@@ -501,6 +496,11 @@ class OCPPManager:
             return False
 
         cp = self.connected_charge_points[cp_id]
+
+        # Berechnung der Zeit seit dem letzten Phasenwechsel
+        now = datetime.now()
+        last_change = self.last_phase_change_timestamp.get(cp_id, now - timedelta(seconds=self.MIN_PHASE_DURATION_S + 1))
+        seconds_since_last_phase = (now - last_change).total_seconds()
 
         # Direkter gewünschter Wert (keine Ampere-Hysterese)
         amp_desired = amp if pv_mode_val != 0.0 else 0.0
@@ -513,7 +513,7 @@ class OCPPManager:
         self.transaction_start_timestamp.setdefault(cp_id, None)
         self.phase_change_candidate.setdefault(cp_id, None)
 
-        # Ensure energy stores exist
+        # Sicherstellen, dass Energiespeicher vorhanden sind.
         self.target_energy_kwh_store.setdefault(cp_id, self.DEFAULT_TARGET_KWH)
         self.charged_energy_wh_store.setdefault(cp_id, 0.0)
         self.last_energy_wh_store.setdefault(cp_id, None)
@@ -535,7 +535,7 @@ class OCPPManager:
         # -----------------------
         is_charging_requested = amp_desired > 0.0
 
-        # Wenden Sie die Hysterese NUR an, wenn eine Phasenänderung gewünscht ist
+        # Wendet die Hysterese NUR an, wenn eine Phasenänderung gewünscht ist
         # UND keine Initialisierung vorliegt UND eine Ladung mit > 0A gewünscht wird.
         if phase_changed and not is_initial_change and is_charging_requested:
             candidate = self.phase_change_candidate.get(cp_id)
@@ -630,6 +630,38 @@ class OCPPManager:
 
         # Re-check amp change
         amp_changed = (self.current_limit_store.get(cp_id) != amp_allowed)
+
+        # ---------------------------
+        # AMPERE-ANPASSUNG WÄHREND DER PHASEN-HYSTERESE
+        # ---------------------------
+        # Wenn ein Phasenwechsel bevorsteht (Kandidat existiert) oder die Sperrzeit läuft:
+        if self.phase_change_candidate.get(cp_id) is not None or seconds_since_last_phase < self.MIN_PHASE_DURATION_S:
+
+            # Prüfen, ob wir einen Phasenwechsel-Kandidaten haben, um die Richtung zu bestimmen
+            candidate = self.phase_change_candidate.get(cp_id)
+            if candidate:
+                requested_p = candidate.get('requested')
+                current_p = self.phase_limit_store.get(cp_id)
+
+                if current_p is not None:
+                    # FALL A: Wechsel nach oben (z.B. 1P -> 3P) -> Sofort auf 16A (max)
+                    if requested_p > current_p and amp_allowed != 16.0:
+                        cnote(f"[{ '..' + cp_id[-4:] }] ⚡ Phase-UP geplant: Setze 16A während Wartezeit.")
+                        amp_allowed = 16.0
+                        amp_changed = True # Änderung erzwingen
+
+                    # FALL B: Wechsel nach unten (z.B. 3P -> 1P) -> Sofort auf 6A (min)
+                    elif requested_p < current_p and amp_allowed != 6.0:
+                        cnote(f"[{ '..' + cp_id[-4:] }] 📉 Phase-DOWN geplant: Setze 6A während Wartezeit.")
+                        amp_allowed = 6.0
+                        amp_changed = True # Änderung erzwingen
+
+            # Wenn nach der obigen Logik immer noch eine Abweichung zum Store besteht,
+            # die nicht durch die 6A/16A Regel abgedeckt wurde, blockieren wir sie hier.
+            if amp_changed and not (candidate and amp_allowed in [6.0, 16.0]):
+                cnote(f"[{ '..' + cp_id[-4:] }] ⏳ Ampere-Update blockiert (Hysterese/Sperrzeit aktiv).")
+                amp_changed = False
+        # ---------------------------
 
         # Wenn Ampere oder Phase geändert => senden
         if amp_changed or phase_changed:

@@ -156,57 +156,6 @@ if (isset($_GET['ajax'])) {
     exit;
 }
 
-$total_power = 0.0; // WICHTIG: Startet immer bei 0.0 (vom Typ float)
-$unit = 'W';
-$MAX_AGE_SECONDS = 20; // Konfigurierbare Toleranz: Messwert darf maximal 90s alt sein.
-
-// 1. Sichere Navigation zum 'meterValue' Block
-$meter_value_block = $meter_values['meter']['meterValue'][0] ?? null;
-
-if ($meter_value_block) {
-
-    // 2. Zeitstempel-Prüfung: Ist der Wert zu alt?
-    $timestamp_str = $meter_value_block['timestamp'] ?? null;
-
-    $is_data_current = false;
-    if ($timestamp_str) {
-        // Konvertiere den ISO 8601-Zeitstempel in einen UNIX-Timestamp
-        $measurement_time = strtotime($timestamp_str);
-        $current_time = time();
-
-        $age_seconds = $current_time - $measurement_time;
-
-        if ($age_seconds <= $MAX_AGE_SECONDS) {
-            // Die Daten sind aktuell, wir können sie verwenden
-            $is_data_current = true;
-        }
-        // Wenn der Wert zu alt ist, bleibt $is_data_current = false.
-    }
-
-
-    // 3. Nur Werte extrahieren, wenn der Zeitstempel aktuell ist
-    if ($is_data_current) {
-
-        $sampled_values = $meter_value_block['sampledValue'] ?? [];
-
-        // 4. Iteration über alle Messwerte
-        foreach ($sampled_values as $item) {
-
-            // Prüfen: Power.Active.Import UND KEINE Phase (Gesamtwert)
-            if (($item['measurand'] ?? '') === 'Power.Active.Import' && !isset($item['phase'])) {
-
-                // Wert als reinen Float speichern
-                // Dies ist der einzige Ort, an dem $total_power aktualisiert wird.
-                $total_power = (float)($item['value'] ?? 0.0);
-                $unit = $item['unit'] ?? 'W'; // Einheit für die optionale Anzeige speichern
-
-                // Wert gefunden, Schleife beenden
-                break;
-            }
-        }
-    }
-}
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -447,7 +396,9 @@ p, label {
         $solar_current = round(($meter_values['Produktion_W'] ?? 0)/1000,1);
         $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0)/1000,1);
         $grid_current = round(($meter_values['Netzbezug_W'] ?? 0)/1000,1);
-        $total_power = round(($total_power/1000),1);
+        $wallbox_Ampere = ($meter_values['current_limit'] ?? 0);
+        $wallbox_Phase = ($meter_values['phases'] ?? 0);
+        $total_power = round((($wallbox_Ampere * $wallbox_Phase * 230)/1000),1);
 
         // Funktion aufrufen und Ergebnis ausgeben (echo)
         echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power);
