@@ -351,7 +351,7 @@ class OCPPManager:
                 self.wb_amp_max = amp_max_val
                 self.wb_amp_min = amp_min_val
 
-                cinfo(f"DB-Steuerdaten geladen (ID=1): amp_max={self.wb_amp_max}A, phases={self.wb_phases}, pv_mode={self.wb_pv_mode}, amp_min={self.wb_amp_min}A")
+                cnote(f"DB-Steuerdaten geladen (ID=1): amp_max={self.wb_amp_max}A, phases={self.wb_phases}, pv_mode={self.wb_pv_mode}, amp_min={self.wb_amp_min}A")
         except Exception as e:
             cwarn(f"Fehler beim Parsen der DB-Daten (ID=1): {e} → Instanz-Defaults verwendet")
             # leave existing wb_* values
@@ -397,8 +397,8 @@ class OCPPManager:
             # Nach DB-Lesen auto_sync_interval für Hintergrundtask updaten
             self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
 
-            cinfo(f"DB-Steuerdaten geladen (ID=2): AUTO_SYNC_INTERVAL={getattr(self,'AUTO_SYNC_INTERVAL',None)}, MIN_PHASE_DURATION_S={getattr(self,'MIN_PHASE_DURATION_S',None)}, MIN_CHARGE_DURATION_S={getattr(self,'MIN_CHARGE_DURATION_S',None)}")
-            cinfo(f"DB-Steuerdaten geladen (ID=3): PHASE_CHANGE_CONFIRM_S={getattr(self,'PHASE_CHANGE_CONFIRM_S',None)}, residualPower={getattr(self,'residualPower',None)}, DEFAULT_TARGET_KWH={getattr(self,'DEFAULT_TARGET_KWH',None)}")
+            cnote(f"DB-Steuerdaten geladen (ID=2): AUTO_SYNC_INTERVAL={getattr(self,'AUTO_SYNC_INTERVAL',None)}, MIN_PHASE_DURATION_S={getattr(self,'MIN_PHASE_DURATION_S',None)}, MIN_CHARGE_DURATION_S={getattr(self,'MIN_CHARGE_DURATION_S',None)}")
+            cnote(f"DB-Steuerdaten geladen (ID=3): PHASE_CHANGE_CONFIRM_S={getattr(self,'PHASE_CHANGE_CONFIRM_S',None)}, residualPower={getattr(self,'residualPower',None)}, DEFAULT_TARGET_KWH={getattr(self,'DEFAULT_TARGET_KWH',None)}")
         except Exception as e:
             cwarn(f"Fehler beim Lesen der Konfiguration aus DB: {e} → Instanz-Defaults verwendet")
 
@@ -431,9 +431,9 @@ class OCPPManager:
         aus_batterie = max(0.0, self.Batteriebezug)
         in_batterie = max(0.0, -self.Batteriebezug)
         # + self.Netzbezug = Aus dem Netz bezogen
-        hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power )
-        ueberschuss = max(0, (self.Produktion - hausverbrauch + self.Batteriebezug - self.residualPower))  #entWIGGlung Berechnung richtig ?????
-        cinfo(f"Überschuss: PV: {self.Produktion}, AKKU {self.Batteriebezug}, Netz: {self.Netzbezug}W, Hausverbrauch {hausverbrauch}, Wallbox ({current_charge_power}W), Überschuss: {ueberschuss}W")
+        self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power )
+        ueberschuss = max(0, (self.Produktion - self.hausverbrauch + self.Batteriebezug - self.residualPower))  #entWIGGlung Berechnung richtig ?????
+        cinfo(f"Überschuss: PV: {self.Produktion}, AKKU {self.Batteriebezug}, Netz: {self.Netzbezug}W, Hausverbrauch {self.hausverbrauch}, Wallbox ({current_charge_power}W), Überschuss: {ueberschuss}W")
 
         # PV-Steuerlogik nur ausführen, wenn der Modus 1 oder 2 ist
         if self.wb_pv_mode == 1 or self.wb_pv_mode == 2:
@@ -446,13 +446,15 @@ class OCPPManager:
             if self.wb_phases == "1":
                 amp = min(amp_1, self.wb_amp_max) if amp_1 >= 6 else 0
             elif self.wb_phases == "3" or self.wb_phases == "0":
-                # Anpassung für "Phase 0" (Auto): Die Phasenwechsel-Schwellen werden an Min/Max Ampere gebunden.
+                # Schwellenwerte für Phase 0 (Auto)
                 if self.wb_phases == "0":
-                    # Benutzerwunsch: 1P Start nur mit wb_amp_min und 3P Start nur mit wb_amp_max (pro Phase).
+                    # 1P ab Mindeststromstärke (6A)
                     required_amp_for_1P = self.wb_amp_min
-                    required_amp_for_3P = self.wb_amp_max
+                    # 3P-Umschaltung, sobald 3 * 6A (ca. 4,1 kW) möglich sind
+                    # 6.2, damit das System bei genau 4,1 kW nicht ständig zwischen 1P und 3P hin- und herspringt
+                    required_amp_for_3P = 6.2  # 
                 else:
-                    # Standard Logik für wb_phases == "3": 6A Minimum
+                    # Standard Logik für feste Phasenwahl (1 oder 3)
                     required_amp_for_1P = 6.0
                     required_amp_for_3P = 6.0
 
@@ -463,6 +465,10 @@ class OCPPManager:
                     self.wb_phases = "1"
                     amp = min(amp_1, self.wb_amp_max)
                 else:
+                    # NEU: Wenn kein Überschuss da ist, aber Modus 0 aktiv ist,
+                    # erzwinge 1-phasige Initialisierung für den Modus 2 (Min-Laden)
+                    if self.wb_phases == "0":
+                        self.wb_phases = "1"
                     amp = 0
 
         # pv_mode == 2: niemals vollständig abschalten, sondern Minimum erzwingen
@@ -527,8 +533,13 @@ class OCPPManager:
         # KORREKTUR: Bei Initialisierung (phase_limit is None) sofort den gewünschten Wert übernehmen.
         is_initial_change = phase_limit is None
         final_ocpp_phases_value = phase_limit if not is_initial_change else requested_phase
-
-        cinfo(f"[{ '..' + cp_id[-4:] }] Prüfe Sync: PV-Mode={pv_mode_val}, PV-Steuerung={is_pv_controlled}, Wunsch: {amp_desired}A/{requested_phase}P. Aktuell: {curr_limit}A/{phase_limit}P")
+        cinfo(
+            f"[{'..' + cp_id[-4:]}] "
+            f"PV-Mode={pv_mode_val}, PV-Steuerung={is_pv_controlled}, "
+            f"Wunsch: {amp_desired}A/{requested_phase}P, "
+            f"Aktuell: {curr_limit}A/{phase_limit}P, "
+            f"Geladen: {round(self.charged_energy_wh_store[cp_id], 2)}Wh"
+        )
 
         # -----------------------
         # PHASE-ONLY HYSTERESE/TIMER
@@ -634,27 +645,24 @@ class OCPPManager:
         # ---------------------------
         # AMPERE-ANPASSUNG WÄHREND DER PHASEN-HYSTERESE
         # ---------------------------
-        # Wenn ein Phasenwechsel bevorsteht (Kandidat existiert) oder die Sperrzeit läuft:
-        if self.phase_change_candidate.get(cp_id) is not None or seconds_since_last_phase < self.MIN_PHASE_DURATION_S:
+        # Prüfen, ob wir einen Phasenwechsel-Kandidaten haben, um die Richtung zu bestimmen
+        candidate = self.phase_change_candidate.get(cp_id)
+        if candidate:
+            requested_p = candidate.get('requested')
+            current_p = self.phase_limit_store.get(cp_id)
 
-            # Prüfen, ob wir einen Phasenwechsel-Kandidaten haben, um die Richtung zu bestimmen
-            candidate = self.phase_change_candidate.get(cp_id)
-            if candidate:
-                requested_p = candidate.get('requested')
-                current_p = self.phase_limit_store.get(cp_id)
+            if current_p is not None:
+                # FALL A: Wechsel nach oben (z.B. 1P -> 3P) -> Sofort auf 16A (max)
+                if requested_p > current_p and amp_allowed != 16.0:
+                    cnote(f"[{ '..' + cp_id[-4:] }] ⚡ Phase-UP geplant: Setze 16A während Wartezeit.")
+                    amp_allowed = 16.0
+                    amp_changed = True # Änderung erzwingen
 
-                if current_p is not None:
-                    # FALL A: Wechsel nach oben (z.B. 1P -> 3P) -> Sofort auf 16A (max)
-                    if requested_p > current_p and amp_allowed != 16.0:
-                        cnote(f"[{ '..' + cp_id[-4:] }] ⚡ Phase-UP geplant: Setze 16A während Wartezeit.")
-                        amp_allowed = 16.0
-                        amp_changed = True # Änderung erzwingen
-
-                    # FALL B: Wechsel nach unten (z.B. 3P -> 1P) -> Sofort auf 6A (min)
-                    elif requested_p < current_p and amp_allowed != 6.0:
-                        cnote(f"[{ '..' + cp_id[-4:] }] 📉 Phase-DOWN geplant: Setze 6A während Wartezeit.")
-                        amp_allowed = 6.0
-                        amp_changed = True # Änderung erzwingen
+                # FALL B: Wechsel nach unten (z.B. 3P -> 1P) -> Sofort auf 6A (min)
+                elif requested_p < current_p and amp_allowed != 6.0:
+                    cnote(f"[{ '..' + cp_id[-4:] }] 📉 Phase-DOWN geplant: Setze 6A während Wartezeit.")
+                    amp_allowed = 6.0
+                    amp_changed = True # Änderung erzwingen
 
             # Wenn nach der obigen Logik immer noch eine Abweichung zum Store besteht,
             # die nicht durch die 6A/16A Regel abgedeckt wurde, blockieren wir sie hier.
@@ -810,7 +818,7 @@ class OCPPManager:
             if self.transaction_id_store.get(cp_id) or self.status_store.get(cp_id) == "Charging":
                 self.charged_energy_wh_store[cp_id] = self.charged_energy_wh_store.get(cp_id, 0.0) + delta
                 self.last_energy_wh_store[cp_id] = energy_wh
-                cinfo(f"[{ '..' + cp_id[-4:] }] Geladene Energie erhöht um {round(delta,2)}Wh -> total {round(self.charged_energy_wh_store[cp_id],2)}Wh")
+
                 # Prüfe Ziel
                 target_kwh = self.target_energy_kwh_store.get(cp_id, self.DEFAULT_TARGET_KWH)
                 if target_kwh and (self.charged_energy_wh_store[cp_id] >= target_kwh * 1000.0):
@@ -926,6 +934,7 @@ class OCPPManager:
             "Produktion_W": self.Produktion,
             "Batteriebezug_W": self.Batteriebezug,
             "BattStatusProz": self.BattStatusProz,
+            "Hausverbrauch": self.hausverbrauch,
             "target_energy_kwh": target_kwh,
             "charged_energy_kwh": round(charged_wh / 1000.0, 4),
             "remaining_kwh": round(remaining_kwh, 4) if remaining_kwh is not None else None

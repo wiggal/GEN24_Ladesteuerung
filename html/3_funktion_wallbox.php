@@ -2,7 +2,7 @@
 /**
  * Generiert den HTML-Code für den Ladebalken basierend auf den übergebenen Werten.
  */
-function generateLoadBar(float $solar, float $battery, float $grid, float $in_auto): string
+function generateLoadBar(float $solar, float $battery, float $grid, float $in_auto, float $in_haus): string
 {
     // 1. Berechnung der Energiewerte
     $aus_battery = max(0.0, $battery);
@@ -11,7 +11,6 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
 
     $in_battery = max(0.0, -$battery);
     $in_grid = max(0.0, -$grid);
-    $in_haus = round(($total - $in_battery - $in_grid - $in_auto),1);
 
 
 

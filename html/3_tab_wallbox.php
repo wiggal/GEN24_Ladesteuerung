@@ -399,9 +399,10 @@ p, label {
         $wallbox_Ampere = ($meter_values['current_limit'] ?? 0);
         $wallbox_Phase = ($meter_values['phases'] ?? 0);
         $total_power = round((($wallbox_Ampere * $wallbox_Phase * 230)/1000),1);
+        $Hausverbrauch = round(($meter_values['Hausverbrauch'] ?? 0)/1000,1);
 
         // Funktion aufrufen und Ergebnis ausgeben (echo)
-        echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power);
+        echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
     ?>
 <div class="card">
     
@@ -414,16 +415,15 @@ p, label {
         <p>Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
         <p>Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
-        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
-
         <?php
-        // Nur Button anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
+        // Nur ResetResetbbutton anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
         $charged_energy = $meter_values['charged_energy_kwh'] ?? 0.0;
         if ($server_running && $client_connected && $charged_energy > 0) {
         echo '&nbsp;<button type="button" class="red" id="btnResetCounter">Reset</button>';
         }
         ?>
         </p>
+        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten sind nicht vorhanden, da kein OCPP-Client (Wallbox) verbunden ist.</p>
@@ -450,8 +450,8 @@ p, label {
             <span class="input-inline">
             <select id="phases" name="phases">
                 <option value="0" <?php if($phases=='0') echo 'selected'; ?>>Auto</option>
-                <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1Ph</option>
-                <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3Ph</option>
+                <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1 Ph</option>
+                <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3 Ph</option>
             </select>
             </span>
         </div>
