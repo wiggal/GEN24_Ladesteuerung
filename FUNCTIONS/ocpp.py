@@ -432,7 +432,9 @@ class OCPPManager:
         in_batterie = max(0.0, -self.Batteriebezug)
         # + self.Netzbezug = Aus dem Netz bezogen
         self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power )
-        ueberschuss = max(0, (self.Produktion - self.hausverbrauch + self.Batteriebezug - self.residualPower))  #entWIGGlung Berechnung richtig ?????
+        # Wenn Batteriebezug positiv ist (Akku entlädt), setzen wir ihn auf 0, um ihn nicht zu nutzen.
+        batterie_anteil = self.Batteriebezug if self.Batteriebezug < 0 else 0
+        ueberschuss = max(0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower))  #entWIGGlung Berechnung richtig ?????
         cinfo(f"Überschuss: PV: {self.Produktion}, AKKU {self.Batteriebezug}, Netz: {self.Netzbezug}W, Hausverbrauch {self.hausverbrauch}, Wallbox ({current_charge_power}W), Überschuss: {ueberschuss}W")
 
         # PV-Steuerlogik nur ausführen, wenn der Modus 1 oder 2 ist
