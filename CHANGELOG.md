@@ -1,6 +1,7 @@
 **[0.40.9] – 202X-XX-XX**  
 
 - Stabilisierung des OCPP-Servers, hauptsächlich im PV-Überschussladen.  
+- DynamicPrice: Keine Entladesperre (-1W), wenn der Akku bereits leer ist.  
 
 **[0.40.8] – 2025-12-12**  
 

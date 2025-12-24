@@ -713,6 +713,11 @@ class dynamic:
 
             Zeilen = sum(1 for row in pv_data_charge if len(row) > 5 and row[5] == -0.1)
 
+        # Wenn die Batterie leer ist, Ladestopp -1 auf 0 ändern, da ja nichts entladen werden kann 
+        for row in pv_data_charge:
+            if row[5] == -1 and row[4] < minimum_batterylevel * 1.05:
+                row[5] = 0
+
         return(pv_data_charge)
 
 
