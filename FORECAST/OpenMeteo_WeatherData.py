@@ -182,8 +182,8 @@ def get_pv_forecast_icon_d2_cloud_layers(quelle, gewicht):
                     additional_cloud_reduction_factor = round((1 - (cloud_percentage/100) * 0.8 * cloudEffect),2) 
                     pv_watts_org = pv_watts
                     pv_watts *= additional_cloud_reduction_factor
-                    if print_level >= 2:
-                        print("DEBUG  Bewölkung %:", formatted_timestamp, cloud_percentage, additional_cloud_reduction_factor, int(pv_watts_org), int(pv_watts))  #entWIGGlung
+                    if print_level >= 3:
+                        print("DEBUG  Bewölkung %:", formatted_timestamp, cloud_percentage, additional_cloud_reduction_factor, int(pv_watts_org), int(pv_watts))
                     # --- Ende der Verstärkung ---
                 
                     estimated_pv_watts = int(round(pv_watts))

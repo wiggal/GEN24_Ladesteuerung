@@ -407,13 +407,13 @@ p, label {
 <div class="card">
     
     <?php if ($client_connected): ?>
-        <p>Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
+        <p>🔌 Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
             echo 'A / ';
             echo htmlspecialchars($meter_values['phases'] ?? '—'); 
             echo 'PH / ';
             echo htmlspecialchars($meter_values['phases'] * $meter_values['current_limit'] * 230 / 1000); ?>kW</strong></p>
-        <p>Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
-        <p>Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
+        <p>⏱️ Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
+        <p>🚗 Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
         <?php
         // Nur ResetResetbbutton anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
@@ -423,7 +423,9 @@ p, label {
         }
         ?>
         </p>
-        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
+        <p>
+        <?php echo ($meter_values['BattStatusProz'] > 30) ? '🔋' : '🪫'; ?>
+        Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten sind nicht vorhanden, da kein OCPP-Client (Wallbox) verbunden ist.</p>

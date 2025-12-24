@@ -395,6 +395,8 @@ class dynamic:
         # Ladeverlust beim Berechnen des Akuu-SOC berücksichtigen
         Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
         netzlade_preisschwelle = basics.getVarConf('dynprice','netzlade_preisschwelle', 'eval')
+        # Falls der Akku-SOC kleiner als minimum_batterylevel => akku_soc
+        if akku_soc < minimum_batterylevel: minimum_batterylevel = akku_soc
         # Wenn keine Maximaler Zwangsladung-SOC (0) Akkukapazität setzen.
         if max_batt_dyn_ladung_W == 0: max_batt_dyn_ladung_W = battery_capacity_Wh
 
@@ -422,7 +424,8 @@ class dynamic:
                     
 
             # Akustand muss minimal unter minimum_batterylevel sein
-            if akku_soc < minimum_batterylevel: akku_soc = int(minimum_batterylevel*0.99)
+            if akku_soc < minimum_batterylevel: 
+                akku_soc = int(minimum_batterylevel*0.99)
             # Akku nochmal auf Maximum begrenzen
             if akku_soc > battery_capacity_Wh: akku_soc = battery_capacity_Wh
             Akkustatus[4] = akku_soc
