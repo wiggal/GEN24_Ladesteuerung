@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-FUNCTIONS/ocpp.py
-
-Enthält OCPP-bezogene Klassen:
- - OCPPManager: verwaltet Stores, WebSocket-Server, HTTP-API und Autosync
- - ChargePointHandler: pro-WebSocket-Handler, delegiert Nachrichten an den Manager
+FUNCTIONS/ocpp.py — Refactorierte, besser strukturierte Version
 """
+
+from __future__ import annotations
 import asyncio
 import json
-import logging
+import traceback
 from datetime import datetime, timezone, timedelta
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional, Tuple
+
 from aiohttp import web
 
-# Logging setup (module-local)
-logger = logging.getLogger("OCPP-Legacy")
-logger.setLevel(logging.ERROR)
-
+# ----------------------
+# Konfiguration / Defaults
+# ----------------------
 WS_PORT = 8887
 HTTP_PORT = 8886
 TIME_SHIFT_SECONDS = 5
@@ -23,915 +23,781 @@ DEFAULT_CONNECTOR_ID = 1
 DEFAULT_IDTAG = "WattpilotUser"
 OCPP_PROTOCOLS = ['ocpp1.6', 'ocpp2.0.1', 'ocpp1.5']
 
-# ----------------------------
-# Auffälliges Console-Logging
-# ----------------------------
-# 0=ERROR/WARN, 1=+/OK 2=+INFO, 3=+NOTE
-def clog(level, prefix, msg):
-    if log_level >= level:
-        ts = datetime.now().strftime("%y%m%d %H:%M:%S")
-        print(f"{ts} {prefix} {msg}")
-
-def cerr(msg):   clog(0, "❌ ERROR:", msg)
-def cwarn(msg):  clog(0, "⚠️ WARN:", msg)
-def cok(msg):    clog(1, "✅ OK:", msg)
-def cinfo(msg):  clog(2, "ℹ️ INFO:", msg)
-def cnote(msg):  clog(3, "✏️ NOTE:", msg)
-
-# Import basics/config zum Lesen der INI-Dateien
+# Externe Module (bestehend aus originalem Projekt)
 import FUNCTIONS.functions
-basics = FUNCTIONS.functions.basics()
-config = basics.loadConfig(['default'])
-# Logginglevel auf default.ini
-log_level = basics.getVarConf('wallbox','log_level', 'eval')
-
-# Hybrid Import für websockets (neu/alt)
-try:
-    # websockets >=12
-    from websockets.server import serve as ws_serve
-    USING_NEW_WEBSOCKETS = True
-    cinfo(f"Using NEW websockets.server.serve API")
-except Exception:
-    # websockets <=11
-    from websockets.asyncio.server import serve as ws_serve
-    USING_LEGACY_WEBSOCKETS = True
-    cinfo(f"Using LEGACY websockets.asyncio.server.serve API")
-
-# SQL Helper import
 import FUNCTIONS.SQLall
 
+basics = FUNCTIONS.functions.basics()
+_ = basics.loadConfig(['default'])
+# try to read configured log level; fallback handled below
+try:
+    log_level = basics.getVarConf('wallbox', 'log_level', 'eval')
+except Exception:
+    log_level = 3
+
+# ----------------------
+# print-based logging 
+# ----------------------
+# 0=ERROR/WARN, 1=+/OK 2=+INFO, 3=+NOTE
+# Einfaches Dup-Suppressing in clog — ersetzt die vorherige clog-Definition
+_last_clog_content: Optional[str] = None
+
+def clog(level: int, prefix: str, msg: str):
+    """
+    Unterdrückt unmittelbar aufeinanderfolgende, identische Log-Nachrichten
+    """
+    global _last_clog_content
+    try:
+        if log_level >= level:
+            content = f"{prefix} {msg}"
+            # Wenn dieselbe prefix+msg unmittelbar zuvor geloggt wurde, unterdrücken
+            if _last_clog_content == content:
+                return
+            _last_clog_content = content
+            ts = datetime.now().strftime("%m-%d %H:%M:%S")
+            print(f"{ts} {content}")
+    except Exception:
+        # best-effort print, keine weitere Unterdrückung hier
+        print(prefix, msg)
+
+def cerr(msg: str):   clog(0, "❌ERROR:", str(msg))
+def cwarn(msg: str):  clog(0, "⚠️  WARN:", str(msg))
+def cok(msg: str):    clog(1, "✅   OK:", str(msg))
+def cinfo(msg: str):  clog(2, "ℹ️  INFO:", str(msg))
+def cdebug(msg: str): clog(3, "🐞DEBUG:", str(msg))
+
+def cerr_exc(msg: str):
+    """Log exception with traceback via clog."""
+    try:
+        tb = traceback.format_exc()
+        clog(0, "❌ ERROR:", f"{msg}\n{tb}")
+    except Exception:
+        clog(0, "❌ ERROR:", msg)
+
+# Hybrid websockets import (neu/alt)
+try:
+    from websockets.server import serve as ws_serve  # websockets>=12
+    USING_NEW_WEBSOCKETS = True
+except Exception:
+    from websockets.asyncio.server import serve as ws_serve  # websockets<=11
+    USING_NEW_WEBSOCKETS = False
+
+# ----------------------
+# Utility-Helper
+# ----------------------
+def now_iso_future(seconds: int = TIME_SHIFT_SECONDS) -> str:
+    return (datetime.now(timezone.utc) + timedelta(seconds=seconds)).isoformat()
+
+def iso_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+def timestamp_ms_future(seconds: int = TIME_SHIFT_SECONDS) -> str:
+    return str(int((datetime.now(timezone.utc) + timedelta(seconds=seconds)).timestamp() * 1000))
+
+def charging_profile_payload(limit: float, phases: int) -> dict:
+    return {
+        "connectorId": DEFAULT_CONNECTOR_ID,
+        "csChargingProfiles": {
+            "chargingProfileId": 1,
+            "stackLevel": 1,
+            "chargingProfilePurpose": "TxDefaultProfile",
+            "chargingProfileKind": "Absolute",
+            "recurrencyKind": "Daily",
+            "chargingSchedule": {
+                "chargingRateUnit": "A",
+                "chargingSchedulePeriod": [{
+                    "startPeriod": 0,
+                    "limit": float(limit),
+                    "numberPhases": int(phases)
+                }]
+            }
+        }
+    }
+
+# ----------------------
+# Per-CP State
+# ----------------------
+@dataclass
+class ChargePointState:
+    cp_id: str
+    websocket: Any = None
+    status: str = "Unknown"
+    meter_values: Dict[str, Any] = field(default_factory=dict)
+    current_limit: Optional[float] = None
+    phase_limit: Optional[int] = None
+    transaction_id: Optional[int] = None
+    last_phase_change: datetime = field(default_factory=lambda: datetime.min)
+    transaction_start: Optional[datetime] = None
+    target_kwh: float = 0.0
+    charged_wh: float = 0.0
+    last_energy_wh: Optional[float] = None
+    phase_candidate: Optional[dict] = None
+    lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False, compare=False)
+
+    def append_debug(self, message: dict):
+        cdebug(f"[{self.log_cp_id}] {message}")
+
+# ----------------------
+# ChargePoint WebSocket Handler
+# ----------------------
 class ChargePointHandler:
-    """Behandelt eine einzelne WebSocket-Verbindung (ein Charge Point)."""
+    def __init__(self, manager: 'OCPPManager', state: ChargePointState):
+        self.manager = manager
+        self.state = state
+        self.websocket = state.websocket
 
-    def __init__(self, manager, cp_id, websocket):
-        self.manager = manager  # Referenz auf OCPPManager
-        self.cp_id = cp_id
-        self.websocket = websocket
-
-    def get_future_utc_timestamp(self, seconds=TIME_SHIFT_SECONDS):
-        return (datetime.now(timezone.utc) + timedelta(seconds=seconds)).isoformat()
-
-    async def send_call_result(self, unique_id, payload=None):
-        """Sendet OCPP CALLRESULT: [3, uniqueId, payload]"""
-        if payload is None:
-            payload = {}
-        msg = [3, unique_id, payload]
+    async def _send_json(self, payload: Any) -> bool:
+        """Schickt JSON über den WebSocket; liefert True bei Erfolg."""
         try:
-            await self.websocket.send(json.dumps(msg))
-            logger.debug(f"Sent CALLRESULT to {self.cp_id}: {msg}")
-            self.manager.debug_store.setdefault(self.cp_id, []).append({"sent": msg, "timestamp": self.get_future_utc_timestamp()})
-        except Exception as e:
-            logger.exception(f"Fehler beim Senden CALLRESULT an {self.cp_id}: {e}")
+            await self.websocket.send(json.dumps(payload))
+            self.state.append_debug({"sent": payload, "timestamp": now_iso_future()})
+            return True
+        except Exception:
+            cerr_exc(f"Fehler beim Senden an {self.state.cp_id}")
+            return False
 
-    async def send_call(self, action, payload=None):
-        """Sendet OCPP CALL: [2, uniqueId, action, payload]"""
-        if payload is None:
-            payload = {}
-        unique_id = str(int((datetime.now(timezone.utc) + timedelta(seconds=TIME_SHIFT_SECONDS)).timestamp() * 1000))
-        msg = [2, unique_id, action, payload]
-        try:
-            await self.websocket.send(json.dumps(msg))
-            logger.debug(f"Sent CALL to {self.cp_id}: {msg}")
-            self.manager.debug_store.setdefault(self.cp_id, []).append({"sent": msg, "timestamp": self.get_future_utc_timestamp()})
-            return unique_id
-        except Exception as e:
-            logger.exception(f"Fehler beim Senden CALL an {self.cp_id}: {e}")
-            return None
+    async def send_callresult(self, unique_id: str, payload: Optional[dict] = None) -> bool:
+        msg = [3, unique_id, payload or {}]
+        return await self._send_json(msg)
+
+    async def send_call(self, action: str, payload: Optional[dict] = None) -> Optional[str]:
+        uid = timestamp_ms_future()
+        msg = [2, uid, action, payload or {}]
+        ok = await self._send_json(msg)
+        return uid if ok else None
 
     async def start(self):
-        # initial values in manager
-        self.manager.status_store[self.cp_id] = "Available"
-        self.manager.meter_values_store[self.cp_id] = {"power": 0, "current": 0, "energy": 0}
-        self.manager.current_limit_store[self.cp_id] = None
-        self.manager.phase_limit_store[self.cp_id] = None
-        self.manager.transaction_id_store[self.cp_id] = None
-        self.manager.debug_store[self.cp_id] = []
-
-        # Neue Stores für Energiemessung/Target
-        # Default-Ziel nutzen (jetzt aus Instanz-Attributen)
-        self.manager.target_energy_kwh_store.setdefault(self.cp_id, self.manager.DEFAULT_TARGET_KWH)
-        self.manager.charged_energy_wh_store.setdefault(self.cp_id, 0.0)
-        self.manager.last_energy_wh_store.setdefault(self.cp_id, None)
-
-        # Setze Zeitstempel zurück so der erste Wechsel erlaubt ist
-        self.manager.last_phase_change_timestamp[self.cp_id] = datetime.now() - timedelta(seconds=self.manager.MIN_PHASE_DURATION_S + 10)
-        self.manager.transaction_start_timestamp[self.cp_id] = None
+        """Haupt-Loop: empfängt Nachrichten vom Charge Point und delegiert."""
+        # initial state defaults
+        s = self.state
+        s.status = "Available"
+        s.meter_values = {"power": 0, "current": 0, "energy": 0}
+        s.current_limit = None
+        s.phase_limit = None
+        s.transaction_id = None
+        s.debug = []
+        s.target_kwh = self.manager.DEFAULT_TARGET_KWH
+        s.charged_wh = 0.0
+        s.last_energy_wh = None
+        s.last_phase_change = datetime.now() - timedelta(seconds=self.manager.MIN_PHASE_DURATION_S + 10)
+        s.transaction_start = None
 
         try:
-            async for message in self.websocket:
-                await self.handle_message(message)
-        except Exception as e:
-            logger.exception(f"WebSocket-Loop für {self.cp_id} beendet mit Fehler: {e}")
+            async for raw in self.websocket:
+                await self._handle(raw)
+        except Exception:
+            cerr_exc(f"WebSocket-Loop für {s.cp_id} beendet mit Fehler")
 
-    async def handle_message(self, message):
+    async def _handle(self, raw: str):
         try:
-            data = json.loads(message)
-            self.manager.debug_store.setdefault(self.cp_id, []).append({"received": data, "timestamp": self.get_future_utc_timestamp()})
-        except Exception as e:
-            logger.error(f"Ungültige JSON-Nachricht von {self.cp_id}: {e}")
+            data = json.loads(raw)
+            self.state.append_debug({"received": data, "timestamp": now_iso_future()})
+        except Exception:
+            cerr(f"Ungültige JSON-Nachricht von {self.state.cp_id}")
             return
 
         if not isinstance(data, list) or len(data) < 2:
-            logger.error(f"Ungültiges OCPP-Format von {self.cp_id}: {data}")
+            cerr(f"Ungültiges OCPP-Format von {self.state.cp_id}: {data}")
             return
 
-        message_type = data[0]
-        unique_id = data[1] if len(data) > 1 else None
+        typ = data[0]
+        uid = data[1] if len(data) > 1 else None
 
-        # Incoming CALL
-        if message_type == 2:
+        if typ == 2:  # CP -> Central (CALL)
             if len(data) < 4:
-                logger.error(f"Ungültiges CALL Format von {self.cp_id}: {data}")
+                cerr(f"Ungültiges CALL Format von {self.state.cp_id}: {data}")
                 return
             action = data[2]
             payload = data[3]
-            logger.info(f"[{self.cp_id}] Received CALL action={action}")
+            cdebug(f"[{self.state.log_cp_id}] Received CALL {action}")
 
             if action == "BootNotification":
-                await self.send_call_result(unique_id, {
-                    "currentTime": self.get_future_utc_timestamp(),
-                    "interval": 300,
-                    "status": "Accepted"
-                })
-
-                # Aktualisiere die internen Wallbox-Attribute und wende sie an
-                self.manager.refresh_wallbox_settings(self.cp_id)
-                asyncio.create_task(self.manager.apply_wallbox_settings(
-                    self.cp_id,
-                    self.manager.wb_amp,
-                    self.manager.wb_phases,
-                    self.manager.wb_pv_mode,
-                    self.manager.wb_is_pv_controlled,
-                    self.manager.wb_amp_min
-                ))
-
+                await self.send_callresult(uid, {"currentTime": now_iso_future(), "interval": 300, "status": "Accepted"})
+                # refresh global/config values and apply for this CP
+                self.manager.refresh_wallbox_settings(cp_id=self.state.cp_id, use_cache=True)
+                # schedule apply (do not await)
+                asyncio.create_task(self.manager.apply_wallbox_settings(self.state.cp_id))
             elif action == "Heartbeat":
-                await self.send_call_result(unique_id, {"currentTime": self.get_future_utc_timestamp()})
-
+                await self.send_callresult(uid, {"currentTime": now_iso_future()})
             elif action == "StatusNotification":
-                self.manager.status_store[self.cp_id] = payload.get("status", self.manager.status_store.get(self.cp_id, "Unknown"))
-                await self.send_call_result(unique_id)
-
+                self.state.status = payload.get("status", self.state.status)
+                await self.send_callresult(uid)
             elif action == "MeterValues":
                 if payload.get("transactionId"):
-                    self.manager.transaction_id_store[self.cp_id] = payload["transactionId"]
-                self.manager.meter_values_store[self.cp_id] = payload
-                await self.send_call_result(unique_id)
-                # Verarbeite MeterValues asynchron (update charged energy, evtl. stop)
-                asyncio.create_task(self.manager.update_charged_energy_from_meter(self.cp_id, payload))
-
+                    self.state.transaction_id = payload["transactionId"]
+                self.state.meter_values = payload
+                await self.send_callresult(uid)
+                asyncio.create_task(self.manager.update_charged_energy_from_meter(self.state.cp_id, payload))
             elif action == "StartTransaction":
                 tx_id = int(datetime.now(timezone.utc).timestamp())
-                self.manager.transaction_id_store[self.cp_id] = tx_id
-                self.manager.status_store[self.cp_id] = "Charging"
-                self.manager.transaction_start_timestamp[self.cp_id] = datetime.now()
-                # Reset charged energy for new transaction, set baseline last energy if available
+                self.state.transaction_id = tx_id
+                self.state.status = "Charging"
+                self.state.transaction_start = datetime.now()
                 try:
-                    await self.manager.start_transaction_setup(self.cp_id)
-                except Exception as e:
-                    cwarn(f"StartTransaction setup failed for {self.cp_id}: {e}")
-                await self.send_call_result(unique_id, {"idTagInfo": {"status": "Accepted"}, "transactionId": tx_id})
-                logger.info(f"[{self.cp_id}] StartTransaction accepted tx={tx_id}")
-
+                    await self.manager.start_transaction_setup(self.state.cp_id)
+                except Exception:
+                    cerr_exc(f"StartTransaction setup failed for {self.state.cp_id}")
+                await self.send_callresult(uid, {"idTagInfo": {"status": "Accepted"}, "transactionId": tx_id})
             elif action == "StopTransaction":
-                self.manager.transaction_id_store[self.cp_id] = None
-                self.manager.status_store[self.cp_id] = "Available"
-                self.manager.transaction_start_timestamp[self.cp_id] = None
-                await self.send_call_result(unique_id, {"idTagInfo": {"status": "Accepted"}})
-                logger.info(f"[{self.cp_id}] StopTransaction accepted")
-
+                self.state.transaction_id = None
+                self.state.status = "Available"
+                self.state.transaction_start = None
+                await self.send_callresult(uid, {"idTagInfo": {"status": "Accepted"}})
             else:
-                logger.warning(f"[{self.cp_id}] Unbekannte CALL Aktion: {action}")
-                await self.send_call_result(unique_id)
+                cwarn(f"[{self.state.log_cp_id}] Unbekannte CALL Aktion: {action}")
+                await self.send_callresult(uid)
 
-        elif message_type == 3:
-            logger.debug(f"[{self.cp_id}] CALLRESULT empfangen: {data}")
-
-        elif message_type == 4:
-            logger.error(f"[{self.cp_id}] CALLERROR empfangen: {data}")
-
+        elif typ == 3:
+            cdebug(f"[{self.state.log_cp_id}] CALLRESULT erhalten: {data}")
+        elif typ == 4:
+            cerr(f"[{self.state.log_cp_id}] CALLERROR erhalten: {data}")
         else:
-            logger.error(f"[{self.cp_id}] Unbekannter messageType: {data}")
+            cerr(f"[{self.state.log_cp_id}] Unbekannter messageType: {data}")
 
+# ----------------------
+# OCPP Manager (zentral)
+# ----------------------
 class OCPPManager:
-    """Verwaltet Charge Points, HTTP-API, WebSocket-Server und Autosync."""
-
-    def __init__(self, ws_port=WS_PORT, http_port=HTTP_PORT, auto_sync_interval=20):
-        # Stores (waren vorher global)
-        self.connected_charge_points = {}     # cp_id -> ChargePointHandler
-        self.meter_values_store = {}
-        self.status_store = {}
-        # per-charge-point pv_mode store (do not override: dict)
-        self.pv_mode = {}
-        self.current_limit_store = {}
-        self.phase_limit_store = {}
-        self.debug_store = {}
-        self.transaction_id_store = {}
-        self.last_phase_change_timestamp = {}
-        self.transaction_start_timestamp = {}
-
-        # Neue Stores für Energie-Zielverfolgung
-        self.target_energy_kwh_store = {}
-        self.charged_energy_wh_store = {}
-        self.last_energy_wh_store = {}
-
-        # Phase-change candidate store to implement hysteresis/timer only for phase changes
-        self.phase_change_candidate = {}
-
-        # Config
+    def __init__(self, ws_port: int = WS_PORT, http_port: int = HTTP_PORT, auto_sync_interval: int = 30):
         self.ws_port = ws_port
         self.http_port = http_port
-        # keep auto_sync_interval as instance attribute (may be updated from DB later)
         self.auto_sync_interval = auto_sync_interval
 
-        # Default-Werte für Wallbox-Steuerdaten als Instanzattribute (präfix wb_)
+        # Per-CP states
+        self.states: Dict[str, ChargePointState] = {}
+
+        # Globals / defaults (überschreibbar aus DB)
         self.wb_amp_max = 16.0
         self.wb_amp_min = 6.0
         self.wb_phases = "3"
         self.wb_pv_mode = 0.0
         self.wb_amp = self.wb_amp_max
         self.wb_is_pv_controlled = False
+
+        self.AUTO_SYNC_INTERVAL = auto_sync_interval
+        self.MIN_PHASE_DURATION_S = 180
+        self.MIN_CHARGE_DURATION_S = 600
+        self.PHASE_CHANGE_CONFIRM_S = 30
+        self.residualPower = -300.0
+        self.DEFAULT_TARGET_KWH = 0.0
+
+        # Inverter / energy cache (updated each autosync iteration)
         self.Netzbezug = 0.0
         self.Produktion = 0.0
         self.Batteriebezug = 0.0
+        self.BattStatusProz = 0.0
+        self.hausverbrauch = 0.0
 
-        # Die früheren Modul-Constants jetzt als Instanzattribute (können aus DB überschrieben werden)
-        self.AUTO_SYNC_INTERVAL = auto_sync_interval
-        self.MIN_PHASE_DURATION_S = 180 
-        self.MIN_CHARGE_DURATION_S = 600
-        self.PHASE_CHANGE_CONFIRM_S = 30 #Bestätigungszeit für Phasenwechsel
-        self.residualPower = -300 # Watt +Netzeinspeisung -Netzbezug
-        self.DEFAULT_TARGET_KWH = 0 # Lade-Ziel in kWh, Laden stoppt, wenn Wert erreicht ist, 0=ausgeschaltet
-
-    def refresh_wallbox_settings(self, cp_id=None):
-        """
-        Hilfsfunktion: ruft get_wallbox_steuerdaten auf (DB-Logik) und aktualisiert
-        die internen wb_-Attribute, so dass andere Methoden diese direkt lesen können.
-        """
-        amp, phases, pv_mode, is_pv_controlled, amp_min = self.get_wallbox_steuerdaten(cp_id=cp_id)
-        # get_wallbox_steuerdaten speichert bereits in den wb_-Attribs; aber wir stellen sicher:
-        self.wb_amp = amp
-        self.wb_phases = phases
-        self.wb_pv_mode = pv_mode
-        self.wb_is_pv_controlled = is_pv_controlled
-        self.wb_amp_min = amp_min
-        # Use loaded AUTO_SYNC_INTERVAL (if set by DB) for background task
-        self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
-
-        # --- Target-KWH-Store mit DB-Default synchronisieren ---
-        # Der DB-Wert (self.DEFAULT_TARGET_KWH) ist immer der Masterwert.
-        new_default_kwh = self.DEFAULT_TARGET_KWH
-
-        for cid in list(self.connected_charge_points.keys()):
-            # Holen Sie den aktuellen Wert aus dem Store (Fallback 0.0)
-            current_store_value = self.target_energy_kwh_store.get(cid, 0.0)
-
-            # Setze den Wert und protokolliere nur, wenn eine Änderung vorliegt.
-            if current_store_value != new_default_kwh:
-                self.target_energy_kwh_store[cid] = new_default_kwh
-                # Verwende cinfo, da es ein geplanter Sync ist (kein Fehler)
-                cinfo(f"[{ '..' + cid[-4:] }] Ladeziel von {current_store_value} kWh auf neuen DB-Default ({new_default_kwh} kWh) aktualisiert.")
+        # Lock to protect manager-wide operations if needed
+        self._mgr_lock = asyncio.Lock()
 
     # ----------------------------
-    # DB Helper (ausgelagert)
+    # DB / Inverter Zugriff (einmal pro iteration)
     # ----------------------------
-    def get_wallbox_steuerdaten(self, cp_id=None):
+    def refresh_wallbox_settings(self, cp_id: Optional[str] = None, use_cache: bool = True):
         """
-        Liest aus der Datenbank mittels FUNCTIONS.SQLall.sqlall().getSQLsteuerdaten('wallbox')
-        Rückgabe: (amp: float, phases: str, pv_mode: float, is_pv_controlled: bool, amp_min: float)
-        ...
+        Liest DB-Konfiguration und Inverter-Werte.
+        Wenn use_cache=True (z.B. bei apply_wallbox_settings in Autosync) werden
+        bereits gelesene Globals nicht mehrfach überschrieben in derselben iteration.
+        cp_id kann angegeben werden, um basis-Werte für einen CP zurückzugeben.
         """
-        # Versuche DB-Lesen
+        # DB lesen
         try:
             sqlall = FUNCTIONS.SQLall.sqlall()
             data = sqlall.getSQLsteuerdaten('wallbox', 'CONFIG/Prog_Steuerung.sqlite')
-        except Exception as e:
-            cwarn(f"DB-Zugriff fehlgeschlagen oder FUNCTIONS nicht vorhanden: {e}")
-            # Return current instance values as fallback
-            return getattr(self, 'wb_amp', 0.0), getattr(self, 'wb_phases', "3"), getattr(self, 'wb_pv_mode', 0.0), False, getattr(self, 'wb_amp_min', 6.0)
+        except Exception:
+            cwarn("DB-Lesen fehlgeschlagen; verwende existierende Defaults")
+            data = None
 
-        # Wenn keine Daten vorhanden sind -> Instanzwerte zurückgeben
-        if not data or '1' not in data:
-            cwarn("Keine Wallbox-Daten in DB gefunden → Verwende Instanz-Defaults")
-            return getattr(self, 'wb_amp', 0.0), getattr(self, 'wb_phases', "3"), getattr(self, 'wb_pv_mode', 0.0), False, getattr(self, 'wb_amp_min', 6.0)
+        if data:
+            try:
+                row = data.get('1') or data.get(1)
+                if row:
+                    parts = (row.get('Options') or "").split(',')
+                    try:
+                        amp_min_val = max(6.0, float(parts[0]))
+                    except Exception:
+                        amp_min_val = getattr(self, 'wb_amp_min', 6.0)
+                    try:
+                        amp_max_val = min(16.0, max(amp_min_val, float(parts[1])))
+                    except Exception:
+                        amp_max_val = getattr(self, 'wb_amp_max', 16.0)
+                    self.wb_phases = str(row.get('Res_Feld2', self.wb_phases))
+                    try:
+                        self.wb_pv_mode = float(row.get('Res_Feld1', self.wb_pv_mode))
+                    except Exception:
+                        pass
+                    self.wb_amp_max, self.wb_amp_min = amp_max_val, amp_min_val
+            except Exception:
+                cwarn("Fehler beim Parsen DB ID=1")
 
-        # Parse Haupt-Zeile (ID=1)
-        try:
-            row = data.get('1') or data.get(1)
-            if row:
-                parts = row.get('Options', '').split(',')
+            try:
+                row2 = data.get('2') or data.get(2)
+                if row2:
+                    try:
+                        self.MIN_PHASE_DURATION_S = int(float(row2.get('Res_Feld1', self.MIN_PHASE_DURATION_S)))
+                    except Exception:
+                        pass
+                    try:
+                        self.MIN_CHARGE_DURATION_S = int(float(row2.get('Res_Feld2', self.MIN_CHARGE_DURATION_S)))
+                    except Exception:
+                        pass
+                    try:
+                        opt = row2.get('Options')
+                        if opt is not None and str(opt).strip():
+                            self.AUTO_SYNC_INTERVAL = int(float(opt))
+                    except Exception:
+                        pass
+                row3 = data.get('3') or data.get(3)
+                if row3:
+                    try:
+                        self.residualPower = float(row3.get('Res_Feld1', self.residualPower))
+                    except Exception:
+                        pass
+                    try:
+                        self.DEFAULT_TARGET_KWH = float(row3.get('Res_Feld2', self.DEFAULT_TARGET_KWH))
+                    except Exception:
+                        pass
+                    try:
+                        opt3 = row3.get('Options')
+                        if opt3 is not None and str(opt3).strip():
+                            self.PHASE_CHANGE_CONFIRM_S = int(float(opt3))
+                    except Exception:
+                        pass
+                # update autosync interval
+                self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
+            except Exception:
+                cwarn("Fehler beim Parsen DB ID=2/3")
+            if cp_id:
+                cinfo(
+                    f"[{'..' + cp_id[-4:]}] "
+                    f"DB_Conf: "
+                    f"{self.wb_pv_mode}, "
+                    f"{self.wb_phases}, "
+                    f"{amp_min_val}, "
+                    f"{amp_max_val}, "
+                    f"{self.AUTO_SYNC_INTERVAL}, "
+                    f"{self.MIN_PHASE_DURATION_S}, "
+                    f"{self.MIN_CHARGE_DURATION_S}, "
+                    f"{self.PHASE_CHANGE_CONFIRM_S}, "
+                    f"{self.residualPower}, "
+                    f"{self.DEFAULT_TARGET_KWH}"
+                )
 
-                # amp_min aus Options[0]
-                try:
-                    amp_min_val = float(parts[0])
-                except (ValueError, IndexError):
-                    amp_min_val = getattr(self, 'wb_amp_min', 6.0)
-                if amp_min_val < 6:
-                    amp_min_val = 6.0
 
-                # amp_max aus Options[1]
-                try:
-                    amp_max_val = float(parts[1])
-                except (ValueError, IndexError):
-                    amp_max_val = getattr(self, 'wb_amp_max', 16.0)
-                if amp_max_val < amp_min_val:
-                    amp_max_val = amp_min_val
-                if amp_max_val > 16:
-                    amp_max_val = 16.0
-
-                # phases / pv_mode aus Res_Feld2 / Res_Feld1
-                self.wb_phases = str(row.get('Res_Feld2', self.wb_phases))
-                try:
-                    self.wb_pv_mode = float(row.get('Res_Feld1', self.wb_pv_mode))
-                except Exception:
-                    # leave existing value
-                    pass
-
-                # setze die berechneten Ampere-Grenzen
-                self.wb_amp_max = amp_max_val
-                self.wb_amp_min = amp_min_val
-
-                cnote(f"DB-Steuerdaten geladen (ID=1): amp_max={self.wb_amp_max}A, phases={self.wb_phases}, pv_mode={self.wb_pv_mode}, amp_min={self.wb_amp_min}A")
-        except Exception as e:
-            cwarn(f"Fehler beim Parsen der DB-Daten (ID=1): {e} → Instanz-Defaults verwendet")
-            # leave existing wb_* values
-
-        # ---- Lese zusätzliche Steuer-Parameter wie gewünscht (ID=2, ID=3) ----
-        try:
-            # ID=2: Res_Feld1 = MIN_PHASE_DURATION_S, Res_Feld2 = MIN_CHARGE_DURATION_S, Options = AUTO_SYNC_INTERVAL
-            row2 = data.get('2') or data.get(2)
-            if row2:
-                try:
-                    self.MIN_PHASE_DURATION_S = int(float(row2.get('Res_Feld1', self.MIN_PHASE_DURATION_S)))
-                except Exception:
-                    pass
-                try:
-                    self.MIN_CHARGE_DURATION_S = int(float(row2.get('Res_Feld2', self.MIN_CHARGE_DURATION_S)))
-                except Exception:
-                    pass
-                try:
-                    opt = row2.get('Options', None)
-                    if opt is not None and str(opt).strip() != "":
-                        self.AUTO_SYNC_INTERVAL = int(float(opt))
-                except Exception:
-                    pass
-
-            # ID=3: Res_Feld1 residualPower, Res_Feld2 DEFAULT_TARGET_KWH, Options PHASE_CHANGE_CONFIRM_S
-            row3 = data.get('3') or data.get(3)
-            if row3:
-                try:
-                    self.residualPower = float(row3.get('Res_Feld1', self.residualPower))
-                except Exception:
-                    pass
-                try:
-                    self.DEFAULT_TARGET_KWH = float(row3.get('Res_Feld2', self.DEFAULT_TARGET_KWH))
-                except Exception:
-                    pass
-                try:
-                    opt3 = row3.get('Options', None)
-                    if opt3 is not None and str(opt3).strip() != "":
-                        self.PHASE_CHANGE_CONFIRM_S = int(float(opt3))
-                except Exception:
-                    pass
-
-            # Nach DB-Lesen auto_sync_interval für Hintergrundtask updaten
-            self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
-
-            cnote(f"DB-Steuerdaten geladen (ID=2): AUTO_SYNC_INTERVAL={getattr(self,'AUTO_SYNC_INTERVAL',None)}, MIN_PHASE_DURATION_S={getattr(self,'MIN_PHASE_DURATION_S',None)}, MIN_CHARGE_DURATION_S={getattr(self,'MIN_CHARGE_DURATION_S',None)}")
-            cnote(f"DB-Steuerdaten geladen (ID=3): PHASE_CHANGE_CONFIRM_S={getattr(self,'PHASE_CHANGE_CONFIRM_S',None)}, residualPower={getattr(self,'residualPower',None)}, DEFAULT_TARGET_KWH={getattr(self,'DEFAULT_TARGET_KWH',None)}")
-        except Exception as e:
-            cwarn(f"Fehler beim Lesen der Konfiguration aus DB: {e} → Instanz-Defaults verwendet")
-
-        # ---- Berechne zulässigen Ampere-Wert basierend auf PV-Modus und Inverter ----
-        amp = self.wb_amp_max
-        is_pv_controlled = False
-
-        # Inverter API immer aufrufen, um Netzbezug zu erhalten und in Instanzattribut speichern
-        self.Netzbezug = 0.0 # Default-Wert
-        self.Produktion = 0.0
-        self.Batteriebezug = 0.0
+        # Inverter lesen (einmal pro Aufruf)
         try:
             InverterApi = basics.get_inverter_class(class_type="Api")
             inverter_api = InverterApi()
             API = inverter_api.get_API()
-            # Der Wert wird direkt im Instanzattribut gespeichert
-            self.Netzbezug = API.get('aktuelleEinspeisung', 0)
-            self.Produktion = API.get('aktuellePVProduktion', 0)
-            self.Batteriebezug = API.get('aktuelleBatteriePower', 0)
-            self.BattStatusProz = API.get('BattStatusProz', 5)
-        except Exception as e:
-            cwarn(f"Inverter API konnte nicht geladen werden: {e} → Netzbezug wird auf 0 gesetzt.")
-            self.Netzbezug = 0.0 # Sicherstellen, dass der Wert numerisch ist
+            self.Netzbezug = float(API.get('aktuelleEinspeisung', 0) or 0)
+            self.Produktion = float(API.get('aktuellePVProduktion', 0) or 0)
+            self.Batteriebezug = float(API.get('aktuelleBatteriePower', 0) or 0)
+            self.BattStatusProz = float(API.get('BattStatusProz', 0) or 0)
+        except Exception:
+            cwarn("Inverter API nicht verfügbar; Netz-/PV-Werte auf 0 gesetzt")
+            self.Netzbezug = 0.0
+            self.Produktion = 0.0
+            self.Batteriebezug = 0.0
+            self.BattStatusProz = 0.0
 
+        # sync default target_kwh to all existing CPs if changed
+        for cid, st in self.states.items():
+            if st.target_kwh != self.DEFAULT_TARGET_KWH:
+                st.target_kwh = self.DEFAULT_TARGET_KWH
+                st.append_debug({"note": "target synced to DEFAULT", "value": self.DEFAULT_TARGET_KWH, "ts": iso_now()})
+
+    # ----------------------------
+    # PV / Limit-Berechnung (extrahiert)
+    # ----------------------------
+    def compute_limits_from_global(self, cp_id: Optional[str] = None) -> Tuple[float, str, float, bool, float]:
+        """
+        Berechnet auf Basis der globalen (oder per-CP vorhandenen) Werte,
+        welches wb_amp / wb_phases / wb_pv_mode / is_pv_controlled / wb_amp_min gelten sollten.
+        Gibt: (amp, phases, pv_mode, is_pv_controlled, amp_min)
+        """
+        # ensure inverter/global values are up-to-date (caller sollte refresh_wallbox_settings vorher ausgeführt haben)
+        amp = self.wb_amp_max
+        is_pv_controlled = False
+
+        # current charge power for cp (if cp_id provided)
         current_charge_power = 0
-        if cp_id and cp_id in self.connected_charge_points:
+        if cp_id and cp_id in self.states:
             current_charge_power = self.get_current_power(cp_id)
 
-        # Überschuss-Berechnung nutzt jetzt self.Netzbezug
-        aus_batterie = max(0.0, self.Batteriebezug)
-        in_batterie = max(0.0, -self.Batteriebezug)
-        # + self.Netzbezug = Aus dem Netz bezogen
-        self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power )
-        # Wenn Batteriebezug positiv ist (Akku entlädt), setzen wir ihn auf 0, um ihn nicht zu nutzen.
-        batterie_anteil = self.Batteriebezug if self.Batteriebezug < 0 else 0
-        ueberschuss = max(0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower))  #entWIGGlung Berechnung richtig ?????
-        cinfo(f"Überschuss: PV: {self.Produktion}, AKKU {self.Batteriebezug}, Netz: {self.Netzbezug}W, Hausverbrauch {self.hausverbrauch}, Wallbox ({current_charge_power}W), Überschuss: {ueberschuss}W")
+        # battery contribution only when discharging (negative value)
+        batterie_anteil = self.Batteriebezug if self.Batteriebezug < 0 else 0.0
+        self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power)
+        ueberschuss = max(0.0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower))
 
-        # PV-Steuerlogik nur ausführen, wenn der Modus 1 oder 2 ist
-        if self.wb_pv_mode == 1 or self.wb_pv_mode == 2:
+        cinfo(f"[{'..' + cp_id[-4:]}] Ladeberechnung: PV={self.Produktion} W, Akku={self.Batteriebezug} W, Netz={self.Netzbezug} W, Haus={self.hausverbrauch} W, CP={current_charge_power} W, Überschuss={ueberschuss} W")
+
+        if float(self.wb_pv_mode) in (1.0, 2.0):
             is_pv_controlled = True
-
-            amp = 0
             amp_1 = int(ueberschuss / 230 / 1) if ueberschuss else 0
             amp_3 = int(ueberschuss / 230 / 3) if ueberschuss else 0
 
             if self.wb_phases == "1":
-                amp = min(amp_1, self.wb_amp_max) if amp_1 >= 6 else 0
-            elif self.wb_phases == "3" or self.wb_phases == "0":
-                # Schwellenwerte für Phase 0 (Auto)
-                if self.wb_phases == "0":
-                    # 1P ab Mindeststromstärke (6A)
-                    required_amp_for_1P = self.wb_amp_min
-                    # 3P-Umschaltung, sobald 3 * 6A (ca. 4,1 kW) möglich sind
-                    # 6.2, damit das System bei genau 4,1 kW nicht ständig zwischen 1P und 3P hin- und herspringt
-                    required_amp_for_3P = 6.2  # 
-                else:
-                    # Standard Logik für feste Phasenwahl (1 oder 3)
-                    required_amp_for_1P = 6.0
-                    required_amp_for_3P = 6.0
-
-                if amp_3 >= required_amp_for_3P:
+                amp = amp_1 if amp_1 >= 6 else 0
+            else:
+                # 6.1 = Hyterese  #entWIGGlung
+                required_3p = 6.1 if self.wb_phases == "0" else 6.0
+                required_1p = self.wb_amp_min if self.wb_phases == "0" else 6.0
+                if amp_3 >= required_3p:
                     self.wb_phases = "3"
                     amp = min(amp_3, self.wb_amp_max)
-                elif amp_1 >= required_amp_for_1P:
+                elif amp_1 >= required_1p:
                     self.wb_phases = "1"
                     amp = min(amp_1, self.wb_amp_max)
                 else:
-                    # NEU: Wenn kein Überschuss da ist, aber Modus 0 aktiv ist,
-                    # erzwinge 1-phasige Initialisierung für den Modus 2 (Min-Laden)
                     if self.wb_phases == "0":
                         self.wb_phases = "1"
                     amp = 0
 
-        # pv_mode == 2: niemals vollständig abschalten, sondern Minimum erzwingen
-        if self.wb_pv_mode == 2:
-            if amp < self.wb_amp_min:
-                amp = min(self.wb_amp_min, self.wb_amp_max)
+        if float(self.wb_pv_mode) == 2.0 and amp < self.wb_amp_min:
+            amp = min(self.wb_amp_min, self.wb_amp_max)
 
-        # Werte in Instanzattribute speichern
         self.wb_amp = amp
         self.wb_is_pv_controlled = is_pv_controlled
-
         return self.wb_amp, self.wb_phases, self.wb_pv_mode, is_pv_controlled, self.wb_amp_min
 
-    def get_current_power(self, cp_id):
-        # Aktuelle Leistung der Wallbox mit Stromstärke und Phase berechnen
-        curr_limit = 0
-        phase_limit = 0
-        curr_aktuell = self.current_limit_store.get(cp_id) or 0
-        phase_aktuell = self.phase_limit_store.get(cp_id) or 0
-        current_charge_power =  curr_aktuell * phase_aktuell * 230 #entWIGGlung
+    # ----------------------------
+    # Aktuelle Leistung aus Store
+    # ----------------------------
+    def get_current_power(self, cp_id: str) -> float:
+        st = self.states.get(cp_id)
+        if not st:
+            return 0.0
+        try:
+            curr = float(st.current_limit or 0.0)
+            phases = int(st.phase_limit or 0)
+            return curr * phases * 230.0
+        except Exception:
+            return 0.0
 
-        return current_charge_power
-        
-    async def apply_wallbox_settings(self, cp_id, amp, phases, pv_mode_val, is_pv_controlled, amp_min=None):
-        """Wendet Ampere- und Phasen-Werte an (SetChargingProfile / RemoteStart/Stop).
-           Hysterese/Timer wird ausschließlich auf Phasenwechsel angewendet (self.PHASE_CHANGE_CONFIRM_S).
-           pv_mode==2: niemals vollständig auf 0A abschalten, sondern mindestens amp_min setzen.
+    # ----------------------------
+    # Apply-Wallbox-Settings (Hauptlogik)
+    # ----------------------------
+    async def apply_wallbox_settings(self, cp_id: str) -> bool:
         """
-        if cp_id not in self.connected_charge_points:
-            cwarn(f"apply_wallbox_settings: Charge Point { '..' + cp_id[-4:] } nicht verbunden.")
+        Liest gewünschte Werte (aus globalen wb_* bzw. DB), berechnet gewünschtes Limit und Phase
+        und sendet ggf. SetChargingProfile / RemoteStart/Stop.
+        Synchronisiert state.current_limit / state.phase_limit.
+        """
+        st = self.states.get(cp_id)
+        if not st:
+            cwarn(f"apply_wallbox_settings: {cp_id} nicht gefunden")
             return False
 
-        cp = self.connected_charge_points[cp_id]
+        # per-CP lock, um parallele Aufrufe zu serialisieren
+        async with st.lock:
+            # ensure global settings refreshed once before compute (could be optimized to call only by autosync)
+            self.refresh_wallbox_settings(cp_id=cp_id, use_cache=True)
+            amp, phases, pv_mode, is_pv_controlled, amp_min = self.compute_limits_from_global(cp_id=cp_id)
+            # desired values
+            amp_desired = amp if pv_mode != 0.0 else 0.0
+            requested_phase = 1 if phases == "1" else 3
 
-        # Berechnung der Zeit seit dem letzten Phasenwechsel
-        now = datetime.now()
-        last_change = self.last_phase_change_timestamp.get(cp_id, now - timedelta(seconds=self.MIN_PHASE_DURATION_S + 1))
-        seconds_since_last_phase = (now - last_change).total_seconds()
+            # initialize stores
+            st.current_limit = st.current_limit  # no-op but keep explicit
+            st.phase_limit = st.phase_limit
 
-        # Direkter gewünschter Wert (keine Ampere-Hysterese)
-        amp_desired = amp if pv_mode_val != 0.0 else 0.0
-        ocpp_phases_value = 1 if phases == "1" else 3
+            # detect phase change
+            phase_changed = (st.phase_limit != requested_phase)
+            is_initial_change = (st.phase_limit is None)
 
-        # Init stores
-        self.current_limit_store.setdefault(cp_id, None)
-        self.phase_limit_store.setdefault(cp_id, None)
-        self.last_phase_change_timestamp.setdefault(cp_id, datetime.now())
-        self.transaction_start_timestamp.setdefault(cp_id, None)
-        self.phase_change_candidate.setdefault(cp_id, None)
+            charged_wh = round(st.charged_wh,1) or 0.0
+            # verbose info for current state including PV mode and charged Wh
+            cinfo(f"[{st.log_cp_id}] PV-Mode={pv_mode}, PV-Steuerung={is_pv_controlled}, Wunsch: {amp_desired}A/{requested_phase}P, Aktuell: {st.current_limit}A/{st.phase_limit}P, Geladen: {charged_wh}Wh")
 
-        # Sicherstellen, dass Energiespeicher vorhanden sind.
-        self.target_energy_kwh_store.setdefault(cp_id, self.DEFAULT_TARGET_KWH)
-        self.charged_energy_wh_store.setdefault(cp_id, 0.0)
-        self.last_energy_wh_store.setdefault(cp_id, None)
-        curr_limit = self.current_limit_store.get(cp_id)
-        phase_limit = self.phase_limit_store.get(cp_id)
-
-        # Decide if phase change is requested (desired != current)
-        requested_phase = ocpp_phases_value
-        phase_changed = (phase_limit != requested_phase)
-
-        # KORREKTUR: Bei Initialisierung (phase_limit is None) sofort den gewünschten Wert übernehmen.
-        is_initial_change = phase_limit is None
-        final_ocpp_phases_value = phase_limit if not is_initial_change else requested_phase
-        cinfo(
-            f"[{'..' + cp_id[-4:]}] "
-            f"PV-Mode={pv_mode_val}, PV-Steuerung={is_pv_controlled}, "
-            f"Wunsch: {amp_desired}A/{requested_phase}P, "
-            f"Aktuell: {curr_limit}A/{phase_limit}P, "
-            f"Geladen: {round(self.charged_energy_wh_store[cp_id], 2)}Wh"
-        )
-
-        # -----------------------
-        # PHASE-ONLY HYSTERESE/TIMER
-        # -----------------------
-        is_charging_requested = amp_desired > 0.0
-
-        # Wendet die Hysterese NUR an, wenn eine Phasenänderung gewünscht ist
-        # UND keine Initialisierung vorliegt UND eine Ladung mit > 0A gewünscht wird.
-        if phase_changed and not is_initial_change and is_charging_requested:
-            candidate = self.phase_change_candidate.get(cp_id)
-            now = datetime.now()
-
-            # New candidate or different requested phase -> start timer
-            if not candidate or candidate.get('requested') != requested_phase:
-                self.phase_change_candidate[cp_id] = {'requested': requested_phase, 'since': now}
-                phase_changed = False # Blockiere Wechsel
-                cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Neuer Phasenwunsch {requested_phase} erkannt, starte Bestätigungs-Timer ({self.PHASE_CHANGE_CONFIRM_S}s).")
-            else:
-                elapsed = (now - candidate['since']).total_seconds()
-                if elapsed >= self.PHASE_CHANGE_CONFIRM_S:
-                    phase_changed = True # Erlaube Wechsel
-                    final_ocpp_phases_value = requested_phase
-                    self.phase_change_candidate[cp_id] = None
-                    cnote(f"{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Phasenwechsel {requested_phase} bestätigt nach {int(elapsed)}s.")
+            # PHASE HYSTERESE: nur wenn Änderung, nicht initial, und Laden > 0 gewünscht
+            is_charging_requested = amp_desired > 0.0
+            candidate = st.phase_candidate
+            if phase_changed and not is_initial_change and is_charging_requested:
+                now = datetime.now()
+                if not candidate or candidate.get('requested') != requested_phase:
+                    st.phase_candidate = {'requested': requested_phase, 'since': now}
+                    phase_changed = False
+                    st.append_debug({"note": "phase-hysteresis-start", "requested": requested_phase, "ts": iso_now()})
                 else:
-                    phase_changed = False # Blockiere Wechsel
-                    cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Warte {self.PHASE_CHANGE_CONFIRM_S - int(elapsed)}s bis Phasenwechsel möglich.")
-        else:
-            # Fall: Phase geändert, aber amp_desired == 0.0 (oder Initialisierung)
-            # -> Wechsel sofort erlauben, da keine aktive Ladung betroffen ist.
-            if phase_changed and not is_initial_change and not is_charging_requested:
-                final_ocpp_phases_value = requested_phase
-                phase_changed = True # Wechsel erlauben
-                cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Umgangen (0A Wunsch). Phase auf {requested_phase}P gesetzt.")
-
-            # Timer cleanup logic (Timer zurücksetzen, falls er lief und eine der oben genannten Bedingungen eintrat)
-            if self.phase_change_candidate.get(cp_id):
-                self.phase_change_candidate[cp_id] = None
-                cnote(f"[{ '..' + cp_id[-4:] }] PHASE-HYSTERESE: Phasenwunsch entfällt/Initialisierung/0A-Wunsch, Timer zurückgesetzt.")
-
-        # pv_mode==2 should not fully stop
-        amp_allowed = amp_desired
-        if pv_mode_val == 2:
-            if amp_allowed < (amp_min or 6.0):
-                cnote(f"[{ '..' + cp_id[-4:] }] pv_mode==2: Vermeide Abschaltung, setze Minimum {amp_min}A statt {amp_allowed}A.")
-                amp_allowed = max(amp_allowed, amp_min)
-
-        # Zusätzlich: wenn ein Ziel gesetzt ist und bereits erreicht, zwinge Stop (0A)
-        target_kwh = self.target_energy_kwh_store.get(cp_id, self.DEFAULT_TARGET_KWH)
-        charged_wh = self.charged_energy_wh_store.get(cp_id, 0.0)
-        if target_kwh and (charged_wh >= target_kwh * 1000.0):
-            cnote(f"[{ '..' + cp_id[-4:] }] Ziel erreicht ({charged_wh/1000.0:.3f} kWh >= {target_kwh} kWh). Stoppe Laden.")
-            amp_allowed = 0.0
-
-        # Laden starten/stoppen (use amp_allowed)
-        status = self.status_store.get(cp_id)
-        active_tx_id = self.transaction_id_store.get(cp_id)
-
-        if amp_allowed > 0.0 and (amp_allowed >= 6.0):
-            if status in ["Available", "AvailableRequested", "SuspendedEVSE", "Finishing"]:
-                await cp.send_call("RemoteStartTransaction", {"connectorId": DEFAULT_CONNECTOR_ID, "idTag": DEFAULT_IDTAG})
-                self.status_store[cp_id] = "ChargingRequested"
-                if not self.transaction_start_timestamp.get(cp_id):
-                    self.transaction_start_timestamp[cp_id] = datetime.now()
-                cinfo(f"[{ '..' + cp_id[-4:] }] Laden gestartet (amp={amp_allowed}A, RemoteStart)")
-        else:
-            # Stopp-Guard (nur bei PV-Steuerung relevant)
-            can_stop_by_guard = True
-            if is_pv_controlled:
-                if self.transaction_start_timestamp.get(cp_id):
-                    charging_duration = (datetime.now() - self.transaction_start_timestamp.get(cp_id)).total_seconds()
-                    if charging_duration < self.MIN_CHARGE_DURATION_S:
-                        cwarn(f"[{ '..' + cp_id[-4:] }] 🛑 STOP GUARD (Zeit): Stop (0A) abgelehnt. Nur {round(charging_duration)}s geladen. Minimum: {self.MIN_CHARGE_DURATION_S}s.")
-                        can_stop_by_guard = False
+                    elapsed = (now - candidate['since']).total_seconds()
+                    if elapsed >= self.PHASE_CHANGE_CONFIRM_S:
+                        phase_changed = True
+                        st.phase_candidate = None
+                        st.append_debug({"note": "phase-hysteresis-confirmed", "requested": requested_phase, "ts": iso_now()})
                     else:
-                        cnote(f"[{ '..' + cp_id[-4:] }] ✅ STOP Laden erlaubt. (Ladedauer={round(charging_duration)}s)")
+                        phase_changed = False
             else:
-                cnote(f"[{ '..' + cp_id[-4:] }] Stop (0A) gewünscht durch pv_mode={pv_mode_val}. Guard übersprungen, da PV-Steuerung inaktiv.")
+                # cleanup if not relevant
+                if st.phase_candidate:
+                    st.phase_candidate = None
 
-            # Wenn Ziel erreicht, ignorieren Guard und stoppe trotzdem (Ziel überträgt Priorität)
+            # pv_mode==2: zwinge Minimum
+            amp_allowed = amp_desired
+            if pv_mode == 2:
+                amp_allowed = max(amp_allowed, amp_min or self.wb_amp_min)
+
+            # Ziel erreicht -> stop
+            target_kwh = st.target_kwh or self.DEFAULT_TARGET_KWH
+            charged_wh = st.charged_wh or 0.0
             if target_kwh and (charged_wh >= target_kwh * 1000.0):
-                cnote(f"[{ '..' + cp_id[-4:] }] Ziel erreicht -> stoppe ungeachtet des Guards.")
-                can_stop_by_guard = True
+                amp_allowed = 0.0
+                st.append_debug({"note": "target reached", "charged_wh": charged_wh, "target_kwh": target_kwh, "ts": iso_now()})
 
-            if not can_stop_by_guard:
-                fallback_limit = amp_min or 6.0
-                amp_allowed = fallback_limit
-                cwarn(f"[{ '..' + cp_id[-4:] }] ❗ STOP GUARD aktiv. Setze Ladelimit auf {fallback_limit}A zur Vermeidung eines Stopps.")
+            status = st.status
+            active_tx_id = st.transaction_id
+
+            # Start/Stop decision
+            if amp_allowed > 0.0 and amp_allowed >= 6.0:
+                if status in ["Available", "AvailableRequested", "SuspendedEVSE", "Finishing"]:
+                    # request remote start
+                    handler = ChargePointHandler(self, st)
+                    await handler.send_call("RemoteStartTransaction", {"connectorId": DEFAULT_CONNECTOR_ID, "idTag": DEFAULT_IDTAG})
+                    st.status = "ChargingRequested"
+                    if not st.transaction_start:
+                        st.transaction_start = datetime.now()
+                    st.append_debug({"note": "start-requested", "amp": amp_allowed, "ts": iso_now()})
             else:
-                if active_tx_id:
-                    await cp.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
-                    self.status_store[cp_id] = "AvailableRequested"
-                    self.transaction_start_timestamp[cp_id] = None
-                    cnote(f"[{ '..' + cp_id[-4:] }] Laden gestoppt (amp=0.0A, RemoteStop als Fallback)")
-                elif status not in ["Available", "AvailableRequested"]:
-                    self.status_store[cp_id] = "Available"
-                    self.transaction_start_timestamp[cp_id] = None
-                    cnote(f"[{ '..' + cp_id[-4:] }] Status auf Available gesetzt.")
+                # STOP-GUARD prüfung
+                can_stop = True
+                if is_pv_controlled and st.transaction_start:
+                    duration = (datetime.now() - st.transaction_start).total_seconds()
+                    if duration < self.MIN_CHARGE_DURATION_S:
+                        can_stop = False
+                        st.append_debug({"note": "stop-guard", "remaining_s": int(self.MIN_CHARGE_DURATION_S - duration), "ts": iso_now()})
+                if target_kwh and (charged_wh >= target_kwh * 1000.0):
+                    can_stop = True
 
-        # Re-check amp change
-        amp_changed = (self.current_limit_store.get(cp_id) != amp_allowed)
+                if not can_stop:
+                    amp_allowed = amp_min or self.wb_amp_min
+                    st.append_debug({"note": "stop-guard-applied", "amp": amp_allowed, "ts": iso_now()})
+                else:
+                    if active_tx_id:
+                        handler = ChargePointHandler(self, st)
+                        await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
+                        st.transaction_id = None
+                        st.status = "AvailableRequested"
+                        st.transaction_start = None
+                        st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
+                    elif status not in ["Available", "AvailableRequested"]:
+                        st.status = "Available"
+                        st.transaction_start = None
+                        st.append_debug({"note": "status-set-available", "ts": iso_now()})
 
-        # ---------------------------
-        # AMPERE-ANPASSUNG WÄHREND DER PHASEN-HYSTERESE
-        # ---------------------------
-        # Prüfen, ob wir einen Phasenwechsel-Kandidaten haben, um die Richtung zu bestimmen
-        candidate = self.phase_change_candidate.get(cp_id)
-        if candidate:
-            requested_p = candidate.get('requested')
-            current_p = self.phase_limit_store.get(cp_id)
+            # ---------------------------
+            # AMPERE-ANPASSUNG WÄHREND DER PHASEN-HYSTERESE (wie Original)
+            # ---------------------------
+            amp_changed = (st.current_limit != amp_allowed)
+            candidate = st.phase_candidate
+            if candidate:
+                requested_p = candidate.get('requested')
+                current_p = st.phase_limit
+                if current_p is not None:
+                    if requested_p > current_p and amp_allowed != 16.0:
+                        st.append_debug({"note": "phase-up-temporary-16", "ts": iso_now()})
+                        amp_allowed = 16.0
+                        amp_changed = True
+                    elif requested_p < current_p and amp_allowed != 6.0:
+                        st.append_debug({"note": "phase-down-temporary-6", "ts": iso_now()})
+                        amp_allowed = 6.0
+                        amp_changed = True
+                if amp_changed and (amp_allowed not in [6.0, 16.0]):
+                    st.append_debug({"note": "amp-update-blocked-by-hysteresis", "ts": iso_now()})
+                    amp_changed = False
+            # ---------------------------
 
-            if current_p is not None:
-                # FALL A: Wechsel nach oben (z.B. 1P -> 3P) -> Sofort auf 16A (max)
-                if requested_p > current_p and amp_allowed != 16.0:
-                    cnote(f"[{ '..' + cp_id[-4:] }] ⚡ Phase-UP geplant: Setze 16A während Wartezeit.")
-                    amp_allowed = 16.0
-                    amp_changed = True # Änderung erzwingen
+            # --- NEUER GUARD: initiales None oder 0 vermeiden, wenn Wunsch 0A ---
+            # Wenn der aktuelle Status noch uninitialisiert ist (None) oder bereits 0A
+            # und der erlaubte Ampere-Wert 0.0 ist, vermeiden wir das Senden eines
+            # SetChargingProfile (z.B. um "Aktuell: NoneA/NoneP" oder unnötiges
+            # Umschreiben von 0A zu 0A/anderer Phase zu verhindern), solange kein Laden gewünscht ist.
+            current_limit_val = st.current_limit
+            current_is_none_or_zero = (current_limit_val is None) or (float(current_limit_val) == 0.0)
+            if amp_allowed == 0.0 and current_is_none_or_zero:
+                if amp_changed:
+                    amp_changed = False
+                if phase_changed:
+                    phase_changed = False
+            # ---------------------------------------------------------------
 
-                # FALL B: Wechsel nach unten (z.B. 3P -> 1P) -> Sofort auf 6A (min)
-                elif requested_p < current_p and amp_allowed != 6.0:
-                    cnote(f"[{ '..' + cp_id[-4:] }] 📉 Phase-DOWN geplant: Setze 6A während Wartezeit.")
-                    amp_allowed = 6.0
-                    amp_changed = True # Änderung erzwingen
+            final_phase = st.phase_limit if st.phase_limit is not None else requested_phase
 
-            # Wenn nach der obigen Logik immer noch eine Abweichung zum Store besteht,
-            # die nicht durch die 6A/16A Regel abgedeckt wurde, blockieren wir sie hier.
-            if amp_changed and not (candidate and amp_allowed in [6.0, 16.0]):
-                cnote(f"[{ '..' + cp_id[-4:] }] ⏳ Ampere-Update blockiert (Hysterese/Sperrzeit aktiv).")
-                amp_changed = False
-        # ---------------------------
-
-        # Wenn Ampere oder Phase geändert => senden
-        if amp_changed or phase_changed:
-            # Bei Phase wechsel: ggf. 0A Limit senden bevor neue Phase
-            if phase_changed and not is_initial_change: # Phase nur ändern, wenn nicht initial
-                cinfo(f"[{ '..' + cp_id[-4:] }] Phase Änderung erkannt: {self.phase_limit_store.get(cp_id)} -> {final_ocpp_phases_value}. Starte 0A-Stop Prozedur.")
+            # Wenn Phasenwechsel erlaubt und nicht initial, ggf. 0A senden
+            if phase_changed and not is_initial_change:
                 current_power = self.get_current_power(cp_id)
                 if current_power > 50:
-                    cinfo(f"[{ '..' + cp_id[-4:] }] Aktive Leistung {current_power}W. Sende 0A Limit + neue Phase.")
-                    payload_stop_zero_amp = {
-                        "connectorId": DEFAULT_CONNECTOR_ID,
-                        "csChargingProfiles": {
-                            "chargingProfileId": 1,
-                            "stackLevel": 1,
-                            "chargingProfilePurpose": "TxDefaultProfile",
-                            "chargingProfileKind": "Absolute",
-                            "recurrencyKind": "Daily",
-                            "chargingSchedule": {
-                                "chargingRateUnit": "A",
-                                "chargingSchedulePeriod": [{
-                                    "startPeriod": 0,
-                                    "limit": 0.0,
-                                    "numberPhases": final_ocpp_phases_value
-                                }]
-                            }
-                        }
-                    }
-                    await cp.send_call("SetChargingProfile", payload_stop_zero_amp)
-                    self.current_limit_store[cp_id] = 0.0
-                    self.phase_limit_store[cp_id] = final_ocpp_phases_value
-                    self.last_phase_change_timestamp[cp_id] = datetime.now()
-
-                    # Warte max 15s auf Leistung < 50W
+                    handler = ChargePointHandler(self, st)
+                    await handler.send_call("SetChargingProfile", charging_profile_payload(0.0, requested_phase))
+                    st.current_limit = 0.0
+                    st.phase_limit = requested_phase
+                    st.last_phase_change = datetime.now()
+                    # log the temporary 0A/phase application
+                    cok(f"[{st.log_cp_id}] Ampere/Phase erfolgreich gesetzt: {0.0}A / {requested_phase}P")
+                    # warte max 15s bis Leistung < 50W
                     for i in range(15):
                         await asyncio.sleep(1)
-                        current_power = self.get_current_power(cp_id)
-                        if current_power < 50:
-                            cok(f"[{ '..' + cp_id[-4:] }] Leistung < 50W nach {i+1}s. Führe Phasenwechsel-Abschluss durch.")
+                        if self.get_current_power(cp_id) < 50:
+                            st.append_debug({"note": "power-dropped-below-50", "after_s": i+1, "ts": iso_now()})
                             break
-                    else:
-                        cwarn(f"[{ '..' + cp_id[-4:] }] WARNUNG: Leistung ist nach 15s noch hoch ({current_power}W). Sende finales Limit.")
-                else:
-                    cnote(f"[{ '..' + cp_id[-4:] }] Aktive Leistung {current_power}W. Kein 0A-Stop notwendig.")
+                    # <<< verhindert 2. SetChargingProfile >>>
+                    amp_changed = False
+                    phase_changed = False
+
+                final_phase = requested_phase
             elif phase_changed and is_initial_change:
-                 # Nur Logging, da final_ocpp_phases_value bereits requested_phase ist
-                 cnote(f"[{ '..' + cp_id[-4:] }] Initiales Phasenlimit auf {final_ocpp_phases_value}P gesetzt (Phase war None).")
+                final_phase = requested_phase
 
+            # Wenn Änderung senden
+            if amp_changed or phase_changed:
+                handler = ChargePointHandler(self, st)
+                await handler.send_call("SetChargingProfile", charging_profile_payload(amp_allowed, final_phase))
+                st.current_limit = amp_allowed
+                st.phase_limit = final_phase
+                if phase_changed:
+                    st.last_phase_change = datetime.now()
+                    await asyncio.sleep(3)
+                st.append_debug({"note": "limit-applied", "amp": amp_allowed, "phases": final_phase, "ts": iso_now()})
+                # log success like in your example
+                cok(f"[{st.log_cp_id}] Ampere/Phase erfolgreich gesetzt: {float(amp_allowed)}A / {int(final_phase)}P")
+            else:
+                st.append_debug({"note": "no-change", "amp": amp_allowed, "phases": final_phase, "ts": iso_now()})
 
-            # Sende finales Limit (amp_allowed)
-            cinfo(f"[{ '..' + cp_id[-4:] }] Sende finales Limit: {amp_allowed}A an Phase {final_ocpp_phases_value}.")
-
-            payload_final_limit = {
-                "connectorId": DEFAULT_CONNECTOR_ID,
-                "csChargingProfiles": {
-                    "chargingProfileId": 1,
-                    "stackLevel": 1,
-                    "chargingProfilePurpose": "TxDefaultProfile",
-                    "chargingProfileKind": "Absolute",
-                    "recurrencyKind": "Daily",
-                    "chargingSchedule": {
-                        "chargingRateUnit": "A",
-                        "chargingSchedulePeriod": [{
-                            "startPeriod": 0,
-                            "limit": amp_allowed,
-                            "numberPhases": final_ocpp_phases_value
-                        }]
-                    }
-                }
-            }
-            await cp.send_call("SetChargingProfile", payload_final_limit)
-
-            # Stores updaten
-            self.current_limit_store[cp_id] = amp_allowed
-            self.phase_limit_store[cp_id] = final_ocpp_phases_value
-
-            # last_phase_change_timestamp nur bei tatsächlichem Phasenwechsel aktualisieren
-            if phase_changed:
-                self.last_phase_change_timestamp[cp_id] = datetime.now()
-                cnote(f"[{ '..' + cp_id[-4:] }] ⏳ COOLDOWN: Warte 3 Sekunden nach Phasenwechsel ({final_ocpp_phases_value}P).")
-                await asyncio.sleep(3)
-
-            cok(f"[{ '..' + cp_id[-4:] }] Ampere/Phase erfolgreich gesetzt: {amp_allowed}A / {final_ocpp_phases_value}P")
-        else:
-            cnote(f"[{ '..' + cp_id[-4:] }] Ampere/Phase unverändert ({amp_allowed}A / {final_ocpp_phases_value}P)")
-
-        return True
+            # done
+            return True
 
     # ----------------------------
-    # Energie-Target / MeterValues Verarbeitung
+    # Energie / MeterValues
     # ----------------------------
-    async def start_transaction_setup(self, cp_id):
-        """Reset charged energy for a new transaction and set baseline last meter reading if available."""
-        self.charged_energy_wh_store[cp_id] = 0.0
-        # set baseline if we have a meter reading
+    async def start_transaction_setup(self, cp_id: str):
+        st = self.states.get(cp_id)
+        if not st:
+            return
+        st.charged_wh = 0.0
         baseline = self._extract_energy_wh_from_meter_store(cp_id)
-        if baseline is not None:
-            self.last_energy_wh_store[cp_id] = baseline
-            cnote(f"[{ '..' + cp_id[-4:] }] StartTransaction: baseline energy set to {baseline}Wh")
-        else:
-            self.last_energy_wh_store[cp_id] = None
-            cnote(f"[{ '..' + cp_id[-4:] }] StartTransaction: no baseline energy available")
+        st.last_energy_wh = baseline
+        st.append_debug({"note": "start-transaction-setup", "baseline": baseline, "ts": iso_now()})
 
-    def _extract_energy_wh_from_meter_store(self, cp_id, meter_payload=None):
-        """Hilfsroutine: extrahiere aktuellen kumulativen Energy-Wert (Wh) aus meter_values_store oder aus gegebenem payload."""
-        payload = meter_payload or self.meter_values_store.get(cp_id)
-        if not payload or 'meterValue' not in payload:
+    def _extract_energy_wh_from_meter_store(self, cp_id: str, meter_payload: Optional[dict] = None) -> Optional[float]:
+        payload = meter_payload or (self.states.get(cp_id).meter_values if cp_id in self.states else None)
+        if not payload:
             return None
-        for meter_value in payload['meterValue']:
-            if 'sampledValue' in meter_value:
-                for sample in meter_value['sampledValue']:
-                    meas = sample.get('measurand', '')
-                    if meas.startswith('Energy.'):
-                        try:
-                            val = float(sample.get('value', 0))
-                            unit = (sample.get('unit') or '').lower()
-                            if unit == 'kwh':
-                                return val * 1000.0
-                            else:
-                                # assume Wh
-                                return val
-                        except Exception:
-                            continue
+        for mv in payload.get('meterValue', []) or []:
+            for s in mv.get('sampledValue', []) or []:
+                meas = s.get('measurand', '')
+                if meas.startswith('Energy.'):
+                    try:
+                        val = float(s.get('value') or 0)
+                        unit = (s.get('unit') or '').lower()
+                        return val * 1000.0 if unit == 'kwh' else val
+                    except Exception:
+                        continue
         return None
 
-    async def update_charged_energy_from_meter(self, cp_id, meter_payload):
-        """Berechnet Delta der kumulativen Energy-Messung und addiert auf charged_energy_wh_store.
-           Wenn ein Ziel gesetzt ist und erreicht wird -> stoppe Laden automatisch.
-        """
+    async def update_charged_energy_from_meter(self, cp_id: str, meter_payload: dict):
+        st = self.states.get(cp_id)
+        if not st:
+            return
         try:
             energy_wh = self._extract_energy_wh_from_meter_store(cp_id, meter_payload)
             if energy_wh is None:
                 return
-            last = self.last_energy_wh_store.get(cp_id)
-            # Wenn kein letzte Messung vorhanden, initialisieren und nichts buchen
+            last = st.last_energy_wh
             if last is None:
-                self.last_energy_wh_store[cp_id] = energy_wh
+                st.last_energy_wh = energy_wh
                 return
             delta = energy_wh - last
             if delta < 0:
-                # Zähler-Rollover oder Messsprung -> setze baseline neu
-                cwarn(f"[{ '..' + cp_id[-4:] }] Energy counter decreased ({last} -> {energy_wh}). Reset baseline.")
-                self.last_energy_wh_store[cp_id] = energy_wh
+                st.last_energy_wh = energy_wh
+                st.append_debug({"note": "energy-decrease-reset-baseline", "last": last, "now": energy_wh, "ts": iso_now()})
                 return
-
-            # Zähle nur während aktiver Transaktion bzw. Status Charging
-            if self.transaction_id_store.get(cp_id) or self.status_store.get(cp_id) == "Charging":
-                self.charged_energy_wh_store[cp_id] = self.charged_energy_wh_store.get(cp_id, 0.0) + delta
-                self.last_energy_wh_store[cp_id] = energy_wh
-
-                # Prüfe Ziel
-                target_kwh = self.target_energy_kwh_store.get(cp_id, self.DEFAULT_TARGET_KWH)
-                if target_kwh and (self.charged_energy_wh_store[cp_id] >= target_kwh * 1000.0):
-                    cinfo(f"[{ '..' + cp_id[-4:] }] Ziel erreicht ({self.charged_energy_wh_store[cp_id]/1000.0:.3f} kWh >= {target_kwh} kWh). Stoppe Laden.")
-                    # Stoppen: wie remote_stop
-                    active_tx_id = self.transaction_id_store.get(cp_id)
-                    if active_tx_id:
-                        await self.connected_charge_points[cp_id].send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
-                        self.transaction_id_store[cp_id] = None
-                        self.status_store[cp_id] = "AvailableRequested"
-                        self.transaction_start_timestamp[cp_id] = None
+            # nur während Ladung/Transaktion zählen
+            if st.transaction_id or st.status == "Charging":
+                st.charged_wh = st.charged_wh + delta
+                st.last_energy_wh = energy_wh
+                target_kwh = st.target_kwh or self.DEFAULT_TARGET_KWH
+                if target_kwh and (st.charged_wh >= target_kwh * 1000.0):
+                    st.append_debug({"note": "target-reached-meter", "charged_wh": st.charged_wh, "ts": iso_now()})
+                    if st.transaction_id:
+                        handler = ChargePointHandler(self, st)
+                        await handler.send_call("RemoteStopTransaction", {"transactionId": st.transaction_id})
+                        st.transaction_id = None
+                        st.status = "AvailableRequested"
+                        st.transaction_start = None
                     else:
-                        ocpp_phases_value = self.phase_limit_store.get(cp_id) or 3
-                        payload_stop_zero_amp = {
-                            "connectorId": DEFAULT_CONNECTOR_ID,
-                            "csChargingProfiles": {
-                                "chargingProfileId": 1,
-                                "stackLevel": 1,
-                                "chargingProfilePurpose": "TxDefaultProfile",
-                                "chargingProfileKind": "Absolute",
-                                "recurrencyKind": "Daily",
-                                "chargingSchedule": {
-                                    "chargingRateUnit": "A",
-                                    "chargingSchedulePeriod": [{"startPeriod": 0, "limit": 0.0, "numberPhases": ocpp_phases_value}]
-                                }
-                            }
-                        }
-                        await self.connected_charge_points[cp_id].send_call("SetChargingProfile", payload_stop_zero_amp)
-                        self.current_limit_store[cp_id] = 0.0
-                        self.phase_limit_store[cp_id] = ocpp_phases_value
-                        self.status_store[cp_id] = "AvailableRequested"
-                        self.transaction_start_timestamp[cp_id] = None
+                        ocpp_phases_value = st.phase_limit or 3
+                        handler = ChargePointHandler(self, st)
+                        await handler.send_call("SetChargingProfile", charging_profile_payload(0.0, ocpp_phases_value))
+                        st.current_limit = 0.0
+                        st.phase_limit = ocpp_phases_value
+                        st.status = "AvailableRequested"
+                        st.transaction_start = None
             else:
-                # Nicht laden: nur baseline aktualisieren
-                self.last_energy_wh_store[cp_id] = energy_wh
-        except Exception as e:
-            cwarn(f"Fehler in update_charged_energy_from_meter für {cp_id}: {e}")
+                st.last_energy_wh = energy_wh
+        except Exception:
+            cerr_exc(f"Fehler in update_charged_energy_from_meter für {cp_id}")
 
     # ----------------------------
-    # WebSocket on_connect
+    # WebSocket on_connect / cleanup
     # ----------------------------
-    async def on_connect(self, websocket, path):
+    async def on_connect(self, websocket, path: str):
         cp_id_from_path = path.strip('/') if path else ''
-        subprotocol = websocket.subprotocol if hasattr(websocket, 'subprotocol') else None
+        subprotocol = getattr(websocket, 'subprotocol', None)
         cp_id = cp_id_from_path or subprotocol or f"CP-{int(datetime.now().timestamp())}"
+        cinfo(f"Neue Verbindung: cp_id={'..' + cp_id[-4:]} subprotocol={subprotocol} path={'/..' + path[-4:]}")
 
-        cinfo(f"Neue Verbindung: cp_id={ '..' + cp_id[-4:] }, subprotocol={subprotocol}, path='{ '/..' + path[-4:]}'")
-        handler = ChargePointHandler(self, cp_id, websocket)
-        self.connected_charge_points[cp_id] = handler
+        # create state & handler
+        st = ChargePointState(cp_id=cp_id, websocket=websocket)
+        # gekürzte ID fürs Logging
+        st.log_cp_id = '..' + cp_id[-4:]
+        # ensure default target set
+        st.target_kwh = self.DEFAULT_TARGET_KWH
+        self.states[cp_id] = st
 
+        handler = ChargePointHandler(self, st)
         try:
             await handler.start()
-        except Exception as e:
-            logger.exception(f"Fehler in Verbindung { '..' + cp_id[-4:] }: {e}")
+        except Exception:
+            cerr_exc(f"Fehler in Verbindung {cp_id}")
         finally:
             # cleanup
-            self.connected_charge_points.pop(cp_id, None)
-            self.meter_values_store.pop(cp_id, None)
-            self.status_store.pop(cp_id, None)
-            self.current_limit_store.pop(cp_id, None)
-            self.phase_limit_store.pop(cp_id, None)
-            self.debug_store.pop(cp_id, None)
-            self.transaction_id_store.pop(cp_id, None)
-            self.last_phase_change_timestamp.pop(cp_id, None)
-            self.transaction_start_timestamp.pop(cp_id, None)
-            self.phase_change_candidate.pop(cp_id, None)
-            # cleanup energy stores
-            self.target_energy_kwh_store.pop(cp_id, None)
-            self.charged_energy_wh_store.pop(cp_id, None)
-            self.last_energy_wh_store.pop(cp_id, None)
-            cinfo(f"Verbindung beendet: { '..' + cp_id[-4:] }")
+            self.states.pop(cp_id, None)
+            cinfo(f"Verbindung beendet: {cp_id}")
 
     # ----------------------------
-    # HTTP Endpoints (methods return handlers)
-    # ----------------------------
+    # HTTP Endpoints
     async def list_cp(self, request):
-        return web.json_response({"connected": list(self.connected_charge_points.keys())})
+        return web.json_response({"connected": list(self.states.keys())})
 
     async def meter_values(self, request):
         cp_id = request.query.get("charge_point_id")
+        st = self.states.get(cp_id)
+        start_time = st.transaction_start if st else None
+        duration = (datetime.now() - start_time).total_seconds() if start_time else 0
+        last_phase_change = st.last_phase_change if st else None
+        phase_duration = (datetime.now() - last_phase_change).total_seconds() if last_phase_change and last_phase_change != datetime.min else 0
 
-        start_time = self.transaction_start_timestamp.get(cp_id)
-        duration = (datetime.now() - (start_time or datetime.now())).total_seconds() if start_time else 0
-
-        last_phase_change = self.last_phase_change_timestamp.get(cp_id)
-        phase_duration = (datetime.now() - (last_phase_change or datetime.now())).total_seconds() if last_phase_change else 0
-
-        candidate = self.phase_change_candidate.get(cp_id)
         candidate_info = None
-        if candidate:
-            elapsed = (datetime.now() - candidate['since']).total_seconds()
-            candidate_info = {"requested": candidate['requested'], "since": candidate['since'].isoformat(), "elapsed_s": round(elapsed,1), "confirm_after_s": self.PHASE_CHANGE_CONFIRM_S}
+        if st and st.phase_candidate:
+            elapsed = (datetime.now() - st.phase_candidate['since']).total_seconds()
+            candidate_info = {"requested": st.phase_candidate['requested'], "since": st.phase_candidate['since'].isoformat(), "elapsed_s": round(elapsed, 1), "confirm_after_s": self.PHASE_CHANGE_CONFIRM_S}
 
-        charged_wh = self.charged_energy_wh_store.get(cp_id, 0.0)
-        target_kwh = self.target_energy_kwh_store.get(cp_id, self.DEFAULT_TARGET_KWH)
+        charged_wh = st.charged_wh if st else 0.0
+        target_kwh = st.target_kwh if st else self.DEFAULT_TARGET_KWH
         remaining_kwh = None
         if target_kwh and target_kwh > 0:
             remaining_kwh = max(0.0, target_kwh - charged_wh / 1000.0)
+        remaining_kwh_rounded = round(remaining_kwh, 4) if remaining_kwh is not None else None
 
         return web.json_response({
-            "meter": self.meter_values_store.get(cp_id, {}),
-            "status": self.status_store.get(cp_id, "Unknown"),
-            "pv_mode": self.pv_mode.get(cp_id, "off"),
-            "current_limit": self.current_limit_store.get(cp_id, None),
-            "phases": self.phase_limit_store.get(cp_id, None),
-            "transaction_id": self.transaction_id_store.get(cp_id),
+            "meter": st.meter_values if st else {},
+            "status": st.status if st else "Unknown",
+            "pv_mode": self.wb_pv_mode,
+            "current_limit": st.current_limit if st else None,
+            "phases": st.phase_limit if st else None,
+            "transaction_id": st.transaction_id if st else None,
             "charging_duration_s": round(duration, 1),
             "phase_stable_s": round(phase_duration, 1),
-            "debug_messages": self.debug_store.get(cp_id, []),
             "phase_change_candidate": candidate_info,
-            # Energie-Infos für Frontend
             "Netzbezug_W": self.Netzbezug,
             "Produktion_W": self.Produktion,
             "Batteriebezug_W": self.Batteriebezug,
@@ -939,69 +805,54 @@ class OCPPManager:
             "Hausverbrauch": self.hausverbrauch,
             "target_energy_kwh": target_kwh,
             "charged_energy_kwh": round(charged_wh / 1000.0, 4),
-            "remaining_kwh": round(remaining_kwh, 4) if remaining_kwh is not None else None
+            "remaining_kwh": remaining_kwh_rounded
         })
 
     async def reset_counter(self, request):
-        """HTTP-Handler zum Zurücksetzen des Lade-Zählers für einen Charge Point."""
         cp_id = request.query.get("charge_point_id")
         if not cp_id:
             return web.json_response({"error": "Missing charge_point_id"}, status=400)
-
-        success = await self.reset_charged_energy_counter(cp_id)
-
-        if success:
+        ok = await self.reset_charged_energy_counter(cp_id)
+        if ok:
             return web.json_response({"status": "success", "charge_point_id": cp_id, "message": "Charged energy counter reset to 0"})
-        else:
-            return web.json_response({"status": "error", "charge_point_id": cp_id, "message": "Charge point not found or reset failed"}, status=404)
+        return web.json_response({"status": "error", "charge_point_id": cp_id, "message": "Charge point not found or reset failed"}, status=404)
 
-    # ----------------------------
-    # Zähler-Reset-Logik
-    # ----------------------------
-    async def reset_charged_energy_counter(self, cp_id):
-        """Setzt die geladene Energie (charged_energy_wh_store) und die letzte Zählerablesung (last_energy_wh_store) zurück."""
-        if cp_id not in self.connected_charge_points:
-            cwarn(f"Reset-Zähler: Charge Point { '..' + cp_id[-4:] } ist nicht verbunden.")
+    async def reset_charged_energy_counter(self, cp_id: str) -> bool:
+        st = self.states.get(cp_id)
+        if not st:
+            cwarn(f"Reset-Zähler: {cp_id} nicht verbunden")
             return False
-
-        # Setze die Stores zurück
-        self.charged_energy_wh_store[cp_id] = 0.0
-        self.last_energy_wh_store[cp_id] = None
-
-        cnote(f"[{ '..' + cp_id[-4:] }] ✅ Geladene Energie und Zähler-Baseline erfolgreich zurückgesetzt.")
+        st.charged_wh = 0.0
+        st.last_energy_wh = None
+        st.append_debug({"note": "charged-energy-reset", "ts": iso_now()})
         return True
 
-    # ----------------------------
-    # AutoSync background task
-    # ----------------------------
+    # ---------- Autosync ----------
     async def autosync_task(self):
+        # slight startup delay
         await asyncio.sleep(2)
-        cinfo(f"AutoSync task started, interval={self.auto_sync_interval}s")
-
+        cinfo(f"AutoSync started, interval={self.auto_sync_interval} s")
         while True:
-            if not self.connected_charge_points:
-                cnote("AutoSync: keine verbundenen Charge Points")
-            else:
-                for cp_id in list(self.connected_charge_points.keys()):
-                    try:
-                        # refresh settings once and then use wb_-attributes directly
-                        self.refresh_wallbox_settings(cp_id=cp_id)
-                        await self.apply_wallbox_settings(cp_id, self.wb_amp, self.wb_phases, self.wb_pv_mode, self.wb_is_pv_controlled, self.wb_amp_min)
-                    except Exception as e:
-                        cerr(f"AutoSync Fehler bei { '..' + cp_id[-4:] }: {e}")
-
+            try:
+                if not self.states:
+                    cdebug("AutoSync: keine verbundenen Charge Points")
+                else:
+                    # refresh DB/Inverter once per cycle
+                    self.refresh_wallbox_settings()
+                    # apply settings to each CP (serially to avoid heavy parallel DB calls)
+                    for cp_id in list(self.states.keys()):
+                        try:
+                            await self.apply_wallbox_settings(cp_id)
+                        except Exception:
+                            cerr_exc(f"AutoSync: Fehler bei apply_wallbox_settings für {cp_id}")
+            except Exception:
+                cerr_exc("AutoSync-Loop Fehler")
             await asyncio.sleep(self.auto_sync_interval)
 
     # ----------------------------
     # Start Server (WebSocket + HTTP)
-    # ----------------------------
     async def start(self):
-        ws = ws_serve(
-            self.on_connect,
-            "0.0.0.0",
-            self.ws_port,
-            subprotocols=OCPP_PROTOCOLS
-        )
+        ws = ws_serve(self.on_connect, "0.0.0.0", self.ws_port, subprotocols=OCPP_PROTOCOLS)
 
         app = web.Application()
         app.add_routes([
@@ -1014,12 +865,9 @@ class OCPPManager:
         await runner.setup()
         site = web.TCPSite(runner, "0.0.0.0", self.http_port)
 
+        # start autosync task
         asyncio.create_task(self.autosync_task())
 
-        await asyncio.gather(
-            ws,
-            site.start(),
-        )
-
-        cinfo(f"OCPP Manager läuft: WS={self.ws_port}, HTTP={self.http_port}")
-        await asyncio.Future()
+        await asyncio.gather(ws, site.start())
+        cinfo(f"OCPP Manager läuft: WS={self.ws_port} HTTP={self.http_port}")
+        await asyncio.Future()  # never return
