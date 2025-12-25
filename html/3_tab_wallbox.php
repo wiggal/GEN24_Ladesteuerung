@@ -156,57 +156,6 @@ if (isset($_GET['ajax'])) {
     exit;
 }
 
-$total_power = 0.0; // WICHTIG: Startet immer bei 0.0 (vom Typ float)
-$unit = 'W';
-$MAX_AGE_SECONDS = 20; // Konfigurierbare Toleranz: Messwert darf maximal 90s alt sein.
-
-// 1. Sichere Navigation zum 'meterValue' Block
-$meter_value_block = $meter_values['meter']['meterValue'][0] ?? null;
-
-if ($meter_value_block) {
-
-    // 2. Zeitstempel-Prüfung: Ist der Wert zu alt?
-    $timestamp_str = $meter_value_block['timestamp'] ?? null;
-
-    $is_data_current = false;
-    if ($timestamp_str) {
-        // Konvertiere den ISO 8601-Zeitstempel in einen UNIX-Timestamp
-        $measurement_time = strtotime($timestamp_str);
-        $current_time = time();
-
-        $age_seconds = $current_time - $measurement_time;
-
-        if ($age_seconds <= $MAX_AGE_SECONDS) {
-            // Die Daten sind aktuell, wir können sie verwenden
-            $is_data_current = true;
-        }
-        // Wenn der Wert zu alt ist, bleibt $is_data_current = false.
-    }
-
-
-    // 3. Nur Werte extrahieren, wenn der Zeitstempel aktuell ist
-    if ($is_data_current) {
-
-        $sampled_values = $meter_value_block['sampledValue'] ?? [];
-
-        // 4. Iteration über alle Messwerte
-        foreach ($sampled_values as $item) {
-
-            // Prüfen: Power.Active.Import UND KEINE Phase (Gesamtwert)
-            if (($item['measurand'] ?? '') === 'Power.Active.Import' && !isset($item['phase'])) {
-
-                // Wert als reinen Float speichern
-                // Dies ist der einzige Ort, an dem $total_power aktualisiert wird.
-                $total_power = (float)($item['value'] ?? 0.0);
-                $unit = $item['unit'] ?? 'W'; // Einheit für die optionale Anzeige speichern
-
-                // Wert gefunden, Schleife beenden
-                break;
-            }
-        }
-    }
-}
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -447,32 +396,36 @@ p, label {
         $solar_current = round(($meter_values['Produktion_W'] ?? 0)/1000,1);
         $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0)/1000,1);
         $grid_current = round(($meter_values['Netzbezug_W'] ?? 0)/1000,1);
-        $total_power = round(($total_power/1000),1);
+        $wallbox_Ampere = ($meter_values['current_limit'] ?? 0);
+        $wallbox_Phase = ($meter_values['phases'] ?? 0);
+        $total_power = round((($wallbox_Ampere * $wallbox_Phase * 230)/1000),1);
+        $Hausverbrauch = round(($meter_values['Hausverbrauch'] ?? 0)/1000,1);
 
         // Funktion aufrufen und Ergebnis ausgeben (echo)
-        echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power);
+        echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
     ?>
 <div class="card">
     
     <?php if ($client_connected): ?>
-        <p>Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
+        <p>🔌 Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
             echo 'A / ';
             echo htmlspecialchars($meter_values['phases'] ?? '—'); 
             echo 'PH / ';
             echo htmlspecialchars($meter_values['phases'] * $meter_values['current_limit'] * 230 / 1000); ?>kW</strong></p>
-        <p>Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
-        <p>Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
+        <p>⏱️ Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
+        <p>🚗 Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
-        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
-
         <?php
-        // Nur Button anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
+        // Nur ResetResetbbutton anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
         $charged_energy = $meter_values['charged_energy_kwh'] ?? 0.0;
         if ($server_running && $client_connected && $charged_energy > 0) {
         echo '&nbsp;<button type="button" class="red" id="btnResetCounter">Reset</button>';
         }
         ?>
         </p>
+        <p>
+        <?php echo ($meter_values['BattStatusProz'] > 30) ? '🔋' : '🪫'; ?>
+        Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
         <hr>
     <?php else: ?>
         <p class="small">Live-Daten sind nicht vorhanden, da kein OCPP-Client (Wallbox) verbunden ist.</p>
@@ -499,8 +452,8 @@ p, label {
             <span class="input-inline">
             <select id="phases" name="phases">
                 <option value="0" <?php if($phases=='0') echo 'selected'; ?>>Auto</option>
-                <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1Ph</option>
-                <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3Ph</option>
+                <option value="1" <?php if($phases=='1') echo 'selected'; ?>>1 Ph</option>
+                <option value="3" <?php if($phases=='3') echo 'selected'; ?>>3 Ph</option>
             </select>
             </span>
         </div>
@@ -747,15 +700,30 @@ function calculatePower() {
 </script>
 <script>
 // ===================================
-// Allgemeine Funktion zum Neuladen
+// Allgemeine Funktion zum Neuladen mit Abweichungsprüfung
 // ===================================
 function refreshData() {
-    var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
-    var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
-    if (current_cp_id) {
-        reload_url += '?cp_id=' + encodeURIComponent(current_cp_id);
+    // Werte aus PHP in JS-Variablen übernehmen
+    var total_quelle = <?php echo ($solar_current + max(0.0, $battery_current) + max(0.0,$grid_current)); ?>;
+    var total_ziel = <?php echo ($total_power + $Hausverbrauch + max(0.0,-$grid_current) + max(0.0,-($battery_current))); ?>;
+
+    // Berechnung der Abweichung
+    var diff = Math.abs(total_quelle - total_ziel);
+    var threshold = total_quelle * 0.10; // 10% Grenze
+
+    // Debugging (optional): console.log("Quelle:", total_quelle, "Ziel:", total_ziel, "Diff:", diff);
+
+    // Nur reloaden, wenn die Abweichung <= 10% ist oder die Quelle 0 ist (verhindert Stillstand bei Nacht)
+    if (total_quelle === 0 || diff <= threshold) {
+        var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
+        var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
+        if (current_cp_id) {
+            reload_url += '?cp_id=' + encodeURIComponent(current_cp_id);
+        }
+        window.location.href = reload_url;
+    } else {
+        console.warn("Reload unterbrochen: Energie-Differenz > 10% (" + diff.toFixed(2) + " kW)");
     }
-    window.location.href = reload_url;
 }
 
 // ===================================
@@ -795,8 +763,8 @@ $('#btnResetCounter').click(function(){
 // ===================================
 // Automatisches Neuladen
 // ===================================
-// Die benannte Funktion wird alle 20 Sekunden ausgeführt
-setInterval(refreshData, 20000); // 20000 ms = 20 Sekunden
+// Die benannte Funktion wird alle 10 Sekunden ausgeführt
+setInterval(refreshData, 10000); // 10000 ms = 10 Sekunden
 </script>
 
 </body>
