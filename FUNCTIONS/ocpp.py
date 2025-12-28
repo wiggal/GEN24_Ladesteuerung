@@ -266,6 +266,10 @@ class OCPPManager:
         # Per-CP states
         self.states: Dict[str, ChargePointState] = {}
 
+        # Absolute Hardware-Grenzen (Hardware-Limits)
+        self.MIN_WB_AMP = 6.0      # Technisches Minimum (meist 6A)
+        self.MAX_WB_AMP = 16.0  # Max (Hardware)
+
         # Globals / defaults (überschreibbar aus DB)
         self.wb_amp_max = 16.0
         self.wb_amp_min = 6.0
@@ -408,24 +412,28 @@ class OCPPManager:
                 st.append_debug({"note": "target synced to DEFAULT", "value": self.DEFAULT_TARGET_KWH, "ts": iso_now()})
 
     # ----------------------------
-    # PV / Limit-Berechnung (extrahiert)
+    # PV / Limit-Berechnung
     # ----------------------------
     def compute_limits_from_global(self, cp_id: Optional[str] = None) -> Tuple[float, str, float, bool, float]:
         """
-        Berechnet auf Basis der globalen (oder per-CP vorhandenen) Werte,
-        welches wb_amp / wb_phases / wb_pv_mode / is_pv_controlled / wb_amp_min gelten sollten.
-        Gibt: (amp, phases, pv_mode, is_pv_controlled, amp_min)
+        Berechnet Limits basierend auf PV-Überschuss und DB-Vorgaben.
+        Änderungen:
+        - Phasenwahl (1/3 Wechsel) NUR wenn wb_phases == "0".
+        - Bei festen Phasen (1 oder 3) wird die Phase IMMER gehalten, auch im Mode 2.
+        - Mode 2 (Min+PV) erzwingt mindestens wb_amp_min (bei 3 Phasen min. 6A).
         """
-        # ensure inverter/global values are up-to-date (caller sollte refresh_wallbox_settings vorher ausgeführt haben)
-        amp = self.wb_amp_max
-        is_pv_controlled = False
+        # Puffer für 3-Phasen Start (6.0 * 1.02 = 6.12A)
+        MIN_START_3P = self.MIN_WB_AMP * 1.02
 
-        # current charge power for cp (if cp_id provided)
+        is_pv_controlled = False
+        # Wir nutzen eine lokale Variable, um die DB-Einstellung (self.wb_phases) zu respektieren
+        phases_to_use = self.wb_phases
+
         current_charge_power = 0
         if cp_id and cp_id in self.states:
             current_charge_power = self.get_current_power(cp_id)
 
-        # battery contribution only when discharging (negative value)
+        # Inverter-Werte verrechnen
         batterie_anteil = self.Batteriebezug if self.Batteriebezug < 0 else 0.0
         self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power)
         ueberschuss = max(0.0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower))
@@ -433,33 +441,53 @@ class OCPPManager:
         cinfo(f"[{'..' + cp_id[-4:]}] Ladeberechnung: PV={self.Produktion} W, Akku={self.Batteriebezug} W, Netz={self.Netzbezug} W, Haus={self.hausverbrauch} W, CP={current_charge_power} W, Überschuss={ueberschuss} W")
 
         if float(self.wb_pv_mode) in (1.0, 2.0):
+            # Standard: Im Modus 1.0 (Nur PV) darf die Ladung auf 0 abfallen
+            MIN_AMP = 0.0
+            # Im Modus 2.0 (Minimalladung) wird MIN_AMP auf das User- oder Hardware-Minimum gesetzt
+            if float(self.wb_pv_mode) == 2.0:
+                MIN_AMP = max(self.MIN_WB_AMP, self.wb_amp_min)
+
             is_pv_controlled = True
             amp_1 = int(ueberschuss / 230 / 1) if ueberschuss else 0
-            amp_3 = int(ueberschuss / 230 / 3) if ueberschuss else 0
+            amp_3_float = (ueberschuss / 230 / 3) if ueberschuss else 0 # Wegen Hysterese MIN_START_3P
+            amp_3 = int(amp_3_float)
 
-            if self.wb_phases == "1":
-                amp = amp_1 if amp_1 >= 6 else 0
-            else:
-                # 6.1 = Hyterese  #entWIGGlung
-                required_3p = 6.1 if self.wb_phases == "0" else 6.0
-                required_1p = self.wb_amp_min if self.wb_phases == "0" else 6.0
-                if amp_3 >= required_3p:
-                    self.wb_phases = "3"
-                    amp = min(amp_3, self.wb_amp_max)
-                elif amp_1 >= required_1p:
-                    self.wb_phases = "1"
-                    amp = min(amp_1, self.wb_amp_max)
+            # --- STRIKTE PHASEN-LOGIK ---
+            if self.wb_phases == "0":
+                # Nur hier erfolgt eine freie Phasenwahl nach PV-Produktion
+                if amp_3_float >= MIN_START_3P:
+                    phases_to_use = "3"
+                    amp = min(amp_3, self.wb_amp_max, self.MAX_WB_AMP)
+                elif amp_1 >= self.wb_amp_min:
+                    phases_to_use = "1"
+                    amp =  min(self.MAX_WB_AMP, max(amp_1, self.wb_amp_min, self.MIN_WB_AMP))
                 else:
-                    if self.wb_phases == "0":
-                        self.wb_phases = "1"
-                    amp = 0
+                    phases_to_use = "1"
+                    amp = MIN_AMP
 
-        if float(self.wb_pv_mode) == 2.0 and amp < self.wb_amp_min:
-            amp = min(self.wb_amp_min, self.wb_amp_max)
+            elif self.wb_phases == "3":
+                # Feste Phase 3: Muss Hardware-Min (6.0) UND User-Min halten
+                phases_to_use = "3"
+                effective_min_3p = max(self.MIN_WB_AMP, self.wb_amp_min)
+                if amp_3 >= effective_min_3p:
+                    # Hier wird der Wert strikt zwischen Min und Max gehalten
+                    amp = min(amp_3, self.wb_amp_max, self.MAX_WB_AMP)
+                else:
+                    amp = MIN_AMP
+
+            else:
+                # Feste Phase 1: Muss User-Min UND Hardware-Max (16A) halten
+                phases_to_use = "1"
+                if amp_1 >= self.wb_amp_min:
+                    amp = min(amp_1, self.wb_amp_max, self.MAX_WB_AMP)
+                else:
+                    amp = MIN_AMP
+
 
         self.wb_amp = amp
         self.wb_is_pv_controlled = is_pv_controlled
-        return self.wb_amp, self.wb_phases, self.wb_pv_mode, is_pv_controlled, self.wb_amp_min
+
+        return self.wb_amp, phases_to_use, self.wb_pv_mode, is_pv_controlled, self.wb_amp_min
 
     # ----------------------------
     # Aktuelle Leistung aus Store
@@ -494,6 +522,14 @@ class OCPPManager:
             # ensure global settings refreshed once before compute (could be optimized to call only by autosync)
             self.refresh_wallbox_settings(cp_id=cp_id, use_cache=True)
             amp, phases, pv_mode, is_pv_controlled, amp_min = self.compute_limits_from_global(cp_id=cp_id)
+
+            # ---- Nur Werte senden wenn Auto angesteckt ist ----  #entWIGGlung
+            plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing"]
+            if st.status not in plugged_states and not st.transaction_id:
+                cwarn(f"[{st.cp_id}] Kein Fahrzeug angesteckt – keine Werte an Wallbox gesendet")
+                return False
+            # ---------------------------------------------------
+
             # desired values
             amp_desired = amp if pv_mode != 0.0 else 0.0
             requested_phase = 1 if phases == "1" else 3
@@ -871,3 +907,24 @@ class OCPPManager:
         await asyncio.gather(ws, site.start())
         cinfo(f"OCPP Manager läuft: WS={self.ws_port} HTTP={self.http_port}")
         await asyncio.Future()  # never return
+
+async def test_logic():
+    manager = OCPPManager()
+    # Manuelles Setzen von Test-Werten (statt DB/Inverter)
+    # Aufruf der Testlogig im Hauptverzeichnis mit:
+    # python3 -m FUNCTIONS.ocpp
+    manager.wb_pv_mode = 1.0  # Nur PV = 1, MIN+PV = 2, MAX = 3
+    manager.wb_phases = "1"   # Automatische Phasenwahl = 0
+    manager.wb_amp_min = 6.0
+    manager.wb_amp_max = 16.0
+    manager.Produktion = 5600.0 
+    manager.Netzbezug = -manager.Produktion + 100.0 # Wir speisen ein => Hausverbrauch = 100 Rest ist Überschuss
+    manager.residualPower = -100.0
+    
+    # Berechnung triggern
+    amp, phases, mode, is_pv, amp_min = manager.compute_limits_from_global("TestCP")
+    
+    print(f"Ergebnis: {amp}A auf {phases} Phasen")
+
+if __name__ == "__main__":
+    asyncio.run(test_logic())
