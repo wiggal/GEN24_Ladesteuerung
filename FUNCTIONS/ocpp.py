@@ -482,10 +482,10 @@ class OCPPManager:
                     amp = max(self.MIN_WB_AMP, min(amp_1, self.wb_amp_max, self.MAX_WB_AMP))
                 else:
                     amp = MIN_AMP
-        else:
-            # PV-Mode = 0  -> feste Werte, keine PV-Steuerung
+        elif float(self.wb_pv_mode) == 3.0:
+            # PV-Mode = 3  -> feste Werte, keine PV-Steuerung
             is_pv_controlled = False
-            # Phase 0 = AUTO -> in Mode 0 immer 3-phasig
+            # Phase 0 = AUTO -> in Mode 3 immer 3-phasig
             if self.wb_phases == "0":
                 phases_to_use = "3"
             else:
