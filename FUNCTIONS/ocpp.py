@@ -424,9 +424,9 @@ class OCPPManager:
         """
         # Puffer für 3-Phasen Start (6.0 * 1.02 = 6.12A)
         MIN_START_3P = self.MIN_WB_AMP * 1.02
-
+        amp = 0
         is_pv_controlled = False
-        # Wir nutzen eine lokale Variable, um die DB-Einstellung (self.wb_phases) zu respektieren
+        # lokale Variable, um die DB-Einstellung (self.wb_phases) zu erhalten
         phases_to_use = self.wb_phases
 
         current_charge_power = 0
@@ -532,12 +532,14 @@ class OCPPManager:
             self.refresh_wallbox_settings(cp_id=cp_id, use_cache=True)
             amp, phases, pv_mode, is_pv_controlled, amp_min = self.compute_limits_from_global(cp_id=cp_id)
 
+            """  #entWIGGlung Status nicht eindeutig. 
             # ---- Nur Werte senden wenn Auto angesteckt ist ----  #entWIGGlung
-            plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing"]
+            plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing", "Available"]
             if st.status not in plugged_states and not st.transaction_id:
-                cwarn(f"[{st.cp_id}] Kein Fahrzeug angesteckt – keine Werte an Wallbox gesendet")
+                cwarn(f"[{st.cp_id}] Kein Fahrzeug angesteckt (Status={st.status}) – keine Werte an Wallbox gesendet")
                 return False
             # ---------------------------------------------------
+            """
 
             # desired values
             amp_desired = amp if pv_mode != 0.0 else 0.0
