@@ -457,7 +457,7 @@ class OCPPManager:
                 # Nur hier erfolgt eine freie Phasenwahl nach PV-Produktion
                 if amp_3_float >= MIN_START_3P:
                     phases_to_use = "3"
-                    amp = min(amp_3, self.wb_amp_max, self.MAX_WB_AMP)
+                    amp = max(self.MIN_WB_AMP, min(amp_3, self.wb_amp_max, self.MAX_WB_AMP))
                 elif amp_1 >= self.wb_amp_min:
                     phases_to_use = "1"
                     amp =  min(self.MAX_WB_AMP, max(amp_1, self.wb_amp_min, self.MIN_WB_AMP))
@@ -471,7 +471,7 @@ class OCPPManager:
                 effective_min_3p = max(self.MIN_WB_AMP, self.wb_amp_min)
                 if amp_3 >= effective_min_3p:
                     # Hier wird der Wert strikt zwischen Min und Max gehalten
-                    amp = min(amp_3, self.wb_amp_max, self.MAX_WB_AMP)
+                    amp = max(self.MIN_WB_AMP, min(amp_3, self.wb_amp_max, self.MAX_WB_AMP))
                 else:
                     amp = MIN_AMP
 
@@ -479,10 +479,19 @@ class OCPPManager:
                 # Feste Phase 1: Muss User-Min UND Hardware-Max (16A) halten
                 phases_to_use = "1"
                 if amp_1 >= self.wb_amp_min:
-                    amp = min(amp_1, self.wb_amp_max, self.MAX_WB_AMP)
+                    amp = max(self.MIN_WB_AMP, min(amp_1, self.wb_amp_max, self.MAX_WB_AMP))
                 else:
                     amp = MIN_AMP
-
+        else:
+            # PV-Mode = 0  -> feste Werte, keine PV-Steuerung
+            is_pv_controlled = False
+            # Phase 0 = AUTO -> in Mode 0 immer 3-phasig
+            if self.wb_phases == "0":
+                phases_to_use = "3"
+            else:
+                phases_to_use = self.wb_phases or "3"
+            # nimm den aktuell zulässigen Max-Wert (oder zulässiges Minimum falls kleiner)
+            amp = max(self.MIN_WB_AMP, min(self.wb_amp_max, self.MAX_WB_AMP))
 
         self.wb_amp = amp
         self.wb_is_pv_controlled = is_pv_controlled
