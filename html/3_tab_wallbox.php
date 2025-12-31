@@ -401,8 +401,9 @@ p, label {
         $total_power = round((($wallbox_Ampere * $wallbox_Phase * 230)/1000),1);
         $Hausverbrauch = round(($meter_values['Hausverbrauch'] ?? 0)/1000,1);
 
-        // Funktion aufrufen und Ergebnis ausgeben (echo)
-        echo generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
+        // Funktion aufrufen und html-Ergebnis ausgeben, $Q_total, $Z_total für  Javascriptfunktion refreshData
+        [$html, $Q_total, $Z_total] =  generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
+        echo $html;
     ?>
 <div class="card">
     
@@ -704,26 +705,23 @@ function calculatePower() {
 // ===================================
 function refreshData() {
     // Werte aus PHP in JS-Variablen übernehmen
-    var total_quelle = <?php echo ($solar_current + max(0.0, $battery_current) + max(0.0,$grid_current)); ?>;
-    var total_ziel = <?php echo ($total_power + $Hausverbrauch + max(0.0,-$grid_current) + max(0.0,-($battery_current))); ?>;
+    var total_quelle = <?php echo ($Q_total); ?>;
+    var total_ziel = <?php echo ($Z_total); ?>;
+    var Hausverbrauch = <?php echo ($Hausverbrauch); ?>;
 
     // Berechnung der Abweichung
     var diff = Math.abs(total_quelle - total_ziel);
-    var threshold = total_quelle * 0.10; // 10% Grenze
+    var threshold = (total_quelle * 0.10) + 0.06; // 10% Grenze
 
-    // Debugging (optional): console.log("Quelle:", total_quelle, "Ziel:", total_ziel, "Diff:", diff);
-
-    // Nur reloaden, wenn die Abweichung <= 10% ist oder die Quelle 0 ist (verhindert Stillstand bei Nacht)
-    if (total_quelle === 0 || diff <= threshold) {
+    // Nur reloaden, wenn die Abweichung <= 10% oder Hausverbrauch > 0 ist.
+    if (Hausverbrauch > 0 || diff <= threshold) {
         var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
         var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
         if (current_cp_id) {
             reload_url += '?cp_id=' + encodeURIComponent(current_cp_id);
         }
         window.location.href = reload_url;
-    } else {
-        console.warn("Reload unterbrochen: Energie-Differenz > 10% (" + diff.toFixed(2) + " kW)");
-    }
+    } 
 }
 
 // ===================================

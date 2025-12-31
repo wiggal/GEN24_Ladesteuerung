@@ -82,7 +82,7 @@ class InverterApi:
         GEN24_API_schluessel = [
             ("nameplate", False),                                                           #BYD
             ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),                              #BYD
-            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_(U16|F32)", False),                              #BYD  Nur vorhanden, wenn Akku an/standby
+            ("BAT_VALUE_STATE_OF_CHARGE_RELATIVE_(U16|F32)", False),                        #BYD  Nur vorhanden, wenn Akku an/standby
             ("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", False, ("label", "<primary>")),         #SM <primary>
             ("SMARTMETER_ENERGYACTIVE_CONSUMED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
             ("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", False, ("label", "<primary>")),    #SM <primary>
@@ -101,7 +101,6 @@ class InverterApi:
             API['Version'] = API_result['PS2.rev-sw']
             # Benötigte Werte mit den geholten API-Werten errechnen und API zuweisen
             # Aktuelle Werte für Prognoseberechung
-            # Folgende Werte sind nur vorhanden, wenn Akku an/standby
             # Folgende Werte sind nur vorhanden, wenn Akku an/standby
             try:
                 # 1. Versuch: F32 (ab FW 1.39.5-1)

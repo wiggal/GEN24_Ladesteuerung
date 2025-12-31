@@ -2,19 +2,18 @@
 /**
  * Generiert den HTML-Code für den Ladebalken basierend auf den übergebenen Werten.
  */
-function generateLoadBar(float $solar, float $battery, float $grid, float $in_auto, float $in_haus): string
+function generateLoadBar(float $solar, float $battery, float $grid, float $in_auto, float $in_haus): array
 {
     // 1. Berechnung der Energiewerte
     $aus_battery = max(0.0, $battery);
     $aus_grid = max(0.0, $grid);
-    $total = $solar + $aus_battery + $aus_grid;
+    $Q_total = $solar + $aus_battery + $aus_grid;
 
     $in_battery = max(0.0, -$battery);
     $in_grid = max(0.0, -$grid);
+    $Z_total = $in_haus + $in_battery + $in_grid + $in_auto;
 
-
-
-    if ($total === 0.0) {
+    if ($Q_total === 0.0) {
         #return '<p class="small">Keine Energiequelle aktiv (Total = 0)</p>';
         return '';
     }
@@ -70,7 +69,7 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
     // 3. Dynamische Generierung der Zellen Quelle
     foreach ($data_quelle as $item) {
         if ($item['value'] >= 0.1) {
-            $pct = ($item['value'] / $total) * 100;
+            $pct = ($item['value'] / $Q_total) * 100;
             $width_style = "width: {$pct}%";
             
             // Emoji Zelle (Obere Reihe)
@@ -84,7 +83,7 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
     // 4. Dynamische Generierung der Zellen Ziel
     foreach ($data_ziel as $item) {
         if ($item['value'] >= 0.1) {
-            $pct = ($item['value'] / $total) * 100;
+            $pct = ($item['value'] / $Q_total) * 100;
             $width_style = "width: {$pct}%";
             
             // Emoji Zelle (Obere Reihe)
@@ -99,7 +98,6 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
     // 4. Erzeugung des HTML-Strings mit den integrierten CSS-Styles
     $html = <<<HTML
     <div class="wrapper">
-
         <table class="bar-table">
             <tr class="load-bar-icons">
                 {$quelle_emoji_cells}
@@ -120,6 +118,6 @@ function generateLoadBar(float $solar, float $battery, float $grid, float $in_au
     </div>
     HTML;
 
-    return $html;
+    return [ $html, $Q_total, $Z_total ];
 }
 ?>
