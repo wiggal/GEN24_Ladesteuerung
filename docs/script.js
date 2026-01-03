@@ -38,18 +38,38 @@ document.addEventListener('DOMContentLoaded', () => {
             let content = await response.text();
 
             if (isMarkdown) {
-                content = marked.parse(content);
+                const renderer = new marked.Renderer();
+
+                renderer.heading = ({ text, depth }) => {
+                    // 1. Bereinigung: Markdown-Links [Text](URL) zu "Text" reduzieren
+                    // 2. Bereinigung: HTML-Tags entfernen
+                    const cleanText = text
+                        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Entfernt (URL), behält [Text]
+                        .replace(/<[^>]*>/g, '');                // Entfernt HTML-Tags
+
+                    // ID generieren (GitHub-Style)
+                    const id = cleanText.toLowerCase()
+                        .trim()
+                        .replace(/[^\w\s-]/g, '')  // Entfernt Sonderzeichen/Emojis für die ID
+                        .replace(/\s+/g, '-');     // Leerzeichen zu Bindestrichen
+
+                    // Das 'text' Property enthält bereits das gerenderte HTML (mit Links),
+                    // wir nutzen es für die Anzeige, aber unsere 'id' für den Anker.
+                    return `<h${depth} id="${id}">${text}</h${depth}>`;
+                };
+
+                content = marked.parse(content, { renderer: renderer });
             }
 
             contentContainer.innerHTML = content;
             logo.textContent = newLogoText || defaultLogoText;
 
-            // Menü schließen, wenn es geöffnet ist
             if (navLinks.classList.contains('nav-active')) {
                 toggleNav();
             }
 
             window.scrollTo(0, 0);
+
         } catch (error) {
             console.error("Fehler beim Laden des Inhalts:", error);
             contentContainer.innerHTML = `<p>Entschuldigung, der Inhalt konnte nicht geladen werden: ${error.message}</p>`;

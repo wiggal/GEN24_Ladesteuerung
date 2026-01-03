@@ -5,13 +5,13 @@
 **Programmfunktionen:**  
 - Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
 und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Batterie zu laden.  
-Über die Tabelle [Ladesteuerung](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieladesteuerung--tab---ladesteuerung-) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
-- [Entladesteuerung,](https://github.com/wiggal/GEN24_Ladesteuerung/#batterieentladesteuerung--tab---entladesteuerung-) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
-- [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
+Über die Tabelle [Ladesteuerung](#batterieladesteuerung) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
+- [Entladesteuerung,](#batterieentladesteuerung) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
+- [Logging](#-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
-- [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden und grafische Darstellung.  
-- **NEU:** 🚘 [Steuerung des Wattpiloten](#-wallboxsteuerung--tab---wallbox-), über OCPP.  
-- [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
+- [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden und grafische Darstellung.  
+- **NEU:** 🚘 [Steuerung des Wattpiloten](#-wallboxsteuerung), über OCPP.  
+- [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 - [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
 ![new](pics/new.png)  
@@ -50,7 +50,7 @@ Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach eine
 
 Für eine manuelle Installation, bzw. genauere Installationshinweise sie oben verlinktes Wiki.   
 
-### 🌦️ Prognoseskripte in FORECAST/
+### 🌦️ Prognoseskripte in FORECAST
 
 Holen von den jeweiligen API-Urls die Prognosedaten und bereiten sie auf für GEN24_Ladesteuerung. 
 
@@ -104,7 +104,7 @@ aus der wird dann durch html/8_tab_Diagram.php das Diagramm **QZ**-Bilanz nach *
 
 ### Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
 
-### Batterieladesteuerung ( TAB--> LadeStrg )
+### Batterieladesteuerung
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
@@ -122,7 +122,7 @@ Im ForecastMgr können die gespeicherten Prognosedaten analysiert, und evtl. gel
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
-### BatterieENTladesteuerung ( TAB--> ENTLadeStrg )
+### BatterieENTladesteuerung
 ![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
 
 Unter "Feste Entladegrenze" kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
@@ -132,7 +132,7 @@ Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
-### 🚘 Wallboxsteuerung ( TAB--> Wallbox )
+### 🚘 Wallboxsteuerung
 ![Tabelle zur Wallbox](pics/Wallbox.png)
 
 ### Settings ( TAB--> Settings )
