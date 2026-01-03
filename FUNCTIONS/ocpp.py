@@ -532,8 +532,8 @@ class OCPPManager:
             self.refresh_wallbox_settings(cp_id=cp_id, use_cache=True)
             amp, phases, pv_mode, is_pv_controlled, amp_min = self.compute_limits_from_global(cp_id=cp_id)
 
-            print("Wallboxstatus: ", st.status)  #entWIGGlung
             """  #entWIGGlung Status nicht eindeutig. 
+            print("Wallboxstatus: ", st.status)  #entWIGGlung
             # ---- Nur Werte senden wenn Auto angesteckt ist ----  #entWIGGlung
             plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing"]
             if st.status not in plugged_states and not st.transaction_id:
