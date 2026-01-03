@@ -156,57 +156,6 @@ if (isset($_GET['ajax'])) {
     exit;
 }
 
-$total_power = 0.0; // WICHTIG: Startet immer bei 0.0 (vom Typ float)
-$unit = 'W';
-$MAX_AGE_SECONDS = 20; // Konfigurierbare Toleranz: Messwert darf maximal 90s alt sein.
-
-// 1. Sichere Navigation zum 'meterValue' Block
-$meter_value_block = $meter_values['meter']['meterValue'][0] ?? null;
-
-if ($meter_value_block) {
-
-    // 2. Zeitstempel-Prüfung: Ist der Wert zu alt?
-    $timestamp_str = $meter_value_block['timestamp'] ?? null;
-
-    $is_data_current = false;
-    if ($timestamp_str) {
-        // Konvertiere den ISO 8601-Zeitstempel in einen UNIX-Timestamp
-        $measurement_time = strtotime($timestamp_str);
-        $current_time = time();
-
-        $age_seconds = $current_time - $measurement_time;
-
-        if ($age_seconds <= $MAX_AGE_SECONDS) {
-            // Die Daten sind aktuell, wir können sie verwenden
-            $is_data_current = true;
-        }
-        // Wenn der Wert zu alt ist, bleibt $is_data_current = false.
-    }
-
-
-    // 3. Nur Werte extrahieren, wenn der Zeitstempel aktuell ist
-    if ($is_data_current) {
-
-        $sampled_values = $meter_value_block['sampledValue'] ?? [];
-
-        // 4. Iteration über alle Messwerte
-        foreach ($sampled_values as $item) {
-
-            // Prüfen: Power.Active.Import UND KEINE Phase (Gesamtwert)
-            if (($item['measurand'] ?? '') === 'Power.Active.Import' && !isset($item['phase'])) {
-
-                // Wert als reinen Float speichern
-                // Dies ist der einzige Ort, an dem $total_power aktualisiert wird.
-                $total_power = (float)($item['value'] ?? 0.0);
-                $unit = $item['unit'] ?? 'W'; // Einheit für die optionale Anzeige speichern
-
-                // Wert gefunden, Schleife beenden
-                break;
-            }
-        }
-    }
-}
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -443,17 +392,58 @@ p, label {
 </div>
 
 <?php
-        // Definieren der Werte
-        $solar_current = round(($meter_values['Produktion_W'] ?? 0)/1000,1);
-        $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0)/1000,1);
-        $grid_current = round(($meter_values['Netzbezug_W'] ?? 0)/1000,1);
-        $total_power = round(($total_power/1000),1);
-        $Hausverbrauch = round(($meter_values['Hausverbrauch'] ?? 0)/1000,1);
+// Aktuelle Live-Werte berechnen
+$solar_current   = round(($meter_values['Produktion_W'] ?? 0) / 1000, 1);
+$battery_current = round(($meter_values['Batteriebezug_W'] ?? 0) / 1000, 1);
+$grid_current    = round(($meter_values['Netzbezug_W'] ?? 0) / 1000, 1);
+$wallbox_Ampere  = ($meter_values['current_limit'] ?? 0);
+$wallbox_Phase   = ($meter_values['phases'] ?? 0);
+$total_power     = round((($wallbox_Ampere * $wallbox_Phase * 230) / 1000), 1);
+$Hausverbrauch   = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
 
-        // Funktion aufrufen und Ergebnis ausgeben (echo)
-       [ $html, $Q_total, $Z_total ] = generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
-       echo $html;
-    ?>
+// Neue Berechnung der Bar
+[ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
+
+$QZnew_Diff = abs($Q_new - $Z_new); 
+/*  #entWIGGlung
+print_r($Q_new);
+echo "<br>";
+print_r($Z_new);
+echo "<br>";
+print_r(round($QZnew_Diff, 3));  
+*/ #entWIGGlung
+
+// Wenn Abweichung zu groß, wegen zeitlich versetzten Werten, generiere Bar mit den alten Werten aus dem POST
+// Prüfen, ob alte Werte per POST übergeben wurden
+if ($QZnew_Diff > 0.2) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['old_Q'], $_POST['old_Z'])) {
+        $solar_current   = floatval($_POST['old_solar']);
+        $battery_current = floatval($_POST['old_batt']);
+        $grid_current    = floatval($_POST['old_grid']);
+        $total_power     = floatval($_POST['old_total']);
+        $Hausverbrauch   = floatval($_POST['old_haus']);
+        // Neue Berechnung der Bar
+        [ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
+    }
+}
+echo $html;  # Balkendiagramm ausgeben
+
+/*  #entWIGGlung
+$QZnew_Diff = abs($Q_new - $Z_new);  #entWIGGlung
+print_r($Q_new);
+echo "<br>";
+print_r($Z_new);
+echo "<br>";
+print_r(round($QZnew_Diff, 3));  #entWIGGlung
+*/ #entWIGGlung
+
+// Versteckte Felder für das nächste JavaScript-Refresh bereitstellen
+echo '<div id="post_data_store" style="display:none;"
+        data-q="'.$Q_new.'" data-z="'.$Z_new.'"
+        data-s="'.$solar_current.'" data-b="'.$battery_current.'"
+        data-g="'.$grid_current.'" data-t="'.$total_power.'"
+        data-h="'.$Hausverbrauch.'"></div>';
+?>
 <div class="card">
     
     <?php if ($client_connected): ?>
@@ -751,7 +741,7 @@ function calculatePower() {
 // ===================================
 // Allgemeine Funktion zum Neuladen
 // ===================================
-function refreshData() {
+function old_refreshData() {
     var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
     var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
     if (current_cp_id) {
@@ -759,6 +749,43 @@ function refreshData() {
     }
     window.location.href = reload_url;
 }
+// ===================================
+// Allgemeine Funktion zum Neuladen mit POST-Feldern
+// ===================================
+function refreshData() {
+    var store = $('#post_data_store');
+    var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
+
+    // Erstelle ein unsichtbares Formular für den POST-Reload
+    var form = $('<form></form>');
+    form.attr("method", "post");
+    form.attr("action", window.location.pathname + (current_cp_id ? '?cp_id=' + encodeURIComponent(current_cp_id) : ''));
+
+    // Die aktuellen (jetzt "alten") Werte für den Vergleich hinzufügen
+    var params = {
+        'old_Q': store.attr('data-q'),
+        'old_Z': store.attr('data-z'),
+        'old_solar': store.attr('data-s'),
+        'old_batt': store.attr('data-b'),
+        'old_grid': store.attr('data-g'),
+        'old_total': store.attr('data-t'),
+        'old_haus': store.attr('data-h')
+    };
+
+    $.each(params, function(key, value) {
+        var field = $('<input></input>');
+        field.attr("type", "hidden");
+        field.attr("name", key);
+        field.attr("value", value);
+        form.append(field);
+    });
+
+    $(document.body).append(form);
+    form.submit();
+}
+
+// Intervall bleibt bei 20 Sekunden
+setInterval(refreshData, 20000);
 
 // ===================================
 // Zähler-Reset Logik 
@@ -797,8 +824,8 @@ $('#btnResetCounter').click(function(){
 // ===================================
 // Automatisches Neuladen
 // ===================================
-// Die benannte Funktion wird alle 10 Sekunden ausgeführt
-setInterval(refreshData, 10000); // 10000 ms = 10 Sekunden
+// Die benannte Funktion wird alle 20 Sekunden ausgeführt
+setInterval(refreshData, 20000); // 20000 ms = 20 Sekunden
 </script>
 
 </body>
