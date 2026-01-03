@@ -405,13 +405,6 @@ $Hausverbrauch   = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
 [ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
 
 $QZnew_Diff = abs($Q_new - $Z_new); 
-/*  #entWIGGlung
-print_r($Q_new);
-echo "<br>";
-print_r($Z_new);
-echo "<br>";
-print_r(round($QZnew_Diff, 3));  
-*/ #entWIGGlung
 
 // Wenn Abweichung zu groß, wegen zeitlich versetzten Werten, generiere Bar mit den alten Werten aus dem POST
 // Prüfen, ob alte Werte per POST übergeben wurden
@@ -428,21 +421,6 @@ if ($QZnew_Diff > 0.2) {
 }
 echo $html;  # Balkendiagramm ausgeben
 
-/*  #entWIGGlung
-$QZnew_Diff = abs($Q_new - $Z_new);  #entWIGGlung
-print_r($Q_new);
-echo "<br>";
-print_r($Z_new);
-echo "<br>";
-print_r(round($QZnew_Diff, 3));  #entWIGGlung
-*/ #entWIGGlung
-
-// Versteckte Felder für das nächste JavaScript-Refresh bereitstellen
-echo '<div id="post_data_store" style="display:none;"
-        data-q="'.$Q_new.'" data-z="'.$Z_new.'"
-        data-s="'.$solar_current.'" data-b="'.$battery_current.'"
-        data-g="'.$grid_current.'" data-t="'.$total_power.'"
-        data-h="'.$Hausverbrauch.'"></div>';
 ?>
 <div class="card">
     
@@ -565,6 +543,7 @@ echo '<div id="post_data_store" style="display:none;"
 </div>
 
 <script src="jquery.min.js"></script>
+
 <script>
 // --- FUNKTIONEN ZUM SPEICHERN/LADEN MIT localStorage ---
 
@@ -722,8 +701,7 @@ function calculatePower() {
         });
     });
 });
-</script>
-<script>
+
   // Scroll-Position speichern
   window.addEventListener("beforeunload", () => {
     sessionStorage.setItem("scrollPos", window.scrollY);
@@ -736,56 +714,41 @@ function calculatePower() {
       window.scrollTo(0, parseInt(scrollPos));
     }
   });
-</script>
-<script>
-// ===================================
-// Allgemeine Funktion zum Neuladen
-// ===================================
-function old_refreshData() {
-    var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
-    var reload_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
-    if (current_cp_id) {
-        reload_url += '?cp_id=' + encodeURIComponent(current_cp_id);
-    }
-    window.location.href = reload_url;
-}
+
 // ===================================
 // Allgemeine Funktion zum Neuladen mit POST-Feldern
 // ===================================
 function refreshData() {
-    var store = $('#post_data_store');
     var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
 
-    // Erstelle ein unsichtbares Formular für den POST-Reload
-    var form = $('<form></form>');
-    form.attr("method", "post");
-    form.attr("action", window.location.pathname + (current_cp_id ? '?cp_id=' + encodeURIComponent(current_cp_id) : ''));
+    var form = $('<form method="post"></form>');
+    var url = window.location.pathname + (current_cp_id ? '?cp_id=' + encodeURIComponent(current_cp_id) : '');
+    form.attr("action", url);
 
-    // Die aktuellen (jetzt "alten") Werte für den Vergleich hinzufügen
+    // PHP-Variablen direkt im JS zugewiesen
     var params = {
-        'old_Q': store.attr('data-q'),
-        'old_Z': store.attr('data-z'),
-        'old_solar': store.attr('data-s'),
-        'old_batt': store.attr('data-b'),
-        'old_grid': store.attr('data-g'),
-        'old_total': store.attr('data-t'),
-        'old_haus': store.attr('data-h')
+        'old_Q': '<?php echo $Q_new; ?>',
+        'old_Z': '<?php echo $Z_new; ?>',
+        'old_solar': '<?php echo $solar_current; ?>',
+        'old_batt': '<?php echo $battery_current; ?>',
+        'old_grid': '<?php echo $grid_current; ?>',
+        'old_total': '<?php echo $total_power; ?>',
+        'old_haus': '<?php echo $Hausverbrauch; ?>'
     };
 
     $.each(params, function(key, value) {
-        var field = $('<input></input>');
-        field.attr("type", "hidden");
-        field.attr("name", key);
-        field.attr("value", value);
-        form.append(field);
+        form.append($('<input type="hidden">').attr("name", key).attr("value", value));
     });
 
     $(document.body).append(form);
     form.submit();
 }
 
-// Intervall bleibt bei 20 Sekunden
-setInterval(refreshData, 20000);
+// ===================================
+// Automatisches Neuladen
+// ===================================
+// Die benannte Funktion wird alle 20 Sekunden ausgeführt
+setInterval(refreshData, 20000); // 20000 ms = 20 Sekunden
 
 // ===================================
 // Zähler-Reset Logik 
@@ -821,11 +784,6 @@ $('#btnResetCounter').click(function(){
     });
 });
 
-// ===================================
-// Automatisches Neuladen
-// ===================================
-// Die benannte Funktion wird alle 20 Sekunden ausgeführt
-setInterval(refreshData, 20000); // 20000 ms = 20 Sekunden
 </script>
 
 </body>
