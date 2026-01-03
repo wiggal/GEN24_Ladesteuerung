@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Das 'text' Property enthält bereits das gerenderte HTML (mit Links),
                     // wir nutzen es für die Anzeige, aber unsere 'id' für den Anker.
-                    return `<h${depth} id="${id}">${text}</h${depth}>`;
+                    return `<h${depth} id="${id}">${cleanText}</h${depth}>`;
                 };
 
                 content = marked.parse(content, { renderer: renderer });
