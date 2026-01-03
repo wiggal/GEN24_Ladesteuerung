@@ -10,10 +10,14 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Logging](https://github.com/wiggal/GEN24_Ladesteuerung/#bar_chart-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
 - [Dynamischen Strompreis](https://github.com/wiggal/GEN24_Ladesteuerung/#heavy_dollar_signelectric_plug-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden und grafische Darstellung.  
+- **NEU:** 🚘 [Steuerung des Wattpiloten](#-wallboxsteuerung--tab---wallbox-), über OCPP.  
 - [Grafana](https://github.com/wiggal/GEN24_Ladesteuerung/#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
-- **NEU:** [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
+- [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
 ![new](pics/new.png)  
+Ab Version: **0.41.0**  
+- 🚘 Steuerung des Wattpiloten, über OCPP.  
+
 Ab Version: **0.40.2**  
 - 🔄 Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist.  
 
@@ -127,6 +131,9 @@ In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, 
 Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
+
+### 🚘 Wallboxsteuerung ( TAB--> Wallbox )
+![Tabelle zur Wallbox](pics/Wallbox.png)
 
 ### Settings ( TAB--> Settings )
 ![Tabelle zu den Settings](pics/Settings.png)
