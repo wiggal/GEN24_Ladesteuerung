@@ -398,11 +398,11 @@ $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0) / 1000, 1);
 $grid_current    = round(($meter_values['Netzbezug_W'] ?? 0) / 1000, 1);
 $wallbox_Ampere  = ($meter_values['current_limit'] ?? 0);
 $wallbox_Phase   = ($meter_values['phases'] ?? 0);
-$total_power     = round((($wallbox_Ampere * $wallbox_Phase * 230) / 1000), 1);
+$car_power       = round((($wallbox_Ampere * $wallbox_Phase * 230) / 1000), 1);
 $Hausverbrauch   = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
 
 // Neue Berechnung der Bar
-[ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
+[ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
 
 $QZnew_Diff = abs($Q_new - $Z_new); 
 
@@ -413,10 +413,10 @@ if ($QZnew_Diff > 0.2) {
         $solar_current   = floatval($_POST['old_solar']);
         $battery_current = floatval($_POST['old_batt']);
         $grid_current    = floatval($_POST['old_grid']);
-        $total_power     = floatval($_POST['old_total']);
+        $car_power     = floatval($_POST['old_total']);
         $Hausverbrauch   = floatval($_POST['old_haus']);
         // Neue Berechnung der Bar
-        [ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $total_power, $Hausverbrauch);
+        [ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
     }
 }
 echo $html;  # Balkendiagramm ausgeben
@@ -433,8 +433,6 @@ echo $html;  # Balkendiagramm ausgeben
         <p>Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
         <p>Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
-        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
-
         <?php
         // Nur Button anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
         $charged_energy = $meter_values['charged_energy_kwh'] ?? 0.0;
@@ -442,6 +440,7 @@ echo $html;  # Balkendiagramm ausgeben
         echo '&nbsp;<button type="button" class="red" id="btnResetCounter">Reset</button>';
         }
         ?>
+        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
         </p>
         <hr>
     <?php else: ?>
@@ -732,7 +731,7 @@ function refreshData() {
         'old_solar': '<?php echo $solar_current; ?>',
         'old_batt': '<?php echo $battery_current; ?>',
         'old_grid': '<?php echo $grid_current; ?>',
-        'old_total': '<?php echo $total_power; ?>',
+        'old_total': '<?php echo $car_power; ?>',
         'old_haus': '<?php echo $Hausverbrauch; ?>'
     };
 

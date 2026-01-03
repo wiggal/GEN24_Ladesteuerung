@@ -1,3 +1,7 @@
+**[0.41.0] – 2026-XX-XX**  
+
+- Freigabe der Wattpilotsteuerung, und Dokumentierung in der README.  
+
 **[0.40.9] – 2026-01-03**  
 
 - Stabilisierung des OCPP-Servers, hauptsächlich im PV-Überschussladen.  
