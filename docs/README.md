@@ -133,9 +133,12 @@ Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
 ### 🚘 Wallboxsteuerung
+Das Tool startet einen OCPP-Server, zu dem eine Wallbox (getestet: Fronius Wattpilot) eine Verbindung als Client herstellt.  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
+
 ![Tabelle zur Wallbox](pics/Wallbox.png)
 
-### Settings ( TAB--> Settings )
+### Settings
 ![Tabelle zu den Settings](pics/Settings.png)
 Programmfunktionen
 Unter Settings kann das Programm zusätzlich gesteuert werden.  

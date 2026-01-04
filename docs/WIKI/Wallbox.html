@@ -8,12 +8,12 @@
   <body lang="de-DE">
     <!--HIERZURUECK--><br>
     <p> <font style="font-size: 24pt"><b>TAB --&gt;&gt; Wallbox </b></font></p>
-    <p><strong>Stand: 11.12.2025<br>
+    <p><strong>Stand: 04.01.2026<br>
       </strong></p>
-    <p>Das Tool stellt durch einen OCPP-Server bereit, zu dem eine
-      Wallbox eine Verbindung als Client herstellt.<br>
+    <p>Das Tool stellt einen OCPP-Server bereit, zu dem eine Wallbox
+      eine Verbindung als Client herstellt.<br>
       Einstellungen für Fronius Wattpilot in der App siehe
-      Konfiguration.<br>
+      Clientkonfiguration.<br>
       <strong></strong></p>
     <p><strong>Programmfunktionen:</strong></p>
     <ul>
@@ -24,11 +24,12 @@
     <strong>Funktionsweise:</strong>
     <ul>
       <li> Es wird ein OCPP-Server gestartet, zu dem eine Wallbox
-        Verbindung aufnimmt.&nbsp;</li>
+        (bisher Wattpilot) Verbindung aufnimmt.&nbsp;</li>
       <li>Über die WebUI kann der OCPP-Server gestartet und gestoppt
         werden, sie stellt auch den Status des OCPP-Server dar.</li>
-      <li> Der OCPP-Server kann auch automatisch durch die Einstellung
-        wallboxsteuerung = 1 in CONFIG/default_priv.ini gestrtet werden.<br>
+      <li> Der OCPP-Server kann auch automatisch durch die Einstellung <font
+          size="+1"> <code>wallboxsteuerung = 1</code></font> in
+        CONFIG/default_priv.ini gestartet werden.<br>
       </li>
       <li>Über die WebUI können die Ladeoptionen eingestellt und in die
         DB CONFIG/Prog_Steuerung.sqlite gespeichert werden.</li>
@@ -38,6 +39,11 @@
             charset=UTF-8">
           <span class="label-inline">Wallboxaktualisierung) aus der DB
             und sendet sie wenn nötig an die Wallbox.</span></span></li>
+      <li><span class="label-inline"><span class="label-inline">Das <b>Logfile</b>
+            <b>ocpp.log</b> liegt in /tmp und damit im Arbeitsspeicher,
+            damit die Speicherkarte eines Raspberry nicht so oft
+            beschrieben wird. <br>
+          </span></span></li>
     </ul>
     <p> <strong>Optionen:<br>
       </strong></p>
@@ -53,6 +59,8 @@
           <li>MIN+PV =&gt; Mit der kleinsten eingestellte Lademenge wird
             immer&nbsp; geladen. <br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
             Ist der PV-Überschuss größer, wird mit diesem geladen.</li>
           <li>MAX =&gt; Es wird immer mit der größten eingestellten
@@ -126,6 +134,8 @@
                     class="label-inline"><span class="label-inline"><span
                         class="label-inline"><span class="label-inline">Mindestladezeit&nbsp;
 
+
+
                           =&gt; </span></span></span></span></span></span><span
                 class="label-inline"><span class="label-inline"><span
                     class="label-inline"><span class="label-inline"><span
@@ -170,19 +180,21 @@
               </span></span><span class="label-inline"><span
                 class="label-inline">Es ist dabei zu beachten, dass nur
                 in ganzen Ampere geschaltet werden kann, und die Werte
-                nicht genau erreich werden können, zum Beispiel:</span></span><br>
+                nicht genau erreicht werden können, zum Beispiel:</span></span><br>
             <span class="label-inline"><span class="label-inline"></span></span><span
               class="label-inline"><span class="label-inline">(+)300
-                =&gt; es sollen 300 Watt im Sytem verbleiben, die
+                =&gt; es sollen 300 Watt im System verbleiben, die
                 entweder in den Akku oder ins Netz fließen.</span></span><br>
             <span class="label-inline"><span class="label-inline"><span
                   class="label-inline"><span class="label-inline">- 300
                     &nbsp; =&gt; es sollen 300 Watt mehr geladen werden,
-                    als im Sytem vorhanden sind, die entweder aus dem
+                    als im System vorhanden sind, die entweder aus dem
                     Akku oder aus dem Netz gezogen werden.</span></span></span></span></li>
           <li><span class="label-inline"><span class="label-inline"><span
                   class="label-inline"><span class="label-inline"><span
                       class="label-inline"><span class="label-inline">Lademenge
+
+
 
                         (kWh) =&gt; Hier kann eine feste Lademenge
                         eingestellt werden, ist sie erreicht, wird das
@@ -217,7 +229,7 @@
           </li>
         </ul>
         <ul>
-          <li> Füge SN (seriennummer) zur URL =&gt; <b>aktiviert</b></li>
+          <li> Füge SN (Seriennummer) zur URL =&gt; <b>aktiviert</b></li>
         </ul>
         <br>
       </li>
