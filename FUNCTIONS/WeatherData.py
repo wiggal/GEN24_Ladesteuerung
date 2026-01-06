@@ -52,8 +52,24 @@ class WeatherData:
         # Alte Einträge löschen die älter 35 Tage sind
         loesche_bis = (datetime.today() - timedelta(days=35)).date().isoformat()
 
-        #Prognosen kleiner 10 löschen
-        data = [entry for entry in data if entry[2] >= 10]
+        #Prognosen kleiner 10W löschen
+        data = [entry for entry in data if entry[2] >= 10 or entry[1] == "Produktion"]
+        # Alle Zeitpunkte der vorhandenen Prognose aufsammeln
+        forecast_times = {entry[0] for entry in data if entry[1] == "Prognose"}
+        # Alle Produktionseinträge behalten, die eine Prognose haben
+        # und falls Produktion == 0 auf 0.1 setzen, wegen Darstellung im Diagramm
+        data = [
+            (
+                entry[0],
+                entry[1],
+                0.1 if entry[1] == "Produktion" and entry[2] == 0 else entry[2],
+                entry[3],
+                entry[4],
+            )
+            for entry in data
+            if entry[1] != "Produktion" or entry[0] in forecast_times
+        ]
+
 
         try:
             # Index auf Zeitpunkt anlegen, falls nicht vorhanden
@@ -143,7 +159,7 @@ class WeatherData:
         )
         SELECT *
         FROM ProduktionDiff
-        WHERE Produktion > 10;
+        WHERE Produktion >= 0;
         """
         try:
             verbindung.execute(sql_anweisung)
