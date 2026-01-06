@@ -67,8 +67,16 @@ class WeatherData:
                 entry[4],
             )
             for entry in data
-            if entry[1] != "Produktion" or entry[0] in forecast_times
+            if (
+                # Produktion nur wenn passende Prognosezeit existiert
+                (entry[1] == "Produktion" and entry[0] in forecast_times)
+                # Produktion bleibt immer, wenn > 10
+                or (entry[1] == "Produktion" and entry[2] > 10)
+                # alle Datensätze ausser Produktion unverändert lassen
+                or entry[1] != "Produktion"
+            )
         ]
+
 
 
         try:
