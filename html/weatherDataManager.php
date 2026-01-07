@@ -338,13 +338,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_delete']) && !
 # Daten für Chartjs bilden
 $chartData = []; // [datum][quelle] = array of [time, wert]
 
+# Suchen, ob Quelle an bestimmten Tag vorhanden
+$result_day = [];
+foreach ($data as $datetime => $entries) {
+    // Datum aus Timestamp holen (YYYY-MM-DD)
+    $day = substr($datetime, 0, 10);
+
+    // Initialisiere den Tag, falls noch nicht vorhanden
+    if (!isset($result_day[$day])) {
+        foreach ($quellenListe as $quelle) {
+            $result_day[$day][$quelle] = false;
+        }
+    }
+
+    // Prüfen, ob gesuchte Quelle in dieser Stunde vorkommt
+    foreach ($quellenListe as $quelle) {
+        if (isset($entries[$quelle])) {
+            $result_day[$day][$quelle] = true;
+        }
+    }
+}
+
 // Dann die Daten aufbereiten
 foreach ($data as $zeitpunkt => $werteProQuelle) {
     $datum = substr($zeitpunkt, 0, 10);
     $uhrzeit = substr($zeitpunkt, 11, 5);
 
     foreach ($quellenListe as $quelle) {
-        $wert = isset($werteProQuelle[$quelle]) ? $werteProQuelle[$quelle]['wert'] : NULL;
+        # Alle Linien auf 0 ziehen, ausser Produktion, und wenn die Datenquelle an dem Tag nicht vorhanden ist ($result_day)
+        if ( $quelle == 'Produktion' or $result_day[$datum][$quelle] === false ) {
+            $wert = isset($werteProQuelle[$quelle]) ? $werteProQuelle[$quelle]['wert'] : NULL;
+        } else {
+            $wert = isset($werteProQuelle[$quelle]) ? $werteProQuelle[$quelle]['wert'] : 0;
+        }
         $gewicht = isset($werteProQuelle[$quelle]['gewicht']) ? $werteProQuelle[$quelle]['gewicht']: '';
 
         $chartData[$datum][$quelle][] = [
