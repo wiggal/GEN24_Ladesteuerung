@@ -409,15 +409,6 @@ $Hausverbrauch   = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
 [ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
 
 $QZnew_Diff = abs($Q_new - $Z_new); 
-print_r($Q_new);  #entWIGGlung
-echo "<br>";
-print_r($Z_new);
-echo "<br>";
-echo $solar_current . ", " . $battery_current . ", " . $grid_current;
-echo "<br>";
-echo $Hausverbrauch . ", " . $car_power . ", " . $battery_current . ", " . $grid_current;
-echo "<br>";
-print_r(round($QZnew_Diff, 3));    #entWIGGlung
 
 // Wenn Abweichung zu groß, wegen zeitlich versetzten Werten, generiere Bar mit den alten Werten aus dem POST
 // Prüfen, ob alte Werte per POST übergeben wurden
@@ -433,13 +424,6 @@ if ($QZnew_Diff > 0.2 or $Hausverbrauch <= 0) {
     }
 }
 echo $html;  # Balkendiagramm ausgeben
-
-$QZnew_Diff = abs($Q_new - $Z_new);  #entWIGGlung
-print_r($Q_new);
-echo "<br>";
-print_r($Z_new);
-echo "<br>";
-print_r(round($QZnew_Diff, 3));  #entWIGGlung
 
 ?>
 <div class="card">
