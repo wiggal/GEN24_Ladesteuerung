@@ -4,7 +4,11 @@
 // Erweiterung: zusätzliche Wallbox-Parameter (IDs 2 und 3) editierbar und in DB speicherbar
 // Änderungen: Details-Bereich "Mehr Optionen" behält manuell gesetzten geöffnet/geschlossen-Status in localStorage
 // ================================================
-$API = "http://127.0.0.1:8886"; // OCPP Server API
+// Erkennt automatisch die IP des Servers (z.B. 192.168.178.4)
+$server_ip = $_SERVER['HTTP_HOST'];
+// Falls HTTP_HOST auch den Port enthält (z.B. :80), filtern wir nur die IP/Domain
+$server_ip = explode(':', $server_ip)[0];
+$API = "http://" . $server_ip . ":8886";
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
 $PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 & echo $!";
 
@@ -405,6 +409,15 @@ $Hausverbrauch   = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
 [ $html, $Q_new, $Z_new ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
 
 $QZnew_Diff = abs($Q_new - $Z_new); 
+print_r($Q_new);  #entWIGGlung
+echo "<br>";
+print_r($Z_new);
+echo "<br>";
+echo $solar_current . ", " . $battery_current . ", " . $grid_current;
+echo "<br>";
+echo $Hausverbrauch . ", " . $car_power . ", " . $battery_current . ", " . $grid_current;
+echo "<br>";
+print_r(round($QZnew_Diff, 3));    #entWIGGlung
 
 // Wenn Abweichung zu groß, wegen zeitlich versetzten Werten, generiere Bar mit den alten Werten aus dem POST
 // Prüfen, ob alte Werte per POST übergeben wurden
@@ -420,6 +433,13 @@ if ($QZnew_Diff > 0.2 or $Hausverbrauch <= 0) {
     }
 }
 echo $html;  # Balkendiagramm ausgeben
+
+$QZnew_Diff = abs($Q_new - $Z_new);  #entWIGGlung
+print_r($Q_new);
+echo "<br>";
+print_r($Z_new);
+echo "<br>";
+print_r(round($QZnew_Diff, 3));  #entWIGGlung
 
 ?>
 <div class="card">
@@ -764,21 +784,19 @@ $('#btnResetCounter').click(function(){
         return;
     }
 
-    // Ruft den POST-Endpoint im OCPP-Server auf
     $.ajax({
-        url: "<?php echo $API; ?>/reset_counter?charge_point_id=" + encodeURIComponent(cp_id),
-        method: "post",
+        url: "<?php echo $API; ?>/reset_counter",
+        method: "GET", // Wichtig: GET nutzen
+        data: { charge_point_id: cp_id },
         dataType: 'json',
-
-        // DIES WIRD NUR BEI ERFOLG AUSGEFÜHRT!
         success: function(response){
+            console.log("Erfolg!");
             refreshData();
         },
-
-        //  Da hier immer ein Fehler kommt, obwohl der Zähler korrekt restetet wurde
         error: function(xhr, status, err) {
+            // Falls es immer noch 'error' anzeigt, schauen wir in die Konsole
+            console.error("Apache-Fehler:", status, err);
             refreshData();
-
         }
     });
 });

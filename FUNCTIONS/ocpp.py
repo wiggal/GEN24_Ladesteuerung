@@ -857,20 +857,35 @@ class OCPPManager:
         })
 
     async def reset_counter(self, request):
-        """HTTP-Handler zum Zurücksetzen des Lade-Zählers."""
-        # Wir stellen auf GET um, damit es vom Browser einfacher aufrufbar ist
+        """HTTP-Handler zum Zurücksetzen des Lade-Zählers mit Apache/CORS Support."""
+        # 1. Parameter aus der URL lesen (für GET-Requests)
         cp_id = request.query.get("charge_point_id")
-
+    
         if not cp_id:
-            return web.json_response({"error": "Missing charge_point_id"}, status=400)
-
-        success = await self.reset_charged_energy_counter(cp_id)
-
-        if success:
-            return web.json_response({"status": "success", "message": "Zähler zurückgesetzt"})
+            resp = web.json_response({"error": "Missing charge_point_id"}, status=400)
         else:
-            # Falls die ID nicht gefunden wurde
-            return web.json_response({"status": "error", "message": "ID nicht gefunden"}, status=404)
+            # 2. Logik ausführen
+            success = await self.reset_charged_energy_counter(cp_id)
+    
+            if success:
+                resp = web.json_response({
+                    "status": "success",
+                    "charge_point_id": cp_id,
+                    "message": "Zaehler erfolgreich auf 0 gesetzt"
+                })
+            else:
+                resp = web.json_response({
+                    "status": "error",
+                    "message": f"Charge Point {cp_id} nicht gefunden"
+                }, status=404)
+
+        # 3. WICHTIG: CORS-Header für Apache hinzufügen
+        # Dies verhindert, dass der Browser "Fehlgeschlagen" meldet
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+
+        return resp
 
     async def reset_charged_energy_counter(self, cp_id: str) -> bool:
         """Setzt die geladene Energie im State-Objekt zurück."""
@@ -918,7 +933,7 @@ class OCPPManager:
         app.add_routes([
             web.get('/list', self.list_cp),
             web.get('/meter_values', self.meter_values),
-            web.post('/reset_counter', self.reset_counter),
+            web.get('/reset_counter', self.reset_counter),
         ])
 
         runner = web.AppRunner(app)
