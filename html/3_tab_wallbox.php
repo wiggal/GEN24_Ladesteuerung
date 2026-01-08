@@ -408,7 +408,7 @@ $QZnew_Diff = abs($Q_new - $Z_new);
 
 // Wenn Abweichung zu groß, wegen zeitlich versetzten Werten, generiere Bar mit den alten Werten aus dem POST
 // Prüfen, ob alte Werte per POST übergeben wurden
-if ($QZnew_Diff > 0.2) {
+if ($QZnew_Diff > 0.2 or $Hausverbrauch <= 0) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['old_Q'], $_POST['old_Z'])) {
         $solar_current   = floatval($_POST['old_solar']);
         $battery_current = floatval($_POST['old_batt']);

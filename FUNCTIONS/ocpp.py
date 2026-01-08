@@ -857,22 +857,34 @@ class OCPPManager:
         })
 
     async def reset_counter(self, request):
+        """HTTP-Handler zum Zurücksetzen des Lade-Zählers."""
+        # Wir stellen auf GET um, damit es vom Browser einfacher aufrufbar ist
         cp_id = request.query.get("charge_point_id")
+
         if not cp_id:
             return web.json_response({"error": "Missing charge_point_id"}, status=400)
-        ok = await self.reset_charged_energy_counter(cp_id)
-        if ok:
-            return web.json_response({"status": "success", "charge_point_id": cp_id, "message": "Charged energy counter reset to 0"})
-        return web.json_response({"status": "error", "charge_point_id": cp_id, "message": "Charge point not found or reset failed"}, status=404)
+
+        success = await self.reset_charged_energy_counter(cp_id)
+
+        if success:
+            return web.json_response({"status": "success", "message": "Zähler zurückgesetzt"})
+        else:
+            # Falls die ID nicht gefunden wurde
+            return web.json_response({"status": "error", "message": "ID nicht gefunden"}, status=404)
 
     async def reset_charged_energy_counter(self, cp_id: str) -> bool:
-        st = self.states.get(cp_id)
+        """Setzt die geladene Energie im State-Objekt zurück."""
+        st = self.states.get(cp_id) # Nutze die neue 'states' Struktur
         if not st:
             cwarn(f"Reset-Zähler: {cp_id} nicht verbunden")
             return False
+
+        # Setze die Werte im Objekt zurück, die von update_charged_energy_from_meter genutzt werden
         st.charged_wh = 0.0
         st.last_energy_wh = None
+
         st.append_debug({"note": "charged-energy-reset", "ts": iso_now()})
+        cok(f"[{st.log_cp_id}] ✅ Zähler erfolgreich zurückgesetzt.")
         return True
 
     # ---------- Autosync ----------

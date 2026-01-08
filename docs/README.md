@@ -140,7 +140,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wigga
 
 ### Settings
 ![Tabelle zu den Settings](pics/Settings.png)
-Programmfunktionen
+Programmfunktionen:  
 Unter Settings kann das Programm zusätzlich gesteuert werden.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).    
