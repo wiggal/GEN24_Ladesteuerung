@@ -196,6 +196,12 @@ button {
 
 button.red { background: #d9534f; }
 button.schreiben { position: sticky; bottom: 10px; left: 40px; }
+button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
 
 select,
 input[type="number"],
@@ -438,10 +444,12 @@ echo $html;  # Balkendiagramm ausgeben
         <p>Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
         <?php
-        // Nur Button anzeigen, wenn Server läuft, Client verbunden ist UND geladene Energie > 0 ist
-        $charged_energy = $meter_values['charged_energy_kwh'] ?? 0.0;
-        if ($server_running && $client_connected && $charged_energy > 0) {
-        echo '&nbsp;<button type="button" class="red" id="btnResetCounter">Reset</button>';
+        // Button nur anzeigen, wenn Server läuft und Client verbunden ist.
+        $charged_energy = (float)($meter_values['charged_energy_kwh'] ?? 0.0);
+        if ($server_running && $client_connected) {
+            $disabled = ($charged_energy <= 0) ? 'disabled' : '';
+
+            echo '<button type="button" id="btnResetCounter" class="red" ' . $disabled . '>Reset</button>';
         }
         ?>
         <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
@@ -464,7 +472,6 @@ echo $html;  # Balkendiagramm ausgeben
                 <option value="2" <?php if($pv_mode=='2') echo 'selected'; ?>>MIN+PV</option>
                 <option value="3" <?php if($pv_mode=='3') echo 'selected'; ?>>MAX</option>
             </select>
-            </span>
         </div>
 
         <div class="row">

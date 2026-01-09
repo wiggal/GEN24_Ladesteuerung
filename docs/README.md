@@ -9,7 +9,7 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Entladesteuerung,](#batterieentladesteuerung) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](#-logging) und grafische Darstellung von Produktion und Verbrauch.  
 - Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
-- [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden und grafische Darstellung.  
+- [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden, mit grafischer Darstellung.  
 - **NEU:** 🚘 [Steuerung des Wattpiloten](#-wallboxsteuerung), über OCPP.  
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 - [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
@@ -45,16 +45,14 @@ Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu 
 
 ## 💾 Installationshinweise: [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
-Ab Version: **0.31.0**  
-Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach einem Download automatisch durchgeführt werden.  
-
-Für eine manuelle Installation, bzw. genauere Installationshinweise sie oben verlinktes Wiki.   
+Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach dessen Download automatisch durchgeführt werden. 
+Für eine manuelle Installation, bzw. genauere Installationshinweise im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).   
 
 ### 🌦️ Prognoseskripte in FORECAST
 
-Holen von den jeweiligen API-Urls die Prognosedaten und bereiten sie auf für GEN24_Ladesteuerung. 
+Holen von den jeweiligen API-Urls die Prognosedaten, bereiten sie auf für GEN24_Ladesteuerung, und speichern Mittelwerte in weatherData.sqlite. 
 
-Besonderheiten:  
+Besonderheiten:
 - Bei forecast.solar kann mit einem Account die Prognose mit den Werten der Produktion aus der DB angepasst werden.  
 - Bei solarprognose.de ist ein Account erforderlich, hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
 - Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag angefordert werden.  
@@ -87,8 +85,8 @@ Hier das Diagramm zu den dynamischen Strompreisen:
 sudo apt update && sudo apt upgrade
 sudo apt install php php-sqlite3
 ```
-Wenn PHP installiert ist, wird durch die Variable `Einfacher_PHP_Webserver = 1` (Standard) in der CONFIG/default_priv.ini beim nächsten Start von `start_PythonScript.sh`
-automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port:2424 erreichbar (z.B.: raspberrypi:2424).  
+Wenn PHP installiert ist, wird durch die Variable `Einfacher_PHP_Webserver = 1` (Standard) in der CONFIG/default_priv.ini beim nächsten Aufruf von `start_PythonScript.sh`
+automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port: 2424 erreichbar (z.B.: raspberrypi:2424).  
 
 **_Alternativ kann auch der Webserver Apache installiert werden:_**  
 [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
@@ -102,19 +100,18 @@ aus der wird dann durch html/8_tab_Diagram.php das Diagramm **QZ**-Bilanz nach *
 ![Grafik zur Quelle/Ziel](pics/QZ_Tag.png)
 *Einzelne Linien und Balken im Diagramm können durch Anklicken des entsprechenden Legendeneintrags ein- oder ausgeblendet werden.*
 
-### Modul zur Reservierung von größeren Mengen PV-Leistung, manuelle Ladesteuerung bzw. Entladesteuerung (z.B. E-Autos)
-
 ### Batterieladesteuerung
+
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 
+Modul zur Reservierung von größeren Mengen PV-Leistung (z.B. E-Autos) und manuelle Ladesteuerung.   
 Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
 Ist **AUTO** eingestellt, wird die Reservierung von EnergyController.py in der Ladeberechnung berücksichtigt.
-
 Bei Einstellung **Slider**, wird mit der eingestellten Prozentzahl der **maximalen Ladeleistung des GEN24**,  
 bei **MaxLadung** mit der in CONFIG/charge_priv.ini unter MaxLadung definierten Ladeleistung,  
 ab dem nächsten Aufruf von EnergyController.py geladen.  
-Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder Auto angewendet.  
+Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder **AUTO** angewendet.  
 
 ### ForecastMgr
 Im ForecastMgr können die gespeicherten Prognosedaten analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
@@ -128,12 +125,14 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wigga
 Unter "Feste Entladegrenze" kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
 
 In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, bzw. zum Laden des Akkus aus dem Netz bei niedrigen Strompreisen, eingetragen werden. 
-Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.
+Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.  
+Hier werden auch die Werte für Zwangsladungen aus dem Netz, oder Ladestopps von DynamicPriceCheck.py eingetragen.  
 
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
 ### 🚘 Wallboxsteuerung
-Das Tool startet einen OCPP-Server, zu dem eine Wallbox (getestet: Fronius Wattpilot) eine Verbindung als Client herstellt.  
+Das Tool startet einen OCPP-Server, zu dem eine Wallbox (aktuell getestet: Fronius Wattpilot) eine Verbindung als Client herstellen kann.  
+Der TAB `Wallbox` ist standardmäßig ausgeblendet, und kann in der html/config_priv.ini eingeblendet werden.  
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
 
 ![Tabelle zur Wallbox](pics/Wallbox.png)

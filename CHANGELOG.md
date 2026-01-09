@@ -1,6 +1,6 @@
-**[0.41.0] – 2026-XX-XX**  
+**[0.41.0] – 2026-01-09**  
 
-- Freigabe der Wattpilotsteuerung, und Dokumentierung in der README.  
+- Verbesserungen der Wattpilotsteuerung, und Dokumentierung in der README.  
 - ForecastMgr bei allen Linien auch die Nullwerte darstellen.  
 
 **[0.40.9] – 2026-01-03**  
