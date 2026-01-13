@@ -26,6 +26,7 @@ RUN apk add --update-cache \
     py-pip \
     bash \
     file \
+    py3-yaml \
     py3-aiohttp \
     py3-websockets \
     py3-requests \

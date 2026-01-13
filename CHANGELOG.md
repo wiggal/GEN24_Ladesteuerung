@@ -1,3 +1,7 @@
+**[0.41.1] – 2026-XX-XX**  
+
+FIX-Docker: ModuleNotFoundError: No module named 'yaml'
+
 **[0.41.0] – 2026-01-09**  
 
 - Verbesserungen der Wattpilotsteuerung, und Dokumentierung in der README.  
