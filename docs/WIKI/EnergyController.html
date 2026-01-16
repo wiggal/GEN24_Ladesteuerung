@@ -2,12 +2,12 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>http_SymoGen24Controller</title>
+    <title>EnergyController</title>
   </head>
   <body>
     <div class="markdown-body">
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      <h1 class="heading-element">http_SymoGen24Controller2.py</h1>
+      <h1 class="heading-element">EnergyController.py</h1>
       <p><strong>Programmfunktionen:</strong></p>
       <ul>
         <li> Prognosebasierte Ladesteuerung für Fronius Symo GEN24 Plus
@@ -38,14 +38,14 @@
       <strong>Funktionsweise:</strong>
       <ul>
         <li>
-          <p>Das Tool http_SymoGen24Controller2.py ist in Python
+          <p>Das Tool EnergyController.py ist in Python
             programmiert, und wird mit folgendem Aufruf in der Regel auf
             einem Linux System gestartet:<br>
-            /DIR/start_PythonScript.sh http_SymoGen24Controller2.py</p>
+            /DIR/start_PythonScript.sh EnergyController.py</p>
         </li>
         <li>
           <p>Im Verzeichnis <b>CONFIG</b> wird mit charge.ini eine
-            Konfiguration für http_SymoGen24Controller2.py ausgeliefert.
+            Konfiguration für EnergyController.py ausgeliefert.
             Wird die charge.ini nach charge_priv.ini kopiert, können
             dort die eigenen Parameter eingestellt werden, ohne dass sie
             bei Updates (mit git pull) überschrieben werden. Ist die
@@ -80,7 +80,7 @@
         </li>
         <li>
           <p>Beim Aufruf von /DIR/start_PythonScript.sh
-            http_SymoGen24Controller2.py können folgende Parameter
+            EnergyController.py können folgende Parameter
             mitgegeben werden, und steuern, welche Werte auf den GEN24
             geschrieben werden, ausgenommen der Einstellungen in den
             WebUI Settings (siehe nächsten Punkt):</p>
@@ -135,7 +135,7 @@
             WICHTIG: Die Parameter werden mit Komma getrennt, und es
             dürfen <b>keine</b> Leerzeichen verwendet werden!!<br>
           </p>
-          <p>/DIR/start_PythonScript.sh http_SymoGen24Controller2.py
+          <p>/DIR/start_PythonScript.sh EnergyController.py
             'logging,optimierung,notstrom'</p>
         </li>
         <li>

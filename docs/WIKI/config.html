@@ -168,13 +168,21 @@ Fast-forward
 <tr><td class="variablenname">battery_capacity_Wh</td>
 <td><input type="text" name="Zeile[21][1]" value="11000" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[22]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[23]" value='[messaging]' >[messaging]</td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[23]" value='[wallbox]' >[wallbox]</td></tr>
+<tr class="comment"><td colspan="2">; wenn wallboxsteuerung = 1, dann wird durch start_PythonScript.sh der ocpp_server gestartet.<br>; Konfiguration und Steuerung des OCPP-Servers erfolgt über den TAB Wattpilot der WebUI </td></tr>
+<tr><td class="variablenname">wallboxsteuerung</td>
+<td><input type="text" name="Zeile[25][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; ocpp_log_level steuert das logging des OCPP-Servers<br>; 0=ERROR/WARN, 1=+/OK 2=+INFO, 3=+NOTE </td></tr>
+<tr><td class="variablenname">log_level</td>
+<td><input type="text" name="Zeile[27][1]" value="3" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[28]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[29]" value='[messaging]' >[messaging]</td></tr>
 <tr class="comment"><td colspan="2">; Hier können Pushmessages zu den Schreibvorgängen über den Dienst ntfy.sh auf die Handyapp ntfy gesendet werden.<br>; Push_Message_EIN (1=EIN/0=AUS)<br>; Die Adresse des über die App erstellten Themennamen eintragen. </td></tr>
 <tr><td class="variablenname">Push_Message_EIN</td>
-<td><input type="text" name="Zeile[25][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[31][1]" value="0" readonly></td></tr>
 <tr><td class="variablenname">Push_Message_Url</td>
-<td><input type="text" name="Zeile[26][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[27]" value='' ></td></tr>
+<td><input type="text" name="Zeile[32][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[33]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/defaultini"></div><br><center><a href="#Hilfezu/CONFIG/weatherini" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;<button type="submit">Hilfe zu weather.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
 <tr class="comment"><td colspan="2">; Bitte die original weather.ini nicht ändern, da sie bei Updates überschrieben wird.<br>; Persönliche Anpassungen stattdessen in einer Kopie als weather_priv.ini ablegen. </td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[env]' >[env]</td></tr>
@@ -391,7 +399,7 @@ Fast-forward
 <tr class="comment"><td colspan="2">; Akkuschonung (0=aus, 1=ein)<br>; Wenn Akkuschonung ein, wird BattVollUm um eine Stunde vor verlegt, da am Schluss nicht mehr so stark geladen wird.<br>; ACHTUNG: Eine Überschreitung der Einspeisegrenze bzw. AC-Leistung des WR setzt die Akkuschonung aus! </td></tr>
 <tr><td class="variablenname">Akkuschonung</td>
 <td><input type="text" name="Zeile[39][1]" value="1" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Akkuschonung_Werte = {&quot;Ladestand%&quot; : &quot;LadewertC&quot;, ...} </td></tr>
+<tr class="comment"><td colspan="2">; Akkuschonung_Werte = {&quot;Ladestand%&quot; : &quot;LadewertC&quot;, ...}<br>; Akkuschonung_Ladewert = ((Akkukapazität * SOH / 100) * LadewertC), aufgerundet auf ganze 10 Watt.<br>; Heißt, der Akkuzustand wird hier wie auch bei anderen Berechnungen angehalten. </td></tr>
 <tr><td class="variablenname">Akkuschonung_Werte</td>
 <td><input type="text" name="Zeile[41][1]" value="{&quot;80&quot;: &quot;0.2&quot;, &quot;90&quot;: &quot;0.1&quot;, &quot;95&quot;: &quot;0.05&quot;}" readonly></td></tr>
 <tr class="comment"><td colspan="2">; bei Prognosemorgen über diesem Wert in kW, wird die Akkuladung auf X% begrenzt,<br>; wenn nicht manuelle Strg ohne Akkuschonung ausgewählt ist.<br>; X ist der erste Wert aus dem String Akkuschonung_Werte<br>; bei einem Wert -1 ist die Funktion abgeschaltet </td></tr>
@@ -516,7 +524,7 @@ Fast-forward
 <td><input type="text" name="Zeile[8][1]" value="0815" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[9]" value='' ></td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[10]" value='[TAB_config]' >[TAB_config]</td></tr>
-<tr class="comment"><td colspan="2">; Hier werden die TABs der WebUI definiert<br>; name = Name, der im TAB dargestellt wird<br>; file = PHP-Skript, das im TAB ausgeführt wird<br>; 0.checked = welcher TAB bei Start angezeigt wird<br>; sichtbar  = Ob der Tab ein- oder ausgeblendet wird.<br>; Soll ein TAB z.B. zwischen 3 und 4 eingefügt werden, kann die Nummer z.B. 3_5 oder 3a sein </td></tr>
+<tr class="comment"><td colspan="2">; Hier werden die TABs der WebUI definiert<br>; name = Name, der im TAB dargestellt wird<br>; file = PHP-Skript, das im TAB ausgeführt wird<br>; checked = ja/nein   welcher TAB bei Start angezeigt wird<br>; sichtbar = ein/aus  Ob der Tab ein- oder ausgeblendet wird.<br>; Soll ein TAB z.B. zwischen 3 und 4 eingefügt werden, kann die Nummer z.B. 3_5 oder 3a sein </td></tr>
 <tr><td class="variablenname">0.name</td>
 <td><input type="text" name="Zeile[12][1]" value="LadeStrg" readonly></td></tr>
 <tr><td class="variablenname">0.file</td>
@@ -535,61 +543,70 @@ Fast-forward
 <tr><td class="variablenname">1.sichtbar</td>
 <td><input type="text" name="Zeile[20][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[21]" value='' ></td></tr>
-<tr><td class="variablenname">2.name</td>
-<td><input type="text" name="Zeile[22][1]" value="config" readonly></td></tr>
-<tr><td class="variablenname">2.file</td>
-<td><input type="text" name="Zeile[23][1]" value="4_tab_config_ini.php" readonly></td></tr>
-<tr><td class="variablenname">2.checked</td>
+<tr><td class="variablenname">1_5.name</td>
+<td><input type="text" name="Zeile[22][1]" value="Wallbox" readonly></td></tr>
+<tr><td class="variablenname">1_5.file</td>
+<td><input type="text" name="Zeile[23][1]" value="3_tab_wallbox.php" readonly></td></tr>
+<tr><td class="variablenname">1_5.checked</td>
 <td><input type="text" name="Zeile[24][1]" value="nein" readonly></td></tr>
-<tr><td class="variablenname">2.sichtbar</td>
-<td><input type="text" name="Zeile[25][1]" value="ein" readonly></td></tr>
+<tr><td class="variablenname">1_5.sichtbar</td>
+<td><input type="text" name="Zeile[25][1]" value="aus" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[26]" value='' ></td></tr>
-<tr><td class="variablenname">3.name</td>
-<td><input type="text" name="Zeile[27][1]" value="Logfiles" readonly></td></tr>
-<tr><td class="variablenname">3.file</td>
-<td><input type="text" name="Zeile[28][1]" value="5_tab_Crontab_log.php" readonly></td></tr>
-<tr><td class="variablenname">3.checked</td>
+<tr><td class="variablenname">2.name</td>
+<td><input type="text" name="Zeile[27][1]" value="config" readonly></td></tr>
+<tr><td class="variablenname">2.file</td>
+<td><input type="text" name="Zeile[28][1]" value="4_tab_config_ini.php" readonly></td></tr>
+<tr><td class="variablenname">2.checked</td>
 <td><input type="text" name="Zeile[29][1]" value="nein" readonly></td></tr>
-<tr><td class="variablenname">3.sichtbar</td>
+<tr><td class="variablenname">2.sichtbar</td>
 <td><input type="text" name="Zeile[30][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[31]" value='' ></td></tr>
-<tr><td class="variablenname">4.name</td>
-<td><input type="text" name="Zeile[32][1]" value="GEN24" readonly></td></tr>
-<tr><td class="variablenname">4.file</td>
-<td><input type="text" name="Zeile[33][1]" value="6_tab_GEN24.php" readonly></td></tr>
-<tr><td class="variablenname">4.checked</td>
+<tr><td class="variablenname">3.name</td>
+<td><input type="text" name="Zeile[32][1]" value="Logfiles" readonly></td></tr>
+<tr><td class="variablenname">3.file</td>
+<td><input type="text" name="Zeile[33][1]" value="5_tab_Crontab_log.php" readonly></td></tr>
+<tr><td class="variablenname">3.checked</td>
 <td><input type="text" name="Zeile[34][1]" value="nein" readonly></td></tr>
-<tr><td class="variablenname">4.sichtbar</td>
+<tr><td class="variablenname">3.sichtbar</td>
 <td><input type="text" name="Zeile[35][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[36]" value='' ></td></tr>
-<tr><td class="variablenname">5.name</td>
-<td><input type="text" name="Zeile[37][1]" value="Strompreis" readonly></td></tr>
-<tr><td class="variablenname">5.file</td>
-<td><input type="text" name="Zeile[38][1]" value="7_tab_Diagram.php" readonly></td></tr>
-<tr><td class="variablenname">5.checked</td>
+<tr><td class="variablenname">4.name</td>
+<td><input type="text" name="Zeile[37][1]" value="GEN24" readonly></td></tr>
+<tr><td class="variablenname">4.file</td>
+<td><input type="text" name="Zeile[38][1]" value="6_tab_GEN24.php" readonly></td></tr>
+<tr><td class="variablenname">4.checked</td>
 <td><input type="text" name="Zeile[39][1]" value="nein" readonly></td></tr>
-<tr><td class="variablenname">5.sichtbar</td>
+<tr><td class="variablenname">4.sichtbar</td>
 <td><input type="text" name="Zeile[40][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[41]" value='' ></td></tr>
-<tr><td class="variablenname">6.name</td>
-<td><input type="text" name="Zeile[42][1]" value="QZ-Bilanz" readonly></td></tr>
-<tr><td class="variablenname">6.file</td>
-<td><input type="text" name="Zeile[43][1]" value="8_tab_Diagram.php" readonly></td></tr>
-<tr><td class="variablenname">6.checked</td>
+<tr><td class="variablenname">5.name</td>
+<td><input type="text" name="Zeile[42][1]" value="Strompreis" readonly></td></tr>
+<tr><td class="variablenname">5.file</td>
+<td><input type="text" name="Zeile[43][1]" value="7_tab_Diagram.php" readonly></td></tr>
+<tr><td class="variablenname">5.checked</td>
 <td><input type="text" name="Zeile[44][1]" value="nein" readonly></td></tr>
-<tr><td class="variablenname">6.sichtbar</td>
+<tr><td class="variablenname">5.sichtbar</td>
 <td><input type="text" name="Zeile[45][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[46]" value='' ></td></tr>
-<tr><td class="variablenname">7.name</td>
-<td><input type="text" name="Zeile[47][1]" value="Settings" readonly></td></tr>
-<tr><td class="variablenname">7.file</td>
-<td><input type="text" name="Zeile[48][1]" value="9_tab_settigs.php" readonly></td></tr>
-<tr><td class="variablenname">7.checked</td>
+<tr><td class="variablenname">6.name</td>
+<td><input type="text" name="Zeile[47][1]" value="QZ-Bilanz" readonly></td></tr>
+<tr><td class="variablenname">6.file</td>
+<td><input type="text" name="Zeile[48][1]" value="8_tab_Diagram.php" readonly></td></tr>
+<tr><td class="variablenname">6.checked</td>
 <td><input type="text" name="Zeile[49][1]" value="nein" readonly></td></tr>
-<tr><td class="variablenname">7.sichtbar</td>
+<tr><td class="variablenname">6.sichtbar</td>
 <td><input type="text" name="Zeile[50][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[51]" value='' ></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[52]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 23.11.2025 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
+<tr><td class="variablenname">7.name</td>
+<td><input type="text" name="Zeile[52][1]" value="Settings" readonly></td></tr>
+<tr><td class="variablenname">7.file</td>
+<td><input type="text" name="Zeile[53][1]" value="9_tab_settigs.php" readonly></td></tr>
+<tr><td class="variablenname">7.checked</td>
+<td><input type="text" name="Zeile[54][1]" value="nein" readonly></td></tr>
+<tr><td class="variablenname">7.sichtbar</td>
+<td><input type="text" name="Zeile[55][1]" value="ein" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[57]" value='' ></td></tr>
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 16.01.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />
 </body>
 </html>
