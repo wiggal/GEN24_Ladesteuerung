@@ -23,7 +23,7 @@ smartmeter_devices = [                       # Smartmeter-Device-Namen (neue GEN
 
 GEN24_IP = "192.168.178.42"                  # IP-Adresse des GEN24
 Leistung_WR = 7500                           # Leistung des größten Wechselrichters / Smartmeters
-Max_Energiesprung = Leistung_WR / 8          # maximal zulässiger Energiesprung pro Abruf/Smartmeter (0 zum deakt.)
+Max_Energiesprung = Leistung_WR / 10          # maximal zulässiger Energiesprung pro Abruf/Smartmeter (0 zum deakt.)
 Max_Energiesprung_kommuliert = Leistung_WR * 2      # tägliche Sicherheitsgrenze pro Smartmeter (0 zum deakt.)
 Wartezeit = 60                               # Wartezeit vor dem Direktabruf in Sekunden
 Summenpruefung_aktiv = 1                     # 1 = aktiv, 0 = deakt. (Prüfung mit Startwert bleibt immer erhalten)
@@ -341,7 +341,7 @@ def get_API(data_temp):
 
         elif Max_Energiesprung > 0 and energy_total > energy_last_total + Max_Energiesprung*len(smartmeter_devices):
             diff = energy_total - energy_last_total
-            print(f"⚠️ Gesamtenergie-Sprung moderat groß (+{diff} Wh, maximal erlaubt +{Max_Energiesprung} Wh) → begrenzt auf +{Max_Energiesprung} Wh.")
+            print(f"⚠️ Gesamtenergie-Sprung moderat groß (+{diff} Wh, maximal erlaubt +{Max_Energiesprung_kommuliert*len(smartmeter_devices)} Wh) → begrenzt auf +{Max_Energiesprung*len(smartmeter_devices)} Wh.")
             energy_total = energy_last_total + Max_Energiesprung*len(smartmeter_devices)
 
     smartmeter_state["energy_last_total"] = energy_total
