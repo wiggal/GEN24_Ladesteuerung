@@ -392,8 +392,9 @@ if __name__ == '__main__':
                             BatteryMaxDischarge = BatteryMaxDischarge_Zwangsladung
                             Neu_BatteryMaxDischarge = abs(int(FesteEntladegrenze))
                             # Akkuschonung auch bei Zwangsladung
-                            if (AkkuschonungLadewert < Neu_BatteryMaxDischarge and Batterieentlandung_steuern > 1): Neu_BatteryMaxDischarge = AkkuschonungLadewert
-                            DEBUG_Ausgabe+="\nDEBUG Akkuschonung auch bei Zwangsladung: " + str(AkkuschonungLadewert)
+                            if (Batterieentlandung_steuern > 1):
+                                if (AkkuschonungLadewert < Neu_BatteryMaxDischarge): Neu_BatteryMaxDischarge = AkkuschonungLadewert
+                                DEBUG_Ausgabe+="\nDEBUG Akkuschonung auch bei Zwangsladung: " + str(AkkuschonungLadewert)
                             # Zwangsladung kann nur geschrieben werden, wenn aktuellerLadewert > Neu_BatteryMaxDischarge
                             if (Neu_BatteryMaxDischarge > aktuellerLadewert): aktuellerLadewert = Neu_BatteryMaxDischarge + 100
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
