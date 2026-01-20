@@ -1,142 +1,259 @@
+<?php
+# config.ini parsen und $TAB_config lesen
+require_once "config_parser.php";
+
+$tabs = [];
+$file_checked = null;
+
+foreach ($TAB_config as $tab) {
+    // nur sichtbare Tabs übernehmen
+    if ($tab['sichtbar'] === 'ein') {
+        // name => file
+        $tabs[$tab['name']] = $tab['file'];
+        // ersten checked => ja merken (NAME!)
+        if ($file_checked === null && $tab['checked'] === 'ja') {
+            $file_checked = $tab['name'];
+        }
+    }
+}
+// Fallbacks, falls kein checked => ja
+if ($file_checked === null) {
+    if (!empty($tabs)) {
+        $file_checked = array_key_first($tabs); // erster sichtbarer Tab
+    } else {
+        $file_checked = 'LadeStrg'; // Standard
+    }
+}
+
+// Sucht erst in POST, dann in GET, sonst Standard 'LadeStrg'
+$activeTab = $_POST['tab'] ?? $_GET['tab'] ?? $file_checked;
+
+$sonder_tabs = [
+  'WeatherMgr'  => 'weatherDataManager.php',
+  'Hilfe'  => 'Hilfe_Ausgabe.php'
+];
+// Neues Array für alle Dateien erzeugen, ohne $tabs zu verändern
+$all_files = $tabs + $sonder_tabs;
+
+// Sicherheitskontrolle um unbefugte Files auszuschießen
+if (!isset($all_files[$activeTab])) {
+    $activeTab = 'LadeStrg';
+    }
+
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
+<meta charset="UTF-8">
 <title>PV_Planung</title>
-  <link rel="icon" type="image/png" href="GEN24Ladesteuerung.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="GEN24Ladesteuerung.png">
 <style>
-/**
- * Tabs
- */
-.tabs {
-    position:fixed; top:0px; width:100%;
-	display: flex;
-	flex-wrap: wrap; // make sure it wraps
-    overflow: hidden;
+/* ===== NAV ===== */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  background: #90CAF9;
+  z-index: 1000;
 }
-.tabs label {
-	order: 1; // Put the labels first
-	display: block;
-	padding: 15px 7px;
-	*margin-right: 0.2rem;
-	margin-right: 0.2%;
-	cursor: pointer;
-    background: #90CAF9;
-    font-weight: bold;
-    font-size: 17px;
-    white-space: nowrap;
-    text-align: center;
+
+.nav form {
+  margin: 0;
+  display: block;
+}
+
+.nav button, .nav .wiki {
+  display: block;
+  border: none;
+  padding: 15px 7px;
+  margin-right: 0.2%;
+  cursor: pointer;
+  background: #90CAF9;
+  font-weight: bold;
+  font-size: 17px;
+  white-space: nowrap;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: background ease 0.2s;
-}
-.tabs label.green {
-  background: #44c767;
-}
-.tabs input[type="radio"]:checked + label.green {
-  background: #999;
+  width: 9vw;
+  box-sizing: border-box;
 }
 
-.tabs .tab {
-  order: 99; // Put the tabs last
-  flex-grow: 1;
-	width: 100%;
-    height: 88dvh;
-	display: none;
-  padding: 1rem;
+.nav button.active {
   background: #fff;
-}
-.tabs input[type="radio"] {
-	display: none;
-}
-.tabs input[type="radio"]:checked + label {
-	background: #fff;
-}
-.tabs input[type="radio"]:checked + label + .tab {
-	display: block;
+  cursor: default;
 }
 
-@media (max-width: 85em) {
-  .tabs label {
-    margin-right: 0;
-    font-size: 20px;
+.nav button.wiki {
+  background: #44c767;
+  width: 9vw; /* Wiki Button gleiche Breite */
+  color: black;
+  text-decoration: none;
+}
+/* ===== CONTENT ===== */
+.content {
+  background: #fff;
+  padding: 5px;
+  margin-top: 30px;
+  /*height: calc(100vh - 80px);   #entWIGGlung*/
+  height: 100vh
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.hilfe a {
+  font-family:Arial;
+  font-size:130%;
+  position: absolute;
+  right: 15px;
+  text-decoration: none;
+}
+
+.weatherDataManager a {
+  font-family:Arial;
+  font-size:130%;
+  position: absolute;
+  left: 8px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+/* Der Iframe füllt den Content komplett aus */
+iframe {
+  width: 100%;
+  height: calc(100vh - 80px);
+  border: none;
+  display: block;
+}
+
+/* ===== MOBILE ANPASSUNG ===== */
+/* Spezifisches Handy-Menü beibehalten */
+@media (max-width: 600px) {
+  /* Scrollbalken für das gesamte Dokument UND den Content-Container ausblenden */
+  html, body, .content {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
+  }
+  /* Für Chrome, Safari und Opera */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  .content::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .hamburger {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    background: #90CAF9;
+    width: 100%;
+    height: 35px;        /* Höhe des blauen Balkens */
+    line-height: 35px;   /* Zentriert die Striche vertikal */
+    font-size: 30px;     /* Die drei Striche deutlich größer */
+    padding-left: 15px;  /* Rückt nur die Striche von links ein */
+    cursor: pointer;
+    box-sizing: border-box;
+    overflow: hidden;    /* Verhindert, dass das große Icon den Balken sprengt */
+  }
+  .nav {
+    top: 35px;
+    flex-direction: column;
+    display: none;
+    width: auto;
+    max-width: 80%; /* Optional: Verhindert, dass das Menü zu breit wird */
+    background: #90CAF9;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+  }
+  .nav.open {
+    display: flex;
+  }
+  .nav button, .nav .wiki {
+    text-align: left;
+    /* Geändert: width: 100% entfernt, damit es nur so breit wie der Text ist */
+    width: auto !important;
+    min-width: 150px; /* Optional: Damit schmale Wörter nicht zu winzig wirken */
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 12px 20px; /* Mehr Platz links/rechts für bessere Optik */
+  }
+
+/* ===== CONTENT ===== */
+  .hilfe, .weatherDataManager {
+    font-size: 80% !important;
+    margin-top: 20px;
   }
 }
-
-/**
- * Generic Styling
-*/
-body {
-  background: #eee;
-  min-height: 100vh;
-	box-sizing: border-box;
-	padding-top: 1vh;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-weight: 300;
-  line-height: 1.5;
-  * max-width: 60rem;
-  margin: 0 auto;
-  font-size: 112%;
-  overflow: hidden;
-}
-
-
 </style>
 </head>
+
 <body>
 
-<?php
-# config.ini parsen
-require_once "config_parser.php";
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="hamburger" onclick="toggleMenu()">☰</div>
 
-if (!isset($TAB_config) OR !is_array($TAB_config)) {
-    echo '</br><center>ACHTUNG: Die Variable "TAB_config" ist in der config.ini oder config_priv.ini nicht (richtig) gesetzt!!</center></body></html>';
-    exit();
-}
-$class_link='';
-# Breite der Tabs in % rechnen
-$anzahl_tabs = array_count_values(array_column($TAB_config, 'sichtbar'))['ein'] + 1; // wegen WIKI-Link
-$Tab_Proz = floor((100-($anzahl_tabs*2))/$anzahl_tabs);
-$class_tab = '';
+  <div class="nav" id="nav">
+    <?php foreach ($tabs as $key => $file): ?>
+      <form method="post">
+        <input type="hidden" name="tab" value="<?= $key ?>">
+        <button
+          type="submit"
+          class="<?= $activeTab === $key ? 'active' : '' ?>"
+          onclick="closeMenu()">
+          <?= htmlspecialchars($key) ?>
+        </button>
+      </form>
+    <?php endforeach; ?>
 
-echo '<div class="tabs">';
-foreach ($TAB_config as $files) {
-    if ($files['sichtbar'] == 'ein' and file_exists($files['file'])){
-        if($files['checked'] == 'ja') {
-            $id_default = ' checked="checked"';
-        } else {
-            $id_default = '';
-        }
-            $class_tab .= '<input type="radio" name="tabs" id="'.$files['name'].'"'.$id_default.' onclick="reloadFrame(\''.$files['name'].'\')">'."\n";
-            $class_tab .= '<label style="width: '.$Tab_Proz.'vw;" for="'.$files['name'].'">'.$files['name'].'</label>'."\n";
-            $class_tab .= '<div class="tab"><iframe id="'.$files['name'].'" src="'.$files['file'].'" style="border:none;" height="100%" width="100%"></iframe></div>'."\n";
+    <button class="wiki" onclick="openWiki()">WIKI</button>
+  </div>
+</div>
+
+<!-- ===== CONTENT ===== -->
+<div class="content">
+  <?php
+    $target = $all_files[$activeTab];
+
+    // Externe Seiten laden: prüfen, ob der Pfad mit http:// oder https:// beginnt
+    if (substr($target, 0, 4) === 'http') {
+        // Externe Seite per Iframe einbinden
+        echo '<iframe src="' . htmlspecialchars($target) . '"></iframe>';
+    } elseif (substr($target, 0, 7) === 'iframe:') {
+        // PHP-Script in Iframe laden, z.B. iframe:6_tab_GEN24.php
+        $teile = explode(":", $target, 2);
+        // Externe Seite per Iframe einbinden
+        echo '<iframe src="' . htmlspecialchars($teile[1]) . '"></iframe>';
+    } else {
+        // Lokale Datei wie gewohnt includen
+        include $target;
     }
-}
-$class_tab .= '<input type="radio" name="tabs" id="WIKI" onclick="openPopup(\'https://wiggal.github.io/GEN24_Ladesteuerung/\'); event.preventDefault();">'."\n";
-$class_tab .= '<label class="green" style="width: '.$Tab_Proz.'vw;" for="WIKI">WIKI</label>'."\n";
-$class_tab .= '<div class="tab"></div>'."\n";
-# ENDE DIV
-$class_tab .= '</div>';
-echo $class_tab;
-?>
+  ?>
+</div>
+
 <script>
-  function openPopup(url) {
-    window.open(url, '_blank', 'width=800,height=600');
-  }
-
-function reloadFrame(button){
-  document.querySelectorAll("iframe").forEach(function(e){ 
-  // nur Iframe des geklickten Tab neu laden
-  if ( e.getAttribute("id") == button ) {
-  e.src+=""; 
-  }
-  });
+function toggleMenu() {
+  document.getElementById('nav').classList.toggle('open');
 }
-// Alle 5 Minuten alle Iframes neu laden
-setInterval(function() {
-  document.querySelectorAll("iframe").forEach(function(e){ e.src+=""; });
-}, 900000);
 
+function closeMenu() {
+  document.getElementById('nav').classList.remove('open');
+}
+
+function openWiki() {
+  window.open(
+    'https://wiggal.github.io/GEN24_Ladesteuerung/',
+    '_blank'
+  );
+}
 </script>
+
 </body>
 </html>
 

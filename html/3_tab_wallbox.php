@@ -71,12 +71,14 @@ if (isset($_POST['action'])) {
     }
 
     // Beim Weiterleiten die aktuelle Client-ID beibehalten
-    $redirect_url = $_SERVER['PHP_SELF'];
+    $redirect_url = $_SERVER['PHP_SELF'] . '?tab=Wallbox'; // NEU: Tab hier fest anfügen
     if (isset($_POST['cp_id']) && !empty($_POST['cp_id'])) {
         $redirect_url .= '?cp_id=' . $_POST['cp_id'];
     }
     
-    header('Location: ' . $redirect_url);
+    // header('Location: ' . $redirect_url);
+    // NEU (funktioniert auch nach HTML-Ausgabe)
+    echo "<script type='text/javascript'>window.location.href='{$redirect_url}';</script>";
     exit;
 }
 
@@ -161,17 +163,11 @@ if (isset($_GET['ajax'])) {
 }
 
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Wattpilot – OCPP Steuerung</title>
 <style>
 /* --- Grundlayout --- */
 body {
     font-family: Arial;
     background: white;
-    padding: 20px;
 }
 
 .card {
@@ -184,7 +180,7 @@ body {
 .card h2 { margin-bottom: 6px; }
 .card p { margin: 4px 0; line-height: 1.1; }
 
-button {
+button.ocpp {
     padding: 6px 12px;
     font-size: 14px;
     background-color: #4CAF50;
@@ -194,9 +190,9 @@ button {
     cursor: pointer;
 }
 
-button.red { background: #d9534f; }
-button.schreiben { position: sticky; bottom: 10px; left: 40px; }
-button:disabled {
+button.ocpp.red { background: #d9534f; }
+button.ocpp.schreiben { position: sticky; bottom: 10px;}
+button.ocpp:disabled {
     background-color: #ccc;
     color: #666;
     cursor: not-allowed;
@@ -242,14 +238,6 @@ p, label {
     vertical-align: middle;
 }
 
-.hilfe {
-    font-family: Arial;
-    font-size: 150%;
-    color: #000;
-    position: fixed;
-    right: 8px;
-}
-
 /* --- Flexbox für Einstellungszeilen --- */
 .row {
     display: flex;
@@ -269,42 +257,8 @@ p, label {
 
 .input-inline select,
 .input-inline input {
-    width: 120px;     /* oder auto / oder 100% – wie du möchtest */
+    width: 120px;     /* oder auto / oder 100% */
     max-width: 100%;
-}
-
-/* --- Smartphone Layout --- */
-@media screen and (max-width: 64em) {
-    body { font-size: 140%; }
-    td { font-size: 120%; }
-
-    .row { gap: 6px; }
-
-    .label-inline {
-        font-size: 120%;
-        width: 440px;     /* Einheitliche Label-Spalte */
-        flex-shrink: 0;   /* verhindert Zusammenstauchen */
-    }
-
-    .input-inline {
-        flex: 0 0 auto;
-        max-width: 35%;
-    }
-
-    .input-inline select,
-    .input-inline input {
-        font-size: 120%;
-        width: 99px;
-        max-width: 100%;
-    }
-    /* Buttons größer */
-    button {
-        font-size: 120%;
-        padding: 12px 20px;
-    }
-    details summary {
-        font-size: 140%;
-        }
 }
 
 /* --- Balkentabelle (PV/Lastenanzeige) --- */
@@ -343,16 +297,31 @@ p, label {
 .in_battery    { background: #3CD73C; color: black; }
 .in_grid       { background: #949494; color: black; }
 
+/* Spezielle Anpassung für Mobilgeräte */
+@media (max-width: 600px) {
+    .label-inline {
+      width: 180px;     /* Einheitliche Label-Spalte */
+      flex-shrink: 0;   /* verhindert Zusammenstauchen */
+    }
+    .input-inline select,
+    .input-inline input {
+      width: 70px;     /* oder auto / oder 100% */
+      max-width: 100%;
+}
+   .wallboxwerte {
+       font-size: 14px;
+   }
+
+} /* @media ENDE */
+
 </style>
-</head>
-<body>
 <?php
   $current_url = urlencode($_SERVER['REQUEST_URI']);
-  $hilfe_link = "Hilfe_Ausgabe.php?file=Wallbox&return=$current_url";
+  $hilfe_link = "index.php?tab=Hilfe&file={$activeTab}";
 ?>
-  <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
+<div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <div class="card">
-    <h2>OCPP Server (Beta-Version)</h2>
+    <h2>OCPP Server</h2>
     <p id="serverStatus">
         <?php if ($server_running): ?>
             <span class="status-dot" style="background:green"></span>
@@ -394,9 +363,15 @@ p, label {
     
     <div style="margin-top:10px;">
         <?php if ($server_running): ?>
-            <form method="post"><input type="hidden" name="action" value="stop_server"><button class="red" id="btnStopServer">Server stoppen</button></form>
+            <form method="post">
+            <input type="hidden" name="action" value="stop_server">
+            <input type="hidden" name="tab" value="Wallbox">
+            <button class="ocpp red" id="btnStopServer">Server stoppen</button></form>
         <?php else: ?>
-            <form method="post"><input type="hidden" name="action" value="start_server"><button class="green" id="btnStartServer">Server starten</button></form>
+            <form method="post">
+            <input type="hidden" name="action" value="start_server">
+            <input type="hidden" name="tab" value="Wallbox">
+            <button class="ocpp green" id="btnStartServer">Server starten</button></form>
         <?php endif; ?>
     </div>
 </div>
@@ -433,7 +408,7 @@ echo $html;  # Balkendiagramm ausgeben
 
 ?>
 <div class="card">
-    
+    <div class="wallboxwerte">
     <?php if ($client_connected): ?>
         <p>Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
             echo 'A / ';
@@ -449,17 +424,18 @@ echo $html;  # Balkendiagramm ausgeben
         if ($server_running && $client_connected) {
             $disabled = ($charged_energy <= 0) ? 'disabled' : '';
 
-            echo '<button type="button" id="btnResetCounter" class="red" ' . $disabled . '>Reset</button>';
+            echo '<button type="button" id="btnResetCounter" class="ocpp red" ' . $disabled . '>Reset</button>';
         }
         ?>
-        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
         </p>
-        <hr>
+        <p>Hausakku SOC: <strong><?php echo ($meter_values['BattStatusProz'] ?? '—'); ?>%</strong></p>
     <?php else: ?>
         <p class="small">Live-Daten sind nicht vorhanden, da kein OCPP-Client (Wallbox) verbunden ist.</p>
     <?php endif; ?>
+        <hr>
+    </div>
 
-    <h2>Optionen einstellen und in DB speichern!</h2>
+    <h3>Optionen einstellen und speichern!</h3>
     <form id="formOptions">
         <input type="hidden" id="selectedCpId" name="cp_id" value="<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>">
         
@@ -472,6 +448,7 @@ echo $html;  # Balkendiagramm ausgeben
                 <option value="2" <?php if($pv_mode=='2') echo 'selected'; ?>>MIN+PV</option>
                 <option value="3" <?php if($pv_mode=='3') echo 'selected'; ?>>MAX</option>
             </select>
+            </span>
         </div>
 
         <div class="row">
@@ -547,7 +524,7 @@ echo $html;  # Balkendiagramm ausgeben
 
         </details>
         <br>
-        <button type="button" id="btnSave" class="schreiben">Speichern</button>
+        <button type="button" id="btnSave" class="ocpp schreiben">Speichern</button>
         <p class="small">Diese Einstellungen werden in der SQLite-Datenbank gespeichert und von der Steuerung (ocpp_server.py) verwendet, um OCPP-Befehle an die Wallbox zu senden.</p>
     </form>
 </div>
@@ -699,11 +676,7 @@ function calculatePower() {
                 // Hinweis: Den Zustand von "Mehr Optionen" NICHT löschen, damit Benutzer-Einstellung erhalten bleibt.
 
                 // Nach dem Speichern auf die Seite des ausgewählten Clients neu laden
-                var redirect_url = '<?php echo $_SERVER['PHP_SELF']; ?>';
-                if (cp_id) {
-                     redirect_url += '?cp_id=' + encodeURIComponent(cp_id);
-                }
-                location.href = redirect_url; 
+                refreshData();
             },
             error: function(xhr, status, err) {
                 alert("Fehler beim Speichern: " + err);
@@ -737,6 +710,7 @@ function refreshData() {
 
     // PHP-Variablen direkt im JS zugewiesen
     var params = {
+        'tab': 'Wallbox',   // damit index weiß von welchem TAB der reload kam
         'old_Q': '<?php echo $Q_new; ?>',
         'old_Z': '<?php echo $Z_new; ?>',
         'old_solar': '<?php echo $solar_current; ?>',
@@ -793,6 +767,3 @@ $('#btnResetCounter').click(function(){
 });
 
 </script>
-
-</body>
-</html>

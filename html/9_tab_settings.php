@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html>
- <head>
-  <title>Einstellungen</title>
   <script src="jquery.min.js"></script>
   <style>
-  .box
-  {
-   max-width:600px;
-   width:100%;
-   margin: 0 auto;;
-  }
   .center {
   margin-left: auto;
   margin-right: auto;
@@ -17,7 +7,7 @@
   .speichern {
 	background-color:#FB5555;
 	border-radius:28px;
-	border:1px solid #FB5555;
+	background-color:#FB5555;
 	display:inline-block;
 	cursor:pointer;
 	color:#000000;
@@ -26,28 +16,32 @@
 	padding:16px 31px;
 	text-decoration:none;
 	text-shadow:0px 1px 0px #FB5555;
+    white-space: nowrap;
+    position: fixed;
+    transform: translate(-50%, 0);
   }
   .speichern:hover {
 	background-color:#EE3030;
   }
   .speichern:active {
 	position:relative;
-	top:1px;
   }
 
 /* LADEGRENZE */
+/* ===== FLEX-CONTAINER ===== */
 .flex-container {
   display: flex;
   flex-direction: column;
-  width: 6%;
-  min-width: 600px;
-  margin: auto;
+  margin: auto;               /* horizontal zentriert */
   background: #fff;
-  align-items: left;
+  align-items: flex-start;    /* Kinder links ausrichten */
   padding: 25px 28px;
   box-shadow: 5px 5px 30px rgba(0,0,0,0.2);
+
+  width: fit-content;         /* Container passt sich Inhalt an */
+  max-width: 100%;            /* niemals breiter als Bildschirm */
+  box-sizing: border-box;     /* Padding wird eingerechnet */
 }
-/* END LADEGRENZE */
 
 /* Radiobuttons */
 input[type="radio"] {
@@ -55,7 +49,6 @@ input[type="radio"] {
    height: 30px;
    accent-color: #FB5555;
 }
-/* ENDE Radiobuttons */
 
 /* CHECKBOX */
 input[type="checkbox"] {
@@ -63,29 +56,29 @@ input[type="checkbox"] {
    height: 30px;
    accent-color: #FB5555;
 }
+
+/* ===== RADIO / CHECKBOX LABELS ===== */
 .auswahllabel {
   font-family: system-ui, sans-serif;
   font-size: 1.5rem;
   line-height: 1.4;
   padding: 5px 8px;
   display: grid;
-  justify-items: left;
-  grid-template-columns: 1.5em auto;
-  grid-gap: 0.5em 0.5em;
+  grid-template-columns: 1.5em minmax(0, 1fr); /* Checkbox/Radio + Text */
+  grid-gap: 0.5em;
+  align-items: center;
+  white-space: nowrap;      /* keine Umbrüche */
+  overflow: hidden;         /* überstehender Text wird abgeschnitten */
+  text-overflow: ellipsis;  /* "..." am Ende bei zu langem Text */
+  max-width: 100%;          /* Text nie breiter als Container */
 }
-/* ENDE CHECKBOX */
 
-.hilfe{
-  font-family:Arial;
-  font-size:150%;
-  color: #000000;
-  position: fixed;
-  right: 8px;
-}
 .ACHTUNG{
   font-family:Arial;
   font-size:150%;
   color: #000000;
+  margin-top: 100px !important; /* Abstand nach oben zum Button */
+  margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
 }
 .containerbeschriftung{
   font-family:Arial;
@@ -94,25 +87,77 @@ input[type="checkbox"] {
   color: #000000;
 }
 
-  </style>
- </head>
+/* Spezielle Anpassung für Mobilgeräte */
+@media (max-width: 600px) {
+  .ACHTUNG {
+    font-size: 100% !important;
+    margin-top: 70px !important; /* Abstand nach oben zum Button */
+    margin-bottom: 5px !important; /* Abstand nach unten zum Slider */
+  }
 
- <body onload="disablecheckboxes()">
+  .auswahllabel {
+    font-size: 100% !important;
+  }
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  th, td {
+    font-size: 90%; /* Schrift auf Handys deutlich verkleinern */
+  }
+
+  .sliderbeschriftung{
+    font-size:90%;
+    margin-top: 25px !important; /* Abstand nach oben zum Button */
+    margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
+  }
+
+  .flex-container {
+    width: 95% !important; /* Container fast volle Breite */
+    padding: 5px 2px !important;
+  }
+
+  .speichern {
+    font-size: 100% !important; /* Speicher-Button verkleinern */
+    padding: 8px 10px !important;
+  }
+
+  .dropdown {
+    font-size: 1.2rem !important; /* Dropdown kleiner */
+  }
+
+  /* Tabelle zwingen, in die Breite zu passen */
+  table.center {
+    width: 90% !important;
+    display: table; /* Stellt sicher, dass sie sich wie eine Tabelle verhält */
+  }
+  table.center td,
+  table.center th {
+    white-space: normal;        /* Umbruch erlauben */
+    word-wrap: break-word;      /* alte Browser */
+    overflow-wrap: break-word;  /* moderne Browser */
+  }
+}
+</style>
 
 <!-- Hilfeaufruf ANFANG -->
 <?php
-  $current_url = urlencode($_SERVER['REQUEST_URI']);
-  $hilfe_link = "Hilfe_Ausgabe.php?file=Settings&return=$current_url";
+  $hilfe_link = "index.php?tab=Hilfe&file={$activeTab}";
 ?>
   <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <!-- Hilfeaufruf ENDE -->
 
-  <div class="container">
+<div align="center"><button type="button" id="import_data" class="speichern">Einstellungen speichern</button></div>
+
    <div class="ACHTUNG" align="center"><p>
    <b>ACHTUNG:</b> Wenn die WebUI-Settings nicht ausgeschaltet sind, 
    <br>überschreiben sie die Aufrufparameter des Skriptes (z.B. vom Cronjob)!
    </p></div>
-  </div>
 
 <?php
 # DB-Eintraege lesen
@@ -159,10 +204,6 @@ foreach ($CheckOptionsALL as &$option) {
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer10" value="dynamicprice" <?php echo $Setting_check['dynamicprice'] ?> >Dynamischer Strompreis</label>
 </div>
 </div>
-
-
-<br />
-<div align="center"><button type="button" id="import_data" class="speichern">Einstellungen ==&#62;&#62; speichern</button></div>
 
   <script>
 function disablecheckboxes() {
@@ -245,5 +286,3 @@ $(document).ready(function(){
  });
 });
 </script>
- </body>
-</html>

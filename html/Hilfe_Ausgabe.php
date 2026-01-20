@@ -1,51 +1,47 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEN24 Ladesteuerung</title>
-    <style>
-        <?php
-        # config.ini parsen
-        require_once "config_parser.php";
+<style>
+html, body {
+    width: 100%;             /* Stellt sicher, dass sie nie breiter als der Viewport sind */
+    overflow-x: hidden;      /* Verhindert horizontales Scrollen der gesamten Seite */
+    margin: 0;               /* Entfernt Standard-Browser-Margin */
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    /* WICHTIG: Fügt Padding hinzu, um den Platz des fixierten Headers auszugleichen. */
+    padding-top: 0px; /* Ausgleich für fixierten Header */
+    scroll-behavior: smooth;
+    scroll-padding-top: 0px;
+}
+table {
+    max-width: 100%;
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    border: none;
+}
 
-        $style_contend = file_get_contents($PythonDIR."/docs/style.css");
-        # Seitenvorschub für WIKI-Navigation entfernen
-        $style_contend = str_replace(
-            'scroll-padding-top: 65px;',
-            'scroll-padding-top: 0px;',
-            $style_contend
-            );
-        $style_contend = str_replace(
-            'padding-top: 35px;',
-            'padding-top: 0px;',
-            $style_contend
-            );
-        echo $style_contend;
-        ?>
-    </style>
-    <style>
-@media (max-width: 968px) {
-  html {
-    font-size: 18px !important;
-  }
-  body {
-    font-size: 1.4rem !important;
-  }
-  table, th, td {
-    font-size: 1.4rem !important;
-  }
+th, td {
+    border: 2px solid #2E64FE;
+    padding: 8px;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 .hilfe{
         position: fixed;
-        top: -2px;
         right: 8px;
         }
-    </style>
+@media (max-width: 600px) {
+  body {
+    font-size: 100% !important;
+  }
+  table, th, td {
+    font-size: 100% !important;
+  }
+}
+</style>
 
 
-    </head>
-<body>
     <main>
         <div id="content-container">
 <?php
@@ -57,10 +53,10 @@ if (!function_exists('str_ends_with')) {
 }
 
 // Hilfe-Datei einlesen
-$filename = isset($_GET['file']) ? basename($_GET['file']) : null;
+$tab = isset($_GET['file']) ? basename($_GET['file']) : null;
 $return_url = isset($_GET['return']) ? htmlspecialchars($_GET['return']) : null;
 # Alle Dokus unter /docs abgelegt
-$filename = $PythonDIR.'/docs/WIKI/' . $filename;
+$filename = $PythonDIR.'/docs/WIKI/' . $tab;
 if ($filename && !str_ends_with($filename, '.html')) {
     $filename .= '.html';
 }
@@ -81,7 +77,7 @@ if (!$filename) {
         // Tag ersetzen
         $html = str_replace(
             '<!--HIERZURUECK-->',
-            '<div class="hilfe" align="right"> <a href="'.$return_url.'"><b>Zurück</b></a></div>',
+            '<div class="hilfe" align="right"> <a href="index.php?tab=' . $tab . '"><b>Zurück</b></a></div>',
             $html_contend
             );
 
@@ -91,5 +87,3 @@ if (!$filename) {
 ?>
         </div>
     </main>
-</body>
-</html>

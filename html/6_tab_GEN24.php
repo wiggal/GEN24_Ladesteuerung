@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html>
-<body>
 <?php
 # config.ini parsen
 require_once "config_parser.php";
@@ -31,5 +28,3 @@ while(!feof($myfile)) {
 }
 header("Location: http://$Zeilenteil[1]");
 ?>
-</body>
-</html>

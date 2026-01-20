@@ -1,11 +1,11 @@
 <?php
 // Datei-Parameter prüfen (z. B. Datei-Name in der URL)
-if (!isset($_GET['file'])) {
+if (!isset($_GET['log_file'])) {
     die('Keine Datei angegeben.');
 }
 
-$fileName = basename($_GET['file']); // Entfernt Pfad-Anteile
-$filePath = $_GET['file'];
+$fileName = basename($_GET['log_file']); // Entfernt Pfad-Anteile
+$filePath = $_GET['log_file'];
 
 // Überprüfen, ob die Datei existiert
 if (!file_exists($filePath)) {

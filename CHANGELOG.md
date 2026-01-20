@@ -1,6 +1,12 @@
 **[0.41.1] – 2026-XX-XX**  
 
+- **Neukonzeption der WebUI um die Oberfläche besser an kleine Bildschirme anpassen zu können.**
+- **Änderung in html/config.ini**  Externe Seiten werden anders eingebunden, in `priv.ini` nachziehen. z.B.:
+    `4.file = iframe:6_tab_GEN24.php`
+    `4.file = http://192.168.178.50`
+
 FIX-Docker: ModuleNotFoundError: No module named 'yaml'
+FIX: name AkkuschonungLadewert is not defined
 
 **[0.41.0] – 2026-01-09**  
 

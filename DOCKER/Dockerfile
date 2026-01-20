@@ -15,6 +15,7 @@ RUN apk add --update-cache git
 RUN git clone -b main https://github.com/wiggal/GEN24_Ladesteuerung.git /home/GEN24
 
 RUN apk add --update-cache \
+    php-openssl \
     php \
     php-json \
     php-sqlite3 \

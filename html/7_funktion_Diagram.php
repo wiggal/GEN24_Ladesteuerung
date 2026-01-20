@@ -1,7 +1,7 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $Strompreis_Dia_optionen, $schaltertext, $durchschnitt_checked)
+function schalter_ausgeben ($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $Strompreis_Dia_optionen, $schaltertext, $durchschnitt_checked, $activeTab)
 {
 # Abstand von bis ermitteln
 # Zeitpunkte mit Zeitzonen, die die Sommerzeit und Winterzeit berücksichtigen
@@ -33,20 +33,24 @@ if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) {
     $button_back_on = 'disabled';
     $PfeilGrauton_back = '0.3';
 };
+# Mobile Schalter
+$mobile_schaltertext = substr($schaltertext, 2);
 
 # Schalter zum Blättern usw.
-echo '<table><tr><td>';
+echo '<table id="schaltertable"><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$VOR_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$VOR_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
 echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
-echo '<button type="submit" style="opacity: '.$PfeilGrauton_back.'" class="navi" '.$button_back_on.'> &nbsp;&lt;&lt;&nbsp;</button>';
+echo '<button type="submit" style="opacity: '.$PfeilGrauton_back.'" class="navi" '.$button_back_on.'> &lt;&lt;</button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$heute.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$morgen.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
@@ -57,24 +61,26 @@ echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$NACH_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$NACH_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
 echo '<input type="hidden" name="AnfangVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="AnfangBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
-echo '<button type="submit" style="opacity: '.$PfeilGrauton_vor.'" class="navi" '.$button_vor_on.'> &nbsp;&gt;&gt;&nbsp; </button>';
+echo '<button type="submit" style="opacity: '.$PfeilGrauton_vor.'" class="navi" '.$button_vor_on.'> &gt;&gt; </button>';
 echo '</form>'."\n";
 
 // Checkbox um Strompreisstatistik auzugeben
 // HTML-Ausgabe
 echo '</td><td>';
 echo '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="Zeitraum" value="'.$Zeitraum.'">'."\n";
-echo '&nbsp;&nbsp;<input type="checkbox" id="durchschnitt" name="durchschnitt" value="ja" ' . $durchschnitt_checked . ' onchange="zeigeBitteWarten(this)">' . "\n";
-echo '<label id="durchschnittLabel" for="durchschnitt"> Statistik anzeigen </label>' . "\n";
-echo '<span id="ladehinweis" style="display:none;"><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bitte warten .....</strong></span>' . "\n";
+echo '&nbsp;<input type="checkbox" id="durchschnitt" name="durchschnitt" value="ja" ' . $durchschnitt_checked . ' onchange="zeigeBitteWarten(this)">' . "\n";
+echo '<label id="durchschnittLabel" for="durchschnitt"> Statistik</label>' . "\n";
+echo '<span id="ladehinweis" style="display:none;"><strong>&nbsp;&nbsp;Bitte warten .....</strong></span>' . "\n";
 echo '</form>' . "\n";
 
 // JavaScript
@@ -90,14 +96,19 @@ echo '</script>' . "\n";
 
 echo '</td><td style="text-align:center; width: 100%;">';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="programmpunkt" value="option">'."\n";
-echo '<button type="submit" class="navi" > '.$schaltertext.' </button>';
+echo '<button type="submit" class="navi" >';
+echo '<span class="desktop-text">'.$schaltertext.'</span>';
+#echo '<span class="mobile-text">'.$mobile_schaltertext.'</span>';  #entWIGGlung
+echo '<span class="mobile-text">'.$schaltertext.'</span>';
+echo '</button>';
 echo '</form>'."\n";
 
-echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$Strompreis_Dia_optionen['Netzladen']['Farbe'].'"><b>';
-echo "&nbsp;$Produktion kWh&nbsp;</b>";
-echo '</td><td style="text-align:right; font-size: 170%; background-color: '.$Strompreis_Dia_optionen['Netzverbrauch']['Farbe'].'"><b>';
-echo "&nbsp;$Verbrauch kWh&nbsp;</b>";
+echo '</td><td class="summen" style="background-color: '.$Strompreis_Dia_optionen['Netzladen']['Farbe'].'"><b>';
+echo "$Produktion kWh</b>";
+echo '</td><td class="summen" style="background-color: '.$Strompreis_Dia_optionen['Netzverbrauch']['Farbe'].'"><b>';
+echo "$Verbrauch kWh</b>";
 
 echo '</td></tr></table><br>';
 } #END function schalter_ausgeben 
@@ -363,7 +374,7 @@ function Preisberechnung($DiaDatenVon, $DiaDatenBis, $groupSTR, $db)  # KI optim
     return $Preisstatistik;
 } # ENDE function Preisberechnung
 
-function Optionenausgabe($DBersterTag_Jahr)
+function Optionenausgabe($DBersterTag_Jahr, $activeTab)
 {
 # HTML-Seite mit Ptionsauswahl ausgeben
 echo "
@@ -404,6 +415,7 @@ window.onload = function() { zeitsetzer(1); };
 
 <div style='text-align: center;'>
 <form method='POST' action='$_SERVER[PHP_SELF]'>
+  <input type='hidden' name='tab' value='$activeTab'>
   <fieldset style='display: none;'>
   <legend class='optionwahl'>Diagrammart:</legend>
   <div style='text-align: left'>
@@ -441,6 +453,25 @@ if ($Preisstatistik != '') {
     }
 
 echo " <script>
+// Schriftgrößen-Bereiche
+const isMobile = window.innerWidth < 768;
+const fontSize = isMobile ? 10 : 20;
+const legendboxWidth = isMobile ? 10 : 20;
+
+// Statistik im Mobile auf 4 Zeilen umbrechen
+let preisTitel = $Preisstatistik_ausgabe;
+if (isMobile && Array.isArray(preisTitel)) {
+    preisTitel = preisTitel
+        .map(line =>
+            line
+                .replace(' Durchschnitt = ', ',Durchschnitt = ')
+                .replace(' Pro kWh = ', ',Pro kWh = ')
+        )
+        .map(l => l.split(','))
+        .flat()
+        .map(l => l.trim());
+}
+
 Chart.register(ChartDataLabels);
 new Chart('PVDaten', {
     data: {
@@ -455,7 +486,7 @@ new Chart('PVDaten', {
       echo "type: '".$optionen[$x]['type']."',\n";
       echo "borderColor: '".$optionen[$x]['Farbe']."',\n";
       echo "backgroundColor: '".$optionen[$x]['Farbe']."',\n";
-      echo "borderWidth: '".$optionen[$x]['linewidth']."',\n";
+      echo "borderWidth: (isMobile ? 1 : ".$optionen[$x]['linewidth']."),\n";
       echo "unit: '".$optionen[$x]['unit']."',\n";
       echo "showLabel: ".$optionen[$x]['showLabel'].",\n";
       echo "pointRadius: 0,\n";
@@ -471,6 +502,7 @@ echo "    }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       interaction: {
         intersect: false,
         mode: 'index',
@@ -508,15 +540,16 @@ echo "    }]
         legend: {
              position: 'top',
              labels: {
+                 boxWidth: legendboxWidth,
                  font: {
-                   size: 20,
+                   size: fontSize,
                  }
             }
         },
         tooltip: {
-            titleFont: { size: 20 },
-            bodyFont: { size: 20 },
-            footerFont: { size: 20 },
+            titleFont: { size: fontSize },
+            bodyFont: { size: fontSize },
+            footerFont: { size: fontSize },
             //filter: (tooltipItem) => tooltipItem.raw !== '', 
             callbacks: {
                   label: function(context) {
@@ -539,15 +572,15 @@ echo "    }]
       x: {
         ticks: {
           font: {
-             size: 20,
+             size: fontSize,
            }
         },
         title: {
           display: true,
           align: 'start',
-          text: $Preisstatistik_ausgabe ,
+          text: preisTitel,
           font: {
-             size: 20,
+             size: fontSize,
            },
         },
       },
@@ -563,7 +596,7 @@ echo "    }]
         ticks: {
            stepSize: 5,
            font: {
-             size: 20,
+             size: fontSize,
            },
            callback: function(value, index, values) {
               return value.toFixed(0) + 'ct';
@@ -584,7 +617,7 @@ echo "    }]
         },
         ticks: {
            font: {
-             size: 20,
+             size: fontSize,
            },
            callback: function(value, index, values) {
               return value >= 0 ? value.toFixed(0) + '' : ''; //Einheit Wh weggelassen
@@ -603,9 +636,9 @@ echo "    }]
             drawOnChartArea: false
         },
         ticks: {
-           stepSize: 20,
+           stepSize: fontSize,
            font: {
-             size: 20,
+             size: fontSize,
            },
            callback: function(value, index, values) {
               return value >= 0 ? Math.round(value) + '%' : '';

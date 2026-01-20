@@ -87,7 +87,7 @@ detect_distro(){
   elif [ -f /etc/alpine-release ]; then
     PM="apk --update add"
     UPDATE=""
-    packages=(shadow iputils-ping file git python3 py-pip py3-yaml py3-requests php php-sqlite3 py3-websockets py3-aiohttp)
+    packages=(shadow iputils-ping file git python3 py-pip py3-yaml py3-requests php php-sqlite3 php-openssl py3-websockets py3-aiohttp)
     SYSTEM=ALPINE
  # elif [ -f /etc/fedora-release ]; then
  #   PM="dnf install -y"

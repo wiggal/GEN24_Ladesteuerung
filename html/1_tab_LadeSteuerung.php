@@ -1,7 +1,3 @@
-<!DOCTYPE html>
-<html>
- <head>
-  <title>PV_Ladeplanung</title>
   <script src="jquery.min.js"></script>
   <style>
   .box
@@ -35,6 +31,7 @@
   font-size: 200%;
   font-weight: normal;
   text-align: right;
+  padding: 4px;
   }
   th {
     text-align: center;
@@ -59,7 +56,6 @@
 	text-shadow:0px 1px 0px #2f6627;
     white-space: nowrap;
     position: fixed;
-    top: 0;
     transform: translate(-50%, 0);
     z-index: 100;  /* <-- sorgt dafür, dass der Button oben bleibt */
   }
@@ -68,7 +64,6 @@
   }
   .speichern:active {
 	position:fixed;
-	top:1px;
   }
 
 /* LADEGRENZBOX */
@@ -117,7 +112,7 @@ label.slider {
 	cursor:pointer;
 	color:#000000;
 	font-family:Arial;
-	font-size:100%;
+	font-size:90%;
 	padding:5px 10px;
 	text-decoration:none;
 	text-shadow:0px 1px 0px #2f6627;
@@ -129,25 +124,19 @@ input.slider {
    accent-color: #44c767;
   }
 
-.hilfe{
-  font-family:Arial;
-  font-size:150%;
-  color: #000000;
-  position: fixed;
-  right: 8px;
-}
-.weatherDataManager{
-  font-family:Arial;
-  font-size:150%;
-  color: #000000;
-  position: fixed;
-  left: 8px;
-}
 .sliderbeschriftung{
   font-family:Arial;
   font-weight: bold;
   font-size:120%;
   color: #000000;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 50px !important; /* Abstand nach oben zum Button */
+  margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
+}
+.checkbox-wrap {
+  white-space: nowrap;
 }
 .prognosevon{
   position: fixed;
@@ -159,22 +148,61 @@ input.slider {
   color: #555;
   font-size: 90%;
 }
-  </style>
- </head>
 
- <body>
-  <div class="weatherDataManager"> <a href="weatherDataManager.php"><b>ForecastMgr</b></a></div>
+/* Spezielle Anpassung für Mobilgeräte */
+@media (max-width: 600px) {
+  .gueltig {
+    width: 100%;
+    display: block;
+  }
+
+  th, td {
+    font-size: 90%; /* Schrift auf Handys deutlich verkleinern */
+  }
+
+  .sliderbeschriftung{
+    font-size:90%;
+    margin-top: 15px !important; /* Abstand nach oben zum Button */
+    margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
+  }
+
+  .flex-container {
+    width: 95% !important; /* Container fast volle Breite */
+    padding: 5px 2px !important;
+  }
+
+  .flex-container > div {
+    margin: 2px !important;      /* Abstand zwischen den Elementen im Block verringern */
+    padding: 2px !important;     /* Inneres Padding der Divs verringern */
+    font-size: 18px !important; /* Slider-Beschriftung kleiner */
+  }
+
+  .speichern {
+    font-size: 100% !important; /* Speicher-Button verkleinern */
+    padding: 8px 10px !important;
+  }
+
+  .dropdown {
+    font-size: 1.2rem !important; /* Dropdown kleiner */
+  }
+
+  /* Tabelle zwingen, in die Breite zu passen */
+  table.center {
+    width: 90% !important;
+    display: table; /* Stellt sicher, dass sie sich wie eine Tabelle verhält */
+  }
+}
+</style>
+
+<div class="weatherDataManager"> <a href="index.php?tab=WeatherMgr&file=<?php echo $activeTab; ?>"><b>FcastMgr</b></a></div>
 <!-- Hilfeaufruf ANFANG -->
 <?php
-  $current_url = urlencode($_SERVER['REQUEST_URI']);
-  $hilfe_link = "Hilfe_Ausgabe.php?file=LadeStrg&return=$current_url";
+  $hilfe_link = "index.php?tab=Hilfe&file={$activeTab}";
 ?>
   <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <!-- Hilfeaufruf ENDE -->
-   <br />
-  <div align="center"><button type="button" id="import_data" class="speichern">PV Ladeplanung ==&#62;&#62; speichern</button></div>
-   <br />
-   <br />
+  <div align="center"><button type="button" id="import_data" class="speichern">Ladesteuerung speichern</button></div>
+  <br />
 
 <?php
 # config.ini parsen
@@ -228,7 +256,11 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
 
 <!-- SLIDER -->
 <div style='text-align: center;'>
-  <p class="sliderbeschriftung">Ladegrenze mit Akkuschonung: <input type="checkbox" name="akkuschonung"  <?php echo $Akkuschon_check ?>><span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
+  <p class="sliderbeschriftung">Ladegrenze mit Akkuschonung: 
+  <span class="checkbox-wrap">
+  <input type="checkbox" name="akkuschonung"  <?php echo $Akkuschon_check ?>>
+  </span>
+  <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
 <div class="flex-container">
     <div>
       <label for="modus" class="dropdown" ></label>
@@ -252,7 +284,7 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
 <br /> <div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>&nbsp;Prognose(KW)&nbsp;</th><th>&nbsp;Rest&nbsp;</th><th>&nbsp;$Res_Feld1&nbsp;</th><th>&nbsp;$Res_Feld2&nbsp;</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Tag und Zeit</th><th style=\"display:none\" >Tag,Zeit zum Dateieintrag noetig, versteckt</th><th>Prognose(KW)</th><th>Rest</th><th>$Res_Feld1</th><th>$Res_Feld2</th></tr>";
 echo "\n";
 
 // Variablen definieren
@@ -448,11 +480,9 @@ $(document).ready(function(){
    success:function(data)
    {
     //alert(data);
-    window.location.reload();
+    window.location.href = "index.php?tab=<?php echo $activeTab; ?>";
    }
   })
  });
 });
 </script>
- </body>
-</html>

@@ -7,7 +7,6 @@ $SQLite_file = $PythonDIR."/weatherData.sqlite";
 # Prüfen, ob DB-existiert
 if (!file_exists($SQLite_file)) {
     echo "\nSQLitedatei $SQLite_file existiert nicht, keine Grafik verfügbar!";
-    echo "</body></html>";
     exit();
 }
 $db = new SQLite3($SQLite_file);
@@ -90,11 +89,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Prognose Tabelle</title>
     <script src="chart.js"></script>
     <style>
         html, body {
@@ -110,7 +104,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         }
 
         .table-container {
-            height: calc(100vh - 120px); /* Fensterhöhe minus Header etc. */
             overflow-y: auto;
             border: 1px solid #ccc;
             margin: 0 20px 20px 20px;
@@ -121,7 +114,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         table {
             border-collapse: collapse;
             width: 100%;
-            min-width: 800px;
         }
 
         th, td {
@@ -141,22 +133,49 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
         tbody tr:nth-child(even) td {
             background-color: #f2f2f2;
         }
+        h1 {
+            font-size: 28px; /* Standard Desktop */
+        }
+
     .hilfe{
-        font-family:Arial;
-        font-size:150%;
-        color: #000000;
         position: fixed;
         right: 8px;
+        z-index: 1200; 
         }
-    .past {
-        opacity: 0.4;
+
+/* Spezielle Anpassung für Mobilgeräte */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 16px;
     }
-    </style>
-</head>
-<body>
-<div class="hilfe" align="right"> <a href="1_tab_LadeSteuerung.php"><b>Zurück</b></a></div>
-    <h1>Solarprognosen aus weatherData</h1>
-    <?php
+
+    /* Verkleinert die Schrift in der Tabelle */
+    #Prognosetable th,
+    #Prognosetable td {
+        font-size: 10px; /* Hier können Sie den Wert nach Bedarf anpassen */
+        padding: 2px; /* Reduziert auch den Innenabstand für mehr Platz */
+    }
+
+    /* Verhindert, dass die Tabelle zu viel Platz einnimmt */
+    .table-container {
+        font-size: 10px;
+        margin: 0 5px 2px 5px;
+    }
+    input[type="checkbox"] {
+        width: 12px;
+        height: 12px;
+    }
+      #tage {
+        font-size: 12px;
+        padding: 1px;
+    }
+}
+</style>
+
+<?php
+    $tab = isset($_GET['file']) ? basename($_GET['file']) : null;
+    echo '<div class="hilfe" align="right"> <a href="index.php?tab='.$tab.'"><b>Zurück</b></a></div>';
+    echo '<h1>Solarprognosen aus weatherData</h1>';
     // Aktuellen Tag bestimmen (POST hat Vorrang)
     $selectedDay = $_POST['selected_day'] ?? date('Y-m-d');
     // Index des aktuellen Tags im $tage-Array finden
@@ -197,7 +216,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     echo '</div>';
     ?>
 
-<canvas id="dayChart" style='height:75vh; width:100vw'></canvas>
+<canvas id="dayChart" style='height:73vh; width:99%'></canvas>
 
     <button onclick="toggleTable()">Tabelle ein-/ausklappen</button>
     <div id="tableWrapper" class="table-container" style="display: none;">
@@ -300,6 +319,7 @@ Das neue Gewicht wird bei der nächsten Anforderung der Prognosequelle gesetzt!\
 \n&#128721; Ausgewählte Quellen wirklich löschen? &#128721;');">Auswahl aus DB löschen</button>
     </fieldset>
 </form>
+<br>
 
 <?php
 // Quellen löschen, wenn Formular abgeschickt wurde
@@ -407,6 +427,11 @@ function renderChart(date) {
     const dateData = chartData[date];
     const allTimes = new Set();
     const datasets = [];
+    // Schriftgrößen-Bereiche
+    const isMobile = window.innerWidth < 768;
+    const fontSize = isMobile ? 10 : 20;
+    const axisFontSize   = isMobile ? 9 : 18;
+    const lineWidth   = isMobile ? 1 : 3;
 
     for (const quelle in dateData) {
         const data = dateData[quelle];
@@ -442,7 +467,7 @@ function renderChart(date) {
             data: werte,
             // Feste Farbzuweisung basierend auf dem Quellnamen
             borderColor: sourceColors[quelle] || '#CCCCCC', // Falls Quelle nicht definiert, Fallback-Farbe
-            borderWidth: 3,
+            borderWidth: lineWidth,
             // Anpassung der Strichart basierend auf Quelle
             borderDash: borderDash,
             pointRadius: 0,
@@ -468,15 +493,22 @@ function renderChart(date) {
     options: {
         responsive: true,
         plugins: {
-            legend: { position: 'top' },
+            legend: { 
+                position: 'top' ,
+                labels: {
+                    font: {
+                        size: axisFontSize   // Hier die Schriftgröße
+                    }
+                }
+            },
             title: {
                 display: false,
                 text: `Prognosen am ${date}`
             },
             tooltip: {
-                titleFont: { size: 20 },
-                bodyFont: { size: 20 },
-                footerFont: { size: 20 },
+                titleFont: { size: fontSize },
+                bodyFont: { size: fontSize },
+                footerFont: { size: fontSize },
                 enabled: true,
                 mode: 'index',
                 intersect: false,
@@ -497,12 +529,12 @@ function renderChart(date) {
             x: {
                 title: { display: true, text: 'Prognose: <?php echo round($Prognose_Summe/1000,1); ?>kWh => Produktion: <?php echo round($Produktion_Summe/1000,1); ?>kWh' ,
                     font: {
-                        size: 18 // Hier Schriftgröße Footer ändern
+                        size: axisFontSize // Hier Schriftgröße Footer ändern
                     }
                 },
                 ticks: {
                     font: {
-                        size: 18 // Schriftgröße für Achsenwerte (Tick-Beschriftung)
+                        size: axisFontSize // Schriftgröße für Achsenwerte (Tick-Beschriftung)
                     }
                 }
             },
@@ -512,7 +544,7 @@ function renderChart(date) {
                 },
                 ticks: {
                     font: {
-                        size: 18 // Schriftgröße für Achsenwerte (Tick-Beschriftung)
+                        size: axisFontSize // Schriftgröße für Achsenwerte (Tick-Beschriftung)
                     }
                 }
             },
@@ -545,6 +577,4 @@ function toggleTable() {
     }
 }
 </script>
-</body>
-</html>
 

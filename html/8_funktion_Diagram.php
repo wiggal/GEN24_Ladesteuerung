@@ -1,7 +1,7 @@
 <?php
 
 ## BEGIN FUNCTIONS
-function schalter_ausgeben ($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch)
+function schalter_ausgeben ($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $activeTab)
 {
 date_default_timezone_set('UTC');
 $date1 = new DateTime($DiaDatenVon);
@@ -55,8 +55,9 @@ if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) {
 };
 
 # Schalter zum Blättern usw.
-echo '<table><tr><td>';
+echo '<table id="schaltertable"><tr><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$VOR_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$VOR_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
@@ -68,6 +69,7 @@ echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
 echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
@@ -79,6 +81,7 @@ echo '</form>'."\n";
 
 echo '</td><td>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$NACH_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$NACH_DiaDatenBis.'">'."\n";
 echo '<input type="hidden" name="diagramtype" value="'.$diagramtype.'">'."\n";
@@ -90,13 +93,14 @@ echo '</form>'."\n";
 
 echo '</td><td style="text-align:center; width: 100%;">';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="energietype" value="option">'."\n";
 echo '<button type="submit" class="navi" > Optionen </button>';
 echo '</form>'."\n";
 
-echo '</td><td style="text-align:right; font-size: 170%; background-color: rgba(255,200,0,1)"><b>';
+echo '</td><td class="summen" style="background-color: rgba(255,200,0,1)"><b>';
 echo "&nbsp;$Produktion kWh&nbsp;</b>";
-echo '</td><td style="text-align:right; font-size: 170%; background-color: rgba(255,0,0,1)"><b>';
+echo '</td><td class="summen" style="background-color: rgba(255,0,0,1)"><b>';
 echo "&nbsp;$Verbrauch kWh&nbsp;</b>";
 
 echo '</td></tr></table><br>';
@@ -362,7 +366,7 @@ return $optionen;
 
 
 
-function Optionenausgabe($DBersterTag_Jahr)
+function Optionenausgabe($DBersterTag_Jahr, $activeTab)
 {
 # HTML-Seite mit Ptionsauswahl ausgeben
 echo "
@@ -436,13 +440,14 @@ window.onload = function() { zeitsetzer(1); };
 
 <div style='text-align: center;'>
 <form method='POST' action='$_SERVER[PHP_SELF]'>
+  <input type='hidden' name='tab' value='$activeTab'>
   <fieldset style='display: inline-block;'>
   <legend class='optionwahl'>Diagrammart:</legend>
   <div style='text-align: left'>
   <input type='radio' id='line' name='diagramtype' value='line' checked>
   <label class='optionwahl' for='line'>Linien</label><br>
   <input type='radio' id='bar' name='diagramtype' value='bar'>
-  <label class='optionwahl' for='bar'>Balken&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><br>
+  <label class='optionwahl' for='bar'>Balken</label><br>
   </div>
   </fieldset>
   <br>
@@ -456,7 +461,7 @@ window.onload = function() { zeitsetzer(1); };
   <input class='date' type='date' name='DiaDatenBis' id='DiaDatenBis' value='' /><br><br>
 
   <input type='radio' id='stunden' name='Zeitraum' value='stunden' onclick='zeitsetzer(1)' checked>
-  <label class='optionwahl' for='stunden'>Stunden&nbsp;&nbsp;&nbsp;&nbsp;</label>
+  <label class='optionwahl' for='stunden'>Stunden</label>
   <input type='radio' id='tage' name='Zeitraum' value='tage' onclick='zeitsetzer(2)'>
   <label class='optionwahl' for='tage'>Tage</label>
   <input type='radio' id='monate' name='Zeitraum' value='monate' onclick='zeitsetzer(3)'>
@@ -480,6 +485,11 @@ if ($EnergieEinheit == 'W') $Nachkommastellen = 0;
 $Y1_stepSize = 100;
 if ($EnergieEinheit == 'kWh') $Y1_stepSize = 10;
 echo " <script>
+// Schriftgrößen-Bereiche
+const isMobile = window.innerWidth < 768;
+const fontSize = isMobile ? 10 : 20;
+const legendboxWidth = isMobile ? 10 : 20;
+
 new Chart('PVDaten', {
     type: '". $Diatype ."',
     data: {
@@ -492,7 +502,7 @@ new Chart('PVDaten', {
       echo "data: [ $val ],\n";
       echo "borderColor: '".$optionen[$x]['Farbe']."',\n";
       echo "backgroundColor: '".$optionen[$x]['Farbe']."',\n";
-      echo "borderWidth: '".$optionen[$x]['linewidth']."',\n";
+      echo "borderWidth: (isMobile ? 1 : ".$optionen[$x]['linewidth']."),\n";
       echo "borderDash: ".$optionen[$x]['borderDash'].",\n";
       echo "pointRadius: 0,\n";
       echo "cubicInterpolationMode: 'monotone',\n";
@@ -507,6 +517,7 @@ echo "    }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       interaction: {
         intersect: false,
         mode: 'index',
@@ -519,16 +530,17 @@ echo "    }]
         legend: {
              position: 'top',
              labels: {
+                 boxWidth: legendboxWidth,
                  font: {
-                   size: 20,
+                   size: fontSize,
                  }
             }
         },
         tooltip: {
             titleAlign: 'center',  // zentriert die Überschrift!
-            titleFont: { size: 20 },
-            bodyFont: { size: 20 },
-            footerFont: { size: 20 },
+            titleFont: { size: fontSize },
+            bodyFont: { size: fontSize },
+            footerFont: { size: fontSize },
             callbacks: {
                   label: function(context) {
                     let total_Q = 0;
@@ -590,14 +602,14 @@ echo "    }]
         max: '". $X_Achse['max'] ."',   // Endzeit
         ticks: {
           font: {
-             size: 20,
+             size: fontSize,
            }
         },
         title: {
           display: true,
           text: '". $Footer ."',
           font: {
-             size: 20,
+             size: fontSize,
            },
         },
       },
@@ -608,7 +620,7 @@ echo "    }]
         ticks: {
            stepSize: '". $Y1_stepSize ."',
            font: {
-             size: 20,
+             size: fontSize,
            }
         },
         // Hier die Scala auf X-Wert begrenzen
@@ -633,9 +645,9 @@ echo "    }]
             drawOnChartArea: false
         },
         ticks: {
-           stepSize: 20,
+           stepSize: fontSize,
            font: {
-             size: 20,
+             size: fontSize,
            },
            callback: function(value, index, values) {
               return value >= 0 ? Math.round(value) + ' %' : '';
@@ -648,4 +660,3 @@ echo "    }]
 </script>";
 }  # END function Diagram_ausgabe
 ?>
-

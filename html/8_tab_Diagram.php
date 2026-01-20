@@ -1,7 +1,3 @@
-<!doctype html>
-<html>
-    <head>
-    <title>Diagramme</title>
     <script src="chart.js"></script>
     <script src="chartjs-adapter-date-fns.js"></script>
     <style>
@@ -10,7 +6,13 @@
         margin: 0px;
     }
     .container {
-        height: 100%;
+      width: 100%;
+      height: calc(100dvh - 35px - 60px); /* Header + Tabelle */
+    }
+    #PVDaten {
+    width: 100%;
+    height: 100%;
+    display: block;
     }
     .navi {
     cursor:pointer;
@@ -19,12 +21,20 @@
     font-size: 150%;
     padding:6px 11px;
   }
+    .summen {
+    text-align:right;
+    font-size: 170%;
+  }
     .optionwahl {
     cursor:pointer;
     color:#000000;
     font-family:Arial;
     font-size: 200%;
-    padding:6px 11px;
+    padding: 6px;
+  }
+    input[type="radio"] {
+    margin: 0 !important;
+    padding: 0 !important;
   }
     .date {
     cursor:pointer;
@@ -34,19 +44,46 @@
     padding:6px 11px;
   }
   table {
-  width: 95%;
+  width: 98%;
   border: 1px solid;
   position: absolute;
+  margin-top: 5px;
   }
   td {
   white-space: nowrap;
   font-family: Arial;
   }
 
-</style>
-    </head>
-    <body>
+/* Spezielle Anpassung für Mobilgeräte */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 16px;
+    }
 
+    /* Verkleinert die Schrift in der Tabelle */
+    #schaltertable th,
+    #schaltertable td {
+        font-size: 10px; /* Hier können Sie den Wert nach Bedarf anpassen */
+        padding: 2px; /* Reduziert auch den Innenabstand für mehr Platz */
+    }
+    .navi {
+    color:#000000;
+    font-family:Arial;
+    font-size: 15px;
+    padding:3px 6px;
+  }
+    #schaltertable td.summen {
+        font-size: 15px;
+    }
+  .optionwahl {
+    font-size: 15px;
+    padding: 1px !important;
+}
+  .date {
+    font-size: 15px;
+  }
+}
+</style>
 
 <?php
 # config.ini parsen
@@ -152,14 +189,14 @@ if ( $Footer_DiaDatenBis != '' and $Footer_DiaDatenVon != $Footer_DiaDatenBis ) 
 } else {
     $Footer = $Footer_DiaDatenVon;
 }
-
 # END _POST_VAR auslesen
+
 # Erstes Jahr aus DB, wenn alle Jahre dargestellt werden sollen
 # DiaDatenBis um 5 Minuten erhöhen, damit der Zähler XX:01 auch noch erfasst wird
 $DiaDatenBis_SQL = date('Y-m-d 00:05', strtotime($DiaDatenBis));
 $DBersterTag_Jahr = date_format(date_create($DBersterTag), 'Y');
 if ($energietype == 'option') {
-    Optionenausgabe($DBersterTag_Jahr);
+    Optionenausgabe($DBersterTag_Jahr, $activeTab);
 } else {
 
 # AC Produktion 
@@ -172,7 +209,7 @@ $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 # Diagrammtype Auswahl
 if ($diagramtype == 'line') {
     # Funktion Schalter aufrufen
-    schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch);
+    schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $activeTab);
 
     # ProduktionsSQL und Daten holen
     $SQL = getSQL('line', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
@@ -184,14 +221,20 @@ if ($diagramtype == 'line') {
     $optionen = Dia_Options('line');
 
     # Nun Linechart ausgeben
-    echo "<div class='container'>
-        <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
-    </div>";
+    if (empty($daten)) {
+        echo '<br><br><p class="navi">Keine Daten für ausgewählten Tag vorhanden!!</p>';
+    } else {
+        echo "\n<div class='container'>
+            <canvas id='PVDaten'></canvas>
+        </div>";
+    }
+
 Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenze, $X_Achse);
+
 } else {  # Dann bar = Balkendiagramm
 
     # Funktion Schalter aufrufen
-    schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch);
+    schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $activeTab);
 
     $SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
     $results = $db->query($SQL);
@@ -202,15 +245,19 @@ Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenz
     $optionen = Dia_Options('bar');
 
     # Nun Barchart ausgeben
-    echo "<div class='container'>
-        <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
-    </div>";
-    Diagram_ausgabe($Footer, 'bar', $labels, $daten, $optionen, 'kWh', $Diagrammgrenze, $X_Achse);
+    if (empty($daten)) {
+        echo '<br><br><p class="navi">Keine Daten für ausgewählten Tag vorhanden!!</p>';
+    } else {
+        echo "\n<div class='container'>
+            <canvas id='PVDaten'></canvas>
+        </div>";
+    }
+
+Diagram_ausgabe($Footer, 'bar', $labels, $daten, $optionen, 'kWh', $Diagrammgrenze, $X_Achse);
 
 } # END if ($diagramtype == 
+
     $db->close();
 } # END if ($energietype == 'option') {
 
 ?>
-    </body>
-</html>

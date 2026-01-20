@@ -1,7 +1,3 @@
-<!doctype html>
-<html>
-    <head>
-    <title>Strompreise</title>
     <script src="chart.js"></script>
     <script src="chartjs-plugin-datalabels.js"></script>
     <style>
@@ -10,7 +6,13 @@
         margin: 0px;
     }
     .container {
-        height: 100%;
+      width: 100%;
+      height: calc(100dvh - 35px - 60px); /* Header + Tabelle */
+    }
+    #PVDaten {
+    width: 100%;
+    height: 100%;
+    display: block;
     }
     .navi {
     cursor:pointer;
@@ -19,12 +21,21 @@
     font-size: 150%;
     padding:6px 11px;
   }
+    .summen {
+    text-align:right;
+    font-size: 170%;
+    padding: 0px 6px;
+  }
     .optionwahl {
     cursor:pointer;
     color:#000000;
     font-family:Arial;
     font-size: 200%;
-    padding:6px 11px;
+    padding: 6px;
+  }
+    input[type="radio"] {
+    margin: 0 !important;
+    padding: 0 !important;
   }
     .date {
     cursor:pointer;
@@ -34,19 +45,57 @@
     padding:6px 11px;
   }
   table {
-  width: 95%;
+  width: 98%;
   border: 1px solid;
   position: absolute;
+  margin-top: 5px;
   }
   td {
   white-space: nowrap;
   font-family: Arial;
   }
+  .mobile-text {
+  display: none;
+  }
+
+/* Spezielle Anpassung für Mobilgeräte */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 16px;
+    }
+
+    /* Verkleinert die Schrift in der Tabelle */
+    #schaltertable th,
+    #schaltertable td {
+        font-size: 10px; 
+        padding: 2px; 
+    }
+    .navi {
+    color:#000000;
+    font-family:Arial;
+    font-size: 14px;
+    padding:3px;
+    }
+    #schaltertable td.summen {
+        font-size: 14px;
+        padding: 1px !important;
+    }
+    .optionwahl {
+      font-size: 14px;
+      padding: 1px !important;
+    }
+    .date {
+      font-size: 15px;
+    }
+    .desktop-text {
+      display: none;
+    }
+    .mobile-text {
+      display: inline;
+    }
+}
 
 </style>
-    </head>
-    <body>
-
 
 <?php
 # config.ini parsen
@@ -135,7 +184,7 @@ $Tag = date_format(date_create($DiaDatenVon), str_replace("%","",'%Y-%m-%d'));
 # Erstes Jahr aus DB, wenn alle Jahre dargestellt werden sollen
 $DBersterTag_Jahr = date_format(date_create($DBersterTag), 'Y');
 if ($programmpunkt == 'option') {
-    Optionenausgabe($DBersterTag_Jahr);
+    Optionenausgabe($DBersterTag_Jahr, $activeTab);
 } else {
 
 # AC Produktion 
@@ -146,7 +195,7 @@ $SQL = getSQL('Netzverbrauch', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Funktion Schalter aufrufen
-schalter_ausgeben($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $Strompreis_Dia_optionen, $Tag, $durchschnitt_checked);
+schalter_ausgeben($DBersterTag, $DBletzterTag, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $Strompreis_Dia_optionen, $Tag, $durchschnitt_checked, $activeTab);
 
 $SQL = getSQL('daten', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
 $results = $db->query($SQL);
@@ -166,13 +215,12 @@ if (empty($daten)) {
     echo '<br><br><p class="navi">Keine Strompreise für ausgewählten Tag vorhanden!!</p>';
 } else {
     echo "<div class='container'>
-    <canvas id='PVDaten' style='height:100vh; width:100vw'></canvas>
+    <canvas id='PVDaten'></canvas>
 </div>";
+
 Diagram_ausgabe($labels, $daten, $Strompreis_Dia_optionen, $Preisstatistik,  $MIN_y3, $MAX_y, $MAX_y3);
 }
 
 $db->close();
 } # END if ($programmpunkt == 'option') {
 ?>
-    </body>
-</html>

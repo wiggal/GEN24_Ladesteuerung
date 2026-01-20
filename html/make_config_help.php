@@ -27,7 +27,29 @@ button {
     font-family:Arial;
     font-size:150%;
     color: #000000;
-    }
+}
+.weatherDataManager {
+    font-size: 80% !important;
+    margin-top: 20px;
+  }
+@media (max-width: 600px) {
+  table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  td, th {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+    pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+}
 
 </style>
   </head>
@@ -108,9 +130,9 @@ foreach ($config_ini_files as $file) {
     $filename_button = preg_replace('#^(\.\./)?CONFIG/#', '', $filename);
     $filename_button = preg_replace('#^(\.\./)+#', '', $filename_button);
     $ankor_text = "Hilfezu".str_replace(['_', '.'], '', $filename);
-    echo '<br><center><a href="#'.$ankor_text.'" style="font-size: 1.7rem; text-decoration: none;">⬇</a>&nbsp;&nbsp;';
+    echo '<br><center><a href="#'.$ankor_text.'" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;';
     echo '<button type="submit">Hilfe zu '.$filename_button.'</button>';
-    echo '&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a></center>';
+    echo '&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center>';
     echo '<br><br>';
     echo '<table>';
 

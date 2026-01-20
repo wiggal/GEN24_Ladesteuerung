@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html>
- <head>
-  <title>Akku Entladesteuerung</title>
   <script src="jquery.min.js"></script>
   <style>
-  .box
-  {
-   max-width:600px;
-   width:100%;
-   margin: 0 auto;;
-  }
   .center {
   margin-left: auto;
   margin-right: auto;
@@ -28,25 +18,19 @@
   }
   th {
   position: sticky;
-  top: 60px;
+  top: 65px;
   }
   th, td {
   font-size: 200%;
   font-weight: normal;
   text-align: center;
-  padding: .2em .2em;
+  padding: 4px;
   }
 
   th, caption {
   background-color: #C1C0C0;
   font-weight: 700;
   }
-
-  /* 3. und 4. Spalte zentriert 
-  td:nth-of-type(3), td:nth-of-type(5), td:nth-of-type(6) {
-  text-align: right;
-  }
-  */
 
   .speichern {
 	background-color:#58ACFA;
@@ -62,7 +46,6 @@
 	text-shadow:0px 1px 0px #58ACFA;
     white-space: nowrap;
     position: fixed;
-    top: 0;
     transform: translate(-50%, 0);
   }
   .speichern:hover {
@@ -70,7 +53,6 @@
   }
   .speichern:active {
 	position:fixed;
-	top:1px;
   }
 
 /* LADEGRENZBOX */
@@ -92,15 +74,6 @@
 }
 /* END LADEGRENZBOX */
 
-/* CHECKBOX */
-input[type="checkbox"] {
-   width: 30px;
-   height: 35px;
-   accent-color: #58ACFA;
-}
-
-/* ENDE CHECKBOX */
-
 label.slider {
 	background-color:#58ACFA;
 	border-radius:10px;
@@ -109,7 +82,7 @@ label.slider {
 	cursor:pointer;
 	color:#000000;
 	font-family:Arial;
-	font-size:100%;
+	font-size:90%;
 	padding:5px 10px;
 	text-decoration:none;
 	text-shadow:0px 1px 0px #2f6627;
@@ -121,37 +94,73 @@ input.slider {
    accent-color: #58ACFA;
   }
 
-.hilfe{
-  font-family:Arial;
-  font-size:150%;
-  color: #000000;
-  position: fixed;
-  right: 8px;
-}
 .sliderbeschriftung{
   font-family:Arial;
   font-weight: bold;
   font-size:120%;
   color: #000000;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 50px !important; /* Abstand nach oben zum Button */
+  margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
 }
 
-  </style>
- </head>
+/* Spezielle Anpassung für Mobilgeräte */
+@media (max-width: 600px) {
+  th, td {
+    font-size: 90%; /* Schrift auf Handys deutlich verkleinern */
+  }
 
- <body>
+  .sliderbeschriftung{
+    font-size:90%;
+    margin-top: 25px !important; /* Abstand nach oben zum Button */
+    margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
+  }
+
+  .flex-container {
+    width: 95% !important; /* Container fast volle Breite */
+    padding: 5px 2px !important;
+  }
+
+  .flex-container > div {
+    margin: 2px !important;      /* Abstand zwischen den Elementen im Block verringern */
+    padding: 2px !important;     /* Inneres Padding der Divs verringern */
+    font-size: 18px !important; /* Slider-Beschriftung kleiner */
+  }
+
+  .speichern {
+    font-size: 100% !important; /* Speicher-Button verkleinern */
+    padding: 8px 10px !important;
+  }
+
+  .dropdown {
+    font-size: 1.2rem !important; /* Dropdown kleiner */
+  }
+
+  /* Tabelle zwingen, in die Breite zu passen */
+  table.center {
+    width: 90% !important;
+    display: table; /* Stellt sicher, dass sie sich wie eine Tabelle verhält */
+  }
+  table.center td,
+  table.center th {
+    white-space: normal;        /* Umbruch erlauben */
+    word-wrap: break-word;      /* alte Browser */
+    overflow-wrap: break-word;  /* moderne Browser */
+  }
+}
+</style>
 
 <!-- Hilfeaufruf ANFANG -->
 <?php
-  $current_url = urlencode($_SERVER['REQUEST_URI']);
-  $hilfe_link = "Hilfe_Ausgabe.php?file=ENTLadeStrg&return=$current_url";
+  $hilfe_link = "index.php?tab=Hilfe&file={$activeTab}";
 ?>
   <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <!-- Hilfeaufruf ENDE -->
 
   <div class="container">
-   <br />
-  <div align="center"><button type="button" id="import_data" class="speichern">Akku Entladesteuerung ==&#62;&#62; speichern</button></div>
-   <br />
+  <div align="center"><button type="button" id="import_data" class="speichern">Entladesteuerung speichern</button></div>
    <br />
 
 <?php
@@ -184,7 +193,7 @@ if (isset($Akku_EntLadung['ManuelleEntladesteuerung']['Res_Feld1'])) {
 <br /><div id="csv_file_data">
 
 <?php
-echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchsgrenze Entladung(KW)</th><th>Feste Entladegrenze(KW)</th><th>Options</th></tr>";
+echo "<table class=\"center\"><tbody><tr><th>Stunde</th><th style=\"display:none\" >Stunde zum Dateieintrag noetig, versteckt</th><th>Verbrauchs&shy;grenze Entladung(KW)</th><th>Feste Entladegrenze(KW)</th><th>Options</th></tr>";
 echo "\n";
 
 // Alle Stunden in Array
@@ -240,6 +249,10 @@ if (isset($Akku_EntLadung[$date]['Options']) and $Akku_EntLadung[$date]['Options
 } else {
     $Options_wert = "";
 }
+# Zeilenumbruch für schmale Displays einfügen
+# z.B.: -0.001;-0.001 => ; ersetzen durch ;<wbr>
+$Res_Feld1_Watt = str_replace(';', ';<wbr>', $Res_Feld1_Watt);
+$Res_Feld2_Watt = str_replace(';', ';<wbr>', $Res_Feld2_Watt);
 
 echo '<tr><td style="white-space: nowrap;" bgcolor=#F1F3F4 class="Tag_Zeit_lesbar" contenteditable="false">';
 echo $date;
@@ -319,11 +332,9 @@ $(document).ready(function(){
    success:function(data)
    {
     //alert(data);
-    location.reload();
+    window.location.href = "index.php?tab=<?php echo $activeTab; ?>";
    }
   })
  });
 });
 </script>
- </body>
-</html>

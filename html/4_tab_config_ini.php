@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
 <style>
 table {
   font-family: Arial, Helvetica, sans-serif;
@@ -29,45 +26,23 @@ select {
   background-color: #F5F5DC;
 }
 .button-container {
-  position: fixed;
-  top: 8px;
   left: 8px;
   display: flex;
   gap: 8px; /* Abstand zwischen den Buttons */
 }
-
-button {
-  padding: 6px 12px;
-  font-size: 14px;
+.button-container.fix {
+  position: fixed;
 }
+
 button {
   font-size: 1.3em;
   background-color: #4CAF50;
+  padding: 6px 12px;
 }
 button.schreiben {
     position: fixed;
     bottom: 0;
 }
-@media screen and (max-width: 64em) {
-body{ font-size: 140%; }
-input { font-size: 100%; }
-th { font-size: 1.5em; }
-td {font-size: 140%;
-    width:48%;
-	max-width: 120px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-    }
-}
-.hilfe{
-    font-family:Arial;
-    font-size:150%;
-    color: #000000;
-    position: fixed;
-    right: 8px;
-    text-align: right;
-    }
 .version{
     font-family:Arial;
     font-size:150%;
@@ -78,16 +53,128 @@ td {font-size: 140%;
   width: auto;      /* passt sich dem Inhalt an */
   display: inline-table; /* optional – verhindert Strecken auf 100% */
 }
+/* Container-Styling */
+  .hilfe-container {
+    display: flex;
+    flex-direction: column; /* Desktop: Untereinander */
+    font-family:Arial;
+    font-size:130%;
+    position: absolute;
+    right: 15px;
+    text-decoration: none;
+    gap: 5px;             /* Abstand zwischen den Links */
+  }
+  .hilfe-container a {
+    text-decoration: none;
+  }
+  .hinweis {
+    font-family:Arial;
+    display:inline-block; 
+    margin-right: 10px;
+  }
+  /* Styling für die neue Legende */
+  .legend-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;           /* Abstand zwischen den Boxen */
+    margin-bottom: 15px;
+    font-family: Arial, sans-serif;
+    justify-content: flex-start; /* Boxen am linken Rand ausrichten */
+  }
+
+  .legend-item {
+    padding: 5px 10px;  /* Kleiner Innenabstand */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    white-space: nowrap; /* Verhindert Zeilenumbruch innerhalb der Box */
+    display: flex;
+    align-items: center;
+    text-align: left;    /* Schrift linksbündig */
+    flex: 0 1 auto;      /* WICHTIG: Box wird nur so breit wie der Inhalt */
+  }
+
+  .legend-item.title {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border: 1px solid #90CAF9; /* Rahmenfarbe an Nav-Blau angepasst */
+  }
+
+  /* Farben */
+  .existing { background-color: #FFF5CC; }
+  .changed  { background-color: #CCE5FF; }
+  .missing  { background-color: #FFCCCC; }
+
+@media (max-width: 600px) {
+
+  .checkbox {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+  }
+  .hilfe-container {
+    font-size: 17px !important;
+    position: static;
+    flex-direction: row;     /* Mobil: Nebeneinander */
+    gap: 20px;
+    justify-content: flex-end; /* Mobil: Schiebt die ganze Reihe nach rechts */
+    align-items: center;
+    }
+  /* Button kleiner */
+  button {
+    font-size: 12px !important;
+    padding: 4px 8px;
+  }
+  /* 1. Tabelle zwingen, nicht breiter als der Bildschirm zu sein */
+  table {
+    table-layout: fixed; /* WICHTIG: Erzwingt Spaltenbreiten */
+    width: 100% !important;
+    word-wrap: break-word;
+  }
+
+  /* 2. Spaltenbreiten definieren (60% für Namen, 40% für Inputs) */
+  td:nth-child(1) {
+    width: 60%;
+  }
+  td:nth-child(2) {
+    width: 40%;
+  }
+
+  /* 3. Inputs an den Platz anpassen */
+  input[type="text"] {
+    width: 100% !important;
+    box-sizing: border-box; /* Padding wird in die Breite eingerechnet */
+  }
+
+  /* 4. Die grauen Kommentarzeilen umbrechen lassen */
+  .comment td {
+    white-space: normal !important; /* Erlaubt Zeilenumbruch */
+    word-break: break-word;        /* Bricht lange Wörter */
+    font-size: 0.85em;             /* Optional: Text etwas kleiner */
+  }
+
+  /* 5. Header-Zeilen ([Hinweis], [Ladeberechnung] etc.) */
+  th {
+    font-size: 14px;
+    word-break: break-all;
+  }
+  .legend-container {
+    gap: 5px; /* Etwas enger auf dem Handy */
+  }
+
+  .legend-item {
+    font-size: 12px;    /* Leicht kleiner für Mobil-Tabellen-Stil */
+    padding: 3px 6px;
+    flex: 0 1 auto;     /* Zwingt Box, auch mobil kompakt zu bleiben */
+  }
+}
 </style>
-</head>
-<body>
 
 <?php
 # config.ini parsen
 require_once "config_parser.php";
 
 $current_url = urlencode($_SERVER['REQUEST_URI']);
-$hilfe_link = "Hilfe_Ausgabe.php?file=config&return=$current_url";
+$hilfe_link = "index.php?tab=Hilfe&file={$activeTab}";
 $config = parse_ini_file($PythonDIR.'/version.ini', true);
 $prg_version = $config['Programm']['version'];
 
@@ -95,9 +182,9 @@ $prg_version = $config['Programm']['version'];
 $repoPath = realpath($PythonDIR);
 $logFile = $repoPath . '/Update.log';
 
-echo '<div class="hilfe">';
-echo '<a href="' . $hilfe_link . '"><b>Hilfe</b></a><br>';
-echo '<a href="https://github.com/wiggal/GEN24_Ladesteuerung/blob/main/CHANGELOG.md" target="_blank"><b>Changelog</b></a></div>';
+echo '<div class="hilfe-container">';
+echo '<a href="' . $hilfe_link . '"><b>Hilfe</b></a>';
+echo '<a href="https://github.com/wiggal/GEN24_Ladesteuerung/blob/main/CHANGELOG.md" target="_blank"><b>Changelog</b></a></div>'."\n";
 
 echo '<div style="text-align:center;">';
 echo '<span class="version">';
@@ -165,7 +252,7 @@ function filterLogByAge(string $filePath): array
 }
 
 
-function get_updatebutton($repoPath, $logFile, $prg_version) {
+function get_updatebutton($repoPath, $logFile, $prg_version, $activeTab) {
     $originalDir = getcwd();
     $error = 'nein';
     $meldungen[] = "=== BEGINN Update-Check ===\n";
@@ -203,38 +290,28 @@ function get_updatebutton($repoPath, $logFile, $prg_version) {
                 $meldungen[] = "Aktueller Branch ist '$currentBranch'. Erwartet wird 'main'.";
                 $error = 'ja';
             } else {
-                // --- Git fetch ---
-                exec('git fetch origin main 2>&1', $fetchOut, $fetchCode);
-                $meldungen[] = "git fetch origin main -> Exit $fetchCode\n" . implode("\n", $fetchOut);
+                // 2. Version direkt via HTTPS laden (schneller als git fetch)
+                $remoteUrl = "https://raw.githubusercontent.com/wiggal/GEN24_Ladesteuerung/refs/heads/main/version.ini";
+                $ctx = stream_context_create(['http' => ['timeout' => 2]]); // 2 Sek. Timeout
+                $iniRaw = @file_get_contents($remoteUrl, false, $ctx);
 
-                // --- Git show version.ini ---
-                exec('git show origin/main:version.ini 2>&1', $remoteIni, $retCode);
-                $meldungen[] =  "git show origin/main:version.ini -> Exit $retCode";
-
-                if ($fetchCode !== 0 || $retCode !== 0 || empty($remoteIni)) {
-                    $meldungen[] = "Git-Fehler: Fetch/Show fehlgeschlagen.";
-                    $meldungen[] = implode("\n", $remoteIni ?: $fetchOut);
-                    $error = 'ja';
+                if ($iniRaw !== false) {
+                    $parsed = @parse_ini_string($iniRaw, true);
+                    $remoteVersion = $parsed['Programm']['version'] ?? null;
                 } else {
-                    // --- Remote-Version parsen ---
-                    $tmp = tmpfile();
-                    fwrite($tmp, implode("\n", $remoteIni));
-                    $meta = stream_get_meta_data($tmp);
-                    $parsed = @parse_ini_file($meta['uri'], true);
-                    fclose($tmp);
-
-                    if ($parsed && isset($parsed['Programm']['version'])) {
-                        $remoteVersion = $parsed['Programm']['version'];
-                        $compare = version_compare(ltrim($localVersion, 'vV'), ltrim($remoteVersion, 'vV'));
-                        $meldungen[] = "Remote-Version gelesen: $remoteVersion (lokal: $localVersion)";
-                    } else {
-                        $meldungen[] = "Remote version.ini konnte nicht gelesen oder geparst werden.";
-                        $error = 'ja';
-                    }
+                    $error = "Remote version.ini nicht erreichbar";
+                }
+                if ($parsed && isset($parsed['Programm']['version'])) {
+                    $remoteVersion = $parsed['Programm']['version'];
+                    $compare = version_compare(ltrim($localVersion, 'vV'), ltrim($remoteVersion, 'vV'));
+                    $meldungen[] = "Remote-Version gelesen: $remoteVersion (lokal: $localVersion)";
+                } else {
+                    $meldungen[] = "Remote version.ini konnte nicht gelesen oder geparst werden.";
+                    $error = 'ja';
                 }
             }
-            chdir($originalDir);
         }
+        chdir($originalDir);
     }
 
     // --- Button oder Fehlerausgabe ---
@@ -266,6 +343,7 @@ function get_updatebutton($repoPath, $logFile, $prg_version) {
 
     echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" style="display:inline;">' . "\n";
     echo '<input type="hidden" name="case" value="git_update">'."\n";
+    echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
     echo '<button type="submit" style="' . htmlspecialchars($buttonStyle) . '" '.$buttontitle . $buttonDisabled . '>';
     echo htmlspecialchars($buttonText) . "\n";
     echo '</button>';
@@ -458,13 +536,14 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
 }
 }
 
-function Dateiauswahl_button($Anzahl, $ini_file, $updatecheck = 'ja'){
+function Dateiauswahl_button($Anzahl, $ini_file, $updatecheck = 'ja', $activeTab){
     echo "</div>\n";
     echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
     echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
     echo '<input type="hidden" name="case" value="">'."\n";
+    echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
     echo '<input type="hidden" name="updatecheck" value="'.$updatecheck.'">'."\n";
-    echo '<div class="button-container">';
+    echo '<div class="button-container fix">';
     echo '<button class="dateiauswahl" type="submit">Zurück zur Dateiauswahl</button>';
     if ($Anzahl == 2){ 
         echo '&nbsp;<button class="Kommentare" type="button" onclick="toggleComments()">Kommentare ein/aus</button>';
@@ -483,23 +562,24 @@ if (isset($ini_file)) $org_ini_file = str_replace('_priv', '', $ini_file);
 if (isset($_POST["updatecheck"])) $updatecheck = $_POST["updatecheck"];
 $nachricht = '';
 if (isset($_GET["nachricht"])) $nachricht = $_GET["nachricht"];
-if ($nachricht != '') echo $nachricht . "<br><br>";
 
 switch ($case) {
     case '':
 # AUSWAEHLEN  _priv.ini
 
 if ($updatecheck == 'ja') {
-    get_updatebutton($PythonDIR, $logFile, $prg_version);
+    get_updatebutton($PythonDIR, $logFile, $prg_version, $activeTab);
 } else {
 echo '</div>';
 }
+if ($nachricht != '') echo "<center>" . $nachricht . "</center>";
 echo '<br><center>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<select name="ini_file">';
 echo getinifile($PythonDIR.'/CONFIG/');
 echo '</select><br><br>';
 echo '<input type="hidden" name="case" value="lesen">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<button type="submit">Auswahl anzeigen</button>';
 echo '</form>'."\n";
 echo '<br><br>';
@@ -509,31 +589,33 @@ echo '<br><br>';
     case 'lesen':
 # AUSGEBEN DER gewählten _priv.ini
 
-Dateiauswahl_button('2', $ini_file, 'nein');
+Dateiauswahl_button('2', $ini_file, 'nein', $activeTab);
 
-echo '<div style="display:inline-block; margin-right: 10px;">';
+echo '<br><div class="hinweis">';
 echo '<b>"'.basename($ini_file).'" hier nur lesbar! <br>Zum editieren Button klicken!</b>';
+echo '</div>';
 echo '<br><br>';
+echo '<div class="button-container">';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="editieren">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="editcase" value="editieren">'."\n";
 echo '<button type="submit">'.basename($ini_file).' editieren</button>';
 echo '</form>';
-echo '</div>';
 echo "\n";
 // Update-Button, wenn Original.ini existiert
 if (file_exists($org_ini_file)) {
-    echo '<div style="display:inline-block;">';
     echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
     echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
     echo '<input type="hidden" name="org_ini_file" value="'.$org_ini_file.'">'."\n";
     echo '<input type="hidden" name="case" value="editieren">'."\n";
+    echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
     echo '<input type="hidden" name="editcase" value="update">'."\n";
     echo '<button type="submit" style="background-color: #FFCCCC;">Update mit '.basename($org_ini_file).'</button>';
     echo '</form>'."\n";
-    echo '</div>';
 }
+echo '</div>';
 
 echo '<br><br>';
 echo '<table>';
@@ -546,7 +628,7 @@ echo '</table>';
     case 'editieren':
 # PASSWORDABFRAGE 
 
-Dateiauswahl_button('1', $ini_file, 'nein');
+Dateiauswahl_button('1', $ini_file, 'nein', $activeTab);
 
 echo '<br><br>';
 echo 'Kennwort um '.basename($ini_file).' zu editieren oder upzudaten:<br>';
@@ -554,6 +636,7 @@ echo '(Kennwortänderung in html/config_priv.ini)<br>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="editieren_passwd">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="editcase" value="'.$_POST["editcase"].'">'."\n";
 echo '<input type="password" name="password" size="10">'."\n";
 echo '<button type="submit">OK</button>';
@@ -564,24 +647,25 @@ echo '<br>';
 
     case 'editieren_passwd':
 # EDITIEREN DER INI-Datei 
-# Erläuterungen zu Hintergrundfarben ausgeben
-echo "<br><br></div>\n";
-echo "<br><table style='width: auto;'><tr><td style='border: 1; padding: 8px;'><b>".$_POST["editcase"]."</b>";
-$SpeichernButton  = ' speichern!';
-if ($_POST["editcase"] == 'update') {
-# SpeichernButton unterschied edit/update
-$SpeichernButton  = ' updaten!';
-echo "</td><td style='border: 0; padding: 8px; background-color: #FFF5CC;'>Werte aus ".basename($ini_file);
-echo "</td><td style='border: 0; padding: 8px; background-color: #CCE5FF;'>Veränderte Werte aus ".basename($org_ini_file);
-echo "</td><td style='border: 0; padding: 8px; background-color: #FFCCCC;'>Fehlende Variablen aus ".basename($org_ini_file);
-}
-echo "</td></tr></table>";
 # Button
-Dateiauswahl_button('2', $ini_file, 'nein');
+Dateiauswahl_button('2', $ini_file, 'nein', $activeTab);
 
 if ($_POST["password"] == $passwd_configedit) {
 
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+# Erläuterungen zu Hintergrundfarben ausgeben
+echo '<br><div class="legend-container">';
+echo '  <div class="legend-item title"><b>'.$_POST["editcase"].'</b></div>';
+$SpeichernButton  = ' speichern!';
+if ($_POST["editcase"] == 'update') {
+    # SpeichernButton unterschied edit/update
+    $SpeichernButton  = ' updaten!';
+    echo '  <div class="legend-item existing">Werte aus '.basename($ini_file) .'</div>';
+    echo '  <div class="legend-item changed">Veränderte Werte aus'.basename($org_ini_file).'</div>';
+    echo '  <div class="legend-item missing">Fehlende Variablen aus '.basename($org_ini_file).'</div>';
+}
+echo '</div>';
+
 echo '<table>';
 
     config_lesen($ini_file, '', $_POST["editcase"], $org_ini_file);
@@ -590,6 +674,7 @@ echo '</table>';
 echo '<br>';
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="schreiben">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<button class="schreiben" type="submit" >'.basename($ini_file).$SpeichernButton.' </button>';
 echo '</form>';
     } else {
@@ -660,7 +745,10 @@ if (!copy($ini_file, $backup_file)) {
     fclose($handle);
 }
 
-header('location: '.$_SERVER["PHP_SELF"].'?nachricht='.$nachricht);
+// header('location: '.$_SERVER["PHP_SELF"].'?nachricht='.$nachricht);
+// NEU (funktioniert auch nach HTML-Ausgabe)
+$redirect_url = $_SERVER["PHP_SELF"] . "?nachricht=" . urlencode($nachricht) . "&tab=" . $activeTab;
+echo "<script type='text/javascript'>window.location.href='$redirect_url';</script>";
 exit();
     break;
 
@@ -673,7 +761,7 @@ $originalDir = getcwd();
 // ins lokales Repo wechseln
 chdir($PythonDIR);
 
-Dateiauswahl_button('1', '', 'ja');
+Dateiauswahl_button('1', '', 'ja', $activeTab);
 // Pull durchführen
 exec('git pull 2>&1', $output, $returnCode);
 
@@ -773,6 +861,3 @@ function toggleComments() {
     });
   });
 </script>
-
-</body>
-</html>
