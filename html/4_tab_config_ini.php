@@ -34,12 +34,12 @@ select {
   position: fixed;
 }
 
-button {
+.content button {
   font-size: 1.3em;
   background-color: #4CAF50;
   padding: 6px 12px;
 }
-button.schreiben {
+.content button.schreiben {
     position: fixed;
     bottom: 0;
 }
@@ -120,7 +120,7 @@ button.schreiben {
     align-items: center;
     }
   /* Button kleiner */
-  button {
+  .content button {
     font-size: 12px !important;
     padding: 4px 8px;
   }

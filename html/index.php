@@ -3,43 +3,24 @@
 require_once "config_parser.php";
 
 $tabs = [];
-$file_checked = null;
 
 foreach ($TAB_config as $tab) {
-    // nur sichtbare Tabs übernehmen
     if ($tab['sichtbar'] === 'ein') {
-        // name => file
         $tabs[$tab['name']] = $tab['file'];
-        // ersten checked => ja merken (NAME!)
-        if ($file_checked === null && $tab['checked'] === 'ja') {
-            $file_checked = $tab['name'];
-        }
-    }
-}
-// Fallbacks, falls kein checked => ja
-if ($file_checked === null) {
-    if (!empty($tabs)) {
-        $file_checked = array_key_first($tabs); // erster sichtbarer Tab
-    } else {
-        $file_checked = 'LadeStrg'; // Standard
     }
 }
 
-// Sucht erst in POST, dann in GET, sonst Standard 'LadeStrg'
-$activeTab = $_POST['tab'] ?? $_GET['tab'] ?? $file_checked;
+$activeTab = $_POST['tab'] ?? $_GET['tab'] ?? $TAB_config['0']['name'];
 
 $sonder_tabs = [
   'WeatherMgr'  => 'weatherDataManager.php',
   'Hilfe'  => 'Hilfe_Ausgabe.php'
 ];
-// Neues Array für alle Dateien erzeugen, ohne $tabs zu verändern
 $all_files = $tabs + $sonder_tabs;
 
-// Sicherheitskontrolle um unbefugte Files auszuschießen
 if (!isset($all_files[$activeTab])) {
     $activeTab = 'LadeStrg';
-    }
-
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -49,80 +30,114 @@ if (!isset($all_files[$activeTab])) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="GEN24Ladesteuerung.png">
 <style>
-/* ===== NAV ===== */
-.nav {
+/* ===== BASIS & NAV-HÖHE ===== */
+/* ===== BASIS & NAV-STRUKTUR ===== */
+body { margin: 0; font-family: Arial, sans-serif; }
+
+.header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
   background: #90CAF9;
   z-index: 1000;
+  height: 50px;
 }
 
-.nav form {
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+}
+
+.nav-visible {
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+  flex-grow: 1;
+}
+
+.nav-item {
   margin: 0;
-  display: block;
+  display: flex;
 }
 
-.nav button, .nav .wiki {
-  display: block;
+/* Standard: 50px Padding & 17px Schrift */
+.nav-item button, .nav-item .wiki-btn {
   border: none;
-  padding: 15px 7px;
-  margin-right: 0.2%;
-  cursor: pointer;
+  padding: 0 50px;   /* Maximales padding 50 wenn Platz*/
   background: #90CAF9;
   font-weight: bold;
   font-size: 17px;
   white-space: nowrap;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: background ease 0.2s;
-  width: 9vw;
+  cursor: pointer;
+  height: 50px;
   box-sizing: border-box;
+  text-align: center;
 }
 
-.nav button.active {
-  background: #fff;
-  cursor: default;
+/* Kompakt-Modus: Reduzierung auf 2px */
+.nav-container.compact .nav-item button,
+.nav-container.compact .nav-item .wiki-btn {
+  padding: 0 8px;
 }
 
-.nav button.wiki {
-  background: #44c767;
-  width: 9vw; /* Wiki Button gleiche Breite */
-  color: black;
-  text-decoration: none;
-}
-/* ===== CONTENT ===== */
-.content {
+.nav-item button.active {
   background: #fff;
-  padding: 5px;
-  margin-top: 30px;
-  /*height: calc(100vh - 80px);   #entWIGGlung*/
-  height: 100vh
-  overflow-y: auto;
-  overflow-x: auto;
+}
+
+/* ===== OVERFLOW / HAMBURGER ===== */
+.hamburger {
+  padding: 0 15px;
+  font-size: 30px;
+  cursor: pointer;
+  line-height: 50px;
+  display: none;
+  background: #90CAF9;
+}
+
+.overflow-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background: #90CAF9;
+  box-shadow: -2px 5px 10px rgba(0,0,0,0.2);
+  min-width: 200px;
+  flex-direction: column;
+}
+
+.overflow-menu.open {
+  display: flex;
+}
+
+/* Im Menü gute Lesbarkeit */
+.overflow-menu .nav-item button {
+  width: 100%;
+  text-align: left;
+  padding: 0 15px !important;
+  border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 .hilfe a {
-  font-family:Arial;
-  font-size:130%;
-  position: absolute;
-  right: 15px;
-  text-decoration: none;
+  font-family: Arial; font-size: 130%; position: absolute;
+  right: 15px; text-decoration: none;
 }
 
 .weatherDataManager a {
-  font-family:Arial;
-  font-size:130%;
-  position: absolute;
-  left: 8px;
-  white-space: nowrap;
-  text-decoration: none;
+  font-family: Arial; font-size: 130%; position: absolute;
+  left: 8px; white-space: nowrap; text-decoration: none;
 }
-/* Der Iframe füllt den Content komplett aus */
+
+.content {
+  background: #fff; 
+  padding: 5px; 
+  margin-top: 50px;
+  height: calc(100vh - 50px);
+  overflow: auto;
+}
+
 iframe {
   width: 100%;
   height: calc(100vh - 80px);
@@ -130,60 +145,15 @@ iframe {
   display: block;
 }
 
-/* ===== MOBILE ANPASSUNG ===== */
-/* Spezifisches Handy-Menü beibehalten */
+/* Mobile Scrollbar-Handling */
 @media (max-width: 600px) {
-  /* Scrollbalken für das gesamte Dokument UND den Content-Container ausblenden */
   html, body, .content {
-    scrollbar-width: none !important; /* Firefox */
-    -ms-overflow-style: none !important; /* IE/Edge */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
   }
-  /* Für Chrome, Safari und Opera */
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar,
-  .content::-webkit-scrollbar {
+  html::-webkit-scrollbar, body::-webkit-scrollbar, .content::-webkit-scrollbar {
     display: none !important;
-    width: 0 !important;
-    height: 0 !important;
   }
-
-  .hamburger {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1001;
-    background: #90CAF9;
-    width: 100%;
-    height: 35px;        /* Höhe des blauen Balkens */
-    line-height: 35px;   /* Zentriert die Striche vertikal */
-    font-size: 30px;     /* Die drei Striche deutlich größer */
-    padding-left: 15px;  /* Rückt nur die Striche von links ein */
-    cursor: pointer;
-    box-sizing: border-box;
-    overflow: hidden;    /* Verhindert, dass das große Icon den Balken sprengt */
-  }
-  .nav {
-    top: 35px;
-    flex-direction: column;
-    display: none;
-    width: auto;
-    max-width: 80%; /* Optional: Verhindert, dass das Menü zu breit wird */
-    background: #90CAF9;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-  }
-  .nav.open {
-    display: flex;
-  }
-  .nav button, .nav .wiki {
-    text-align: left;
-    /* Geändert: width: 100% entfernt, damit es nur so breit wie der Text ist */
-    width: auto !important;
-    min-width: 150px; /* Optional: Damit schmale Wörter nicht zu winzig wirken */
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding: 12px 20px; /* Mehr Platz links/rechts für bessere Optik */
-  }
-
 /* ===== CONTENT ===== */
   .hilfe, .weatherDataManager {
     font-size: 80% !important;
@@ -195,65 +165,143 @@ iframe {
 
 <body>
 
-<!-- ===== HEADER ===== -->
 <div class="header">
-  <div class="hamburger" onclick="toggleMenu()">☰</div>
+  <div class="nav-container">
+    <div class="nav-visible" id="navVisible">
+      <?php foreach ($tabs as $key => $file): ?>
+        <form method="post" class="nav-item">
+          <input type="hidden" name="tab" value="<?= $key ?>">
+          <button type="submit" class="<?= $activeTab === $key ? 'active' : '' ?>">
+            <?= htmlspecialchars($key) ?>
+          </button>
+        </form>
+      <?php endforeach; ?>
+      
+      <div class="nav-item">
+        <button class="wiki-btn" onclick="openWiki()" style="background: #44c767;">WIKI</button>
+      </div>
+    </div>
 
-  <div class="nav" id="nav">
-    <?php foreach ($tabs as $key => $file): ?>
-      <form method="post">
-        <input type="hidden" name="tab" value="<?= $key ?>">
-        <button
-          type="submit"
-          class="<?= $activeTab === $key ? 'active' : '' ?>"
-          onclick="closeMenu()">
-          <?= htmlspecialchars($key) ?>
-        </button>
-      </form>
-    <?php endforeach; ?>
-
-    <button class="wiki" onclick="openWiki()">WIKI</button>
+    <div class="nav-overflow">
+      <div class="hamburger" id="hamburgerBtn" onclick="toggleMenu()">☰</div>
+      <div class="overflow-menu" id="overflowMenu"></div>
+    </div>
   </div>
 </div>
+<script>
+  // Sofort ausführen, sobald das HTML gerendert ist, nicht auf content warten
+  updateNavigation();
+</script>
 
-<!-- ===== CONTENT ===== -->
 <div class="content">
   <?php
     $target = $all_files[$activeTab];
-
-    // Externe Seiten laden: prüfen, ob der Pfad mit http:// oder https:// beginnt
     if (substr($target, 0, 4) === 'http') {
-        // Externe Seite per Iframe einbinden
         echo '<iframe src="' . htmlspecialchars($target) . '"></iframe>';
     } elseif (substr($target, 0, 7) === 'iframe:') {
-        // PHP-Script in Iframe laden, z.B. iframe:6_tab_GEN24.php
         $teile = explode(":", $target, 2);
-        // Externe Seite per Iframe einbinden
         echo '<iframe src="' . htmlspecialchars($teile[1]) . '"></iframe>';
     } else {
-        // Lokale Datei wie gewohnt includen
         include $target;
     }
   ?>
 </div>
 
 <script>
-function toggleMenu() {
-  document.getElementById('nav').classList.toggle('open');
+function updateNavigation() {
+  const visibleContainer = document.getElementById('navVisible');
+  const overflowMenu = document.getElementById('overflowMenu');
+  const hamburger = document.getElementById('hamburgerBtn');
+  
+  // Alle Items zurückholen
+  const items = Array.from(document.querySelectorAll('.nav-item'));
+  items.forEach(item => visibleContainer.appendChild(item));
+  
+  hamburger.style.display = 'none';
+  overflowMenu.classList.remove('open');
+
+  let availableWidth = visibleContainer.offsetWidth;
+  let currentWidth = 0;
+
+  items.forEach(item => {
+    // Wir addieren die Breite des Items
+    currentWidth += item.offsetWidth;
+    
+    // Wenn es nicht mehr passt (Puffer für Hamburger einrechnen)
+    if (currentWidth > availableWidth - 60) {
+      hamburger.style.display = 'block';
+      overflowMenu.appendChild(item);
+    }
+  });
 }
 
-function closeMenu() {
-  document.getElementById('nav').classList.remove('open');
+function toggleMenu() {
+  document.getElementById('overflowMenu').classList.toggle('open');
 }
 
 function openWiki() {
-  window.open(
-    'https://wiggal.github.io/GEN24_Ladesteuerung/',
-    '_blank'
-  );
+  window.open('https://wiggal.github.io/GEN24_Ladesteuerung/', '_blank');
 }
+
+window.addEventListener('resize', updateNavigation);
+window.addEventListener('load', updateNavigation);
+
+// Schließen bei Klick außerhalb
+window.onclick = function(event) {
+  if (!event.target.matches('.hamburger')) {
+    const dropdown = document.getElementById('overflowMenu');
+    if (dropdown && dropdown.classList.contains('open')) {
+      dropdown.classList.remove('open');
+    }
+  }
+}
+function updateNavigation() {
+  const container = document.querySelector('.nav-container');
+  const visibleContainer = document.getElementById('navVisible');
+  const overflowMenu = document.getElementById('overflowMenu');
+  const hamburger = document.getElementById('hamburgerBtn');
+
+  // 1. Reset: Alles zurück in die Leiste, Kompakt-Modus aus
+  const items = Array.from(document.querySelectorAll('.nav-item'));
+  items.forEach(item => visibleContainer.appendChild(item));
+  container.classList.remove('compact');
+  hamburger.style.display = 'none';
+  overflowMenu.classList.remove('open');
+
+  const availableWidth = visibleContainer.offsetWidth - 60;
+
+  // 2. Erster Durchgang: Messen mit 10px Padding
+  let currentWidth = 0;
+  let needsCompact = false;
+
+  items.forEach(item => {
+    currentWidth += item.getBoundingClientRect().width;
+  });
+
+  // Wenn es mit 10px nicht passt, auf 2px umschalten
+  if (currentWidth > availableWidth) {
+    container.classList.add('compact');
+    needsCompact = true;
+  }
+
+  // 3. Zweiter Durchgang: Wenn nötig, Items in den Hamburger schieben
+  if (needsCompact) {
+    currentWidth = 0;
+    items.forEach(item => {
+      // Neue Breite mit 2px Padding messen
+      currentWidth += item.getBoundingClientRect().width;
+
+      if (currentWidth > availableWidth) {
+        hamburger.style.display = 'block';
+        overflowMenu.appendChild(item);
+      }
+    });
+  }
+}
+
+window.addEventListener('resize', updateNavigation);
+window.addEventListener('load', updateNavigation);
 </script>
 
 </body>
 </html>
-

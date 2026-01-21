@@ -177,7 +177,7 @@ body {
     border-radius: 8px;
 }
 
-.card h2 { margin-bottom: 6px; }
+.card h2 { margin: 0px; }
 .card p { margin: 4px 0; line-height: 1.1; }
 
 button.ocpp {
@@ -307,9 +307,12 @@ p, label {
     .input-inline input {
       width: 70px;     /* oder auto / oder 100% */
       max-width: 100%;
-}
+    }
    .wallboxwerte {
-       font-size: 14px;
+     font-size: 14px;
+   }
+   .hilfe {
+      margin: 0px;
    }
 
 } /* @media ENDE */

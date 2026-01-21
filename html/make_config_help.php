@@ -141,7 +141,7 @@ foreach ($config_ini_files as $file) {
     echo '</table>';
     echo '<div id="'.$ankor_text.'"></div>';
 }
-echo '<br /><br /><hr />Hilfe erzeugt am '.date("d.m.Y", $timestamp).' durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 1.7rem; text-decoration: none;">⬆</a><br />';
+echo '<br /><br /><hr />Hilfe erzeugt am '.date("d.m.Y", $timestamp).' durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />';
 ?>
 
 </body>

@@ -1,9 +1,13 @@
 **[0.41.1] – 2026-XX-XX**  
 
 - **Neukonzeption der WebUI um die Oberfläche besser an kleine Bildschirme anpassen zu können.**
-- **Änderung in html/config.ini**  Externe Seiten werden anders eingebunden, in `priv.ini` nachziehen. z.B.:
+- **Änderungen in html/config.ini**  in `priv.ini` nachziehen.  
+  - Externe Seiten werden anders eingebunden z.B.:
     `4.file = iframe:6_tab_GEN24.php`
+    http(s):-Links können nun direkt eingebunden werden (z.B. Grafana)  
     `4.file = http://192.168.178.50`
+  - X.checked fällt weg, beim Start wird immer der erste TAB aktiviert.  
+  - X.sort ist neu, damit kann einfach eine Sortierung der TABs erreicht werden.  
 
 FIX-Docker: ModuleNotFoundError: No module named 'yaml'
 FIX: name AkkuschonungLadewert is not defined

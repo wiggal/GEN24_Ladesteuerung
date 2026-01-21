@@ -45,7 +45,7 @@ table a {
   display: block;
 }
 
-/* Mobile: kompakt */
+/* Spezielle Anpassung für Mobilgeräte */
 @media (max-width: 600px) {
   .bottom-bar form {
     flex-direction: column;
@@ -57,11 +57,8 @@ table a {
     align-items: center;
     font-size: 12px;
   }
-}
 
-/* Spezielle Anpassung für Mobilgeräte */
-@media (max-width: 600px) {
-  body {
+  .content {
     font-size: 100% !important;
   }
 
@@ -73,7 +70,7 @@ table a {
     width: 100px;   /* optional, je nach Wunsch */
   }
   /* Filter-Button kleiner */
-  button {
+  .content button {
     font-size: 12px !important;
     padding: 4px 8px;
   }
