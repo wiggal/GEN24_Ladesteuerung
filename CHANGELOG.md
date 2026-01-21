@@ -1,7 +1,7 @@
 **[0.41.1] – 2026-XX-XX**  
 
 - **Neukonzeption der WebUI um die Oberfläche besser an kleine Bildschirme anpassen zu können.**
-- **Änderungen in html/config.ini**  in `priv.ini` nachziehen.  
+- **Änderungen in html/config.ini**  in `priv.ini` nachziehen.
   - Externe Seiten werden anders eingebunden z.B.:
     `4.file = iframe:6_tab_GEN24.php`
     http(s):-Links können nun direkt eingebunden werden (z.B. Grafana)  
