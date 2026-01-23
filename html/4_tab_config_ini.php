@@ -71,6 +71,7 @@ select {
     font-family:Arial;
     display:inline-block; 
     margin-right: 10px;
+    margin-top: 10px;
   }
   /* Styling für die neue Legende */
   .legend-container {
@@ -78,6 +79,7 @@ select {
     flex-wrap: wrap;
     gap: 8px;           /* Abstand zwischen den Boxen */
     margin-bottom: 15px;
+    margin-top: 10px;
     font-family: Arial, sans-serif;
     justify-content: flex-start; /* Boxen am linken Rand ausrichten */
   }
@@ -119,6 +121,9 @@ select {
     justify-content: flex-end; /* Mobil: Schiebt die ganze Reihe nach rechts */
     align-items: center;
     }
+  .hinweis {
+    margin-top: 0px;
+  }
   /* Button kleiner */
   .content button {
     font-size: 12px !important;
@@ -159,6 +164,7 @@ select {
   }
   .legend-container {
     gap: 5px; /* Etwas enger auf dem Handy */
+    margin-top: 0px;
   }
 
   .legend-item {

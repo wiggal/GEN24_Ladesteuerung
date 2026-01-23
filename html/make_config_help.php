@@ -29,7 +29,7 @@ button {
     color: #000000;
 }
 .weatherDataManager {
-    font-size: 80% !important;
+    position: relative;
     margin-top: 20px;
   }
 @media (max-width: 600px) {

@@ -1,4 +1,4 @@
-**[0.41.1] – 2026-XX-XX**  
+**[0.41.1] – 2026-01-23**  
 
 - **Neukonzeption der WebUI um die Oberfläche besser an kleine Bildschirme anpassen zu können.**
 - **Änderungen in html/config.ini**  in `priv.ini` nachziehen.
@@ -7,7 +7,7 @@
     http(s):-Links können nun direkt eingebunden werden (z.B. Grafana)  
     `4.file = http://192.168.178.50`
   - X.checked fällt weg, beim Start wird immer der erste TAB aktiviert.  
-  - X.sort ist neu, damit kann einfach eine Sortierung der TABs erreicht werden.  
+  - X.sort ist neu, damit kann einfacher die Reihenfolge der TABs geändert werden.  
 
 FIX-Docker: ModuleNotFoundError: No module named 'yaml'
 FIX: name AkkuschonungLadewert is not defined

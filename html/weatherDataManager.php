@@ -432,6 +432,7 @@ function renderChart(date) {
     const fontSize = isMobile ? 10 : 20;
     const axisFontSize   = isMobile ? 9 : 18;
     const lineWidth   = isMobile ? 1 : 3;
+    const legendboxWidth = isMobile ? 10 : 20;
 
     for (const quelle in dateData) {
         const data = dateData[quelle];
@@ -496,6 +497,7 @@ function renderChart(date) {
             legend: { 
                 position: 'top' ,
                 labels: {
+                    boxWidth: legendboxWidth,
                     font: {
                         size: axisFontSize   // Hier die Schriftgröße
                     }

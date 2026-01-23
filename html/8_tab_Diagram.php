@@ -59,21 +59,18 @@
     h1 {
         font-size: 16px;
     }
-
-    /* Verkleinert die Schrift in der Tabelle */
-    #schaltertable th,
-    #schaltertable td {
-        font-size: 10px; /* Hier können Sie den Wert nach Bedarf anpassen */
-        padding: 2px; /* Reduziert auch den Innenabstand für mehr Platz */
-    }
     .navi {
     color:#000000;
     font-family:Arial;
     font-size: 15px;
     padding:3px 6px;
-  }
-    #schaltertable td.summen {
-        font-size: 15px;
+    }
+    #schaltertable {
+      width: 95%;
+    }
+    #schaltertable td.summen,
+    #schaltertable button {
+        font-size: 14px;
     }
   .optionwahl {
     font-size: 15px;

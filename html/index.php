@@ -133,6 +133,7 @@ body { margin: 0; font-family: Arial, sans-serif; }
 .content {
   background: #fff; 
   padding: 5px; 
+  margin-left: 8px;
   margin-top: 50px;
   height: calc(100vh - 50px);
   overflow: auto;
@@ -154,11 +155,29 @@ iframe {
   html::-webkit-scrollbar, body::-webkit-scrollbar, .content::-webkit-scrollbar {
     display: none !important;
   }
+.header {
+  height: 40px;
+}
+.nav-container {
+  height: 40px;
+}
+.nav-item button, .nav-item .wiki-btn {
+  height: 40px;
+}
+.hamburger {
+  line-height: 40px;
+}
+.overflow-menu {
+  top: 40px;
+}
 /* ===== CONTENT ===== */
-  .hilfe, .weatherDataManager {
-    font-size: 80% !important;
-    margin-top: 20px;
-  }
+.hilfe, .weatherDataManager {
+   font-size: 80% !important;
+   margin-top: 20px;
+}
+.content {
+  margin-top: 40px;
+  height: calc(100vh - 40px);
 }
 </style>
 </head>

@@ -633,30 +633,40 @@ echo "    }]
           }
         }
       },
-      y2: {
+    y2: {
         type: 'linear',
         display: 'auto',
         position: 'right',
         min: (context) => {
-            return (context.chart.scales.y.min / context.chart.scales.y.max * 100)
+            // Deine bewährte Formel für die Nullpunkt-Synchronisation
+            return (context.chart.scales.y.min / context.chart.scales.y.max * 100);
         },
         max: 100,
         grid: {
             drawOnChartArea: false
         },
+        afterBuildTicks: (axis) => {
+            // löschen der automatisch generierten Ticks
+            // und setzen manuelle Ticks von 0 bis 100 in 20er Schritten
+            const ticks = [];
+            for (let i = 0; i <= 100; i += 20) {
+                ticks.push({ value: i });
+            }
+            axis.ticks = ticks;
+        },
         ticks: {
-           stepSize: fontSize,
-           font: {
-             size: fontSize,
-           },
-           callback: function(value, index, values) {
-              return value >= 0 ? Math.round(value) + ' %' : '';
-           }
+            font: {
+                size: fontSize,
+            },
+            callback: function(value) {
+                // hier nur noch mit dem %-Zeichen versehen.
+                return value + ' %';
+            }
         }
-      },
-    }
     },
-  });
+  }
+  },
+});
 </script>";
 }  # END function Diagram_ausgabe
 ?>

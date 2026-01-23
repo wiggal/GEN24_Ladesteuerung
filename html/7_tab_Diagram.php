@@ -63,25 +63,29 @@
     h1 {
         font-size: 16px;
     }
-
-    /* Verkleinert die Schrift in der Tabelle */
-    #schaltertable th,
-    #schaltertable td {
-        font-size: 10px; 
-        padding: 2px; 
-    }
     .navi {
     color:#000000;
     font-family:Arial;
     font-size: 14px;
     padding:3px;
     }
-    #schaltertable td.summen {
-        font-size: 14px;
+    #schaltertable {
+      width: 55%;
+    }
+    /* Verkleinert die Schrift "Statistik" */
+    #schaltertable th,
+    #schaltertable td {
+        font-size: 13px;
+        padding: 2px;
+    }
+
+    #schaltertable td.summen,
+    #schaltertable button {
+        font-size: 13px;
         padding: 1px !important;
     }
     .optionwahl {
-      font-size: 14px;
+      font-size: 15px;
       padding: 1px !important;
     }
     .date {
