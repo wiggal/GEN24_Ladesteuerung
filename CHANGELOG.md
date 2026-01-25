@@ -1,3 +1,6 @@
+**[0.41.2] – 2026-xx-XX**  
+
+
 **[0.41.1] – 2026-01-23**  
 
 - **Neukonzeption der WebUI um die Oberfläche besser an kleine Bildschirme anpassen zu können.**

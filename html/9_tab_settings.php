@@ -24,7 +24,7 @@
 	background-color:#EE3030;
   }
   .speichern:active {
-	position:relative;
+	position: fixed;
   }
 
 /* LADEGRENZE */
@@ -280,7 +280,8 @@ $(document).ready(function(){
    success:function(data)
    {
     //alert(data);
-    location.reload();
+    window.location.href = "index.php?tab=<?php echo $activeTab; ?>";
+
    }
   })
  });
