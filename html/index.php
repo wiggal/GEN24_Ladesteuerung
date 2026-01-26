@@ -157,6 +157,7 @@ iframe {
   }
 .header {
   height: 40px;
+  visibility: visible;
 }
 .nav-container {
   height: 40px;
@@ -207,120 +208,75 @@ iframe {
     </div>
   </div>
 </div>
+
 <script>
-  // Sofort ausführen, sobald das HTML gerendert ist, nicht auf content warten
+// Globale Funktionen für Events
+function toggleMenu() {
+    const menu = document.getElementById('overflowMenu');
+    menu.classList.toggle('open');
+}
+
+function openWiki() {
+    window.open('https://wiggal.github.io/GEN24_Ladesteuerung/', '_blank');
+}
+
+(function () {
+  const updateNavigation = () => {
+    const container = document.querySelector('.nav-container');
+    const visible = document.getElementById('navVisible');
+    const overflow = document.getElementById('overflowMenu');
+    const hamburger = document.getElementById('hamburgerBtn');
+    const items = Array.from(document.querySelectorAll('.nav-item'));
+
+    // Reset
+    container.classList.remove('compact');
+    hamburger.style.display = 'none';
+    overflow.classList.remove('open');
+    items.forEach(item => visible.appendChild(item));
+
+    const availableWidth = visible.offsetWidth - 60;
+    let widths = items.map(item => item.getBoundingClientRect().width);
+    let totalWidth = widths.reduce((a, b) => a + b, 0);
+
+    // Kompakt-Check
+    if (totalWidth > availableWidth) {
+      container.classList.add('compact');
+      widths = items.map(item => item.getBoundingClientRect().width);
+    }
+
+    // Overflow-Check
+    let used = 0;
+    items.forEach((item, i) => {
+      used += widths[i];
+      if (used > availableWidth) {
+        hamburger.style.display = 'block';
+        overflow.appendChild(item);
+      }
+    });
+  };
+
+  // Sofort ausführen
   updateNavigation();
+  window.addEventListener('resize', updateNavigation);
+  window.addEventListener('load', updateNavigation);
+})();
 </script>
 
 <div class="content">
   <?php
     $target = $all_files[$activeTab];
-    if (substr($target, 0, 4) === 'http') {
-        echo '<iframe src="' . htmlspecialchars($target) . '"></iframe>';
-    } elseif (substr($target, 0, 7) === 'iframe:') {
-        $teile = explode(":", $target, 2);
-        echo '<iframe src="' . htmlspecialchars($teile[1]) . '"></iframe>';
+    if (substr($target, 0, 4) === 'http' || substr($target, 0, 7) === 'iframe:') {
+        $url = (substr($target, 0, 7) === 'iframe:') ? explode(":", $target, 2)[1] : $target;
+        echo '<iframe src="' . htmlspecialchars($url) . '"></iframe>';
     } else {
-        include $target;
+        // Hier wird die lokale PHP-Datei geladen
+        if (file_exists($target)) {
+            include $target;
+        } else {
+            echo "Datei $target nicht gefunden.";
+        }
     }
   ?>
 </div>
-
-<script>
-function updateNavigation() {
-  const visibleContainer = document.getElementById('navVisible');
-  const overflowMenu = document.getElementById('overflowMenu');
-  const hamburger = document.getElementById('hamburgerBtn');
-  
-  // Alle Items zurückholen
-  const items = Array.from(document.querySelectorAll('.nav-item'));
-  items.forEach(item => visibleContainer.appendChild(item));
-  
-  hamburger.style.display = 'none';
-  overflowMenu.classList.remove('open');
-
-  let availableWidth = visibleContainer.offsetWidth;
-  let currentWidth = 0;
-
-  items.forEach(item => {
-    // Wir addieren die Breite des Items
-    currentWidth += item.offsetWidth;
-    
-    // Wenn es nicht mehr passt (Puffer für Hamburger einrechnen)
-    if (currentWidth > availableWidth - 60) {
-      hamburger.style.display = 'block';
-      overflowMenu.appendChild(item);
-    }
-  });
-}
-
-function toggleMenu() {
-  document.getElementById('overflowMenu').classList.toggle('open');
-}
-
-function openWiki() {
-  window.open('https://wiggal.github.io/GEN24_Ladesteuerung/', '_blank');
-}
-
-window.addEventListener('resize', updateNavigation);
-window.addEventListener('load', updateNavigation);
-
-// Schließen bei Klick außerhalb
-window.onclick = function(event) {
-  if (!event.target.matches('.hamburger')) {
-    const dropdown = document.getElementById('overflowMenu');
-    if (dropdown && dropdown.classList.contains('open')) {
-      dropdown.classList.remove('open');
-    }
-  }
-}
-function updateNavigation() {
-  const container = document.querySelector('.nav-container');
-  const visibleContainer = document.getElementById('navVisible');
-  const overflowMenu = document.getElementById('overflowMenu');
-  const hamburger = document.getElementById('hamburgerBtn');
-
-  // 1. Reset: Alles zurück in die Leiste, Kompakt-Modus aus
-  const items = Array.from(document.querySelectorAll('.nav-item'));
-  items.forEach(item => visibleContainer.appendChild(item));
-  container.classList.remove('compact');
-  hamburger.style.display = 'none';
-  overflowMenu.classList.remove('open');
-
-  const availableWidth = visibleContainer.offsetWidth - 60;
-
-  // 2. Erster Durchgang: Messen mit 10px Padding
-  let currentWidth = 0;
-  let needsCompact = false;
-
-  items.forEach(item => {
-    currentWidth += item.getBoundingClientRect().width;
-  });
-
-  // Wenn es mit 10px nicht passt, auf 2px umschalten
-  if (currentWidth > availableWidth) {
-    container.classList.add('compact');
-    needsCompact = true;
-  }
-
-  // 3. Zweiter Durchgang: Wenn nötig, Items in den Hamburger schieben
-  if (needsCompact) {
-    currentWidth = 0;
-    items.forEach(item => {
-      // Neue Breite mit 2px Padding messen
-      currentWidth += item.getBoundingClientRect().width;
-
-      if (currentWidth > availableWidth) {
-        hamburger.style.display = 'block';
-        overflowMenu.appendChild(item);
-      }
-    });
-  }
-}
-
-window.addEventListener('resize', updateNavigation);
-window.addEventListener('load', updateNavigation);
-</script>
-
 </body>
 </html>
