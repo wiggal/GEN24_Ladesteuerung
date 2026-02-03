@@ -1,4 +1,4 @@
-**[0.41.2] – 2026-xx-XX**  
+**[0.41.2] – 2026-02-03**  
 
 - WebUI: Menü im Mobilemodus flüssiger darstellen.  
 

@@ -78,7 +78,7 @@ class InverterApi:
         API = {}
         # relevante API-Schlüssel definieren: 
         # schluessel [1-3] bei mehrfachschlussel, True für Summenbildung
-        # ("label", "<primary>") = attributes.key, Value zur Identifizierung der Hardware, hier des SM am Stromzähler
+        # ("label", "<primary>") = attributes.key, Value zur Identifizierung des SM am Stromzähler, bei mehreren SM
         GEN24_API_schluessel = [
             ("nameplate", False),                                                           #BYD
             ("BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16", False),                              #BYD
