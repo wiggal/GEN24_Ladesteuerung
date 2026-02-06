@@ -95,7 +95,6 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             margin: 0;
             padding: 0;
             height: calc(100vh - 90px); 
-            font-family: Arial, sans-serif;
             background: #f7f7f7;
         }
 

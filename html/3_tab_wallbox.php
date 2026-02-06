@@ -166,7 +166,6 @@ if (isset($_GET['ajax'])) {
 <style>
 /* --- Grundlayout --- */
 body {
-    font-family: Arial;
     background: white;
 }
 
@@ -223,7 +222,6 @@ input[type="text"] {
 
 p, label {
     color: #000;
-    font-family: Arial;
     font-size: 120%;
     padding: 2px 1px;
     line-height: 1.1;
@@ -265,7 +263,6 @@ p, label {
 .wrapper {
     width: 99%;
     margin: 10px 0;
-    font-family: sans-serif;
 }
 
 .bar-table {

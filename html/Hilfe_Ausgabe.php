@@ -3,7 +3,6 @@ html, body {
     width: 100%;             /* Stellt sicher, dass sie nie breiter als der Viewport sind */
     overflow-x: hidden;      /* Verhindert horizontales Scrollen der gesamten Seite */
     margin: 0;               /* Entfernt Standard-Browser-Margin */
-    font-family: Arial, sans-serif;
     line-height: 1.6;
     color: #333;
     /* WICHTIG: Fügt Padding hinzu, um den Platz des fixierten Headers auszugleichen. */

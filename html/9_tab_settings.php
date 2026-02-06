@@ -11,7 +11,6 @@
 	display:inline-block;
 	cursor:pointer;
 	color:#000000;
-	font-family:Arial;
 	font-size:200%;
 	padding:16px 31px;
 	text-decoration:none;
@@ -59,7 +58,6 @@ input[type="checkbox"] {
 
 /* ===== RADIO / CHECKBOX LABELS ===== */
 .auswahllabel {
-  font-family: system-ui, sans-serif;
   font-size: 1.5rem;
   line-height: 1.4;
   padding: 5px 8px;
@@ -74,14 +72,12 @@ input[type="checkbox"] {
 }
 
 .ACHTUNG{
-  font-family:Arial;
   font-size:150%;
   color: #000000;
   margin-top: 100px !important; /* Abstand nach oben zum Button */
   margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
 }
 .containerbeschriftung{
-  font-family:Arial;
   font-weight: bold;
   font-size:120%;
   color: #000000;
