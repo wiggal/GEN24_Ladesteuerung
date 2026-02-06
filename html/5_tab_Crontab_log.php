@@ -1,5 +1,4 @@
 <style>
-body{font-family:Arial;}
 button {
   font-size: 1.3em;
   background-color: #4CAF50;
@@ -8,7 +7,6 @@ input { font-size: 1.3em; }
 a.ende{
   display: inline-block;
   text-decoration: none !important;
-  font-family:Arial;
   font-size: 110%;
 }
 .headertop{

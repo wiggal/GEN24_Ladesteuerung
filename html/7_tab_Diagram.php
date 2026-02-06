@@ -17,7 +17,6 @@
     .navi {
     cursor:pointer;
     color:#000000;
-    font-family:Arial;
     font-size: 150%;
     padding:6px 11px;
   }
@@ -29,7 +28,6 @@
     .optionwahl {
     cursor:pointer;
     color:#000000;
-    font-family:Arial;
     font-size: 200%;
     padding: 6px;
   }
@@ -40,7 +38,6 @@
     .date {
     cursor:pointer;
     color:#000000;
-    font-family:Arial;
     font-size: 150%;
     padding:6px 11px;
   }
@@ -52,7 +49,6 @@
   }
   td {
   white-space: nowrap;
-  font-family: Arial;
   }
   .mobile-text {
   display: none;
@@ -65,7 +61,6 @@
     }
     .navi {
     color:#000000;
-    font-family:Arial;
     font-size: 14px;
     padding:3px;
     }

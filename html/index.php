@@ -32,7 +32,9 @@ if (!isset($all_files[$activeTab])) {
 <style>
 /* ===== BASIS & NAV-HÖHE ===== */
 /* ===== BASIS & NAV-STRUKTUR ===== */
-body { margin: 0; font-family: Arial, sans-serif; }
+body { margin: 0;
+  font-family: sans-serif, Arial, Helvetica, "Liberation Sans";
+  }
 
 .header {
   position: fixed;
@@ -121,12 +123,12 @@ body { margin: 0; font-family: Arial, sans-serif; }
 }
 
 .hilfe a {
-  font-family: Arial; font-size: 130%; position: absolute;
+  font-size: 130%; position: absolute;
   right: 15px; text-decoration: none;
 }
 
 .weatherDataManager a {
-  font-family: Arial; font-size: 130%; position: absolute;
+  font-size: 130%; position: absolute;
   left: 8px; white-space: nowrap; text-decoration: none;
 }
 

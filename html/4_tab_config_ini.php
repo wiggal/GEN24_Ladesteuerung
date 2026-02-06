@@ -1,6 +1,5 @@
 <style>
 table {
-  font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
 }
@@ -44,7 +43,6 @@ select {
     bottom: 0;
 }
 .version{
-    font-family:Arial;
     font-size:150%;
     color: #000000;
     }
@@ -57,7 +55,6 @@ select {
   .hilfe-container {
     display: flex;
     flex-direction: column; /* Desktop: Untereinander */
-    font-family:Arial;
     font-size:130%;
     position: absolute;
     right: 15px;
@@ -68,7 +65,6 @@ select {
     text-decoration: none;
   }
   .hinweis {
-    font-family:Arial;
     display:inline-block; 
     margin-right: 10px;
     margin-top: 10px;
@@ -80,7 +76,6 @@ select {
     gap: 8px;           /* Abstand zwischen den Boxen */
     margin-bottom: 15px;
     margin-top: 10px;
-    font-family: Arial, sans-serif;
     justify-content: flex-start; /* Boxen am linken Rand ausrichten */
   }
 

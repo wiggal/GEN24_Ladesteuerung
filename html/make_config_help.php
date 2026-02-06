@@ -24,7 +24,6 @@ button {
   background-color: #2596be;
 }
 .ueberschrift{
-    font-family:Arial;
     font-size:150%;
     color: #000000;
 }

@@ -1,3 +1,7 @@
+**[0.41.3] – 2026-XX-XX**  
+
+- Fonts in HTML-Seiten vereinheitlichen, auf `sans-serif`.  
+
 **[0.41.2] – 2026-02-03**  
 
 - WebUI: Menü im Mobilemodus flüssiger darstellen.  

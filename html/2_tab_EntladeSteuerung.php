@@ -9,7 +9,6 @@
   }
 
   table {
-  font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   border-spacing: 0;
   border-width: thin 0 0 thin;
@@ -39,7 +38,6 @@
 	display:inline-block;
 	cursor:pointer;
 	color:#000000;
-	font-family:Arial;
 	font-size:200%;
 	padding:16px 31px;
 	text-decoration:none;
@@ -81,7 +79,6 @@ label.slider {
 	display:inline-block;
 	cursor:pointer;
 	color:#000000;
-	font-family:Arial;
 	font-size:90%;
 	padding:5px 10px;
 	text-decoration:none;
@@ -95,7 +92,6 @@ input.slider {
   }
 
 .sliderbeschriftung{
-  font-family:Arial;
   font-weight: bold;
   font-size:120%;
   color: #000000;
