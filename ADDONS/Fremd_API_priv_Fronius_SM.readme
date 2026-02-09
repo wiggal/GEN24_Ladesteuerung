@@ -1,0 +1,423 @@
+import json
+import os
+import requests
+import time
+import re
+from datetime import datetime
+
+
+# >>>>>>>>  Hier Änderungen vornehmen  >>>>>>>>>>>>>>>>>>>>>
+# Ganz unten stehen weitere Tipps bei Verbindungs- und Datenproblemen.
+# Zum aktivieren des Skriptes den Name in Fremd_API_priv.py umbenennen
+# Version v1.0
+
+energy_initial_total = 0                     # EINMALIGER Startwert (manuell setzen)
+#                                              Gesamtproduktionswert aller Smartmeter in Wh
+#                                              wird als letzte Sicherheit genutzt und nicht aktualisiert
+#                                              am besten VOR Veränderungen in diesem Skript oder der FremdAPI_last.json aktualisieren
+
+smartmeter_devices = [                       # Smartmeter-Device-Namen (neue GEN24-Struktur ab Firmware 1.39.5-1); inkompatibel mit vorheriger Firmware
+    "Fronius_SmartMeter_2223836ab422",       # Die ID's findet man unter: http://192.168.178.XX/components/readable
+    "Fronius_SmartMeter_4d68ed529a2d"        # Aufpassen, dass man die richtigen nimmt, die OptenDTU Meter haben bei vielen Werten 0.0 stehen
+]
+
+GEN24_IP = "192.168.178.42"                  # IP-Adresse des GEN24
+Leistung_WR = 7500                           # Leistung des größten Wechselrichters / Smartmeters
+Max_Energiesprung = Leistung_WR / 10          # maximal zulässiger Energiesprung pro Abruf/Smartmeter (0 zum deakt.)
+Max_Energiesprung_kommuliert = Leistung_WR * 2      # tägliche Sicherheitsgrenze pro Smartmeter (0 zum deakt.)
+Wartezeit = 60                               # Wartezeit vor dem Direktabruf in Sekunden
+Summenpruefung_aktiv = 1                     # 1 = aktiv, 0 = deakt. (Prüfung mit Startwert bleibt immer erhalten)
+
+
+# >>>>>>>>  Unterhalb nur bei Bedarf ändern  >>>>>>>>>>>>>>>>>>>>>
+
+
+SAVE_FILE = os.path.join(os.path.dirname(__file__), "FremdAPI_last.json")
+GEN24_URL = f"http://{GEN24_IP}/components/readable"
+
+
+# ------------------------- Hilfsfunktionen -------------------------
+
+def fetch_gen24_data():
+    try:
+        response = requests.get(GEN24_URL, timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"Fehler beim Abrufen der GEN24-Daten: {e}")
+        return {}
+
+def extract_devices_struct(raw):             # Extrahiert die Smartmeter-Daten aus der API-Antwort
+    if isinstance(raw, dict):
+        if "Body" in raw and isinstance(raw["Body"], dict) and "Data" in raw["Body"]:
+            return raw["Body"]["Data"]
+        if "Data" in raw and isinstance(raw["Data"], dict):
+            return raw["Data"]
+        return raw
+    return {}
+
+def load_state():
+    """State aus Datei laden. Bei defekter JSON wird versucht,
+       energy_last_total aus dem Rohtext zu retten."""
+
+    recovered_energy_last_total = None
+
+    if os.path.exists(SAVE_FILE):
+        try:
+            with open(SAVE_FILE, "r") as f:
+                content = f.read().strip()
+
+            # ------------------------------------------------------------------
+            # Fall 1: Datei leer → neue Struktur
+            # ------------------------------------------------------------------
+            if not content:
+                print("WARNUNG: FremdAPI_last.json ist leer → neuer State wird erzeugt.")
+
+            else:
+                # ------------------------------------------------------------------
+                # Versuch: JSON normal parsen
+                # ------------------------------------------------------------------
+                try:
+                    smartmeter_state = json.loads(content)
+
+                    # -------- energy_last_total hart prüfen (Typ + Mindestwert) ----------
+                    elt_temp = smartmeter_state.get("energy_last_total", energy_initial_total)
+                    try:
+                        elt_temp = int(elt_temp)
+                    except:
+                        print("WARNUNG: energy_last_total hatte ungültigen Typ → auf Initialwert gesetzt.")
+                        elt_temp = energy_initial_total
+
+                    if elt_temp < energy_initial_total:
+                        print(f"energy_last_total aktualisiert auf Initialwert {energy_initial_total}")
+                        elt_temp = energy_initial_total
+
+                    smartmeter_state["energy_last_total"] = elt_temp
+
+                    # -------- Struktur aller Smartmeter prüfen --------
+                    structure_corrected = False
+                    for name in smartmeter_devices:
+                        if name not in smartmeter_state or not isinstance(smartmeter_state[name], dict):
+                            print(f"{name}: Struktur ungültig → wird neu initialisiert.")
+                            smartmeter_state[name] = {
+                                "power_last": 0,
+                                "energy_calc": 0,
+                                "energy_last": 0,
+                                "stale_count": 0
+                            }
+                            structure_corrected = True
+
+                    if structure_corrected:
+                        print("Strukturfehler korrigiert – State überarbeitet.")
+
+                    return smartmeter_state
+
+                # ------------------------------------------------------------------
+                # JSON kaputt → Recovery versuchen
+                # ------------------------------------------------------------------
+                except json.JSONDecodeError:
+                    print("WARNUNG: JSON defekt → versuche Recovery...")
+
+                    # energy_last_total aus Rohtext extrahieren
+                    match = re.search(r'"energy_last_total"\s*:\s*(\d+)', content)
+                    if match:
+                        recovered_energy_last_total = int(match.group(1))
+                        print(f"Recovery erfolgreich: energy_last_total extrahiert → {recovered_energy_last_total}")
+                    else:
+                        print("Recovery fehlgeschlagen: energy_last_total nicht gefunden.")
+
+        except Exception as e:
+            print(f"WARNUNG: Fehler beim Lesen ({e}) → Recovery wird versucht...")
+
+    # ------------------------------------------------------------------
+    # Datei leer, fehlt, defekt, kein gültiges JSON oder unvollständiger Inhalt → neue State-Datei erzeugen.
+    # ------------------------------------------------------------------
+    print("Erzeuge neue JSON Datei")
+
+    smartmeter_state = {
+        smartmeter_name: {
+            "power_last": 0,
+            "energy_calc": 0,
+            "energy_last": 0,
+            "stale_count": 0
+        }
+        for smartmeter_name in smartmeter_devices
+    }
+
+    # energy_last_total setzen
+    if recovered_energy_last_total is not None:
+        # Niemals kleiner als Initialwert!
+        smartmeter_state["energy_last_total"] = max(recovered_energy_last_total, energy_initial_total)
+        print(f"energy_last_total aus defekter Datei wiederhergestellt → {smartmeter_state['energy_last_total']}")
+    else:
+        smartmeter_state["energy_last_total"] = energy_initial_total
+        print(f"energy_last_total initial auf {energy_initial_total} gesetzt.")
+
+    return smartmeter_state
+
+
+def save_state(smartmeter_state):
+    try:
+        with open(SAVE_FILE, "w") as f:
+            json.dump(smartmeter_state, f, indent=4)
+    except Exception:
+        print("Fehler beim Speichern!")
+
+
+def reset_counters(smartmeter_state):
+    """Setzt die stale_count-Zähler täglich zwischen 00:05 und 00:25 zurück."""
+
+    now = datetime.now()
+    if now.hour == 0 and 5 <= now.minute <= 25:
+        for smartmeter_name in smartmeter_devices:
+            smartmeter_state[smartmeter_name]["stale_count"] = 0
+        print("Tagesreset: stale_count auf 0 gesetzt.")
+
+
+def try_direct_read(smartmeter_name, data=None, attempt=1):
+    # Warte global definierte Zeit
+    if Wartezeit > 0:
+        print(f"{smartmeter_name}: Warte {Wartezeit}s vor Direktabruf (Versuch {attempt})...")
+        time.sleep(Wartezeit)
+
+    # Extrahiere Geräteliste (sicherheitshalber default {} setzen)
+    sm_map = extract_devices_struct(data or {}) or {}
+
+    # Hole das Device-Objekt; prüfe, ob es ein dict ist
+    device = sm_map.get(smartmeter_name)
+    if not isinstance(device, dict):
+        # entweder Device fehlt oder ist None/kein Dict -> keine Channels verfügbar
+        print(f"{smartmeter_name}: Direktabruf fehlgeschlagen (Versuch {attempt}) → Device nicht vorhanden oder ungültig")
+        return None, None
+
+    # Hole Channels und prüfe ebenfalls auf dict
+    ch = device.get("channels")
+    if not isinstance(ch, dict):
+        print(f"{smartmeter_name}: Direktabruf fehlgeschlagen (Versuch {attempt}) → Channels fehlen oder ungültig")
+        return None, None
+
+    # sichere Kanal-Leseversuche
+    sm_energy_raw = ch.get("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64")
+    sm_power_raw = ch.get("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", 0)
+
+    if sm_energy_raw is None:
+        print(f"{smartmeter_name}: Direktabruf fehlgeschlagen (Versuch {attempt}) → fehlender Kanal")
+        return None, None
+
+    try:
+        sm_energy = int(sm_energy_raw)
+        sm_power = int(sm_power_raw)
+        print(f"{smartmeter_name}: Direktabruf erfolgreich (Versuch {attempt})")
+        return sm_energy, sm_power
+    except Exception as e:
+        print(f"{smartmeter_name}: Direktabruf fehlgeschlagen (Versuch {attempt}) → {e}")
+        return None, None
+
+# ------------------------- Hauptfunktion -------------------------
+
+def get_API(data_temp):
+    smartmeter_state = load_state()
+    reset_counters(smartmeter_state)
+    now = datetime.now()
+
+    power_total = 0
+    energy_total = 0
+
+    # Einmal GEN24-Daten abrufen, um sie für Direktabrufe zu nutzen
+    fresh_data = fetch_gen24_data()
+
+    # Geräte aus der übergebenen Struktur extrahieren (robust gegenüber unterschiedlichen Formen)
+    smartmeter_map = extract_devices_struct(data_temp)
+
+    for smartmeter_name in smartmeter_devices:
+        sm_state = smartmeter_state.get(smartmeter_name, {})
+
+        # Sicherstellen, dass alle erwarteten Keys existieren
+        sm_state.setdefault("power_last", 0)
+        sm_state.setdefault("energy_calc", 0)
+        sm_state.setdefault("energy_last", 0)
+        sm_state.setdefault("stale_count", 0)
+        smartmeter_state[smartmeter_name] = sm_state  # falls neu angelegt
+
+        # ----------- Zugriff auf übergebene Data-Struktur ----------- 
+        device = smartmeter_map.get(smartmeter_name)
+        if isinstance(device, dict):
+            ch = device.get("channels") if isinstance(device.get("channels"), dict) else {}
+        else:
+            ch = {}
+
+        # Werte einlesen
+        sm_power = None
+        sm_energy = None
+
+        # Übergeben Werte von Gen24_api.py lesen
+        try:
+            sm_power_raw = ch.get("SMARTMETER_POWERACTIVE_MEAN_SUM_F64", None)
+            if sm_power_raw is not None:
+                sm_power = int(sm_power_raw)
+        except Exception:
+            sm_power = None
+
+        try:
+            sm_energy_raw = ch.get("SMARTMETER_ENERGYACTIVE_PRODUCED_SUM_F64", None)
+            if sm_energy_raw is not None:
+                sm_energy = int(sm_energy_raw)
+        except Exception:
+            sm_energy = None
+
+        # ---------- Direktabruf bei Fehlern (max. 2 Versuche) ----------
+        if sm_energy is None:
+            sm_energy, sm_power = try_direct_read(smartmeter_name, data=fresh_data, attempt=1)
+        if sm_energy is None:
+            sm_energy, sm_power = try_direct_read(smartmeter_name, data=fresh_data, attempt=2)
+
+        # ---------- Fallback auf gespeicherten State ----------
+        if sm_energy is None:
+            print(f"{smartmeter_name}: Fallback genutzt – alte Werte.")
+            sm_energy = sm_state.get("energy_last", 0)
+            sm_power = sm_state.get("power_last", 0)
+
+        # Erste Initialisierung: energy_calc und energy_last auf den aktuellen Wert setzen
+        if sm_state["energy_calc"] == 0 and sm_state["energy_last"] == 0:
+            print(f"{smartmeter_name}: Erste Initialisierung → {sm_energy}")
+            sm_state["energy_calc"] = sm_energy
+            sm_state["energy_last"] = sm_energy
+
+        # ---------- Prüfung Power ----------
+        if sm_power is not None and 0 <= sm_power < Leistung_WR:
+            sm_state["power_last"] = sm_power
+        else:
+            print(f"{smartmeter_name}: Fehler Produktionswert ({sm_power}), nutze alten Wert.")
+            sm_power = sm_state["power_last"]
+
+        # Stale Detection: Wenn ENERGY unverändert, aber Power größer 0 → nächster Energiewert wird berechnet
+        if sm_energy == sm_state["energy_last"] and sm_power > 60 and 8 <= now.hour < 18:
+            sm_state["stale_count"] += 1
+            print(f"{smartmeter_name}: unverändert, Zähler = {sm_state['stale_count']}, berechne neuen Wert")
+            sm_energy = int(sm_state["energy_calc"] + (sm_power or 0) / 8)
+            sm_state["energy_calc"] = sm_energy
+
+        # Power_Last auf 0 setzen, wenn Smartmeter lange keine neuen Werte liefert oder außerhalb PV-Zeit
+        if sm_state["stale_count"] >= 18 or now.hour < 8 or now.hour >= 18:
+            if sm_state["power_last"] != 0:
+                sm_state["power_last"] = 0
+                print(f"{smartmeter_name}: Power_Last auf 0 gesetzt wegen längerem Stillstand oder außerhalb PV-Zeit")
+
+        # Prüfung der SM Werte (ob der Gen24 die Werte des richtigen SM gesendet hat)
+        if Summenpruefung_aktiv:
+            min_val = min(sm_state["energy_calc"], sm_state["energy_last"])
+            max_val = max(sm_state["energy_calc"], sm_state["energy_last"])
+
+            if min_val <= sm_energy <= (max_val + Max_Energiesprung_kommuliert): # Wenn der Wert innerhalb der großen Toleranz liegt
+                sm_state["energy_last"] = sm_energy
+            elif (min_val - Max_Energiesprung/2) <= sm_energy:            # Wenn der Wert durch Fehler geringfügig kleiner ist
+                sm_energy = max_val
+            else:                                                         # Wenn der Wert falsch ist
+                old = sm_energy
+                sm_energy = int(max_val + sm_state["power_last"] / 8)
+                print(f"{smartmeter_name}: Fehler Summenwert ({old}) → Fallback {sm_energy}")
+
+        # ---------- energy_berechnet aktualisieren ----------
+        if sm_energy > sm_state["energy_calc"]:
+            sm_state["energy_calc"] = sm_energy
+
+        power_total += sm_power
+        energy_total += sm_energy
+
+    # ---------------------- Gesamt-Sicherheitslogik ----------------------
+    energy_last_total = smartmeter_state.get("energy_last_total", 0)
+    if Summenpruefung_aktiv:
+        if energy_last_total == 0:
+            print(f"Erster Start → energy_last_total = {energy_total}")
+
+        elif energy_total < energy_last_total:
+            print(f"⚠️ Gesamtenergie rückläufig ({energy_total} < {energy_last_total}) → nutze alten Wert.")
+            energy_total = energy_last_total
+
+        elif Max_Energiesprung_kommuliert > 0 and energy_total > energy_last_total + Max_Energiesprung_kommuliert*len(smartmeter_devices):
+            diff = energy_total - energy_last_total
+            print(f"⚠️ Gesamtenergie-Sprung viel zu groß (+{diff} Wh, maximal erlaubt +{Max_Energiesprung_kommuliert*len(smartmeter_devices)} Wh) → verworfen.")
+            energy_total = energy_last_total
+
+        elif Max_Energiesprung > 0 and energy_total > energy_last_total + Max_Energiesprung*len(smartmeter_devices):
+            diff = energy_total - energy_last_total
+            print(f"⚠️ Gesamtenergie-Sprung moderat groß (+{diff} Wh, maximal erlaubt +{Max_Energiesprung_kommuliert*len(smartmeter_devices)} Wh) → begrenzt auf +{Max_Energiesprung*len(smartmeter_devices)} Wh.")
+            energy_total = energy_last_total + Max_Energiesprung*len(smartmeter_devices)
+
+    smartmeter_state["energy_last_total"] = energy_total
+    save_state(smartmeter_state)
+
+    # ---------------------- Ausgabe ----------------------
+    if energy_initial_total > energy_total:
+        energy_total = energy_initial_total  # Zusätzliche Sicherheit, trotz deaktivierter Summenprüfung
+        print(f"⚠️ Datenfehler: AC_Produktion aktualisiert auf Initialwert {energy_initial_total}")
+        print(f"⚠️ Bitte Summenpruefung in den Einstellungen aktivieren")
+
+    Fremd_API = {
+        "aktuellePVProduktion": power_total,
+        "AC_Produktion": energy_total,
+        "DC_Produktion": int(energy_total * 1.05)
+    }
+
+    print("\nGesamtProduktionSM:", Fremd_API["aktuellePVProduktion"])
+    print("GesamtEnergieSM:", Fremd_API["AC_Produktion"], "\n")
+
+    return Fremd_API
+
+
+"""
+Empfehlungen und Hinweise:
+
+Die ID's für die OpenDTU Smartmeter ("Fronius_SmartMeter_2223836ab422") findet man unter: http://192.168.178.XX/components/readable
+Dabei muss man etwas aufpassen, dass man die richtigen ID's nimmt, die OptenDTU Meter haben bei vielen Werten 0.0 stehen.
+Den Hauszähler erkennt man gut an den gemessenen Spannungen:
+   "SMARTMETER_VOLTAGE_MEAN_01_F64" : 228.20400000000004
+   "SMARTMETER_VOLTAGE_MEAN_12_F64" : 391.69999999999999
+
+Die Standard-Einstellung der OpenDTU sollte sein, dass diese nur sendet,
+wenn alle Wechselrichter der DTU eine aktive Verbindung haben.
+--> unter Netzwerkeinstellungen → Modbus-Einstellungen:
+Modbus TCP Server aktivieren: aktiv (blau)
+Modbus TCP Serverstart verzögern: aktiv (blau)
+
+Fällt ein Wechselrichter kurzzeitig aus, stoppt die DTU die Datenübertragung.
+Beim nächsten Abruf meldet der GEN24 die in der Zwischenzeit erzeugte Energie auf einmal.
+Da GEN24 und die PV-Planung die Leistung aus den Differenzen der kumulierten Energie berechnen,
+können so Spitzen entstehen, die die Historie verfälschen.
+
+Max_Energiesprung glättet kurze Ausfälle oder Messfehler pro Smartmeter/Abruf.
+Max_Energiesprung_kommuliert begrenzt die anrechenbare Energie für längere Offline-Zeiten.
+Fehlerhafte GEN24-Werte werden zuverlässig aussortiert.
+
+Überschreitet ein Smartmeter die „kommulierte“ Grenze nach einem längeren Ausfall,
+kann Max_Energiesprung_kommuliert z. B. um Faktor 10 erhöht werden,
+damit sich die PV-Planung schrittweise wieder an den tatsächlichen Wert annähert.
+So bleiben Historie und Leistungsberechnung plausibel.
+
+Bei mir kam es ebenfalls vor, dass die DTU beim Neustart zu wenig bisher produzierte Energie
+an den Fronius übertragen hat, was in der Historie für Chaos sorgte.
+
+Im Zweifelsfall schalte ich den GEN24 kurz ab (oder trenne ihn vom Netzwerk).
+Während der GEN24 offline ist, berechnet das Skript die fehlenden Energiewerte
+näherungsweise automatisch anhand der letzten Leistung (Stale-Mechanismus).
+Dadurch bleiben die Werte plausibel und große Sprünge werden verhindert.
+Wenn die DTU und alle Wechselrichter wieder stabil laufen, kann der GEN24 wieder online gehen.
+
+Die Sendeleistung der DTU zu verändern brachte bei mir nur geringfügige Verbesserungen.
+Viel entscheidender waren die Positionierung der DTU und die Ausrichtung der Antenne.
+
+Bei mehr als drei Wechselrichtern an einer DTU empfehle ich eine zweite DTU.
+Die Kosten sind überschaubar und die Auswirkungen von Datenverlusten halbieren sich.
+
+Die vielen Sicherheitsmechanismen stammen aus der alten GEN24-Firmware (1.38),
+bei der der GEN24 teilweise zusätzliche Smartmeter „erfunden“ hat.
+Manchmal hat er sogar die beiden IDs vertauscht oder die Werte eines Smartmeters unter beiden IDs ausgegeben.
+Damit daraus dennoch eine korrekte Historie entsteht, wurden alle diese Schutzmechanismen eingeführt.
+
+Anscheinend bestehen die Probleme noch in geringer Form mit der 1.39.
+
+Vielen Dank insbesondere an Wiggal:
+https://github.com/wiggal/
+
+Dieses Skript von Bert911 mit Hilfe von ChatGPT (GPT‑5‑mini) erstellt und Wiggal zur unbegrenzten Nutzung zur Verfügung gestellt.
+"""
