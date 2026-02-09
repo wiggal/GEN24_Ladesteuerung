@@ -16,9 +16,9 @@ energy_initial_total = 0                     # EINMALIGER Startwert (manuell set
 #                                              wird als letzte Sicherheit genutzt und nicht aktualisiert
 #                                              am besten VOR Veränderungen in diesem Skript oder der FremdAPI_last.json aktualisieren
 
-smartmeter_devices = [                       # Smartmeter-Device-Namen (neue GEN24-Struktur ab Firmware 1.39.5-1)
-    "Fronius_SmartMeter_2223836ab422",       # inkompatibel mit vorheriger Firmware
-    "Fronius_SmartMeter_4d68ed529a2d"
+smartmeter_devices = [                       # Smartmeter-Device-Namen (neue GEN24-Struktur ab Firmware 1.39.5-1); inkompatibel mit vorheriger Firmware
+    "Fronius_SmartMeter_2223836ab422",       # Die ID's findet man unter: http://192.168.178.XX/components/readable
+    "Fronius_SmartMeter_4d68ed529a2d"        # Aufpassen, dass man die richtigen nimmt, die OptenDTU Meter haben bei vielen Werten 0.0 stehen
 ]
 
 GEN24_IP = "192.168.178.42"                  # IP-Adresse des GEN24
@@ -367,6 +367,12 @@ def get_API(data_temp):
 
 """
 Empfehlungen und Hinweise:
+
+Die ID's für die OpenDTU Smartmeter ("Fronius_SmartMeter_2223836ab422") findet man unter: http://192.168.178.XX/components/readable
+Dabei muss man etwas aufpassen, dass man die richtigen ID's nimmt, die OptenDTU Meter haben bei vielen Werten 0.0 stehen.
+Den Hauszähler erkennt man gut an den gemessenen Spannungen:
+   "SMARTMETER_VOLTAGE_MEAN_01_F64" : 228.20400000000004
+   "SMARTMETER_VOLTAGE_MEAN_12_F64" : 391.69999999999999
 
 Die Standard-Einstellung der OpenDTU sollte sein, dass diese nur sendet,
 wenn alle Wechselrichter der DTU eine aktive Verbindung haben.
