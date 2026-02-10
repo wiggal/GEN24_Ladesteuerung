@@ -41,7 +41,6 @@
 	font-size:200%;
 	padding:16px 31px;
 	text-decoration:none;
-	text-shadow:0px 1px 0px #58ACFA;
     white-space: nowrap;
     position: fixed;
     transform: translate(-50%, 0);

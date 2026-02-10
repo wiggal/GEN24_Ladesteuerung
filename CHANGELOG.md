@@ -1,6 +1,7 @@
-**[0.41.3] – 2026-XX-XX**  
+**[0.41.3] – 2026-02-10**  
 
 - Fonts in HTML-Seiten vereinheitlichen, auf `sans-serif`.  
+- Einbinden einer OpenDTU Emulation in den Gen24 von @Bert911.  
 
 **[0.41.2] – 2026-02-03**  
 

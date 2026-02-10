@@ -183,7 +183,7 @@ button.ocpp {
     padding: 6px 12px;
     font-size: 14px;
     background-color: #4CAF50;
-    color: white;
+    color: black;
     border: none;
     border-radius: 4px;
     cursor: pointer;
