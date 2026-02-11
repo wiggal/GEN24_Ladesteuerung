@@ -434,6 +434,31 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
         }
     } #ENDE foreach ($file_array
 
+    # Kennwörter usw. überschreiben, wenn $edit_methode === '' => lesen
+    if ($edit_methode === '') {  
+        $gesuchteVariablen = ['password', 'passwd_configedit', 'api_key', 'accesstoken', 'resource_id', 'resource_id2'];
+        // Ebene 1: Hauptgruppen (z.B. 'Konfiguration')
+        foreach ($all_ini_daten as &$ebene1) {
+            if (is_array($ebene1)) {
+        
+                // Ebene 2: Untergruppen (z.B. 'Ladeberechnung')
+                foreach ($ebene1 as &$ebene2) {
+                    if (is_array($ebene2)) {
+    
+                        // Ebene 3: Die eigentlichen Datensätze
+                        foreach ($ebene2 as &$item) {
+                            if (isset($item['variable']) && in_array($item['variable'], $gesuchteVariablen)) {
+                                $item['wert'] = '*****';
+                            }
+                        }
+    
+                    }
+                }
+            }
+        }
+        unset($ebene1, $ebene2, $item);
+    } 
+
     # Ab hier werden die gesammelten Zeilen ausgegeben
     if ($edit_methode !== 'update') {
         $zeilenzaehler = 0;
