@@ -71,14 +71,16 @@ if (isset($_POST['action'])) {
     }
 
     // Beim Weiterleiten die aktuelle Client-ID beibehalten
-    $redirect_url = $_SERVER['PHP_SELF'] . '?tab=Wallbox'; // NEU: Tab hier fest anfügen
+        echo "
+	<script>
+    		const params = new URLSearchParams();
+    		params.set('tab', " . json_encode('Wallbox') . ");";
     if (isset($_POST['cp_id']) && !empty($_POST['cp_id'])) {
-        $redirect_url .= '?cp_id=' . $_POST['cp_id'];
-    }
-    
-    // header('Location: ' . $redirect_url);
-    // NEU (funktioniert auch nach HTML-Ausgabe)
-    echo "<script type='text/javascript'>window.location.href='{$redirect_url}';</script>";
+    	echo "params.set('cp_id', " . json_encode($_POST['cp_id']) . ");";
+    	}
+    echo "window.location.href = window.location.pathname + '?' + params.toString();
+	</script>
+	";
     exit;
 }
 

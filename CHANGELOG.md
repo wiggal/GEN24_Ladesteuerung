@@ -1,3 +1,8 @@
+**[0.41.4] – 2026-XX-XX**  
+
+- Im config-TAB Kennwörter usw. nur im Editiermodus anzeigen.  
+- Anpassungen für HA-Addon https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung  
+
 **[0.41.3] – 2026-02-10**  
 
 - Fonts in HTML-Seiten vereinheitlichen, auf `sans-serif`.  
