@@ -588,6 +588,7 @@ if (isset($ini_file)) $org_ini_file = str_replace('_priv', '', $ini_file);
 if (isset($_POST["updatecheck"])) $updatecheck = $_POST["updatecheck"];
 $nachricht = '';
 if (isset($_GET["nachricht"])) $nachricht = $_GET["nachricht"];
+# Wegen HA
 
 switch ($case) {
     case '':
@@ -598,7 +599,7 @@ if ($updatecheck == 'ja') {
 } else {
 echo '</div>';
 }
-if ($nachricht != '') echo "<center>" . $nachricht . "</center>";
+if ($nachricht != '') echo "<center>" . gzuncompress(base64_decode($nachricht)) . "</center>";
 echo '<br><center>';
 echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<select name="ini_file">';
@@ -771,10 +772,16 @@ if (!copy($ini_file, $backup_file)) {
     fclose($handle);
 }
 
-// header('location: '.$_SERVER["PHP_SELF"].'?nachricht='.$nachricht);
-// NEU (funktioniert auch nach HTML-Ausgabe)
-$redirect_url = $_SERVER["PHP_SELF"] . "?nachricht=" . urlencode($nachricht) . "&tab=" . $activeTab;
-echo "<script type='text/javascript'>window.location.href='$redirect_url';</script>";
+// NEU (funktioniert auch nach HTML-Ausgabe und in HomeAssistant)
+$nachricht_gz=base64_encode(gzcompress($nachricht,9));
+echo "
+<script>
+    const params = new URLSearchParams();
+    params.set('nachricht', " . json_encode($nachricht_gz) . ");
+    params.set('tab', " . json_encode($activeTab) . ");
+    window.location.href = window.location.pathname + '?' + params.toString();
+</script>
+";
 exit();
     break;
 
