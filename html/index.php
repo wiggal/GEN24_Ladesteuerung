@@ -191,7 +191,7 @@ iframe {
   <div class="nav-container">
     <div class="nav-visible" id="navVisible">
       <?php foreach ($tabs as $key => $file): ?>
-        <form method="post" class="nav-item">
+        <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" class="nav-item">
           <input type="hidden" name="tab" value="<?= $key ?>">
           <button type="submit" class="<?= $activeTab === $key ? 'active' : '' ?>">
             <?= htmlspecialchars($key) ?>
