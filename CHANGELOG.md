@@ -1,4 +1,4 @@
-**[0.41.4] – 2026-XX-XX**  
+**[0.41.4] – 2026-02-15**  
 
 - Im config-TAB Kennwörter usw. nur im Editiermodus anzeigen.  
 - Anpassungen für HA-Addon https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung  
