@@ -342,7 +342,7 @@ function get_updatebutton($repoPath, $logFile, $prg_version, $activeTab) {
         foreach ($meldungen as $msg) writeLog($logFile, $msg);
     }
 
-    echo '<form method="post" action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" style="display:inline;">' . "\n";
+    echo '<form method="post" action="' . htmlspecialchars(basename($_SERVER['PHP_SELF'])) . '" style="display:inline;">' . "\n";
     echo '<input type="hidden" name="case" value="git_update">'."\n";
     echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
     echo '<button type="submit" style="' . htmlspecialchars($buttonStyle) . '" '.$buttontitle . $buttonDisabled . '>';
