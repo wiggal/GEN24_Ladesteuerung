@@ -110,7 +110,6 @@ label.slider {
 	font-size:90%;
 	padding:5px 10px;
 	text-decoration:none;
-	text-shadow:0px 1px 0px #2f6627;
     flex-shrink: 0;
   }
 input.slider {
