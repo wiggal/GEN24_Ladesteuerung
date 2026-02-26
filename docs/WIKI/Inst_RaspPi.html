@@ -119,14 +119,16 @@ sudo chmod +x /home/GEN24/start_PythonScript.sh
           machen.<br>
           EnergyController.py immer eine Minute nach vollen zehn Minuten
           ausführen (1-56/10), da der GEN24 die Daten immer etwa zur
-          vollen fünften Minute bereitstellt. Da das Smartmeter die
-          Daten aktuell hat, kann beim Ausführen zur vollen fünften
+          vollen fünften Minute bereitstellt.&nbsp; Da das Smartmeter
+          die Daten aktuell hat, kann beim Ausführen zur vollen fünften
           Minute passieren, dass die Daten vom GEN24 noch nicht zur
           Verfügung stehen. Dadurch entstehen unschöne Zacken in der
           Tagesgrafik.<br>
           Bei Verwendung der Dynamischen Strompreise zur
           Lade-/Entladesteuerung alle fünf Minuten ausführen (1-56/5),
           da die Strompreistaktung nun alle 15 Minuten erfolgt.<br>
+          Da nun beim Logging auf Änderungen überprüft wird, kann das
+          Skript nun auch minütlich durchführt werden.<br>
         </p>
       </li>
     </ul>
@@ -212,6 +214,7 @@ sudo apt install php php-sqlite3
 
 
 
+
         = 1</code> (Standard) in der CONFIG/default_priv.ini beim ersten
       Start von <code>start_PythonScript.sh</code> automatisch der
       einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf
@@ -238,6 +241,7 @@ sudo apt install apache2
       <li>/etc/apache2/envvars <code>export APACHE_RUN_GROUP=www-data</code>
         nach <code>export APACHE_RUN_GROUP=pi</code> ändern.</li>
       <li>/etc/apache2/sites-enabled/000-default.conf <code>DocumentRoot
+
 
 
 

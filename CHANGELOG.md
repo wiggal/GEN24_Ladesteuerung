@@ -1,3 +1,7 @@
+**[0.41.5] – 2026-XX-XX**  
+
+- Logging nur schreiben, wenn sich die Werte verändert haben, damit kann EnergyController.py in kleineren Abständen ausgeführt werden.  
+
 **[0.41.4] – 2026-02-15**  
 
 - Im config-TAB Kennwörter usw. nur im Editiermodus anzeigen.  

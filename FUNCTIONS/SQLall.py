@@ -29,37 +29,57 @@ class sqlall:
         print("DB",path,"wurde erstellt.")
 
     def save_SQLite(self, database, AC_Produktion, DC_Produktion, AC_to_DC, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus):
-        # Daten in SQLite_DB speichern (lifetime Zählerständer)
+        # Zeitpunkt formatieren
         Zeitpunkt = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
         verbindung = sqlite3.connect(database)
         zeiger = verbindung.cursor()
-    
+        gespeichert = False
+
+        # Die SQL-Logik: Einfügen nur, wenn der letzte Datensatz andere Werte hatte
+        # Der Zeitpunkt wird beim Vergleich ignoriert, damit er nicht jedes Mal triggert
+        sql_query = """
+            INSERT INTO pv_daten (
+                Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch,
+                Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC
+            )
+            SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            WHERE NOT EXISTS (
+                SELECT 1 FROM pv_daten
+                WHERE AC_Produktion = ?
+                AND DC_Produktion = ?
+                AND Batterie_IN = ?
+                AND Batterie_OUT = ?
+                AND AC_to_DC = ?
+                ORDER BY Zeitpunkt DESC
+                LIMIT 1
+            )
+        """
+
+        # Parameter für das SELECT (was eingefügt werden soll) + Parameter für das WHERE (zum Vergleich)
+        params = (
+            Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC,
+            AC_Produktion, DC_Produktion, Batterie_IN, Batterie_OUT, AC_to_DC
+        )
+
         try:
-            # Index auf Zeitpunkt erzeugen, wegen Geschwindigkeit
-            zeiger.execute(""" CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)""")
-            # Versuch Daten in DB schreiben (geht nicht, wenn Spalte AC_to_DC noch fehlt)
-            zeiger.execute("""
-                    INSERT INTO pv_daten
-                           VALUES (?,?,?,?,?,?,?,?,?,?)
-                   """,
-                  (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC)
-                  )
-        except:
-            # Wenn Datenbanktabelle noch nicht existiert, anlegen
+            zeiger.execute("CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)")
+            zeiger.execute(sql_query, params)
+            if zeiger.rowcount > 0:
+                gespeichert = True
+        except sqlite3.OperationalError:
+            # Falls Tabelle fehlt oder Spalten nicht passen
             self.create_database_PVDaten(database)
-            # Daten in DB nochmal versuchen zu schreiben
-            zeiger.execute("""
-                    INSERT INTO pv_daten
-                           VALUES (?,?,?,?,?,?,?,?,?,?)
-                   """,
-                  (Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch, Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC)
-                  )
-            
+            # Nach dem Erstellen/Reparieren erneut versuchen
+            zeiger.execute(sql_query, params)
+            if zeiger.rowcount > 0:
+                gespeichert = True
+        except Exception as e:
+            print(f"Ein Fehler ist aufgetreten: {e}")
+            gespeichert = False
     
         verbindung.commit()
         verbindung.close()
-    
-        return ()
+        return (gespeichert)
 
     def getSQLlastProduktion(self, database):
         verbindung = sqlite3.connect(database)

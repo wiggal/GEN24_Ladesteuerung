@@ -593,9 +593,12 @@ if __name__ == '__main__':
                     Logging_Schreib_Ausgabe = ""
                     if ('logging' in Options):
                         # In die DB werden die liftime Verbrauchszählerstände gespeichert
-                        sqlall.save_SQLite('PV_Daten.sqlite', API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
+                        gespeichert = sqlall.save_SQLite('PV_Daten.sqlite', API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
                         API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
-                        Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
+                        if gespeichert:
+                            Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
+                        else:
+                            Logging_Schreib_Ausgabe = 'SQLite-Datei unverändert!'
                     else:
                         Logging_Schreib_Ausgabe = "Logging NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
 
