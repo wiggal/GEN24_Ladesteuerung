@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ocpp_server.py 
-Startet den OCPPManager aus FUNCTIONS/ocpp.py
+Startet den OCPPManager FUNCTIONS/ocpp.py
 
 OCPP-Server (kompatibel mit websockets >=12 und <=11)
 Features:
@@ -12,12 +12,12 @@ Features:
  - Sendet SetChargingProfile NUR wenn sich Werte ändern (Ampere ODER Phasen)
  - Führt Phasenumschaltung über ZWEI SetChargingProfile Calls durch (0A Limit -> Warten -> Ampere Limit + neue Phase)
  - Auffälliges ANSI-Farben-Logging (Console)
- - NEU: Stabilitäts-Guards für Phase Change (MIN_PHASE_DURATION_S) und Stop (MIN_CHARGE_DURATION_S)
- - NEU: **PV-Quellen-Guard**: Phasenumschaltung und Ladestopp (Limit 0A) erfolgen nur, 
+ - Stabilitäts-Guards für Phase Change (MIN_PHASE_DURATION_S) und Stop (MIN_CHARGE_DURATION_S)
+ - **PV-Quellen-Guard**: Phasenumschaltung und Ladestopp (Limit 0A) erfolgen nur, 
    wenn die Steuerung aus dem PV-Überschuss-Modus (pv_mode 1 oder 2) stammt.
  - Logging bei start aus dem WebUI in /tmp/ocpp.log
  
- ==> Einstellungen in der APP
+ ==> Einstellungen in der Fronius-Wattpilot-APP
  Modus: Eco Mode AUS
  Einstellungen, Fahrzeug PHASENUMSCHALTUNG: Automatisch
  Internet, OCPP => aktiviert
