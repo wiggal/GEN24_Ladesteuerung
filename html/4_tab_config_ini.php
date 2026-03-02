@@ -15,7 +15,7 @@ tr:hover {background-color: #ddd;}
 
 th {
   text-align: left;
-  background-color: #CCFFCC;
+  background-color: #58ACFA;
 }
 input:read-only {
   background-color: #fadbd8;
@@ -100,6 +100,7 @@ select {
   .existing { background-color: #FFF5CC; }
   .changed  { background-color: #CCE5FF; }
   .missing  { background-color: #FFCCCC; }
+  .neworg  { background-color: #CCFFCC; }
 
 @media (max-width: 600px) {
 
@@ -371,7 +372,6 @@ function getinifile($dir)
 return $files;
 }
 		
-
 function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
 {
     $file_array['_priv'] = $priv_ini_file;
@@ -460,7 +460,7 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
     } 
 
     # Ab hier werden die gesammelten Zeilen ausgegeben
-    if ($edit_methode !== 'update') {
+    if ($edit_methode !== 'update') { # ini editieren
         $zeilenzaehler = 0;
         foreach ($all_ini_daten['_priv'] as $key1 => $element) {
             echo '<tr><th colspan="2"><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$key1.'\' >'.$key1.'</th></tr>'."\n";
@@ -483,14 +483,14 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
             }
         $zeilenzaehler++;
         }
-   } else {
+   } else { # Ab hier Update
         $zeilenzaehler = 0;
         foreach ($all_ini_daten['_org'] as $key1 => $element) {
             $Zeilenhintergrund_block = '';
             $Zeilenhintergrund_comm = '';
             $Zeilenhintergrund_var = '';
             $checkbox_group = '';
-            if(!isset($all_ini_daten['_priv'][$key1])) $Zeilenhintergrund_block = 'style="background-color: #FFCCCC;"';  #rot
+            if(!isset($all_ini_daten['_priv'][$key1])) $Zeilenhintergrund_block = ' style="background-color: #CCFFCC;"';  #gruen
             $checkbox_group = str_replace(['[', ']','.','_'], '', $key1);
             echo '<tr><th colspan="2"'.$Zeilenhintergrund_block.'><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$key1.'\' >'.$key1."\n";
             echo '<input type="hidden" name="Zeile['.$zeilenzaehler.'][2]" value="off">'."\n";
@@ -502,7 +502,7 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                 }
                 if ($subelement['comment'] !== '') {
                     if (!isset ($all_ini_daten['_priv'][$key1][$key2]['comment'])) {
-                        $Zeilenhintergrund_comm = 'style="background-color: #FFCCCC;"';  #rot
+                        $Zeilenhintergrund_comm = 'style="background-color: #CCFFCC;"';  #gruen
                     } elseif ($all_ini_daten['_priv'][$key1][$key2]['comment'] !== $subelement['comment']) {
                         $Zeilenhintergrund_comm = 'style="background-color: #CCE5FF;"';  #blau
                     } 
@@ -515,23 +515,8 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                     echo '</td></tr>'."\n";
 
                     $Zeilenhintergrund_comm = '';
-                    $zeilenzaehler++;
 
-                    # Alle Sonderkonfigurationen aus der charge_priv.ini übernehmen
-                    if ($key1 === '[monats_priv.ini]') {
-                        // Nur Schlüssel mit '_priv.ini' übernehmen
-                        foreach ($all_ini_daten['_priv']['[monats_priv.ini]'] as $key_monats_priv => $value) {
-                            if (strpos($key_monats_priv, '_priv.ini') !== false) {
-                                echo '<tr '.$Zeilenhintergrund_var.'><td><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$key_monats_priv.' = \'>'.$key_monats_priv.'</td>'."\n";
-                                echo '<td><input type="text" name="Zeile['.$zeilenzaehler.'][1]" value="'. htmlspecialchars($value['wert'], ENT_QUOTES) .'" '.$readonly.">\n";
-                                echo '<input type="hidden" name="Zeile['.$zeilenzaehler.'][2]" value="off">'."\n";
-                                echo '<input type="checkbox" name="Zeile['.$zeilenzaehler.'][2]" class="'.$checkbox_group.'" checked>'."\n";
-                                echo '</td></tr>'."\n";
-                            }
-                        $zeilenzaehler++;
-                        }
-                    }
-                    $zeilenzaehler++;
+                $zeilenzaehler++;
                 }
 
                 if ($subelement['variable'] !== '') {
@@ -557,6 +542,21 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
                 $zeilenzaehler++;
                 }
         $zeilenzaehler++;
+        }
+        # Alle Sonderkonfigurationen aus den _priv.ini übernehmen
+        if (isset($all_ini_daten['_priv'][$key1])) {
+            foreach ($all_ini_daten['_priv'][$key1] as $key_monats_priv => $value) {
+                if (strpos($key_monats_priv, 'leerzeile_') === false and !isset($all_ini_daten['_org'][$key1][$key_monats_priv])) {
+                    if ($key1 !== '[monats_priv.ini]') $Zeilenhintergrund_var = 'style="background-color: #FFCCCC;"';  #rot
+                    echo '<tr '.$Zeilenhintergrund_var.'><td><input type="hidden" name="Zeile['.$zeilenzaehler.'][0]" value=\''.$key_monats_priv.' = \'>'.$key_monats_priv.'</td>'."\n";
+                    echo '<td><input type="text" name="Zeile['.$zeilenzaehler.'][1]" value="'. htmlspecialchars($value['wert'], ENT_QUOTES) .'" '.$readonly.">\n";
+                    echo '<input type="hidden" name="Zeile['.$zeilenzaehler.'][2]" value="off">'."\n";
+                    echo '<input type="checkbox" name="Zeile['.$zeilenzaehler.'][2]" class="'.$checkbox_group.'" checked>'."\n";
+                    echo '</td></tr>'."\n";
+                    $Zeilenhintergrund_var = '';
+                }
+            $zeilenzaehler++;
+            }
         }
     }
 }
@@ -688,8 +688,9 @@ if ($_POST["editcase"] == 'update') {
     # SpeichernButton unterschied edit/update
     $SpeichernButton  = ' updaten!';
     echo '  <div class="legend-item existing">Werte aus '.basename($ini_file) .'</div>';
-    echo '  <div class="legend-item changed">Veränderte Werte aus'.basename($org_ini_file).'</div>';
-    echo '  <div class="legend-item missing">Fehlende Variablen aus '.basename($org_ini_file).'</div>';
+    echo '  <div class="legend-item changed">Veränderter Kommentar aus '.basename($org_ini_file).'</div>';
+    echo '  <div class="legend-item missing">Fehlt in '.basename($org_ini_file).'</div>';
+    echo '  <div class="legend-item neworg">Fehlt in '.basename($ini_file).'</div>';
 }
 echo '</div>';
 
@@ -697,7 +698,7 @@ echo '<table>';
 
     config_lesen($ini_file, '', $_POST["editcase"], $org_ini_file);
 
-echo '</table>';
+echo '</table><br><br>';
 echo '<br>';
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="schreiben">'."\n";
@@ -875,22 +876,32 @@ function toggleComments() {
 <script>
   // checkboxgruppen auswählen
   document.querySelectorAll('.check-all').forEach(masterCheckbox => {
-    const group = masterCheckbox.dataset.group;
-    const groupCheckboxes = document.querySelectorAll('.' + group);
+  const group = masterCheckbox.dataset.group;
+  const groupCheckboxes = document.querySelectorAll('.' + group);
 
-    // Wenn "Alle auswählen" geändert wird
-    masterCheckbox.addEventListener('change', () => {
-      groupCheckboxes.forEach(cb => {
-        cb.checked = masterCheckbox.checked;
-      });
-    });
-
-    // Wenn ein einzelnes Kontrollkästchen geändert wird
+  // 1. Master steuert die Gruppe
+  masterCheckbox.addEventListener('change', () => {
+    // Wenn Master abgewählt wird -> alle Unterboxen aus
+    // Wenn Master angewählt wird -> alle Unterboxen an
     groupCheckboxes.forEach(cb => {
-      cb.addEventListener('change', () => {
-        const allChecked = [...groupCheckboxes].every(c => c.checked);
-        masterCheckbox.checked = allChecked;
-      });
+      cb.checked = masterCheckbox.checked;
     });
   });
+
+  // 2. Unter-Checkboxen steuern Master
+  groupCheckboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      // Prüfen, ob MINDESTENS EINE Unter-Checkbox aktiv ist
+      const anyChecked = [...groupCheckboxes].some(c => c.checked);
+
+      // Die Master-Box bleibt an, solange 'anyChecked' true ist
+      masterCheckbox.checked = anyChecked;
+
+      // Optional: Falls du dennoch optisch unterscheiden willst,
+      // ob ALLE oder nur EINIGE gewählt sind:
+      const allChecked = [...groupCheckboxes].every(c => c.checked);
+      masterCheckbox.indeterminate = anyChecked && !allChecked;
+    });
+  });
+});
 </script>

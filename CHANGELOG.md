@@ -1,6 +1,7 @@
 **[0.41.5] – 2026-XX-XX**  
 
 - Logging nur schreiben, wenn sich die Werte verändert haben, damit kann EnergyController.py in kleineren Abständen ausgeführt werden.  
+- Änderung in update priv.ini-Dateien: Eigene Einträge in priv.ini-Dateien können übernommen werden.  
 
 **[0.41.4] – 2026-02-15**  
 
