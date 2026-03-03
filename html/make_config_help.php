@@ -10,13 +10,13 @@
 
 .ini_block {
   text-align: left;
-  background-color: #CCFFCC;
+  background-color: #58ACFA;
   font-size: 1.3em;
   font-weight: bold;
 }
 
 input:read-only {
-  background-color: #90CAF9;
+  background-color: #fadbd8;
   font-size: 1.0em;
 }
 button {
@@ -140,7 +140,7 @@ foreach ($config_ini_files as $file) {
     echo '</table>';
     echo '<div id="'.$ankor_text.'"></div>';
 }
-echo '<br /><br /><hr />Hilfe erzeugt am '.date("d.m.Y", $timestamp).' durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />';
+echo '<br /><br /><hr />Hilfe erzeugt am '.date("d.m.Y").' durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />';
 ?>
 
 </body>

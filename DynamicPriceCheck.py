@@ -285,10 +285,10 @@ for row in pv_data_charge:
 
     if Ladewert == -1:
         Netzverbrauch = Verbrauch - PV_Prognose
-        Netzladen = 0
+        Netzladen = -1
         if Netzverbrauch < 0: Netzverbrauch = 0
     elif Ladewert < -1:
-        Netzverbrauch = Verbrauch - PV_Prognose
+        Netzverbrauch = int((Verbrauch - PV_Prognose) / Stundenteile) 
         Netzladen = Ladewert * -1
         if Netzverbrauch < 0:
             Netzladen = Netzladen + Netzverbrauch

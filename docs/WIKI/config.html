@@ -10,13 +10,13 @@
 
 .ini_block {
   text-align: left;
-  background-color: #CCFFCC;
+  background-color: #58ACFA;
   font-size: 1.3em;
   font-weight: bold;
 }
 
 input:read-only {
-  background-color: #90CAF9;
+  background-color: #fadbd8;
   font-size: 1.0em;
 }
 button {
@@ -56,25 +56,38 @@ button {
 <!--HIERZURUECK-->
 
 
-    <div class="weatherDataManager"> <a href="#ConfigParameter"><b>Beschreibung der Config-Parameter</b></a></div>
-    <br>
-    <center> <font style="font-size: 24pt"><b><span>TAB</span>--&gt;
-          config</b></font> <br>
+    <a id="top"></a> <a href="#UpdateINI"><b>Update der _priv.ini
+        Dateien</b></a> <br>
+    <a href="#ConfigParameter"><b>Beschreibung der Config-Parameter</b></a>
+    <center>
+      <h2 class="western" align="center"><font style="font-size: 24pt"><b><span>TAB</span>--&gt;
+
+
+
+
+
+
+
+            config</b></font><br>
+        <font style="font-size: 24pt"><b> </b></font> </h2>
+      <div align="left">
+        <h2 align="center">Softwareupdate bei einem Git-Repositiry:</h2>
+        In der Überschrift wird die installierte Version der
+        Ladesteuerung angezeigt.<br>
+      </div>
+      <div align="left"> Wenn das Quellverzeichnis ein <b>Git-Repository</b>
+        ist, also mit <b>"git clone
+          https://github.com/wiggal/GEN24_Ladesteuerung.git ."</b>
+        erzeugt wurde (siehe Install im WIKI), <br>
+        wird neben der Überschrift ein Updatebutton angezeigt. Ist eine
+        neuere Version auf Github vorhanden ist, kann über diesen Button
+        ein Update gemacht werden.&nbsp; <br>
+      </div>
       <br>
       <table>
         <tbody>
           <tr>
             <td>
-              <p>In der Überschrift wird die installierte Version der
-                Ladesteuerung angezeigt.<br>
-                Wenn das Quellverzeichnis ein Git-Repository ist, also
-                mit `git clone
-                https://github.com/wiggal/GEN24_Ladesteuerung.git .`
-                erzeugt wurde (siehe install im WIKI), wird nach der
-                Überschrift ein Updatebutton angezeigt. Wenn eine neuere
-                Version auf Github vorhanden ist, kann über diesen
-                Button ein Update gemacht werden. <br>
-              </p>
               <p><u><i> Beispielausgaben währen des Update:</i></u><br>
                 <br>
               </p>
@@ -126,28 +139,58 @@ Fast-forward
                 werde.</i><br>
             </td>
           </tr>
-          <tr>
-            <td>
-              <p>In dem Dropdown können alle vorhandenen
-                _priv.ini-Dateien ausgewählt und mit dem Button
-                angezeigt werden. Anschließend kann die ausgewählte
-                _priv.ini-Datei editiert oder wenn eine original
-                ini-Datei vorhanden ist mit dieser verglichen und auf
-                deren Stand upgedatet werden. Die Datei
-                html/config_priv.ini muß in einem Editor angepasst
-                werden.<br>
-              </p>
-            </td>
-          </tr>
         </tbody>
       </table>
-      <br>
     </center>
     <hr width="100%" size="2">
-    <h2 class="western" align="center"><br>
+    <h2 class="western" align="center"><a name="UpdateINI"></a>Update
+      der _priv.ini Dateien<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br>
     </h2>
-    <h2 class="western" align="center"><a name="ConfigParameter"></a></h2>
-    <h2 class="western" align="center">Beschreibung der Config-Parameter<br>
+    In dem Dropdown können alle vorhandenen _priv.ini-Dateien ausgewählt
+    und angezeigt werden. <br>
+    Anschließend kann die ausgewählte _priv.ini-Datei editiert oder wenn
+    eine original ini-Datei vorhanden ist mit dieser verglichen und auf
+    deren Stand upgedatet werden. <br>
+    <h4>Folgende Optionen sind beim Update möglich:</h4>
+    <div style="display: inline-block; background-color: #FFF5CC;">Werte
+      aus XY_priv.ini</div>
+    <br>
+    <br>
+    Die Werte, die in der&nbsp; XY_priv.ini den Variablen zugewiesen
+    wurden. Sie können hier, genauso wie unter editieren, verändert
+    werden.<br>
+    <br>
+    <div style="display: inline-block; background-color: #CCE5FF;">Veränderter
+      Kommentar aus XY.ini</div>
+    <br>
+    <br>
+    Kommentare, die sich in der original XY.ini verändert haben, werden
+    hier in die XY_priv.ini übernommen.<br>
+    <br>
+    <div style="display: inline-block; background-color: #FFCCCC;">Fehlt
+      in XY.ini</div>
+    <br>
+    <br>
+    Werte die in der XY_priv.ini enthalten sind fehlen in der original
+    XY.ini.<br>
+    Wenn die Werte in die XY_priv.ini hinzugefügt wurden und so erhalte
+    bleiben sollen, müssen die Optionsfelder Angewählt bleiben.<br>
+    Sie die Werte, die ursprünglich aus der XY.ini übernommen wurden,
+    dort weggefallen (werden nicht mehr benötigt), können sie durch
+    Abwahl der Optionsfelder auch aus der XY_priv.ini entfernt werden.<br>
+    <br>
+    <div style="display: inline-block; background-color: #CCFFCC;">Fehlt
+      in XY_priv.ini<br>
+    </div>
+    <br>
+    <br>
+    Werte die in der XY.ini enthalten sind,aber in der XY_priv.ini
+    fehlen, werden der XY_priv.ini hinzugefügt, wenn die Optionsfelder
+    ausgewählt bleiben.<br>
+    <br>
+    <hr width="100%" size="2">
+    <h2 class="western" align="center"><a name="ConfigParameter"></a>Beschreibung
+      der Config-Parameter<br>
     </h2>
     <br>
   <br><center><a href="#Hilfezu/CONFIG/defaultini" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;<button type="submit">Hilfe zu default.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
@@ -621,6 +664,6 @@ Fast-forward
 <td><input type="text" name="Zeile[55][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[57]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 09.02.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 03.03.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>
