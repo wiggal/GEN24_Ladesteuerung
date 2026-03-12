@@ -236,9 +236,12 @@ Fast-forward
 <tr class="comment"><td colspan="2">; Hier können Pushmessages zu den Schreibvorgängen über den Dienst ntfy.sh auf die Handyapp ntfy gesendet werden.<br>; Push_Message_EIN (1=EIN/0=AUS)<br>; Die Adresse des über die App erstellten Themennamen eintragen. </td></tr>
 <tr><td class="variablenname">Push_Message_EIN</td>
 <td><input type="text" name="Zeile[31][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Wenn ERROR_Push_Message_EIN = 1, werden Pushmessages bei Harwareausfall versendet.<br>; z.B. Smartmeter, Akku oder Wechselrichter ist nicht erreichbar </td></tr>
+<tr><td class="variablenname">ERROR_Push_Message_EIN</td>
+<td><input type="text" name="Zeile[33][1]" value="1" readonly></td></tr>
 <tr><td class="variablenname">Push_Message_Url</td>
-<td><input type="text" name="Zeile[32][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[33]" value='' ></td></tr>
+<td><input type="text" name="Zeile[34][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[35]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/defaultini"></div><br><center><a href="#Hilfezu/CONFIG/weatherini" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;<button type="submit">Hilfe zu weather.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
 <tr class="comment"><td colspan="2">; Bitte die original weather.ini nicht ändern, da sie bei Updates überschrieben wird.<br>; Persönliche Anpassungen stattdessen in einer Kopie als weather_priv.ini ablegen. </td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[env]' >[env]</td></tr>
@@ -606,7 +609,7 @@ Fast-forward
 <tr><td class="variablenname">2.sort</td>
 <td><input type="text" name="Zeile[24][1]" value="2" readonly></td></tr>
 <tr><td class="variablenname">2.sichtbar</td>
-<td><input type="text" name="Zeile[25][1]" value="aus" readonly></td></tr>
+<td><input type="text" name="Zeile[25][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[26]" value='' ></td></tr>
 <tr><td class="variablenname">3.name</td>
 <td><input type="text" name="Zeile[27][1]" value="config" readonly></td></tr>
@@ -663,6 +666,6 @@ Fast-forward
 <td><input type="text" name="Zeile[55][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[57]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 04.03.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 12.03.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>

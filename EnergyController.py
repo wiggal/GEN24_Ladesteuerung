@@ -37,6 +37,10 @@ if __name__ == '__main__':
         password = basics.getVarConf('inverter','password', 'str')
         # Hier Hochkommas am Anfang und am Ende enternen
         password = password[1:-1]
+        Push_title="Meldung Batterieladesteuerung!"
+        Push_Schreib_Ausgabe=''
+        ERROR_Push_Schreib_Ausgabe=''
+        Push_Tags="sunny,zap"
 
         try:
             # Ping Ersatz, prüft ob WR online
@@ -578,16 +582,15 @@ if __name__ == '__main__':
 
                     ######## Notstromreserve setzen, ENDE
 
-    
-                    # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
-                    Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
-                    if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
-                        Push_Message_Url = basics.getVarConf('messaging','Push_Message_Url','str')
-                        apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
-                        print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
-
-
                     ### LOGGING, Schreibt mit den übergebenen Daten SQlite-Datei
+
+                    # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+                    if (Push_Schreib_Ausgabe != ""):
+                        Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
+                        if (Push_Message_EIN == 1):
+                            Push_Message_Url=basics.sendPush( Push_Schreib_Ausgabe, Push_title, Push_Tags )
+                            print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
+
                     ## nur wenn "schreiben" oder "logging" übergeben worden ist
                     sqlall = FUNCTIONS.SQLall.sqlall()
                     Logging_Schreib_Ausgabe = ""
@@ -606,8 +609,6 @@ if __name__ == '__main__':
                         print(Logging_Schreib_Ausgabe)
                     # LOGGING ENDE
 
-
-
                     #DEBUG ausgeben
                     if print_level >= 2:
                         DEBUG_Ausgabe+= "\nDEBUG\nDEBUG <<<<<< A U S >>>>>>>\n"
@@ -617,11 +618,25 @@ if __name__ == '__main__':
 
 
             except OSError:
+                Push_title='Es ist ein Fehler aufgetreten!!!'
+                ERROR_Push_Schreib_Ausgabe='Fehler nicht definiert'
+                Push_Tags='warning'
                 print("Es ist ein Fehler aufgetreten!!!")
 
 
         except requests.exceptions.RequestException as e:
             print(datetime.now())
             print(f"Fehler bei der Verbindung: {e}")
+            Push_title='Fehler bei der Verbindung WR'
+            ERROR_Push_Schreib_Ausgabe='WR offline'
+            Push_Tags='warning'
             print(">>>>>>>>>> WR offline")
+
+
+        # Wenn ERROR_Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+        if (ERROR_Push_Schreib_Ausgabe != ""):
+            ERROR_Push_Message_EIN = basics.getVarConf('messaging','ERROR_Push_Message_EIN','eval')
+            if (ERROR_Push_Message_EIN == 1):
+                Push_Message_Url=basics.sendPush( ERROR_Push_Schreib_Ausgabe, Push_title, Push_Tags )
+                print("ERROR_PushMeldung an ", Push_Message_Url, " gesendet.\n")
 

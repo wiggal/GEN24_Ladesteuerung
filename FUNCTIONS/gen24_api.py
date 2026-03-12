@@ -141,6 +141,10 @@ class InverterApi:
             print("\nAPI_URL zur Fehlersuche: ", gen24url)
             print("\nBenötigte Werte:\n", GEN24_API_schluessel)
             print("\nVorhandene Werte:\n", API_result)
+            # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+            ERROR_Push_Message_EIN = basics.getVarConf('messaging','ERROR_Push_Message_EIN','eval')
+            if (ERROR_Push_Message_EIN == 1):
+                basics.sendPush('Anlage prüfen', 'ERROR: API-Wert fehlt', 'warning')
             exit()
 
 

@@ -1,6 +1,7 @@
 # Funktionen für die Gen24_Ladesteuerung
 from datetime import datetime
 import json
+import requests
 import configparser
 import sqlite3
 import importlib
@@ -127,3 +128,8 @@ class basics:
 
         conn.close()
         return {"result": {"watts": result}}
+
+    def sendPush(self, message, title, tags):
+        Push_Message_Url = self.getVarConf('messaging','Push_Message_Url','str')
+        apiResponse = requests.post(Push_Message_Url, data=message.encode(encoding='utf-8'), headers={ "Title": title, "Tags":  tags})
+        return(Push_Message_Url)

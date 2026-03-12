@@ -1,3 +1,8 @@
+**[0.41.6] – 2026-XX-XX**  
+
+-  PushMeldungen können nun auch bei Hardwareausfällen von PV-Komponenten gesendet werden.  
+- **Änderung in CONFIG/default.ini** im Block `[messaging]` wurde hierzu die Variable ERROR_Push_Message_EIN eingefügt, in `priv.ini` nachziehen.  
+ 
 **[0.41.5] – 2026-03-06**  
 
 - Logging nur schreiben, wenn sich die Werte verändert haben, damit kann EnergyController.py in kleineren Abständen ausgeführt werden.  
