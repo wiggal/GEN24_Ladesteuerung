@@ -2,6 +2,7 @@
 
 -  PushMeldungen können nun auch bei Hardwareausfällen von PV-Komponenten gesendet werden.  
 - **Änderung in CONFIG/default.ini** im Block `[messaging]` wurde hierzu die Variable ERROR_Push_Message_EIN eingefügt, in `priv.ini` nachziehen.  
+- `http_SymoGen24Controller2.py` das nur noch als Wrapper für `EnergyController.py` diente fällt nun weg.  
  
 **[0.41.5] – 2026-03-06**  
 
