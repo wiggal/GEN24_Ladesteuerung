@@ -176,6 +176,11 @@ class ChargePointHandler:
         s.phase_limit = None
         s.transaction_id = None
         s.debug = []
+
+        # NEU: Zähler beim ersten Verbinden auf 0 setzen  #entWIGGlung
+        s.charged_wh = 0.0
+        s.last_energy_wh = None
+
         s.target_kwh = self.manager.DEFAULT_TARGET_KWH
         s.charged_wh = 0.0
         s.last_energy_wh = None
@@ -532,7 +537,7 @@ class OCPPManager:
             self.refresh_wallbox_settings(cp_id=cp_id, use_cache=True)
             amp, phases, pv_mode, is_pv_controlled, amp_min = self.compute_limits_from_global(cp_id=cp_id)
 
-            """  #entWIGGlung Status nicht eindeutig. 
+            """ Status nicht eindeutig.   #entWIGGlung
             print("Wallboxstatus: ", st.status)  #entWIGGlung
             # ---- Nur Werte senden wenn Auto angesteckt ist ----  #entWIGGlung
             plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing"]
@@ -720,7 +725,7 @@ class OCPPManager:
         st = self.states.get(cp_id)
         if not st:
             return
-        st.charged_wh = 0.0
+        # st.charged_wh = 0.0   #Auf Null setzen nur beim Serverrestart  #entWIGGlung
         baseline = self._extract_energy_wh_from_meter_store(cp_id)
         st.last_energy_wh = baseline
         st.append_debug({"note": "start-transaction-setup", "baseline": baseline, "ts": iso_now()})
