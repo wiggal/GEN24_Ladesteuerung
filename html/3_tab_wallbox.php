@@ -313,6 +313,10 @@ p, label {
    .hilfe {
       margin: 0px;
    }
+   .content {
+        height: auto; /* Erlaubt dem Body zu scrollen */
+        overflow: visible;
+    }
 
 } /* @media ENDE */
 
