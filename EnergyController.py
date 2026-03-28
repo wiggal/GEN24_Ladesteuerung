@@ -188,7 +188,7 @@ if __name__ == '__main__':
                     # für Akkuschonung aus PV-Planung nicht erforderlich
                     Akkuschonung_Verzogerung = 0
                     if Akkuschonung > 0:
-                        Akkuschonung_Verzogerung = progladewert_inst.akkuschonung_verzoegerung(BattganzeKapazWatt, SOC_data, BattStatusProz, BattVollUm, MaxLadung) 
+                        Akkuschonung_Verzogerung = progladewert_inst.akkuschonung_verzoegerung(BattganzeKapazWatt, SOC_data, MaxLadung) 
                         BattVollUm = BattVollUm - Akkuschonung_Verzogerung
 
 

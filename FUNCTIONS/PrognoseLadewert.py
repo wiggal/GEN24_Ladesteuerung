@@ -450,9 +450,9 @@ class progladewert:
         # Rückgabe der geänderten Variablen als Tupel
         return (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, SOC_Proz_Grenze, AkkuschonungLadewert)
 
-    def akkuschonung_verzoegerung(self, kapazitaet_wh, stufen_dict, BattStatusProz, BattVollUm, hardware_limit_w=3000):
+    def akkuschonung_verzoegerung(self, kapazitaet_wh, stufen_dict, MaxLadung):
         """
-        Berechnet die reine Verzögerung im Vergleich zur Ladung mit hardware_limit_w.
+        Berechnet die reine Verzögerung im Vergleich zur Ladung mit MaxLadung.
         """
         verlaengerung_h = 0.0
 
@@ -464,25 +464,21 @@ class progladewert:
             start = stufen_mit_ende[i]
             ende = stufen_mit_ende[i+1]
 
-            # Nur Phasen berechnen, die über dem aktuellen Ladestand liegen
-            if ende > BattStatusProz:
-                effektiver_start = max(start, BattStatusProz)
+            # Energiegehalt dieses Abschnitts (Wh)
+            energie_phase = kapazitaet_wh * (ende - start) / 100
 
-                # Energiegehalt dieses Abschnitts (Wh)
-                energie_phase = kapazitaet_wh * (ende - effektiver_start) / 100
+            # Leistung dieser Stufe (Faktor * Kapazität)
+            faktor = float(stufen_dict[str(start)])
+            p_red = kapazitaet_wh * faktor
 
-                # Leistung dieser Stufe (Faktor * Kapazität)
-                faktor = float(stufen_dict[str(start)])
-                p_red = kapazitaet_wh * faktor
+            # Vergleich: Wie lange dauert es mit P_red vs. Hardware-Limit?
+            if p_red > 0:
+                zeit_gedrosselt = energie_phase / p_red
+                zeit_hardware = energie_phase / MaxLadung
 
-                # Vergleich: Wie lange dauert es mit P_red vs. Hardware-Limit?
-                if p_red > 0:
-                    zeit_gedrosselt = energie_phase / p_red
-                    zeit_hardware = energie_phase / hardware_limit_w
-
-                    # Nur positive Differenzen (Verzögerungen) addieren
-                    if zeit_gedrosselt > zeit_hardware:
-                        verlaengerung_h += (zeit_gedrosselt - zeit_hardware)
+                # Nur positive Differenzen (Verzögerungen) addieren
+                if zeit_gedrosselt > zeit_hardware:
+                    verlaengerung_h += (zeit_gedrosselt - zeit_hardware)
 
         # 2. Rundungslogik (Ganze Stunden, ab 0.75 aufrunden)
         if (verlaengerung_h % 1) >= 0.75:
