@@ -184,10 +184,12 @@ if __name__ == '__main__':
                     if BattVollUm <= 0:
                        BattVollUm = Sonnenuntergang + BattVollUm
 
-                    # Bei Akkuschonung BattVollUm eine Stunde vor verlegen, nur für Prognoseberechnung,
+                    # Bei Akkuschonung BattVollUm Verzögerung berechnen und anbringen.
                     # für Akkuschonung aus PV-Planung nicht erforderlich
+                    Akkuschonung_Verzogerung = 0
                     if Akkuschonung > 0:
-                        BattVollUm = BattVollUm - 1
+                        Akkuschonung_Verzogerung = progladewert_inst.akkuschonung_verzoegerung(BattganzeKapazWatt, SOC_data, BattStatusProz, BattVollUm, MaxLadung) 
+                        BattVollUm = BattVollUm - Akkuschonung_Verzogerung
 
 
                     # Geamtprognose und Ladewert berechnen mit Funktion getLadewert
@@ -299,18 +301,19 @@ if __name__ == '__main__':
                     if print_level >= 1:
                         try:
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
-                            print("Programmversion:            ", prg_version)
-                            print("aktuellePrognose:           ", aktuelleVorhersage)
-                            print("TagesPrognose - BattVollUm: ", TagesPrognoseGesamt,"-", BattVollUm)
-                            print("Grundlast_Summe für Tag:    ", Grundlast_Summe)
-                            print("aktuellePVProduktion/Watt:  ", aktuellePVProduktion)
-                            print("aktuelleEinspeisung/Watt:   ", aktuelleEinspeisung)
-                            print("aktuelleBatteriePower/Watt: ", aktuelleBatteriePower)
-                            print("GesamtverbrauchHaus/Watt:   ", GesamtverbrauchHaus)
-                            print("aktuelleBattKapazität/Watt: ", BattKapaWatt_akt)
-                            print("Batteriestatus in Prozent:  ", BattStatusProz,"%")
-                            print("LadewertGrund: ", LadewertGrund)
-                            print("Bisheriger Ladewert/Watt:   ", alterLadewert)
+                            print(f"Programmversion:             {prg_version}")
+                            print(f"aktuellePrognose:            {aktuelleVorhersage}")
+                            print(f"TagesPrognose:               {TagesPrognoseGesamt}")
+                            print(f"BattVollUm (Akkuschonung):   {BattVollUm} ({Akkuschonung_Verzogerung})")
+                            print(f"Grundlast_Summe für Tag:     {Grundlast_Summe}")
+                            print(f"aktuellePVProduktion/Watt:   {aktuellePVProduktion}")
+                            print(f"aktuelleEinspeisung/Watt:    {aktuelleEinspeisung}")
+                            print(f"aktuelleBatteriePower/Watt:  {aktuelleBatteriePower}")
+                            print(f"GesamtverbrauchHaus/Watt:    {GesamtverbrauchHaus}")
+                            print(f"aktuelleBattKapazität/Watt:  {BattKapaWatt_akt}")
+                            print(f"Batteriestatus in Prozent:   {BattStatusProz}%")
+                            print(f"LadewertGrund:               {LadewertGrund}")
+                            print(f"Bisheriger Ladewert/Watt:    {alterLadewert}")
                             print(f"Neuer Ladewert/Watt({BatSparFaktor: .1f}):   {aktuellerLadewert}")
                             print()
                         except Exception as e:

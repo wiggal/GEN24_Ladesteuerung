@@ -4,6 +4,7 @@
 - **Änderung in CONFIG/default.ini** im Block `[messaging]` wurde hierzu die Variable ERROR_Push_Message_EIN eingefügt, in `priv.ini` nachziehen.  
 - `http_SymoGen24Controller2.py` das nur noch als Wrapper für `EnergyController.py` diente, fällt nun weg.  
 - OCPP-Server: `Geladene kWh` nicht beim Beenden und Starten der Ladung zurücksetzen (z.B. beim Phasenwechsel).  
+- Bei Akkuschonung BattVollUm-Verzögerung gegenüber MaxLadung berechnen und anbringen.
  
 **[0.41.5] – 2026-03-06**  
 
