@@ -1,10 +1,13 @@
 import FUNCTIONS.functions
+import FUNCTIONS.SQLall
+import FUNCTIONS.byd_status
 import requests
 import json
 import re
         
 basics = FUNCTIONS.functions.basics()
 sqlall = FUNCTIONS.SQLall.sqlall()
+byd = FUNCTIONS.byd_status.BYD_Status()
 
 class InverterApi:
     def __init__(self):
@@ -147,6 +150,15 @@ class InverterApi:
                 basics.sendPush('Anlage prüfen', 'ERROR: API-Wert fehlt', 'warning')
             exit()
 
+        # Zellspannung von BYD lesen  #entWIGGlung
+        API['maxvolt'] = 0
+        Akkuschonung = basics.getVarConf('Ladeberechnung','Akkuschonung','eval')
+        if(Akkuschonung == 2):
+            akkuIP = basics.getVarConf('inverter','akkuIP','str')
+            if (akkuIP == "reserva"):
+                print("#### Reserva: Akkuschonung mit MaxVolt noch nicht eingebaut!!!")
+            else:
+                API['maxvolt'] = byd.read(akkuIP, 8080)
 
         # Daten von weiteren GEN24 lesen
         IP_weitere_Gen24 = basics.getVarConf('inverter','IP_weitere_Gen24','str')

@@ -8,13 +8,16 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 Über die Tabelle [Ladesteuerung](#batterieladesteuerung) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
 - [Entladesteuerung,](#batterieentladesteuerung) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
 - [Logging](#-logging) und grafische Darstellung von Produktion und Verbrauch.  
-- Akkuschonung: Um einen LFP-Akku zu schonen, wird die Ladeleistung ab 80% auf 0,2C und ab 90% auf 0,1C (optional ab 95% weniger) beschränkt (anpassbar).  
+- Akkuschonung: Um einen LFP-Akku zu schonen, kann die Ladeleistung z.B. ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt werden. Es ist auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
 - [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden, mit grafischer Darstellung.  
 - **NEU:** 🚘 [Steuerung des Wattpiloten](#-wallboxsteuerung), über OCPP.  
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 - [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
 ![new](pics/new.png)  
+Ab Version: **0.41.7**  
+- Es ist nun auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
+
 Ab Version: **0.41.0**  
 - 🚘 Steuerung des Wattpiloten, über OCPP.  
 
@@ -26,16 +29,6 @@ Ab Version: **0.40.0**
 Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
 ⚠️ Die **Cronjobs** und die **default_priv.ini** müssen angepasst werden!!  
 - [WikiExtension_Gen24_Ladesteuerung von @killwack](https://github.com/killwack/WikiExtension_Gen24_Ladesteuerung/wiki)  
-
-Ab Version: **0.38.1**  
-- Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die GEN24_Ladesteuerung übergeben werden.  
-
-Ab Version: **0.38.0**  
-- Update auf Firmware 1.38.6-1.  
-
-Ab Version: **0.31.0**  
-- Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
-Installationsskript install_gen24.sh für eine automatische Installation bzw. Updating.  
 
 ![new](pics/new2.png)  
 
@@ -152,6 +145,13 @@ Eine [Beschreibung](../GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddat
 ----------
 
 **News History:**  
+Ab Version: **0.38.1**  
+Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die GEN24_Ladesteuerung übergeben werden.  
+Ab Version: **0.38.0**  
+Update auf Firmware 1.38.6-1.  
+Ab Version: **0.31.0**  
+ Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
+Installationsskript install_gen24.sh für eine automatische Installation bzw. Updating.  
 Ab Version: **0.30.4**  
 Neues Prognoseskripte OpenMeteo_WeatherData.py für https://open-meteo.com.  
 Ab Version: **0.30.2**  

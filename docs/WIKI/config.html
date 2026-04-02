@@ -220,28 +220,31 @@ Fast-forward
 <tr class="comment"><td colspan="2">; Das Kennwort muss in einfache Hochkommas gesetzt werden, wegen evtl. Sonderzeichen<br>; sollte das Kennwort ein % enthalten bitte zwei %% eintragen. </td></tr>
 <tr><td class="variablenname">password</td>
 <td><input type="text" name="Zeile[19][1]" value="&#039;XXXXXXXX&#039;" readonly></td></tr>
+<tr class="comment"><td colspan="2">; hier IP des BYD_Akku oder bei Fronius-Reserva reserva eintragen<br>; Um den Zugriff auf den BYD_Akku zu ermöglichen, muss ein Routing zu 192.168.16.254<br>; entweder am Rechner oder am Router eingetragen sein. </td></tr>
+<tr><td class="variablenname">akkuIP</td>
+<td><input type="text" name="Zeile[21][1]" value="192.168.178.222" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Akkukapazität in Wh, wird benötigt, wenn Akku offline ist!! </td></tr>
 <tr><td class="variablenname">battery_capacity_Wh</td>
-<td><input type="text" name="Zeile[21][1]" value="11000" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[22]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[23]" value='[wallbox]' >[wallbox]</td></tr>
+<td><input type="text" name="Zeile[23][1]" value="11000" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[24]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[25]" value='[wallbox]' >[wallbox]</td></tr>
 <tr class="comment"><td colspan="2">; wenn wallboxsteuerung = 1, dann wird durch start_PythonScript.sh der ocpp_server gestartet.<br>; Konfiguration und Steuerung des OCPP-Servers erfolgt über den TAB Wattpilot der WebUI </td></tr>
 <tr><td class="variablenname">wallboxsteuerung</td>
-<td><input type="text" name="Zeile[25][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[27][1]" value="0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; ocpp_log_level steuert das logging des OCPP-Servers<br>; 0=ERROR/WARN, 1=+/OK 2=+INFO, 3=+NOTE </td></tr>
 <tr><td class="variablenname">log_level</td>
-<td><input type="text" name="Zeile[27][1]" value="3" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[28]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[29]" value='[messaging]' >[messaging]</td></tr>
+<td><input type="text" name="Zeile[29][1]" value="3" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[30]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[31]" value='[messaging]' >[messaging]</td></tr>
 <tr class="comment"><td colspan="2">; Hier können Pushmessages zu den Schreibvorgängen über den Dienst ntfy.sh auf die Handyapp ntfy gesendet werden.<br>; Push_Message_EIN (1=EIN/0=AUS)<br>; Die Adresse des über die App erstellten Themennamen eintragen. </td></tr>
 <tr><td class="variablenname">Push_Message_EIN</td>
-<td><input type="text" name="Zeile[31][1]" value="0" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Wenn ERROR_Push_Message_EIN = 1, werden Pushmessages bei Harwareausfall versendet.<br>; z.B. Smartmeter, Akku oder Wechselrichter ist nicht erreichbar </td></tr>
+<td><input type="text" name="Zeile[33][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Wenn ERROR_Push_Message_EIN = 1, werden Pushmessages bei Hardwareausfall versendet.<br>; z.B. Smartmeter, Akku oder Wechselrichter ist nicht erreichbar </td></tr>
 <tr><td class="variablenname">ERROR_Push_Message_EIN</td>
-<td><input type="text" name="Zeile[33][1]" value="1" readonly></td></tr>
+<td><input type="text" name="Zeile[35][1]" value="1" readonly></td></tr>
 <tr><td class="variablenname">Push_Message_Url</td>
-<td><input type="text" name="Zeile[34][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[35]" value='' ></td></tr>
+<td><input type="text" name="Zeile[36][1]" value="https://ntfy.sh/XXXXXXXXX" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[37]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/defaultini"></div><br><center><a href="#Hilfezu/CONFIG/weatherini" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;<button type="submit">Hilfe zu weather.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
 <tr class="comment"><td colspan="2">; Bitte die original weather.ini nicht ändern, da sie bei Updates überschrieben wird.<br>; Persönliche Anpassungen stattdessen in einer Kopie als weather_priv.ini ablegen. </td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[env]' >[env]</td></tr>
@@ -455,60 +458,63 @@ Fast-forward
 <tr><td class="variablenname">GrenzwertGroestePrognose</td>
 <td><input type="text" name="Zeile[36][1]" value="2000" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[37]" value='' ></td></tr>
-<tr class="comment"><td colspan="2">; Akkuschonung (0=aus, 1=ein)<br>; Wenn Akkuschonung ein, wird BattVollUm um eine Stunde vor verlegt, da am Schluss nicht mehr so stark geladen wird.<br>; ACHTUNG: Eine Überschreitung der Einspeisegrenze bzw. AC-Leistung des WR setzt die Akkuschonung aus! </td></tr>
+<tr class="comment"><td colspan="2">; Akkuschonung (0=aus, 1=ein, 2=ein+Zellspannungs_Werte)<br>; Wenn Akkuschonung ein (1 oder 2), wird BattVollUm um die berechnete Verzögerung vorverlegt, da am Schluss nicht mehr so stark geladen wird.<br>; ACHTUNG: Eine Überschreitung der Einspeisegrenze bzw. AC-Leistung des WR setzt die Akkuschonung aus! </td></tr>
 <tr><td class="variablenname">Akkuschonung</td>
 <td><input type="text" name="Zeile[39][1]" value="1" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Akkuschonung_Werte = {&quot;Ladestand%&quot; : &quot;LadewertC&quot;, ...}<br>; Akkuschonung_Ladewert = ((Akkukapazität * SOH / 100) * LadewertC), aufgerundet auf ganze 10 Watt.<br>; Heißt, der Akkuzustand wird hier wie auch bei anderen Berechnungen angehalten. </td></tr>
 <tr><td class="variablenname">Akkuschonung_Werte</td>
 <td><input type="text" name="Zeile[41][1]" value="{&quot;80&quot;: &quot;0.2&quot;, &quot;90&quot;: &quot;0.1&quot;, &quot;95&quot;: &quot;0.05&quot;}" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Akkuschonung = 2: Liegt die maximale Zellspannung der Akkuzellen über Zellspannung_ein wird zwingend der Ladewert LadewertC gesetzt,<br>; unter Zellspannung_aus wird wieder der anderweitig berechnete Ladewert angehalten.<br>; Zellspannungs_Werte = Zellspannung_ein,LadewertC,Zellspannung_aus </td></tr>
+<tr><td class="variablenname">Zellspannungs_Werte</td>
+<td><input type="text" name="Zeile[43][1]" value="3.42,0.03,3.38" readonly></td></tr>
 <tr class="comment"><td colspan="2">; bei Prognosemorgen über diesem Wert in kW, wird die Akkuladung auf X% begrenzt,<br>; wenn nicht manuelle Strg ohne Akkuschonung ausgewählt ist.<br>; X ist der erste Wert aus dem String Akkuschonung_Werte<br>; bei einem Wert -1 ist die Funktion abgeschaltet </td></tr>
 <tr><td class="variablenname">PrognoseLimit_SOC</td>
-<td><input type="text" name="Zeile[43][1]" value="-1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[44]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[45]" value='[monats_priv.ini]' >[monats_priv.ini]</td></tr>
+<td><input type="text" name="Zeile[45][1]" value="-1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[46]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[47]" value='[monats_priv.ini]' >[monats_priv.ini]</td></tr>
 <tr class="comment"><td colspan="2">; hier können die Namen von zusätzlichen monatsabhängigen config.ini definiert werden.<br>; die Monate müssen immer zweistellig sein!!<br>; Dateiname (immer Kleinbuchstaben) = GültigkeitsMonate<br>; winter_priv.ini = 11, 12, 01 </td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[47]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[48]" value='[Entladung]' >[Entladung]</td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[49]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[50]" value='[Entladung]' >[Entladung]</td></tr>
 <tr class="comment"><td colspan="2">; Konfigdaten für die Entladesteuerung<br>; Batterieentladung und Zwangsladung ein- bzw. ausschalten (1=ein, 0=aus, 2=Ein+Akkuschonung bei Zwangsladung) </td></tr>
 <tr><td class="variablenname">Batterieentlandung_steuern</td>
-<td><input type="text" name="Zeile[50][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[52][1]" value="0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben </td></tr>
 <tr><td class="variablenname">WREntladeSchreibGrenze_Watt</td>
-<td><input type="text" name="Zeile[52][1]" value="200" readonly></td></tr>
+<td><input type="text" name="Zeile[54][1]" value="200" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Feste Entladebegrenzung ab einem bestimmten Verbrauch (Angaben in Watt)<br>; Funktion nur aktiv, wenn Verbrauch_Feste_Entladegrenze &gt; 0 (z.B. 10000 Watt für Wallbox)<br>; Ist der Verbrauch über Verbrauch_Feste_Entladegrenze, wird die Entnahme aus dem Akku auf Feste_Entladegrenze begrenzt </td></tr>
 <tr><td class="variablenname">Verbrauch_Feste_Entladegrenze</td>
-<td><input type="text" name="Zeile[54][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[56][1]" value="0" readonly></td></tr>
 <tr><td class="variablenname">Feste_Entladegrenze</td>
-<td><input type="text" name="Zeile[55][1]" value="300" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[57]" value='[Notstrom]' >[Notstrom]</td></tr>
+<td><input type="text" name="Zeile[57][1]" value="300" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[58]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[59]" value='[Notstrom]' >[Notstrom]</td></tr>
 <tr class="comment"><td colspan="2">; Notstromreservekapazität auf bestimmten Prozentsatz begrenzen (1=ein, 0=aus) </td></tr>
 <tr><td class="variablenname">Notstromreserve_steuern</td>
-<td><input type="text" name="Zeile[59][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[61][1]" value="0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Notstromreservekapazität Minimum normalerweise 5% kann hier höher gesetzt werden </td></tr>
 <tr><td class="variablenname">Notstromreserve_Min</td>
-<td><input type="text" name="Zeile[61][1]" value="5" readonly></td></tr>
+<td><input type="text" name="Zeile[63][1]" value="5" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Notstrom_Werte = {&quot;PrognoseGrenzeMorgen/kWh&quot; : &quot;Notstromreservekapazität/%&quot;, ...} </td></tr>
 <tr><td class="variablenname">Notstrom_Werte</td>
-<td><input type="text" name="Zeile[63][1]" value="{&quot;9&quot;: &quot;30&quot;}" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[64]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[65]" value='[EigenverbOptimum]' >[EigenverbOptimum]</td></tr>
+<td><input type="text" name="Zeile[65][1]" value="{&quot;9&quot;: &quot;30&quot;}" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[66]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[67]" value='[EigenverbOptimum]' >[EigenverbOptimum]</td></tr>
 <tr class="comment"><td colspan="2">; Nur HTTP<br>; durch das Setzen eines bestimmten Einspeisewertes unter Eigenverbrauchs-Optimierung<br>; kann über Nacht der Akku entladen werden<br>; EigenverbOpt_steuern 0 = aus, 1 = ein und Tagesoptimierung nach Prognose, 2 = nachts ein und tags aus </td></tr>
 <tr><td class="variablenname">EigenverbOpt_steuern</td>
-<td><input type="text" name="Zeile[67][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[69][1]" value="0" readonly></td></tr>
 <tr><td class="variablenname">GrundlastNacht</td>
-<td><input type="text" name="Zeile[68][1]" value="340" readonly></td></tr>
+<td><input type="text" name="Zeile[70][1]" value="340" readonly></td></tr>
 <tr><td class="variablenname">AkkuZielProz</td>
-<td><input type="text" name="Zeile[69][1]" value="40" readonly></td></tr>
+<td><input type="text" name="Zeile[71][1]" value="40" readonly></td></tr>
 <tr><td class="variablenname">MaxEinspeisung</td>
-<td><input type="text" name="Zeile[70][1]" value="200" readonly></td></tr>
+<td><input type="text" name="Zeile[72][1]" value="200" readonly></td></tr>
 <tr class="comment"><td colspan="2">; der zu schreibende Wert wird auf RundungEinspeisewert gerundet, um die Schreibzugriffe zu minimieren </td></tr>
 <tr><td class="variablenname">RundungEinspeisewert</td>
-<td><input type="text" name="Zeile[72][1]" value="100" readonly></td></tr>
+<td><input type="text" name="Zeile[74][1]" value="100" readonly></td></tr>
 <tr class="comment"><td colspan="2">; PrognoseGrenzeMorgen in KWh </td></tr>
 <tr><td class="variablenname">PrognoseGrenzeMorgen</td>
-<td><input type="text" name="Zeile[74][1]" value="30" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[75]" value='' ></td></tr>
+<td><input type="text" name="Zeile[76][1]" value="30" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[77]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/chargeini"></div><br><center><a href="#Hilfezu/CONFIG/dynpriceini" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;<button type="submit">Hilfe zu dynprice.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
 <tr class="comment"><td colspan="2">; Bitte die original dynprice.ini nicht ändern, da sie bei Updates überschrieben wird.<br>; Persönliche Anpassungen stattdessen in einer Kopie als dynprice_priv.ini ablegen. </td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[dynprice]' >[dynprice]</td></tr>
@@ -666,6 +672,6 @@ Fast-forward
 <td><input type="text" name="Zeile[55][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[57]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 12.03.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 02.04.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>
