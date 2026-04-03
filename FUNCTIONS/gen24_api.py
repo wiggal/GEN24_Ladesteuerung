@@ -14,6 +14,79 @@ class InverterApi:
         self.dummy = 'dummmy'
 
     def extract_API_values(self, obj, key_patterns):
+        import re
+        
+        if isinstance(key_patterns, tuple):
+            key_patterns = [key_patterns]
+
+        results = {}
+        aggregates = {}
+        agg_configs = {} 
+        
+        # 1. Aggregationen vorbereiten (nur wenn mode ein String ist)
+        for entry in key_patterns:
+            pattern, mode, *maybe = entry
+            if isinstance(mode, str):
+                clean_p = re.sub(r'\[.*?\]|\(.*?\)', '', pattern).strip('_')
+                agg_name = f"{mode.upper()}_{re.sub(r'[^A-Za-z0-9_]', '_', clean_p)}"
+                
+                initial_val = 0.0
+                if mode == "max": initial_val = float('-inf')
+                elif mode == "min": initial_val = float('inf')
+                
+                aggregates[agg_name] = initial_val
+                agg_configs[pattern] = (mode, agg_name)
+
+        def recurse(o, inherited_attrs=None, inherited_label=None):
+            if isinstance(o, dict):
+                attrs = o.get("attributes", {})
+                local_label = o.get("label") or attrs.get("label")
+                active_label = local_label if local_label else inherited_label
+                
+                active_attrs = inherited_attrs.copy() if inherited_attrs else {}
+                if isinstance(attrs, dict): active_attrs.update(attrs)
+
+                for k, v in o.items():
+                    # Pattern-Matching
+                    for entry in key_patterns:
+                        pattern, mode, *maybe = entry
+                        if re.fullmatch(pattern, k):
+                            # Bedingungs-Check
+                            condition = maybe[0] if maybe else None
+                            if condition:
+                                c_type, c_val = condition
+                                if c_type == "label" and active_label != c_val: continue
+                                if c_type != "label" and active_attrs.get(c_type) != c_val: continue
+
+                            if isinstance(mode, str):
+                                # AGGREGATION
+                                m_type, name = agg_configs[pattern]
+                                try:
+                                    val = float(v)
+                                    if m_type == "sum": aggregates[name] += val
+                                    elif m_type == "max": aggregates[name] = max(aggregates[name], val)
+                                    elif m_type == "min": aggregates[name] = min(aggregates[name], val)
+                                except: pass
+                            elif k not in results:
+                                # EINZELWERT (mode ist False)
+                                results[k] = v
+
+                    if isinstance(v, (dict, list)):
+                        recurse(v, active_attrs, active_label)
+
+            elif isinstance(o, list):
+                for item in o: recurse(item, inherited_attrs, inherited_label)
+
+        recurse(obj)
+        
+        # Unendliche Werte korrigieren und Aggregationen mergen
+        for name, val in aggregates.items():
+            if val in (float('-inf'), float('inf')): val = 0.0
+            results[name] = val
+                
+        return results
+
+    def extract_API_values_old(self, obj, key_patterns):
         results = {}
         sums = {}
 
@@ -80,7 +153,8 @@ class InverterApi:
         #    data = json.load(f)
         API = {}
         # relevante API-Schlüssel definieren: 
-        # schluessel [1-3] bei mehrfachschlussel, True für Summenbildung
+        # schluessel [1-3] bei mehrfachschlussel, "sum" für Summenbildung
+        # als Aggregation kann "sum", "max" oder "min" angegeben werden
         # ("label", "<primary>") = attributes.key, Value zur Identifizierung des SM am Stromzähler, bei mehreren SM
         GEN24_API_schluessel = [
             ("nameplate", False),                                                           #BYD
@@ -92,10 +166,10 @@ class InverterApi:
             ("BAT_POWERACTIVE_MEAN_F32", False),                                            #WR   Nur vorhanden, wenn Akku an/standby
             ("BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64", False),                            #WR
             ("BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64", False),                         #WR
-            ("PV_POWERACTIVE_MEAN_0[1-2]_F32", True),                                       #WR
-            ("ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0[1-3]_U64", True),                        #WR
-            ("PV_ENERGYACTIVE_ACTIVE_SUM_0[1-2]_U64", True),                                #WR
-            ("ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0[1-3]_U64", True),                  #WR
+            ("PV_POWERACTIVE_MEAN_0[1-2]_F32", "sum"),                                       #WR
+            ("ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0[1-3]_U64", "sum"),                        #WR
+            ("PV_ENERGYACTIVE_ACTIVE_SUM_0[1-2]_U64", "sum"),                                #WR
+            ("ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0[1-3]_U64", "sum"),                  #WR
             ("PS2.rev-sw", False)                                                           #WR
         ]
         API_result = self.extract_API_values(data, GEN24_API_schluessel)
@@ -150,13 +224,15 @@ class InverterApi:
                 basics.sendPush('Anlage prüfen', 'ERROR: API-Wert fehlt', 'warning')
             exit()
 
-        # Zellspannung von BYD lesen  #entWIGGlung
+        # Zellspannung von BYD oder Reserva lesen
         API['maxvolt'] = 0
         Akkuschonung = basics.getVarConf('Ladeberechnung','Akkuschonung','eval')
         if(Akkuschonung == 2):
             akkuIP = basics.getVarConf('inverter','akkuIP','str')
             if (akkuIP == "reserva"):
-                print("#### Reserva: Akkuschonung mit MaxVolt noch nicht eingebaut!!!")
+                print("#### Reserva: Akkuschonung mit MaxVolt noch nicht getestet!!!")  #entWIGGlung
+                API_result = self.extract_API_values(data, [("BATMODULE_VOLTAGE_CELL_MAX_F32", "max")])
+                API['maxvolt']   =  round(float(API_result['MAX_BATMODULE_VOLTAGE_CELL_MAX_F32']),3)
             else:
                 API['maxvolt'] = byd.read(akkuIP, 8080)
 

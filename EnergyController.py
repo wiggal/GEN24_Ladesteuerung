@@ -315,7 +315,7 @@ if __name__ == '__main__':
                             print(f"aktuelleBatteriePower/Watt:  {aktuelleBatteriePower}")
                             print(f"GesamtverbrauchHaus/Watt:    {GesamtverbrauchHaus}")
                             print(f"aktuelleBattKapazität/Watt:  {BattKapaWatt_akt}")
-                            print(f"Batteriestatus in Prozent:   {BattStatusProz}%")
+                            print(f"Batteriestatus (MaxVolt):    {BattStatusProz}%({API['maxvolt']}V)")
                             print(f"LadewertGrund:               {LadewertGrund}")
                             print(f"Bisheriger Ladewert/Watt:    {alterLadewert}")
                             print(f"Neuer Ladewert/Watt({BatSparFaktor: .1f}):   {aktuellerLadewert}")

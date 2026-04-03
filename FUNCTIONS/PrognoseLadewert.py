@@ -447,20 +447,15 @@ class progladewert:
             DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt_SOC)
             DEBUG_Ausgabe+="\nDEBUG <<<< SOC 80% für Ladeberechnung AKTIV!!! >>>>"
 
-        # Wenn Akkuschonung == 2, Ladewert bei hoher Zellspannung reduzieren  #entWIGGlung
+        # Wenn Akkuschonung == 2, Ladewert bei hoher Zellspannung reduzieren
         if Akkuschonung == 2:
             Zellspannungs_Werte = basics.getVarConf('Ladeberechnung','Zellspannungs_Werte','str')
             Zellspannung_ein, LadewertC, Zellspannung_aus = map(float, Zellspannungs_Werte.split(",")) # ACHTUNG Strigs
             Volt_ladewert = int(BattganzeLadeKapazWatt_Akku * LadewertC)
-            #Zellspannung_ein = 3.31  #entWIGGlung
-            #Zellspannung_aus = 3.31  #entWIGGlung
-            #alterLadewert = 384  #entWIGGlung
-            print(f"MaxVolt = {maxvolt}V")  #entWIGGlung
             if((alterLadewert != Volt_ladewert) and maxvolt >= Zellspannung_ein) or ((alterLadewert == Volt_ladewert) and maxvolt >= Zellspannung_aus):
                 aktuellerLadewert = Volt_ladewert
                 WR_schreiben = self.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, alterLadewert)
                 LadewertGrund = f"Akkuschonung: Zellspannung zu hoch {maxvolt}"
-                print(f"Akkuschonung: Zellspannung zu hoch {maxvolt}")  #entWIGGlung
         
         # Rückgabe der geänderten Variablen als Tupel
         return (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, SOC_Proz_Grenze, AkkuschonungLadewert)
