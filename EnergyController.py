@@ -209,6 +209,9 @@ if __name__ == '__main__':
                     ManuelleSteuerung = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld1'])
                     # Akkuschonung aus PV-Planung ermitteln
                     ManuelleStrg_Akkuschon = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld2'])
+                    # Wenn Akkuschonung in PV-Planung gewählt, und Akkuschonung == 2 (Zellspannung berücksichtigen) ManuelleStrg_Akkuschon =2
+                    if ManuelleStrg_Akkuschon == 1 and Akkuschonung == 2:
+                        ManuelleStrg_Akkuschon = 2
                     # Prüfen, ob Einträge schon abgelaufen
                     try: 
                         Ablaufdatum = int(reservierungdata_tmp['ManuelleSteuerung']['Options'])
@@ -279,7 +282,8 @@ if __name__ == '__main__':
                                 WRSchreibGrenze_nachUnten, # Übergabe der aktuellen Werte
                                 DEBUG_Ausgabe, 
                                 LadewertGrund,
-                                WR_schreiben
+                                WR_schreiben,
+                                API['maxvolt']
                         )
 
                     # Wenn die aktuellePVProduktion < 50 Watt ist, nicht schreiben, 
@@ -311,7 +315,7 @@ if __name__ == '__main__':
                             print(f"aktuelleBatteriePower/Watt:  {aktuelleBatteriePower}")
                             print(f"GesamtverbrauchHaus/Watt:    {GesamtverbrauchHaus}")
                             print(f"aktuelleBattKapazität/Watt:  {BattKapaWatt_akt}")
-                            print(f"Batteriestatus in Prozent:   {BattStatusProz}%")
+                            print(f"Batteriestatus (MaxVolt):    {BattStatusProz}%({API['maxvolt']}V)")
                             print(f"LadewertGrund:               {LadewertGrund}")
                             print(f"Bisheriger Ladewert/Watt:    {alterLadewert}")
                             print(f"Neuer Ladewert/Watt({BatSparFaktor: .1f}):   {aktuellerLadewert}")

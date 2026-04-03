@@ -1,3 +1,9 @@
+**[0.41.7] – 2026-XX-XX**  
+- Akkuschonung: Nun kann der Ladewert auch über die höchste Zellspannung gesteuert werden.  
+  **Änderung in CONFIG/default.ini** im Block `[inverter]` wurde hierzu die Variable `akkuIP` eingefügt, in `priv.ini` nachziehen.  
+  **Änderung in CONFIG/charge.ini** im Block `[Ladeberechnung]` wurde hierzu die Variable `Zellspannungs_Werte` eingefügt, in `priv.ini` nachziehen.  i
+       Wird Akkuschonung = 2 gesetzt, wird die höchste Zellspannung zur Ladeleistungsreduktion verwendet.  
+
 **[0.41.6] – 2026-03-29**  
 
 - Push-Meldungen können nun auch bei Hardwareausfällen von PV-Komponenten gesendet werden.  
