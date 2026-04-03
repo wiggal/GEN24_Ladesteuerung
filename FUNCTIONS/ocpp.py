@@ -28,7 +28,7 @@ import FUNCTIONS.functions
 import FUNCTIONS.SQLall
 
 basics = FUNCTIONS.functions.basics()
-_ = basics.loadConfig(['default'])
+config = basics.loadConfig(['default', 'charge'])
 # try to read configured log level; fallback handled below
 try:
     log_level = basics.getVarConf('wallbox', 'log_level', 'eval')
