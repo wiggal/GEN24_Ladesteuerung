@@ -1,4 +1,4 @@
-**[0.41.7] – 2026-XX-XX**  
+**[0.41.7] – 2026-04-06**  
 - Akkuschonung: Nun kann der Ladewert auch über die höchste Zellspannung gesteuert werden.  
   **Änderung in CONFIG/default.ini** im Block `[inverter]` wurde hierzu die Variable `akkuIP` eingefügt, in `priv.ini` nachziehen.  
   **Änderung in CONFIG/charge.ini** im Block `[Ladeberechnung]` wurde hierzu die Variable `Zellspannungs_Werte` eingefügt, in `priv.ini` nachziehen.  i
