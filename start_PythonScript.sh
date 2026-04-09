@@ -138,5 +138,11 @@ if [[ ! -r "$PYTHON_SCRIPT" ]]; then
 fi
 
 # --- 6. Python-Skript ausführen ---
+# Nun auch mit Absolutem Pfad möglich, z.B. /dev/null
+if [[ "$LOGFILE" = /* ]]; then
+    LOG_TARGET="$LOGFILE"
+else
+    LOG_TARGET="${GEN24_Pfad}/${LOGFILE}"
+fi
 
-/usr/bin/python3 "$@" >> "${GEN24_Pfad}/${LOGFILE}" 2>&1
+/usr/bin/python3 "$@" >> "$LOG_TARGET" 2>&1

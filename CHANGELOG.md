@@ -1,3 +1,6 @@
+**[0.41.8] – 2026-XX-XX**  
+- FIX: start_PythonScript.sh -o Logfile mit absolutem Pfad erzeugte Fehler, z.B. beim Start des Dockers.  
+
 **[0.41.7] – 2026-04-06**  
 - Akkuschonung: Nun kann der Ladewert auch über die höchste Zellspannung gesteuert werden.  
   **Änderung in CONFIG/default.ini** im Block `[inverter]` wurde hierzu die Variable `akkuIP` eingefügt, in `priv.ini` nachziehen.  
