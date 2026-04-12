@@ -35,8 +35,9 @@ if __name__ == '__main__':
         host_ip = basics.getVarConf('inverter','hostNameOrIp', 'str')
         user = basics.getVarConf('inverter','user', 'str')
         password = basics.getVarConf('inverter','password', 'str')
-        # Hier Hochkommas am Anfang und am Ende enternen
-        password = password[1:-1]
+        # Hier evtl. Hochkommas am Anfang und am Ende enternen
+        if (password.startswith("'") and password.endswith("'")):
+            password = password[1:-1]
         Push_title="Meldung Batterieladesteuerung!"
         Push_Schreib_Ausgabe=''
         ERROR_Push_Schreib_Ausgabe=''
