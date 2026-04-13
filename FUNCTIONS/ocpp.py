@@ -730,6 +730,10 @@ class OCPPManager:
         st.last_energy_wh = baseline
         st.append_debug({"note": "start-transaction-setup", "baseline": baseline, "ts": iso_now()})
 
+    # ----------------------------
+    # Energie / Messwerte Extraktion
+    # ----------------------------
+
     def _extract_energy_wh_from_meter_store(self, cp_id: str, meter_payload: Optional[dict] = None) -> Optional[float]:
         payload = meter_payload or (self.states.get(cp_id).meter_values if cp_id in self.states else None)
         if not payload:
@@ -745,6 +749,41 @@ class OCPPManager:
                     except Exception:
                         continue
         return None
+
+    def _extract_power_w_from_meter_store(self, cp_id: str) -> float:
+        """Extrahiert die aktuelle Wirkleistung (Gesamt) in Watt."""
+        st = self.states.get(cp_id)
+        if not st or not st.meter_values:
+            return 0.0
+
+        for mv in st.meter_values.get('meterValue', []):
+            for s in mv.get('sampledValue', []):
+                # Wir suchen die Gesamtleistung (ohne 'phase' Attribut)
+                if s.get('measurand') == 'Power.Active.Import' and 'phase' not in s:
+                    try:
+                        return float(s.get('value', 0))
+                    except (ValueError, TypeError):
+                        continue
+        return 0.0
+
+    def _get_average_voltage(self, cp_id: str) -> float:  #entWIGGlung
+        """Berechnet die durchschnittliche Spannung über alle Phasen."""
+        st = self.states.get(cp_id)
+        if not st or not st.meter_values:
+            return 230.0
+
+        voltages = []
+        for mv in st.meter_values.get('meterValue', []):
+            for s in mv.get('sampledValue', []):
+                if s.get('measurand') == 'Voltage' and s.get('phase') in ['L1', 'L2', 'L3']:
+                    try:
+                        val = float(s.get('value'))
+                        if val > 100:
+                            voltages.append(val)
+                    except (ValueError, TypeError):
+                        continue
+
+        return round(sum(voltages) / len(voltages), 1) if voltages else 230.0
 
     async def update_charged_energy_from_meter(self, cp_id: str, meter_payload: dict):
         st = self.states.get(cp_id)
@@ -841,9 +880,17 @@ class OCPPManager:
             remaining_kwh = max(0.0, target_kwh - charged_wh / 1000.0)
         remaining_kwh_rounded = round(remaining_kwh, 4) if remaining_kwh is not None else None
 
+        # Hier rufen wir deine neuen Hilfsmethoden auf
+        current_power = self._extract_power_w_from_meter_store(cp_id) if cp_id else 0.0
+        if st and st.status not in ["Charging", "SuspendedEV", "SuspendedEVSE"]:
+            current_power = 0.0
+        avg_voltage = self._get_average_voltage(cp_id) if cp_id else 230.0  #entWIGGlung
+
         return web.json_response({
             "meter": st.meter_values if st else {},
             "status": st.status if st else "Unknown",
+            "power_w": current_power,       # Wirkleistung laut Wallbox
+            "avg_voltage": avg_voltage,     # Durchschnittliche Spannung (L1+L2+L3)/3  #entWIGGlung
             "pv_mode": self.wb_pv_mode,
             "current_limit": st.current_limit if st else None,
             "phases": st.phase_limit if st else None,
