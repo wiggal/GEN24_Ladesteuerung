@@ -15,6 +15,9 @@ und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Ba
 - [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
 ![new](pics/new.png)  
+Ab Version: **0.42.0**  
+- 🚘 Steuerung des Wattpiloten, nun auch mit NextTrip.  
+
 Ab Version: **0.41.7**  
 - Es ist nun auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
 
@@ -159,22 +162,3 @@ Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN
 Ab Version: **0.30.0**  
 Speicherung der Prognosedaten in `weatherData.sqlite`, Berechnung der Prognose mit gespeicherten Werten.  
 Mit dem verlinkten  `ForecastMgr` können die Prognosedaten gesichtet und gelöscht werden.  
-Ab Version: **0.29.0**  
-Zur Akkuschonung kann der Akku bei entprechender Prognose auch nur bis 80% geladen werden.  
-Vorbereitung des DynamicPriceCheck auf viertelstündliche Strompreise.  
-Ab Version: **0.28.1**  
-Neues Prognoseskripte Akkudoktor__WeatherData.py für https://api.akkudoktor.net/ von @tz8  
-**ACHTUNG:** Umfangreiche Änderungen in CONFIG/weather_priv.ini nötig!!  
-Ab Version: **0.28.0**  
-**ACHTUNG:** Die Prognoseskripte wurden ins Verzeichnis FORECAST verschoben.  
-**Cronjobs müssen angepasst werden!!** (siehe Cortabeinträge Wetterdienste).  
-Ab Version: **0.26.9**  
-Diagramm zur Darstellung der dynamischen Strompreise.  
-Ab Version: **0.26.8**  
-Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von @Manniene  
-Ab Version: **0.26.1**  
-Dynamischer Strompreis: Akku laden bei günstigen Strompreisen in Tabelle ENTLadeStrg eintragen durch DynamicPriceCheck.py.  
-Ab Version: **0.25.1**  
-Prognosebegrenzung auf Höchstwerte der historischen Produktion.  
-Ab Version: **0.25.0**  
-Zwangsladung durch Eintragen von negativen kW in die Tabelle ENTLadeStrg  

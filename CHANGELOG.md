@@ -1,3 +1,6 @@
+**[0.42.0] – 2026-XX-XX**  
+- Wallboxsteuerung: NextTrip mit notwendigen Anpassungen im Frontend hinzugefügt.  
+
 **[0.41.8] – 2026-04-16**  
 - FIX: start_PythonScript.sh -o Logfile mit absolutem Pfad erzeugte Fehler, z.B. beim Start des Dockers.  
 - FIX OCPP-Server: Keine Werte an Wallbox senden, wenn keine Auto angesteckt ist.  

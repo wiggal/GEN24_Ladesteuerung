@@ -164,11 +164,15 @@ class sqlall:
         columns = [col[0] for col in zeiger.description]
         for row in rows:
             data[row[0]] = {}
-            # Hier nur Zahlen zulassen
-            try:
-                data[row[0]][columns[1]] = float(row[1])
-            except (ValueError, TypeError):
-                data[row[0]][columns[1]] = 0
+            # Hier nur Zahlen zulassen, wenn schlussel nicht wallbox
+            if schluessel != 'wallbox':
+                try:
+                    data[row[0]][columns[1]] = float(row[1])
+                except (ValueError, TypeError):
+                    data[row[0]][columns[1]] = 0
+            else:
+                # Bei wallbox den Wert einfach direkt übernehmen
+                data[row[0]][columns[1]] = row[1]
 
             # Feld 2 kann String enthalten, wegen viertestündlichen Strompreisen
             data[row[0]][columns[2]] = row[2]

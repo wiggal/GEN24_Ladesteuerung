@@ -218,15 +218,29 @@ class ChargePointHandler:
 
             if action == "BootNotification":
                 await self.send_callresult(uid, {"currentTime": now_iso_future(), "interval": 300, "status": "Accepted"})
-                # refresh global/config values and apply for this CP
+                # refresh global/config values; apply verzögert damit StatusNotification zuerst eintreffen kann
                 self.manager.refresh_wallbox_settings(cp_id=self.state.cp_id, use_cache=True)
-                # schedule apply (do not await)
-                asyncio.create_task(self.manager.apply_wallbox_settings(self.state.cp_id))
+                async def _delayed_apply(cp_id, delay=15):
+                    await asyncio.sleep(delay)
+                    await self.manager.apply_wallbox_settings(cp_id)
+                asyncio.create_task(_delayed_apply(self.state.cp_id))
             elif action == "Heartbeat":
                 await self.send_callresult(uid, {"currentTime": now_iso_future()})
             elif action == "StatusNotification":
-                self.state.status = payload.get("status", self.state.status)
+                new_status = payload.get("status", self.state.status)
+                old_status = self.state.status
+                self.state.status = new_status
                 await self.send_callresult(uid)
+                # Fahrzeug hat Laden beendet/pausiert → sofort Limit auf 0 setzen
+                if new_status == "SuspendedEV" and old_status != "SuspendedEV":
+                    cinfo(f"[{self.state.log_cp_id}] Fahrzeug hat Laden pausiert (SuspendedEV) – setze Limit auf 0.0A")
+                    if self.state.phase_limit is not None:
+                        try:
+                            await self.send_call("SetChargingProfile", charging_profile_payload(0.0, self.state.phase_limit))
+                            self.state.current_limit = 0.0
+                            self.state.append_debug({"note": "status-suspended-ev-immediate-zero", "ts": iso_now()})
+                        except Exception:
+                            cerr_exc(f"Fehler beim Setzen auf 0A bei SuspendedEV fuer {self.state.cp_id}")
             elif action == "MeterValues":
                 if payload.get("transactionId"):
                     self.state.transaction_id = payload["transactionId"]
@@ -289,6 +303,10 @@ class OCPPManager:
         self.PHASE_CHANGE_CONFIRM_S = 30
         self.residualPower = -300.0
         self.DEFAULT_TARGET_KWH = 0.0
+
+        # NextTrip (PV-Mode 4) Ladezeiten aus DB (ID=4)
+        self.wb_ladezeit_von: str = "22:00"   # Res_Feld1
+        self.wb_ladezeit_bis: str = "06:00"   # Res_Feld2
 
         # Inverter / energy cache (updated each autosync iteration)
         self.Netzbezug = 0.0
@@ -373,6 +391,25 @@ class OCPPManager:
                             self.PHASE_CHANGE_CONFIRM_S = int(float(opt3))
                     except Exception:
                         pass
+                # ID=4: NextTrip Ladezeiten
+                row4 = data.get('4') or data.get(4)
+                if row4:
+                    try:
+                        raw_v = row4.get('Res_Feld1')
+                        if raw_v is not None:
+                            v = str(raw_v).strip()
+                            if v:
+                                self.wb_ladezeit_von = v
+                    except Exception:
+                        pass
+                    try:
+                        raw_b = row4.get('Res_Feld2')
+                        if raw_b is not None:
+                            b = str(raw_b).strip()
+                            if b:
+                                self.wb_ladezeit_bis = b
+                    except Exception:
+                        pass
                 # update autosync interval
                 self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
             except Exception:
@@ -390,7 +427,8 @@ class OCPPManager:
                     f"{self.MIN_CHARGE_DURATION_S}, "
                     f"{self.PHASE_CHANGE_CONFIRM_S}, "
                     f"{self.residualPower}, "
-                    f"{self.DEFAULT_TARGET_KWH}"
+                    f"{self.DEFAULT_TARGET_KWH}, "
+                    f"NextTrip={self.wb_ladezeit_von}–{self.wb_ladezeit_bis}"
                 )
 
 
@@ -417,8 +455,33 @@ class OCPPManager:
                 st.append_debug({"note": "target synced to DEFAULT", "value": self.DEFAULT_TARGET_KWH, "ts": iso_now()})
 
     # ----------------------------
-    # PV / Limit-Berechnung
+    # NextTrip: Zeitfenster-Prüfung
     # ----------------------------
+    def _is_in_nexttrip_window(self) -> bool:
+        """
+        Gibt True zurück, wenn die aktuelle Uhrzeit im Zeitfenster
+        [wb_ladezeit_von .. wb_ladezeit_bis] liegt.
+        Unterstützt Fenster über Mitternacht, z.B. 22:00 – 06:00.
+        """
+        try:
+            now_t = datetime.now().time().replace(second=0, microsecond=0)
+            def parse_t(s: str):
+                h, m = map(int, s.strip().split(":"))
+                from datetime import time as dtime
+                return dtime(h, m)
+            t_von = parse_t(self.wb_ladezeit_von)
+            t_bis = parse_t(self.wb_ladezeit_bis)
+            if t_von <= t_bis:
+                # normales Fenster z.B. 08:00 – 14:00
+                return t_von <= now_t <= t_bis
+            else:
+                # über Mitternacht z.B. 22:00 – 06:00
+                return now_t >= t_von or now_t <= t_bis
+        except Exception:
+            cwarn(f"NextTrip: Ungültige Zeitangabe von='{self.wb_ladezeit_von}' bis='{self.wb_ladezeit_bis}'")
+            return False
+
+
     def compute_limits_from_global(self, cp_id: Optional[str] = None) -> Tuple[float, str, float, bool, float]:
         """
         Berechnet Limits basierend auf PV-Überschuss und DB-Vorgaben.
@@ -498,6 +561,26 @@ class OCPPManager:
             # nimm den aktuell zulässigen Max-Wert (oder zulässiges Minimum falls kleiner)
             amp = max(self.MIN_WB_AMP, min(self.wb_amp_max, self.MAX_WB_AMP))
 
+        elif float(self.wb_pv_mode) == 4.0:
+            # PV-Mode = 4  -> NextTrip: Laden im Zeitfenster mit Max-Leistung bis Lademenge erreicht
+            is_pv_controlled = False
+            if self.wb_phases == "0":
+                phases_to_use = "3"
+            else:
+                phases_to_use = self.wb_phases or "3"
+            if self._is_in_nexttrip_window():
+                amp = max(self.MIN_WB_AMP, min(self.wb_amp_max, self.MAX_WB_AMP))
+                cinfo(
+                    f"NextTrip: im Zeitfenster {self.wb_ladezeit_von}–{self.wb_ladezeit_bis} "
+                    f"→ {amp}A / {phases_to_use}P"
+                )
+            else:
+                amp = 0.0
+                cinfo(
+                    f"NextTrip: außerhalb Zeitfenster {self.wb_ladezeit_von}–{self.wb_ladezeit_bis} "
+                    f"→ kein Laden"
+                )
+
         self.wb_amp = amp
         self.wb_is_pv_controlled = is_pv_controlled
 
@@ -537,15 +620,26 @@ class OCPPManager:
             self.refresh_wallbox_settings(cp_id=cp_id, use_cache=True)
             amp, phases, pv_mode, is_pv_controlled, amp_min = self.compute_limits_from_global(cp_id=cp_id)
 
-            """ Status nicht eindeutig.   #entWIGGlung
-            print("Wallboxstatus: ", st.status)  #entWIGGlung
-            # ---- Nur Werte senden wenn Auto angesteckt ist ----  #entWIGGlung
-            plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing"]
+            # ---- Nur Werte senden wenn Fahrzeug angesteckt ist ----
+            plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing",
+                              "ChargingRequested", "AvailableRequested"]
             if st.status not in plugged_states and not st.transaction_id:
-                cwarn(f"[{st.cp_id}] Kein Fahrzeug angesteckt (Status={st.status}) – keine Werte an Wallbox gesendet")
+                cdebug(f"[{st.log_cp_id}] Kein Fahrzeug angesteckt (Status={st.status}) – keine Werte gesendet")
                 return False
             # ---------------------------------------------------
-            """
+
+            # ---- SuspendedEV: Fahrzeug hat Laden pausiert → stop-guard überspringen, Limit auf 0 ----
+            if st.status == "SuspendedEV":
+                if st.current_limit != 0.0:
+                    handler = ChargePointHandler(self, st)
+                    await handler.send_call("SetChargingProfile", charging_profile_payload(0.0, st.phase_limit or 3))
+                    st.current_limit = 0.0
+                    st.append_debug({"note": "suspended-ev-limit-set-zero", "ts": iso_now()})
+                    cinfo(f"[{st.log_cp_id}] Fahrzeug angesteckt (Status=SuspendedEV) – SetChargingProfile 0.0A nach OCPP")
+                else:
+                    cdebug(f"[{st.log_cp_id}] Fahrzeug angesteckt (Status=SuspendedEV) – bereits 0.0A, kein Senden")
+                return False
+            # -----------------------------------------------------------------------
 
             # desired values
             amp_desired = amp if pv_mode != 0.0 else 0.0
@@ -603,6 +697,15 @@ class OCPPManager:
             # Start/Stop decision
             if amp_allowed > 0.0 and amp_allowed >= 6.0:
                 if status in ["Available", "AvailableRequested", "SuspendedEVSE", "Finishing"]:
+                    # Vor RemoteStart: offene Transaktion beenden (Wallbox würde sonst ablehnen)
+                    if active_tx_id:
+                        cinfo(f"[{st.log_cp_id}] Offene Transaktion {active_tx_id} vor Neustart beenden")
+                        handler = ChargePointHandler(self, st)
+                        await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
+                        st.transaction_id = None
+                        st.transaction_start = None
+                        active_tx_id = None
+                        await asyncio.sleep(2)
                     # request remote start
                     handler = ChargePointHandler(self, st)
                     await handler.send_call("RemoteStartTransaction", {"connectorId": DEFAULT_CONNECTOR_ID, "idTag": DEFAULT_IDTAG})
@@ -612,14 +715,19 @@ class OCPPManager:
                     st.append_debug({"note": "start-requested", "amp": amp_allowed, "ts": iso_now()})
             else:
                 # STOP-GUARD prüfung
-                can_stop = True
-                if is_pv_controlled and st.transaction_start:
-                    duration = (datetime.now() - st.transaction_start).total_seconds()
-                    if duration < self.MIN_CHARGE_DURATION_S:
-                        can_stop = False
-                        st.append_debug({"note": "stop-guard", "remaining_s": int(self.MIN_CHARGE_DURATION_S - duration), "ts": iso_now()})
-                if target_kwh and (charged_wh >= target_kwh * 1000.0):
+                # SuspendedEV = Fahrzeug hat aktiv Laden verweigert → stop-guard greift NICHT
+                if status == "SuspendedEV":
                     can_stop = True
+                    cdebug(f"[{st.log_cp_id}] Stop-Guard übersprungen – Fahrzeug in SuspendedEV")
+                else:
+                    can_stop = True
+                    if is_pv_controlled and st.transaction_start:
+                        duration = (datetime.now() - st.transaction_start).total_seconds()
+                        if duration < self.MIN_CHARGE_DURATION_S:
+                            can_stop = False
+                            st.append_debug({"note": "stop-guard", "remaining_s": int(self.MIN_CHARGE_DURATION_S - duration), "ts": iso_now()})
+                    if target_kwh and (charged_wh >= target_kwh * 1000.0):
+                        can_stop = True
 
                 if not can_stop:
                     amp_allowed = amp_min or self.wb_amp_min
@@ -633,9 +741,22 @@ class OCPPManager:
                         st.transaction_start = None
                         st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
                     elif status not in ["Available", "AvailableRequested"]:
-                        st.status = "Available"
-                        st.transaction_start = None
-                        st.append_debug({"note": "status-set-available", "ts": iso_now()})
+                        # Nur auf Available setzen wenn Fahrzeug NICHT angesteckt ist
+                        physically_plugged = status in ["SuspendedEVSE", "Preparing", "Finishing", "SuspendedEV"]
+                        if not physically_plugged:
+                            st.status = "Available"
+                            st.transaction_start = None
+                            st.append_debug({"note": "status-set-available", "ts": iso_now()})
+                        else:
+                            # Fahrzeug angesteckt aber kein Laden gewünscht → nur einmal 0A senden
+                            phase_for_zero = st.phase_limit or 3
+                            if st.current_limit != 0.0:
+                                handler = ChargePointHandler(self, st)
+                                await handler.send_call("SetChargingProfile", charging_profile_payload(0.0, phase_for_zero))
+                                st.current_limit = 0.0
+                                cinfo(f"[{st.log_cp_id}] Fahrzeug angesteckt (Status={status}) – SetChargingProfile 0.0A nach OCPP")
+                            else:
+                                cdebug(f"[{st.log_cp_id}] Fahrzeug angesteckt (Status={status}) – bereits 0.0A, kein Senden")
 
             # ---------------------------
             # AMPERE-ANPASSUNG WÄHREND DER PHASEN-HYSTERESE (wie Original)
@@ -647,13 +768,23 @@ class OCPPManager:
                 current_p = st.phase_limit
                 if current_p is not None:
                     if requested_p > current_p and amp_allowed != 16.0:
-                        st.append_debug({"note": "phase-up-temporary-16", "ts": iso_now()})
-                        amp_allowed = 16.0
-                        amp_changed = True
+                        if st.current_limit != 16.0:
+                            st.append_debug({"note": "phase-up-temporary-16", "ts": iso_now()})
+                            amp_allowed = 16.0
+                            amp_changed = True
+                        else:
+                            # bereits 16A gesetzt – kein erneutes Senden
+                            amp_allowed = 16.0
+                            amp_changed = False
                     elif requested_p < current_p and amp_allowed != 6.0:
-                        st.append_debug({"note": "phase-down-temporary-6", "ts": iso_now()})
-                        amp_allowed = 6.0
-                        amp_changed = True
+                        if st.current_limit != 6.0:
+                            st.append_debug({"note": "phase-down-temporary-6", "ts": iso_now()})
+                            amp_allowed = 6.0
+                            amp_changed = True
+                        else:
+                            # bereits 6A gesetzt – kein erneutes Senden
+                            amp_allowed = 6.0
+                            amp_changed = False
                 if amp_changed and (amp_allowed not in [6.0, 16.0]):
                     st.append_debug({"note": "amp-update-blocked-by-hysteresis", "ts": iso_now()})
                     amp_changed = False
@@ -809,12 +940,14 @@ class OCPPManager:
                 target_kwh = st.target_kwh or self.DEFAULT_TARGET_KWH
                 if target_kwh and (st.charged_wh >= target_kwh * 1000.0):
                     st.append_debug({"note": "target-reached-meter", "charged_wh": st.charged_wh, "ts": iso_now()})
+                    cok(f"[{st.log_cp_id}] Lademenge erreicht: {round(st.charged_wh/1000.0, 3)} kWh / {target_kwh} kWh – stoppe Laden")
                     if st.transaction_id:
                         handler = ChargePointHandler(self, st)
                         await handler.send_call("RemoteStopTransaction", {"transactionId": st.transaction_id})
                         st.transaction_id = None
                         st.status = "AvailableRequested"
                         st.transaction_start = None
+                        cok(f"[{st.log_cp_id}] RemoteStopTransaction gesendet → Laden beendet")
                     else:
                         ocpp_phases_value = st.phase_limit or 3
                         handler = ChargePointHandler(self, st)
@@ -823,6 +956,7 @@ class OCPPManager:
                         st.phase_limit = ocpp_phases_value
                         st.status = "AvailableRequested"
                         st.transaction_start = None
+                        cok(f"[{st.log_cp_id}] Ampere/Phase erfolgreich gesetzt: 0.0A / {ocpp_phases_value}P")
             else:
                 st.last_energy_wh = energy_wh
         except Exception:

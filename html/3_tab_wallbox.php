@@ -147,6 +147,14 @@ $residualPower        = $EV_Reservierung['3']['Res_Feld1'] ?? -300;      // resi
 $default_target_kwh   = $EV_Reservierung['3']['Res_Feld2'] ?? 0.0;        // DEFAULT_TARGET_KWH
 $phase_change_confirm_s = $EV_Reservierung['3']['Options'] ?? 30;        // PHASE_CHANGE_CONFIRM_S
 
+// Neue Einstellungen ID=4 (Ladezeiten)
+$ladezeit_von = $EV_Reservierung['4']['Res_Feld1'] ?? "12:00";
+$ladezeit_bis = $EV_Reservierung['4']['Res_Feld2'] ?? "05:00";
+
+// Neue Einstellungen ID=5 (Preise)
+$strompreis_fest = $EV_Reservierung['5']['Res_Feld1'] ?? 0.30;
+$einspeise_verg  = $EV_Reservierung['5']['Res_Feld2'] ?? 0.07;
+
 // -------------------------
 // AJAX poll
 // -------------------------
@@ -454,6 +462,7 @@ echo $html;
                 <option value="1" <?php if($pv_mode=='1') echo 'selected'; ?>>PV</option>
                 <option value="2" <?php if($pv_mode=='2') echo 'selected'; ?>>MIN+PV</option>
                 <option value="3" <?php if($pv_mode=='3') echo 'selected'; ?>>MAX</option>
+                <option value="4" <?php if($pv_mode=='4') echo 'selected'; ?>>NextTrip</option>
             </select>
             </span>
         </div>
@@ -490,11 +499,48 @@ echo $html;
             </select>
             <span id="powerMax" class="small" style="margin-left: 10px;">(— kW)</span> </span>
         </div>
+        <div class="row">
+            <span class="label-inline">Lademenge(kWh) (DB=<?php echo htmlspecialchars($default_target_kwh); ?>):</span>
+            <span class="input-inline"><input id="defaultTargetKwh" type="number" step="1" min="0" value="<?php echo htmlspecialchars($default_target_kwh); ?>"></span>
+        </div>
+        <hr>
 
+        <details id="nextTripOptions" <?php echo ($pv_mode == '4') ? 'open' : ''; ?>>
+            <summary><b>Next Trip Optionen:</b></summary>
+
+            <div class="row">
+                <span class="label-inline">Ladezeit-von (DB=<?php echo htmlspecialchars($ladezeit_von); ?>):</span>
+                <span class="input-inline">
+                    <input id="ladezeitVon" type="text"
+                        value="<?php echo htmlspecialchars($ladezeit_von); ?>"
+                        placeholder="HH:MM"
+                        style="cursor: s-resize;">
+                </span>
+            </div>
+
+            <div class="row">
+                <span class="label-inline">Ladezeit-bis (DB=<?php echo htmlspecialchars($ladezeit_bis); ?>):</span>
+                <span class="input-inline">
+                    <input id="ladezeitBis" type="text"
+                        value="<?php echo htmlspecialchars($ladezeit_bis); ?>"
+                        placeholder="HH:MM"
+                        style="cursor: s-resize;">
+                </span>
+            </div>
+
+            <div class="row">
+                <span class="label-inline">Strompreis-fest (€) (DB=<?php echo htmlspecialchars($strompreis_fest); ?>):</span>
+                <span class="input-inline"><input id="strompreisFest" type="number" step="0.001" value="<?php echo htmlspecialchars($strompreis_fest); ?>"></span>
+            </div>
+
+            <div class="row">
+                <span class="label-inline">Einspeisevergütung (€) (DB=<?php echo htmlspecialchars($einspeise_verg); ?>):</span>
+                <span class="input-inline"><input id="einspeiseVerg" type="number" step="0.001" value="<?php echo htmlspecialchars($einspeise_verg); ?>"></span>
+            </div>
+        </details>
         <hr>
         <details id="moreOptions">
             <summary><b>Erweiterte Optionen:</b></summary>
-        <h3>Timing Einstellungen:</h3>
 
         <div class="row">
             <span class="label-inline">Wallboxaktualisierung(s) (DB=<?php echo htmlspecialchars($auto_sync_interval); ?>):</span>
@@ -516,19 +562,12 @@ echo $html;
             <span class="input-inline"><input id="phaseChangeConfirm" type="number" min="0" step="30" value="<?php echo htmlspecialchars($phase_change_confirm_s); ?>"></span>
         </div>
 
-        <hr>
-        <h3>Sonstige Zielwerte:</h3>
-
         <div class="row">
             <span class="label-inline">Verbleibende Leistung(W) (DB=<?php echo htmlspecialchars($residualPower); ?>):</span>
             <span class="input-inline"><input id="residualPower" type="number" step="100" value="<?php echo htmlspecialchars($residualPower); ?>"></span>
         </div>
 
-        <div class="row">
-            <span class="label-inline">Lademenge(kWh) (DB=<?php echo htmlspecialchars($default_target_kwh); ?>):</span>
-            <span class="input-inline"><input id="defaultTargetKwh" type="number" step="1" min="0" value="<?php echo htmlspecialchars($default_target_kwh); ?>"></span>
-        </div>
-
+        <hr>
         </details>
         <br>
         <button type="button" id="btnSave" class="ocpp schreiben">Speichern</button>
@@ -563,6 +602,105 @@ $(document).ready(function(){
     // Save on change
     ls_ids.forEach(function(id){ 
         $('#' + id).on('change input', function(){ saveToLocalStorage(id); });
+    });
+
+    // --- Logik für Next Trip Optionen Sichtbarkeit ---
+    function toggleNextTripVisibility() {
+        var selectedMode = $('#pvMode').val();
+        var nextTripDetails = document.getElementById('nextTripOptions');
+
+        if (selectedMode === '4') { // '4' ist NextTrip
+            nextTripDetails.setAttribute('open', 'open');
+        } else {
+            nextTripDetails.removeAttribute('open');
+        }
+    }
+
+    // Bei Änderung des PV-Modus umschalten
+    $('#pvMode').on('change', toggleNextTripVisibility);
+
+    // --- Bestehende Logik für "Erweiterte Optionen" (moreOptions) ---
+    // Diese bleibt unverändert, da sie bereits den User-Status via localStorage speichert
+    var moreOptionsKey = 'moreOptionsOpen';
+    var moreOptionsEl = document.getElementById('moreOptions');
+    if (moreOptionsEl) {
+        var stored = localStorage.getItem(moreOptionsKey);
+        if (stored === '1') {
+            moreOptionsEl.setAttribute('open', 'open');
+        } else {
+            moreOptionsEl.removeAttribute('open');
+        }
+        moreOptionsEl.addEventListener('toggle', function(){
+            localStorage.setItem(moreOptionsKey, this.open ? '1' : '0');
+        });
+    }
+
+    // --- Zentrale Funktion zum Formatieren & Runden ---
+    function formatAndRoundTime(inputVal) {
+        // Entferne alles außer Zahlen und Doppelpunkt
+        var clean = inputVal.replace(/[^0-9:]/g, '');
+
+        // Falls nur Zahlen eingegeben wurden (z.B. 1200 -> 12:00)
+        if (clean.length === 4 && clean.indexOf(':') === -1) {
+            clean = clean.substr(0, 2) + ':' + clean.substr(2, 2);
+        }
+
+        var parts = clean.split(':');
+        var h = parseInt(parts[0], 10) || 0;
+        var m = parseInt(parts[1], 10) || 0;
+
+        // Stunden auf 0-23 begrenzen
+        h = Math.min(Math.max(h, 0), 23);
+
+        // Minuten auf das nächste 15er Intervall runden
+        m = Math.round(m / 15) * 15;
+        if (m >= 60) {
+            m = 0;
+            h = (h + 1) % 24;
+        }
+
+        return (h < 10 ? '0' + h : h) + ":" + (m < 10 ? '0' + m : m);
+    }
+
+    // --- Blätter-Funktion (wie zuvor) ---
+    function scrollTime(input, direction) {
+        var current = formatAndRoundTime($(input).val());
+        var parts = current.split(':');
+        var totalMinutes = parseInt(parts[0]) * 60 + parseInt(parts[1]) + (direction * 15);
+
+        if (totalMinutes < 0) totalMinutes += 1440;
+        if (totalMinutes >= 1440) totalMinutes -= 1440;
+
+        var newH = Math.floor(totalMinutes / 60);
+        var newM = totalMinutes % 60;
+        var formatted = (newH < 10 ? '0' + newH : newH) + ":" + (newM < 10 ? '0' + newM : newM);
+        $(input).val(formatted).trigger('change');
+    }
+
+    // --- EVENTS ---
+
+    // 1. Manuelle Eingabe korrigieren beim Verlassen des Feldes
+    $('#ladezeitVon, #ladezeitBis').on('blur', function() {
+        var corrected = formatAndRoundTime($(this).val());
+        $(this).val(corrected);
+    });
+
+    // 2. Mausrad-Blättern
+    $('#ladezeitVon, #ladezeitBis').on('wheel', function(e) {
+        e.preventDefault();
+        var direction = e.originalEvent.deltaY < 0 ? 1 : -1;
+        scrollTime(this, direction);
+    });
+
+    // 3. Tastatur-Blättern (Pfeiltasten)
+    $('#ladezeitVon, #ladezeitBis').on('keydown', function(e) {
+        if (e.which === 38) { // Hoch
+            e.preventDefault();
+            scrollTime(this, 1);
+        } else if (e.which === 40) { // Runter
+            e.preventDefault();
+            scrollTime(this, -1);
+        }
     });
     
 // ===================================
@@ -634,61 +772,115 @@ function calculatePower() {
             }
         });
     }
+    // =========================================================================
+    // NEU: Sichtbarkeit der Next Trip Optionen steuern
+    // =========================================================================
+    function updateNextTripVisibility() {
+        var selectedMode = $('#pvMode').val();
+        var nextTripDetails = document.getElementById('nextTripOptions');
+
+        if (nextTripDetails) {
+            // Nur wenn Modus "4" (NextTrip) gewählt ist, aufklappen
+            if (selectedMode === '4') {
+                nextTripDetails.setAttribute('open', 'open');
+            } else {
+                nextTripDetails.removeAttribute('open');
+            }
+        }
+    }
+
+    // Sofort beim Laden der Seite ausführen
+    updateNextTripVisibility();
+
+    // Bei jeder Änderung des PV-Modus-Dropdowns ausführen
+    $('#pvMode').on('change', function() {
+        updateNextTripVisibility();
+    });
+    // =========================================================================
 
     $('#btnSave').click(function(){
-        var amp_min = $('#ampMin').val();
-        var amp_max = $('#ampMax').val();
-        var phases = $('#phases').val();
-        var pv_mode = $('#pvMode').val();
-        var cp_id = $('#selectedCpId').val(); // Ausgewählte Client-ID (kann leer sein)
+    // --- Daten sammeln ---
 
-        // Neue Parameter (ID=2)
-        var auto_sync_interval = $('#autoSyncInterval').val();
-        var min_phase_dur = $('#minPhaseDur').val();
-        var min_charge_dur = $('#minChargeDur').val();
+    // ID 1: Basis-Einstellungen
+    var pv_mode = $('#pvMode').val();
+    var phases = $('#phases').val();
+    var amp_min = $('#ampMin').val();
+    var amp_max = $('#ampMax').val();
 
-        // Neue Parameter (ID=3)
-        var phase_change_confirm = $('#phaseChangeConfirm').val();
-        var residual_power = $('#residualPower').val();
-        var default_target_kwh = $('#defaultTargetKwh').val();
+    // ID 2: Zeitintervalle
+    var auto_sync_interval = $('#autoSyncInterval').val();
+    var min_phase_dur = $('#minPhaseDur').val();
+    var min_charge_dur = $('#minChargeDur').val();
 
-        $.ajax({
-            url: "SQL_speichern.php",
-            method: "post",
-            data: {
-                ID: ["1","2","3"],
-                Schluessel: ["wallbox","wallbox","wallbox"],
-                Tag_Zeit: ["1","2","3"],
-                // Res_Feld1 for each ID:
-                // ID=1 -> pv_mode
-                // ID=2 -> MIN_PHASE_DURATION_S
-                // ID=3 -> residualPower
-                Res_Feld1: [pv_mode, min_phase_dur, residual_power],
-                // Res_Feld2 for each ID:
-                // ID=1 -> phases
-                // ID=2 -> MIN_CHARGE_DURATION_S
-                // ID=3 -> DEFAULT_TARGET_KWH
-                Res_Feld2: [phases, min_charge_dur, default_target_kwh],
-                // Options for each ID:
-                // ID=1 -> amp_min,amp_max
-                // ID=2 -> AUTO_SYNC_INTERVAL
-                // ID=3 -> PHASE_CHANGE_CONFIRM_S
-                Options: [amp_min + "," + amp_max, auto_sync_interval, phase_change_confirm]
-            },
-            success: function(data){
-                // Nach erfolgreichem Speichern die lokalen Werte löschen,
-                // damit beim nächsten Neuladen die NEUEN DB-Werte angezeigt werden.
-                ls_ids.forEach(function(id){ localStorage.removeItem(id); });
+    // ID 3: Leistung & Target
+    var phase_change_confirm = $('#phaseChangeConfirm').val();
+    var residual_power = $('#residualPower').val();
+    var default_target_kwh = $('#defaultTargetKwh').val();
 
-                // Hinweis: Den Zustand von "Mehr Optionen" NICHT löschen, damit Benutzer-Einstellung erhalten bleibt.
+    // ID 4: Next Trip Zeiten (aus Grafik)
+    var lz_von = $('#ladezeitVon').val();
+    var lz_bis = $('#ladezeitBis').val();
 
-                // Nach dem Speichern auf die Seite des ausgewählten Clients neu laden
-                refreshData();
-            },
-            error: function(xhr, status, err) {
-                alert("Fehler beim Speichern: " + err);
-            }
-        });
+    // ID 5: Preise (aus Grafik)
+    var s_preis = $('#strompreisFest').val();
+    var e_verg  = $('#einspeiseVerg').val();
+
+    // --- AJAX Request ---
+    $.ajax({
+        url: "SQL_speichern.php",
+        method: "post",
+        data: {
+            // Die Arrays müssen exakt gleich lang sein (5 Einträge)
+            ID:         ["1", "2", "3", "4", "5"],
+            Schluessel: ["wallbox", "wallbox", "wallbox", "wallbox", "wallbox"],
+            Tag_Zeit:   ["1", "2", "3", "4", "5"],
+
+            // Zuordnung Res_Feld1
+            Res_Feld1: [
+                pv_mode,           // ID 1
+                min_phase_dur,     // ID 2
+                residual_power,    // ID 3
+                lz_von,            // ID 4
+                s_preis            // ID 5
+            ],
+
+            // Zuordnung Res_Feld2
+            Res_Feld2: [
+                phases,            // ID 1
+                min_charge_dur,    // ID 2
+                default_target_kwh,// ID 3
+                lz_bis,            // ID 4
+                e_verg             // ID 5
+            ],
+
+            // Zuordnung Options
+            Options: [
+                amp_min + "," + amp_max, // ID 1
+                auto_sync_interval,      // ID 2
+                phase_change_confirm,    // ID 3
+                "",                      // ID 4
+                ""                       // ID 5
+            ]
+        },
+        success: function(response){
+            // LocalStorage aufräumen, damit beim Refresh die neuen DB-Werte geladen werden
+            var ls_ids = [
+                'pvMode','phases','ampMin','ampMax','autoSyncInterval',
+                'minPhaseDur','minChargeDur','phaseChangeConfirm','residualPower',
+                'defaultTargetKwh', 'ladezeitVon', 'ladezeitBis', 'strompreisFest', 'einspeiseVerg'
+            ];
+
+            ls_ids.forEach(function(id){
+                localStorage.removeItem(id);
+            });
+
+            // Seite neu laden (mit Scroll-Position-Erhalt durch deinen bestehenden Listener)
+            refreshData();
+        },
+        error: function(xhr, status, err) {
+            alert("Fehler beim Speichern in die Datenbank: " + err);
+        }
+     });
     });
 });
 
