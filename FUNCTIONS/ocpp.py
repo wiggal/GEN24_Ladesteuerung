@@ -657,10 +657,12 @@ class OCPPManager:
             # verbose info for current state including PV mode and charged Wh
             cinfo(f"[{st.log_cp_id}] PV-Mode={pv_mode}, PV-Steuerung={is_pv_controlled}, Wunsch: {amp_desired}A/{requested_phase}P, Aktuell: {st.current_limit}A/{st.phase_limit}P, Geladen: {charged_wh}Wh")
 
-            # PHASE HYSTERESE: nur wenn Änderung, nicht initial, und Laden > 0 gewünscht
+            # PHASE HYSTERESE: nur wenn Änderung, nicht initial, Laden > 0 gewünscht
+            # UND automatische Phasenwahl aktiv (wb_phases == "0")
+            # Bei fester Phaseneinstellung (1 oder 3) keine Hysterese nötig
             is_charging_requested = amp_desired > 0.0
             candidate = st.phase_candidate
-            if phase_changed and not is_initial_change and is_charging_requested:
+            if phase_changed and not is_initial_change and is_charging_requested and self.wb_phases == "0":
                 now = datetime.now()
                 if not candidate or candidate.get('requested') != requested_phase:
                     st.phase_candidate = {'requested': requested_phase, 'since': now}
@@ -725,7 +727,9 @@ class OCPPManager:
                         duration = (datetime.now() - st.transaction_start).total_seconds()
                         if duration < self.MIN_CHARGE_DURATION_S:
                             can_stop = False
-                            st.append_debug({"note": "stop-guard", "remaining_s": int(self.MIN_CHARGE_DURATION_S - duration), "ts": iso_now()})
+                            remaining_s = int(self.MIN_CHARGE_DURATION_S - duration)
+                            cinfo(f"[{st.log_cp_id}] Stop-Guard aktiv – noch {remaining_s}s warten (Mindestladezeit={self.MIN_CHARGE_DURATION_S}s)")
+                            st.append_debug({"note": "stop-guard", "remaining_s": remaining_s, "ts": iso_now()})
                     if target_kwh and (charged_wh >= target_kwh * 1000.0):
                         can_stop = True
 
