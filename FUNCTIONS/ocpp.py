@@ -177,7 +177,7 @@ class ChargePointHandler:
         s.transaction_id = None
         s.debug = []
 
-        # NEU: Zähler beim ersten Verbinden auf 0 setzen  #entWIGGlung
+        # NEU: Zähler beim ersten Verbinden auf 0 setzen
         s.charged_wh = 0.0
         s.last_energy_wh = None
 
@@ -259,7 +259,8 @@ class ChargePointHandler:
                 await self.send_callresult(uid, {"idTagInfo": {"status": "Accepted"}, "transactionId": tx_id})
             elif action == "StopTransaction":
                 self.state.transaction_id = None
-                self.state.status = "Available"
+                # NICHT self.state.status = "Available" setzen!
+                # Die Wallbox schickt danach StatusNotification (z.B. "Finishing" oder "SuspendedEVSE")
                 self.state.transaction_start = None
                 await self.send_callresult(uid, {"idTagInfo": {"status": "Accepted"}})
             else:
@@ -302,6 +303,7 @@ class OCPPManager:
         self.MIN_CHARGE_DURATION_S = 600
         self.PHASE_CHANGE_CONFIRM_S = 30
         self.residualPower = -300.0
+        self.max_leistung_ha = 0.1
         self.DEFAULT_TARGET_KWH = 0.0
 
         # NextTrip (PV-Mode 4) Ladezeiten aus DB (ID=4)
@@ -410,6 +412,12 @@ class OCPPManager:
                                 self.wb_ladezeit_bis = b
                     except Exception:
                         pass
+                    try:
+                        raw_ha = row4.get('Res_Feld2')
+                        if raw_ha is not None:
+                            self.max_leistung_ha = float(raw_ha)*-1
+                    except Exception:
+                        pass
                 # update autosync interval
                 self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
             except Exception:
@@ -498,11 +506,21 @@ class OCPPManager:
         phases_to_use = self.wb_phases
 
         current_charge_power = 0
+        # NEU (echter Messwert, konsistent mit HTTP-Endpoint):
         if cp_id and cp_id in self.states:
-            current_charge_power = self.get_current_power(cp_id)
+            current_charge_power = self._extract_power_w_from_meter_store(cp_id)
+            st = self.states[cp_id]
+            # Fallback auf Schätzung wenn noch keine MeterValues vorliegen
+            if current_charge_power == 0.0 and st.current_limit and st.phase_limit:
+                if st.status in ["Charging", "ChargingRequested"]:
+                    current_charge_power = self.get_current_power(cp_id)
 
         # Inverter-Werte verrechnen
-        batterie_anteil = self.Batteriebezug if self.Batteriebezug < 0 else 0.0
+        # Wert "-inf" wäre unendlich = keine Begrenzung ##WIGGAL
+        if self.max_leistung_ha > 0:
+            batterie_anteil = self.Batteriebezug
+        else:
+            batterie_anteil = max(self.max_leistung_ha, min(self.Batteriebezug, 0.0)) ##WIGGAL
         self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power)
         ueberschuss = max(0.0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower))
 

@@ -49,8 +49,9 @@ zur Unterscheidung der im WebUI eingestellten aber noch nicht gesicherten Werte.
         <ul>
             <li>Aus =&gt; Laden wird/ist gestoppt</li>
             <li>PV =&gt; Reines Überschussladen</li>
-            <li>MIN+PV =&gt; Mit der kleinsten eingestellte Lademenge wird immer geladen.<br>Ist der PV-Überschuss größer, wird mit diesem geladen.</li>
-            <li>MAX =&gt; Es wird immer mit der größten eingestellten Lademenge geladen.<br></li>
+            <li>MIN+PV =&gt; Mit der kleinsten eingestellte Ladeleistung wird immer geladen.<br>Ist der PV-Überschuss größer, wird mit diesem geladen.</li>
+            <li>MAX =&gt; Es wird immer mit der größten eingestellten Ladeleistung geladen.<br></li>
+            <li>NextTrip =&gt; Im eingestellten Zeitraum wird immer mit der größten eingestellten Ladeleistung geladen, bis Lademenge erreicht ist.<br></li>
         </ul>
     </li>
     <li><span class="label-inline">Phasen (DB=0):<br></span>
@@ -131,6 +132,11 @@ zur Unterscheidung der im WebUI eingestellten aber noch nicht gesicherten Werte.
                 <span class="label-inline">(+)300 =&gt; es sollen 300 Watt im System verbleiben, die entweder in den Akku oder ins Netz fließen.</span><br>
                 <span class="label-inline">- 300 &nbsp; =&gt; es sollen 300 Watt mehr geladen werden, als im System vorhanden sind, die entweder aus dem Akku oder aus dem Netz gezogen werden.</span>
             </li>
+        </ul>
+    </li>
+    <li><span class="label-inline">Ladebegr. Hausakku(kW) (DB=0.8):</span>
+        <ul>
+            <li><span class="label-inline">Hiermit kann die Ladeleistung des Hausakkus ungefähr auf die eingestellten kW begrenzt werden, falls sie höher wäre.</span></li>
         </ul>
     </li>
 </ul>

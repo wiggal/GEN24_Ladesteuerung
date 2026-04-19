@@ -150,6 +150,7 @@ $phase_change_confirm_s = $EV_Reservierung['3']['Options'] ?? 30;        // PHAS
 // Neue Einstellungen ID=4 (Ladezeiten)
 $ladezeit_von = $EV_Reservierung['4']['Res_Feld1'] ?? "12:00";
 $ladezeit_bis = $EV_Reservierung['4']['Res_Feld2'] ?? "05:00";
+$max_leistung_ha = $EV_Reservierung['4']['Options'] ?? "-0.1";
 
 // Neue Einstellungen ID=5 (Preise)
 $strompreis_fest = $EV_Reservierung['5']['Res_Feld1'] ?? 0.30;
@@ -567,6 +568,11 @@ echo $html;
             <span class="input-inline"><input id="residualPower" type="number" step="100" value="<?php echo htmlspecialchars($residualPower); ?>"></span>
         </div>
 
+        <div class="row">
+            <span class="label-inline">Ladebegr. Hausakku(kW) (DB=<?php echo htmlspecialchars($max_leistung_ha); ?>):</span>
+            <span class="input-inline"><input id="MaxLeistHAkW" type="number" step="0.1" min="-0.1" value="<?php echo htmlspecialchars($max_leistung_ha); ?>"></span>
+        </div>
+
         <hr>
         </details>
         <br>
@@ -594,7 +600,7 @@ function loadFromLocalStorage(id) {
 
 $(document).ready(function(){
     // IDs, die wir im localStorage zwischenhalten möchten
-    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minPhaseDur','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh'];
+    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minPhaseDur','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh', 'MaxLeistHAkW'];
 
     // Load saved values
     ls_ids.forEach(function(id){ loadFromLocalStorage(id); });
@@ -820,6 +826,7 @@ function calculatePower() {
     // ID 4: Next Trip Zeiten (aus Grafik)
     var lz_von = $('#ladezeitVon').val();
     var lz_bis = $('#ladezeitBis').val();
+    var max_leistung_ha = $('#MaxLeistHAkW').val();
 
     // ID 5: Preise (aus Grafik)
     var s_preis = $('#strompreisFest').val();
@@ -858,7 +865,7 @@ function calculatePower() {
                 amp_min + "," + amp_max, // ID 1
                 auto_sync_interval,      // ID 2
                 phase_change_confirm,    // ID 3
-                "",                      // ID 4
+                max_leistung_ha,         // ID 4
                 ""                       // ID 5
             ]
         },
@@ -867,7 +874,8 @@ function calculatePower() {
             var ls_ids = [
                 'pvMode','phases','ampMin','ampMax','autoSyncInterval',
                 'minPhaseDur','minChargeDur','phaseChangeConfirm','residualPower',
-                'defaultTargetKwh', 'ladezeitVon', 'ladezeitBis', 'strompreisFest', 'einspeiseVerg'
+                'defaultTargetKwh', 'ladezeitVon', 'ladezeitBis', 'strompreisFest', 'einspeiseVerg',
+                'MaxLeistHAkW'
             ];
 
             ls_ids.forEach(function(id){
