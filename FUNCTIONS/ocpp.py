@@ -522,8 +522,8 @@ class OCPPManager:
         else:
             batterie_anteil = max(self.max_leistung_ha, min(self.Batteriebezug, 0.0)) ##WIGGAL
         self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power)
-        ueberschuss = int(max(0.0, self.Produktion + batterie_anteil + self.Netzbezug - self.residualPower))
-        #print("==>>>WIGGAL", self.max_leistung_ha, batterie_anteil)
+        ueberschuss = int(max(0.0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower)))
+        print("==>>>WIGGAL", self.max_leistung_ha, batterie_anteil)
 
         cinfo(f"[{'..' + cp_id[-4:]}] Ladeberechnung: PV={self.Produktion} W, Akku={self.Batteriebezug} W, Netz={self.Netzbezug} W, Haus={self.hausverbrauch} W, CP={current_charge_power} W, Überschuss={ueberschuss} W")
 
