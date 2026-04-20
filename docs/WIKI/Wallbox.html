@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="de-DE">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width">
     <title>Wallbox</title>
-    <style type="text/css">
-        body { font-family: sans-serif; line-height: 1.5; padding: 20px; }
-        .c1 { font-size: 24pt; font-weight: bold; }
-        .c2 { font-size: 120%; font-family: monospace; }
-        .label-inline { font-weight: normal; }
-        ul { margin-bottom: 10px; }
+    <style>
+        @media (max-width: 600px) {
+        table, th, td {
+            font-size: 90% !important;
+        }
+        }
     </style>
 </head>
 <body lang="de-DE">
@@ -17,7 +17,7 @@
 
 <p><span class="c1">TAB --&gt;&gt; Wallbox</span></p>
 
-<p><strong>Stand: 17.04.2026<br></strong></p>
+<p><strong>Stand: 20.04.2026<br></strong></p>
 
 <p>
     Das Tool stellt einen OCPP-Server bereit, zu dem eine Wallbox eine Verbindung als Client herstellt.<br>
@@ -136,7 +136,8 @@ zur Unterscheidung der im WebUI eingestellten aber noch nicht gesicherten Werte.
     </li>
     <li><span class="label-inline">Ladebegr. Hausakku(kW) (DB=0.8):</span>
         <ul>
-            <li><span class="label-inline">Hiermit kann die Ladeleistung des Hausakkus ungefähr auf die eingestellten kW begrenzt werden, falls sie höher wäre.</span></li>
+            <li><span class="label-inline">Hiermit kann die Ladeleistung des Hausakkus ungefähr auf die eingestellten kW begrenzt werden, falls sie größer wäre.<br>
+            Bei -0.1 ist die Begrenzung abgeschaltet.</span></li>
         </ul>
     </li>
 </ul>

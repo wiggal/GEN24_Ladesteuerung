@@ -303,7 +303,7 @@ class OCPPManager:
         self.MIN_CHARGE_DURATION_S = 600
         self.PHASE_CHANGE_CONFIRM_S = 30
         self.residualPower = -300.0
-        self.max_leistung_ha = 0.1
+        self.max_leistung_ha = -100
         self.DEFAULT_TARGET_KWH = 0.0
 
         # NextTrip (PV-Mode 4) Ladezeiten aus DB (ID=4)
@@ -415,7 +415,7 @@ class OCPPManager:
                     try:
                         raw_ha = row4.get('Options')
                         if raw_ha is not None:
-                            self.max_leistung_ha = float(raw_ha)*-1
+                            self.max_leistung_ha = float(raw_ha)*-1000
                     except Exception:
                         pass
                 # update autosync interval
@@ -430,13 +430,14 @@ class OCPPManager:
                     f"{self.wb_phases}, "
                     f"{amp_min_val}, "
                     f"{amp_max_val}, "
+                    f"{self.DEFAULT_TARGET_KWH}, "
+                    f"{self.wb_ladezeit_von}–{self.wb_ladezeit_bis}, "
                     f"{self.AUTO_SYNC_INTERVAL}, "
                     f"{self.MIN_PHASE_DURATION_S}, "
                     f"{self.MIN_CHARGE_DURATION_S}, "
                     f"{self.PHASE_CHANGE_CONFIRM_S}, "
                     f"{self.residualPower}, "
-                    f"{self.DEFAULT_TARGET_KWH}, "
-                    f"NextTrip={self.wb_ladezeit_von}–{self.wb_ladezeit_bis}"
+                    f"{self.max_leistung_ha} "
                 )
 
 
@@ -506,26 +507,31 @@ class OCPPManager:
         phases_to_use = self.wb_phases
 
         current_charge_power = 0
-        # NEU (echter Messwert, konsistent mit HTTP-Endpoint):
+        # Aktuelle Ladepower mit aktuell gesetzten Werten berechnen
         if cp_id and cp_id in self.states:
-            current_charge_power = self._extract_power_w_from_meter_store(cp_id)
-            st = self.states[cp_id]
-            # Fallback auf Schätzung wenn noch keine MeterValues vorliegen
-            if current_charge_power == 0.0 and st.current_limit and st.phase_limit:
-                if st.status in ["Charging", "ChargingRequested"]:
-                    current_charge_power = self.get_current_power(cp_id)
+            current_charge_power = self.get_current_power(cp_id)  # A × P × U(gemessen), Fallback 230V
 
         # Inverter-Werte verrechnen
-        # Wert "-inf" wäre unendlich = keine Begrenzung ##WIGGAL
+        # Hausakku Ladebegrenzung, rechnen -0.1kW = keine Begrenzung
         if self.max_leistung_ha > 0:
             batterie_anteil = self.Batteriebezug
         else:
             batterie_anteil = max(self.max_leistung_ha, min(self.Batteriebezug, 0.0)) ##WIGGAL
+
+        # batterie_antei darf nicht größer 0 sein
+        if batterie_anteil > 0: batterie_anteil = 0
+
         self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power)
         ueberschuss = int(max(0.0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower)))
-        print("==>>>WIGGAL", self.max_leistung_ha, batterie_anteil)
+        #print("==>>>WIGGAL", self.max_leistung_ha, batterie_anteil)
 
-        cinfo(f"[{'..' + cp_id[-4:]}] Ladeberechnung: PV={self.Produktion} W, Akku={self.Batteriebezug} W, Netz={self.Netzbezug} W, Haus={self.hausverbrauch} W, CP={current_charge_power} W, Überschuss={ueberschuss} W")
+        cinfo(f"[{'..' + cp_id[-4:]}] Ladeberechnung: "
+            f"PV={self.Produktion:.0f} W, "
+            f"Akku={self.Batteriebezug:.0f} W, "
+            f"Netz={self.Netzbezug:.0f} W, "
+            f"Haus={self.hausverbrauch:.0f} W, "
+            f"CP={current_charge_power:.0f} W, "
+            f"Überschuss={ueberschuss:.0f} W")
 
         if float(self.wb_pv_mode) in (1.0, 2.0):
             # Standard: Im Modus 1.0 (Nur PV) darf die Ladung auf 0 abfallen
@@ -612,13 +618,14 @@ class OCPPManager:
         st = self.states.get(cp_id)
         if not st:
             return 0.0
+
         try:
             curr = float(st.current_limit or 0.0)
             phases = int(st.phase_limit or 0)
-            return curr * phases * 230.0
+            voltage = self._get_average_voltage(cp_id)  # statt fix 230V
+            return curr * phases * voltage
         except Exception:
             return 0.0
-
     # ----------------------------
     # Apply-Wallbox-Settings (Hauptlogik)
     # ----------------------------
@@ -674,7 +681,8 @@ class OCPPManager:
 
             charged_wh = round(st.charged_wh,1) or 0.0
             # verbose info for current state including PV mode and charged Wh
-            cinfo(f"[{st.log_cp_id}] PV-Mode={pv_mode}, PV-Steuerung={is_pv_controlled}, Wunsch: {amp_desired}A/{requested_phase}P, Aktuell: {st.current_limit}A/{st.phase_limit}P, Geladen: {charged_wh}Wh")
+            limit_str = f"{st.current_limit}A/{st.phase_limit}P" if st.current_limit is not None else "unbekannt"
+            cinfo(f"[{st.log_cp_id}] PV-Mode={pv_mode}, PV-Steuerung={is_pv_controlled}, Wunsch: {amp_desired}A/{requested_phase}P, Aktuell: {limit_str}, Geladen: {charged_wh}Wh")
 
             # PHASE HYSTERESE: nur wenn Änderung, nicht initial, Laden > 0 gewünscht
             # UND automatische Phasenwahl aktiv (wb_phases == "0")
@@ -694,6 +702,8 @@ class OCPPManager:
                         st.phase_candidate = None
                         st.append_debug({"note": "phase-hysteresis-confirmed", "requested": requested_phase, "ts": iso_now()})
                     else:
+                        remaining_s = int(self.PHASE_CHANGE_CONFIRM_S - elapsed)
+                        cinfo(f"[{st.log_cp_id}] Phasenwechsel-Hysterese aktiv – noch {remaining_s}s warten.")
                         phase_changed = False
             else:
                 # cleanup if not relevant
@@ -742,7 +752,7 @@ class OCPPManager:
                     cdebug(f"[{st.log_cp_id}] Stop-Guard übersprungen – Fahrzeug in SuspendedEV")
                 else:
                     can_stop = True
-                    if is_pv_controlled and st.transaction_start:
+                    if is_pv_controlled and st.transaction_start and st.transaction_id:
                         duration = (datetime.now() - st.transaction_start).total_seconds()
                         if duration < self.MIN_CHARGE_DURATION_S:
                             can_stop = False
@@ -754,16 +764,38 @@ class OCPPManager:
 
                 if not can_stop:
                     amp_allowed = amp_min or self.wb_amp_min
+                    st.stop_candidate = None  # Stop-Guard aktiv → Hysterese zurücksetzen
                     st.append_debug({"note": "stop-guard-applied", "amp": amp_allowed, "ts": iso_now()})
                 else:
-                    if active_tx_id:
-                        handler = ChargePointHandler(self, st)
-                        await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
-                        st.transaction_id = None
-                        st.status = "AvailableRequested"
-                        st.transaction_start = None
-                        st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
+                    if active_tx_id and amp_allowed == 0.0:
+                        # Stop-Hysterese: kurze Unterschreitungen abfangen
+                        now = datetime.now()
+                        if st.stop_candidate is None:
+                            st.stop_candidate = now
+                            amp_allowed = amp_min or self.wb_amp_min
+                            cinfo(f"[{st.log_cp_id}] Stop-Hysterese gestartet – warte {self.PHASE_CHANGE_CONFIRM_S}s vor Stopp")
+                            st.append_debug({"note": "stop-hysteresis-start", "ts": iso_now()})
+                        else:
+                            elapsed = (now - st.stop_candidate).total_seconds()
+                            if elapsed < self.PHASE_CHANGE_CONFIRM_S:
+                                remaining_s = int(self.PHASE_CHANGE_CONFIRM_S - elapsed)
+                                amp_allowed = amp_min or self.wb_amp_min
+                                cinfo(f"[{st.log_cp_id}] Stop-Hysterese aktiv – noch {remaining_s}s warten vor Stopp")
+                                st.append_debug({"note": "stop-hysteresis-wait", "remaining_s": remaining_s, "ts": iso_now()})
+                            else:
+                                st.stop_candidate = None
+                                cinfo(f"[{st.log_cp_id}] Stop-Hysterese bestätigt – stoppe Laden")
+                                handler = ChargePointHandler(self, st)
+                                await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
+                                st.transaction_id = None
+                                st.status = "AvailableRequested"
+                                st.transaction_start = None
+                                st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
+                    elif active_tx_id:
+                        # amp_allowed > 0 → Laden gewünscht, Stop-Kandidat zurücksetzen
+                        st.stop_candidate = None
                     elif status not in ["Available", "AvailableRequested"]:
+                        st.stop_candidate = None
                         # Nur auf Available setzen wenn Fahrzeug NICHT angesteckt ist
                         physically_plugged = status in ["SuspendedEVSE", "Preparing", "Finishing", "SuspendedEV"]
                         if not physically_plugged:
@@ -784,7 +816,7 @@ class OCPPManager:
             # ---------------------------
             # AMPERE-ANPASSUNG WÄHREND DER PHASEN-HYSTERESE (wie Original)
             # ---------------------------
-            amp_changed = (st.current_limit != amp_allowed)
+            amp_changed = abs((st.current_limit or 0.0) - amp_allowed) > 0.5
             candidate = st.phase_candidate
             if candidate:
                 requested_p = candidate.get('requested')

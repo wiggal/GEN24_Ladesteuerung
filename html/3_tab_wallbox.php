@@ -396,20 +396,17 @@ p, label {
 $solar_current   = round(($meter_values['Produktion_W'] ?? 0) / 1000, 1);
 $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0) / 1000, 1);
 $grid_current    = round(($meter_values['Netzbezug_W'] ?? 0) / 1000, 1);
+$Hausverbrauch    = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
 
 // 2. Ladeleistung 
-// Wir nehmen den realen Messwert, filtern aber Standby-Rauschen unter 300W/0.3kW
+// Wir nehmen den realen Messwert, filtern aber Standby-Rauschen unter 200W/0.2kW
 $car_power = round(($meter_values['power_w'] ?? 0) / 1000, 1);
-if ($car_power < 0.3) $car_power = 0;
+if ($car_power < 0.2) $car_power = 0;
 
-// 3. Hausverbrauch als mathematischer Rest
-// Die Summe der Quellen minus die Wallbox ergibt zwingend das Haus.
-$Q_sum = $solar_current + $battery_current + $grid_current;
-$Hausverbrauch = round($Q_sum - $car_power, 1);
-
-// 4. Plausibilitäts-Korrektur, Hausverbrauch immer darstellen
+// 3. Plausibilitäts-Korrektur, Hausverbrauch immer darstellen
 // Falls die Wallbox-Daten hängen (alt/hoch) und die Erzeugung sinkt (neu/niedrig),
 // würde der Hausverbrauch negativ. Das korrigieren wir hier zugunsten der Anzeige.
+$Q_sum = $solar_current + $battery_current + $grid_current;
 if ($Hausverbrauch < 0.1) {
     $Hausverbrauch = 0.2; // Mindestlast Haus (Kühlschrank/Standby)
     // Wir passen die Car-Power an, damit die Bar optisch perfekt bleibt
@@ -418,7 +415,7 @@ if ($Hausverbrauch < 0.1) {
     }
 }
 
-// 5. Balkendiagramm generieren
+// 4. Balkendiagramm generieren
 [ $html, $Q_final, $Z_final ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
 
 echo $html; 
