@@ -410,7 +410,7 @@ class progladewert:
 
             if BattStatusProz >= BattStatusProz_Grenze_AkkuSchon and ManuelleStrg_Akkuschon > 0:
                 # Um das setzen der Akkuschonung zu verhindern, wenn aktuellePVProduktion zu wenig oder der Akku wieder entladen wird.
-                if (AkkuschonungLadewert < aktuellerLadewert or AkkuschonungLadewert < alterLadewert + 10) and aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert:
+                if (AkkuschonungLadewert < aktuellerLadewert) and (aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert):
                     aktuellerLadewert = AkkuschonungLadewert
                     WRSchreibGrenze_nachUnten = aktuellerLadewert / 5
                     WRSchreibGrenze_nachOben = aktuellerLadewert / 5
