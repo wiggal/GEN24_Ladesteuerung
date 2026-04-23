@@ -768,29 +768,40 @@ class OCPPManager:
                     st.append_debug({"note": "stop-guard-applied", "amp": amp_allowed, "ts": iso_now()})
                 else:
                     if active_tx_id and amp_allowed == 0.0:
-                        # Stop-Hysterese: kurze Unterschreitungen abfangen
-                        now = datetime.now()
-                        if st.stop_candidate is None:
-                            st.stop_candidate = now
-                            amp_allowed = amp_min or self.wb_amp_min
-                            cinfo(f"[{st.log_cp_id}] Stop-Hysterese gestartet – warte {self.PHASE_CHANGE_CONFIRM_S}s vor Stopp")
-                            st.append_debug({"note": "stop-hysteresis-start", "ts": iso_now()})
-                        else:
-                            elapsed = (now - st.stop_candidate).total_seconds()
-                            if elapsed < self.PHASE_CHANGE_CONFIRM_S:
-                                remaining_s = int(self.PHASE_CHANGE_CONFIRM_S - elapsed)
+                        if is_pv_controlled:
+                            # Stop-Hysterese: kurze PV-Unterschreitungen abfangen
+                            now = datetime.now()
+                            if st.stop_candidate is None:
+                                st.stop_candidate = now
                                 amp_allowed = amp_min or self.wb_amp_min
-                                cinfo(f"[{st.log_cp_id}] Stop-Hysterese aktiv – noch {remaining_s}s warten vor Stopp")
-                                st.append_debug({"note": "stop-hysteresis-wait", "remaining_s": remaining_s, "ts": iso_now()})
+                                cinfo(f"[{st.log_cp_id}] Stop-Hysterese gestartet – warte {self.PHASE_CHANGE_CONFIRM_S}s vor Stopp")
+                                st.append_debug({"note": "stop-hysteresis-start", "ts": iso_now()})
                             else:
-                                st.stop_candidate = None
-                                cinfo(f"[{st.log_cp_id}] Stop-Hysterese bestätigt – stoppe Laden")
-                                handler = ChargePointHandler(self, st)
-                                await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
-                                st.transaction_id = None
-                                st.status = "AvailableRequested"
-                                st.transaction_start = None
-                                st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
+                                elapsed = (now - st.stop_candidate).total_seconds()
+                                if elapsed < self.PHASE_CHANGE_CONFIRM_S:
+                                    remaining_s = int(self.PHASE_CHANGE_CONFIRM_S - elapsed)
+                                    amp_allowed = amp_min or self.wb_amp_min
+                                    cinfo(f"[{st.log_cp_id}] Stop-Hysterese aktiv – noch {remaining_s}s warten vor Stopp")
+                                    st.append_debug({"note": "stop-hysteresis-wait", "remaining_s": remaining_s, "ts": iso_now()})
+                                else:
+                                    st.stop_candidate = None
+                                    cinfo(f"[{st.log_cp_id}] Stop-Hysterese bestätigt – stoppe Laden")
+                                    handler = ChargePointHandler(self, st)
+                                    await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
+                                    st.transaction_id = None
+                                    st.status = "AvailableRequested"
+                                    st.transaction_start = None
+                                    st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
+                        else:
+                            # PV-Mode=0 oder andere nicht-PV-Modi → sofort stoppen
+                            st.stop_candidate = None
+                            cinfo(f"[{st.log_cp_id}] Kein PV-Modus – stoppe sofort")
+                            handler = ChargePointHandler(self, st)
+                            await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
+                            st.transaction_id = None
+                            st.status = "AvailableRequested"
+                            st.transaction_start = None
+                            st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
                     elif active_tx_id:
                         # amp_allowed > 0 → Laden gewünscht, Stop-Kandidat zurücksetzen
                         st.stop_candidate = None
