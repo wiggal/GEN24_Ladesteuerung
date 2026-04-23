@@ -27,36 +27,6 @@ except ImportError:
             return datetime.timedelta(hours=1)
 
 
-def interpolate_at_offset(data, offset_minuten=0):
-    times_iso = data["hourly"]["time"]
-    irradiance = data["hourly"]["global_tilted_irradiance"]
-
-    # Zeiten in datetime-Objekte umwandeln
-    times_dt = [datetime.datetime.fromisoformat(t) for t in times_iso]
-
-    interpolated_values = []
-
-    for i in range(len(times_dt)):
-        offset_time = times_dt[i] + datetime.timedelta(minutes=offset_minuten)
-
-        # Nach Intervall suchen, das die Offset-Zeit umschließt
-        interpolated = 0
-        for j in range(len(times_dt) - 1):
-            t1, t2 = times_dt[j], times_dt[j + 1]
-            v1, v2 = irradiance[j], irradiance[j + 1]
-
-            if t1 <= offset_time <= t2 and v1 is not None and v2 is not None:
-                ratio = (offset_time - t1).total_seconds() / (t2 - t1).total_seconds()
-                interpolated = int(v1 + (v2 - v1) * ratio)
-                break  # Interpolation gefunden
-
-        interpolated_values.append(interpolated)
-
-    # Neues Feld ergänzen, Zeit bleibt unverändert
-    data["hourly"]["global_tilted_irradiance"] = interpolated_values
-
-    return data
-
 def compute_mean_field(data, prefix, target_field):
     # Falls das Zielfeld schon existiert, nichts tun
     if target_field in data['hourly']:
@@ -109,7 +79,6 @@ def get_pv_forecast_icon_d2_cloud_layers(quelle, gewicht):
     cloudEffect = basics.getVarConf('openmeteo','cloudEffect','eval')
     # Basis-Effizienzfaktor (systemische Verluste, nicht-optimale Bedingungen)
     base_efficiency_factor = basics.getVarConf('openmeteo','base_efficiency_factor','eval')
-    offset_minuten = basics.getVarConf('openmeteo','offset_minuten','eval')
 
     start_date = now_local.strftime('%Y-%m-%d')
     end_date = (now_local + datetime.timedelta(days=2)).strftime('%Y-%m-%d')
@@ -156,10 +125,6 @@ def get_pv_forecast_icon_d2_cloud_layers(quelle, gewicht):
         # Mittelwerte berechnen
         data = compute_mean_field(data, 'global_tilted_irradiance_', 'global_tilted_irradiance')
         data = compute_mean_field(data, 'cloud_cover_', 'cloud_cover')
-
-        # Offset anwenden, wenn nicht 0
-        if (offset_minuten != 0):
-            data = interpolate_at_offset(data, offset_minuten)
 
         pv_forecast_data = []
         if "hourly" in data and "time" in data["hourly"] and "global_tilted_irradiance" in data["hourly"]:
@@ -244,7 +209,7 @@ if __name__ == "__main__":
     data = get_pv_forecast_icon_d2_cloud_layers(Quelle, Gewicht)
 
     if isinstance(data, list):
-        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
+        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht, '', offset_minuten)
         # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
         weatherdata.store_forecast_result()
         print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now_local.strftime(format)} gespeichert.\n')

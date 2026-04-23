@@ -44,13 +44,141 @@ class WeatherData:
         print("DB",path,"wurde erstellt.")
 
 
-    def storeWeatherData_SQL(self, data, quelle, gewicht_neu=-1, loesche_quelle=''):
+    def apply_minute_offset(self, data, offset_minutes):
+        """
+        Verschiebt die Prognosewerte um offset_minutes.
+        Positive Werte = später (nach rechts), negative = früher (nach links).
+        Die Zeitstempel bleiben auf vollen Stunden, die Werte werden interpoliert.
+        """
+        if offset_minutes == 0:
+            return data
+    
+        from datetime import datetime, timedelta
+    
+        dt_format = "%Y-%m-%d %H:%M:%S"
+    
+        times = [datetime.strptime(entry[0], dt_format) for entry in data]
+        values = [entry[2] for entry in data]
+
+        def interpolate_value(target_dt):
+            source_dt = target_dt - timedelta(minutes=offset_minutes)
+
+            hour_before = source_dt.replace(minute=0, second=0, microsecond=0)
+            hour_after = hour_before + timedelta(hours=1)
+
+            val_before = None
+            val_after = None
+            for i, t in enumerate(times):
+                if t == hour_before:
+                    val_before = values[i]
+                if t == hour_after:
+                    val_after = values[i]
+
+            if val_before is None and val_after is None:
+                return 0  # Außerhalb des Datenbereichs
+            if val_before is None:
+                return val_after
+            if val_after is None:
+                return val_before
+
+            frac = (source_dt - hour_before).seconds / 3600.0
+            return val_before + (val_after - val_before) * frac
+
+        new_data = []
+        for i, entry in enumerate(data):
+            target_dt = times[i]
+            new_value = interpolate_value(target_dt)
+
+            new_entry = (
+                entry[0],
+                entry[1],
+                round(new_value),
+                entry[3],
+                entry[4],
+            )
+            new_data.append(new_entry)
+
+        return new_data
+
+    def WIGGAL_apply_minute_offset(self, data, offset_minutes):
+        """
+        Verschiebt die Prognosewerte um offset_minutes.
+        Positive Werte = früher (nach links),negative = später (nach rechts).
+        Die Zeitstempel bleiben auf vollen Stunden, die Werte werden interpoliert.
+        """
+        if offset_minutes == 0:
+            return data
+
+        # um keine verdrehte Verschiebung zu erhalten
+        offset_minutes = -offset_minutes
+        # Index aufbauen: Zeitpunkt -> (index, entry)
+        dt_format = "%Y-%m-%d %H:%M:%S"
+
+        # Zeitstempel als datetime-Objekte extrahieren
+        times = [datetime.strptime(entry[0], dt_format) for entry in data]
+        values = [entry[2] for entry in data]
+
+        # Hilfsfunktion: Wert zu einem bestimmten Zeitpunkt interpolieren
+        def interpolate_value(target_dt):
+            # Originalzeit minus Offset = wo im Original nachschauen
+            source_dt = target_dt - timedelta(minutes=offset_minutes)
+
+            # Nächste Stunden-Grenzen im Original finden
+            hour_before = source_dt.replace(minute=0, second=0, microsecond=0)
+            hour_after = hour_before + timedelta(hours=1)
+
+            # Werte an den Stundengrenzen suchen
+            val_before = None
+            val_after = None
+            for i, t in enumerate(times):
+                if t == hour_before:
+                    val_before = values[i]
+                if t == hour_after:
+                    val_after = values[i]
+
+            if val_before is None and val_after is None:
+                return None  # Außerhalb des Datenbereichs
+            if val_before is None:
+                return val_after
+            if val_after is None:
+                return val_before
+
+            # Lineare Interpolation
+            frac = (source_dt - hour_before).seconds / 3600.0
+            return val_before + (val_after - val_before) * frac
+
+        # Neue Daten mit interpolierten Werten aufbauen
+        new_data = []
+        for i, entry in enumerate(data):
+            target_dt = times[i]
+            new_value = interpolate_value(target_dt)
+
+            if new_value is None:
+                # Außerhalb des Datenbereichs -> Originalwert behalten oder 0
+                new_value = entry[2]
+
+            new_entry = (
+                entry[0],           # Zeitstempel unverändert
+                entry[1],           # Quelle unverändert
+                round(new_value),   # Interpolierter Wert (gerundet auf int)
+                entry[3],           # Gewicht unverändert
+                entry[4],           # Options unverändert
+        )
+            new_data.append(new_entry)
+
+        return new_data
+
+    def storeWeatherData_SQL(self, data, quelle, gewicht_neu=-1, loesche_quelle='', offset_minutes=0):
         self.check_or_create_db('weatherData.sqlite')
         verbindung = sqlite3.connect('weatherData.sqlite')
         zeiger = verbindung.cursor()
         print_level = basics.getVarConf('env','print_level','eval')
         # Alte Einträge löschen die älter 35 Tage sind
         loesche_bis = (datetime.today() - timedelta(days=35)).date().isoformat()
+
+        # Minutenoffset anwenden
+        if offset_minutes != 0 and gewicht_neu != -1:
+            data = self.apply_minute_offset(data, offset_minutes * -1)
 
         #Prognosen kleiner 10W löschen
         data = [entry for entry in data if entry[2] >= 10 or entry[1] == "Produktion"]
@@ -305,7 +433,7 @@ class WeatherData:
         DB_data.extend(Prognose)
             
         # Speichern der Resultate  in DB
-        self.storeWeatherData_SQL(DB_data, 'Basis, Prognose, Produktion', '-1', loesche_quelle)
+        self.storeWeatherData_SQL(DB_data, 'Basis, Prognose, Produktion', -1, loesche_quelle)
         conn.close()
 
         return()

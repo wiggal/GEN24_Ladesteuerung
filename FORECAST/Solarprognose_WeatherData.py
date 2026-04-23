@@ -26,7 +26,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
         exit()
     dict_watts = {}
     for key, value in json_data1.get('data',{}).items():
-        key_neu = str(datetime.fromtimestamp(value[0]) + timedelta(hours=Zeitversatz))
+        key_neu = str(datetime.fromtimestamp(value[0]))
         dict_watts[key_neu] = int(value[1]*1000*KW_Faktor)
 
     # Daten für SQL erzeugen
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     accesstoken = basics.getVarConf('solarprognose', 'accesstoken', 'str')
     item = basics.getVarConf('solarprognose', 'item', 'str')
     type = basics.getVarConf('solarprognose', 'type', 'str')
-    Zeitversatz = int(basics.getVarConf('solarprognose', 'Zeitversatz', 'eval'))
+    offset_minuten = int(basics.getVarConf('solarprognose', 'offset_minuten', 'eval'))
     algorithm = basics.getVarConf('solarprognose', 'algorithm', 'str')
 
     time.sleep(WaitSec)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     data = data_all[0]
     data_err = data_all[1]
     if isinstance(data, list):
-        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
+        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht, '', offset_minuten)
         # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
         weatherdata.store_forecast_result()
         print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')

@@ -2,6 +2,11 @@
 - Wallboxsteuerung: NextTrip mit notwendigen Anpassungen im Frontend hinzugefügt.  
 - Wallboxsteuerung: Option zu Begrenzung der Ladeleistung des Hausakkus hinzugefügt.  
 
+- Änderungen an den Prognoseskripten und in der CONFIG/weather.ini bzw. CONFIG/weather_priv.ini  
+  Alle Prognosedienste können nun mit der Variablen `offset_minuten` die Prognose verschieben.  
+  Deshalb wurde die Variable in den Blöcken der jeweiligen Prognosedienste hinzugefügt.  
+  **Änderungen in CONFIG/weather.ini**, bitte in `priv.ini` nachziehen.  
+
 **[0.41.8] – 2026-04-16**  
 - FIX: start_PythonScript.sh -o Logfile mit absolutem Pfad erzeugte Fehler, z.B. beim Start des Dockers.  
 - FIX OCPP-Server: Keine Werte an Wallbox senden, wenn keine Auto angesteckt ist.  

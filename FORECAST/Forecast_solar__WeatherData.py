@@ -115,6 +115,7 @@ if __name__ == '__main__':
     basics = FUNCTIONS.functions.basics()
     weatherdata = FUNCTIONS.WeatherData.WeatherData()
     config = basics.loadConfig(['default', 'weather'])
+    offset_minuten = basics.getVarConf('forecast.solar','offset_minuten','eval')
     ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
     Gewicht = basics.getVarConf('forecast.solar','Gewicht','eval')
     Quelle = 'forecast.solar'
@@ -123,7 +124,7 @@ if __name__ == '__main__':
     now = datetime.now()    
     data = loadLatestWeatherData(Quelle, Gewicht)
     if isinstance(data, list):
-        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
+        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht, '', offset_minuten)
         # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
         weatherdata.store_forecast_result()
         print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')

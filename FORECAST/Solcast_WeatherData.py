@@ -121,6 +121,7 @@ if __name__ == '__main__':
     # Benoetigte Variablen definieren und prüfen
     Strings = basics.getVarConf('pv.strings', 'anzahl', 'eval')
     Zeitzone = basics.getVarConf('solcast.com', 'Zeitzone', 'eval')
+    offset_minuten = int(basics.getVarConf('solcast.com', 'offset_minuten', 'eval'))
     KW_Faktor = basics.getVarConf('solcast.com', 'KW_Faktor', 'eval')
     KW_Faktor2 = basics.getVarConf('solcast.com', 'KW_Faktor2', 'eval')
     api_key = basics.getVarConf('solcast.com', 'api_key', 'str')
@@ -136,7 +137,7 @@ if __name__ == '__main__':
     data = data_all[0]
     data_err = data_all[1]
     if isinstance(data, list):
-        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
+        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht, '', offset_minuten)
         # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
         weatherdata.store_forecast_result()
         print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')

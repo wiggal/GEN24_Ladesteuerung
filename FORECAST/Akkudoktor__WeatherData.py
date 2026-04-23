@@ -89,13 +89,14 @@ if __name__ == '__main__':
     config = basics.loadConfig(['default', 'weather'])
     ForecastCalcMethod = basics.getVarConf('env','ForecastCalcMethod','str')
     Gewicht = basics.getVarConf('akkudoktor','Gewicht','eval')
+    offset_minuten = basics.getVarConf('akkudoktor','offset_minuten','eval')
     Quelle = 'akkudoktor'
     
     format = "%H:%M:%S"    
     now = datetime.now()    
     data = loadLatestWeatherData(Quelle, Gewicht)
     if isinstance(data, list):
-        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht)
+        weatherdata.storeWeatherData_SQL(data, Quelle, Gewicht, '', offset_minuten)
         # Ergebnis mit ForecastCalcMethod berechnen und in DB speichern
         weatherdata.store_forecast_result()
         print(f'{Quelle} OK: Prognosedaten und Ergebnisse ({ForecastCalcMethod}) {now.strftime(format)} gespeichert.\n')
