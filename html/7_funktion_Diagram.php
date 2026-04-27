@@ -271,108 +271,105 @@ function getSQL($SQLType, $DiaDatenVon, $DiaDatenBis, $groupSTR)
     // Standard-Rückgabe, falls $SQLType nicht erkannt wird (jetzt nur diese 3 Fälle)
     return null;
 }
-function Preisberechnung($DiaDatenVon, $DiaDatenBis, $groupSTR, $db)  # KI optimiert
-{  
+
+function Preisberechnung($DiaDatenVon, $DiaDatenBis, $groupSTR, $db)  # KI optimiert & Korrigiert
+{
     $Preisstatistik = [];
     $Zeitraeume = ["T", "M", "J"];
 
-    // 1. Ursprüngliche Grenzen speichern. Wichtig, da die Grenzen in der Schleife verändert werden.
     $Original_DiaDatenVon = $DiaDatenVon;
     $Original_DiaDatenBis = $DiaDatenBis;
 
-    // SQL-Vorlage mit Platzhaltern für die Datumsangaben
+    // DAS NEUE SQL-TEMPLATE
     $SQL_TEMPLATE = "
     WITH Stündlicher_Netzverbrauch AS (
-        -- Schritt 1: Aggregiere den Netzverbrauch (letzter Zählerstand) pro Stunde
         SELECT
             STRFTIME('%Y-%m-%d %H:00:00', Zeitpunkt) AS Stunde,
             MAX(Netzverbrauch) AS Netzverbrauch_Stunde
         FROM pv_daten
         WHERE Zeitpunkt BETWEEN '{{DiaDatenVon}}' AND '{{DiaDatenBis}}'
         GROUP BY Stunde
-    )
-    , Stündlicher_Netzbezug AS (
-        -- Schritt 2: Berechne den Netzbezug (Verbrauch) pro Stunde mit LEAD
+    ),
+    Stündlicher_Netzbezug AS (
         SELECT
             Stunde,
-            -- LEAD(Wert, 1) holt den Zählerstand der nächsten Stunde
             (LEAD(Netzverbrauch_Stunde, 1) OVER (ORDER BY Stunde) - Netzverbrauch_Stunde) AS Netzbezug
         FROM Stündlicher_Netzverbrauch
-        ORDER BY Stunde
+    ),
+    Marktpreise AS (
+        -- Hier holen wir ALLE Preise des Zeitraums ohne Filterung durch Verbrauch
+        SELECT Bruttopreis
+        FROM strompreise
+        WHERE Zeitpunkt BETWEEN '{{DiaDatenVon}}' AND '{{StatistikBis}}'
     )
-    , Berechnungsbasis AS (
-        -- Schritt 3: Preise zuordnen und Kosten berechnen
+    SELECT
+        -- Statistiken über den gesamten Marktzeitraum
+        ROUND((SELECT MIN(Bruttopreis) FROM Marktpreise), 2) AS MIN,
+        ROUND((SELECT MAX(Bruttopreis) FROM Marktpreise), 2) AS MAX,
+        ROUND((SELECT AVG(Bruttopreis) FROM Marktpreise), 2) AS AVG,
+
+        -- Deine persönlichen Kosten (nur wenn Netzbezug > 0)
+        ROUND(SUM(calc.Preis), 2) AS SUM,
+        ROUND(SUM(calc.Preis) / (SUM(calc.Netzbezug) / 1000.0), 2) AS KostSUM
+    FROM (
         SELECT
             sp.Bruttopreis,
             pv.Netzbezug,
             (pv.Netzbezug * sp.Bruttopreis / 1000.0) AS Preis
         FROM strompreise AS sp
-        INNER JOIN Stündlicher_Netzbezug AS pv
-            -- JOIN über die volle Stunde
-            ON sp.Zeitpunkt = pv.Stunde
-        WHERE
-            -- Filtern: Nur positiver Verbrauch und gültige Preise
-            pv.Netzbezug IS NOT NULL AND pv.Netzbezug > 0 AND sp.Bruttopreis IS NOT NULL
-    )
-    SELECT
-        ROUND(MIN(Bruttopreis), 2) AS MIN,
-        ROUND(MAX(Bruttopreis), 2) AS MAX,
-        ROUND(AVG(Bruttopreis), 2) AS AVG,
-        ROUND(SUM(Preis), 2) AS SUM,
-        -- KostSUM: Gesamtkosten / Gesamtverbrauch (in kWh, daher /1000.0)
-        ROUND((SUM(Preis) / (SUM(Netzbezug) / 1000.0)), 2) AS KostSUM
-    FROM Berechnungsbasis;
+        INNER JOIN Stündlicher_Netzbezug AS pv ON sp.Zeitpunkt = pv.Stunde
+        WHERE pv.Netzbezug > 0 AND pv.Stunde < '{{StatistikBis}}'
+    ) AS calc;
     ";
 
-    // 2. Schleife für Tag, Monat, Jahr
     foreach ($Zeitraeume as $Zeitraum) {
-
-        // Aktuelle Zeitgrenzen für diesen Durchlauf
         $Aktuell_Von = $Original_DiaDatenVon;
         $Aktuell_Bis = $Original_DiaDatenBis;
+        $Statistik_Bis = $Original_DiaDatenBis; // Hilfsvariable für die saubere Grenze
 
-        // Anpassen der Grenzen basierend auf dem Zeitraum (Monat oder Jahr)
         if ($Zeitraum == 'M') {
-            // Monat: Start am ersten Tag des Startmonats, Ende am ersten Tag des Folgemonats
             $date = new DateTime($Original_DiaDatenVon);
             $date->modify('first day of this month');
-            $Aktuell_Von = $date->format('Y-m-d H:i');
+            $Aktuell_Von = $date->format('Y-m-d 00:00:00');
 
             $date = new DateTime($Original_DiaDatenBis);
             $date->modify('first day of next month');
-            $Aktuell_Bis = $date->format('Y-m-d H:i');
+            $Aktuell_Bis = $date->format('Y-m-d 00:05:00'); // Puffer für LEAD
+            $Statistik_Bis = $date->modify('-5 minutes')->format('Y-m-d 23:59:59'); // Ende des Monats
         }
 
         if ($Zeitraum == 'J') {
-            // Jahr: Start am 1. Januar des Startjahres, Ende am 1. Januar des Folgejahres
             $date = new DateTime($Original_DiaDatenVon);
             $date->modify('first day of January this year');
-            $Aktuell_Von = $date->format('Y-m-d H:i');
+            $Aktuell_Von = $date->format('Y-m-d 00:00:00');
 
             $date = new DateTime($Original_DiaDatenBis);
             $date->modify('first day of January next year');
-            $Aktuell_Bis = $date->format('Y-m-d H:i');
+            $Aktuell_Bis = $date->format('Y-m-d 00:05:00'); // Puffer für LEAD
+            $Statistik_Bis = $date->modify('-5 minutes')->format('Y-m-d 23:59:59'); // Ende des Jahres
         }
 
-        // 3. Platzhalter im SQL-Template ersetzen
+        // Falls Zeitraum 'T' (Tag), Statistik_Bis einfach auf Bis setzen
+        if ($Zeitraum == 'T') {
+             $Statistik_Bis = $Original_DiaDatenBis;
+        }
+
         $SQL = str_replace(
-            ['{{DiaDatenVon}}', '{{DiaDatenBis}}', '{{groupSTR}}'],
-            [$Aktuell_Von, $Aktuell_Bis, $groupSTR],
+            ['{{DiaDatenVon}}', '{{DiaDatenBis}}', '{{StatistikBis}}'],
+            [$Aktuell_Von, $Aktuell_Bis, $Statistik_Bis],
             $SQL_TEMPLATE
         );
 
-        // 4. Abfrage ausführen und Ergebnisse speichern
         $result = $db->query($SQL);
         if ($result) {
             $Preisstatistik[$Zeitraum] = $result->fetchArray(SQLITE3_ASSOC);
         } else {
-            // Fehlerbehandlung hinzufügen
             $Preisstatistik[$Zeitraum] = ['Error' => $db->lastErrorMsg()];
         }
     }
 
     return $Preisstatistik;
-} # ENDE function Preisberechnung
+}
 
 function Optionenausgabe($DBersterTag_Jahr, $activeTab)
 {
