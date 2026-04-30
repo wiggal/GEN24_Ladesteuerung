@@ -158,7 +158,7 @@ switch ($case) {
     echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
     echo '</form>'."\n";
     echo '</div>';
-    echo '<br><br><br><br><br>';
+    echo '<br><br><br><br><br><br><br><br>';
 
     # AUSGEBEN DER Crontab.log von Heute
     while(!feof($myfile)) {
@@ -196,7 +196,7 @@ switch ($case) {
     $suchstring = '';
     if (isset($_POST["suchstring"])) $suchstring = $_POST["suchstring"];
     echo '</div>';
-    echo '<br><br>';
+    echo '<br><br><br><br><br><br><br><br>';
     # Ausgabe der gesuchten Zeile mit Datumszeile 
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);

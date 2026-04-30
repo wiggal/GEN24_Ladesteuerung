@@ -1,3 +1,5 @@
+**[0.42.1] – 2026-XX-XX**  
+
 **[0.42.0] – 2026-04-28**  
 - Wallboxsteuerung: NextTrip mit notwendigen Anpassungen im Frontend hinzugefügt.  
 - Wallboxsteuerung: Option zu Begrenzung der Ladeleistung des Hausakkus hinzugefügt.  
