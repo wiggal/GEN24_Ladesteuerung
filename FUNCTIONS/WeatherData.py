@@ -43,36 +43,30 @@ class WeatherData:
             """)
         print("DB",path,"wurde erstellt.")
 
-
     def apply_minute_offset(self, data, offset_minutes):
         if offset_minutes == 0 or not data:
             return data
-    
-        from datetime import datetime, timedelta
+
         dt_format = "%Y-%m-%d %H:%M:%S"
-        
+
         # Daten in Dictionary laden für schnellen Zugriff
         time_map = {datetime.strptime(e[0], dt_format): e[2] for e in data}
-        times = sorted(time_map.keys())
-        last_time = times[-1]
-    
+
         new_data = []
-    
+
         for entry in data:
             target_dt = datetime.strptime(entry[0], dt_format)
-            # Wo kommt der Wert her? 40 Min früher
-            source_dt = target_dt - timedelta(minutes=offset_minutes)
-            
+
+            # Erst Offset anwenden, dann die einrahmenden Stunden bestimmen
+            source_dt = target_dt + timedelta(minutes=offset_minutes)
+
             hour_before_dt = source_dt.replace(minute=0, second=0, microsecond=0)
             hour_after_dt = hour_before_dt + timedelta(hours=1)
-        
-            # Wert-Extraktion mit 0-Fallback für "nach dem letzten Wert"
+
             val_before = time_map.get(hour_before_dt, 0)
             val_after = time_map.get(hour_after_dt, 0)
 
-            # Interpolation zwischen den Stunden
-            # Bei 40 Min Offset und source_dt auf einer vollen Stunde:
-            # frac = 0.0 -> voll val_before
+            # Interpolation basierend auf source_dt (nach Offset)
             frac = (source_dt - hour_before_dt).total_seconds() / 3600.0
             new_value = val_before + (val_after - val_before) * frac
 
@@ -96,7 +90,7 @@ class WeatherData:
 
         # Minutenoffset anwenden
         if offset_minutes != 0 and gewicht_neu != -1:
-            data = self.apply_minute_offset(data, offset_minutes * -1)
+            data = self.apply_minute_offset(data, offset_minutes)
 
         #Prognosen kleiner 10W löschen
         data = [entry for entry in data if entry[2] >= 10 or entry[1] == "Produktion"]
