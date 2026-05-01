@@ -74,7 +74,6 @@ class progladewert:
         return int(values[index]), self.DEBUG_Ausgabe
 
     def getLadewert(self, BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt):
-    
             # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
             format_Tag = "%Y-%m-%d"
             # aktuelle Stunde und aktuelle Minute
@@ -123,19 +122,26 @@ class progladewert:
                 # Alles über WR_Kapazitaet bzw. Einspeisegrenze von BattKapaWatt_akt abziehen,
                 # da dies nicht für die Prognoseberechnung zur Verfügung steht.
                 # Prognose wird in Funktion getPrognose auf WR_Kapazitaet * 1.1 begrenzt
+                #entWIGGlung
                 Zwangs_Ladung_fun = 0
-                if ( Prognose > self.WR_Kapazitaet ):
+                if (Prognose > self.WR_Kapazitaet):
                     Zwangs_Ladung_fun = Prognose - self.WR_Kapazitaet
-                Zwangs_Ladung_fun2 = (Prognose - self.Einspeisegrenze - Grundlast)
-                if ( Zwangs_Ladung_fun2 > Zwangs_Ladung_fun): Zwangs_Ladung_fun = Zwangs_Ladung_fun2
 
-                # aktuelle Prognose bzw. Grundlast wenn größer von jeweiliger Prognose abziehen und aufsummieren, für Ladungwertberechnung durch Prognosekappung
-                # PrognAbzug = Progn_aktuell * evtl. Minutenfaktor
-                PrognAbzug = Progn_aktuell * (Grundlast_fun/Grundlast)
+                Zwangs_Ladung_fun2 = (Prognose - self.Einspeisegrenze - Grundlast)
+                if (Zwangs_Ladung_fun2 > Zwangs_Ladung_fun):
+                    Zwangs_Ladung_fun = Zwangs_Ladung_fun2
+
+                # KORREKTUR: Den Wert auf die verbleibende Zeit der Stunde skalieren!
+                if Zwangs_Ladung_fun < 0: Zwangs_Ladung_fun = 0
+                Zwangs_Ladung_fun = Zwangs_Ladung_fun * Stunden_fun
+
+                # Restliche Berechnungen
+                PrognAbzug = Progn_aktuell * (Grundlast_fun / Grundlast)
                 if (PrognAbzug < Grundlast_fun): PrognAbzug = Grundlast_fun
                 Progn_ueber_aktuell += Prognose_fun - PrognAbzug
-    
+
                 Zwangs_Ladung += Zwangs_Ladung_fun
+                #entWIGGlung
                 Stunden_sum += Stunden_fun
                 Grundlast_Sum += Grundlast_fun
     

@@ -169,7 +169,7 @@ if __name__ == '__main__':
                     Ladelimit_80 = ' (100%)'
                     BattKapaWatt_akt_SOC = BattKapaWatt_akt
                     if PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
-                        BattKapaWatt_akt_SOC = int(BattKapaWatt_akt - BattganzeKapazWatt*((100-SOC_Proz_Grenze)/100))
+                        BattKapaWatt_akt = int(BattKapaWatt_akt - BattganzeKapazWatt*((100-SOC_Proz_Grenze)/100))
                         Ladelimit_80 = '('+str(SOC_Proz_Grenze)+'%)'
 
                     # WRSchreibGrenze_nachUnten ab 90% Batteriestand prozentual erhöhen (ersetzen von BatterieVoll!!)
@@ -188,7 +188,7 @@ if __name__ == '__main__':
                     # Bei Akkuschonung BattVollUm Verzögerung berechnen und anbringen.
                     # für Akkuschonung aus PV-Planung nicht erforderlich
                     Akkuschonung_Verzogerung = 0
-                    if Akkuschonung > 0:
+                    if Akkuschonung > 0 and (PrognoseLimit_SOC < 0 or PrognoseMorgen < PrognoseLimit_SOC):
                         Akkuschonung_Verzogerung = progladewert_inst.akkuschonung_verzoegerung(BattganzeKapazWatt, SOC_data, MaxLadung) 
                         BattVollUm = BattVollUm - Akkuschonung_Verzogerung
 

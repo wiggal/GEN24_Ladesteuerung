@@ -1,5 +1,6 @@
 **[0.42.1] – 2026-XX-XX**  
 - FIX: letzter Prognosewert wurde nicht um offset_minuten verschoben.  
+- FIX: Berechnung der Ladteleistung bei Begrenzung durch Akkuschohnung auf XX% SOC.  
 
 **[0.42.0] – 2026-04-28**  
 - Wallboxsteuerung: NextTrip mit notwendigen Anpassungen im Frontend hinzugefügt.  
