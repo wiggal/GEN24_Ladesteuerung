@@ -261,7 +261,7 @@ if __name__ == '__main__':
                             WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                             LadewertGrund = "BattStatusProz < MindBattLad"
     
-                    # Wenn Akkuschonung > 0 ab 80% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
+                    # Wenn Akkuschonung > 0 ab XX% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
                     if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
                         (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, 
                         WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, SOC_Proz_Grenze, AkkuschonungLadewert) = \
