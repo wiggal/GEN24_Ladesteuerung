@@ -303,36 +303,21 @@ class WeatherData:
                     gewicht = 0
                 stundenwerte[stunde].extend([wert] * gewicht)
 
-        # Berechnet das Maximum über alle Listen-Längen im Dictionary
-        if stundenwerte:
-            max_elemente = max(len(v) for v in stundenwerte.values())
-        else:
-            max_elemente = 0
-
         result = {}
         result_basis = {}
-
         for stunde in sorted(stundenwerte):
-            werte_liste = stundenwerte[stunde]
-
-            if werte_liste:
-                # 2. Auffüllen mit Nullen, bis max_elemente erreicht ist
-                # Dies stellt sicher, dass z.B. Ausreisser an den Rändern voll in die Mittelbildung eingehen.
-                fehlende_anzahl = max_elemente - len(werte_liste)
-                if fehlende_anzahl > 0:
-                    werte_liste.extend([0] * fehlende_anzahl)
-
+            if stundenwerte.get(stunde):
                 zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
 
                 # Statistische Auswertungen nach ForecastCalcMethod
                 if ( 'median' in ForecastCalcMethod):
-                    result[zeit_str] = int(median(werte_liste))
+                    result[zeit_str] = int(median(stundenwerte[stunde]))
                 elif ( 'mittel' in ForecastCalcMethod):
-                    result[zeit_str] = int(mean(werte_liste))
+                    result[zeit_str] = int(mean(stundenwerte[stunde]))
                 elif ( 'min' in ForecastCalcMethod):
-                    result[zeit_str] = int(min(werte_liste))
+                    result[zeit_str] = int(min(stundenwerte[stunde]))
                 elif ( 'max' in ForecastCalcMethod):
-                    result[zeit_str] = int(max(werte_liste))
+                    result[zeit_str] = int(max(stundenwerte[stunde]))
                 else:
                     print("ERROR: Es wurde keine zulässige ForecastCalcMethod gefunden!!!")
                     exit()
