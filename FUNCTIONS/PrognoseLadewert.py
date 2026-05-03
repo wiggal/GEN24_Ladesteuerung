@@ -190,7 +190,9 @@ class progladewert:
             # Wenn größter Prognosewert je Stunde ist kleiner als GrenzwertGroestePrognose volle Ladung
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
             GrenzwertGroestePrognose = basics.getVarConf('Ladeberechnung','GrenzwertGroestePrognose','eval')
-            if GrenzwertGroestePrognose > groestePrognose:
+            ZeitbisBattVollUm = BattVollUm - datetime.now().hour
+            # Nur bis 2 Stunden vor BattVollUm auf GrenzwertGroestePrognose pruefen
+            if GrenzwertGroestePrognose > groestePrognose and ZeitbisBattVollUm > 2:
                 aktuellerLadewert = self.MaxLadung
                 LadewertGrund = "Größter Prognosewert " + str(groestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
 
