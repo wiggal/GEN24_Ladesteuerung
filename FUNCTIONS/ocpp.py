@@ -133,6 +133,8 @@ class ChargePointState:
     last_energy_wh: Optional[float] = None
     phase_candidate: Optional[dict] = None
     lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False, compare=False)
+    last_meter_power_w: float = 0.0        # Istwert aus letztem MeterValues
+    last_meter_ts: Optional[datetime] = None  # Zeitstempel des letzten MeterValues
 
     def append_debug(self, message: dict):
         cdebug(f"[{self.log_cp_id}] {message}")
@@ -523,7 +525,6 @@ class OCPPManager:
 
         self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power)
         ueberschuss = int(max(0.0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower)))
-        #print("==>>>WIGGAL", self.max_leistung_ha, batterie_anteil)
 
         cinfo(f"[{'..' + cp_id[-4:]}] Ladeberechnung: "
             f"PV={self.Produktion:.0f} W, "
@@ -614,18 +615,25 @@ class OCPPManager:
     # ----------------------------
     # Aktuelle Leistung aus Store
     # ----------------------------
-    def get_current_power(self, cp_id: str) -> float:
+    def get_current_power_soll(self, cp_id: str) -> float:
+        """Sollwert: gesetztes Limit × Phasen × Spannung."""
         st = self.states.get(cp_id)
         if not st:
             return 0.0
-
         try:
-            curr = float(st.current_limit or 0.0)
-            phases = int(st.phase_limit or 0)
-            voltage = self._get_average_voltage(cp_id)  # statt fix 230V
-            return curr * phases * voltage
+            return float(st.current_limit or 0.0) * int(st.phase_limit or 0) * self._get_average_voltage(cp_id)
         except Exception:
             return 0.0
+
+    def get_current_power(self, cp_id: str) -> float:
+        """Istwert wenn vorhanden, sonst Sollwert — für interne Berechnungen (hausverbrauch etc.)."""
+        st = self.states.get(cp_id)
+        if not st:
+            return 0.0
+        if st.last_meter_ts is not None:
+            return st.last_meter_power_w
+        return self.get_current_power_soll(cp_id)
+
     # ----------------------------
     # Apply-Wallbox-Settings (Hauptlogik)
     # ----------------------------
@@ -922,7 +930,6 @@ class OCPPManager:
         st = self.states.get(cp_id)
         if not st:
             return
-        # st.charged_wh = 0.0   #Auf Null setzen nur beim Serverrestart  #entWIGGlung
         baseline = self._extract_energy_wh_from_meter_store(cp_id)
         st.last_energy_wh = baseline
         st.append_debug({"note": "start-transaction-setup", "baseline": baseline, "ts": iso_now()})
@@ -1080,17 +1087,19 @@ class OCPPManager:
             remaining_kwh = max(0.0, target_kwh - charged_wh / 1000.0)
         remaining_kwh_rounded = round(remaining_kwh, 4) if remaining_kwh is not None else None
 
-        # Hier rufen wir deine neuen Hilfsmethoden auf
-        current_power = self._extract_power_w_from_meter_store(cp_id) if cp_id else 0.0
+        # In meter_values():
+        power_ist  = self._extract_power_w_from_meter_store(cp_id) if cp_id else 0.0
+        power_soll = self.get_current_power_soll(cp_id) if cp_id else 0.0
+
         if st and st.status not in ["Charging", "SuspendedEV", "SuspendedEVSE"]:
-            current_power = 0.0
-        avg_voltage = self._get_average_voltage(cp_id) if cp_id else 230.0  #entWIGGlung
+            power_ist  = 0.0
+            power_soll = 0.0
 
         return web.json_response({
             "meter": st.meter_values if st else {},
             "status": st.status if st else "Unknown",
-            "power_w": current_power,       # Wirkleistung laut Wallbox
-            "avg_voltage": avg_voltage,     # Durchschnittliche Spannung (L1+L2+L3)/3  #entWIGGlung
+            "power_w_ist":  power_ist,   # gemessen via MeterValues
+            "power_w_soll": power_soll,  # current_limit × phases × voltage
             "pv_mode": self.wb_pv_mode,
             "current_limit": st.current_limit if st else None,
             "phases": st.phase_limit if st else None,

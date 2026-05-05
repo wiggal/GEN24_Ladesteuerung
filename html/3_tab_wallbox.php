@@ -398,27 +398,33 @@ $battery_current = round(($meter_values['Batteriebezug_W'] ?? 0) / 1000, 1);
 $grid_current    = round(($meter_values['Netzbezug_W'] ?? 0) / 1000, 1);
 $Hausverbrauch    = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
 
-// 2. Ladeleistung 
-// Wir nehmen den realen Messwert, filtern aber Standby-Rauschen unter 200W/0.2kW
-$car_power = round(($meter_values['power_w'] ?? 0) / 1000, 1);
+// 2. Ladeleistung — Ist- und Sollwert aus OCPP
+$car_power_ist  = round(($meter_values['power_w_ist']  ?? 0) / 1000, 1);
+$car_power_soll = round(($meter_values['power_w_soll'] ?? 0) / 1000, 1);
+
+// Quellbilanz: welcher Wert passt besser zur Inverter-Summe?
+$Q_sum      = $solar_current + max(0, $battery_current) + max(0, $grid_current);
+$in_battery = max(0, -$battery_current);
+$in_grid    = max(0, -$grid_current);
+$basis      = $Hausverbrauch + $in_battery + $in_grid;
+
+$abw_ist  = abs($Q_sum - ($basis + $car_power_ist));
+$abw_soll = abs($Q_sum - ($basis + $car_power_soll));
+
+$car_power = ($abw_ist <= $abw_soll) ? $car_power_ist : $car_power_soll;
 if ($car_power < 0.2) $car_power = 0;
 
-// 3. Plausibilitäts-Korrektur, Hausverbrauch immer darstellen
-// Falls die Wallbox-Daten hängen (alt/hoch) und die Erzeugung sinkt (neu/niedrig),
-// würde der Hausverbrauch negativ. Das korrigieren wir hier zugunsten der Anzeige.
-$Q_sum = $solar_current + $battery_current + $grid_current;
-if ($Hausverbrauch < 0.1) {
-    $Hausverbrauch = 0.2; // Mindestlast Haus (Kühlschrank/Standby)
-    // Wir passen die Car-Power an, damit die Bar optisch perfekt bleibt
-    if ($car_power > 0) {
-        $car_power = max(0, round($Q_sum - $Hausverbrauch, 1));
-    }
-}
+// 3. Hausverbrauch-Mindestlast
+if ($Hausverbrauch < 0.1) $Hausverbrauch = 0.2;
 
 // 4. Balkendiagramm generieren
-[ $html, $Q_final, $Z_final ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
+[ $html_neu, $Q_final, $Z_final ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
+$diff = abs($Q_final - $Z_final);
 
-echo $html; 
+// Differenz und neue Werte als data-Attribute ausgeben — JavaScript entscheidet anhand localStorage
+echo "<div id=\"loadbar-container\" data-diff=\"{$diff}\" data-html=\"" . htmlspecialchars($html_neu) . "\">";
+echo $html_neu;
+echo "</div>";
 ?>
 <div class="card">
     <div class="wallboxwerte">
@@ -903,6 +909,28 @@ function calculatePower() {
   });
 
 // ===================================
+// Ladebalken-Cache via localStorage
+// ===================================
+(function() {
+    var container = document.getElementById('loadbar-container');
+    if (!container) return;
+
+    var diff = parseFloat(container.dataset.diff);
+    var htmlNeu = container.dataset.html;
+
+    if (diff <= 0.3) {
+        // Plausibel → als letzten gültigen Stand speichern
+        localStorage.setItem('loadbar_cache', htmlNeu);
+    } else {
+        // Abweichung zu groß → gecachten Stand wiederherstellen
+        var cached = localStorage.getItem('loadbar_cache');
+        if (cached) {
+            container.innerHTML = cached;
+        }
+    }
+})();
+
+// ===================================
 // Einfaches Neuladen der Seite
 // ===================================
 function refreshData() {
@@ -922,7 +950,7 @@ function refreshData() {
 // Automatisches Neuladen
 // ===================================
 // Die benannte Funktion wird alle 20 Sekunden ausgeführt
-setInterval(refreshData, 20000); // 20000 ms = 20 Sekunden
+setInterval(refreshData, 15000); // 20000 ms = 20 Sekunden
 
 // ===================================
 // Zähler-Reset Logik 
