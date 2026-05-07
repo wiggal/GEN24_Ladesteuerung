@@ -135,6 +135,7 @@ class ChargePointState:
     lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False, compare=False)
     last_meter_power_w: float = 0.0        # Istwert aus letztem MeterValues
     last_meter_ts: Optional[datetime] = None  # Zeitstempel des letzten MeterValues
+    stop_pre_phase: Optional[int] = None   # Ursprüngliche Phase vor Stop-Delay (invertierte Phase aktiv)
 
     def append_debug(self, message: dict):
         cdebug(f"[{self.log_cp_id}] {message}")
@@ -773,6 +774,7 @@ class OCPPManager:
                 if not can_stop:
                     amp_allowed = amp_min or self.wb_amp_min
                     st.stop_candidate = None  # Stop-Guard aktiv → Hysterese zurücksetzen
+                    st.stop_pre_phase = None
                     st.append_debug({"note": "stop-guard-applied", "amp": amp_allowed, "ts": iso_now()})
                 else:
                     if active_tx_id and amp_allowed == 0.0:
@@ -789,11 +791,23 @@ class OCPPManager:
                                 if elapsed < self.PHASE_CHANGE_CONFIRM_S:
                                     remaining_s = int(self.PHASE_CHANGE_CONFIRM_S - elapsed)
                                     amp_allowed = amp_min or self.wb_amp_min
-                                    cinfo(f"[{st.log_cp_id}] Stop-Hysterese aktiv – noch {remaining_s}s warten vor Stopp")
+                                    cinfo(f"[{st.log_cp_id}] Stop-Hysterese aktiv – noch {remaining_s}s von {self.PHASE_CHANGE_CONFIRM_S}s warten vor Stopp")
                                     st.append_debug({"note": "stop-hysteresis-wait", "remaining_s": remaining_s, "ts": iso_now()})
+                                elif not st.stop_pre_phase:
+                                    # Hysterese bestätigt: Phase invertieren → triggert Phasenwechsel-Delay
+                                    cur_phase = st.phase_limit or 1
+                                    inv_phase = 3 if cur_phase == 1 else 1
+                                    st.stop_pre_phase = cur_phase
+                                    st.phase_candidate = {"requested": inv_phase, "since": datetime.now(), "stop_delay": True}
+                                    cinfo(f"[{st.log_cp_id}] Stop-Hysterese bestätigt – Phase {cur_phase}→{inv_phase} (Stop-Delay), warte einen Zyklus")
+                                    st.append_debug({"note": "stop-phase-invert", "from": cur_phase, "to": inv_phase, "ts": iso_now()})
+                                    # amp_allowed bleibt 0.0 → Phasenwechsel-Delay greift unten
                                 else:
+                                    # Zweiter Zyklus: Delay abgelaufen, Überschuss weiterhin zu niedrig → stoppen
                                     st.stop_candidate = None
-                                    cinfo(f"[{st.log_cp_id}] Stop-Hysterese bestätigt – stoppe Laden")
+                                    st.stop_pre_phase = None
+                                    st.phase_candidate = None
+                                    cinfo(f"[{st.log_cp_id}] Stop-Delay abgelaufen, Überschuss weiterhin zu niedrig – stoppe Laden")
                                     handler = ChargePointHandler(self, st)
                                     await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
                                     st.transaction_id = None
@@ -803,6 +817,7 @@ class OCPPManager:
                         else:
                             # PV-Mode=0 oder andere nicht-PV-Modi → sofort stoppen
                             st.stop_candidate = None
+                            st.stop_pre_phase = None
                             cinfo(f"[{st.log_cp_id}] Kein PV-Modus – stoppe sofort")
                             handler = ChargePointHandler(self, st)
                             await handler.send_call("RemoteStopTransaction", {"transactionId": active_tx_id})
@@ -812,6 +827,12 @@ class OCPPManager:
                             st.append_debug({"note": "remote-stop-sent", "ts": iso_now()})
                     elif active_tx_id:
                         # amp_allowed > 0 → Laden gewünscht, Stop-Kandidat zurücksetzen
+                        if st.stop_pre_phase:
+                            # Überschuss zurück während invertierter Phase aktiv → Originalphase wiederherstellen
+                            cinfo(f"[{st.log_cp_id}] Stop abgebrochen – Überschuss zurück, stelle Phase {st.stop_pre_phase} wieder her")
+                            st.append_debug({"note": "stop-aborted-restore-phase", "phase": st.stop_pre_phase, "ts": iso_now()})
+                            st.phase_candidate = {"requested": st.stop_pre_phase, "since": datetime.now()}
+                            st.stop_pre_phase = None
                         st.stop_candidate = None
                     elif status not in ["Available", "AvailableRequested"]:
                         st.stop_candidate = None
@@ -837,7 +858,7 @@ class OCPPManager:
             # ---------------------------
             amp_changed = abs((st.current_limit or 0.0) - amp_allowed) > 0.5
             candidate = st.phase_candidate
-            if candidate:
+            if candidate and not candidate.get('stop_delay'):
                 requested_p = candidate.get('requested')
                 current_p = st.phase_limit
                 if current_p is not None:
@@ -1077,8 +1098,9 @@ class OCPPManager:
 
         candidate_info = None
         if st and st.phase_candidate:
-            elapsed = (datetime.now() - st.phase_candidate['since']).total_seconds()
-            candidate_info = {"requested": st.phase_candidate['requested'], "since": st.phase_candidate['since'].isoformat(), "elapsed_s": round(elapsed, 1), "confirm_after_s": self.PHASE_CHANGE_CONFIRM_S}
+            since = st.phase_candidate.get('since')
+            elapsed = (datetime.now() - since).total_seconds() if since else 0.0
+            candidate_info = {"requested": st.phase_candidate['requested'], "since": since.isoformat() if since else None, "elapsed_s": round(elapsed, 1), "confirm_after_s": self.PHASE_CHANGE_CONFIRM_S}
 
         charged_wh = st.charged_wh if st else 0.0
         target_kwh = st.target_kwh if st else self.DEFAULT_TARGET_KWH
