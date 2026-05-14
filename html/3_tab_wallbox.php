@@ -138,7 +138,6 @@ $amp_options = $EV_Reservierung['1']['Options'] ?? '6,16';
 list($amp_min, $amp_max) = array_map('trim', explode(",", $amp_options . ","));
 
 // Neue Einstellungen ID=2
-$min_phase_duration_s = $EV_Reservierung['2']['Res_Feld1'] ?? 180;       // MIN_PHASE_DURATION_S
 $min_charge_duration_s = $EV_Reservierung['2']['Res_Feld2'] ?? 600;       // MIN_CHARGE_DURATION_S
 $auto_sync_interval   = $EV_Reservierung['2']['Options']    ?? 20;        // AUTO_SYNC_INTERVAL
 
@@ -551,10 +550,6 @@ echo "</div>";
             <span class="input-inline"><input id="autoSyncInterval" type="number" min="10" step="10" value="<?php echo htmlspecialchars($auto_sync_interval); ?>"></span>
         </div>
 
-        <div class="row">
-            <span class="label-inline">Phasen-Intervall(s) (DB=<?php echo htmlspecialchars($min_phase_duration_s); ?>):</span>
-            <span class="input-inline"><input id="minPhaseDur" type="number" min="60" step="60" value="<?php echo htmlspecialchars($min_phase_duration_s); ?>"></span>
-        </div>
 
         <div class="row">
             <span class="label-inline">Mindestladezeit(s) (DB=<?php echo htmlspecialchars($min_charge_duration_s); ?>):</span>
@@ -603,7 +598,7 @@ function loadFromLocalStorage(id) {
 
 $(document).ready(function(){
     // IDs, die wir im localStorage zwischenhalten möchten
-    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minPhaseDur','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh', 'MaxLeistHAkW'];
+    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh', 'MaxLeistHAkW'];
 
     // Load saved values
     ls_ids.forEach(function(id){ loadFromLocalStorage(id); });
@@ -818,7 +813,6 @@ function calculatePower() {
 
     // ID 2: Zeitintervalle
     var auto_sync_interval = $('#autoSyncInterval').val();
-    var min_phase_dur = $('#minPhaseDur').val();
     var min_charge_dur = $('#minChargeDur').val();
 
     // ID 3: Leistung & Target
@@ -848,7 +842,7 @@ function calculatePower() {
             // Zuordnung Res_Feld1
             Res_Feld1: [
                 pv_mode,           // ID 1
-                min_phase_dur,     // ID 2
+                0,                 // ID 2 (MIN_PHASE_DURATION_S entfernt)
                 residual_power,    // ID 3
                 lz_von,            // ID 4
                 s_preis            // ID 5
@@ -876,7 +870,7 @@ function calculatePower() {
             // LocalStorage aufräumen, damit beim Refresh die neuen DB-Werte geladen werden
             var ls_ids = [
                 'pvMode','phases','ampMin','ampMax','autoSyncInterval',
-                'minPhaseDur','minChargeDur','phaseChangeConfirm','residualPower',
+                'minChargeDur','phaseChangeConfirm','residualPower',
                 'defaultTargetKwh', 'ladezeitVon', 'ladezeitBis', 'strompreisFest', 'einspeiseVerg',
                 'MaxLeistHAkW'
             ];
