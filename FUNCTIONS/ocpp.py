@@ -728,6 +728,7 @@ class OCPPManager:
                 if not candidate or candidate.get('requested') != requested_phase:
                     st.phase_candidate = {'requested': requested_phase, 'since': now}
                     phase_changed = False
+                    cinfo(f"[{st.log_cp_id}] Phasenwechsel-Hysterese gestartet – warte {self.PHASE_CHANGE_CONFIRM_S}s vor Wechsel auf {requested_phase}P.")
                     st.append_debug({"note": "phase-hysteresis-start", "requested": requested_phase, "ts": iso_now()})
                 else:
                     elapsed = (now - candidate['since']).total_seconds()
