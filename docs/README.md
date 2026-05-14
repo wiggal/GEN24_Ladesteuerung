@@ -1,5 +1,5 @@
-
-## ☀️ GEN24_Ladesteuerung 🔋 
+![Logo](pics/Logo.png)
+## ⚡☀️ EnergyWIGGAL🔋🚘
 ## [📚 Wiki 📚](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 **Programmfunktionen:**  
@@ -46,7 +46,7 @@ Für eine manuelle Installation, bzw. genauere Installationshinweise im [Wiki](h
 
 ### 🌦️ Prognoseskripte in FORECAST
 
-Holen von den jeweiligen API-Urls die Prognosedaten, bereiten sie auf für GEN24_Ladesteuerung, und speichern Mittelwerte in weatherData.sqlite. 
+Holen von den jeweiligen API-Urls die Prognosedaten, bereiten sie auf für EnergyController24, und speichern Mittelwerte in weatherData.sqlite. 
 
 Besonderheiten:
 - Bei forecast.solar kann mit einem Account die Prognose mit den Werten der Produktion aus der DB angepasst werden.  
@@ -149,7 +149,7 @@ Eine [Beschreibung](../GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddat
 
 **News History:**  
 Ab Version: **0.38.1**  
-Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die GEN24_Ladesteuerung übergeben werden.  
+Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die EnergyController24 übergeben werden.  
 Ab Version: **0.38.0**  
 Update auf Firmware 1.38.6-1.  
 Ab Version: **0.31.0**  

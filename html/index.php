@@ -28,7 +28,7 @@ if (!isset($all_files[$activeTab])) {
 <meta charset="UTF-8">
 <title>PV_Planung</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="GEN24Ladesteuerung.png">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
 /* ===== BASIS & NAV-HÖHE ===== */
 /* ===== BASIS & NAV-STRUKTUR ===== */

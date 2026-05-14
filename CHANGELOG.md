@@ -1,8 +1,10 @@
 **[0.42.1] – 2026-XX-XX**  
+- Neues Logo `EnergyWIGGAL` eingebaut.  
 - FIX: letzter Prognosewert wurde nicht um offset_minuten verschoben.  
 - FIX: Berechnung der Ladeleistung bei Begrenzung durch Akkuschonung auf XX% SOC.  
 - Wallboxsteuerung: Darstellung des Energieflusses stabilisiert.  
-- OCPP-Server: Phasen-Delay auch bei erkanntem Ladestop im PV-Modus, durch zu wenig Überschuss, anwenden.  
+- OCPP-Server: Phasen-Delay auch bei erkanntem Ladestop im PV-Modus, durch zu wenig Überschuss, anwenden (Stop-Hysterese).  
+               Start-Hysterese mit einem Drittel des Phasen-Delay hinzugefügt.  
 
 **[0.42.0] – 2026-04-28**  
 - Wallboxsteuerung: NextTrip mit notwendigen Anpassungen im Frontend hinzugefügt.  
