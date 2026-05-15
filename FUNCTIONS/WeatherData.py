@@ -43,13 +43,12 @@ class WeatherData:
             """)
         print("DB",path,"wurde erstellt.")
 
+
     def apply_minute_offset(self, data, offset_minutes):
         if offset_minutes == 0 or not data:
             return data
 
         dt_format = "%Y-%m-%d %H:%M:%S"
-
-        # Daten in Dictionary laden für schnellen Zugriff
         time_map = {datetime.strptime(e[0], dt_format): e[2] for e in data}
 
         new_data = []
@@ -57,18 +56,19 @@ class WeatherData:
         for entry in data:
             target_dt = datetime.strptime(entry[0], dt_format)
 
-            # Erst Offset anwenden, dann die einrahmenden Stunden bestimmen
-            source_dt = target_dt + timedelta(minutes=offset_minutes)
+            # Wenn der ursprüngliche Wert 0 war → bleibt 0
+            if time_map.get(target_dt, 0) <= 50:
+                new_value = time_map.get(target_dt, 0)
+            else:
+                source_dt = target_dt + timedelta(minutes=offset_minutes)
+                hour_before_dt = source_dt.replace(minute=0, second=0, microsecond=0)
+                hour_after_dt = hour_before_dt + timedelta(hours=1)
 
-            hour_before_dt = source_dt.replace(minute=0, second=0, microsecond=0)
-            hour_after_dt = hour_before_dt + timedelta(hours=1)
+                val_before = time_map.get(hour_before_dt, 0)
+                val_after = time_map.get(hour_after_dt, 0)
 
-            val_before = time_map.get(hour_before_dt, 0)
-            val_after = time_map.get(hour_after_dt, 0)
-
-            # Interpolation basierend auf source_dt (nach Offset)
-            frac = (source_dt - hour_before_dt).total_seconds() / 3600.0
-            new_value = val_before + (val_after - val_before) * frac
+                frac = (source_dt - hour_before_dt).total_seconds() / 3600.0
+                new_value = val_before + (val_after - val_before) * frac
 
             new_data.append((
                 entry[0],

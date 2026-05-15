@@ -1,4 +1,6 @@
-**[0.42.1] – 2026-05.14**  
+**[0.42.2] – 2026-XX-XX**  
+
+**[0.42.1] – 2026-05-14**  
 - Neues Logo `EnergyWIGGAL` eingebaut.  
 - FIX: letzter Prognosewert wurde nicht um offset_minuten verschoben.  
 - FIX: Berechnung der Ladeleistung bei Begrenzung durch Akkuschonung auf XX% SOC.  
