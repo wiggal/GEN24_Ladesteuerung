@@ -104,8 +104,15 @@ require_once "config_parser.php";
 <div id="top"><div>
 <?php
 // --- Datei auswählen ---
-$file_name = isset($_REQUEST['log_file']) ? basename($_REQUEST['log_file']) : 'Crontab.log';
-$file = $PythonDIR . '/' . $file_name;
+$log_file_param = isset($_REQUEST['log_file']) ? $_REQUEST['log_file'] : 'Crontab.log';
+// Absoluten Pfad direkt verwenden, sonst relativ zu PythonDIR
+if (strpos($log_file_param, '/') === 0) {
+    $file = $log_file_param;
+    $file_name = basename($log_file_param);
+} else {
+    $file_name = basename($log_file_param);
+    $file = $PythonDIR . '/' . $file_name;
+}
 if(!file_exists($file)) {
   die("Datei ". $file ." ist nicht vorhanden!");
 } else {
@@ -115,14 +122,19 @@ if(!file_exists($file)) {
 // --- Logdateien im Verzeichnis auslesen ---
 $logFiles = glob($PythonDIR . '/*.log');
 
+// --- /tmp/ocpp.log ergänzen wenn vorhanden ---
+if (file_exists('/tmp/ocpp.log')) {
+    $logFiles[] = '/tmp/ocpp.log';
+}
+
 // --- Tabelle mit Download-Symbol & Anzeige-Link ---
 echo '<div class="download">';
 echo '<table>';
 foreach ($logFiles as $log) {
     $basename = basename($log);
-    $nameWithoutExt = preg_replace('/\.log$/', '', $basename); // ".log" entfernen
+    $nameWithoutExt = preg_replace('/\.log$/', '', $basename);
     $downloadLink = '5_download_log.php?log_file=' . urlencode($log);
-    $viewLink = '?log_file=' . urlencode($basename);
+    $viewLink = '?log_file=' . urlencode($log);
 
     echo '<tr>';
     echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '&tab=' . $activeTab . '">' . htmlspecialchars($nameWithoutExt) . '</a></td>';
@@ -139,6 +151,7 @@ echo '<br>';
 
 $Ausgabe = 0;
 $datum = date("Y-m-d", time());
+$datum_kurz = date("m-d", time());
 
 $case = '';
 if (isset($_POST["case"])) $case = $_POST["case"];
@@ -148,22 +161,31 @@ $TAGE = 'aus';
 if (isset($_POST["TAGE"])) $TAGE = $_POST["TAGE"];
 if($TAGE == 'ein') $Ausgabe = 1;
 
+$suchstring_anzeige = isset($_POST["suchstring"]) ? htmlspecialchars($_POST["suchstring"]) : 'geschrieben';
+echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<input type="hidden" name="log_file" value="'.$file.'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
+echo '<input type="hidden" name="case" value="filter">'."\n";
+echo '<label class="checkbox"><input type="checkbox" name="DEBUG" value="ein"' . ($DEBUG == 'ein' ? ' checked' : '') . '> DEBUG-Zeilen anzeigen</label>';
+echo "\n";
+echo '<label class="checkbox"><input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '> Alle Tage anzeigen</label>';
+echo "\n";
+echo '<input type="input" name="suchstring" value="'.$suchstring_anzeige.'" size="10">'."\n";
+echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
+echo '</form>'."\n";
+echo '</div>';
+echo '<br><br><br><br><br><br><br><br>';
+
 switch ($case) {
     case '':
-    echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-    echo '<input type="hidden" name="log_file" value="'.$file_name.'">'."\n";
-    echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
-    echo '<input type="hidden" name="case" value="filter">'."\n";
-    echo '<input type="input" name="suchstring" value="geschrieben" size="10">'."\n";
-    echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
-    echo '</form>'."\n";
-    echo '</div>';
-    echo '<br><br><br><br><br><br><br><br>';
 
     # AUSGEBEN DER Crontab.log von Heute
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
-        if (strpos($Zeile, 'BEGINN') !== false && strpos($Zeile, $datum) !== false) $Ausgabe = 1;
+        // Datum am Zeilenanfang erkennen: mm-dd HH:MM:SS oder BEGINN mit Datum
+        if (strpos($Zeile, 'BEGINN') !== false && (strpos($Zeile, $datum) !== false || strpos($Zeile, $datum_kurz) !== false)) $Ausgabe = 1;
+        if (preg_match('/^(\d{2}-\d{2}) \d{2}:\d{2}:\d{2}/', $Zeile, $m) && ($m[1] === $datum_kurz)) $Ausgabe = 1;
+        if ($TAGE == 'ein') $Ausgabe = 1;
         if ($Ausgabe == 1) {
             // DEBUG ausblenden
             if ($DEBUG == "aus") {
@@ -195,22 +217,40 @@ switch ($case) {
     case 'filter':
     $suchstring = '';
     if (isset($_POST["suchstring"])) $suchstring = $_POST["suchstring"];
-    echo '</div>';
-    echo '<br><br><br><br><br><br><br><br>';
+    $BEGIN_DATUM = '';
+    $BEGIN_UHRZEIT = '';
     # Ausgabe der gesuchten Zeile mit Datumszeile 
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
-        if (strpos($Zeile, 'BEGINN') !== false && strpos($Zeile, $datum) !== false) $Ausgabe = 1;
-        if ($Ausgabe == 1) {
-            if (strpos($Zeile, 'BEGINN') !== false) {
-                $BEGIN_DATE = explode(" ", $Zeile);
-                $BEGIN_TIME = explode(":", $BEGIN_DATE[4]);
+        // Datum/Zeit aus Zeilenanfang lesen: mm-dd HH:MM:SS
+        if (preg_match('/^(\d{2}-\d{2}) (\d{2}:\d{2}):\d{2}/', $Zeile, $m)) {
+            $zeile_datum = $m[1];
+            $zeile_uhrzeit = $m[2];
+            if ($TAGE == 'ein' || $zeile_datum === $datum_kurz) {
+                $Ausgabe = 1;
+                $BEGIN_DATUM = $zeile_datum;
+                $BEGIN_UHRZEIT = $zeile_uhrzeit;
             }
-            if (strpos($Zeile, $suchstring) !== false) {
-                echo $BEGIN_TIME[0] . ":" . $BEGIN_TIME[1] . " " . $BEGIN_DATE[3] . "<br>" .  $Zeile . "<br><br>";
+        }
+        // Fallback: BEGINN-Zeilen wie bisher
+        if (strpos($Zeile, 'BEGINN') !== false) {
+            if ($TAGE == 'ein' || strpos($Zeile, $datum) !== false || strpos($Zeile, $datum_kurz) !== false) {
+                $Ausgabe = 1;
+                $tmp = explode(" ", $Zeile);
+                $BEGIN_DATUM = $tmp[3] ?? '';
+                $BEGIN_UHRZEIT = isset($tmp[4]) ? substr($tmp[4], 0, 5) : '';
+            }
+        }
+        if ($Ausgabe == 1) {
+            if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . $suchstring . '/', $Zeile)) {
+                if ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '') {
+                    echo $BEGIN_UHRZEIT . " " . $BEGIN_DATUM . "<br>";
+                }
+                echo $Zeile . "<br>";
             }
         }
     }
+    echo "<br><br>";
     break;
 }
 echo '<br><br><br><br><br><div id="bottom">';
@@ -219,14 +259,14 @@ echo '<a class="ende" name="bottom" href="#top">An den Anfang springen!</a><br>'
 echo "\n";
 echo '<form method="post" action="#bottom" enctype="multipart/form-data">';
 echo '<label class="checkbox">';
-echo '<input type="checkbox" name="DEBUG" value="ein"> DEBUG-Zeilen anzeigen';
+echo '<input type="checkbox" name="DEBUG" value="ein"' . ($DEBUG == 'ein' ? ' checked' : '') . '> DEBUG-Zeilen anzeigen';
 echo '</label>';
 echo "\n";
 echo '<label class="checkbox">';
-echo '<input type="checkbox" name="TAGE" value="ein"> Alle Tage anzeigen';
+echo '<input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '> Alle Tage anzeigen';
 echo '</label>';
 echo "\n";
-echo '<input type="hidden" name="log_file" value="'.$file_name.'">'."\n";
+echo '<input type="hidden" name="log_file" value="'.$file.'">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<button type="submit">Neu laden</button>';
 echo '</form><br>';
