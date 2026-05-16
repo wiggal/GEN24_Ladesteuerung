@@ -1,4 +1,5 @@
 **[0.42.2] – 2026-XX-XX**  
+- TAB Logfiles: Auch Logfile des OCPP_Servers (/tmp/ocpp.log) anzeigen, wenn vorhanden.  
 
 **[0.42.1] – 2026-05-14**  
 - Neues Logo `EnergyWIGGAL` eingebaut.  

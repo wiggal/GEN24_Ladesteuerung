@@ -162,13 +162,12 @@ if (isset($_POST["TAGE"])) $TAGE = $_POST["TAGE"];
 if($TAGE == 'ein') $Ausgabe = 1;
 
 $suchstring_anzeige = isset($_POST["suchstring"]) ? htmlspecialchars($_POST["suchstring"]) : 'geschrieben';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form id="filterform" method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="log_file" value="'.$file.'">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="case" value="filter">'."\n";
-echo '<label class="checkbox"><input type="checkbox" name="DEBUG" value="ein"' . ($DEBUG == 'ein' ? ' checked' : '') . '> DEBUG-Zeilen anzeigen</label>';
-echo "\n";
-echo '<label class="checkbox"><input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '> Alle Tage anzeigen</label>';
+echo '<label style="display:none"><input type="checkbox" name="DEBUG" value="ein"' . ($DEBUG == 'ein' ? ' checked' : '') . '></label>';
+echo '<label style="display:none"><input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '></label>';
 echo "\n";
 echo '<input type="input" name="suchstring" value="'.$suchstring_anzeige.'" size="10">'."\n";
 echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
@@ -243,7 +242,8 @@ switch ($case) {
         }
         if ($Ausgabe == 1) {
             if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . $suchstring . '/', $Zeile)) {
-                if ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '') {
+                $hatEigeneDatumzeile = preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $Zeile);
+                if (!$hatEigeneDatumzeile && ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '')) {
                     echo $BEGIN_UHRZEIT . " " . $BEGIN_DATUM . "<br>";
                 }
                 echo $Zeile . "<br>";
@@ -277,6 +277,19 @@ echo '</div>';
 document.addEventListener('DOMContentLoaded', function () {
     if (location.hash !== '#bottom') {
         location.hash = '#bottom';
+    }
+
+    // Beim Filtern: Checkbox-Zustand aus bottom-bar ins Filter-Formular übernehmen
+    var filterForm = document.getElementById('filterform');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function () {
+            var debugCb    = document.querySelector('.bottom-bar input[name="DEBUG"]');
+            var tageCb     = document.querySelector('.bottom-bar input[name="TAGE"]');
+            var hiddenDebug = filterForm.querySelector('input[name="DEBUG"]');
+            var hiddenTage  = filterForm.querySelector('input[name="TAGE"]');
+            if (debugCb && hiddenDebug) hiddenDebug.checked = debugCb.checked;
+            if (tageCb  && hiddenTage)  hiddenTage.checked  = tageCb.checked;
+        });
     }
 });
 </script>
