@@ -138,7 +138,7 @@ class ChargePointState:
     stop_candidate: Optional[datetime] = None  # Zeitpunkt ab dem Überschuss < Minimum anliegt (Stop-Hysterese)
     stop_pre_phase: Optional[int] = None        # Ursprüngliche Phase vor Stop-Delay (invertierte Phase aktiv)
     start_candidate: Optional[datetime] = None  # Zeitpunkt ab dem Überschuss >= 6A anliegt (Start-Hysterese)
-    just_plugged: bool = False                   # True: Fahrzeug gerade frisch angesteckt → Start-Hysterese überspringen
+    just_plugged: Optional[datetime] = None      # Zeitstempel des Ansteckens – Start-Hysterese überspringen (verfällt nach JUST_PLUGGED_GRACE_S)
     prev_pv_mode: Optional[float] = None         # PV-Modus des letzten Zyklus – Wechsel von 0/inaktiv → aktiv überspringt Start-Hysterese
 
     def __getattr__(self, name: str):
@@ -259,7 +259,7 @@ class ChargePointHandler:
                 # Fahrzeug frisch angesteckt → Start-Hysterese zurücksetzen (sofort starten wenn Überschuss da)
                 if new_status in ["SuspendedEVSE", "Preparing"] and old_status in ["Available", "AvailableRequested", None]:
                     self.state.start_candidate = None
-                    self.state.just_plugged = True
+                    self.state.just_plugged = datetime.now()
                     cinfo(f"[{self.state.log_cp_id}] Fahrzeug angesteckt ({new_status}) – Start-Hysterese deaktiviert")
                     self.state.append_debug({"note": "start-candidate-reset-on-plug", "ts": iso_now()})
             elif action == "MeterValues":
@@ -697,7 +697,7 @@ class OCPPManager:
             pv_mode_activated = (prev_pv is not None) and (prev_pv == 0.0) and (pv_mode != 0.0)
             if pv_mode_activated:
                 st.start_candidate = None
-                st.just_plugged = True
+                st.just_plugged = datetime.now()
                 cinfo(f"[{st.log_cp_id}] PV-Modus aktiviert ({prev_pv}→{pv_mode}) – Start-Hysterese übersprungen")
                 st.append_debug({"note": "start-hysteresis-skip-pv-activated", "prev": prev_pv, "now": pv_mode, "ts": iso_now()})
             st.prev_pv_mode = pv_mode
@@ -786,8 +786,15 @@ class OCPPManager:
                     # – außer Fahrzeug wurde gerade erst angesteckt
                     start_confirm_s = self.PHASE_CHANGE_CONFIRM_S // 3
                     now = datetime.now()
-                    if st.just_plugged:
-                        st.just_plugged = False
+                    JUST_PLUGGED_GRACE_S = 120
+                    just_plugged_active = (
+                        st.just_plugged is not None and
+                        (datetime.now() - st.just_plugged).total_seconds() < JUST_PLUGGED_GRACE_S
+                    )
+                    if not just_plugged_active and st.just_plugged is not None:
+                        st.just_plugged = None  # Grace-Period abgelaufen – normales Verhalten
+                    if just_plugged_active:
+                        st.just_plugged = None
                         st.start_candidate = None
                         # Sofort starten – kein Warten
                         handler = ChargePointHandler(self, st)
