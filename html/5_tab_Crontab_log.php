@@ -191,7 +191,8 @@ switch ($case) {
                 if (
                 preg_match('/^\s*DEBUG/', $Zeile) ||
                 preg_match('/^\s*>> /', $Zeile) ||
-                preg_match('/^\s*\+\+ /', $Zeile)
+                preg_match('/^\s*\+\+ /', $Zeile) ||
+                preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2} 🐞DEBUG/', $Zeile)
                 ) {
                     continue;
                 }
