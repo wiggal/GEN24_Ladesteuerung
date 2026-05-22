@@ -671,7 +671,7 @@ class OCPPManager:
             plugged_states = ["Preparing", "Charging", "SuspendedEV", "SuspendedEVSE", "Finishing",
                               "ChargingRequested", "AvailableRequested"]
             if st.status not in plugged_states and not st.transaction_id:
-                cdebug(f"[{st.log_cp_id}] Kein Fahrzeug angesteckt (Status={st.status}) – keine Werte gesendet")
+                cinfo(f"[{st.log_cp_id}] Kein Fahrzeug angesteckt (Status={st.status}) – keine Werte gesendet")
                 return False
             # ---------------------------------------------------
 
