@@ -141,12 +141,16 @@
         wie viele der letzten Tage erhalten bleiben sollen. Wird die
         Anzahl der Tage auf 0 gestellt, werden die gesamten Daten der
         gewählten Quellen gelöscht.<br>
-        <br>
         <font size="+1"><b>ACHTUNG:</b></font> Während gelöschte
         Berechnungen beim nächsten Skriptaufruf wieder erzeugt werden,
         können historische Prognosedaten <b>NICHT</b> wieder erzeugt
         werden. Deshalb ist beim Löschen der Daten besondere Vorsicht
         geboten. </li>
+        <br>
+      <li> Die Prognose kann per API aus der Datenbank ausgelesen werden, 
+      um sie in einer anderen Anwendung (z.B. HA) einbinden zu können.<br>
+      Der Aufruf IP-raspberrypi:2424/API_forecast.php liefert ein JSON-Format wie von api.forecast.solar.
+      </li>
     </ul>
   </body>
 </html>
