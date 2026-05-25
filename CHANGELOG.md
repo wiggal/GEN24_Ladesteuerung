@@ -1,5 +1,6 @@
-**[0.42.2] – 2026-XX-XX**  
+**[0.42.2] – 2026-05-25**  
 - TAB Logfiles: Auch Logfile des OCPP_Servers (/tmp/ocpp.log) anzeigen, wenn vorhanden.  
+- Wallboxsteuerung: Hysterese-Optimierung beim Start.
 - NEU: Der Aufruf `IP_zur_ladesteuerung:2424/API_forecast.php` liefert die berechneten Prognosedaten 
   im JSON-Format von api.forecast.solar um sie in anderen Anwendungen (z.B. HA) einbinden zu können.
 
