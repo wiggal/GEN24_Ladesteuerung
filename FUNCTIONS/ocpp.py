@@ -738,7 +738,10 @@ class OCPPManager:
                         st.append_debug({"note": "phase-hysteresis-confirmed", "requested": requested_phase, "ts": iso_now()})
                     else:
                         remaining_s = int(self.PHASE_CHANGE_CONFIRM_S - elapsed)
-                        cinfo(f"[{st.log_cp_id}] Phasenwechsel-Hysterese aktiv – noch {remaining_s}s / {self.PHASE_CHANGE_CONFIRM_S}s warten.")
+                        # Log unterdrücken während Start-Hysterese aktiv ist – sonst erscheint
+                        # "warte noch Xs" in jedem Zyklus inkl. dem in dem der Start feuert (irreführend).
+                        if st.start_candidate is None:
+                            cinfo(f"[{st.log_cp_id}] Phasenwechsel-Hysterese aktiv – noch {remaining_s}s / {self.PHASE_CHANGE_CONFIRM_S}s warten.")
                         phase_changed = False
             else:
                 # cleanup if not relevant – aber stop_delay-Kandidaten (Phase-Invert beim Stopp) niemals löschen.
@@ -830,6 +833,15 @@ class OCPPManager:
                             st.status = "ChargingRequested"
                             if not st.transaction_start:
                                 st.transaction_start = datetime.now()
+                            # Zielphase beim Start direkt übernehmen – andernfalls würde im ersten
+                            # Folgezyklus final_phase = st.phase_limit (alte Phase) verwendet und
+                            # ein SetChargingProfile mit falscher Phase gesendet.
+                            # Phasenwechsel-Hysterese ebenfalls verwerfen: sie wurde vor dem Stop
+                            # gestartet und ist für die neue Transaktion nicht mehr relevant.
+                            st.phase_limit = requested_phase
+                            if st.phase_candidate and not st.phase_candidate.get("stop_delay"):
+                                st.phase_candidate = None
+                                st.append_debug({"note": "phase-candidate-cleared-on-start", "ts": iso_now()})
                             st.append_debug({"note": "start-requested", "amp": amp_allowed, "ts": iso_now()})
                 else:
                     # Transaktion läuft bereits → start_candidate zurücksetzen
@@ -983,14 +995,21 @@ class OCPPManager:
                             amp_allowed = 16.0
                             amp_changed = False
                     elif requested_p < current_p and amp_allowed != 6.0:
-                        if st.current_limit != 6.0:
-                            st.append_debug({"note": "phase-down-temporary-6", "ts": iso_now()})
-                            amp_allowed = 6.0
-                            amp_changed = True
-                        else:
-                            # bereits 6A gesetzt – kein erneutes Senden
-                            amp_allowed = 6.0
-                            amp_changed = False
+                        # Temporäres 6A-Limit nur wenn Transaktion läuft UND bereits aktiv geladen wird
+                        # (current_limit > 0). Bei current_limit == 0.0 ist die Transaktion frisch
+                        # gestartet ohne bisher gesetztes Profil – in diesem Fall direkt mit dem
+                        # tatsächlichen Überschuss-Strom auf der Zielphase starten.
+                        already_charging = active_tx_id and (st.current_limit or 0.0) > 0.0
+                        if already_charging:
+                            if st.current_limit != 6.0:
+                                st.append_debug({"note": "phase-down-temporary-6", "ts": iso_now()})
+                                amp_allowed = 6.0
+                                amp_changed = True
+                            else:
+                                # bereits 6A gesetzt – kein erneutes Senden
+                                amp_allowed = 6.0
+                                amp_changed = False
+                        # else: kein Eingriff – amp_allowed bleibt beim berechneten Überschuss-Wert
                 if amp_changed and (amp_allowed not in [6.0, 16.0]):
                     st.append_debug({"note": "amp-update-blocked-by-hysteresis", "ts": iso_now()})
                     amp_changed = False
