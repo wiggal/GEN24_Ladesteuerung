@@ -161,7 +161,11 @@ $TAGE = 'aus';
 if (isset($_POST["TAGE"])) $TAGE = $_POST["TAGE"];
 if($TAGE == 'ein') $Ausgabe = 1;
 
-$suchstring_anzeige = isset($_POST["suchstring"]) ? htmlspecialchars($_POST["suchstring"]) : 'geschrieben';
+if (!empty($_POST['suchstring'])) {
+    $suchstring_anzeige = htmlspecialchars($_POST['suchstring']);
+} else {
+    $suchstring_anzeige = htmlspecialchars($_POST['letzte_suche'] ?? 'geschrieben');
+}
 echo '<form id="filterform" method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 echo '<input type="hidden" name="log_file" value="'.$file.'">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
@@ -169,7 +173,8 @@ echo '<input type="hidden" name="case" value="filter">'."\n";
 echo '<label style="display:none"><input type="checkbox" name="DEBUG" value="ein"' . ($DEBUG == 'ein' ? ' checked' : '') . '></label>';
 echo '<label style="display:none"><input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '></label>';
 echo "\n";
-echo '<input type="input" name="suchstring" value="'.$suchstring_anzeige.'" size="10">'."\n";
+echo '<input type="hidden" name="letzte_suche" value="'.$suchstring_anzeige.'">'."\n";
+echo '<input type="input" name="suchstring" placeholder="'.$suchstring_anzeige.'" size="10">'."\n";
 echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
 echo '</form>'."\n";
 echo '</div>';
@@ -216,7 +221,7 @@ switch ($case) {
 
     case 'filter':
     $suchstring = '';
-    if (isset($_POST["suchstring"])) $suchstring = $_POST["suchstring"];
+    $suchstring = trim($_POST["suchstring"] ?? '') ?: 'geschrieben';
     $BEGIN_DATUM = '';
     $BEGIN_UHRZEIT = '';
     # Ausgabe der gesuchten Zeile mit Datumszeile 
