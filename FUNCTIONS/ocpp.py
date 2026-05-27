@@ -786,7 +786,7 @@ class OCPPManager:
                     st.append_debug({"note": "stop-candidate-reset-on-surplus", "amp": amp_allowed, "ts": iso_now()})
                 if status in ["Available", "AvailableRequested", "SuspendedEVSE", "Finishing"] and not active_tx_id:
                     # Start-Hysterese: kurze PV-Spitzen nicht sofort starten
-                    # – außer Fahrzeug wurde gerade erst angesteckt
+                    # – außer Fahrzeug wurde gerade erst angesteckt ODER kein PV-Modus aktiv
                     start_confirm_s = self.PHASE_CHANGE_CONFIRM_S // 3
                     now = datetime.now()
                     JUST_PLUGGED_GRACE_S = 120
@@ -796,16 +796,17 @@ class OCPPManager:
                     )
                     if not just_plugged_active and st.just_plugged is not None:
                         st.just_plugged = None  # Grace-Period abgelaufen – normales Verhalten
-                    if just_plugged_active:
+                    if just_plugged_active or not is_pv_controlled:
                         st.just_plugged = None
                         st.start_candidate = None
-                        # Sofort starten – kein Warten
+                        # Sofort starten – kein Warten (just_plugged oder nicht PV-gesteuert)
                         handler = ChargePointHandler(self, st)
                         await handler.send_call("RemoteStartTransaction", {"connectorId": DEFAULT_CONNECTOR_ID, "idTag": DEFAULT_IDTAG})
                         st.status = "ChargingRequested"
                         if not st.transaction_start:
                             st.transaction_start = datetime.now()
-                        st.append_debug({"note": "start-requested-just-plugged", "amp": amp_allowed, "ts": iso_now()})
+                        note = "start-requested-just-plugged" if just_plugged_active else "start-requested-no-pv-mode"
+                        st.append_debug({"note": note, "amp": amp_allowed, "ts": iso_now()})
                     elif st.start_candidate is None:
                         st.start_candidate = now
                         cinfo(f"[{st.log_cp_id}] Start-Hysterese gestartet – warte {start_confirm_s}s vor Start ({amp_allowed}A)")
