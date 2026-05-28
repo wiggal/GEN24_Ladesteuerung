@@ -3,14 +3,13 @@
 ## [📚 Wiki 📚](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 **Programmfunktionen:**  
-- Prognosebasierte Ladesteuerung für  Fronius Symo GEN24 Plus um eine Einspeisebegrenzung (bei mir 70%) zu umgehen,
-und eine Produktion über der AC-Ausgangsleistungsgrenze des WR als DC in die Batterie zu laden.  
-Über die Tabelle [Ladesteuerung](#batterieladesteuerung) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden.  
-- [Entladesteuerung,](#batterieentladesteuerung) um die Entladung der Batterie bei großen Verbräuchen zu steuern.  
-- [Logging](#-logging) und grafische Darstellung von Produktion und Verbrauch.  
+- Prognose basierte Ladesteuerung für Fronius Symo GEN24 Plus und Verto, um eine Einspeisebegrenzung (bei mir 70%) zu umgehen und den Akku schonend zu laden.
+- Über die Tabelle [Ladesteuerung](#batterieladesteuerung) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt werden und Ladeleistungen manuell eingestellt werden.
+- Über die Tabelle [Entladesteuerung,](#batterieentladesteuerung)kann die Entladung bzw. Zwangsladung des Akkus gesteuert werden. Auch automatisch mit dynamischen Strompreisen.
+- [Logging](#-logging) und grafische Darstellung von Prognoseberechnung, Strompreise und QZ-Bilanz (Produktion und Verbrauch).
 - Akkuschonung: Um einen LFP-Akku zu schonen, kann die Ladeleistung z.B. ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt werden. Es ist auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
 - [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden, mit grafischer Darstellung.  
-- **NEU:** 🚘 [Steuerung des Wattpiloten](#-wallboxsteuerung), über OCPP.  
+- [Ladesteuerung des Wattpiloten](#-wallboxsteuerung), für E-Autos 🚘 über OCPP.
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 - [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
