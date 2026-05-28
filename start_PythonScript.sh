@@ -9,7 +9,6 @@ LOGFILE="Crontab.log"
 
 # WICHTIG: Verwende die vom Frontend erwartete PID-Datei für die Zustandsprüfung
 OCPP_PID_FILE="/tmp/ocpp_server.pid"
-OCPP_LOG_FILE="/tmp/ocpp.log" 
 
 # --- 2. Konfiguration aus default.ini/default_priv.ini parsen ---
 
@@ -86,7 +85,7 @@ if [[ "$Wallboxsteuerung" -eq 1 ]]; then
         cd "$GEN24_Pfad" || { echo "$(date) Fehler: Konnte nicht in das Hauptverzeichnis für OCPP wechseln." >> "${GEN24_Pfad}/${LOGFILE}"; exit 1; }
 
         # Starte den Python-Server und speichere die PID in der GEMEINSAMEN Datei
-        PID=$(nohup /usr/bin/python3 -u ocpp_server.py > "$OCPP_LOG_FILE" 2>&1 & echo $!)
+        PID=$(nohup /usr/bin/python3 -u ocpp_server.py 2>&1 & echo $!)
         
         if [[ -n "$PID" ]]; then
             echo "$PID" > "$OCPP_PID_FILE"

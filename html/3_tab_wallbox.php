@@ -10,7 +10,7 @@ $server_ip = $_SERVER['HTTP_HOST'];
 $server_ip = explode(':', $server_ip)[0];
 $API = "http://" . $server_ip . ":8886";
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
-$PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 & echo $!";
+$PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py 2>&1 & echo $!";
 
 include 'SQL_steuerfunctions.php';
 require_once '3_funktion_wallbox.php';
@@ -385,7 +385,7 @@ p, label {
             <form method="post">
             <input type="hidden" name="action" value="start_server">
             <input type="hidden" name="tab" value="Wallbox">
-            <button class="ocpp green" id="btnStartServer">Server starten</button></form>
+            <button class="ocpp green" id="btnStartServer" onclick="this.disabled=true;this.textContent='Server startet…';this.form.submit();">Server starten</button></form>
         <?php endif; ?>
     </div>
 </div>
