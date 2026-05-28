@@ -1,5 +1,5 @@
-**[0.42.3] – 2026-XX-XX**  
-- Logfilei-Rotation von /tmp/ocpp.log des OCPP-Servers.  
+**[0.42.3] – 2026-05-28**  
+- Logfile-Rotation von /tmp/ocpp.log des OCPP-Servers.  
 
 **[0.42.2] – 2026-05-25**  
 - TAB Logfiles: Auch Logfile des OCPP_Servers (/tmp/ocpp.log) anzeigen, wenn vorhanden.  
