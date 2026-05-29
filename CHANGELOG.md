@@ -1,3 +1,5 @@
+**[0.42.4] – 2026-XX-XX**  
+
 **[0.42.3] – 2026-05-28**  
 - Logfile-Rotation von /tmp/ocpp.log des OCPP-Servers.  
 
