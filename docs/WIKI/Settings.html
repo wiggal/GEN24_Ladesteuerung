@@ -13,6 +13,7 @@
   </style>
   </head>
   <body lang="de-DE">
+    <div class="weatherDataManager"> <a href="#Scheduler"><b>Hilfe Scheduler</b></a></div>
     <!--HIERZURUECK-->
     <br>
     <center>
@@ -115,5 +116,28 @@
         </tbody>
       </table>
     </center>
+    <br> <br>
+    <hr width="100%" size="2">
+
+    <div style="text-align:center;">
+    <div style="display:inline-block; text-align:left;">
+
+        <h2 style="text-align:center;">
+            <a name="Scheduler"></a>
+            Scheduler =&gt; ⏱ CronJob-Verwaltung
+        </h2>
+
+        Der Datenbankscheduler, der per Cronjob jede Minute aufgerufen wird,
+        <br>(<code>* * * * * /usr/bin/python /home/GEN24/db_scheduler.py</code>)
+        <br>liest die in der CronJob-Verwaltung eingetragenen Jobs und führt die fälligen aus.
+        <br><br>
+
+        In der ⏱ CronJob-Verwaltung können die benötigten CronJobs
+        <br>eingetragen, geändert, aktiviert, deaktiviert und gelöscht werden.
+
+    </div>
+    </div>
+    <br> <br> <br> <br>
+
   </body>
 </html>

@@ -14,7 +14,7 @@
             <div class="markdown-body">
               <p>(<strong>ACHTUNG:</strong> Die Beschreibung kann in
                 Einzelpunkten abweichend sein.)<br>
-                Stand 19.01.2026</p>
+                Stand 30.05.2026</p>
               <h1 class="heading-element">💾 Installation
                 GEN24_Ladesteuerung auf einem RaspberryPi</h1>
             </div>
@@ -53,140 +53,9 @@
     </ul>
     <h2 class="heading-element">Automatische Installation bzw. Update:</h2>
     <p>Nach einem Download und dem Ausführen von <code>install_gen24.sh</code>
-      erfolgt eine automatische Installation bzw. Update.<br>
+      erfolgt eine automatische Installation bzw. Update. <br> 
+      Die Crontabeinträge können in der WebUI unter Settings =&gt; Scheduler angepasst werden.<br>
     </p>
-    <h2 class="heading-element">Manuelle Installation:<br>
-    </h2>
-    <h3 class="heading-element">Python Installationen</h3>
-    <div class="snippet-clipboard-content notranslate position-relative
-      overflow-auto">
-      <pre class="notranslate"><code>sudo apt install </code><code>passwd iputils-ping cron file git python3 python3-pip python3-yaml python3-requests php php-sqlite3<br>#Für die Wattpilotanbindung<br></code><code>sudo apt install python3-aiohttp python3-websockets</code></pre>
-    </div>
-    <h3 class="heading-element">Skripte GEN24_Ladesteuerung installieren</h3>
-    <p>Am besten die Scripte mit <code>git</code> holen, dann könen sie
-      einfach upgedatet werden, ohne geänderte Dateien zu überschreiben.</p>
-    <div class="snippet-clipboard-content notranslate position-relative
-      overflow-auto">
-      <pre class="notranslate"><code># Erstinstallation Verzeichnis /home/GEN24 erzeugen:
-git clone https://github.com/wiggal/GEN24_Ladesteuerung.git .
-# Die CONFIG/XY.ini's nach CONFIG/XY_priv.ini's und die html/config.ini nach html/config_priv.ini kopieren.
-# Anpassungen in den CONFIG/XY_priv.ini's und in html/config_priv.ini machen.
-# Nun können die Neuerungen immer mit git geholt werden, ohne die Änderungen zu überschreiben
-# Update mit git
-git pull
-# Tipp: Dateien die zukünftig nicht mehr überschieben werden sollen (z.B. weatherData.sqlite) in die Datei .gitignore aufnehmen.
-</code></pre>
-      <div class="zeroclipboard-container position-absolute right-0
-        top-0"> </div>
-    </div>
-    <p><strong>Alternativ:</strong></p>
-    <ul>
-      <li>Verzeichnis /home/GEN24 erzeugen, Scripte downloaden,
-        entpacken und Rechte setzen.<br>
-        Die Befehle müssen mit <code>sudo</code> ausgeführt werden, da
-        unter <code>/home/</code> nur <code>root</code> Schreibrechte
-        hat.</li>
-    </ul>
-    <div class="snippet-clipboard-content notranslate position-relative
-      overflow-auto">
-      <pre class="notranslate"><code>cd /home/
-sudo wget https://github.com/wiggal/GEN24_Ladesteuerung/archive/refs/heads/main.zip
-sudo unzip main.zip
-sudo rm main.zip
-sudo mv GEN24_Ladesteuerung-main GEN24
-sudo chown -R pi:pi /home/GEN24
-sudo chmod +x /home/GEN24/start_PythonScript.sh
-</code></pre>
-      <div class="zeroclipboard-container position-absolute right-0
-        top-0"> </div>
-    </div>
-    <p><strong>Konfiguration Ladesteuerung:</strong></p>
-    <ul>
-      <li>
-        <p>Konfiguration der Ladesteuerung<br>
-          Die jeweilige CONFIG/XY.ini nach CONFIG/XY_priv.ini und die
-          html/config.ini nach html/config_priv.ini kopieren.
-          Anpassungen in den CONFIG/XY_priv.ini's und in
-          html/config_priv.ini machen, siehe auch die jeweils verlinkte
-          Hilfe in der WebUI, bzw. hier im Wiki.<br>
-          Sind CONFIG/XY_priv.ini Dateien bei einem Programmlauf nicht
-          vorhanden, werden sie von CONFIG/XY.ini kopiert.<br>
-        </p>
-      </li>
-      <li>
-        <p>Crontabeinträge<br>
-          <code>crontab -e</code> # Editor wählen und folgende Einträge
-          machen.<br>
-          EnergyController.py immer eine Minute nach vollen zehn Minuten
-          ausführen (1-56/10), da der GEN24 die Daten immer etwa zur
-          vollen fünften Minute bereitstellt.&nbsp; Da das Smartmeter
-          die Daten aktuell hat, kann beim Ausführen zur vollen fünften
-          Minute passieren, dass die Daten vom GEN24 noch nicht zur
-          Verfügung stehen. Dadurch entstehen unschöne Zacken in der
-          Tagesgrafik.<br>
-          Bei Verwendung der Dynamischen Strompreise zur
-          Lade-/Entladesteuerung alle fünf Minuten ausführen (1-56/5),
-          da die Strompreistaktung nun alle 15 Minuten erfolgt.<br>
-          Da nun beim Logging auf Änderungen überprüft wird, kann das
-          Skript nun auch minütlich durchführt werden.<br>
-        </p>
-      </li>
-    </ul>
-    <div class="snippet-clipboard-content notranslate position-relative
-      overflow-auto">
-      <pre class="notranslate"><code>1-56/10 * * * * /DIR/start_PythonScript.sh EnergyController.py schreiben
-</code></pre>
-      <div class="zeroclipboard-container position-absolute right-0
-        top-0"> </div>
-    </div>
-    <p>
-      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      <b>PV-Prognosen:</b><br>
-      Damit die Ladesteuerung per EnergyController.py funktioniert, ist
-      eine PV-Prognose erforderlich.<br>
-      Mit den Skripten XY_WeatherData.py im Verzeichnis FORECAST, können
-      Prognosen von verschiedenen Wetterdiensten abgerufen werden.<br>
-      Die Prognosen werde in <code>weatherData.sqlite</code>
-      gespeichert. Aus den einzelnen gespeicherten Prognosen wird mit
-      der in <code>weather_priv.ini</code> definierten Methode und
-      Gewichten die PV-Prognose berechnet.<br>
-      Nähere Informationen sie auch im WIKI unter "config", bzw. in der
-      Hilfe zum TAB "config"<br>
-    </p>
-    <div class="snippet-clipboard-content notranslate position-relative
-      overflow-auto">
-      <pre class="notranslate"><code>33 5,8,10,12,14 * * * /DIR/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py
-8 5,7,9,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py
-0 6,8,11,13,15 * * * /DIR/start_PythonScript.sh FORECAST/Solcast_WeatherData.py
-0 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py
-35 5,7,9,11,13,15,17,19 * * * /DIR/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py
-</code></pre>
-      <div class="zeroclipboard-container position-absolute right-0
-        top-0"> </div>
-    </div>
-    <p><strong><strong>Verwendung Dynamischer Strompreise:<br>
-        </strong></strong></p>
-    <p>Sollen Dynamischer Strompreise verwendet werden ist noch
-      folgender Crontabeintrag erforderlich:<strong><strong></strong></strong><br>
-      <br>
-      <code>58 * * * * /home/GEN24/start_PythonScript.sh -o</code><code>
-        DynPriceCheck.log DynamicPriceCheck.py schreiben</code></p>
-    <p>Weiter Informationen siehe Beschreibung unter DynamicPriceCheck<strong><strong>.<br>
-        </strong></strong></p>
-    <p><strong><strong></strong>Logdateien jeden Montag abräumen</strong></p>
-    <div class="snippet-clipboard-content notranslate position-relative
-      overflow-auto">
-      <pre class="notranslate"><code>0 5 * * 1 mv /DIR/Crontab.log /DIR/old_Crontab.log
-0 5 * * 1 mv /DIR/DynPriceCheck.log /DIR/old_DynPriceCheck.log
-</code></pre>
-      <div class="zeroclipboard-container position-absolute right-0
-        top-0"> </div>
-    </div>
-    <ul>
-      <li>Editor mit schreiben beenden, folgende Meldung muss
-        erscheinen, damit die Conjobs aktiv sind:<br>
-        „crontab: installing new crontab“</li>
-    </ul>
     <h2 class="heading-element">Webserver Installation:</h2>
     <p><strong>PHP installieren:</strong></p>
     <div class="snippet-clipboard-content notranslate position-relative
@@ -197,77 +66,18 @@ sudo apt install php php-sqlite3
       <div class="zeroclipboard-container position-absolute right-0
         top-0"> </div>
     </div>
-    <p>Wenn PHP installiert ist, wird durch die Variable <code>Einfacher_PHP_Webserver
+    <p>Wenn PHP installiert ist, wird durch die Variable <code>Einfacher_PHP_Webserver = 1
+      </code> (Standard) in der CONFIG/default_priv.ini <br>
+      beim ersten Start von <code>start_PythonScript.sh</code> automatisch der
+      einfache PHP-Webserver gestartet. 
+      <br>Die Webseite ist dann auf Port:2424 erreichbar (z.B.: raspberrypi:2424).</p>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        = 1</code> (Standard) in der CONFIG/default_priv.ini beim ersten
-      Start von <code>start_PythonScript.sh</code> automatisch der
-      einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf
-      Port:2424 erreichbar (z.B.: raspberrypi:2424).</p>
-    <p><strong><em>Alternativ kann auch der Webserver Apache installiert
-          werden:</em></strong><br>
-      (dann <code>Einfacher_PHP_Webserver = 0</code> setzen)<br>
-      <strong>Apache installieren und konfigurieren:</strong></p>
-    <div class="snippet-clipboard-content notranslate position-relative
-      overflow-auto">
-      <pre class="notranslate"><code>sudo apt update &amp;&amp; sudo apt upgrade
-sudo apt install apache2
-</code></pre>
-      <div class="zeroclipboard-container position-absolute right-0
-        top-0"> </div>
-    </div>
-    <p>Änderungen der Apachekonfiguration unter /etc/apache2/:<br>
-      ApacheUser auf „pi“ und DokumetRoot auf /home/GEN24/html/ ändern</p>
-    <ul>
-      <li>/etc/apache2/apache2.conf <code>&lt;Directory /var/www/&gt;</code>
-        nach <code>&lt;Directory /home/GEN24/html/&gt;</code> ändern.</li>
-      <li>/etc/apache2/envvars <code>export APACHE_RUN_USER=www-data</code>
-        nach <code>export APACHE_RUN_USER=pi</code> ändern.</li>
-      <li>/etc/apache2/envvars <code>export APACHE_RUN_GROUP=www-data</code>
-        nach <code>export APACHE_RUN_GROUP=pi</code> ändern.</li>
-      <li>/etc/apache2/sites-enabled/000-default.conf <code>DocumentRoot
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          /var/www/html</code> nach <code>DocumentRoot /home/GEN24/html</code>
-        ändern.</li>
-    </ul>
-    <p>Apache neu starten<br>
-      <code>sudo service apache2 restart</code></p>
     <p><strong>Vorhandene Skripts:</strong><br>
       1_tab_LadeSteuerung.php ==&gt;&gt; Reservierung von großen
       PV-Mengen und feste manuelle Ladesteuerung<br>
       2_tab_EntladeSteuerung.php ==&gt;&gt; EntladeSteuerung durch
       Eintrag in Tabelle und feste manuelle Entladesteuerung<br>
+      3_tab_wallbox.php ==&gt;&gt; Wallboxsteuerung über einen OCPP-Server.<br>
       4_tab_config_ini.php ==&gt;&gt; Anzeigen und Editieren der
       CONFIG/XY_priv.ini's<br>
       5_tab_Crontab_log.php ==&gt;&gt; Anzeigen und Downloaden der
@@ -279,9 +89,8 @@ sudo apt install apache2
       9_tab_settigs.php ==&gt;&gt; Settings, ändern der Startparameter
       der Ladesteuerung</p>
     <p>In der <code>html/config_priv.ini</code> können die tab_Skripte
-      unter <code>$TAB_config</code> konfiguriert werden. Man kann den
-      Namen ändern, Tab's die nicht benötigt werden ausblenden, den Tab
-      der beim Start geladen wird auswählen und eigene Skripts als "Tab"
-      einbinden.</p>
+      unter <code>$TAB_config</code> konfiguriert werden.
+      <br>Man kann den Anzeigenamen ändern, die Tab's sortieren, Tab's die nicht benötigt werden ausblenden, 
+      <br>den Tab der beim Start geladen wird auswählen und eigene Skripts als "Tab" einbinden.</p>
   </body>
 </html>

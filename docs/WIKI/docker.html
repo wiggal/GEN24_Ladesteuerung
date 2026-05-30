@@ -37,8 +37,8 @@
     <div class="markdown-heading">
       <h2 class="heading-element">💾 Installation Dockerimage
         Gen24-Ladesteuerung im Synology-Docker:</h2>
-      (Inhalte von <a href="https://github.com/jaydee73">@jaydee73</a>
-      danke 👍) Stand: 2025-06-11</div>
+      (Inhalte teilweise von <a href="https://github.com/jaydee73">@jaydee73</a>
+      danke 👍) Stand: 2026-05-30</div>
     <div class="markdown-heading">
       <h3 class="heading-element">Ordner für Docker-Container anlegen
         und Dateien bereitstellen</h3>
@@ -53,9 +53,6 @@
       anpassen (siehe 4_Hilfe.html und allgemeine Installationshinweise)<br>
       <code>config_priv.ini</code> (aus dem Unterordner html), nach
       eigenen Bedürfnissen anpassen (zumindest KWp-Wert anpassen)</p>
-    <p>Datei <code>crontab</code> neu erzeugen (keine Dateiendung!) die
-      für die eigene Installation angepassten Crontab-Einträge (siehe
-      allgemeine Anleitung) hier einfügen.<br>
       Datei <code>Crontab.log</code> neu erzeugen (bleibt zunächst
       leer, wird dann vom Script gefüllt).</p>
     <div class="markdown-heading">
@@ -103,10 +100,6 @@ href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Doc
           <td><code>/home/GEN24/html/config_priv.ini</code></td>
         </tr>
         <tr>
-          <td><code>crontab</code></td>
-          <td><code>/var/tmp/www-data</code></td>
-        </tr>
-        <tr>
           <td><code>Crontab.log</code></td>
           <td><code>/home/GEN24/Crontab.log</code></td>
         </tr>
@@ -142,7 +135,7 @@ href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Doc
 href="https://github.com/wiggal/Docker_gen24_ladesteuerung/wiki/Installation-Dockerimage-von-Gen24%E2%80%90Ladesteuerung-im-Synology%E2%80%90Docker#update-wird-im-container-manager-angezeigt"><svg
           class="octicon octicon-link" viewBox="0 0 16 16" version="1.1"
           width="16" height="16" aria-hidden="true"></svg></a></div>
-    <p>Wenn eine gemappte Datei (config.ini, config.ini oder crontab)
+    <p>Wenn eine gemappte Datei (z.B. config.ini oder config.ini)
       geändert werden muss:</p>
     <ul>
       <li>Container stoppen</li>
