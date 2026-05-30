@@ -10,7 +10,11 @@ $server_ip = $_SERVER['HTTP_HOST'];
 $server_ip = explode(':', $server_ip)[0];
 $API = "http://" . $server_ip . ":8886";
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
-$PYTHON_SERVER_CMD = "cd ..; nohup python3 -u ocpp_server.py 2>&1 & echo $!";
+# config.ini parsen
+require_once "config_parser.php";
+global $PythonDIR;
+$GEN24_DIR = realpath(__DIR__ . '/' . $PythonDIR);
+$PYTHON_SERVER_CMD = "nohup python3 -u $GEN24_DIR/ocpp_server.py > /tmp/ocpp_server.log 2>&1 & echo $!";
 
 include 'SQL_steuerfunctions.php';
 require_once '3_funktion_wallbox.php';

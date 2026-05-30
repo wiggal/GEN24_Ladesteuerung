@@ -2,6 +2,7 @@
 // ================================================
 // ScheduleManager – CronJob-Verwaltung, aufrufbar aus Settings-Tab
 // Liest/schreibt Jobs aus der Tabelle cron_jobs in Prog_Steuerung.sqlite
+// DB-Zugriff: PHP SQLite3 (kein PDO)
 // ================================================
 
 include 'SQL_steuerfunctions.php';
@@ -13,20 +14,21 @@ include 'SQL_steuerfunctions.php';
 require_once "config_parser.php";
 
 global $PythonDIR;
-$DB_PATH = $PythonDIR.'/CONFIG/Prog_Steuerung.sqlite';
-$GEN24_DIR = realpath(__DIR__ . '/' .$PythonDIR);
+$DB_PATH  = $PythonDIR . '/CONFIG/Prog_Steuerung.sqlite';
+$GEN24_DIR = realpath(__DIR__ . '/' . $PythonDIR);
 
 // -------------------------
 // Helper: DB-Verbindung + Tabelle anlegen falls nicht vorhanden
 // -------------------------
 function get_db($path, $GEN24_DIR) {
     try {
-        $db = new PDO('sqlite:' . $path);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $db = new SQLite3($path);
+        $db->enableExceptions(true);
 
         // Prüfen ob Tabelle bereits existiert
-        $exists = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='cron_jobs'")->fetchColumn();
+        $exists = $db->querySingle(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='cron_jobs'"
+        );
 
         // Tabelle anlegen falls nicht vorhanden
         $db->exec("CREATE TABLE IF NOT EXISTS cron_jobs (
@@ -59,11 +61,24 @@ function get_db($path, $GEN24_DIR) {
                 ['Rotate Crontab.log',        '0',        '5',                   '*','*','1', 'mv '.$GEN24_DIR.'/Crontab.log '.$GEN24_DIR.'/old_Crontab.log',1,                                       'Log-Rotation Mo'],
                 ['Rotate DynPriceCheck.log',  '0',        '5',                   '*','*','1', 'mv '.$GEN24_DIR.'/DynPriceCheck.log '.$GEN24_DIR.'/old_DynPriceCheck.log',0,                           'Log-Rotation DynPrice Mo'],
             ];
-            $stmt = $db->prepare("INSERT INTO cron_jobs
-                (Name, Minute, Stunde, Tag_Monat, Monat, Tag_Woche, Befehl, Aktiv, Notiz, Angelegt_Am)
-                VALUES (?,?,?,?,?,?,?,?,?,?)");
+            $stmt = $db->prepare(
+                "INSERT INTO cron_jobs
+                 (Name, Minute, Stunde, Tag_Monat, Monat, Tag_Woche, Befehl, Aktiv, Notiz, Angelegt_Am)
+                 VALUES (:n, :mi, :st, :tm, :mo, :tw, :be, :ak, :no, :an)"
+            );
             foreach ($defaults as $j) {
-                $stmt->execute([$j[0],$j[1],$j[2],$j[3],$j[4],$j[5],$j[6],$j[7],$j[8],$now]);
+                $stmt->bindValue(':n',  $j[0], SQLITE3_TEXT);
+                $stmt->bindValue(':mi', $j[1], SQLITE3_TEXT);
+                $stmt->bindValue(':st', $j[2], SQLITE3_TEXT);
+                $stmt->bindValue(':tm', $j[3], SQLITE3_TEXT);
+                $stmt->bindValue(':mo', $j[4], SQLITE3_TEXT);
+                $stmt->bindValue(':tw', $j[5], SQLITE3_TEXT);
+                $stmt->bindValue(':be', $j[6], SQLITE3_TEXT);
+                $stmt->bindValue(':ak', $j[7], SQLITE3_INTEGER);
+                $stmt->bindValue(':no', $j[8], SQLITE3_TEXT);
+                $stmt->bindValue(':an', $now,  SQLITE3_TEXT);
+                $stmt->execute();
+                $stmt->reset();
             }
         }
 
@@ -71,6 +86,18 @@ function get_db($path, $GEN24_DIR) {
     } catch (Exception $e) {
         return null;
     }
+}
+
+// -------------------------
+// Helper: Alle Jobs als Array laden
+// -------------------------
+function fetch_all_jobs(SQLite3 $db): array {
+    $result = $db->query("SELECT * FROM cron_jobs ORDER BY ID");
+    $rows = [];
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        $rows[] = $row;
+    }
+    return $rows;
 }
 
 // -------------------------
@@ -83,47 +110,67 @@ if (isset($_POST['action'])) {
     if ($db) {
         // --- Job speichern (neu oder update) ---
         if ($action === 'save_job') {
-            $id      = isset($_POST['job_id']) && $_POST['job_id'] !== '' ? intval($_POST['job_id']) : null;
-            $name    = trim($_POST['Name']    ?? '');
-            $minute  = trim($_POST['Minute']  ?? '*');
-            $stunde  = trim($_POST['Stunde']  ?? '*');
-            $tag_m   = trim($_POST['Tag_Monat'] ?? '*');
-            $monat   = trim($_POST['Monat']   ?? '*');
-            $tag_w   = trim($_POST['Tag_Woche'] ?? '*');
-            $befehl  = trim($_POST['Befehl']  ?? '');
-            $aktiv   = isset($_POST['Aktiv']) ? 1 : 0;
-            $notiz   = trim($_POST['Notiz']   ?? '');
+            $id     = isset($_POST['job_id']) && $_POST['job_id'] !== '' ? intval($_POST['job_id']) : null;
+            $name   = trim($_POST['Name']      ?? '');
+            $minute = trim($_POST['Minute']    ?? '*');
+            $stunde = trim($_POST['Stunde']    ?? '*');
+            $tag_m  = trim($_POST['Tag_Monat'] ?? '*');
+            $monat  = trim($_POST['Monat']     ?? '*');
+            $tag_w  = trim($_POST['Tag_Woche'] ?? '*');
+            $befehl = trim($_POST['Befehl']    ?? '');
+            $aktiv  = isset($_POST['Aktiv']) ? 1 : 0;
+            $notiz  = trim($_POST['Notiz']     ?? '');
 
             if ($name !== '' && $befehl !== '') {
                 if ($id === null) {
                     // Neuer Job
-                    $stmt = $db->prepare("INSERT INTO cron_jobs
-                        (Name, Minute, Stunde, Tag_Monat, Monat, Tag_Woche, Befehl, Aktiv, Notiz, Angelegt_Am)
-                        VALUES (?,?,?,?,?,?,?,?,?, datetime('now','localtime'))");
-                    $stmt->execute([$name, $minute, $stunde, $tag_m, $monat, $tag_w, $befehl, $aktiv, $notiz]);
+                    $stmt = $db->prepare(
+                        "INSERT INTO cron_jobs
+                         (Name, Minute, Stunde, Tag_Monat, Monat, Tag_Woche, Befehl, Aktiv, Notiz, Angelegt_Am)
+                         VALUES (:n, :mi, :st, :tm, :mo, :tw, :be, :ak, :no, datetime('now','localtime'))"
+                    );
                 } else {
                     // Bestehenden Job updaten
-                    $stmt = $db->prepare("UPDATE cron_jobs SET
-                        Name=?, Minute=?, Stunde=?, Tag_Monat=?, Monat=?, Tag_Woche=?,
-                        Befehl=?, Aktiv=?, Notiz=?
-                        WHERE ID=?");
-                    $stmt->execute([$name, $minute, $stunde, $tag_m, $monat, $tag_w, $befehl, $aktiv, $notiz, $id]);
+                    $stmt = $db->prepare(
+                        "UPDATE cron_jobs SET
+                         Name=:n, Minute=:mi, Stunde=:st, Tag_Monat=:tm, Monat=:mo, Tag_Woche=:tw,
+                         Befehl=:be, Aktiv=:ak, Notiz=:no
+                         WHERE ID=:id"
+                    );
+                    $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
                 }
+                $stmt->bindValue(':n',  $name,   SQLITE3_TEXT);
+                $stmt->bindValue(':mi', $minute, SQLITE3_TEXT);
+                $stmt->bindValue(':st', $stunde, SQLITE3_TEXT);
+                $stmt->bindValue(':tm', $tag_m,  SQLITE3_TEXT);
+                $stmt->bindValue(':mo', $monat,  SQLITE3_TEXT);
+                $stmt->bindValue(':tw', $tag_w,  SQLITE3_TEXT);
+                $stmt->bindValue(':be', $befehl, SQLITE3_TEXT);
+                $stmt->bindValue(':ak', $aktiv,  SQLITE3_INTEGER);
+                $stmt->bindValue(':no', $notiz,  SQLITE3_TEXT);
+                $stmt->execute();
             }
         }
 
         // --- Job aktivieren/deaktivieren (Toggle) ---
         if ($action === 'toggle_job') {
             $id = intval($_POST['job_id'] ?? 0);
-            $db->prepare("UPDATE cron_jobs SET Aktiv = CASE WHEN Aktiv=1 THEN 0 ELSE 1 END WHERE ID=?")
-               ->execute([$id]);
+            $stmt = $db->prepare(
+                "UPDATE cron_jobs SET Aktiv = CASE WHEN Aktiv=1 THEN 0 ELSE 1 END WHERE ID=:id"
+            );
+            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->execute();
         }
 
         // --- Job löschen ---
         if ($action === 'delete_job') {
             $id = intval($_POST['job_id'] ?? 0);
-            $db->prepare("DELETE FROM cron_jobs WHERE ID=?")->execute([$id]);
+            $stmt = $db->prepare("DELETE FROM cron_jobs WHERE ID=:id");
+            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->execute();
         }
+
+        $db->close();
     }
 
     // Redirect zurück zum Tab
@@ -136,10 +183,11 @@ if (isset($_POST['action'])) {
 // -------------------------
 if (isset($_GET['ajax'])) {
     header('Content-Type: application/json; charset=utf-8');
-    $db = get_db($DB_PATH, $GEN24_DIR);
+    $db   = get_db($DB_PATH, $GEN24_DIR);
     $jobs = [];
     if ($db) {
-        $jobs = $db->query("SELECT * FROM cron_jobs ORDER BY ID")->fetchAll();
+        $jobs = fetch_all_jobs($db);
+        $db->close();
     }
     echo json_encode(['jobs' => $jobs, 'timestamp' => time()]);
     exit;
@@ -148,12 +196,13 @@ if (isset($_GET['ajax'])) {
 // -------------------------
 // Jobs laden für HTML-Ausgabe
 // -------------------------
-$db   = get_db($DB_PATH, $GEN24_DIR);
-$jobs = [];
+$db     = get_db($DB_PATH, $GEN24_DIR);
+$jobs   = [];
+$db_ok  = ($db !== null);
 if ($db) {
-    $jobs = $db->query("SELECT * FROM cron_jobs ORDER BY ID")->fetchAll();
+    $jobs = fetch_all_jobs($db);
+    $db->close();
 }
-$db_ok = ($db !== null);
 
 ?>
 <style>
