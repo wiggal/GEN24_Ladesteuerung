@@ -18,4 +18,3 @@ services:
             - ./CONFIGS/Crontab.log:/home/GEN24/Crontab.log
             - ./CONFIGS/PV_Daten.sqlite:/home/GEN24/PV_Daten.sqlite
             - ./CONFIGS/weatherData.sqlite:/home/GEN24/weatherData.sqlite
-            - ./CONFIGS/crontab:/var/tmp/www-data

@@ -14,6 +14,7 @@ $activeTab = $_POST['tab'] ?? $_GET['tab'] ?? $TAB_config['0']['name'];
 
 $sonder_tabs = [
   'WeatherMgr'  => 'weatherDataManager.php',
+  'ScheduleManager'  => 'ScheduleManager.php',
   'Hilfe'  => 'Hilfe_Ausgabe.php'
 ];
 $all_files = $tabs + $sonder_tabs;
@@ -176,7 +177,7 @@ iframe {
 /* ===== CONTENT ===== */
 .hilfe, .weatherDataManager {
    font-size: 80% !important;
-   margin-top: 20px;
+   margin-top: 10px;
 }
 .content {
   margin-top: 40px;

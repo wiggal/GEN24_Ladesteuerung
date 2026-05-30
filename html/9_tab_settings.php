@@ -16,6 +16,7 @@
 	text-decoration:none;
     white-space: nowrap;
     position: fixed;
+    bottom: 10px;
     transform: translate(-50%, 0);
   }
   .speichern:hover {
@@ -73,7 +74,7 @@ input[type="checkbox"] {
 .ACHTUNG{
   font-size:150%;
   color: #000000;
-  margin-top: 100px !important; /* Abstand nach oben zum Button */
+  margin-top: 10px !important; /* Abstand nach oben zum Button */
   margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
 }
 .containerbeschriftung{
@@ -86,7 +87,7 @@ input[type="checkbox"] {
 @media (max-width: 600px) {
   .ACHTUNG {
     font-size: 100% !important;
-    margin-top: 70px !important; /* Abstand nach oben zum Button */
+    margin-top: 50px !important; /* Abstand nach oben zum Button */
     margin-bottom: 5px !important; /* Abstand nach unten zum Slider */
   }
 
@@ -120,6 +121,7 @@ input[type="checkbox"] {
   .speichern {
     font-size: 100% !important; /* Speicher-Button verkleinern */
     padding: 8px 10px !important;
+    bottom: 10px;
   }
 
   .dropdown {
@@ -139,6 +141,8 @@ input[type="checkbox"] {
   }
 }
 </style>
+
+<div class="weatherDataManager"> <a href="index.php?tab=ScheduleManager&file=Settings"><b>⏱  Scheduler</b></a></div>
 
 <!-- Hilfeaufruf ANFANG -->
 <?php
@@ -199,6 +203,7 @@ foreach ($CheckOptionsALL as &$option) {
  <label style="padding: 5px 50px" class="auswahllabel" ><input type="checkbox" name="hausakkuladung.option" id="steuer10" value="dynamicprice" <?php echo $Setting_check['dynamicprice'] ?> >Dynamischer Strompreis</label>
 </div>
 </div>
+
 
   <script>
 function disablecheckboxes() {
