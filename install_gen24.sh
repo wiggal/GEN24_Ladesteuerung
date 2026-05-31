@@ -82,7 +82,7 @@ detect_distro(){
     PM="apt-get install -y"
     UPDATE="apt-get update -y"
     # DEBIAN-Paketliste
-    packages=(passwd iputils-ping cron file git python3 python3-pip python3-yaml python3-requests php php-sqlite3 python3-websockets python3-aiohttp)
+    packages=(passwd iputils-ping cron file git python3 python3-pip python3-yaml python3-requests python-is-python3 php php-sqlite3 python3-websockets python3-aiohttp)
     SYSTEM=DEBIAN
   elif [ -f /etc/alpine-release ]; then
     PM="apk --update add"
@@ -247,6 +247,10 @@ fi
 if [ ! -s "CONFIG/Prog_Steuerung.sqlite" ]; then
     python3 -c "from SQLall import sqlall; sqlall().create_database_ProgSteuerung('$REPO_DIR/CONFIG/Prog_Steuerung.sqlite')"
 fi
+# Scheduler-DB anlegen, wenn sie nicht existiert, Abfrage in PHP-Skript
+cd html
+/usr/bin/php ScheduleManager.php >/dev/null
+cd $REPO_DIR
 
 # CONFIG/default_priv.ini mit Benutzereingaben erzeugen
 if [ ! -f "CONFIG/default_priv.ini" ]; then
@@ -283,6 +287,10 @@ EOF
 # Crontab erstellen
 echo "$CRON_ENTRIES" | $SUDO_IST crontab -u "$USERNAME" -
 echo "Crontab für Benutzer $USERNAME wurde angelegt."
+
+# Webserver starten wenn er nicht schon läuft
+$REPO_DIR/start_PythonScript.sh -o /dev/null EnergyController.py &
+
 echo -e "\n✅ Installation erfolgreich abgeschlossen!"
 echo -e "  Bitte noch die CONFIG/*_priv.ini anlegen bzw. anpassen!"
 
