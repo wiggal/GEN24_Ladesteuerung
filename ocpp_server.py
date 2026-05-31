@@ -29,6 +29,13 @@ Features:
 import asyncio
 import os
 import sys
+
+# Arbeitsverzeichnis auf das Verzeichnis dieses Skripts setzen,
+# damit relative Pfade (CONFIG/, FUNCTIONS/, *.sqlite) immer korrekt aufgelöst werden –
+# unabhängig davon, aus welchem Verzeichnis das Skript gestartet wird.
+# (identisches Verhalten wie EnergyController.py)
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 from FUNCTIONS.ocpp import OCPPManager
 
 PID_FILE = "/tmp/ocpp_server.pid"
