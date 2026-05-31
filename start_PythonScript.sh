@@ -98,7 +98,7 @@ server_is_running() {
 if [[ "$Wallboxsteuerung" -eq 1 ]]; then
     if ! server_is_running; then
         cd "$GEN24_Pfad" || exit 1
-        nohup /usr/bin/python3 -u ocpp_server.py &
+        nohup /usr/bin/python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 &
     fi
 # Wenn Wallboxsteuerung=0 ist, wird KEIN Stopp-Befehl ausgeführt.
 # Der Server läuft weiter, auch wenn er durch das Frontend gestartet wurde, und sollte nur dort gestoppt werden.

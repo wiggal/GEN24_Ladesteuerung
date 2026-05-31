@@ -14,7 +14,7 @@ $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
 require_once "config_parser.php";
 global $PythonDIR;
 $GEN24_DIR = realpath(__DIR__ . '/' . $PythonDIR);
-$PYTHON_SERVER_CMD = "nohup python3 -u $GEN24_DIR/ocpp_server.py > /tmp/ocpp_server.log 2>&1 & echo $!";
+$PYTHON_SERVER_CMD = "nohup python3 -u $GEN24_DIR/ocpp_server.py > /tmp/ocpp.log 2>&1 & echo $!";
 
 include 'SQL_steuerfunctions.php';
 require_once '3_funktion_wallbox.php';
