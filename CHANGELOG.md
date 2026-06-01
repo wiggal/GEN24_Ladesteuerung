@@ -1,3 +1,5 @@
+**[0.42.5] – 2026-XX-XX**  
+
 **[0.42.4] – 2026-06-01**  
 **NEU**  
 - Es wurde ein programmeigener Scheduler integieret. Damit ist nur mehr ein Crontabeintrag erforderlich.
