@@ -38,6 +38,7 @@ RUN apk add --update-cache \
 && echo "* * * * * /usr/bin/python /home/GEN24/db_scheduler.py" >>/var/tmp/www-data \
 && chmod +x /home/GEN24/start_* \
 && >> /home/GEN24/Crontab.log \
+&& echo "alias ll='ls -alF'" >> /root/.bashrc \
 && touch /var/log/cron.log
 
 # Alle Befehle die Nach dem Imagestart ausgeführt werden müssen

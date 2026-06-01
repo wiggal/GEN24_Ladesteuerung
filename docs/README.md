@@ -14,6 +14,9 @@
 - [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
 
 ![new](pics/new.png)  
+Ab Version: **0.42.4**  
+- Grafische CronJob-Verwaltung in der WebUI unter Settings => ⏱  Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 
+
 Ab Version: **0.42.0**  
 - 🚘 Steuerung des Wattpiloten, nun auch mit NextTrip.  
 

@@ -1,9 +1,9 @@
-**[0.42.4] – 2026-XX-XX**  
+**[0.42.4] – 2026-06-01**  
 **NEU**  
 - Es wurde ein programmeigener Scheduler integieret. Damit ist nur mehr ein Crontabeintrag erforderlich.
-  Alle weiteren Cronjobs können nun in der WebUI unter Settings => ⏱ Scheduler konfiguriert werden. 
-  **Neuen Crojob eintragen und alte entfernen!!**
-  * * * * * /usr/bin/python /home/GEN24/db_scheduler.py
+  Alle weiteren Cronjobs können nun in der WebUI unter Settings => ⏱ Scheduler konfiguriert werden.  
+  **Neuen Crojob eintragen und alte entfernen!!**  
+  `* * * * * /usr/bin/python /home/GEN24/db_scheduler.py`  
   **Achtung Docker:** Das Mapping ./CONFIGS/crontab:/var/tmp/www-data entfällt, bitte entfernen.  
 
 **[0.42.3] – 2026-05-28**  
