@@ -127,7 +127,7 @@ main(){
 
 main "$@"
 
-# CONFIG/default_priv.ini mit Benutzereingaben erzeugen wenn nicht vorhaanden
+# wenn CONFIG/default_priv.ini nicht vorhanden Installationsverzeichnis abfragen
 if [ ! -f "$REPO_DIR/CONFIG/default_priv.ini" ]; then
 
     # Installationsverzeichnis abfragen:
@@ -147,7 +147,7 @@ if [ ! -f "$REPO_DIR/CONFIG/default_priv.ini" ]; then
     echo ""
 fi
 
-# CONFIG/default_priv.ini mit Benutzereingaben erzeugen wenn nicht vorhaanden
+# CONFIG/default_priv.ini mit Benutzereingaben erzeugen wenn nicht vorhanden
 if [ ! -f "$REPO_DIR/CONFIG/default_priv.ini" ]; then
 
     # IP-Adresse Wechselrichter abfragen und prüfen

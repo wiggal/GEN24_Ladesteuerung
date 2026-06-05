@@ -11,9 +11,12 @@
 - [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden, mit grafischer Darstellung.  
 - [Ladesteuerung des Wattpiloten](#-wallboxsteuerung), für E-Autos 🚘 über OCPP.
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
-- [Home Assistant Add-on](https://github.com/roethigj/ha_addons/tree/main/gen24_ladesteuerung) erstellt von [@roethigj](https://github.com/roethigj).  
+- GEN24 Ladesteuerung – Home Assistant Wrapper.  
 
 ![new](pics/new.png)  
+Ab Version: **0.42.5**  
+- GEN24 Ladesteuerung – Home Assistant Wrapper. 
+
 Ab Version: **0.42.4**  
 - Grafische CronJob-Verwaltung in der WebUI unter Settings => ⏱  Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 
 

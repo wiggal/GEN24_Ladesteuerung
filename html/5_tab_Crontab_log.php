@@ -94,8 +94,8 @@ table a {
     font-size: 16px;
   }
 }
-
 </style>
+
 <?php
 # config.ini parsen
 require_once "config_parser.php";
@@ -105,24 +105,33 @@ require_once "config_parser.php";
 <?php
 // --- Datei auswählen ---
 $log_file_param = isset($_REQUEST['log_file']) ? $_REQUEST['log_file'] : 'Crontab.log';
-// Absoluten Pfad direkt verwenden, sonst relativ zu PythonDIR
-if (strpos($log_file_param, '/') === 0) {
+
+// Wenn ocpp.log angefordert wird, nutzen wir direkt den absoluten Pfad im Container
+if ($log_file_param === 'ocpp.log' || basename($log_file_param) === 'ocpp.log') {
+    $file = '/tmp/ocpp.log';
+    $file_name = 'ocpp.log';
+} elseif (strpos($log_file_param, '/') === 0) {
     $file = $log_file_param;
     $file_name = basename($log_file_param);
 } else {
     $file_name = basename($log_file_param);
     $file = $PythonDIR . '/' . $file_name;
 }
+
 if(!file_exists($file)) {
-  die("Datei ". $file ." ist nicht vorhanden!");
+  die("Datei ". htmlspecialchars($file) ." ist nicht vorhanden!");
 } else {
+  // Sicherheits-Check für Container-Berechtigungen
+  if (!is_readable($file)) {
+      die("Datei " . htmlspecialchars($file) . " ist vorhanden, aber PHP hat keine Leserechte! (chmod 666 prüfen)");
+  }
   $myfile = fopen($file, "r");
 }
 
 // --- Logdateien im Verzeichnis auslesen ---
 $logFiles = glob($PythonDIR . '/*.log');
 
-// --- /tmp/ocpp.log ergänzen wenn vorhanden ---
+// --- /tmp/ocpp.log ergänzen wenn im Container vorhanden ---
 if (file_exists('/tmp/ocpp.log')) {
     $logFiles[] = '/tmp/ocpp.log';
 }
@@ -131,12 +140,18 @@ if (file_exists('/tmp/ocpp.log')) {
 echo '<div class="download">';
 echo '<table>';
 foreach ($logFiles as $log) {
-    $basename = basename($log); // Nur 'Crontab.log' statt '../Crontab.log'
+    $basename = basename($log); 
     $nameWithoutExt = preg_replace('/\.log$/', '', $basename);
 
-    // Wir übergeben nur den reinen Namen an die URL
-    $downloadLink = '5_download_log.php?log_file=' . urlencode($basename);
-    $viewLink = '?log_file=' . urlencode($basename);
+    // Spezialfall ocpp.log abfangen
+    if ($log === '/tmp/ocpp.log') {
+        $downloadLink = '5_download_log.php?log_file=ocpp.log';
+        $viewLink = '?log_file=ocpp.log';
+        $nameWithoutExt = 'ocpp';
+    } else {
+        $downloadLink = '5_download_log.php?log_file=' . urlencode($basename);
+        $viewLink = '?log_file=' . urlencode($basename);
+    }
 
     echo '<tr>';
     echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '&tab=' . htmlspecialchars($activeTab) . '">' . htmlspecialchars($nameWithoutExt) . '</a></td>';
@@ -182,10 +197,11 @@ echo '</form>'."\n";
 echo '</div>';
 echo '<br><br><br><br><br><br><br><br>';
 
+$letzteWarLeer = false;
+
 switch ($case) {
     case '':
-
-    # AUSGEBEN DER Crontab.log von Heute
+    # AUSGEBEN DER Logdatei von Heute
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
         // Datum am Zeilenanfang erkennen: mm-dd HH:MM:SS oder BEGINN mit Datum
@@ -216,13 +232,12 @@ switch ($case) {
             }
             // reguläre Zeile anzeigen und Flag zurücksetzen
             $letzteWarLeer = false;
-            echo $Zeile . "<br>";
+            echo htmlspecialchars($Zeile) . "<br>";
         }
     }
     break;
 
     case 'filter':
-    $suchstring = '';
     $suchstring = trim($_POST["suchstring"] ?? '') ?: 'geschrieben';
     $BEGIN_DATUM = '';
     $BEGIN_UHRZEIT = '';
@@ -249,18 +264,20 @@ switch ($case) {
             }
         }
         if ($Ausgabe == 1) {
-            if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . $suchstring . '/', $Zeile)) {
+            if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . preg_quote($suchstring, '/') . '/', $Zeile)) {
                 $hatEigeneDatumzeile = preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $Zeile);
                 if (!$hatEigeneDatumzeile && ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '')) {
-                    echo $BEGIN_UHRZEIT . " " . $BEGIN_DATUM . "<br>";
+                    echo htmlspecialchars($BEGIN_UHRZEIT . " " . $BEGIN_DATUM) . "<br>";
                 }
-                echo $Zeile . "<br>";
+                echo htmlspecialchars($Zeile) . "<br>";
             }
         }
     }
     echo "<br><br>";
     break;
 }
+fclose($myfile);
+
 echo '<br><br><br><br><br><div id="bottom">';
 echo '<div class="bottom-bar">';
 echo '<a class="ende" name="bottom" href="#top">An den Anfang springen!</a><br>';
@@ -279,8 +296,8 @@ echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<button type="submit">Neu laden</button>';
 echo '</form><br>';
 echo '</div>';
-
 ?>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     if (location.hash !== '#bottom') {
@@ -301,4 +318,3 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-
