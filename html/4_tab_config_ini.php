@@ -343,7 +343,7 @@ function get_updatebutton($repoPath, $logFile, $prg_version, $activeTab) {
         foreach ($meldungen as $msg) writeLog($logFile, $msg);
     }
 
-    echo '<form method="post" action="' . htmlspecialchars(basename($_SERVER['PHP_SELF'])) . '" style="display:inline;">' . "\n";
+    echo '<form method="post" action="" style="display:inline;">' . "\n";
     echo '<input type="hidden" name="case" value="git_update">'."\n";
     echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
     echo '<button type="submit" style="' . htmlspecialchars($buttonStyle) . '" '.$buttontitle . $buttonDisabled . '>';
@@ -564,7 +564,7 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
 
 function Dateiauswahl_button($Anzahl, $ini_file, $updatecheck = 'ja', $activeTab){
     echo "</div>\n";
-    echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+    echo '<form method="POST" action="">'."\n";
     echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
     echo '<input type="hidden" name="case" value="">'."\n";
     echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
@@ -601,7 +601,7 @@ echo '</div>';
 }
 if ($nachricht != '') echo "<center>" . gzuncompress(base64_decode($nachricht)) . "</center>";
 echo '<br><center>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<select name="ini_file">';
 echo getinifile($PythonDIR.'/CONFIG/');
 echo '</select><br><br>';
@@ -623,7 +623,7 @@ echo '<b>"'.basename($ini_file).'" hier nur lesbar! <br>Zum editieren Button kli
 echo '</div>';
 echo '<br><br>';
 echo '<div class="button-container">';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="editieren">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
@@ -633,7 +633,7 @@ echo '</form>';
 echo "\n";
 // Update-Button, wenn Original.ini existiert
 if (file_exists($org_ini_file)) {
-    echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+    echo '<form method="POST" action="">'."\n";
     echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
     echo '<input type="hidden" name="org_ini_file" value="'.$org_ini_file.'">'."\n";
     echo '<input type="hidden" name="case" value="editieren">'."\n";
@@ -660,7 +660,7 @@ Dateiauswahl_button('1', $ini_file, 'nein', $activeTab);
 echo '<br><br>';
 echo 'Kennwort um '.basename($ini_file).' zu editieren oder upzudaten:<br>';
 echo '(Kennwortänderung in html/config_priv.ini)<br>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="editieren_passwd">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
@@ -679,7 +679,7 @@ Dateiauswahl_button('2', $ini_file, 'nein', $activeTab);
 
 if ($_POST["password"] == $passwd_configedit) {
 
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 # Erläuterungen zu Hintergrundfarben ausgeben
 echo '<br><div class="legend-container">';
 echo '  <div class="legend-item title"><b>'.$_POST["editcase"].'</b></div>';

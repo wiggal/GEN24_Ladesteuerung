@@ -131,13 +131,15 @@ if (file_exists('/tmp/ocpp.log')) {
 echo '<div class="download">';
 echo '<table>';
 foreach ($logFiles as $log) {
-    $basename = basename($log);
+    $basename = basename($log); // Nur 'Crontab.log' statt '../Crontab.log'
     $nameWithoutExt = preg_replace('/\.log$/', '', $basename);
-    $downloadLink = '5_download_log.php?log_file=' . urlencode($log);
-    $viewLink = '?log_file=' . urlencode($log);
+
+    // Wir übergeben nur den reinen Namen an die URL
+    $downloadLink = '5_download_log.php?log_file=' . urlencode($basename);
+    $viewLink = '?log_file=' . urlencode($basename);
 
     echo '<tr>';
-    echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '&tab=' . $activeTab . '">' . htmlspecialchars($nameWithoutExt) . '</a></td>';
+    echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '&tab=' . htmlspecialchars($activeTab) . '">' . htmlspecialchars($nameWithoutExt) . '</a></td>';
     echo '<td style="text-align:center;"><a class="ende" href="' . htmlspecialchars($downloadLink) . '" title="Download"><span class="icon">💾</span></a></td>';
     echo '</tr>';
 }
@@ -166,7 +168,7 @@ if (!empty($_POST['suchstring'])) {
 } else {
     $suchstring_anzeige = htmlspecialchars($_POST['letzte_suche'] ?? 'geschrieben');
 }
-echo '<form id="filterform" method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form id="filterform" method="POST" action="">'."\n";
 echo '<input type="hidden" name="log_file" value="'.$file.'">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="case" value="filter">'."\n";

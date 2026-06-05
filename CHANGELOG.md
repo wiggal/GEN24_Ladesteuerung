@@ -1,4 +1,7 @@
 **[0.42.5] – 2026-XX-XX**  
+**NEU**  
+- Bereitstellung eines HomeAssistant-Addons als Wrapper.  
+  Installationsrepository: https://github.com/wiggal/GEN24_Ladesteuerung  
 
 **[0.42.4] – 2026-06-01**  
 **NEU**  

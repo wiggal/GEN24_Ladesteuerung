@@ -56,7 +56,7 @@ if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) {
 
 # Schalter zum Blättern usw.
 echo '<table id="schaltertable"><tr><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$VOR_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$VOR_DiaDatenBis.'">'."\n";
@@ -68,7 +68,7 @@ echo '<button type="submit" style="opacity: '.$PfeilGrauton_back.'" class="navi"
 echo '</form>'."\n";
 
 echo '</td><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$GLOBALS['_POST']['AnfangVon'].'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$GLOBALS['_POST']['AnfangBis'].'">'."\n";
@@ -80,7 +80,7 @@ echo '<button type="submit" class="navi"> aktuell </button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$NACH_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$NACH_DiaDatenBis.'">'."\n";
@@ -92,7 +92,7 @@ echo '<button type="submit" style="opacity: '.$PfeilGrauton_vor.'" class="navi" 
 echo '</form>'."\n";
 
 echo '</td><td style="text-align:center; width: 100%;">';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="energietype" value="option">'."\n";
 echo '<button type="submit" class="navi" > Optionen </button>';
@@ -439,7 +439,7 @@ window.onload = function() { zeitsetzer(1); };
 </script>
 
 <div style='text-align: center;'>
-<form method='POST' action='$_SERVER[PHP_SELF]'>
+<form method='POST' action=''>
   <input type='hidden' name='tab' value='$activeTab'>
   <fieldset style='display: inline-block;'>
   <legend class='optionwahl'>Diagrammart:</legend>

@@ -38,7 +38,7 @@ $mobile_schaltertext = substr($schaltertext, 2);
 
 # Schalter zum Blättern usw.
 echo '<table id="schaltertable"><tr><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$VOR_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$VOR_DiaDatenBis.'">'."\n";
@@ -49,7 +49,7 @@ echo '<button type="submit" style="opacity: '.$PfeilGrauton_back.'" class="navi"
 echo '</form>'."\n";
 
 echo '</td><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$heute.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$morgen.'">'."\n";
@@ -60,7 +60,7 @@ echo '<button type="submit" class="navi"> aktuell </button>';
 echo '</form>'."\n";
 
 echo '</td><td>';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$NACH_DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$NACH_DiaDatenBis.'">'."\n";
@@ -73,7 +73,7 @@ echo '</form>'."\n";
 // Checkbox um Strompreisstatistik auzugeben
 // HTML-Ausgabe
 echo '</td><td>';
-echo '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
+echo '<form method="POST" action="">' . "\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="DiaDatenVon" value="'.$DiaDatenVon.'">'."\n";
 echo '<input type="hidden" name="DiaDatenBis" value="'.$DiaDatenBis.'">'."\n";
@@ -95,7 +95,7 @@ echo '}' . "\n";
 echo '</script>' . "\n";
 
 echo '</td><td style="text-align:center; width: 100%;">';
-echo '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="programmpunkt" value="option">'."\n";
 echo '<button type="submit" class="navi" >';
@@ -411,7 +411,7 @@ window.onload = function() { zeitsetzer(1); };
 </script>
 
 <div style='text-align: center;'>
-<form method='POST' action='$_SERVER[PHP_SELF]'>
+<form method='POST' action=''>
   <input type='hidden' name='tab' value='$activeTab'>
   <fieldset style='display: none;'>
   <legend class='optionwahl'>Diagrammart:</legend>

@@ -8,7 +8,7 @@
 $server_ip = $_SERVER['HTTP_HOST'];
 // Falls HTTP_HOST auch den Port enthält (z.B. :80), filtern wir nur die IP/Domain
 $server_ip = explode(':', $server_ip)[0];
-$API = "http://" . $server_ip . ":8886";
+$API = "http://localhost:8886";
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
 # config.ini parsen
 require_once "config_parser.php";
