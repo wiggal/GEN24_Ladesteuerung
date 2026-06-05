@@ -1,0 +1,33 @@
+---
+name: "GEN24 Ladesteuerung PR v.0.42.5"
+description: "Fronius GEN24 / Verto Wechselrichter – prognosebasierte Ladesteuerung & Energiemanagement (EnergyWIGGAL)"
+version: "0.42.5"
+slug: "gen24_ladesteuerung"
+init: false
+homeassistant: "2023.1.0"
+
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+
+ports:
+  2424/tcp: 2424
+  8887/tcp: 8887
+ports_description:
+  2424/tcp: "WebUI der Ladesteuerung"
+  8887/tcp: "WebSocket / OCPP-Server"
+
+map:
+  - homeassistant_config:rw
+
+
+ingress: true
+ingress_port: 2424
+panel_icon: "mdi:solar-power-variant"
+panel_title: "GEN24"
+
+options: {}
+
+schema: {}

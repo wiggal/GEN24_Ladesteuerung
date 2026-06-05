@@ -1,0 +1,191 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# GEN24 Ladesteuerung run ...
+# ==============================================================================
+set -e
+
+bashio::log.info "╔══════════════════════════════════════╗"
+bashio::log.info "║   GEN24 Ladesteuerung – Addon Start  ║"
+bashio::log.info "╚══════════════════════════════════════╝"
+
+
+# ── 1. Konfiguration festlegen ───────────────────────────────────────────────
+INST_DIR="/home/GEN24"
+DATA_DIR="/homeassistant/gen24_ladesteuerung"
+CONFIG_DIR="${DATA_DIR}/CONFIG"
+export PYTHONPATH="${INST_DIR}/FUNCTIONS"
+
+# Resilienz-Verzeichnisse frühzeitig anlegen
+mkdir -p "${DATA_DIR}"
+mkdir -p "${CONFIG_DIR}"
+
+# --- Git-Quelle ---
+GIT_REPO=https://github.com/wiggal/GEN24_Ladesteuerung
+GIT_BRANCH="v0.42.5"
+
+
+bashio::log.info "Starte Git-Abgleich..."
+
+# ── 2. Prüfen, ob das Zielverzeichnis existiert und ein Git-Repository ist ──────
+if [ -d "$INST_DIR/.git" ]; then
+    bashio::log.info "Ordner existiert bereits. Führe Git Pull aus..."
+    cd "$INST_DIR"
+
+    # Git anweisen, den lokalen Stand notfalls zu überschreiben, falls Konflikte da sind
+    git fetch --all
+    git reset --hard origin/main || git reset --hard origin/master
+    git pull
+
+    bashio::log.info "Update erfolgreich abgeschlossen."
+else
+    bashio::log.info "Ordner existiert nicht oder ist leer. Starte Git Clone..."
+    # --- Repo klonen (Branch falls vorhanden, sonst main) ---
+    if [ "${GIT_BRANCH}" != "main" ] && \
+       git ls-remote --exit-code --heads "${GIT_REPO}" "${GIT_BRANCH}" > /dev/null 2>&1; then \
+        echo ">>> Branch '${GIT_BRANCH}' auf ${GIT_REPO} gefunden – clonen..." && \
+        git clone --branch "${GIT_BRANCH}" "${GIT_REPO}" ${INST_DIR}; \
+    else \
+        echo ">>> Branch '${GIT_BRANCH}' nicht gefunden oder main – clone main von ${GIT_REPO}..." && \
+        git clone --branch main "${GIT_REPO}" ${INST_DIR}; \
+    fi
+    bashio::log.info "Repository erfolgreich geklont."
+fi
+
+# ── 3. Zeitzone aus den HA-Systemeinstellungen holen ──────────────────────────
+TIMEZONE=$(bashio::info.timezone)
+export TZ="${TIMEZONE}"
+if [ -f "/usr/share/zoneinfo/${TIMEZONE}" ]; then
+    cp "/usr/share/zoneinfo/${TIMEZONE}" /etc/localtime
+    bashio::log.info "Zeitzone: ${TIMEZONE}"
+else
+    bashio::log.warning "Zeitzone '${TIMEZONE}' nicht gefunden, nutze UTC."
+fi
+
+# Hilfsfunktion zum Auslesen aus INIs (für Validierung / Logs)
+ini_get() {
+    local file="$1" key="$2"
+    if [[ -f "$file" ]]; then
+        awk -F '=' -v k="$key" '$1 ~ "^[ \t]*"k"[ \t]*$" {gsub(/^[ \t]*\047?|[ \t]*\047?$/, "", $2); print $2}' "$file"
+    fi
+}
+
+# ── 4. INI-Dateien anlegen (falls Erstinstallation) ──────────────────────────
+
+# 4a. default_priv.ini
+if [ ! -f "${CONFIG_DIR}/default_priv.ini" ]; then
+    bashio::log.info "Erstinstallation: Erstelle default_priv.ini aus Template..."
+    # Wir legen die Datei mit deinen gewünschten Vorgabewerten als Startpunkt an
+    sed \
+        -e "s|^hostNameOrIp *=.*|hostNameOrIp = 192.168.178.99|" \
+        -e "s|^password *=.*|password = 'Kennwort_customer'|" \
+        -e "s|^Einfacher_PHP_Webserver *=.*|Einfacher_PHP_Webserver = 1|" \
+        "${INST_DIR}/CONFIG/default.ini" > "${CONFIG_DIR}/default_priv.ini"
+else
+    bashio::log.info "default_priv.ini geladen."
+fi
+
+# 4b. charge_priv.ini
+if [ ! -f "${CONFIG_DIR}/charge_priv.ini" ]; then
+    cp "${INST_DIR}/CONFIG/charge.ini" "${CONFIG_DIR}/charge_priv.ini"
+fi
+
+# 4c. weather_priv.ini
+if [ ! -f "${CONFIG_DIR}/weather_priv.ini" ]; then
+    bashio::log.info "Erstinstallation: Erstelle weather_priv.ini aus Template..."
+    cp "${INST_DIR}/CONFIG/weather.ini" "${CONFIG_DIR}/weather_priv.ini"
+
+    # Hier werden deine Standard-Wetterdaten direkt per sed oder awk reingeschrieben
+    sed -i \
+        -e "s|^lat *=.*|lat = 48.59|" \
+        -e "s|^lon *=.*|lon = 12.25|" \
+        -e "s|^peak_power *=.*|peak_power = 10|" \
+        -e "s|^dec *=.*|dec = 30|" \
+        -e "s|^az *=.*|az = 0|" \
+        "${CONFIG_DIR}/weather_priv.ini"
+else
+    bashio::log.info "weather_priv.ini geladen."
+fi
+
+# 4d. dynprice_priv.ini
+if [ ! -f "${CONFIG_DIR}/dynprice_priv.ini" ]; then
+    cp "${INST_DIR}/CONFIG/dynprice.ini" "${CONFIG_DIR}/dynprice_priv.ini"
+fi
+
+# 4e. winter_priv.ini
+if [ ! -f "${CONFIG_DIR}/winter_priv.ini" ]; then
+    cp "${INST_DIR}/CONFIG/winter.ini" "${CONFIG_DIR}/winter_priv.ini" 2>/dev/null || true
+fi
+
+# 4f. config_priv.ini (WebUI)
+if [ ! -f "${DATA_DIR}/config_priv.ini" ]; then
+    cp "${INST_DIR}/html/config.ini" "${DATA_DIR}/config_priv.ini" 2>/dev/null || touch "${DATA_DIR}/config_priv.ini"
+fi
+
+# ── 5. Validierung der geladenen Werte für das Log ───────────────────────────
+CURRENT_IP=$(ini_get "${CONFIG_DIR}/default_priv.ini" "hostNameOrIp")
+bashio::log.info "Wechselrichter IP aus INI: ${CURRENT_IP}"
+
+# ── 6. Datenbanken & Symlinks ────────────────────────────────────────────
+cd "${INST_DIR}"
+
+_db_init() {
+    local data_path="$1" symlink="$2" py_cmd="$3"
+    if [ ! -s "${data_path}" ]; then
+        bashio::log.info "Erstelle $(basename ${data_path}) ..."
+        python3 -c "${py_cmd}" || bashio::log.warning "DB-Erstellung fehlgeschlagen: ${data_path}"
+    fi
+    rm -f "${symlink}"
+    ln -sf "${data_path}" "${symlink}"
+}
+
+_db_init \
+    "${DATA_DIR}/weatherData.sqlite" \
+    "${INST_DIR}/weatherData.sqlite" \
+    "from WeatherData import WeatherData; WeatherData().create_database('${DATA_DIR}/weatherData.sqlite')"
+
+_db_init \
+    "${DATA_DIR}/PV_Daten.sqlite" \
+    "${INST_DIR}/PV_Daten.sqlite" \
+    "from SQLall import sqlall; sqlall().create_database_PVDaten('${DATA_DIR}/PV_Daten.sqlite')"
+
+_db_init \
+    "${CONFIG_DIR}/Prog_Steuerung.sqlite" \
+    "${INST_DIR}/CONFIG/Prog_Steuerung.sqlite" \
+    "from SQLall import sqlall; sqlall().create_database_ProgSteuerung('${CONFIG_DIR}/Prog_Steuerung.sqlite')"
+
+# Config-Symlinks
+rm -f "${INST_DIR}/CONFIG/default_priv.ini"  && ln -sf "${CONFIG_DIR}/default_priv.ini"  "${INST_DIR}/CONFIG/default_priv.ini"
+rm -f "${INST_DIR}/CONFIG/charge_priv.ini"   && ln -sf "${CONFIG_DIR}/charge_priv.ini"   "${INST_DIR}/CONFIG/charge_priv.ini"
+rm -f "${INST_DIR}/CONFIG/weather_priv.ini"  && ln -sf "${CONFIG_DIR}/weather_priv.ini"  "${INST_DIR}/CONFIG/weather_priv.ini"
+rm -f "${INST_DIR}/html/config_priv.ini"     && ln -sf "${DATA_DIR}/config_priv.ini"     "${INST_DIR}/html/config_priv.ini"
+rm -f "${INST_DIR}/CONFIG/dynprice_priv.ini" && ln -sf "${CONFIG_DIR}/dynprice_priv.ini" "${INST_DIR}/CONFIG/dynprice_priv.ini"
+rm -f "${INST_DIR}/CONFIG/winter_priv.ini"   && ln -sf "${CONFIG_DIR}/winter_priv.ini"   "${INST_DIR}/CONFIG/winter_priv.ini" 2>/dev/null || true
+
+# Crontab.log
+touch "${DATA_DIR}/Crontab.log"
+rm -f "${INST_DIR}/Crontab.log" && ln -sf "${DATA_DIR}/Crontab.log" "${INST_DIR}/Crontab.log"
+
+# ── 7. PHP ScheduleManager ───────────────────────────────────────────────────
+bashio::log.info "Initialisiere ScheduleManager ..."
+cd "${INST_DIR}/html"
+/usr/bin/php ScheduleManager.php >/dev/null 2>&1 || true
+cd "${INST_DIR}"
+
+# ── 8. Initialer Wetterdatenabruf ────────────────────────────────────────────
+if [ ! -s "${DATA_DIR}/weatherData.sqlite" ]; then
+    bashio::log.info "Lade initiale Wetterdaten ..."
+    "${INST_DIR}/start_PythonScript.sh" "${INST_DIR}/FORECAST/Forecast_solar__WeatherData.py" || true
+fi
+
+# ── 9. EnergyController (WebSocket/API Backend) ──────────────────────────────
+bashio::log.info "Starte EnergyController ..."
+"${INST_DIR}/start_PythonScript.sh" -o /dev/null EnergyController.py &
+
+# ── 10. crond ────────────────────────────────────────────────────────────────
+if ! grep -q "db_scheduler.py" /var/tmp/www-data 2>/dev/null; then
+    printf '# DO NOT EDIT\n* * * * * /usr/bin/python3 /home/GEN24/db_scheduler.py\n' \
+        > /var/tmp/www-data
+fi
+crontab /var/tmp/www-data
+bashio::log.info "GEN24 Ladesteuerung läuft. crond startet ..."
+exec /usr/sbin/crond -f -d 8
