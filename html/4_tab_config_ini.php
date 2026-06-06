@@ -172,6 +172,7 @@ select {
 </style>
 
 <?php
+date_default_timezone_set('Europe/Berlin');
 # config.ini parsen
 require_once "config_parser.php";
 

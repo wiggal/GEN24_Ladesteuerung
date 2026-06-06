@@ -188,4 +188,4 @@ if ! grep -q "db_scheduler.py" /var/tmp/www-data 2>/dev/null; then
 fi
 crontab /var/tmp/www-data
 bashio::log.info "GEN24 Ladesteuerung läuft. crond startet ..."
-exec /usr/sbin/crond -f -d 8
+exec /usr/sbin/crond -f -d 9
