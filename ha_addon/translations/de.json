@@ -1,2 +1,8 @@
 {
+  "configuration": {
+    "force_reinstall": {
+      "name": "Repo neu klonen",
+      "description": "ACHTUNG: Nach dem Neustart bitte wieder deaktivieren. Löscht und klont das lokale Repository beim nächsten Start neu. NUR nötig bei Problemen mit git pull!"
+    }
+  }
 }

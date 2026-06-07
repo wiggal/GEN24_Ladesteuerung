@@ -13,11 +13,13 @@ bashio::log.info "╚═══════════════════�
 INST_DIR="/home/GEN24"
 DATA_DIR="/homeassistant/gen24_ladesteuerung"
 CONFIG_DIR="${DATA_DIR}/CONFIG"
-export PYTHONPATH="${INST_DIR}/FUNCTIONS"
+REPO_DIR="${DATA_DIR}/GEN24"
+export PYTHONPATH="${REPO_DIR}/FUNCTIONS"
 
 # Resilienz-Verzeichnisse frühzeitig anlegen
 mkdir -p "${DATA_DIR}"
 mkdir -p "${CONFIG_DIR}"
+mkdir -p "${REPO_DIR}"
 
 # --- Git-Quelle ---
 GIT_REPO=https://github.com/wiggal/GEN24_Ladesteuerung
@@ -27,35 +29,43 @@ GIT_BRANCH="v0.42.5"
 bashio::log.info "Starte Git-Abgleich..."
 
 # ── 2. Prüfen, ob das Zielverzeichnis existiert und ein Git-Repository ist ──────
-if [ -d "$INST_DIR/.git" ]; then
-    bashio::log.info "Ordner existiert bereits. Führe Git Pull aus..."
-    cd "$INST_DIR"
+if bashio::config.true 'force_reinstall' 2>/dev/null; then
+    bashio::log.info "Force-Reinstall: lösche Repo..."
+    rm -rf "${REPO_DIR}"
+    mkdir -p "${REPO_DIR}"
+fi
 
-    # Git anweisen, den lokalen Stand notfalls zu überschreiben, falls Konflikte da sind
+if [ -d "${REPO_DIR}/.git" ]; then
+    bashio::log.info "Repo vorhanden. Führe Git Pull aus..."
+    cd "${REPO_DIR}"
     git fetch --all
-    git reset --hard origin/main || git reset --hard origin/master
-    git pull
-
+    git reset --hard "origin/${GIT_BRANCH}"
     bashio::log.info "Update erfolgreich abgeschlossen."
 else
-    bashio::log.info "Ordner existiert nicht oder ist leer. Starte Git Clone..."
-    # --- Repo klonen (Branch falls vorhanden, sonst main) ---
+    bashio::log.info "Starte Git Clone..."
     if [ "${GIT_BRANCH}" != "main" ] && \
-       git ls-remote --exit-code --heads "${GIT_REPO}" "${GIT_BRANCH}" > /dev/null 2>&1; then \
-        echo ">>> Branch '${GIT_BRANCH}' auf ${GIT_REPO} gefunden – clonen..." && \
-        git clone --branch "${GIT_BRANCH}" "${GIT_REPO}" ${INST_DIR}; \
-    else \
-        echo ">>> Branch '${GIT_BRANCH}' nicht gefunden oder main – clone main von ${GIT_REPO}..." && \
-        git clone --branch main "${GIT_REPO}" ${INST_DIR}; \
+       git ls-remote --exit-code --heads "${GIT_REPO}" "${GIT_BRANCH}" > /dev/null 2>&1; then
+        echo ">>> Branch '${GIT_BRANCH}' auf ${GIT_REPO} gefunden – clonen..."
+        git clone --branch "${GIT_BRANCH}" "${GIT_REPO}" "${REPO_DIR}"
+    else
+        echo ">>> Branch '${GIT_BRANCH}' nicht gefunden oder main – clone main von ${GIT_REPO}..."
+        git clone --branch main "${GIT_REPO}" "${REPO_DIR}"
     fi
     bashio::log.info "Repository erfolgreich geklont."
 fi
+
+# Symlink /home/GEN24 → persistentes Repo
+rm -f "${INST_DIR}"
+ln -sf "${REPO_DIR}" "${INST_DIR}"
+# Ab hier direkt auf echten Pfad arbeiten
+INST_DIR="${REPO_DIR}"
 
 # ── 3. Zeitzone aus den HA-Systemeinstellungen holen ──────────────────────────
 TIMEZONE=$(bashio::info.timezone)
 export TZ="${TIMEZONE}"
 if [ -f "/usr/share/zoneinfo/${TIMEZONE}" ]; then
     cp "/usr/share/zoneinfo/${TIMEZONE}" /etc/localtime
+    echo "${TIMEZONE}" > /etc/timezone
     bashio::log.info "Zeitzone: ${TIMEZONE}"
 else
     bashio::log.warning "Zeitzone '${TIMEZONE}' nicht gefunden, nutze UTC."
@@ -74,7 +84,6 @@ ini_get() {
 # 4a. default_priv.ini
 if [ ! -f "${CONFIG_DIR}/default_priv.ini" ]; then
     bashio::log.info "Erstinstallation: Erstelle default_priv.ini aus Template..."
-    # Wir legen die Datei mit deinen gewünschten Vorgabewerten als Startpunkt an
     sed \
         -e "s|^hostNameOrIp *=.*|hostNameOrIp = 192.168.178.99|" \
         -e "s|^password *=.*|password = 'Kennwort_customer'|" \
@@ -93,8 +102,6 @@ fi
 if [ ! -f "${CONFIG_DIR}/weather_priv.ini" ]; then
     bashio::log.info "Erstinstallation: Erstelle weather_priv.ini aus Template..."
     cp "${INST_DIR}/CONFIG/weather.ini" "${CONFIG_DIR}/weather_priv.ini"
-
-    # Hier werden deine Standard-Wetterdaten direkt per sed oder awk reingeschrieben
     sed -i \
         -e "s|^lat *=.*|lat = 48.59|" \
         -e "s|^lon *=.*|lon = 12.25|" \
@@ -153,7 +160,7 @@ _db_init \
     "${INST_DIR}/CONFIG/Prog_Steuerung.sqlite" \
     "from SQLall import sqlall; sqlall().create_database_ProgSteuerung('${CONFIG_DIR}/Prog_Steuerung.sqlite')"
 
-# Config-Symlinks
+# Config-Symlinks (direkt auf REPO_DIR, kein doppelter Symlink)
 rm -f "${INST_DIR}/CONFIG/default_priv.ini"  && ln -sf "${CONFIG_DIR}/default_priv.ini"  "${INST_DIR}/CONFIG/default_priv.ini"
 rm -f "${INST_DIR}/CONFIG/charge_priv.ini"   && ln -sf "${CONFIG_DIR}/charge_priv.ini"   "${INST_DIR}/CONFIG/charge_priv.ini"
 rm -f "${INST_DIR}/CONFIG/weather_priv.ini"  && ln -sf "${CONFIG_DIR}/weather_priv.ini"  "${INST_DIR}/CONFIG/weather_priv.ini"
