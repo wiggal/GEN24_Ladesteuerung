@@ -4,9 +4,9 @@
 # ==============================================================================
 set -e
 
-bashio::log.info "╔══════════════════════════════════════╗"
-bashio::log.info "║   GEN24 Ladesteuerung – Addon Start  ║"
-bashio::log.info "╚══════════════════════════════════════╝"
+bashio::log.info "╔═══════════════════════════════╗"
+bashio::log.info "║   EnergyWIGGAL – App Start    ║"
+bashio::log.info "╚═══════════════════════════════╝"
 
 
 # ── 1. Konfiguration festlegen ───────────────────────────────────────────────

@@ -1,5 +1,5 @@
 # ============================================================
-# GEN24 Ladesteuerung – Home Assistant Addon
+# GEN24 Ladesteuerung – Home Assistant App
 # Build-Kontext ist das ha_addon/ Verzeichnis selbst.
 # Der Repo-Code wird per git clone geholt.
 # ============================================================

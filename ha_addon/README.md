@@ -1,25 +1,25 @@
-# GEN24 Ladesteuerung – Home Assistant Addon
+# EnergyWIGGAL – Home Assistant App
 
-Home Assistant Wrapper für [GEN24_Ladesteuerung (EnergyWIGGAL)](https://github.com/wiggal/GEN24_Ladesteuerung) –
+Home Assistant Wrapper für [EnergyWIGGAL](https://github.com/wiggal/GEN24_Ladesteuerung) –
 ermöglicht Betrieb und Konfiguration direkt aus Home Assistant heraus.
 
 ---
 
 ## Installation
-Das Addon baut den Code direkt aus dem Repository-Inhalt.
+Die App baut den Code direkt aus dem Repository-Inhalt.
 
 ### Repository in HA hinzufügen
 
-1. **Einstellungen → Addons → Addon-Store → ⋮ (Drei-Punkte-Menü) → Repositories**
+1. **Einstellungen → Apps → App-Store → ⋮ (Drei-Punkte-Menü) → Repositories**
 2. URL eintragen:
    ```
    https://github.com/wiggal/GEN24_Ladesteuerung
    ```
 3. **Hinzufügen** → Store neu laden
-4. „GEN24 Ladesteuerung" erscheint als Addon (evtl. suchen) → **Installieren**
+4. „EnergyWIGGAL" erscheint als App (evtl. suchen) → **Installieren**
 
 
-## Update/Aktualisieren des Addons
+## Update/Aktualisieren der App
 
 - Ein Update erfolgt durch einen `git pull` auf das Repository.
 - Bei Fehlern in lokalen Repository kann mit dem Schalter `Repo neu klonen` 
@@ -37,13 +37,13 @@ Das Addon baut den Code direkt aus dem Repository-Inhalt.
 
 ## Konfiguration
 
-Die Konfiguration erfolgt vollständig im ADDON  **GEN24 Ladesteuerung  → TAB config**.
+Die Konfiguration erfolgt vollständig in der App  **EnergyWIGGAL  → TAB config**.
 
 ---
 
 ## Persistente Datenhaltung
 
-Alle Daten liegen im HA-Addon-Datenspeicher – **sie überleben eine Deinstallation**
+Alle Daten liegen im HA-APP-Datenspeicher – **sie überleben eine Deinstallation**
 
 ```
 config/gen24_ladesteuerung/     (auf dem HA-Host)
@@ -75,7 +75,7 @@ config/gen24_ladesteuerung/     (auf dem HA-Host)
 
 ```
 GEN24_Ladesteuerung/
-├── repository.yaml          ← macht das Repo zum HA-Addon-Store
+├── repository.yaml          ← macht das Repo zum HA-App-Store
 ├── ha_addon/                ← dieses Verzeichnis
 │   ├── config.yaml
 │   ├── Dockerfile

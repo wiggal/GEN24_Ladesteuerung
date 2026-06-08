@@ -4,6 +4,3 @@ build_from:
   amd64:   "ghcr.io/home-assistant/amd64-base:3.20"
   armhf:   "ghcr.io/home-assistant/armhf-base:3.20"
   armv7:   "ghcr.io/home-assistant/armv7-base:3.20"
-
-args:
-  BUILD_VERSION: "0.42.1"

@@ -15,7 +15,7 @@
 
 ![new](pics/new.png)  
 Ab Version: **0.42.5**  
-- GEN24 Ladesteuerung – Home Assistant Wrapper. 
+- [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/WIKI/HA_README.md)
 
 Ab Version: **0.42.4**  
 - Grafische CronJob-Verwaltung in der WebUI unter Settings => ⏱  Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 

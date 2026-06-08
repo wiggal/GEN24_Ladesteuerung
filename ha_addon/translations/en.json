@@ -1,0 +1,8 @@
+{
+  "configuration": {
+    "force_reinstall": {
+      "name": "Repository Re-clone",
+      "description": "WARNING: Disable this again after the restart. Deletes the local repository and performs a fresh clone on the next startup. Only required if there are issues with git pull!"
+    }
+  }
+}
