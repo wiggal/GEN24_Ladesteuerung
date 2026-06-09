@@ -10,15 +10,15 @@
 - Akkuschonung: Um einen LFP-Akku zu schonen, kann die Ladeleistung z.B. ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt werden. Es ist auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
 - [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden, mit grafischer Darstellung.  
 - [Ladesteuerung des Wattpiloten](#-wallboxsteuerung), für E-Autos 🚘 über OCPP.
+- [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/WIKI/HA_README.md)
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
-- GEN24 Ladesteuerung – Home Assistant Wrapper.  
 
 ![new](pics/new.png)  
 Ab Version: **0.42.5**  
 - [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/WIKI/HA_README.md)
 
 Ab Version: **0.42.4**  
-- Grafische CronJob-Verwaltung in der WebUI unter Settings => ⏱  Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 
+- Grafische CronJob-Verwaltung in der WebUI unter Settings => ⏱Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 
 
 Ab Version: **0.42.0**  
 - 🚘 Steuerung des Wattpiloten, nun auch mit NextTrip.  
@@ -48,6 +48,9 @@ Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu 
 
 Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach dessen Download automatisch durchgeführt werden. 
 Für eine manuelle Installation, bzw. genauere Installationshinweise im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).   
+![new](pics/new.png)
+Settings => ⏱Scheduler
+![Settings=>Scheduler](pics/scheduler.png)
 
 ### 🌦️ Prognoseskripte in FORECAST
 
@@ -69,11 +72,10 @@ Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss h
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
 ### 💲🔌 DynamicPriceCheck.py
-Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
-**Crontab Beispiel** (-o = alternatives Logfile):
-```
-58 * * * * /DIR/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py schreiben
-```
+Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. 
+Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
+Siehe hierzu Settings => ⏱Scheduler.
+
 Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von EnergyController.py auf den GEN24 geschrieben.  
 Hier das Diagramm zu den dynamischen Strompreisen:
 ![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
