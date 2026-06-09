@@ -22,7 +22,7 @@ mkdir -p "${CONFIG_DIR}"
 mkdir -p "${REPO_DIR}"
 
 # --- Git-Quelle ---
-GIT_REPO=https://github.com/wiggal/GEN24_Ladesteuerung
+GIT_REPO=https://tuxis.de/git/GEN24_ENTW_TUXIS_HA/
 GIT_BRANCH="v0.42.5"
 
 
@@ -36,20 +36,23 @@ if bashio::config.true 'force_reinstall' 2>/dev/null; then
 fi
 
 if [ -d "${REPO_DIR}/.git" ]; then
-    bashio::log.info "Repo vorhanden. Führe Git Pull aus..."
+    bashio::log.info "Repo vorhanden. Führe Git Update aus..."
     cd "${REPO_DIR}"
     git fetch --all
     git reset --hard "origin/${GIT_BRANCH}"
-    bashio::log.info "Update erfolgreich abgeschlossen."
+    bashio::log.info "Update erfolgreich abgeschlossen (origin/${GIT_BRANCH})."
 else
     bashio::log.info "Starte Git Clone..."
     if [ "${GIT_BRANCH}" != "main" ] && \
        git ls-remote --exit-code --heads "${GIT_REPO}" "${GIT_BRANCH}" > /dev/null 2>&1; then
-        echo ">>> Branch '${GIT_BRANCH}' auf ${GIT_REPO} gefunden – clonen..."
+        bashio::log.info "Branch '${GIT_BRANCH}' auf ${GIT_REPO} gefunden – clonen..."
         git clone --branch "${GIT_BRANCH}" "${GIT_REPO}" "${REPO_DIR}"
-    else
-        echo ">>> Branch '${GIT_BRANCH}' nicht gefunden oder main – clone main von ${GIT_REPO}..."
+    elif git ls-remote --exit-code --heads "${GIT_REPO}" main > /dev/null 2>&1; then
+        bashio::log.info "Branch '${GIT_BRANCH}' nicht gefunden – clone main von ${GIT_REPO}..."
         git clone --branch main "${GIT_REPO}" "${REPO_DIR}"
+    else
+        bashio::log.error "Weder Branch '${GIT_BRANCH}' noch 'main' auf ${GIT_REPO} gefunden – Abbruch."
+        exit 1
     fi
     bashio::log.info "Repository erfolgreich geklont."
 fi

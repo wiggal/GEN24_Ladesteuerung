@@ -1,7 +1,7 @@
 # EnergyWIGGAL – Home Assistant App
 
 Home Assistant Wrapper für [EnergyWIGGAL](https://github.com/wiggal/GEN24_Ladesteuerung) –
-ermöglicht Betrieb und Konfiguration direkt aus Home Assistant heraus.
+ermöglicht Betrieb und Konfiguration direkt aus Home Assistant heraus. [WIKI](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 ---
 
