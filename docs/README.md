@@ -18,7 +18,7 @@ Ab Version: **0.42.5**
 - [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/WIKI/HA_README.md)
 
 Ab Version: **0.42.4**  
-- Grafische CronJob-Verwaltung in der WebUI unter Settings => ⏱Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 
+- Grafische CronJob-Verwaltung in der WebUI unter Settings => Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 
 
 Ab Version: **0.42.0**  
 - 🚘 Steuerung des Wattpiloten, nun auch mit NextTrip.  
@@ -49,7 +49,7 @@ Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu 
 Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach dessen Download automatisch durchgeführt werden. 
 Für eine manuelle Installation, bzw. genauere Installationshinweise im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).   
 ![new](pics/new.png)
-Settings => ⏱Scheduler
+Cronjobs werden nun unter Settings => Scheduler konfiguriert:
 ![Settings=>Scheduler](pics/scheduler.png)
 
 ### 🌦️ Prognoseskripte in FORECAST
@@ -74,7 +74,7 @@ da dies das Batteriemanagement des GEN24 selber regelt (auch über der definiert
 ### 💲🔌 DynamicPriceCheck.py
 Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. 
 Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
-Siehe hierzu Settings => ⏱Scheduler.
+Siehe hierzu Settings => Scheduler.
 
 Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von EnergyController.py auf den GEN24 geschrieben.  
 Hier das Diagramm zu den dynamischen Strompreisen:
