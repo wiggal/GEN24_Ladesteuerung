@@ -194,7 +194,7 @@ if __name__ == '__main__':
 
 
                     # Geamtprognose und Ladewert berechnen mit Funktion getLadewert
-                    PrognoseUNDUeberschuss = progladewert_inst.getLadewert(BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt)
+                    PrognoseUNDUeberschuss = progladewert_inst.getLadewert(BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt, MaxLadung)
                     TagesPrognoseGesamt = PrognoseUNDUeberschuss[0]
                     Grundlast_Summe = PrognoseUNDUeberschuss[1]
                     aktuellerLadewert = PrognoseUNDUeberschuss[2]

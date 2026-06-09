@@ -73,7 +73,7 @@ class progladewert:
         self.DEBUG_Ausgabe += "\nDEBUG FesteEntladegrenze index " + str(index) + " = " + str(values[index])
         return int(values[index]), self.DEBUG_Ausgabe
 
-    def getLadewert(self, BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt):
+    def getLadewert(self, BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt, MaxLadung):
             # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
             format_Tag = "%Y-%m-%d"
             # aktuelle Stunde und aktuelle Minute
@@ -205,6 +205,11 @@ class progladewert:
             if((Pro_Ertrag_Tag_tmp - Grundlast_Sum) < BattKapaWatt_akt):
                 aktuellerLadewert = self.MaxLadung
                 LadewertGrund = "TagesPrognose - Grundlast_Summe < aktuelleBattKapazität"
+
+            # Damit nicht noch knapp vor MaxLadung ein Wert geschrieben wird
+            # Wenn aktuellerLadewert > 95% von MaxLadung dann MaxLadung
+            if (aktuellerLadewert > (MaxLadung * 0.95)):
+                aktuellerLadewert = MaxLadung
     
             return int(Pro_Ertrag_Tag), Grundlast_Sum, aktuellerLadewert, LadewertGrund
     
