@@ -191,7 +191,7 @@ echo '<label style="display:none"><input type="checkbox" name="DEBUG" value="ein
 echo '<label style="display:none"><input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '></label>';
 echo "\n";
 echo '<input type="hidden" name="letzte_suche" value="'.$suchstring_anzeige.'">'."\n";
-echo '<input type="input" name="suchstring" placeholder="'.$suchstring_anzeige.'" size="10">'."\n";
+echo '<input type="text" name="suchstring" placeholder="'.$suchstring_anzeige.'" size="10" title="Mehrere Suchbegriffe mit | trennen (z.B. OK|INFO)">'."\n";
 echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
 echo '</form>'."\n";
 echo '</div>';
@@ -238,7 +238,12 @@ switch ($case) {
     break;
 
     case 'filter':
-    $suchstring = trim($_POST["suchstring"] ?? '') ?: 'geschrieben';
+    if (!empty($_POST['suchstring'])) {
+        $suchstring = trim($_POST["suchstring"] ?? '');
+    } else {
+        $suchstring = htmlspecialchars($_POST['letzte_suche'] ?? 'geschrieben');
+    }
+    
     $BEGIN_DATUM = '';
     $BEGIN_UHRZEIT = '';
     # Ausgabe der gesuchten Zeile mit Datumszeile 
@@ -264,7 +269,7 @@ switch ($case) {
             }
         }
         if ($Ausgabe == 1) {
-            if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . preg_quote($suchstring, '/') . '/', $Zeile)) {
+            if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . $suchstring . '/', $Zeile)) {
                 $hatEigeneDatumzeile = preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $Zeile);
                 if (!$hatEigeneDatumzeile && ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '')) {
                     echo htmlspecialchars($BEGIN_UHRZEIT . " " . $BEGIN_DATUM) . "<br>";
