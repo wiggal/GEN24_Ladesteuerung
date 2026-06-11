@@ -1,4 +1,18 @@
 ![Logo](pics/Logo.png)
+
+![License](https://img.shields.io/github/license/wiggal/GEN24_Ladesteuerung)
+![Debian](https://img.shields.io/badge/Debian-supported-A81D33?logo=debian)
+![Alpine Linux](https://img.shields.io/badge/Alpine%20Linux-3.x-0D597F?logo=alpinelinux)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python)
+![PHP](https://img.shields.io/badge/PHP-8.x-777BB4?logo=php)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite)
+![Chart.js](https://img.shields.io/badge/Chart.js-4.x-FF6384?logo=chartdotjs)<br>
+![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-compatible-C51A4A?logo=raspberrypi)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)
+![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2023.1%2B-41BDF5?logo=homeassistant)
+![Fronius](https://img.shields.io/badge/Fronius-GEN24-E2001A?logo=data:image/svg+xml;base64,...)
+![Wattpilot](https://img.shields.io/badge/Fronius-Wattpilot-E2001A)
+![OCPP](https://img.shields.io/badge/OCPP-1.6J-00A651)
 ## ⚡☀️ EnergyWIGGAL🔋🚘
 ## [📚 Wiki 📚](https://wiggal.github.io/GEN24_Ladesteuerung/)
 

@@ -285,7 +285,9 @@ img {
     height: auto;
     display: block;
 }
-
+#content-container p img {
+    display: inline-block;
+}
 iframe, video {
     max-width: 100%;
     height: auto;
