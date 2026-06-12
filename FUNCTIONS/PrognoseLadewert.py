@@ -371,7 +371,7 @@ class progladewert:
         return PrognoseMorgen, Eigen_Opt_Std, int(Eigen_Opt_Std_neu), Dauer_Nacht_Std, AkkuZielProz, DEBUG_Eig_opt, Backup_Reserve
     
     def getAkkuschonWert(self, BattStatusProz, BattganzeLadeKapazWatt, alterLadewert, aktuellerLadewert):
-        HysteProdFakt = 1
+        HysteProdFakt = 3
         Ladefaktor = 1
         BattStatusProz_Grenze = 100
         DEBUG_Ausgabe = ""
@@ -393,7 +393,7 @@ class progladewert:
         # Bei Akkuschonung Schaltverzögerung (hysterese), wenn Ladewert ist bereits der Akkuschonwert (+/- 3W) BattStatusProz_Grenze 5% runter
         if ( abs(AkkuschonungLadewert - alterLadewert) < 3 ):
             BattStatusProz_Grenze = BattStatusProz_Grenze * 0.95
-            HysteProdFakt = 5
+            HysteProdFakt = 6
 
         if BattStatusProz >= BattStatusProz_Grenze:
             DEBUG_Ausgabe += "DEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
@@ -436,9 +436,9 @@ class progladewert:
         # ACHTUNG: SOC_Proz_Grenze wird hier in der Methode geändert!
         SOC_Proz_Grenze_org = SOC_Proz_Grenze
         if (alterLadewert == 0):
-            SOC_Proz_Grenze = SOC_Proz_Grenze - 3
+            SOC_Proz_Grenze = SOC_Proz_Grenze - 5
 
-        # Wenn ein DEBUG
+        # Wenn DEBUG eingeschaltet
         if PrognoseLimit_SOC >= 0:
             DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< Ladebegrenzung auf "+str(SOC_Proz_Grenze_org)+"% SOC >>>>>>>>>>>>>"
             DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
@@ -447,7 +447,7 @@ class progladewert:
         if ManuelleStrg_Akkuschon == 0:
             DEBUG_Ausgabe += "\nDEBUG Keine Begrenzung, da Akkuschonung in LadeStrg abgewählt!"
 
-        # Begrenzung nur wenn ManuelleStrg_Akkuschon > 0
+        # Begrenzung auch wenn ManuelleStrg_Akkuschon > 0
         if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC and ManuelleStrg_Akkuschon > 0:
             aktuellerLadewert = 0
             # Aufruf mit self.
