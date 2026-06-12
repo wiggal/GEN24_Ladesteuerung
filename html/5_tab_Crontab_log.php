@@ -246,6 +246,7 @@ switch ($case) {
     
     $BEGIN_DATUM = '';
     $BEGIN_UHRZEIT = '';
+    $BEGIN_Merken = '';
     # Ausgabe der gesuchten Zeile mit Datumszeile 
     while(!feof($myfile)) {
         $Zeile = fgets($myfile);
@@ -272,7 +273,10 @@ switch ($case) {
             if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . $suchstring . '/', $Zeile)) {
                 $hatEigeneDatumzeile = preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $Zeile);
                 if (!$hatEigeneDatumzeile && ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '')) {
-                    echo htmlspecialchars($BEGIN_UHRZEIT . " " . $BEGIN_DATUM) . "<br>";
+                    if ($BEGIN_Merken !== $BEGIN_DATUM . $BEGIN_UHRZEIT) {
+                        echo htmlspecialchars($BEGIN_UHRZEIT . " " . $BEGIN_DATUM) . "<br>";
+                        $BEGIN_Merken = $BEGIN_DATUM . $BEGIN_UHRZEIT;
+                    }    
                 }
                 echo htmlspecialchars($Zeile) . "<br>";
             }
