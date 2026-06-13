@@ -1,4 +1,4 @@
-**[0.42.5] – 2026-XX-XX**  
+**[0.42.5] – 2026-06-13**  
 **NEU**  
 - Bereitstellung eines **x0HomeAssistant-Addonsi** als Wrapper.  
   Installationsrepository: https://github.com/wiggal/GEN24_Ladesteuerung  
