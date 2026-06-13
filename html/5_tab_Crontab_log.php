@@ -138,6 +138,8 @@ if (file_exists('/tmp/ocpp.log')) {
 
 // --- Tabelle mit Download-Symbol & Anzeige-Link ---
 echo '<div class="download">';
+echo '<details id="logdateien">';
+echo '<summary><b>Logdateien:</b></summary>';
 echo '<table>';
 foreach ($logFiles as $log) {
     $basename = basename($log); 
@@ -159,6 +161,7 @@ foreach ($logFiles as $log) {
     echo '</tr>';
 }
 echo '</table>';
+echo '</details>';
 echo '</div>';
 echo "\n";
 
@@ -195,7 +198,7 @@ echo '<input type="text" name="suchstring" placeholder="'.$suchstring_anzeige.'"
 echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
 echo '</form>'."\n";
 echo '</div>';
-echo '<br><br><br><br><br><br><br><br>';
+echo '<br><br><br><br><br><br>';
 
 $letzteWarLeer = false;
 
@@ -232,7 +235,11 @@ switch ($case) {
             }
             // reguläre Zeile anzeigen und Flag zurücksetzen
             $letzteWarLeer = false;
-            echo htmlspecialchars($Zeile) . "<br>";
+            if (preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $Zeile)) {
+                echo $Zeile . "<br>";
+            } else {
+                echo htmlspecialchars($Zeile) . "<br>";
+            }
         }
     }
     break;
@@ -278,7 +285,11 @@ switch ($case) {
                         $BEGIN_Merken = $BEGIN_DATUM . $BEGIN_UHRZEIT;
                     }    
                 }
-                echo htmlspecialchars($Zeile) . "<br>";
+                if (preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $Zeile)) {
+                    echo $Zeile . "<br>";
+                } else {
+                    echo htmlspecialchars($Zeile) . "<br>";
+                }
             }
         }
     }
