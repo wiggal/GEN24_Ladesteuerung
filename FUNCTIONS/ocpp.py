@@ -784,6 +784,17 @@ class OCPPManager:
                         st.phase_candidate = None
                         st.append_debug({"note": "stop-delay-candidate-dropped-surplus", "ts": iso_now()})
                     st.append_debug({"note": "stop-candidate-reset-on-surplus", "amp": amp_allowed, "ts": iso_now()})
+                    # Phasenwechsel-Hysterese nachholen: der phase_changed-Block oben konnte nicht
+                    # greifen weil stop_candidate zu dem Zeitpunkt noch gesetzt war. Jetzt ist er
+                    # gecleared → Hysterese jetzt starten falls Phasenwechsel gewünscht und
+                    # wb_phases=="0" (automatisch) und noch kein passender Kandidat läuft.
+                    if (phase_changed and not is_initial_change and is_charging_requested
+                            and self.wb_phases == "0"
+                            and (not st.phase_candidate or st.phase_candidate.get('requested') != requested_phase)):
+                        st.phase_candidate = {'requested': requested_phase, 'since': datetime.now()}
+                        phase_changed = False
+                        cinfo(f"[{st.log_cp_id}] Phasenwechsel-Hysterese gestartet (nach Stop-Reset) – warte {self.PHASE_CHANGE_CONFIRM_S}s vor Wechsel auf {requested_phase}P.")
+                        st.append_debug({"note": "phase-hysteresis-start-post-stop-reset", "requested": requested_phase, "ts": iso_now()})
                 if status in ["Available", "AvailableRequested", "SuspendedEVSE", "Finishing"] and not active_tx_id:
                     # Start-Hysterese: kurze PV-Spitzen nicht sofort starten
                     # – außer Fahrzeug wurde gerade erst angesteckt ODER kein PV-Modus aktiv
