@@ -1,4 +1,5 @@
 **[0.42.6] – 2026-XX-XX**  
+- FIX: Wegen Mapping im Docker, `Rotate XX.log` von `mv ` auf `cp ` umgestell, mit Migration.  
 
 **[0.42.5] – 2026-06-13**  
 **NEU**  

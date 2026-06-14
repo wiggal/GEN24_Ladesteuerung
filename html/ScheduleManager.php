@@ -57,9 +57,10 @@ function get_db($path, $GEN24_DIR) {
                 ['Solcast WeatherData',       '0',        '6,8,11,13,15',        '*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Solcast_WeatherData.py',0,                            'Solcast'],
                 ['Akkudoktor WeatherData',    '0',        '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py',0,                        'Akkudoktor'],
                 ['OpenMeteo WeatherData',     '35',       '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py',0,                          'OpenMeteo'],
-                ['DynamicPriceCheck',         '58',       '*',                   '*','*','*', $GEN24_DIR.'/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py schreiben',0,        'Dynamische Strompreise'],
-                ['Rotate Crontab.log',        '0',        '5',                   '*','*','1', 'mv '.$GEN24_DIR.'/Crontab.log '.$GEN24_DIR.'/old_Crontab.log',1,                                       'Log-Rotation Mo'],
-                ['Rotate DynPriceCheck.log',  '0',        '5',                   '*','*','1', 'mv '.$GEN24_DIR.'/DynPriceCheck.log '.$GEN24_DIR.'/old_DynPriceCheck.log',0,                           'Log-Rotation DynPrice Mo'],
+                ['DynamicPriceCheck',         '58',       '*',                   '*','*','*', $GEN24_DIR.'/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py schreiben',0,         'Dynamische Strompreise'],
+                // Container-sichere Log-Rotation via cp und > statt mv
+                ['Rotate Crontab.log',        '0',        '5',                   '*','*','1', 'cp '.$GEN24_DIR.'/Crontab.log '.$GEN24_DIR.'/old_Crontab.log; >'.$GEN24_DIR.'/Crontab.log',1,                                        'Log-Rotation Mo'],
+                ['Rotate DynPriceCheck.log',  '0',        '5',                   '*','*','1', 'cp '.$GEN24_DIR.'/DynPriceCheck.log '.$GEN24_DIR.'/old_DynPriceCheck.log; >'.$GEN24_DIR.'/DynPriceCheck.log',0,                            'Log-Rotation DynPrice Mo'],
             ];
             $stmt = $db->prepare(
                 "INSERT INTO cron_jobs
@@ -79,6 +80,32 @@ function get_db($path, $GEN24_DIR) {
                 $stmt->bindValue(':an', $now,  SQLITE3_TEXT);
                 $stmt->execute();
                 $stmt->reset();
+            }
+        } else {
+            // Migration vom 20260614 => bei Gelegenheit entferenen   #entWIGGlung
+            // AUTOMATISCHE MIGRATION: Bestehende mv-Befehle durch cp-Variante ersetzen
+            $check_stmt = $db->query("SELECT ID, Befehl FROM cron_jobs WHERE Name LIKE 'Rotate %'");
+            if ($check_stmt) {
+                while ($row = $check_stmt->fetchArray(SQLITE3_ASSOC)) {
+                    // Prüfen, ob der Befehl noch mit 'mv ' beginnt
+                    if (strpos($row['Befehl'], 'mv ') === 0) {
+                        $parts = explode(' ', $row['Befehl']);
+                        if (count($parts) >= 3) {
+                            $source_file = $parts[1];
+                            $target_file = $parts[2];
+
+                            // Neuen container-sicheren Befehl generieren
+                            $new_befehl = "cp {$source_file} {$target_file}; >{$source_file}";
+
+                            // In der Datenbank patchen
+                            $update_stmt = $db->prepare("UPDATE cron_jobs SET Befehl = :b WHERE ID = :id");
+                            $update_stmt->bindValue(':b', $new_befehl, SQLITE3_TEXT);
+                            $update_stmt->bindValue(':id', $row['ID'], SQLITE3_INTEGER);
+                            $update_stmt->execute();
+                            $update_stmt->close();
+                        }
+                    }
+                }
             }
         }
 
