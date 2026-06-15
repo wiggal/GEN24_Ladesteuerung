@@ -139,7 +139,9 @@ $EV_Reservierung = getSteuercodes('wallbox'); // Fester DB-Schlüssel
 $pv_mode = $EV_Reservierung['1']['Res_Feld1'] ?? 0;
 $phases  = $EV_Reservierung['1']['Res_Feld2'] ?? 1;
 $amp_options = $EV_Reservierung['1']['Options'] ?? '6,16';
-list($amp_min, $amp_max) = array_map('trim', explode(",", $amp_options . ","));
+$amp_parts = array_map('trim', explode(",", $amp_options));
+$amp_min = $amp_parts[0] ?? '6';
+$amp_max = $amp_parts[1] ?? '16';
 
 // Neue Einstellungen ID=2
 $min_charge_duration_s = $EV_Reservierung['2']['Res_Feld2'] ?? 600;       // MIN_CHARGE_DURATION_S
@@ -188,6 +190,10 @@ if (isset($_GET['ajax'])) {
     );
     $diff_ajax = abs($Q_ajax - $Z_ajax);
 
+    $cl_ajax = (float)($meter_values['current_limit'] ?? 0);
+    $ph_ajax = (int)($meter_values['phases'] ?? 0);
+    $kw_ajax = round($ph_ajax * $cl_ajax * 230 / 1000, 2);
+
     echo json_encode([
         'server_running'   => $server_running,
         'pid'              => $server_running && file_exists($SERVER_PID_FILE) ? intval(@file_get_contents($SERVER_PID_FILE)) : null,
@@ -198,6 +204,9 @@ if (isset($_GET['ajax'])) {
         'timestamp'        => time(),
         'loadbar_html'     => $html_ajax,
         'loadbar_diff'     => $diff_ajax,
+        'wallbox_amp'      => $cl_ajax,
+        'wallbox_phases'   => $ph_ajax,
+        'wallbox_kw'       => $kw_ajax,
     ]);
     exit;
 }
@@ -361,7 +370,7 @@ p, label {
 </style>
 <?php
   $current_url = urlencode($_SERVER['REQUEST_URI']);
-  $hilfe_link = "index.php?tab=Hilfe&file={$activeTab}";
+  $hilfe_link = "index.php?tab=Hilfe&file=" . ($activeTab ?? basename(__FILE__, '.php'));
 ?>
 <div class="hilfe"> <a href="<?php echo $hilfe_link; ?>"><b>Hilfe</b></a></div>
 <div class="card">
@@ -381,7 +390,7 @@ p, label {
     <p>
         <label>
             OCPP Client auswählen:
-            <select id="chargePointSelect" onchange="window.location.href='<?php echo $_SERVER['PHP_SELF']; ?>?cp_id=' + this.value">
+            <select id="chargePointSelect" onchange="var u=window.location.pathname+'?tab=Wallbox&cp_id='+encodeURIComponent(this.value); window.location.href=u;">
                 <?php foreach ($connected_list as $cp_id): ?>
                     <option value="<?php echo htmlspecialchars($cp_id); ?>" <?php if ($cp_id === $selected_charge_point_id) echo 'selected'; ?>>
                         <?php echo htmlspecialchars($cp_id); ?>
@@ -457,13 +466,14 @@ echo "</div>";
 <div class="card">
     <div class="wallboxwerte">
     <?php if ($client_connected): ?>
-        <p>Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php echo htmlspecialchars($meter_values['current_limit'] ?? '—'); 
-            echo 'A / ';
-            echo htmlspecialchars($meter_values['phases'] ?? '—'); 
-            echo 'PH / ';
-            echo htmlspecialchars($meter_values['phases'] * $meter_values['current_limit'] * 230 / 1000); ?>kW</strong></p>
-        <p>Ladedauer (Std:Min:Sek): <strong><?php echo gmdate("H:i:s", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
-        <p>Geladene kWh: <strong><?php echo htmlspecialchars($meter_values['charged_energy_kwh'] ?? 0); ?></strong>
+        <p>Wallboxwerte(0A=AUS): <strong id="currentAmp"><?php
+            $cl = (float)($meter_values['current_limit'] ?? 0);
+            $ph = (int)($meter_values['phases'] ?? 0);
+            echo htmlspecialchars($cl) . 'A / ' . htmlspecialchars($ph) . 'PH / ';
+            echo htmlspecialchars(round($ph * $cl * 230 / 1000, 2));
+            ?>kW</strong></p>
+        <p>Ladedauer (Std:Min): <strong><?php echo gmdate("H:i", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
+        <p>Geladene kWh: <strong><?php echo htmlspecialchars(round($meter_values['charged_energy_kwh'],1) ?? 0); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
         <?php
         // Button nur anzeigen, wenn Server läuft und Client verbunden ist.
@@ -627,7 +637,7 @@ function loadFromLocalStorage(id) {
 
 $(document).ready(function(){
     // IDs, die wir im localStorage zwischenhalten möchten
-    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh', 'MaxLeistHAkW'];
+    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh','ladezeitVon','ladezeitBis','strompreisFest','einspeiseVerg','MaxLeistHAkW'];
 
     // Load saved values
     ls_ids.forEach(function(id){ loadFromLocalStorage(id); });
@@ -904,13 +914,10 @@ function calculatePower() {
 // Einfaches Neuladen der Seite
 // ===================================
 function refreshData() {
-    var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
-
-    var url = window.location.pathname + "?tab=Wallbox";
-    if (current_cp_id) {
-        url += '&cp_id=' + encodeURIComponent(current_cp_id);
-    }
-
+    var params = new URLSearchParams(window.location.search);
+    params.set('tab', 'Wallbox');
+    // cp_id aus der aktuellen URL übernehmen, falls vorhanden
+    var url = window.location.pathname + '?' + params.toString();
     window.location.href = url;
 }
 
@@ -929,8 +936,8 @@ var lastValidLoadbar = null;
 })();
 
 function pollLoadbar() {
-    var cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
-    var url = window.location.pathname + "?tab=Wallbox&ajax=1";
+    var cp_id = new URLSearchParams(window.location.search).get('cp_id') || "";
+    var url = "<?php echo htmlspecialchars(basename(__FILE__)); ?>?ajax=1";
     if (cp_id) url += '&cp_id=' + encodeURIComponent(cp_id);
 
     $.getJSON(url, function(data) {
@@ -947,6 +954,14 @@ function pollLoadbar() {
                 container.innerHTML = lastValidLoadbar;
             }
         }
+
+        // Wallboxwerte aktualisieren
+        var ampEl = document.getElementById('currentAmp');
+        if (ampEl && typeof data.wallbox_amp !== 'undefined') {
+            ampEl.textContent = data.wallbox_amp + 'A / ' + data.wallbox_phases + 'PH / ' + data.wallbox_kw + 'kW';
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.warn('pollLoadbar AJAX-Fehler:', textStatus, errorThrown, url);
     });
 }
 
@@ -961,8 +976,9 @@ setInterval(refreshData, 60000);
 // ===================================
 // Zähler-Reset Logik 
 // ===================================
+$(document).ready(function(){
 $('#btnResetCounter').click(function(){
-    var cp_id = '<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>';
+    var cp_id = new URLSearchParams(window.location.search).get('cp_id') || '<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>';
 
     if (!cp_id) {
         alert("Fehler: Die Charge Point ID ist leer.");
@@ -988,6 +1004,7 @@ $('#btnResetCounter').click(function(){
             refreshData();
         }
     });
+});
 });
 
 </script>

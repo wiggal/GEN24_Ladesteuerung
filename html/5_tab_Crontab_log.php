@@ -245,7 +245,7 @@ echo '<br><br><br><br><br><br>'; // Die Abstände sorgen dafür, dass der eigent
 
 $letzteWarLeer = false;
 
-echo '<pre style="font-family: monospace; white-space: pre-wrap; word-wrap: break-word; font-size: 14px; text-align: left;">';
+echo '<pre style="font-family: monospace; white-space: pre-wrap; word-wrap: break-word; font-size: clamp(12px, 1.5vw, 14px); text-align: left;">';
 switch ($case) {
     case '':
     # AUSGEBEN DER Logdatei
