@@ -9,22 +9,30 @@ a.ende{
   text-decoration: none !important;
   font-size: 110%;
 }
+
+/* ==========================================================================
+   DESKTOP-EINSTELLUNGEN
+   ========================================================================== */
 .headertop{
   background-color:#ffffff;
   position: fixed;
-  left: 8px;
+  left: 16px;
+  top: 55px; /* Unterhalb der blauen Hauptnavigation (50px) */
+  z-index: 100;
 }
 .download{
   background-color:#ffffff;
   position: fixed;
-  right: 15px
+  right: 25px;
+  top: 55px; /* Unterhalb der blauen Hauptnavigation (50px) */
+  z-index: 101;
 }
 .checkbox {
   display: block;
 }
 
 table a {
-  display: inline-block;           /* wichtig, sonst unterstrich bei <span> */
+  display: inline-block;
   text-decoration: none !important;
   color: #007bff;
 }
@@ -38,13 +46,44 @@ table a {
   z-index: 9999;
 }
 
-/* Checkboxen untereinander auf Desktop */
-.checkbox {
-  display: block;
+/* Schiebt den Log-Text auf dem Desktop unter die fixierten Elemente */
+body {
+  padding-top: 130px !important;
 }
 
-/* Spezielle Anpassung für Mobilgeräte */
+/* ==========================================================================
+   MOBIL-EINSTELLUNGEN (max-width: 600px)
+   ========================================================================== */
 @media (max-width: 600px) {
+  /* Genug Platz nach oben für Hauptnavigation + Klappmenü + Filter */
+  body {
+    padding-top: 150px !important;
+  }
+
+  /* Das Klappmenü sitzt mobil unter der blauen Navigationsleiste (40px) */
+  .download {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 40px;
+    padding: 6px 10px 12px 10px; /* Erhöhtes Padding unten, um Lücke zu schließen */
+    z-index: 102; /* Höherer z-index, damit das Menü beim Aufklappen oben liegt */
+    background: #fff;
+  }
+
+  /* Der Filter wandert mobil direkt unter das Klappmenü */
+  .headertop {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 80px;
+    padding: 6px 10px;
+    z-index: 101;
+    background: #fff;
+    border-bottom: 1px solid #ccc; /* Schließt den gesamten Block optisch ab */
+    margin-top: -5px; /* Zieht das Element minimal hoch, um Blitzen zu verhindern */
+  }
+
   .bottom-bar form {
     flex-direction: column;
     align-items: flex-start;
@@ -58,6 +97,7 @@ table a {
 
   .content {
     font-size: 100% !important;
+    margin-top: 0 !important;
   }
 
   /* Suchfeld kleiner */
@@ -65,7 +105,7 @@ table a {
   input[type="text"] {
     font-size: 12px !important;
     padding: 4px 6px;
-    width: 100px;   /* optional, je nach Wunsch */
+    width: 140px;
   }
   /* Filter-Button kleiner */
   .content button {
@@ -99,14 +139,14 @@ table a {
 <?php
 # config.ini parsen
 require_once "config_parser.php";
-
 ?>
-<div id="top"><div>
+
+<div id="top"></div>
+
 <?php
 // --- Datei auswählen ---
 $log_file_param = isset($_REQUEST['log_file']) ? $_REQUEST['log_file'] : 'Crontab.log';
 
-// Wenn ocpp.log angefordert wird, nutzen wir direkt den absoluten Pfad im Container
 if ($log_file_param === 'ocpp.log' || basename($log_file_param) === 'ocpp.log') {
     $file = '/tmp/ocpp.log';
     $file_name = 'ocpp.log';
@@ -121,7 +161,6 @@ if ($log_file_param === 'ocpp.log' || basename($log_file_param) === 'ocpp.log') 
 if(!file_exists($file)) {
   die("Datei ". htmlspecialchars($file) ." ist nicht vorhanden!");
 } else {
-  // Sicherheits-Check für Container-Berechtigungen
   if (!is_readable($file)) {
       die("Datei " . htmlspecialchars($file) . " ist vorhanden, aber PHP hat keine Leserechte! (chmod 666 prüfen)");
   }
@@ -131,7 +170,6 @@ if(!file_exists($file)) {
 // --- Logdateien im Verzeichnis auslesen ---
 $logFiles = glob($PythonDIR . '/*.log');
 
-// --- /tmp/ocpp.log ergänzen wenn im Container vorhanden ---
 if (file_exists('/tmp/ocpp.log')) {
     $logFiles[] = '/tmp/ocpp.log';
 }
@@ -145,14 +183,12 @@ foreach ($logFiles as $log) {
     $basename = basename($log); 
     $nameWithoutExt = preg_replace('/\.log$/', '', $basename);
 
-    // --- Dateigröße ermitteln und in MB umrechnen ---
     $fileSizeInMB = 0;
     if (file_exists($log)) {
         $bytes = filesize($log);
-        $fileSizeInMB = round($bytes / 1048576, 2); // Auf 2 Nachkommastellen runden
+        $fileSizeInMB = round($bytes / 1048576, 2);
     }
 
-    // Spezialfall ocpp.log abfangen
     if ($log === '/tmp/ocpp.log') {
         $downloadLink = '5_download_log.php?log_file=ocpp.log';
         $viewLink = '?log_file=ocpp.log';
@@ -205,7 +241,7 @@ echo '<input type="text" name="suchstring" placeholder="'.$suchstring_anzeige.'"
 echo '<button type="submit"> &gt;&gt;filtern&lt;&lt; </button>';
 echo '</form>'."\n";
 echo '</div>';
-echo '<br><br><br><br><br><br>';
+echo '<br><br><br><br><br><br>'; // Die Abstände sorgen dafür, dass der eigentliche Log-Inhalt nicht unter dem Header startet
 
 $letzteWarLeer = false;
 
