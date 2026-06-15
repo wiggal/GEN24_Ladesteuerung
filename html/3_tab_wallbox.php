@@ -164,14 +164,40 @@ $einspeise_verg  = $EV_Reservierung['5']['Res_Feld2'] ?? 0.07;
 // -------------------------
 if (isset($_GET['ajax'])) {
     header('Content-Type: application/json; charset=utf-8');
+
+    // Ladebalken-HTML für AJAX berechnen
+    $solar_current_a   = round(($meter_values['Produktion_W'] ?? 0) / 1000, 1);
+    $battery_current_a = round(($meter_values['Batteriebezug_W'] ?? 0) / 1000, 1);
+    $grid_current_a    = round(($meter_values['Netzbezug_W'] ?? 0) / 1000, 1);
+    $Hausverbrauch_a   = round(($meter_values['Hausverbrauch'] ?? 0) / 1000, 1);
+    $car_power_ist_a   = round(($meter_values['power_w_ist']  ?? 0) / 1000, 1);
+    $car_power_soll_a  = round(($meter_values['power_w_soll'] ?? 0) / 1000, 1);
+
+    $Q_sum_a    = $solar_current_a + max(0, $battery_current_a) + max(0, $grid_current_a);
+    $in_batt_a  = max(0, -$battery_current_a);
+    $in_grid_a  = max(0, -$grid_current_a);
+    $basis_a    = $Hausverbrauch_a + $in_batt_a + $in_grid_a;
+    $abw_ist_a  = abs($Q_sum_a - ($basis_a + $car_power_ist_a));
+    $abw_soll_a = abs($Q_sum_a - ($basis_a + $car_power_soll_a));
+    $car_power_a = ($abw_ist_a <= $abw_soll_a) ? $car_power_ist_a : $car_power_soll_a;
+    if ($car_power_a < 0.2) $car_power_a = 0;
+    if ($Hausverbrauch_a < 0.1) $Hausverbrauch_a = 0.2;
+
+    [ $html_ajax, $Q_ajax, $Z_ajax ] = generateLoadBar(
+        $solar_current_a, $battery_current_a, $grid_current_a, $car_power_a, $Hausverbrauch_a
+    );
+    $diff_ajax = abs($Q_ajax - $Z_ajax);
+
     echo json_encode([
-        'server_running' => $server_running,
-        'pid' => $server_running && file_exists($SERVER_PID_FILE) ? intval(@file_get_contents($SERVER_PID_FILE)) : null,
-        'connected_list' => array_values($connected_list),
+        'server_running'   => $server_running,
+        'pid'              => $server_running && file_exists($SERVER_PID_FILE) ? intval(@file_get_contents($SERVER_PID_FILE)) : null,
+        'connected_list'   => array_values($connected_list),
         'client_connected' => $client_connected,
-        'meter_values' => $meter_values ?? new stdClass(),
-        'charge_point_id' => $selected_charge_point_id,
-        'timestamp' => time()
+        'meter_values'     => $meter_values ?? new stdClass(),
+        'charge_point_id'  => $selected_charge_point_id,
+        'timestamp'        => time(),
+        'loadbar_html'     => $html_ajax,
+        'loadbar_diff'     => $diff_ajax,
     ]);
     exit;
 }
@@ -422,10 +448,9 @@ if ($Hausverbrauch < 0.1) $Hausverbrauch = 0.2;
 
 // 4. Balkendiagramm generieren
 [ $html_neu, $Q_final, $Z_final ] = generateLoadBar($solar_current, $battery_current, $grid_current, $car_power, $Hausverbrauch);
-$diff = abs($Q_final - $Z_final);
+// $diff nicht mehr benötigt (war für localStorage-Cache)
 
-// Differenz und neue Werte als data-Attribute ausgeben — JavaScript entscheidet anhand localStorage
-echo "<div id=\"loadbar-container\" data-diff=\"{$diff}\" data-html=\"" . htmlspecialchars($html_neu) . "\">";
+echo "<div id=\"loadbar-container\">";
 echo $html_neu;
 echo "</div>";
 ?>
@@ -588,7 +613,7 @@ echo "</div>";
 <script>
 // --- FUNKTIONEN ZUM SPEICHERN/LADEN MIT localStorage ---
 
-function saveToLocalStorage(id) {self.Netzbezug
+function saveToLocalStorage(id) {
     var el = $('#' + id);
     if (el.length) localStorage.setItem(id, el.val());
 }
@@ -611,37 +636,6 @@ $(document).ready(function(){
     ls_ids.forEach(function(id){ 
         $('#' + id).on('change input', function(){ saveToLocalStorage(id); });
     });
-
-    // --- Logik für Next Trip Optionen Sichtbarkeit ---
-    function toggleNextTripVisibility() {
-        var selectedMode = $('#pvMode').val();
-        var nextTripDetails = document.getElementById('nextTripOptions');
-
-        if (selectedMode === '4') { // '4' ist NextTrip
-            nextTripDetails.setAttribute('open', 'open');
-        } else {
-            nextTripDetails.removeAttribute('open');
-        }
-    }
-
-    // Bei Änderung des PV-Modus umschalten
-    $('#pvMode').on('change', toggleNextTripVisibility);
-
-    // --- Bestehende Logik für "Erweiterte Optionen" (moreOptions) ---
-    // Diese bleibt unverändert, da sie bereits den User-Status via localStorage speichert
-    var moreOptionsKey = 'moreOptionsOpen';
-    var moreOptionsEl = document.getElementById('moreOptions');
-    if (moreOptionsEl) {
-        var stored = localStorage.getItem(moreOptionsKey);
-        if (stored === '1') {
-            moreOptionsEl.setAttribute('open', 'open');
-        } else {
-            moreOptionsEl.removeAttribute('open');
-        }
-        moreOptionsEl.addEventListener('toggle', function(){
-            localStorage.setItem(moreOptionsKey, this.open ? '1' : '0');
-        });
-    }
 
     // --- Zentrale Funktion zum Formatieren & Runden ---
     function formatAndRoundTime(inputVal) {
@@ -907,48 +901,62 @@ function calculatePower() {
   });
 
 // ===================================
-// Ladebalken-Cache via localStorage
-// ===================================
-(function() {
-    var container = document.getElementById('loadbar-container');
-    if (!container) return;
-
-    var diff = parseFloat(container.dataset.diff);
-    var htmlNeu = container.dataset.html;
-
-    if (diff <= 0.3) {
-        // Plausibel → als letzten gültigen Stand speichern
-        localStorage.setItem('loadbar_cache', htmlNeu);
-    } else {
-        // Abweichung zu groß → gecachten Stand wiederherstellen
-        var cached = localStorage.getItem('loadbar_cache');
-        if (cached) {
-            container.innerHTML = cached;
-        }
-    }
-})();
-
-// ===================================
 // Einfaches Neuladen der Seite
 // ===================================
 function refreshData() {
     var current_cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
 
-    // Wir bauen die URL nur mit der Charge Point ID zusammen
     var url = window.location.pathname + "?tab=Wallbox";
     if (current_cp_id) {
         url += '&cp_id=' + encodeURIComponent(current_cp_id);
     }
 
-    // Einfaches Neuladen per GET (keine POST-Felder mehr nötig)
     window.location.href = url;
 }
 
 // ===================================
-// Automatisches Neuladen
+// Ladebalken per AJAX aktualisieren
 // ===================================
-// Die benannte Funktion wird alle 20 Sekunden ausgeführt
-setInterval(refreshData, 15000); // 20000 ms = 20 Sekunden
+var lastValidLoadbar = null;
+
+// Einmalig alten localStorage-Cache übernehmen und bereinigen
+(function() {
+    var old = localStorage.getItem('loadbar_cache');
+    if (old) {
+        lastValidLoadbar = old;
+        localStorage.removeItem('loadbar_cache');
+    }
+})();
+
+function pollLoadbar() {
+    var cp_id = "<?php echo htmlspecialchars($selected_charge_point_id ?? ''); ?>";
+    var url = window.location.pathname + "?tab=Wallbox&ajax=1";
+    if (cp_id) url += '&cp_id=' + encodeURIComponent(cp_id);
+
+    $.getJSON(url, function(data) {
+        var container = document.getElementById('loadbar-container');
+        if (!container) return;
+
+        if (typeof data.loadbar_html !== 'undefined' && data.loadbar_html !== '') {
+            if (data.loadbar_diff <= 0.3) {
+                // Plausibel → anzeigen und merken
+                lastValidLoadbar = data.loadbar_html;
+                container.innerHTML = data.loadbar_html;
+            } else if (lastValidLoadbar) {
+                // Abweichung zu groß → letzten gültigen Stand anzeigen
+                container.innerHTML = lastValidLoadbar;
+            }
+        }
+    });
+}
+
+// Ladebalken alle 10s per AJAX (kein Seitenflackern)
+setInterval(pollLoadbar, 10000);
+// Erster Poll nach 5s (initiales HTML ist bereits korrekt gerendert)
+setTimeout(pollLoadbar, 5000);
+
+// Full-Reload alle 60s (aktualisiert Konfigurationsfelder und Wallboxwerte)
+setInterval(refreshData, 60000);
 
 // ===================================
 // Zähler-Reset Logik 
