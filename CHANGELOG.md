@@ -1,4 +1,4 @@
-**[0.42.6] – 2026-XX-XX**  
+**[0.42.6] – 2026-06-15**  
 - Logfiles-TAB: Logfileauflistung in Aufklappmenü, und Dateigröße angeben.  
 - FIX: Wegen Mapping im Docker, `Rotate XX.log` von `mv ` auf `cp ` umgestell, mit Migration.  
 - FIX Wallbox-TAB: Energiebalken bleiben manchmal hängen.  

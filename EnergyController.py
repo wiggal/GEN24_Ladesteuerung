@@ -472,7 +472,8 @@ if __name__ == '__main__':
                         else:
                             Schreib_Ausgabe += 'Batteriesteuerung NICHT geschrieben,\nda Option "laden/entladen" NICHT gesetzt!\n'
                     else:
-                        Schreib_Ausgabe += "Batteriesteuerung: Änderungen kleiner Schreibgrenzen!\n"
+                        if (aktuellerLadewert != alterLadewert):
+                            Schreib_Ausgabe += "Batteriesteuerung: Änderungen kleiner Schreibgrenzen!\n"
 
                     if print_level >= 1:
                         print(Schreib_Ausgabe)
