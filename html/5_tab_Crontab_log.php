@@ -245,43 +245,60 @@ echo '<br><br><br><br><br><br>'; // Die Abstände sorgen dafür, dass der eigent
 
 $letzteWarLeer = false;
 
+echo '<pre style="font-family: monospace; white-space: pre-wrap; word-wrap: break-word; font-size: 14px; text-align: left;">';
 switch ($case) {
     case '':
-    # AUSGEBEN DER Logdatei von Heute
-    while(!feof($myfile)) {
-        $Zeile = fgets($myfile);
-        // Datum am Zeilenanfang erkennen: mm-dd HH:MM:SS oder BEGINN mit Datum
-        if (strpos($Zeile, 'BEGINN') !== false && (strpos($Zeile, $datum) !== false || strpos($Zeile, $datum_kurz) !== false)) $Ausgabe = 1;
-        if (preg_match('/^(\d{2}-\d{2}) \d{2}:\d{2}:\d{2}/', $Zeile, $m) && ($m[1] === $datum_kurz)) $Ausgabe = 1;
-        if ($TAGE == 'ein') $Ausgabe = 1;
-        if ($Ausgabe == 1) {
-            // DEBUG ausblenden
-            if ($DEBUG == "aus") {
-                if (
-                preg_match('/^\s*DEBUG/', $Zeile) ||
-                preg_match('/^\s*>> /', $Zeile) ||
-                preg_match('/^\s*\+\+ /', $Zeile) ||
-                preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2} 🐞DEBUG/', $Zeile)
-                ) {
-                    continue;
+    # AUSGEBEN DER Logdatei
+    
+    // KOMBINTION 1: Extrem-Turbo, wenn ALLES (inklusive Debug) angezeigt werden soll.
+    if ($TAGE == 'ein' && $DEBUG == 'ein') {
+        while (!feof($myfile)) {
+            echo htmlspecialchars(fread($myfile, 8192));
+        }
+    } else {
+        // KOMBINATION 2 & 3: Für "Nur Heute" oder "Alle Tage OHNE Debug"
+        while(!feof($myfile)) {
+            $Zeile = fgets($myfile);
+            
+            // Datum am Zeilenanfang erkennen: mm-dd HH:MM:SS oder BEGINN mit Datum
+            if (strpos($Zeile, 'BEGINN') !== false && (strpos($Zeile, $datum) !== false || strpos($Zeile, $datum_kurz) !== false)) $Ausgabe = 1;
+            if (preg_match('/^(\d{2}-\d{2}) \d{2}:\d{2}:\d{2}/', $Zeile, $m) && ($m[1] === $datum_kurz)) $Ausgabe = 1;
+            if ($TAGE == 'ein') $Ausgabe = 1;
+            
+            if ($Ausgabe == 1) {
+                // Wenn DEBUG ausgeschaltet ist, filtern wir hier im Eiltempo
+                if ($DEBUG == "aus") {
+                    // PHP 7.4 KOMPATIBEL: strpos() ist genauso schnell wie str_contains
+                    if (
+                        strpos($Zeile, 'DEBUG') !== false || 
+                        strpos($Zeile, '>> ') !== false || 
+                        strpos($Zeile, '++ ') !== false
+                    ) {
+                        continue; // Debug-Zeile überspringen
+                    }
                 }
-            }
-            // Leerzeilen prüfen und ggf. überspringen
-            if (trim($Zeile) === '') {
-                if ($letzteWarLeer) {
-                    continue; // mehrere Leerzeilen → nur die erste anzeigen
+
+                // Zeile von unsichtbaren Umbrüchen befreien
+                $Zeile = rtrim($Zeile, "\r\n");
+
+                // Leerzeilen prüfen und ggf. überspringen
+                if (trim($Zeile) === '') {
+                    if ($letzteWarLeer) {
+                        continue; 
+                    } else {
+                        $letzteWarLeer = true;
+                        echo "\n";
+                        continue;
+                    }
+                }
+                
+                // Reguläre Zeile anzeigen
+                $letzteWarLeer = false;
+                if (preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $Zeile)) {
+                    echo $Zeile . "\n";
                 } else {
-                    $letzteWarLeer = true;
-                    echo "<br>";
-                    continue;
+                    echo htmlspecialchars($Zeile) . "\n";
                 }
-            }
-            // reguläre Zeile anzeigen und Flag zurücksetzen
-            $letzteWarLeer = false;
-            if (preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $Zeile)) {
-                echo $Zeile . "<br>";
-            } else {
-                echo htmlspecialchars($Zeile) . "<br>";
             }
         }
     }
@@ -324,21 +341,23 @@ switch ($case) {
                 $hatEigeneDatumzeile = preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $Zeile);
                 if (!$hatEigeneDatumzeile && ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '')) {
                     if ($BEGIN_Merken !== $BEGIN_DATUM . $BEGIN_UHRZEIT) {
-                        echo htmlspecialchars($BEGIN_UHRZEIT . " " . $BEGIN_DATUM) . "<br>";
+                        echo "\n" . htmlspecialchars($BEGIN_UHRZEIT . " " . $BEGIN_DATUM) . "\n";
                         $BEGIN_Merken = $BEGIN_DATUM . $BEGIN_UHRZEIT;
                     }    
                 }
+                // Auch beim Filtern die Zeilenenden säubern
+                $Zeile = rtrim($Zeile, "\r\n");
                 if (preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $Zeile)) {
-                    echo $Zeile . "<br>";
+                    echo $Zeile . "\n";
                 } else {
-                    echo htmlspecialchars($Zeile) . "<br>";
+                    echo htmlspecialchars($Zeile) . "\n";
                 }
             }
         }
     }
-    echo "<br><br>";
     break;
 }
+echo '</pre>';
 fclose($myfile);
 
 echo '<br><br><br><br><br><div id="bottom">';
@@ -363,20 +382,40 @@ echo '</div>';
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // 1. Automatisch ans Ende der Seite springen
     if (location.hash !== '#bottom') {
         location.hash = '#bottom';
     }
 
-    // Beim Filtern: Checkbox-Zustand aus bottom-bar ins Filter-Formular übernehmen
+    // =========================================================================
+    // NEU: JavaScript-Automatik für die Checkboxen in der bottom-bar
+    // =========================================================================
+    var debugCb = document.querySelector('.bottom-bar input[name="DEBUG"]');
+    var tageCb  = document.querySelector('.bottom-bar input[name="TAGE"]');
+
+    if (tageCb && debugCb) {
+        tageCb.addEventListener('change', function() {
+            // Wenn "Alle Tage anzeigen" aktiviert wird, hake automatisch auch "DEBUG" an
+            if (tageCb.checked) {
+                debugCb.checked = true;
+            }
+        });
+    }
+    // =========================================================================
+
+    // 2. Beim Filtern: Checkbox-Zustand aus bottom-bar ins Filter-Formular übernehmen
     var filterForm = document.getElementById('filterform');
     if (filterForm) {
         filterForm.addEventListener('submit', function () {
-            var debugCb    = document.querySelector('.bottom-bar input[name="DEBUG"]');
-            var tageCb     = document.querySelector('.bottom-bar input[name="TAGE"]');
             var hiddenDebug = filterForm.querySelector('input[name="DEBUG"]');
             var hiddenTage  = filterForm.querySelector('input[name="TAGE"]');
-            if (debugCb && hiddenDebug) hiddenDebug.checked = debugCb.checked;
-            if (tageCb  && hiddenTage)  hiddenTage.checked  = tageCb.checked;
+
+            if (debugCb && hiddenDebug) {
+                hiddenDebug.value = debugCb.checked ? 'ein' : 'aus';
+            }
+            if (tageCb && hiddenTage) {
+                hiddenTage.value = tageCb.checked ? 'ein' : 'aus';
+            }
         });
     }
 });
