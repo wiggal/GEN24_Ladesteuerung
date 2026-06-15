@@ -139,11 +139,18 @@ if (file_exists('/tmp/ocpp.log')) {
 // --- Tabelle mit Download-Symbol & Anzeige-Link ---
 echo '<div class="download">';
 echo '<details id="logdateien">';
-echo '<summary><b>Logdateien:</b></summary>';
+echo '<summary><b>Logdateien (Größe MB):</b></summary>';
 echo '<table>';
 foreach ($logFiles as $log) {
     $basename = basename($log); 
     $nameWithoutExt = preg_replace('/\.log$/', '', $basename);
+
+    // --- Dateigröße ermitteln und in MB umrechnen ---
+    $fileSizeInMB = 0;
+    if (file_exists($log)) {
+        $bytes = filesize($log);
+        $fileSizeInMB = round($bytes / 1048576, 2); // Auf 2 Nachkommastellen runden
+    }
 
     // Spezialfall ocpp.log abfangen
     if ($log === '/tmp/ocpp.log') {
@@ -156,7 +163,7 @@ foreach ($logFiles as $log) {
     }
 
     echo '<tr>';
-    echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '&tab=' . htmlspecialchars($activeTab) . '">' . htmlspecialchars($nameWithoutExt) . '</a></td>';
+    echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '&tab=' . htmlspecialchars($activeTab) . '">' . htmlspecialchars($nameWithoutExt) . ' (' . $fileSizeInMB . ')</a></td>';
     echo '<td style="text-align:center;"><a class="ende" href="' . htmlspecialchars($downloadLink) . '" title="Download"><span class="icon">💾</span></a></td>';
     echo '</tr>';
 }
