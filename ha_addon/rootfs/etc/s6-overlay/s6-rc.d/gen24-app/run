@@ -23,7 +23,7 @@ mkdir -p "${REPO_DIR}"
 
 # --- Git-Quelle ---
 GIT_REPO=https://tuxis.de/git/GEN24_ENTW_TUXIS_HA/
-GIT_BRANCH="v0.42.5"
+GIT_BRANCH="main"
 
 
 bashio::log.info "Starte Git-Abgleich..."
