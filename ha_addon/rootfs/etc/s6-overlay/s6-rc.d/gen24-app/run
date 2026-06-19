@@ -22,7 +22,7 @@ mkdir -p "${CONFIG_DIR}"
 mkdir -p "${REPO_DIR}"
 
 # --- Git-Quelle ---
-GIT_REPO=https://tuxis.de/git/GEN24_ENTW_TUXIS_HA/
+GIT_REPO=https://github.com/wiggal/GEN24_Ladesteuerung
 GIT_BRANCH="main"
 
 
