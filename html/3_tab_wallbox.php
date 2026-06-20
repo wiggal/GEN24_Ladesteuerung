@@ -9,6 +9,7 @@ $server_ip = $_SERVER['HTTP_HOST'];
 // Falls HTTP_HOST auch den Port enthält (z.B. :80), filtern wir nur die IP/Domain
 $server_ip = explode(':', $server_ip)[0];
 $API = "http://localhost:8886";
+$API_PUBLIC = "http://" . $_SERVER['SERVER_ADDR'] . ":8886"; // browserseitig (JS AJAX)
 $SERVER_PID_FILE = "/tmp/ocpp_server.pid";
 # config.ini parsen
 require_once "config_parser.php";
@@ -990,7 +991,7 @@ $('#btnResetCounter').click(function(){
     }
 
     $.ajax({
-        url: "<?php echo $API; ?>/reset_counter",
+        url: "<?php echo $API_PUBLIC; ?>/reset_counter",
         method: "GET", // Wichtig: GET nutzen
         data: { charge_point_id: cp_id },
         dataType: 'json',
