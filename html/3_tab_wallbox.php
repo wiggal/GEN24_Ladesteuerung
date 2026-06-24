@@ -145,13 +145,13 @@ $amp_min = $amp_parts[0] ?? '6';
 $amp_max = $amp_parts[1] ?? '16';
 
 // Neue Einstellungen ID=2
-$min_charge_duration_s = $EV_Reservierung['2']['Res_Feld2'] ?? 600;       // MIN_CHARGE_DURATION_S
 $auto_sync_interval   = $EV_Reservierung['2']['Options']    ?? 20;        // AUTO_SYNC_INTERVAL
+$min_charge_duration_s = $EV_Reservierung['2']['Res_Feld2'] ?? 600;       // MIN_CHARGE_DURATION_S
 
 // Neue Einstellungen ID=3
-$residualPower        = $EV_Reservierung['3']['Res_Feld1'] ?? -300;      // residualPower (Watt)
+$phase_change_confirm_s = $EV_Reservierung['3']['Options'] ?? 300;        // PHASE_CHANGE_CONFIRM_S
+$residualPower        = $EV_Reservierung['3']['Res_Feld1'] ?? 100;      // residualPower (Watt)
 $default_target_kwh   = $EV_Reservierung['3']['Res_Feld2'] ?? 0.0;        // DEFAULT_TARGET_KWH
-$phase_change_confirm_s = $EV_Reservierung['3']['Options'] ?? 30;        // PHASE_CHANGE_CONFIRM_S
 
 // Neue Einstellungen ID=4 (Ladezeiten)
 $ladezeit_von = $EV_Reservierung['4']['Res_Feld1'] ?? "12:00";
@@ -622,31 +622,8 @@ echo "</div>";
 <script src="jquery.min.js"></script>
 
 <script>
-// --- FUNKTIONEN ZUM SPEICHERN/LADEN MIT localStorage ---
-
-function saveToLocalStorage(id) {
-    var el = $('#' + id);
-    if (el.length) localStorage.setItem(id, el.val());
-}
-
-function loadFromLocalStorage(id) {
-    var storedValue = localStorage.getItem(id);
-    if (storedValue !== null) {
-        $('#' + id).val(storedValue);
-    }
-}
 
 $(document).ready(function(){
-    // IDs, die wir im localStorage zwischenhalten möchten
-    var ls_ids = ['pvMode','phases','ampMin','ampMax','autoSyncInterval','minChargeDur','phaseChangeConfirm','residualPower','defaultTargetKwh','ladezeitVon','ladezeitBis','strompreisFest','einspeiseVerg','MaxLeistHAkW'];
-
-    // Load saved values
-    ls_ids.forEach(function(id){ loadFromLocalStorage(id); });
-
-    // Save on change
-    ls_ids.forEach(function(id){ 
-        $('#' + id).on('change input', function(){ saveToLocalStorage(id); });
-    });
 
     // --- Zentrale Funktion zum Formatieren & Runden ---
     function formatAndRoundTime(inputVal) {
@@ -876,18 +853,6 @@ function calculatePower() {
             ]
         },
         success: function(response){
-            // LocalStorage aufräumen, damit beim Refresh die neuen DB-Werte geladen werden
-            var ls_ids = [
-                'pvMode','phases','ampMin','ampMax','autoSyncInterval',
-                'minChargeDur','phaseChangeConfirm','residualPower',
-                'defaultTargetKwh', 'ladezeitVon', 'ladezeitBis', 'strompreisFest', 'einspeiseVerg',
-                'MaxLeistHAkW'
-            ];
-
-            ls_ids.forEach(function(id){
-                localStorage.removeItem(id);
-            });
-
             // Seite neu laden (mit Scroll-Position-Erhalt durch deinen bestehenden Listener)
             refreshData();
         },
