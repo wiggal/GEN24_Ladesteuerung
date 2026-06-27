@@ -122,6 +122,8 @@ Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeit
 Im ForecastMgr können die gespeicherten Prognosedaten analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
 ![ForecastMgr](pics/ForecastMgr.png)
 
+Die berechnete Prognose kann per API aus der Datenbank ausgelesen werden, um sie in einer anderen Anwendung (z.B. HA) einbinden zu können.  
+Der Aufruf IP-raspberrypi:2424/API_forecast.php liefert ein JSON-Format wie von api.forecast.solar.  
 Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/LadeStrg.html#weatherDataManager).  
 
 ### BatterieENTladesteuerung
