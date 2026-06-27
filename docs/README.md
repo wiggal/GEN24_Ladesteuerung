@@ -43,15 +43,6 @@ Ab Version: **0.41.7**
 Ab Version: **0.41.0**  
 - 🚘 Steuerung des Wattpiloten, über OCPP.  
 
-Ab Version: **0.40.2**  
-- 🔄 Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist.  
-
-Ab Version: **0.40.0**  
-- Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
-Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
-⚠️ Die **Cronjobs** und die **default_priv.ini** müssen angepasst werden!!  
-- [WikiExtension_Gen24_Ladesteuerung von @killwack](https://github.com/killwack/WikiExtension_Gen24_Ladesteuerung/wiki)  
-
 ![new](pics/new2.png)  
 
 Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
@@ -142,12 +133,12 @@ In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, 
 Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.  
 Hier werden auch die Werte für Zwangsladungen aus dem Netz, oder Ladestopps von DynamicPriceCheck.py eingetragen.  
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/ENTLadeStrg.html)  
 
 ### 🚘 Wallboxsteuerung
 Das Tool startet einen OCPP-Server, zu dem eine Wallbox (aktuell getestet: Fronius Wattpilot) eine Verbindung als Client herstellen kann.  
 Der TAB `Wallbox` ist standardmäßig ausgeblendet, und kann in der html/config_priv.ini eingeblendet werden.  
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Wallbox.html)  
 
 ![Tabelle zur Wallbox](pics/Wallbox.png)
 
@@ -156,7 +147,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wigga
 Programmfunktionen:  
 Unter Settings kann das Programm zusätzlich gesteuert werden.  
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)    
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Settings.html)    
 
 ### Grafana Beispiele  
 ![Beispiele](pics/Grafana.png)
@@ -166,6 +157,13 @@ Eine [Beschreibung](../GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddat
 ----------
 
 **News History:**  
+Ab Version: **0.40.2**  
+- 🔄 Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist.  
+Ab Version: **0.40.0**  
+- Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
+Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
+⚠️ Die **Cronjobs** und die **default_priv.ini** müssen angepasst werden!!  
+- [WikiExtension_Gen24_Ladesteuerung von @killwack](https://github.com/killwack/WikiExtension_Gen24_Ladesteuerung/wiki)  
 Ab Version: **0.38.1**  
 Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die EnergyController24 übergeben werden.  
 Ab Version: **0.38.0**  
