@@ -62,6 +62,9 @@ header {
     font-weight: bold;
     z-index: 101; /* Stellt sicher, dass das Logo über dem Menü liegt (falls offen) */
     flex-shrink: 0; /* Verhindert, dass das Logo schrumpft, wenn Platz eng wird */
+    display: flex;       /* Icon und Text nebeneinander */
+    align-items: center; /* Vertikal zentriert */
+    gap: 10px;            /* Abstand zwischen Icon und Text */
 }
 
 /* Styling für das Logo-Bild innerhalb des Headers */

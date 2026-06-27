@@ -58,10 +58,10 @@ Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „B
 Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
 ![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
 
-## 💾 Installationshinweise: [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
+## 💾 Installationshinweise: [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Inst_RaspPi.html).
 
 Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach dessen Download automatisch durchgeführt werden. 
-Für eine manuelle Installation, bzw. genauere Installationshinweise im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).   
+Für eine manuelle Installation, bzw. genauere Installationshinweise siehe [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Inst_RaspPi.html).   
 ![new](pics/new.png)
 Cronjobs werden nun unter Settings => Scheduler konfiguriert:
 ![Settings=>Scheduler](pics/scheduler.png)
@@ -85,7 +85,7 @@ im Batteriemanagement des Wechselrichters.
 Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
-### 💲🔌 DynamicPriceCheck.py
+### 💲🔌 DynamicPriceCheck.pyInst_RaspPi.html
 Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. 
 Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
 Siehe hierzu Settings => Scheduler.
@@ -104,9 +104,6 @@ sudo apt install php php-sqlite3
 ```
 Wenn PHP installiert ist, wird durch die Variable `Einfacher_PHP_Webserver = 1` (Standard) in der CONFIG/default_priv.ini beim nächsten Aufruf von `start_PythonScript.sh`
 automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port: 2424 erreichbar (z.B.: raspberrypi:2424).  
-
-**_Alternativ kann auch der Webserver Apache installiert werden:_**  
-[siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 ### 📊 Logging
 
@@ -134,7 +131,7 @@ Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeit
 Im ForecastMgr können die gespeicherten Prognosedaten analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
 ![ForecastMgr](pics/ForecastMgr.png)
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/LadeStrg.html#weatherDataManager).  
 
 ### BatterieENTladesteuerung
 ![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
@@ -145,12 +142,12 @@ In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, 
 Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.  
 Hier werden auch die Werte für Zwangsladungen aus dem Netz, oder Ladestopps von DynamicPriceCheck.py eingetragen.  
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)  
 
 ### 🚘 Wallboxsteuerung
 Das Tool startet einen OCPP-Server, zu dem eine Wallbox (aktuell getestet: Fronius Wattpilot) eine Verbindung als Client herstellen kann.  
 Der TAB `Wallbox` ist standardmäßig ausgeblendet, und kann in der html/config_priv.ini eingeblendet werden.  
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).  
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)  
 
 ![Tabelle zur Wallbox](pics/Wallbox.png)
 
@@ -159,7 +156,7 @@ Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wigga
 Programmfunktionen:  
 Unter Settings kann das Programm zusätzlich gesteuert werden.  
 
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/).    
+Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)    
 
 ### Grafana Beispiele  
 ![Beispiele](pics/Grafana.png)

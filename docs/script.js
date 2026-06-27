@@ -3,9 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.getElementById('navLinks');
     const navItems = navLinks.querySelectorAll('li a'); // Alle Links in der Navigation
     const contentContainer = document.getElementById('content-container');
-    const logo = document.querySelector('.logo'); // Das Logo-Element
+    const logo = document.querySelector('.logo'); // Das Logo-Element (Link, enthält Icon + Text)
+    const logoText = document.querySelector('.logo-text'); // Nur der Text-Teil des Logos
 
-    const defaultLogoText = logo.textContent; // Standard-Logo-Text
+    const defaultLogoText = logoText.textContent; // Standard-Logo-Text
 
     // Funktion zum Umschalten des Navigationsmenüs
     const toggleNav = () => {
@@ -29,9 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     burger.addEventListener('click', toggleNav);
 
     // Funktion zum Laden von Inhalten und Aktualisieren des Logos
+    // path darf eine Sprungmarke enthalten, z.B. "WIKI/EnergyController.html#abschnitt-x"
     const loadContent = async (path, isMarkdown, newLogoText) => {
         try {
-            const response = await fetch(path);
+            // Datei-Pfad und Sprungmarke (Hash) trennen, damit fetch() nur die echte Datei lädt
+            const [filePath, hash] = path.split('#');
+
+            const response = await fetch(filePath);
             if (!response.ok) {
                 throw new Error(`HTTP-Fehler! Status: ${response.status}`);
             }
@@ -62,18 +67,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             contentContainer.innerHTML = content;
-            logo.textContent = newLogoText || defaultLogoText;
+            logoText.textContent = newLogoText || defaultLogoText;
 
             if (navLinks.classList.contains('nav-active')) {
                 toggleNav();
             }
 
-            window.scrollTo(0, 0);
+            // Zur Sprungmarke springen, falls vorhanden, sonst zum Seitenanfang
+            if (hash) {
+                // Scrollt manuell mit Offset, damit der fixierte Header das Zielelement nicht verdeckt
+                const headerOffset = 70;
+                const scrollToTarget = () => {
+                    const target = contentContainer.querySelector(`[name="${hash}"]`)
+                        || document.getElementById(hash);
+                    if (target) {
+                        const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+                        window.scrollTo({ top, behavior: 'auto' });
+                        return true;
+                    }
+                    return false;
+                };
+
+                // Doppeltes requestAnimationFrame: wartet auf Layout/Reflow nach innerHTML-Änderung
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        if (!scrollToTarget()) {
+                            // Fallback: falls Bilder o.ä. das Layout noch verzögern, kurz erneut versuchen
+                            setTimeout(() => {
+                                if (!scrollToTarget()) {
+                                    window.scrollTo(0, 0);
+                                }
+                            }, 150);
+                        }
+                    });
+                });
+            } else {
+                window.scrollTo(0, 0);
+            }
 
         } catch (error) {
             console.error("Fehler beim Laden des Inhalts:", error);
             contentContainer.innerHTML = `<p>Entschuldigung, der Inhalt konnte nicht geladen werden: ${error.message}</p>`;
-            logo.textContent = "Fehler!";
+            logoText.textContent = "Fehler!";
         }
     };
 
@@ -105,12 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // URL-Parameter auswerten
     const params = new URLSearchParams(window.location.search);
     const page = params.get("page");
-    
+
     if (page) {
-        const isMarkdown = page.toLowerCase().endsWith(".md");
+        // Dateinamen-Endung und Logo-Text sollen sich auf den Datei-Teil beziehen, nicht auf die Sprungmarke
+        const pageFilePath = page.split('#')[0];
+        const isMarkdown = pageFilePath.toLowerCase().endsWith(".md");
 
         // Dateiname als Logo verwenden
-        const fileName = page.split('/').pop().replace(/\.(md|html)$/i, '');
+        const fileName = pageFilePath.split('/').pop().replace(/\.(md|html)$/i, '');
 
         loadContent(page, isMarkdown, fileName);
     } else {
