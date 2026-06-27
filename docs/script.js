@@ -102,7 +102,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Initialen Inhalt laden (README.md) und Logo aktualisieren
-    loadContent('README.md', true, 'README');
+    // URL-Parameter auswerten
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get("page");
+    
+    if (page) {
+        const isMarkdown = page.toLowerCase().endsWith(".md");
+
+        // Dateiname als Logo verwenden
+        const fileName = page.split('/').pop().replace(/\.(md|html)$/i, '');
+
+        loadContent(page, isMarkdown, fileName);
+    } else {
+        // Standardseite laden
+        loadContent('README.md', true, 'README');
+}
 });
 
