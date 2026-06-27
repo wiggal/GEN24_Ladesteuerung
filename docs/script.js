@@ -140,6 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // URL-Parameter auswerten
     const params = new URLSearchParams(window.location.search);
     const page = params.get("page");
+    // Der Browser trennt den Hash (#...) bereits vom Query-String ab,
+    // daher muss er separat aus window.location.hash gelesen werden.
+    const urlHash = window.location.hash ? window.location.hash.substring(1) : '';
 
     if (page) {
         // Dateinamen-Endung und Logo-Text sollen sich auf den Datei-Teil beziehen, nicht auf die Sprungmarke
@@ -149,7 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Dateiname als Logo verwenden
         const fileName = pageFilePath.split('/').pop().replace(/\.(md|html)$/i, '');
 
-        loadContent(page, isMarkdown, fileName);
+        // Hash wieder anhängen, falls er separat in der URL stand (window.location.hash)
+        const pageWithHash = urlHash ? `${pageFilePath}#${urlHash}` : page;
+
+        loadContent(pageWithHash, isMarkdown, fileName);
     } else {
         // Standardseite laden
         loadContent('README.md', true, 'README');
