@@ -1,3 +1,5 @@
+**[0.42.8] – 2026-XX-XX**  
+
 **[0.42.7] – 2026-06-27**  
 - FIX: Reset-Button Wallbox-TAB.  
 - FIX: Vorgabe Standartwerte fehlerhaft im Wallbox-TAB.  
