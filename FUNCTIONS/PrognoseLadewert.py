@@ -464,7 +464,8 @@ class progladewert:
             Zellspannungs_Werte = basics.getVarConf('Ladeberechnung','Zellspannungs_Werte','str')
             Zellspannung_ein, LadewertC, Zellspannung_aus = map(float, Zellspannungs_Werte.split(",")) # ACHTUNG Strigs
             Volt_ladewert = int(BattganzeLadeKapazWatt_Akku * LadewertC)
-            if((alterLadewert != Volt_ladewert) and maxvolt >= Zellspannung_ein) or ((alterLadewert == Volt_ladewert) and maxvolt >= Zellspannung_aus):
+            if((alterLadewert != Volt_ladewert) and maxvolt >= Zellspannung_ein) or ((alterLadewert == Volt_ladewert) and (maxvolt >= Zellspannung_aus or (maxvolt == 0 and BattStatusProz > 80))): 
+                # or (maxvolt == 0 and BattStatusProz > 80) ==>> wenn Akku nicht erreichbar und BattStatusProz > 80, sonnst geht er nicht mehr runter
                 aktuellerLadewert = Volt_ladewert
                 WR_schreiben = self.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, alterLadewert)
                 LadewertGrund = f"Akkuschonung: Zellspannung zu hoch {maxvolt}"
