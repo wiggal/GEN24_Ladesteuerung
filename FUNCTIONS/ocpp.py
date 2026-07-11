@@ -75,12 +75,16 @@ def cerr_exc(msg: str):
         clog(0, "❌ ERROR:", msg)
 
 # Hybrid websockets import (neu/alt)
+# HINWEIS: websockets.server.serve ist ab websockets 14 als deprecated Legacy-Alias
+# markiert, funktioniert aber (noch) mit der alten Handler-Signatur (websocket, path).
+# websockets.asyncio.server.serve ist die aktuelle API (websockets >= 13) und ruft den
+# Handler nur mit (websocket) auf. on_connect() ist unten für beide Fälle abgesichert.
 try:
-    from websockets.server import serve as ws_serve  # websockets>=12
-    USING_NEW_WEBSOCKETS = True
-except Exception:
-    from websockets.asyncio.server import serve as ws_serve  # websockets<=11
+    from websockets.server import serve as ws_serve  # legacy-Alias (deprecated, aber noch funktionsfähig)
     USING_NEW_WEBSOCKETS = False
+except Exception:
+    from websockets.asyncio.server import serve as ws_serve  # aktuelle API (websockets >= 13)
+    USING_NEW_WEBSOCKETS = True
 
 # ----------------------
 # Utility-Helper
@@ -142,11 +146,30 @@ class ChargePointState:
     prev_pv_mode: Optional[float] = None         # PV-Modus des letzten Zyklus – Wechsel von 0/inaktiv → aktiv überspringt Start-Hysterese
 
     def __getattr__(self, name: str):
-        """Fallback für fehlende Felder bei Live-Deployments mit alten State-Objekten."""
+        """Fallback für fehlende Felder bei Live-Deployments mit alten State-Objekten.
+        Dunder-Attribute (__deepcopy__, __getstate__, usw.) werden NICHT maskiert,
+        damit Introspektion/Pickling/Copy weiterhin korrekt per AttributeError
+        signalisieren können, dass das Attribut nicht existiert. Für alle anderen
+        (echten Tippfehlern verdächtigen) Namen wird zusätzlich eine Debug-Meldung
+        ausgegeben, statt den Zugriff komplett stillschweigend auf None fallen zu lassen.
+        """
+        if name.startswith('__') and name.endswith('__'):
+            raise AttributeError(name)
+        cdebug(f"[ChargePointState] Unbekanntes Attribut '{name}' abgefragt – Fallback auf None (evtl. Tippfehler?)")
         return None
 
-    def append_debug(self, message: dict):
+    def append_debug(self, message: dict, max_history: int = 200):
+        """Loggt die Debug-Nachricht UND legt sie in einer begrenzten Historie
+        (self.debug) ab, damit sie z.B. über eine API auslesbar ist."""
         cdebug(f"[{self.log_cp_id}] {message}")
+        try:
+            if not isinstance(self.debug, list):
+                self.debug = []
+            self.debug.append(message)
+            if len(self.debug) > max_history:
+                del self.debug[: len(self.debug) - max_history]
+        except Exception:
+            cwarn(f"[{self.log_cp_id}] Debug-Historie konnte nicht aktualisiert werden")
 
 # ----------------------
 # ChargePoint WebSocket Handler
@@ -234,7 +257,7 @@ class ChargePointHandler:
                 async def _delayed_apply(cp_id, delay=15):
                     await asyncio.sleep(delay)
                     await self.manager.apply_wallbox_settings(cp_id)
-                asyncio.create_task(_delayed_apply(self.state.cp_id))
+                self.manager.spawn_task(_delayed_apply(self.state.cp_id), name=f"delayed_apply-{self.state.cp_id}")
             elif action == "Heartbeat":
                 await self.send_callresult(uid, {"currentTime": now_iso_future()})
             elif action == "StatusNotification":
@@ -246,20 +269,25 @@ class ChargePointHandler:
                 # aber nur wenn wir selbst gerade kein Laden beabsichtigen (current_limit bereits 0)
                 # sonst ist SuspendedEV nur ein kurzer Übergangszustand beim Profilwechsel
                 if new_status == "SuspendedEV" and old_status != "SuspendedEV":
-                    if (self.state.current_limit or 0.0) == 0.0 and self.state.phase_limit is not None:
-                        cinfo(f"[{self.state.log_cp_id}] Fahrzeug hat Laden pausiert (SuspendedEV) – setze Limit auf 0.0A")
-                        try:
-                            await self.send_call("SetChargingProfile", charging_profile_payload(0.0, self.state.phase_limit))
-                            self.state.current_limit = 0.0
-                            self.state.append_debug({"note": "status-suspended-ev-immediate-zero", "ts": iso_now()})
-                        except Exception:
-                            cerr_exc(f"Fehler beim Setzen auf 0A bei SuspendedEV fuer {self.state.cp_id}")
-                    else:
-                        cdebug(f"[{self.state.log_cp_id}] SuspendedEV ignoriert – current_limit={self.state.current_limit}A (Übergangszustand)")
+                    # Lock halten: apply_wallbox_settings() läuft möglicherweise gerade parallel
+                    # (autosync_task) für denselben CP und würde sonst current_limit direkt im
+                    # Anschluss mit einem veralteten Wert überschreiben (Race Condition).
+                    async with self.state.lock:
+                        if (self.state.current_limit or 0.0) == 0.0 and self.state.phase_limit is not None:
+                            cinfo(f"[{self.state.log_cp_id}] Fahrzeug hat Laden pausiert (SuspendedEV) – setze Limit auf 0.0A")
+                            try:
+                                await self.send_call("SetChargingProfile", charging_profile_payload(0.0, self.state.phase_limit))
+                                self.state.current_limit = 0.0
+                                self.state.append_debug({"note": "status-suspended-ev-immediate-zero", "ts": iso_now()})
+                            except Exception:
+                                cerr_exc(f"Fehler beim Setzen auf 0A bei SuspendedEV fuer {self.state.cp_id}")
+                        else:
+                            cdebug(f"[{self.state.log_cp_id}] SuspendedEV ignoriert – current_limit={self.state.current_limit}A (Übergangszustand)")
                 # Fahrzeug frisch angesteckt → Start-Hysterese zurücksetzen (sofort starten wenn Überschuss da)
                 if new_status in ["SuspendedEVSE", "Preparing"] and old_status in ["Available", "AvailableRequested", None]:
-                    self.state.start_candidate = None
-                    self.state.just_plugged = datetime.now()
+                    async with self.state.lock:
+                        self.state.start_candidate = None
+                        self.state.just_plugged = datetime.now()
                     cinfo(f"[{self.state.log_cp_id}] Fahrzeug angesteckt ({new_status}) – Start-Hysterese deaktiviert")
                     self.state.append_debug({"note": "start-candidate-reset-on-plug", "ts": iso_now()})
             elif action == "MeterValues":
@@ -267,7 +295,10 @@ class ChargePointHandler:
                     self.state.transaction_id = payload["transactionId"]
                 self.state.meter_values = payload
                 await self.send_callresult(uid)
-                asyncio.create_task(self.manager.update_charged_energy_from_meter(self.state.cp_id, payload))
+                self.manager.spawn_task(
+                    self.manager.update_charged_energy_from_meter(self.state.cp_id, payload),
+                    name=f"meter_update-{self.state.cp_id}"
+                )
             elif action == "StartTransaction":
                 tx_id = int(datetime.now(timezone.utc).timestamp())
                 self.state.transaction_id = tx_id
@@ -307,6 +338,11 @@ class OCPPManager:
         # Per-CP states
         self.states: Dict[str, ChargePointState] = {}
 
+        # Starke Referenzen auf Fire-and-forget-Tasks (autosync, delayed apply, meter update).
+        # Ohne dies hält der Event-Loop nur eine schwache Referenz -> der GC kann einen
+        # laufenden Task mitten in der Ausführung einsammeln und lautlos abbrechen.
+        self._background_tasks: set = set()
+
         # Absolute Hardware-Grenzen (Hardware-Limits)
         self.MIN_WB_AMP = 6.0      # Technisches Minimum (meist 6A)
         self.MAX_WB_AMP = 16.0  # Max (Hardware)
@@ -340,6 +376,27 @@ class OCPPManager:
         # Lock to protect manager-wide operations if needed
         self._mgr_lock = asyncio.Lock()
 
+    def spawn_task(self, coro, name: Optional[str] = None) -> asyncio.Task:
+        """
+        Erstellt einen Fire-and-forget-Task MIT starker Referenz (in self._background_tasks),
+        damit der Task nicht vom GC mitten in der Ausführung eingesammelt wird (bekannter
+        asyncio-Fallstrick: der Event-Loop hält selbst nur eine schwache Referenz).
+        Loggt zusätzlich unbehandelte Exceptions aus dem Task, statt sie stillschweigend
+        verschwinden zu lassen ("Task exception was never retrieved").
+        """
+        task = asyncio.create_task(coro, name=name)
+        self._background_tasks.add(task)
+
+        def _on_done(t: asyncio.Task):
+            self._background_tasks.discard(t)
+            if not t.cancelled():
+                exc = t.exception()
+                if exc is not None:
+                    cerr(f"Hintergrund-Task '{name or t.get_name()}' fehlgeschlagen: {exc!r}")
+
+        task.add_done_callback(_on_done)
+        return task
+
     # ----------------------------
     # DB / Inverter Zugriff (einmal pro iteration)
     # ----------------------------
@@ -359,6 +416,11 @@ class OCPPManager:
             data = None
 
         if data:
+            # Defaults VOR dem try-Block setzen: verhindert NameError im cinfo()-Aufruf
+            # weiter unten, falls die DB-Zeile ID=1 fehlt (row ist dann None) oder das
+            # Parsen komplett fehlschlägt.
+            amp_min_val = getattr(self, 'wb_amp_min', 6.0)
+            amp_max_val = getattr(self, 'wb_amp_max', 16.0)
             try:
                 row = data.get('1') or data.get(1)
                 if row:
@@ -377,6 +439,8 @@ class OCPPManager:
                     except Exception:
                         pass
                     self.wb_amp_max, self.wb_amp_min = amp_max_val, amp_min_val
+                else:
+                    cwarn("DB-Zeile ID=1 (Wallbox-Grundkonfig) nicht gefunden; verwende bisherige Werte")
             except Exception:
                 cwarn("Fehler beim Parsen DB ID=1")
 
@@ -539,7 +603,8 @@ class OCPPManager:
         self.hausverbrauch = max(0.0, self.Produktion + self.Batteriebezug + self.Netzbezug - current_charge_power)
         ueberschuss = int(max(0.0, (self.Produktion - self.hausverbrauch + batterie_anteil - self.residualPower)))
 
-        cinfo(f"[{'..' + cp_id[-4:]}] Ladeberechnung: "
+        _log_tag = ('..' + cp_id[-4:]) if cp_id else '??'
+        cinfo(f"[{_log_tag}] Ladeberechnung: "
             f"PV={self.Produktion:.0f} W, "
             f"Akku={self.Batteriebezug:.0f} W, "
             f"Netz={self.Netzbezug:.0f} W, "
@@ -564,7 +629,9 @@ class OCPPManager:
                 # Nur hier erfolgt eine freie Phasenwahl nach PV-Produktion
                 if amp_3_float >= MIN_START_3P:
                     phases_to_use = "3"
-                    amp = max(self.MIN_WB_AMP, min(amp_3, self.wb_amp_max, self.MAX_WB_AMP))
+                    # Untergrenze konsistent mit den anderen Zweigen: Hardware- UND User-Minimum
+                    effective_min_3p_auto = max(self.MIN_WB_AMP, self.wb_amp_min)
+                    amp = max(effective_min_3p_auto, min(amp_3, self.wb_amp_max, self.MAX_WB_AMP))
                 elif amp_1 >= self.wb_amp_min:
                     phases_to_use = "1"
                     amp =  min(self.MAX_WB_AMP, max(amp_1, self.wb_amp_min, self.MIN_WB_AMP))
@@ -769,7 +836,7 @@ class OCPPManager:
             active_tx_id = st.transaction_id
 
             # Start/Stop decision
-            if amp_allowed > 0.0 and amp_allowed >= 6.0:
+            if amp_allowed > 0.0 and amp_allowed >= self.MIN_WB_AMP:
                 # Überschuss vorhanden → Stop-Hysterese zurücksetzen
                 if active_tx_id and st.stop_candidate is not None:
                     if st.stop_pre_phase:
@@ -997,32 +1064,32 @@ class OCPPManager:
                 requested_p = candidate.get('requested')
                 current_p = st.phase_limit
                 if current_p is not None:
-                    if requested_p > current_p and amp_allowed != 16.0:
-                        if st.current_limit != 16.0:
-                            st.append_debug({"note": "phase-up-temporary-16", "ts": iso_now()})
-                            amp_allowed = 16.0
+                    if requested_p > current_p and amp_allowed != self.MAX_WB_AMP:
+                        if st.current_limit != self.MAX_WB_AMP:
+                            st.append_debug({"note": "phase-up-temporary-max", "ts": iso_now()})
+                            amp_allowed = self.MAX_WB_AMP
                             amp_changed = True
                         else:
-                            # bereits 16A gesetzt – kein erneutes Senden
-                            amp_allowed = 16.0
+                            # bereits Hardware-Max gesetzt – kein erneutes Senden
+                            amp_allowed = self.MAX_WB_AMP
                             amp_changed = False
-                    elif requested_p < current_p and amp_allowed != 6.0:
-                        # Temporäres 6A-Limit nur wenn Transaktion läuft UND bereits aktiv geladen wird
-                        # (current_limit > 0). Bei current_limit == 0.0 ist die Transaktion frisch
-                        # gestartet ohne bisher gesetztes Profil – in diesem Fall direkt mit dem
-                        # tatsächlichen Überschuss-Strom auf der Zielphase starten.
+                    elif requested_p < current_p and amp_allowed != self.MIN_WB_AMP:
+                        # Temporäres Hardware-Min-Limit nur wenn Transaktion läuft UND bereits aktiv
+                        # geladen wird (current_limit > 0). Bei current_limit == 0.0 ist die
+                        # Transaktion frisch gestartet ohne bisher gesetztes Profil – in diesem Fall
+                        # direkt mit dem tatsächlichen Überschuss-Strom auf der Zielphase starten.
                         already_charging = active_tx_id and (st.current_limit or 0.0) > 0.0
                         if already_charging:
-                            if st.current_limit != 6.0:
-                                st.append_debug({"note": "phase-down-temporary-6", "ts": iso_now()})
-                                amp_allowed = 6.0
+                            if st.current_limit != self.MIN_WB_AMP:
+                                st.append_debug({"note": "phase-down-temporary-min", "ts": iso_now()})
+                                amp_allowed = self.MIN_WB_AMP
                                 amp_changed = True
                             else:
-                                # bereits 6A gesetzt – kein erneutes Senden
-                                amp_allowed = 6.0
+                                # bereits Hardware-Min gesetzt – kein erneutes Senden
+                                amp_allowed = self.MIN_WB_AMP
                                 amp_changed = False
                         # else: kein Eingriff – amp_allowed bleibt beim berechneten Überschuss-Wert
-                if amp_changed and (amp_allowed not in [6.0, 16.0]):
+                if amp_changed and (amp_allowed not in [self.MIN_WB_AMP, self.MAX_WB_AMP]):
                     st.append_debug({"note": "amp-update-blocked-by-hysteresis", "ts": iso_now()})
                     amp_changed = False
             # ---------------------------
@@ -1205,11 +1272,32 @@ class OCPPManager:
     # ----------------------------
     # WebSocket on_connect / cleanup
     # ----------------------------
-    async def on_connect(self, websocket, path: str):
+    async def on_connect(self, websocket, path: Optional[str] = None):
+        # Kompatibilität zwischen websockets-APIs: die alte/legacy serve()-Implementierung
+        # ruft den Handler mit (websocket, path) auf, die neue websockets.asyncio.server.serve()
+        # (ab websockets 13+) übergibt NUR websocket. Falls path fehlt, aus der Connection
+        # extrahieren, damit cp_id in beiden Fällen korrekt ermittelt wird.
+        if path is None:
+            path = getattr(getattr(websocket, 'request', None), 'path', None) or getattr(websocket, 'path', '') or ''
         cp_id_from_path = path.strip('/') if path else ''
         subprotocol = getattr(websocket, 'subprotocol', None)
         cp_id = cp_id_from_path or subprotocol or f"CP-{int(datetime.now().timestamp())}"
         cinfo(f"Neue Verbindung: cp_id={'..' + cp_id[-4:]} subprotocol={subprotocol} path={'/..' + path[-4:]}")
+
+        # Kollisionsschutz: falls unter dieser cp_id bereits eine ANDERE aktive Verbindung
+        # bekannt ist (z.B. weil path/subprotocol nicht eindeutig genug sind, oder ein
+        # schneller Reconnect stattfindet, bevor der alte Handler sein Cleanup abgeschlossen
+        # hat), würde self.states[cp_id]=st sonst den alten State-Eintrag STILL überschreiben.
+        # Die alte handler.start()-Schleife liefe dann weiter, ohne dass Manager/Autosync/HTTP-API
+        # noch etwas davon wissen -> "unsichtbare" Geisterverbindung. Stattdessen: alte
+        # Verbindung sauber schließen, damit ihr eigener finally-Block korrekt aufräumt.
+        existing = self.states.get(cp_id)
+        if existing is not None and existing.websocket is not websocket:
+            cwarn(f"cp_id-Kollision: '{'..' + cp_id[-4:]}' bereits mit anderer aktiver Verbindung verknüpft – schließe alte Verbindung")
+            try:
+                await existing.websocket.close()
+            except Exception:
+                pass
 
         # create state & handler
         st = ChargePointState(cp_id=cp_id, websocket=websocket)
@@ -1225,8 +1313,11 @@ class OCPPManager:
         except Exception:
             cerr_exc(f"Fehler in Verbindung {cp_id}")
         finally:
-            # cleanup
-            self.states.pop(cp_id, None)
+            # Nur aufräumen, wenn der Eintrag noch zu DIESER Verbindung gehört. Sonst hat
+            # zwischenzeitlich bereits eine neue Verbindung für dieselbe cp_id den Eintrag
+            # ersetzt (schneller Reconnect) – die dürfen wir hier nicht versehentlich entfernen.
+            if self.states.get(cp_id) is st:
+                self.states.pop(cp_id, None)
             cinfo(f"Verbindung beendet: {cp_id}")
 
     # ----------------------------
@@ -1370,7 +1461,7 @@ class OCPPManager:
         site = web.TCPSite(runner, "0.0.0.0", self.http_port)
 
         # start autosync task
-        asyncio.create_task(self.autosync_task())
+        self.spawn_task(self.autosync_task(), name="autosync_task")
 
         await asyncio.gather(ws, site.start())
         cinfo(f"OCPP Manager läuft: WS={self.ws_port} HTTP={self.http_port}")
