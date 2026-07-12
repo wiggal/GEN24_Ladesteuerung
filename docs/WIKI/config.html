@@ -333,88 +333,62 @@ Fast-forward
 <tr><td class="variablenname">Gewicht</td>
 <td><input type="text" name="Zeile[58][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[59]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[60]" value='[solarprognose]' >[solarprognose]</td></tr>
-<tr class="comment"><td colspan="2">; Hier die Werte eintragen, wenn die Prognose mit Solarprognose_WeatherData.py von http://www.solarprognose.de geholt werden soll </td></tr>
-<tr><td class="variablenname">accesstoken</td>
-<td><input type="text" name="Zeile[62][1]" value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" readonly></td></tr>
-<tr><td class="variablenname">item</td>
-<td><input type="text" name="Zeile[63][1]" value="inverter" readonly></td></tr>
-<tr><td class="variablenname">id</td>
-<td><input type="text" name="Zeile[64][1]" value="1111" readonly></td></tr>
-<tr><td class="variablenname">type</td>
-<td><input type="text" name="Zeile[65][1]" value="hourly" readonly></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[60]" value='[solcast.com]' >[solcast.com]</td></tr>
+<tr class="comment"><td colspan="2">; Hier die Werte eintragen, wenn die Prognose mit Solcast_WeatherData.py von https://api.solcast.com.au geholt werden soll </td></tr>
+<tr><td class="variablenname">api_key</td>
+<td><input type="text" name="Zeile[62][1]" value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" readonly></td></tr>
+<tr><td class="variablenname">resource_id</td>
+<td><input type="text" name="Zeile[63][1]" value="xxxx-xxxx-xxxx-xxxx" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch. </td></tr>
+<tr><td class="variablenname">Zeitzone</td>
+<td><input type="text" name="Zeile[65][1]" value="+1" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Wenn die Prognosekurve zur Produktionskurve generell verschoben ist, kann die Zeit hiermit um X Minuten verschoben werden<br>; Positive Werte = früher (nach links),negative = später (nach rechts). </td></tr>
 <tr><td class="variablenname">offset_minuten</td>
 <td><input type="text" name="Zeile[67][1]" value="0" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Sekunden des sleep = Vorgabe von solarprognose.de </td></tr>
-<tr><td class="variablenname">WaitSec</td>
-<td><input type="text" name="Zeile[69][1]" value="21" readonly></td></tr>
-<tr class="comment"><td colspan="2">; mögliche Werte mosmix|own-v1|clearsky, für mosmix muss dem Standort eine Mosmix Station zugeordnet sein.<br>; Karte mit Stationen: https://wettwarn.de/mosmix/mosmix.html </td></tr>
-<tr><td class="variablenname">algorithm</td>
-<td><input type="text" name="Zeile[71][1]" value="own-v1" readonly></td></tr>
-<tr class="comment"><td colspan="2">; falls die Anlagengröße in KWp nicht mit der Größe in Solarprognose übereinstimmt (z.B. Erweiterung) </td></tr>
 <tr><td class="variablenname">KW_Faktor</td>
-<td><input type="text" name="Zeile[73][1]" value="1.00" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht)<br>; Gewicht = 0; die Prognose wird nicht zur Berechnung der Durchschnittsprognose verwendet. </td></tr>
-<tr><td class="variablenname">Gewicht</td>
-<td><input type="text" name="Zeile[75][1]" value="1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[76]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[77]" value='[solcast.com]' >[solcast.com]</td></tr>
-<tr class="comment"><td colspan="2">; Hier die Werte eintragen, wenn die Prognose mit Solcast_WeatherData.py von https://api.solcast.com.au geholt werden soll </td></tr>
-<tr><td class="variablenname">api_key</td>
-<td><input type="text" name="Zeile[79][1]" value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" readonly></td></tr>
-<tr><td class="variablenname">resource_id</td>
-<td><input type="text" name="Zeile[80][1]" value="xxxx-xxxx-xxxx-xxxx" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch. </td></tr>
-<tr><td class="variablenname">Zeitzone</td>
-<td><input type="text" name="Zeile[82][1]" value="+1" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Wenn die Prognosekurve zur Produktionskurve generell verschoben ist, kann die Zeit hiermit um X Minuten verschoben werden<br>; Positive Werte = früher (nach links),negative = später (nach rechts). </td></tr>
-<tr><td class="variablenname">offset_minuten</td>
-<td><input type="text" name="Zeile[84][1]" value="0" readonly></td></tr>
-<tr><td class="variablenname">KW_Faktor</td>
-<td><input type="text" name="Zeile[85][1]" value="1.00" readonly></td></tr>
+<td><input type="text" name="Zeile[68][1]" value="1.00" readonly></td></tr>
 <tr class="comment"><td colspan="2">; spezifische Werte für eventuellen 2. String: </td></tr>
 <tr><td class="variablenname">resource_id2</td>
-<td><input type="text" name="Zeile[87][1]" value="xxxx-xxxx-xxxx-xxxx" readonly></td></tr>
+<td><input type="text" name="Zeile[70][1]" value="xxxx-xxxx-xxxx-xxxx" readonly></td></tr>
 <tr><td class="variablenname">KW_Faktor2</td>
-<td><input type="text" name="Zeile[88][1]" value="1.00" readonly></td></tr>
+<td><input type="text" name="Zeile[71][1]" value="1.00" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>; Gewicht = 0; die Prognose wird nicht zur Berechnung der Durchschnittsprognose verwendet. </td></tr>
 <tr><td class="variablenname">Gewicht</td>
-<td><input type="text" name="Zeile[90][1]" value="1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[91]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[92]" value='[openmeteo]' >[openmeteo]</td></tr>
+<td><input type="text" name="Zeile[73][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[74]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[75]" value='[openmeteo]' >[openmeteo]</td></tr>
 <tr class="comment"><td colspan="2">; Infos zur API siehe https://open-meteo.com/en/docs<br>; Wenn die Prognosekurve zur Produktionskurve generell verschoben ist, kann die Zeit hiermit um X Minuten verschoben werden<br>; Positive Werte = früher (nach links),negative = später (nach rechts). </td></tr>
 <tr><td class="variablenname">offset_minuten</td>
-<td><input type="text" name="Zeile[94][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[77][1]" value="0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Faktor des zusätzlichen Bewölkungseinflusses<br>; 0 = kein Einfluss =&gt; 1.0 starker Einfluss </td></tr>
 <tr><td class="variablenname">cloudEffect</td>
-<td><input type="text" name="Zeile[96][1]" value="0" readonly></td></tr>
+<td><input type="text" name="Zeile[79][1]" value="0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Basis-Effizienzfaktor (systemische Verluste, nicht-optimale Bedingungen) </td></tr>
 <tr><td class="variablenname">base_efficiency_factor</td>
-<td><input type="text" name="Zeile[98][1]" value="0.90" readonly></td></tr>
+<td><input type="text" name="Zeile[81][1]" value="0.90" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Getestete Wettermodelle, Programm überprüft auf dies Modelle<br>; Liste kann erweitert werden </td></tr>
 <tr><td class="variablenname">valid_models</td>
-<td><input type="text" name="Zeile[100][1]" value="{&#039;icon_d2&#039;,&#039;icon_eu&#039;,&#039;ecmwf_aifs025_single&#039;}" readonly></td></tr>
+<td><input type="text" name="Zeile[83][1]" value="{&#039;icon_d2&#039;,&#039;icon_eu&#039;,&#039;ecmwf_aifs025_single&#039;}" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Verwendetes Wettermodel, es können  auch mehrere angegeben werden, der Werte dann gemittelt werden.<br>; z.B. icon_d2,icon_eu </td></tr>
 <tr><td class="variablenname">weather_models</td>
-<td><input type="text" name="Zeile[102][1]" value="icon_d2" readonly></td></tr>
+<td><input type="text" name="Zeile[85][1]" value="icon_d2" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht)<br>; Gewicht = 0; die Prognose wird nicht zur Berechnung der Durchschnittsprognose verwendet. </td></tr>
 <tr><td class="variablenname">Gewicht</td>
-<td><input type="text" name="Zeile[104][1]" value="1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[105]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[106]" value='[solcast_ha]' >[solcast_ha]</td></tr>
+<td><input type="text" name="Zeile[87][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[88]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[89]" value='[solcast_ha]' >[solcast_ha]</td></tr>
 <tr class="comment"><td colspan="2">; Konfiguration für ADDONS/Solcast_WeatherData_from_HA_file.py von @roethigj<br>; Beschreibung siehe ADDONS/Solcast_WeatherData_from_HA_file.readme<br>; Hier den Pfad eintragen, wo die solecast.json vom HA Addon liegt<br>; (z.B. /usr/share/hassio/homeassistant/solcast.json) </td></tr>
 <tr><td class="variablenname">HA_weatherfile</td>
-<td><input type="text" name="Zeile[108][1]" value="/usr/share/hassio/homeassistant/solcast.json" readonly></td></tr>
+<td><input type="text" name="Zeile[91][1]" value="/usr/share/hassio/homeassistant/solcast.json" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch. </td></tr>
 <tr><td class="variablenname">Zeitzone</td>
-<td><input type="text" name="Zeile[110][1]" value="+1" readonly></td></tr>
+<td><input type="text" name="Zeile[93][1]" value="+1" readonly></td></tr>
 <tr><td class="variablenname">KW_Faktor</td>
-<td><input type="text" name="Zeile[111][1]" value="1.00" readonly></td></tr>
+<td><input type="text" name="Zeile[94][1]" value="1.00" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht)<br>; Gewicht = 0; die Prognose wird nicht zur Berechnung der Durchschnittsprognose verwendet. </td></tr>
 <tr><td class="variablenname">Gewicht</td>
-<td><input type="text" name="Zeile[113][1]" value="1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[114]" value='' ></td></tr>
+<td><input type="text" name="Zeile[96][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[97]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/weatherini"></div><br><center><a href="#Hilfezu/CONFIG/chargeini" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;<button type="submit">Hilfe zu charge.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
 <tr class="comment"><td colspan="2">; Bitte die original charge.ini nicht ändern, da sie bei Updates überschrieben wird.<br>; Persönliche Anpassungen stattdessen in einer Kopie als charge_priv.ini ablegen. </td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[Ladeberechnung]' >[Ladeberechnung]</td></tr>
@@ -681,6 +655,6 @@ Fast-forward
 <td><input type="text" name="Zeile[55][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[57]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 27.04.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 12.07.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>

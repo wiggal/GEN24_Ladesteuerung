@@ -415,7 +415,6 @@ const sourceColors = {
     'Basis': '#FF3300', //  Rot für Prognosewert
     'Produktion': '#4CAF50',    //  Grün für Produktion-Wert
     'solcast.com': '#3F51B5', // Blau
-    'solarprognose': '#7B3F00', // Braun
     'akkudoktor': '#9C27B0', // Lila
     'forecast.solar': '#87CEFA', // Hellblau
     'openmeteo': '#696969', // dunkelgrau

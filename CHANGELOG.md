@@ -1,4 +1,5 @@
 **[0.42.8] – 2026-XX-XX**  
+- Solarprognose.de entfernt, da es den Dienst leider nicht mehr gibt.  
 
 **[0.42.7] – 2026-06-27**  
 - FIX: Reset-Button Wallbox-TAB.  

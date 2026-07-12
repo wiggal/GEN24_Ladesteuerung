@@ -53,7 +53,6 @@ function get_db($path, $GEN24_DIR) {
             $defaults = [
                 ['EnergyController',          '1-56/5',  '*',                    '*','*','*', $GEN24_DIR.'/start_PythonScript.sh EnergyController.py logging',1,                                'EnergyController nur logging'],
                 ['Forecast Solar WeatherData','33',       '5,8,10,12,14',        '*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py',1,                    'Solar-Wetterprognose'],
-                ['Solarprognose WeatherData', '8',        '5,7,9,11,13,15',      '*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Solarprognose_WeatherData.py',0,                      'Solarprognose'],
                 ['Solcast WeatherData',       '0',        '6,8,11,13,15',        '*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Solcast_WeatherData.py',0,                            'Solcast'],
                 ['Akkudoktor WeatherData',    '0',        '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py',0,                        'Akkudoktor'],
                 ['OpenMeteo WeatherData',     '35',       '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py',0,                          'OpenMeteo'],
@@ -107,6 +106,9 @@ function get_db($path, $GEN24_DIR) {
                     }
                 }
             }
+
+            // Migration: Dienst 'Solarprognose WeatherData' gibt es nicht mehr => entfernen falls vorhanden   #entWIGGlung
+            $db->exec("DELETE FROM cron_jobs WHERE Name = 'Solarprognose WeatherData'");
         }
 
         return $db;

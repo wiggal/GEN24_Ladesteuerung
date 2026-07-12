@@ -63,7 +63,6 @@ Holen von den jeweiligen API-Urls die Prognosedaten, bereiten sie auf für Energ
 
 Besonderheiten:
 - Bei forecast.solar kann mit einem Account die Prognose mit den Werten der Produktion aus der DB angepasst werden.  
-- Bei solarprognose.de ist ein Account erforderlich, hier wird ein genauer Zeitpunkt für die Anforderung vorgegeben.  
 - Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag angefordert werden.  
 - Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
 - Bei open-meteo.com können verschiedene Wetterdienste konfiguriert werden, kein Account nötig.  
