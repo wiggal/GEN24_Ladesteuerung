@@ -1,4 +1,4 @@
-**[0.42.8] – 2026-XX-XX**  
+**[0.42.8] – 2026-07-13**  
 - Solarprognose.de entfernt, da es den Dienst leider nicht mehr gibt.  
 - api.solcast.com.au: Bei ERROR 429 zweiter Versuch nach 30 Sekunden.  
 
