@@ -1,6 +1,6 @@
 **[0.42.9] – 2026-XX-XX**  
 - **Neuer Prognosedienst** DWD_mosmix_forecast.py basierend auf den Daten des DWD.  
-  Erforderlich Pythonmodule => `pandas` und `numpy` in bestehenden Systemen installieren.  
+  Erforderliche Pythonmodule => `pandas` und `numpy` in bestehenden Systemen installieren.  
   Erweiterung der CONFIG/weather.ini um `[dwd.mosmix]` in CONFIG/weather_priv.ini übernehmen. 
   Eintrag in Scheduler bei Bedarf, z.B.:  
   `6 3,7,9,11,13,15,17,19 * * * 	/home/GEN24/start_PythonScript.sh FORECAST/DWD_mosmix_forecast.py`
