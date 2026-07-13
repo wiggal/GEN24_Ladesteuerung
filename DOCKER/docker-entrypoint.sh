@@ -7,7 +7,7 @@ export PYTHONPATH="$INST_DIR/FUNCTIONS"
 cd "$INST_DIR" || exit 1
 # weatherData.sqlite
 if [ ! -s "weatherData.sqlite" ]; then
-python3 -c "from WeatherData import WeatherData; WeatherData().create_database('$INST_DIR/weatherData.sqlite')"
+    python3 -c "from WeatherData import WeatherData; WeatherData().create_database('$INST_DIR/weatherData.sqlite')"
 fi
 #PV_Daten.sqlite
 if [ ! -s "PV_Daten.sqlite" ]; then
