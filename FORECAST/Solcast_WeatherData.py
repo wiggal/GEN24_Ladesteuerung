@@ -11,10 +11,41 @@ from datetime import datetime, timedelta
 import FUNCTIONS.functions
 import FUNCTIONS.WeatherData
 
+def _fetch_solcast(url, label, max_versuche=2, wartezeit=30):
+    """
+    Ruft eine Solcast-Forecast-URL ab.
+    Bei 429 (Server überlastet) wird nach `wartezeit` Sekunden ein
+    weiterer Versuch unternommen. Der Fehler wird erst ausgegeben,
+    wenn auch der letzte Versuch fehlschlägt.
+    Rückgabe: (json_daten, None) bei Erfolg, (None, Fehlermeldung) bei Fehler.
+    """
+    for versuch in range(1, max_versuche + 1):
+        try:
+            apiResponse = requests.get(url, timeout=99.50)
+            print("DEBUG Wetter URL ("+label+", Versuch "+str(versuch)+"): "+url)
+            if apiResponse.status_code == 200:
+                return dict(json.loads(apiResponse.text)), None
+            elif apiResponse.status_code == 429:
+                if versuch < max_versuche:
+                    print("### WARNUNG 429: Limit verbraucht oder Solcast-Server überlastet ("+label+"), Versuch "+str(versuch)+"/"+str(max_versuche)+". Warte "+str(wartezeit)+"s und versuche es erneut...")
+                    time.sleep(wartezeit)
+                    continue
+                print("### ERROR 429: Limit verbraucht oder Solcast-Server überlastet ("+label+") - auch nach "+str(max_versuche)+" Versuchen.")
+                return None, "429: Limit verbraucht oder Solcast-Server überlastet ("+label+")"
+            else:
+                print("### ERROR "+str(apiResponse.status_code)+":  Keine forecasts-Daten von api.solcast.com.au ("+label+")")
+                return None, "Fehler "+str(apiResponse.status_code)+" ("+label+")"
+        except requests.exceptions.Timeout:
+            print("### ERROR:  Timeout von api.solcast.com.au ("+label+")")
+            return None, "Timeout ("+label+")"
+    return None, "Unbekannter Fehler ("+label+")"
+
+
 def loadLatestWeatherData(Quelle, Gewicht):
     # Varablen definieren
     format = "%Y-%m-%d %H:%M:%S"
     dict_watts = {}
+    SQL_watts = []
     heute = datetime.strftime(now, "%Y-%m-%d")
     morgen = datetime.strftime(now + timedelta(days=1), "%Y-%m-%d")
     sommerzeit = time.localtime().tm_isdst
@@ -23,33 +54,16 @@ def loadLatestWeatherData(Quelle, Gewicht):
 
     try:
         url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id, 'forecasts', api_key)
-        try:
-            apiResponse = requests.get(url, timeout=99.50)
-            print("DEBUG Wetter URL: "+url)
-            if apiResponse.status_code == 200:
-                json_data1 = dict(json.loads(apiResponse.text))
-            else:
-                print("### ERROR "+str(apiResponse.status_code)+":  Keine forecasts-Daten von api.solcast.com.au")
-                exit()
-        except requests.exceptions.Timeout:
-            print("### ERROR:  Timeout von api.solcast.com.au")
-            exit()
-        
+        json_data1, fehler1 = _fetch_solcast(url, "String1")
+        if json_data1 is None:
+            return (None, fehler1)
+
         if Strings == 2:
             url = 'https://api.solcast.com.au/rooftop_sites/{}/{}?format=json&api_key={}'.format(resource_id2, 'forecasts', api_key)
-            try:
-                apiResponse2 = requests.get(url, timeout=99.50)
-                apiResponse2.raise_for_status()
-                print("DEBUG Wetter URL2: "+url)
-                if apiResponse2.status_code == 200:
-                    json_data2 = dict(json.loads(apiResponse2.text))
-                else:
-                    print("### ERROR "+str(apiResponse.status_code)+":  Keine estimated_actuals-Daten von api.solcast.com.au")
-                    exit()
-            except requests.exceptions.Timeout:
-                print("### ERROR:  Timeout von api.solcast.com.au")
-                exit()
-            
+            json_data2, fehler2 = _fetch_solcast(url, "String2")
+            if json_data2 is None:
+                return (None, fehler2)
+
         try:
             # wenn zuviele Zugriffe
             istda = json_data1['response_status']['error_code']
