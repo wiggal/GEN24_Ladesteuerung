@@ -1,7 +1,7 @@
 ---
 name: "EnergyWIGGAL"
 description: "Fronius GEN24 / Verto Wechselrichter – prognosebasierte Ladesteuerung & Energiemanagement (EnergyWIGGAL)"
-version: "0.42.8"
+version: "0.42.9"
 slug: "gen24_ladesteuerung"
 init: false
 homeassistant: "2023.1.0"
