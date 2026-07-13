@@ -376,19 +376,39 @@ Fast-forward
 <tr><td class="variablenname">Gewicht</td>
 <td><input type="text" name="Zeile[87][1]" value="1" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[88]" value='' ></td></tr>
-<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[89]" value='[solcast_ha]' >[solcast_ha]</td></tr>
-<tr class="comment"><td colspan="2">; Konfiguration für ADDONS/Solcast_WeatherData_from_HA_file.py von @roethigj<br>; Beschreibung siehe ADDONS/Solcast_WeatherData_from_HA_file.readme<br>; Hier den Pfad eintragen, wo die solecast.json vom HA Addon liegt<br>; (z.B. /usr/share/hassio/homeassistant/solcast.json) </td></tr>
-<tr><td class="variablenname">HA_weatherfile</td>
-<td><input type="text" name="Zeile[91][1]" value="/usr/share/hassio/homeassistant/solcast.json" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch. </td></tr>
-<tr><td class="variablenname">Zeitzone</td>
-<td><input type="text" name="Zeile[93][1]" value="+1" readonly></td></tr>
-<tr><td class="variablenname">KW_Faktor</td>
-<td><input type="text" name="Zeile[94][1]" value="1.00" readonly></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[89]" value='[dwd.mosmix]' >[dwd.mosmix]</td></tr>
+<tr class="comment"><td colspan="2">; auto = Suche mit Koordinaten oder feste Stationsnummer wie 10865 von https://www.dwd.de/DE/leistungen/met_verfahren_mosmix/mosmix_stationskatalog.html </td></tr>
+<tr><td class="variablenname">station</td>
+<td><input type="text" name="Zeile[91][1]" value="auto" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Wenn die Prognosekurve zur Produktionskurve generell verschoben ist, kann die Zeit hiermit um X Minuten verschoben werden<br>; Positive Werte = früher (nach links),negative = später (nach rechts). </td></tr>
+<tr><td class="variablenname">offset_minuten</td>
+<td><input type="text" name="Zeile[93][1]" value="30" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Basis-Effizienzfaktor (systemische Verluste, nicht-optimale Bedingungen) </td></tr>
+<tr><td class="variablenname">efficiency</td>
+<td><input type="text" name="Zeile[95][1]" value="0.965" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Temperaturkoeffizient der Leistung deiner PV-Module, Typischer Wert für kristalline Silizium-Module: -0,3 % bis -0,45 % pro °C, also -0.003 bis -0.0045 als Dezimalwert. </td></tr>
+<tr><td class="variablenname">temp_coeff</td>
+<td><input type="text" name="Zeile[97][1]" value="-0.0038" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Standorthoehe in Metern </td></tr>
+<tr><td class="variablenname">altitude</td>
+<td><input type="text" name="Zeile[99][1]" value="520" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht)<br>; Gewicht = 0; die Prognose wird nicht zur Berechnung der Durchschnittsprognose verwendet. </td></tr>
 <tr><td class="variablenname">Gewicht</td>
-<td><input type="text" name="Zeile[96][1]" value="1" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[97]" value='' ></td></tr>
+<td><input type="text" name="Zeile[101][1]" value="1.0" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[102]" value='' ></td></tr>
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[103]" value='[solcast_ha]' >[solcast_ha]</td></tr>
+<tr class="comment"><td colspan="2">; Konfiguration für ADDONS/Solcast_WeatherData_from_HA_file.py von @roethigj<br>; Beschreibung siehe ADDONS/Solcast_WeatherData_from_HA_file.readme<br>; Hier den Pfad eintragen, wo die solecast.json vom HA Addon liegt<br>; (z.B. /usr/share/hassio/homeassistant/solcast.json) </td></tr>
+<tr><td class="variablenname">HA_weatherfile</td>
+<td><input type="text" name="Zeile[105][1]" value="/usr/share/hassio/homeassistant/solcast.json" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes ( je Größer der Wert umso größer das Gewicht)<br>; Zeitversatz zu UTC, hier für Zeitzone Europe/Berlin UTC +1, Sommerzeit = +1 erfolgt nun automatisch. </td></tr>
+<tr><td class="variablenname">Zeitzone</td>
+<td><input type="text" name="Zeile[107][1]" value="+1" readonly></td></tr>
+<tr><td class="variablenname">KW_Faktor</td>
+<td><input type="text" name="Zeile[108][1]" value="1.00" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Gewicht ermöglicht eine höhere Gewichtung des Wetterdienstes (je größer der Wert, umso größer das Gewicht)<br>; Gewicht = 0; die Prognose wird nicht zur Berechnung der Durchschnittsprognose verwendet. </td></tr>
+<tr><td class="variablenname">Gewicht</td>
+<td><input type="text" name="Zeile[110][1]" value="1" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[111]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/weatherini"></div><br><center><a href="#Hilfezu/CONFIG/chargeini" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;<button type="submit">Hilfe zu charge.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[Hinweis]' >[Hinweis]</td></tr>
 <tr class="comment"><td colspan="2">; Bitte die original charge.ini nicht ändern, da sie bei Updates überschrieben wird.<br>; Persönliche Anpassungen stattdessen in einer Kopie als charge_priv.ini ablegen. </td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[2]" value='[Ladeberechnung]' >[Ladeberechnung]</td></tr>
@@ -655,6 +675,6 @@ Fast-forward
 <td><input type="text" name="Zeile[55][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[57]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 12.07.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 13.07.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>

@@ -54,9 +54,10 @@ function get_db($path, $GEN24_DIR) {
                 ['EnergyController',          '1-56/5',  '*',                    '*','*','*', $GEN24_DIR.'/start_PythonScript.sh EnergyController.py logging',1,                                'EnergyController nur logging'],
                 ['Forecast Solar WeatherData','33',       '5,8,10,12,14',        '*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Forecast_solar__WeatherData.py',1,                    'Solar-Wetterprognose'],
                 ['Solcast WeatherData',       '0',        '6,8,11,13,15',        '*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Solcast_WeatherData.py',0,                            'Solcast'],
-                ['Akkudoktor WeatherData',    '0',        '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py',0,                        'Akkudoktor'],
+                ['dwd.mosmix',                '2',        '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/DWD_mosmix_forecast.py',0,                            'dwd.mosmix'],
+                ['Akkudoktor WeatherData',    '4',        '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/Akkudoktor__WeatherData.py',0,                        'Akkudoktor'],
                 ['OpenMeteo WeatherData',     '35',       '5,7,9,11,13,15,17,19','*','*','*', $GEN24_DIR.'/start_PythonScript.sh FORECAST/OpenMeteo_WeatherData.py',0,                          'OpenMeteo'],
-                ['DynamicPriceCheck',         '58',       '*',                   '*','*','*', $GEN24_DIR.'/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py schreiben',0,         'Dynamische Strompreise'],
+                ['DynamicPriceCheck',         '58',       '*',                   '*','*','*', $GEN24_DIR.'/start_PythonScript.sh -o DynPriceCheck.log DynamicPriceCheck.py schreiben',0,        'Dynamische Strompreise'],
                 // Container-sichere Log-Rotation via cp und > statt mv
                 ['Rotate Crontab.log',        '0',        '5',                   '*','*','1', 'cp '.$GEN24_DIR.'/Crontab.log '.$GEN24_DIR.'/old_Crontab.log; >'.$GEN24_DIR.'/Crontab.log',1,                                        'Log-Rotation Mo'],
                 ['Rotate DynPriceCheck.log',  '0',        '5',                   '*','*','1', 'cp '.$GEN24_DIR.'/DynPriceCheck.log '.$GEN24_DIR.'/old_DynPriceCheck.log; >'.$GEN24_DIR.'/DynPriceCheck.log',0,                            'Log-Rotation DynPrice Mo'],
@@ -543,7 +544,7 @@ p, label {
         <summary><b>Crontab-Eintrag für den Scheduler</b></summary>
         <div style="margin-top:8px;">
         <p class="small">In der System-Crontab (<code>crontab -e</code>) muss nur noch dieser eine Eintrag stehen:</p>
-        <pre style="background:#f0f0f0;padding:8px;border-radius:4px;font-size:0.9em;overflow-x:auto;">* * * * * /usr/bin/python /home/GEN24/db_scheduler.py </pre>
+        <pre style="background:#f0f0f0;padding:8px;border-radius:4px;font-size:0.9em;overflow-x:auto;">* * * * * /usr/bin/python3 /home/GEN24/db_scheduler.py </pre>
         <p class="small">Der Scheduler liest jede Minute alle aktiven Jobs aus dieser Tabelle und führt fällige Jobs aus.</p>
         <p class="small"><b>Cron-Syntax Kurzreferenz:</b></p>
         <table style="font-size:0.85em;border-collapse:collapse;width:100%;">

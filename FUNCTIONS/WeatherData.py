@@ -86,7 +86,12 @@ class WeatherData:
         zeiger = verbindung.cursor()
         print_level = basics.getVarConf('env','print_level','eval')
         # Alte Einträge löschen die älter 35 Tage sind
-        loesche_bis = (datetime.today() - timedelta(days=35)).date().isoformat()
+        # Auf 60 Tage erhoeht (vorher 35): gibt mehr Puffer fuer Schlechtwetterphasen
+        # (min_samples in get_opt_prognose braucht genug valide Tage pro Uhrzeit).
+        # Die exponentielle Gewichtung in get_opt_prognose sorgt dafuer, dass sehr alte
+        # Tage trotzdem kaum noch Einfluss haben (bei halbwertszeit_tage=10 zaehlt ein
+        # 35 Tage alter Tag nur noch ~11%, ein 60 Tage alter nur noch ~1.6%).
+        loesche_bis = (datetime.today() - timedelta(days=60)).date().isoformat()
 
         # Minutenoffset anwenden
         if offset_minutes != 0 and gewicht_neu != -1:
@@ -232,37 +237,89 @@ class WeatherData:
 
         return(Produktion)
 
-    def get_opt_prognose(self, Produktion, Basis):
-        # 1. Dictionaries vorbereiten
+    def get_opt_prognose(self, Produktion, Basis, min_samples=3, faktor_min=0.2,
+                          faktor_max=3.0, halbwertszeit_tage=10):
+        """Ermittelt einen Korrekturfaktor je Uhrzeit (HH:MM:SS) aus dem Verhaeltnis
+        Produktion/Basis ueber die gespeicherte Historie und wendet ihn auf die
+        aktuelle Basis-Prognose an.
+
+        Tuning-Parameter (Anpassung je nach Bedarf):
+        - min_samples: Mindestanzahl valider Datenpunkte je Uhrzeit, bevor ueberhaupt
+          ein Korrekturfaktor gebildet wird (sonst faktor=1.0, keine Korrektur).
+          Bei wenig Historie (<2 Wochen) ggf. auf 2 senken; bei viel Historie (>1 Monat)
+          eher auf 5 erhoehen fuer robustere Faktoren.
+        - faktor_min/faktor_max: Kappt Ausreisser (z.B. durch Messfehler, Schnee auf
+          Panel, kurzzeitige Verschattung). Falls die Anlage an manchen Stunden
+          systematisch nur einen kleinen Bruchteil der Prognose erreicht (z.B. durch
+          Teilverschattung), faktor_min ggf. auf 0.1 senken.
+        - halbwertszeit_tage: Nach wie vielen Tagen ein historischer Datenpunkt nur
+          noch halb so stark gewichtet wird (exponentielle Aktualitaets-Gewichtung).
+          Kuerzer (z.B. 5) fuer schnellere Reaktion auf Aenderungen (Verschmutzung,
+          Jahreszeitenwechsel); laenger (z.B. 20) fuer stabilere, rauschaermere Faktoren.
+          Bei Erhoehung der DB-Aufbewahrung (siehe loesche_bis) auf deutlich mehr als
+          60 Tage sollte halbwertszeit_tage eher verkuerzt werden, damit alte,
+          saisonal nicht mehr passende Tage nicht zu viel Gewicht behalten.
+        """
         prognose_dict = {zeit: watt for zeit, _, watt, *_ in Basis}
         produktion_dict = {zeit: watt for zeit, _, watt, *_ in Produktion}
-        # 2. Faktoren nach Uhrzeit (HH:MM:SS) sammeln
+
+        heute = max(
+            (datetime.strptime(z, "%Y-%m-%d %H:%M:%S") for z in prognose_dict),
+            default=self.now
+        )
+
+        # (faktor, gewicht) je Uhrzeit sammeln, statt nur faktor - fuer gewichteten Median
         faktoren_nach_stunde = defaultdict(list)
+
         for zeit in prognose_dict:
-            # Damit nur relevate Prognosen verwendet werden Faktor nur bei > 100Watt
-            if zeit in produktion_dict: 
-                uhrzeit = zeit[11:]  # z.B. '05:00:00'
-                if produktion_dict[zeit] > 100 and prognose_dict[zeit] > 100:
-                    faktor = produktion_dict[zeit] / prognose_dict[zeit]
-                else:
-                    faktor = 1.0
-                faktoren_nach_stunde[uhrzeit].append(faktor)
-        
-        # 3. Median-Faktor je Uhrzeit berechnen
-        median_faktoren = {
-            uhrzeit: median(faktoren)
-            for uhrzeit, faktoren in faktoren_nach_stunde.items()
-        }
-        # 4. Justierte Prognose-Liste erzeugen
+            if zeit not in produktion_dict:
+                continue
+            # Grenzwertige Punkte (<=100W) werden AUSGESCHLOSSEN statt mit faktor=1.0
+            # verwaessert zu werden - gerade Uebergangsstunden (Sonnenauf-/-untergang)
+            # sollen den Median nicht kuenstlich Richtung 1.0 ziehen
+            if produktion_dict[zeit] <= 100 or prognose_dict[zeit] <= 100:
+                continue
+
+            faktor = produktion_dict[zeit] / prognose_dict[zeit]
+            faktor = max(faktor_min, min(faktor_max, faktor))  # Ausreisser kappen
+
+            zeit_dt = datetime.strptime(zeit, "%Y-%m-%d %H:%M:%S")
+            alter_tage = (heute - zeit_dt).days
+            gewicht = 0.5 ** (alter_tage / halbwertszeit_tage)
+
+            uhrzeit = zeit[11:]  # z.B. '05:00:00'
+            faktoren_nach_stunde[uhrzeit].append((faktor, gewicht))
+
+        def gewichteter_median(werte_gewichte):
+            # Werte nach Groesse sortieren, dann den Wert finden, bei dem die
+            # kumulierte Gewichtssumme die Haelfte des Gesamtgewichts erreicht
+            werte_gewichte = sorted(werte_gewichte, key=lambda x: x[0])
+            gesamt_gewicht = sum(g for _, g in werte_gewichte)
+            if gesamt_gewicht == 0:
+                return None
+            kumuliert = 0
+            for wert, gewicht in werte_gewichte:
+                kumuliert += gewicht
+                if kumuliert >= gesamt_gewicht / 2:
+                    return wert
+            return werte_gewichte[-1][0]
+
+        median_faktoren = {}
+        for uhrzeit, werte_gewichte in faktoren_nach_stunde.items():
+            # Mindestanzahl Datenpunkte fordern - sonst keine Korrektur (faktor=1.0)
+            if len(werte_gewichte) < min_samples:
+                continue
+            median_faktoren[uhrzeit] = gewichteter_median(werte_gewichte)
+
         Opt_Prognose = []
         for zeit in prognose_dict:
-            uhrzeit = zeit[11:]  # z. B. '06:00:00'
-            faktor = median_faktoren.get(uhrzeit)
-            if faktor:
-                neue_prognose = round(prognose_dict[zeit] * faktor)
-                Opt_Prognose.append((zeit, "Prognose", neue_prognose, '0', ''))
+            uhrzeit = zeit[11:]
+            faktor = median_faktoren.get(uhrzeit, 1.0)
+            neue_prognose = round(prognose_dict[zeit] * faktor)
+            Opt_Prognose.append((zeit, "Prognose", neue_prognose, '0', ''))
 
         return(Opt_Prognose)
+
 
     def store_forecast_result(self):
         print_level = basics.getVarConf('env','print_level','eval')
