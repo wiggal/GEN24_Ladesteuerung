@@ -82,12 +82,12 @@ detect_distro(){
     PM="apt-get install -y"
     UPDATE="apt-get update -y"
     # DEBIAN-Paketliste
-    packages=(passwd iputils-ping cron file git python3 python3-pip python3-yaml python3-requests python-is-python3 php php-sqlite3 python3-websockets python3-aiohttp)
+    packages=(passwd iputils-ping cron file git python3 python3-pip python3-yaml python3-requests python3-pandas python3-numpy python-is-python3 php php-sqlite3 python3-websockets python3-aiohttp)
     SYSTEM=DEBIAN
   elif [ -f /etc/alpine-release ]; then
     PM="apk --update add"
     UPDATE=""
-    packages=(shadow iputils-ping file git python3 py-pip py3-yaml py3-requests php php-sqlite3 php-openssl py3-websockets py3-aiohttp)
+    packages=(shadow iputils-ping file git python3 py-pip py3-yaml py3-requests py3-pandas py3-numpy php php-sqlite3 php-openssl py3-websockets py3-aiohttp)
     SYSTEM=ALPINE
  # elif [ -f /etc/fedora-release ]; then
  #   PM="dnf install -y"
@@ -280,7 +280,7 @@ CRON_ENTRIES=$(cat <<EOF
 @reboot $REPO_DIR/start_PythonScript.sh
 # Prognoseskripte
 # Scheduler EnergyWIGGAL
-* * * * * /usr/bin/python $REPO_DIR/db_scheduler.py
+* * * * * /usr/bin/python3 $REPO_DIR/db_scheduler.py
 EOF
 )
 

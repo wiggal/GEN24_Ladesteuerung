@@ -7,7 +7,7 @@ export PYTHONPATH="$INST_DIR/FUNCTIONS"
 cd "$INST_DIR" || exit 1
 # weatherData.sqlite
 if [ ! -s "weatherData.sqlite" ]; then
-    python3 -c "from WeatherData import WeatherData; WeatherData().create_database('$INST_DIR/weatherData.sqlite')"
+/home/GEN24/DOCKER/docker-entrypoint.sh    python3 -c "from WeatherData import WeatherData; WeatherData().create_database('$INST_DIR/weatherData.sqlite')"
 fi
 #PV_Daten.sqlite
 if [ ! -s "PV_Daten.sqlite" ]; then
@@ -26,7 +26,7 @@ cd $INST_DIR
 if [ ! -s /home/GEN24/weatherData.sqlite ]; then
     /home/GEN24/start_PythonScript.sh /home/GEN24/FORECAST/Forecast_solar__WeatherData.py
 fi
-# 2. Python Script im Hintergrund starten
+# 2. Python3 Script im Hintergrund starten
 /home/GEN24/start_PythonScript.sh -o /dev/null EnergyController.py &
 
 # 3. Cronjob laden

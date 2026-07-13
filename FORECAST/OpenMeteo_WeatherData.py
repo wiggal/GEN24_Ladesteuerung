@@ -9,7 +9,7 @@ import datetime
 import FUNCTIONS.functions
 import FUNCTIONS.WeatherData
 
-# Versuche, zoneinfo zu importieren, für Python 3.9+
+# Versuche, zoneinfo zu importieren, für Python3.9+
 try:
     from zoneinfo import ZoneInfo
 except ImportError:

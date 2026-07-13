@@ -34,6 +34,8 @@ RUN apk add --no-cache \
         py3-aiohttp \
         py3-websockets \
         py3-requests \
+        py3-pandas \
+        py3-numpy \
  && touch /var/log/cron.log
 
 # --- s6-Overlay run-Skript (liegt jetzt direkt im Build-Kontext) ---

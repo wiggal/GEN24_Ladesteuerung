@@ -214,7 +214,7 @@ class WeatherData:
             DB_data = verbindung.fetchall()
         except:
             print("\nDie Datei PV_Daten.sqlite fehlt oder ist leer!")
-            print("Bitte 'python EnergyController.py logging' ausführen\n")
+            print("Bitte 'python3 EnergyController.py logging' ausführen\n")
             DB_data = []
             DB_data.append((aktuelle_Std, 0),)
             # Schließe die Verbindung
