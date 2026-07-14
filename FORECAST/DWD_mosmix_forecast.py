@@ -3,9 +3,8 @@
 DWD_mosmix_forecast.py
 
 DWD MOSMIX_L -> PV-Ertragsprognose, integriert in die EnergyWIGGAL-Scheduler-Struktur
-(analog zu Forecast_solar__WeatherData.py). Laedt die MOSMIX_L Vorhersage der
-konfigurierten (oder automatisch gefundenen) DWD-Wetterstation, rechnet die
-Globalstrahlung (Rad1h) bzw. ersatzweise die effektive Bewoelkung (Neff) in eine
+Laedt die MOSMIX_L Vorhersage der konfigurierten (oder automatisch gefundenen) DWD-Wetterstation, 
+rechnet die Globalstrahlung (Rad1h) bzw. ersatzweise die effektive Bewoelkung (Neff) in eine
 PV-Ertragsprognose um und speichert das Ergebnis ueber weatherdata.storeWeatherData_SQL()
 in die DB.
 
@@ -19,20 +18,18 @@ innerhalb der ohnehin viel groesseren Wettervorhersage-Unsicherheit.
 Keine API-Keys noetig - DWD Open Data ist frei zugaenglich.
 
 Abhaengigkeiten:
-    pip install requests --break-system-packages
-    (pandas/numpy werden vorausgesetzt, i.d.R. bereits vorhanden)
+    pip install requests pandas numpy --break-system-packages
 
-Konfiguration (Annahme, an echte config.ini anpassen):
+Konfiguration in CONFIG/weather_priv.ini
     [dwd.mosmix]
-    station = auto          ; oder feste MOSMIX-Stationsnummer, z.B. 10865
+    ; oder feste MOSMIX-Stationsnummer, z.B. 10865
+    station = auto          
     Gewicht = 1.0
     offset_minuten = 0
     efficiency = 0.965
     temp_coeff = -0.0036
-    altitude = 520           ; Standorthoehe in Metern
-
-    [pv.strings]             ; wiederverwendet, identisch zu forecast.solar-Config
-    lat, lon, dec, az, wp, anzahl, dec2, az2, wp2
+    ; Standorthoehe in Metern
+    altitude = 520
 
     Stationsnummern manuell nachschlagen: https://wettwarn.de/mosmix/mosmix.html
     (Azimuth-Konvention wie forecast.solar: 0=Sued, -90=Ost, 90=West)
@@ -247,13 +244,6 @@ def fetch_mosmix_l(station: str, timeout: int = 30) -> pd.DataFrame:
 
 # ---------------------------------------------------------------------------
 # PV-Modellierung (pvlib-frei: eigene Sonnenstand-/Erbs-/Clearsky-/PVWatts-Implementierung)
-#
-# Alle Bausteine wurden numerisch gegen pvlib validiert:
-#   Sonnenstand:  max ~0.08 Grad (Zenit) / ~0.24 Grad (Azimut) Abweichung
-#   Erbs (DNI/DHI): max ~5 W/m^2 Abweichung
-#   POA-Transposition: max ~3 W/m^2 Abweichung
-#   PVWatts AC: max ~1% Abweichung
-# Alles weit innerhalb der ohnehin viel groesseren Wettervorhersage-Unsicherheit.
 # ---------------------------------------------------------------------------
 
 def solar_position(lat: float, lon: float, times: pd.DatetimeIndex):
@@ -419,8 +409,8 @@ def model_pv_output(df: pd.DataFrame, lat: float, lon: float, altitude: float,
     dni = erbs_out["dni"].fillna(0)
     dhi = erbs_out["dhi"].fillna(0)
 
-    # forecast.solar-Konvention: azimuth 0=Sued, negative=Ost, positive=West
-    # interne Konvention (wie pvlib): 180=Sued, 90=Ost, 270=West -> Umrechnung
+    # Konvention: azimuth 0=Sued, negative=Ost, positive=West
+    # interne Konvention: 180=Sued, 90=Ost, 270=West -> Umrechnung
     panel_azimuth = (azimuth + 180) % 360
 
     poa_global = get_total_irradiance_isotropic(
@@ -441,16 +431,10 @@ def model_pv_output(df: pd.DataFrame, lat: float, lon: float, altitude: float,
 
 
 # ---------------------------------------------------------------------------
-# Integration in die EnergyWIGGAL-Scheduler-Struktur
+# Integration in die EnergyWIGGAL-Struktur
 # ---------------------------------------------------------------------------
 
 def loadLatestWeatherData(Quelle, Gewicht):
-    # ACHTUNG: Konfigurationsschluessel unten sind Annahmen, angelehnt an das Muster aus
-    # Forecast_solar__WeatherData.py / OpenMeteo_WeatherData.py ([pv.strings] wird
-    # wiederverwendet, damit du Standort/Ausrichtung/Anlagengroesse nicht doppelt pflegen
-    # musst). Neue DWD-spezifische Werte liegen unter [dwd.mosmix] - bitte an deine
-    # tatsaechliche config.ini anpassen, falls abweichende Sektions-/Schluesselnamen
-    # verwendet werden.
     station_cfg = basics.getVarConf('dwd.mosmix', 'station', 'str')
     altitude = basics.getVarConf('dwd.mosmix', 'altitude', 'eval')
     efficiency = basics.getVarConf('dwd.mosmix', 'efficiency', 'eval')
@@ -493,7 +477,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
         exit()
 
     # Pro String (dec/az/wp bzw. dec2/az2/wp2 usw.) separat modellieren, dann ueber
-    # weatherdata.sum_pv_data() zusammenfuehren - analog zu OpenMeteo_WeatherData.py
+    # weatherdata.sum_pv_data() zusammenfuehren
     string_zaehler = 1
     SQL_watts_dict = {}
     while string_zaehler <= anzahl_strings:
@@ -510,33 +494,29 @@ def loadLatestWeatherData(Quelle, Gewicht):
             efficiency=efficiency, temp_coeff=temp_coeff, use_cloud_fallback=use_cloud_fallback,
         )
 
-        # In lokale Zeit (Europe/Berlin) umrechnen - identisches Zeitstempelformat wie
-        # forecast.solar/OpenMeteo ("%Y-%m-%d %H:%M:%S"), damit storeWeatherData_SQL
-        # kompatibel bleibt. WICHTIG: DWD liefert UTC: tz_convert() rechnet tatsaechlich
+        # WICHTIG: DWD liefert UTC: tz_convert() rechnet tatsaechlich
         # um (inkl. Sommerzeit), nicht nur tz-Info entfernen, sonst 1-2h Versatz.
         #
         # Hinweis Rad1h-Bezugszeit: laut DWD-Parameteruebersicht ist Rad1h ein
         # Summenwert der "letzten 1 Stunde" (Intervall [T-1h, T]), kein Momentanwert AM
         # Zeitpunkt T. Ein evtl. noetiger Korrekturversatz wird zentral ueber das
         # bereits vorhandene 'offset_minuten' (siehe __main__, an storeWeatherData_SQL
-        # uebergeben) gehandhabt - wie bei forecast.solar/openmeteo auch - statt hier
-        # eine zweite, eigene Offset-Logik einzubauen.
+        # uebergeben) gehandhabt statt hier eine zweite, eigene Offset-Logik einzubauen.
         pv_forecast_data = []
         for ts, value in pv["ac_watts"].items():
             ts_local = ts.tz_convert("Europe/Berlin")
             key = ts_local.strftime("%Y-%m-%d %H:%M:%S")
             value = round(max(value, 0.0))  # auf ganze Watt runden
             if value > 10:
-                # method_used landet im Info-/Notiz-Feld der DB-Zeile (statt '' wie bei
-                # forecast.solar/OpenMeteo), damit im Nachhinein sichtbar bleibt, ob
+                # method_used landet im Info-/Notiz-Feld der DB-Zeile 
+                # damit im Nachhinein sichtbar bleibt, ob
                 # Rad1h oder der Neff-Fallback verwendet wurde
                 pv_forecast_data.append((key, Quelle, value, Gewicht, method_used))
 
         SQL_watts_dict[string_zaehler] = pv_forecast_data
         string_zaehler += 1
 
-    # Summierung ueber alle Strings via projekteigener Funktion (statt manueller
-    # pandas-Summierung), damit sich das Verhalten exakt an OpenMeteo_WeatherData.py haelt
+    # Summierung ueber alle Strings 
     SQL_watts = weatherdata.sum_pv_data(SQL_watts_dict)
 
     return SQL_watts

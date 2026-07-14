@@ -110,6 +110,12 @@ function get_db($path, $GEN24_DIR) {
 
             // Migration: Dienst 'Solarprognose WeatherData' gibt es nicht mehr => entfernen falls vorhanden   #entWIGGlung
             $db->exec("DELETE FROM cron_jobs WHERE Name = 'Solarprognose WeatherData'");
+
+            // Migration: 'dwd.mosmix' eintragen, wenn Tabelle vorhanden aber Eintrag fehlt   #entWIGGlung
+            $befehl_esc = SQLite3::escapeString($GEN24_DIR.'/start_PythonScript.sh FORECAST/DWD_mosmix_forecast.py');
+            $db->exec("INSERT INTO cron_jobs (Name, Minute, Stunde, Tag_Monat, Monat, Tag_Woche, Befehl, Aktiv, Notiz, Angelegt_Am)
+                       SELECT 'dwd.mosmix', '6', '5,7,9,11,13,15,17,19', '*', '*', '*', '{$befehl_esc}', 0, 'dwd.mosmix', datetime('now','localtime')
+                       WHERE NOT EXISTS (SELECT 1 FROM cron_jobs WHERE Name = 'dwd.mosmix')");
         }
 
         return $db;
