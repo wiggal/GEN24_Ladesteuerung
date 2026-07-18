@@ -28,6 +28,10 @@
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.42.8**  
+- Neuer Prognosedienst DWD_mosmix_forecast.py 
+- Im ForecastMgr kann nun eine statistische Auswertung über die Treffsicherheit der Dienste erfolgen.
+
 Ab Version: **0.42.5**  
 - [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)
 
@@ -66,6 +70,7 @@ Besonderheiten:
 - Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag angefordert werden.  
 - Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
 - Bei open-meteo.com können verschiedene Wetterdienste konfiguriert werden, kein Account nötig.  
+- Bei DWD_mosmix_forecast wird aus den mosmix-Daten des DWD eine Prognose berechnet, kein Account nötig.  
 
 ### 📉 EnergyController.py
 

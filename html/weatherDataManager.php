@@ -28,6 +28,7 @@ if (empty($data)) {
 $structuredData = [];
 $alleQuellen = [];
 
+
 $tage2 = [];
 foreach ($data as $row) {
     # Prognosen 0 aussieben
@@ -110,6 +111,16 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
+        #statsContainer {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        #statsContainer p,
+        #statsContainer h4 {
+            margin: 8px 0;
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -119,6 +130,11 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             padding: 10px;
             border: 1px solid #ccc;
             text-align: center;
+        }
+
+        #Prognosetable th, #Prognosetable td,
+        #StatistikTable th, #StatistikTable td {
+            text-align: left;
         }
 
         thead th {
@@ -150,7 +166,9 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
 
     /* Verkleinert die Schrift in der Tabelle */
     #Prognosetable th,
-    #Prognosetable td {
+    #Prognosetable td,
+    #StatistikTable th,
+    #StatistikTable td {
         font-size: 10px; /* Hier können Sie den Wert nach Bedarf anpassen */
         padding: 2px; /* Reduziert auch den Innenabstand für mehr Platz */
     }
@@ -159,6 +177,15 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
     .table-container {
         font-size: 10px;
         margin: 0 5px 2px 5px;
+    }
+    #statsContainer {
+        font-size: 10px;
+        margin: 0 0 2px 0;
+    }
+    #statsToggleRow {
+        display: block;
+        margin-left: 20px;
+        margin-top: 10px;
     }
     input[type="checkbox"] {
         width: 12px;
@@ -283,9 +310,19 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             </tbody>
         </table>
 
-<form method="post" action="?download=csv" style="margin-top: 30px; margin-left: 20px;">
+<form method="post" action="?download=csv" style="margin-top: 30px; margin-left: 20px; display: inline-block;">
 <button type="submit" style="background-color: #4CAF50; color: white;">Daten als CSV herunterladen</button>
 </form>
+
+<br>
+
+<span id="statsToggleRow" style="margin-top: 30px; margin-left: 20px; display: inline-block;">
+    <button type="button" id="statsToggleBtn" style="background-color: #3F51B5; color: white;" onclick="toggleStats()">Prognosestatistik</button>
+    <label for="statsDays" style="margin-left: 10px;">Zeitraum (Tage, 0 = alle):</label>
+    <input type="number" id="statsDays" min="0" max="365" value="0" style="width: 50px; text-align:center;">
+</span>
+
+<div id="statsContainer" style="display:none; padding: 3px;"></div>
 
 <!-- Formular zur Quellenlöschung -->
 <form method="post" style="margin-top: 20px;">
@@ -560,6 +597,35 @@ window.addEventListener('load', function () {
     const container = document.querySelector('.table-container');
     // Chart anzeigen, sobald Seite geladen ist
     renderChart(selectedDay);
+});
+</script>
+<script>
+// Prognosegenauigkeit laden und ein-/ausblenden
+function loadStats() {
+    const days = document.getElementById('statsDays').value;
+    const container = document.getElementById('statsContainer');
+    container.innerHTML = 'Lade Statistik...';
+    fetch('weatherStats_ajax.php?days=' + encodeURIComponent(days))
+        .then(response => response.text())
+        .then(html => { container.innerHTML = html; })
+        .catch(err => { container.innerHTML = 'Fehler beim Laden der Statistik.'; });
+}
+
+function toggleStats() {
+    const container = document.getElementById('statsContainer');
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        loadStats();
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+document.getElementById('statsDays').addEventListener('change', function () {
+    const container = document.getElementById('statsContainer');
+    if (container.style.display !== 'none') {
+        loadStats();
+    }
 });
 </script>
 <script>

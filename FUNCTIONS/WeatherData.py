@@ -85,7 +85,7 @@ class WeatherData:
         verbindung = sqlite3.connect('weatherData.sqlite')
         zeiger = verbindung.cursor()
         print_level = basics.getVarConf('env','print_level','eval')
-        # Alte Einträge löschen die älter 35 Tage sind
+        # Alte Einträge löschen die älter 60 Tage sind
         # Auf 60 Tage erhoeht (vorher 35): gibt mehr Puffer fuer Schlechtwetterphasen
         # (min_samples in get_opt_prognose braucht genug valide Tage pro Uhrzeit).
         # Die exponentielle Gewichtung in get_opt_prognose sorgt dafuer, dass sehr alte
