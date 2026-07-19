@@ -123,7 +123,7 @@ ab dem nächsten Aufruf von EnergyController.py geladen.
 Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder **AUTO** angewendet.  
 
 ### ForecastMgr
-Im ForecastMgr können die gespeicherten Prognosedaten analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
+Im ForecastMgr können die gespeicherten Prognosedaten mit der Prognosestatistik analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
 ![ForecastMgr](pics/ForecastMgr.png)
 
 Die berechnete Prognose kann per API aus der Datenbank ausgelesen werden, um sie in einer anderen Anwendung (z.B. HA) einbinden zu können.  
