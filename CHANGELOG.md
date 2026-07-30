@@ -1,3 +1,6 @@
+**[0.43.0] – 2026-XX-XX**  
+- Fix: Download im FcastMgr
+
 **[0.42.9] – 2026-07-19**  
 - **Neuer Prognosedienst** DWD_mosmix_forecast.py basierend auf den Daten des DWD.  
   Erforderliche Pythonmodule => `pandas` und `numpy` in bestehenden Systemen installieren.  
