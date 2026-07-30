@@ -62,6 +62,13 @@ import FUNCTIONS.WeatherData
 DWD_URL_L = "https://opendata.dwd.de/weather/local_forecasts/mos/MOSMIX_L/single_stations/{station}/kml/MOSMIX_L_LATEST_{station}.kmz"
 DWD_STATION_CATALOG_URL = "https://www.dwd.de/DE/leistungen/met_verfahren_mosmix/mosmix_stationskatalog.cfg?view=nasPublication&nn=16102"
 
+# www.dwd.de blockt Requests ohne browserartigen User-Agent mit 403 Forbidden
+DWD_REQUEST_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+    "Accept": "text/plain,text/html,application/xhtml+xml,*/*",
+}
+
 MOSMIX_PARAMS = ["Rad1h", "TTT", "FF", "Neff"]
 
 NS = {
@@ -74,7 +81,7 @@ def load_station_catalog(timeout: int = 30):
     """Laedt den DWD MOSMIX-Stationskatalog und liefert eine Liste von
     (station_id, name, lat, lon) Tupeln. Wird sowohl von find_nearest_station()
     als auch von get_station_name() genutzt."""
-    resp = requests.get(DWD_STATION_CATALOG_URL, timeout=timeout)
+    resp = requests.get(DWD_STATION_CATALOG_URL, timeout=timeout, headers=DWD_REQUEST_HEADERS)
     resp.raise_for_status()
 
     # Format: "ID ICAO NAME... LAT LON ELEV", NAME kann mehrere Woerter enthalten.
@@ -447,7 +454,11 @@ def loadLatestWeatherData(Quelle, Gewicht):
     # 'none'/'auto'/leer -> automatische Stationssuche zu lat/lon
     if station_cfg is None or station_cfg.strip().lower() in ('none', 'auto', ''):
         print("DEBUG DWD: keine Station konfiguriert, suche naechste verfuegbare Station...")
-        station = find_nearest_station(lat, lon)
+        try:
+            station = find_nearest_station(lat, lon)
+        except Exception as e:
+            print(f"### ERROR: automatische Stationssuche fehlgeschlagen: {e}")
+            exit()
         # find_nearest_station() hat den Namen bereits mit ausgegeben, kein erneuter Katalogabruf noetig
     else:
         station = station_cfg
@@ -511,7 +522,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
                 # method_used landet im Info-/Notiz-Feld der DB-Zeile 
                 # damit im Nachhinein sichtbar bleibt, ob
                 # Rad1h oder der Neff-Fallback verwendet wurde
-                pv_forecast_data.append((key, Quelle, value, Gewicht, method_used))
+                pv_forecast_data.append((key, Quelle, value, Gewicht, ''))
 
         SQL_watts_dict[string_zaehler] = pv_forecast_data
         string_zaehler += 1
