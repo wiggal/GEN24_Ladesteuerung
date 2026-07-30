@@ -190,11 +190,11 @@ foreach ($logFiles as $log) {
     }
 
     if ($log === '/tmp/ocpp.log') {
-        $downloadLink = '5_download_log.php?log_file=ocpp.log';
+        $downloadLink = 'download_file.php?dir=tmp&file=ocpp.log';
         $viewLink = '?log_file=ocpp.log';
         $nameWithoutExt = 'ocpp';
     } else {
-        $downloadLink = '5_download_log.php?log_file=' . urlencode($basename);
+        $downloadLink = 'download_file.php?dir=py&file=' . urlencode($basename);
         $viewLink = '?log_file=' . urlencode($basename);
     }
 

@@ -64,29 +64,20 @@ $existierendePriorisierte = array_intersect($priorisiert, $quellenListe);
 $rest = array_diff($quellenListe, $priorisiert);
 $quellenListe = array_merge($existierendePriorisierte, $rest);
 
-# Download als CSV Funktion
-if (isset($_GET['download']) && $_GET['download'] === 'csv') {
-    // --- CSV EXPORT ---
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="weatherData.csv"');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-
-    $output = fopen('php://output', 'w');
-
-    // Kopfzeile schreiben
-    fputcsv($output, array_merge(['Zeitpunkt'], $quellenListe));
-
+// CSV-Datei aktuell halten, damit 5_download_log.php sie als Download
+// ausliefern kann (gleicher Mechanismus wie bei den Log-Dateien)
+$csvExportFile = '/tmp/weatherData_export.csv';
+$csvHandle = fopen($csvExportFile, 'w');
+if ($csvHandle) {
+    fputcsv($csvHandle, array_merge(['Zeitpunkt'], $quellenListe));
     foreach ($structuredData as $row) {
         $zeile = [$row['Zeitpunkt']];
         foreach ($quellenListe as $q) {
             $zeile[] = $row[$q] ?? '';
         }
-        fputcsv($output, $zeile);
+        fputcsv($csvHandle, $zeile);
     }
-
-    fclose($output);
-    exit;
+    fclose($csvHandle);
 }
 ?>
 
@@ -310,7 +301,9 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv') {
             </tbody>
         </table>
 
-<form method="post" action="?download=csv" style="margin-top: 30px; margin-left: 20px; display: inline-block;">
+<form method="get" action="download_file.php" style="margin-top: 30px; margin-left: 20px; display: inline-block;">
+<input type="hidden" name="dir" value="tmp">
+<input type="hidden" name="file" value="weatherData_export.csv">
 <button type="submit" style="background-color: #4CAF50; color: white;">Daten als CSV herunterladen</button>
 </form>
 
