@@ -80,6 +80,7 @@ class progladewert:
             Akt_Std = int(datetime.strftime(self.now, "%H"))
             Akt_Minute = int(datetime.strftime(self.now, "%M"))
             BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
+            strompreis_einspeisegrenze = basics.getVarConf('Ladeberechnung','strompreis_einspeisegrenze','eval')
     
             # Gesamte Tagesprognose, Tagesüberschuß aus Prognose ermitteln
             i = Akt_Std
@@ -210,9 +211,92 @@ class progladewert:
             # Wenn aktuellerLadewert > 95% von MaxLadung dann MaxLadung
             if (aktuellerLadewert > (MaxLadung * 0.95)):
                 aktuellerLadewert = MaxLadung
+
+            # Wenn strompreis_einspeisegrenze != -999 Strompreise lesen und prüfen
+            if strompreis_einspeisegrenze > -9:
+                self.DEBUG_Ausgabe += f"DEBUG\nDEBUG *************** Auf negative oder niedrige Strompreise prüfen:\n"
+                aktuellerLadewert, LadewertGrund = self.getLadungEinspeisegrenzeVerguetung(
+                    aktuellerLadewert,
+                    LadewertGrund,
+                    BattVollUm,
+                    strompreis_einspeisegrenze,
+                    MaxLadung
+                )
     
             return int(Pro_Ertrag_Tag), Grundlast_Sum, aktuellerLadewert, LadewertGrund
     
+    def getLadungEinspeisegrenzeVerguetung(self, aktuellerLadewert, LadewertGrund, BattVollUm, strompreis_einspeisegrenze, MaxLadung):
+
+        try:
+            # Strompreise bis BattVollUm aus DB lesen
+            import sqlite3
+            database = 'PV_Daten.sqlite'
+            verbindung = sqlite3.connect(database)
+            cursor = verbindung.cursor()
+            now = datetime.now()
+
+            # 1. Aktuelle Viertelstunde berechnen (abgerundet, z. B. 08:03 Uhr -> 08:00:00)
+            start_viertelstunde = now.replace(
+                minute=(now.minute // 15) * 15, 
+                second=0, 
+                microsecond=0
+            )
+
+            # 2. Zielzeitpunkt für BattVollUm (z. B. 14:00:00 Uhr)
+            end_zeitpunkt = now.replace(
+                hour=BattVollUm, 
+                minute=0, 
+                second=0, 
+                microsecond=0
+            )
+            if end_zeitpunkt < start_viertelstunde:
+                end_zeitpunkt += timedelta(days=1)
+
+            # 3. Preis der AKTUELLEN Viertelstunde abfragen
+            cursor.execute(
+                "SELECT Boersenpreis FROM strompreise WHERE Zeitpunkt = ?;", 
+                (start_viertelstunde.strftime("%Y-%m-%d %H:%M:%S"),)
+            )
+            aktueller_preis = cursor.fetchone()
+            aktueller_preis = aktueller_preis[0] if aktueller_preis else None
+        
+            # 4. NIEDRIGSTEN Preis von jetzt bis BattVollUm abfragen
+            sql_min = """
+                SELECT Boersenpreis, Zeitpunkt 
+                FROM strompreise 
+                WHERE Zeitpunkt >= ? AND Zeitpunkt <= ?
+                ORDER BY Boersenpreis ASC 
+                LIMIT 1;
+            """
+            cursor.execute(sql_min, (
+                start_viertelstunde.strftime("%Y-%m-%d %H:%M:%S"),
+                end_zeitpunkt.strftime("%Y-%m-%d %H:%M:%S")
+            ))
+            min_eintrag = cursor.fetchone()
+        
+            # Ergibt: (niedrigster_preis, zeitpunkt)
+            niedrigster_preis, min_zeitpunkt = min_eintrag if min_eintrag else (None, None)
+
+            # Ausgabe / Weiterverarbeitung
+            if niedrigster_preis < strompreis_einspeisegrenze:
+                self.DEBUG_Ausgabe += f"DEBUG >>>> Niedrigster Preis bis {BattVollUm}:00 Uhr: {niedrigster_preis} am {min_zeitpunkt}\n"
+                aktuellerLadewert = 0
+                LadewertGrund = f"Strompreis < {niedrigster_preis} erwartet!"
+                if aktueller_preis < strompreis_einspeisegrenze:
+                    aktuellerLadewert = MaxLadung
+                    LadewertGrund = f"Aktueller Strompreis < {niedrigster_preis}!"
+                    self.DEBUG_Ausgabe += f"DEBUG >>>> Aktueller Preis angewendet: {start_viertelstunde.strftime('%H:%M')}: {aktueller_preis} < {strompreis_einspeisegrenze}\n"
+                else:
+                    self.DEBUG_Ausgabe += f"DEBUG >>>> Aktueller Preis NICHT angewendet: {start_viertelstunde.strftime('%H:%M')}: {aktueller_preis} > {strompreis_einspeisegrenze}\n"
+            else:
+                self.DEBUG_Ausgabe += f"DEBUG >>>> Kein Preis unter {strompreis_einspeisegrenze} gefunden. Niedrigster Preis {niedrigster_preis} am {min_zeitpunkt}\n"
+                return aktuellerLadewert, LadewertGrund
+                
+        except:
+            print(f"ERROR: Es konnte kein Strompreis ermittelt werden, eventuell DynamicPriceCheck im Scheduler aktvieren!!")
+
+        return aktuellerLadewert, LadewertGrund
+
     def getLoggingPrognose(self, BattKapaWatt_akt):
     
             format_Tag = "%Y-%m-%d"

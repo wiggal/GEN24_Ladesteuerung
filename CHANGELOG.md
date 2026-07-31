@@ -1,5 +1,7 @@
 **[0.43.0] – 2026-XX-XX**  
 - Fix: Download im FcastMgr
+- **NEU** Ladesteuerung abhänging vom Strompreis. Dadurch kann eine Maximale Ladung z.B. bei negativen Strompreisen erfolgen.  
+  **Änderung in CONFIG/charge.ini** im Block `[Ladeberechnung]` wurde hierzu die Variable `strompreis_einspeisegrenze` eingefügt, in `priv.ini` nachziehen.  
 
 **[0.42.9] – 2026-07-19**  
 - **Neuer Prognosedienst** DWD_mosmix_forecast.py basierend auf den Daten des DWD.  
@@ -68,7 +70,7 @@
 **[0.41.7] – 2026-04-06**  
 - Akkuschonung: Nun kann der Ladewert auch über die höchste Zellspannung gesteuert werden.  
   **Änderung in CONFIG/default.ini** im Block `[inverter]` wurde hierzu die Variable `akkuIP` eingefügt, in `priv.ini` nachziehen.  
-  **Änderung in CONFIG/charge.ini** im Block `[Ladeberechnung]` wurde hierzu die Variable `Zellspannungs_Werte` eingefügt, in `priv.ini` nachziehen.  i
+  **Änderung in CONFIG/charge.ini** im Block `[Ladeberechnung]` wurde hierzu die Variable `Zellspannungs_Werte` eingefügt, in `priv.ini` nachziehen.  
        Wird Akkuschonung = 2 gesetzt, wird die höchste Zellspannung zur Ladeleistungsreduktion verwendet.  
 
 **[0.41.6] – 2026-03-29**  
