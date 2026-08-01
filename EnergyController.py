@@ -610,7 +610,7 @@ if __name__ == '__main__':
                         if gespeichert:
                             Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:
-                            Logging_Schreib_Ausgabe = 'SQLite-Datei unverändert!'
+                            Logging_Schreib_Ausgabe = 'SQLite-Datei unverändert != XX:x1 !'
                     else:
                         Logging_Schreib_Ausgabe = "Logging NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
 
