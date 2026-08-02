@@ -604,11 +604,15 @@ if __name__ == '__main__':
                     sqlall = FUNCTIONS.SQLall.sqlall()
                     Logging_Schreib_Ausgabe = ""
                     if ('logging' in Options):
-                        # In die DB werden die liftime Verbrauchszählerstände gespeichert
-                        gespeichert = sqlall.save_SQLite('PV_Daten.sqlite', API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
-                        API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz)
-                        if gespeichert:
-                            Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
+                        # 0. Nur bei X:01, X:11, X:21, aufrufen und schreiben
+                        if now.minute % 10 == 1:
+                            # Zählerstand Wattpilot lesen
+                            WattpilotZaehler = inverter_api.get_wallbox_total_meter_wh()
+                            # In die DB werden die liftime Verbrauchszählerstände gespeichert
+                            gespeichert = sqlall.save_SQLite('PV_Daten.sqlite', API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
+                            API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz, WattpilotZaehler)
+                            if gespeichert:
+                                Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:
                             Logging_Schreib_Ausgabe = 'SQLite-Datei unverändert != XX:x1 !'
                     else:

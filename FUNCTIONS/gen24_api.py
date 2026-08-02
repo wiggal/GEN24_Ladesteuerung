@@ -4,6 +4,7 @@ import FUNCTIONS.byd_status
 import requests
 import json
 import re
+import sqlite3
         
 basics = FUNCTIONS.functions.basics()
 sqlall = FUNCTIONS.SQLall.sqlall()
@@ -320,6 +321,63 @@ class InverterApi:
             print("\n")
 
         return(API)
-    
+
+    # Gesamt-Zählerstand (lebenslange geladene Energie) der Wattpilot-Wallbox über die
+    # HTTP-API von ocpp.py abrufen, in Wh. Host/Port analog zum PHP-Frontend serverseitig
+    # fest auf localhost:8886 (siehe $API im PHP-UI).
+    # charge_point_id wird – ebenfalls analog zum PHP-Frontend (siehe $connected_list /
+    # $selected_charge_point_id in 3_tab_wallbox.php) – dynamisch über /list ermittelt,
+    # da es dafür keinen festen Config-Wert gibt. Optional kann eine bestimmte cp_id
+    # übergeben werden, falls mehrere Wallboxen verbunden sind.
+    #
+    # ocpp.py liefert total_meter_wh nur, solange (a) ein Charge Point verbunden ist und
+    # (b) mind. eine MeterValues-Nachricht mit Energiewert einging (z.B. während einer
+    # laufenden Ladung). Ist beides nicht der Fall, wird – analog zum bestehenden
+    # Produktion_MAX_DB-Fallback weiter oben – der bisher höchste in PV_Daten.sqlite
+    # gespeicherte Wallbox-Wert (ebenfalls in Wh) als letzter bekannter Zählerstand
+    # zurückgegeben, statt None bzw. 0 zu liefern.
+    def get_wallbox_total_meter_wh(self, cp_id=None):
+        wallbox_api = "http://localhost:8886"
+        total_meter_wh = None
+
+        if not cp_id:
+            try:
+                list_json = requests.get(wallbox_api + "/list", timeout=3).text
+                connected_list = json.loads(list_json).get('connected', [])
+                cp_id = connected_list[0] if connected_list else None
+            except Exception as e:
+                #print("*********** Wallbox-API (/list) nicht erreichbar oder fehlerhaft! *********")
+                #print("Fehlerursache:", e)
+                pass
+
+        if cp_id:
+            try:
+                wallbox_url = wallbox_api + "/meter_values"
+                resp = requests.get(wallbox_url, params={"charge_point_id": cp_id}, timeout=3)
+                data = json.loads(resp.text)
+                total_meter_wh = data.get('total_meter_wh')
+            except Exception as e:
+                #print("*********** Wallbox-API (Gesamt-Zählerstand) nicht erreichbar oder fehlerhaft! *********")
+                #print("Fehlerursache:", e)
+                #print("API_URL zur Fehlersuche: ", wallbox_url)
+                pass
+
+        if total_meter_wh is None:
+            #print("*********** Wallbox: kein aktueller Zählerstand verfügbar, letzten Wert aus PV_Daten.sqlite übernehmen! *********")
+            try:
+                verbindung = sqlite3.connect('PV_Daten.sqlite')
+                zeiger = verbindung.cursor()
+                zeiger.execute("SELECT MAX(Wallbox) FROM pv_daten")
+                row = zeiger.fetchone()
+                verbindung.close()
+                if row and row[0] is not None:
+                    total_meter_wh = row[0]
+            except Exception as e:
+                #print("*********** Letzter Wallbox-Wert aus PV_Daten.sqlite nicht lesbar! *********")
+                #print("Fehlerursache:", e)
+                pass
+
+        return int(total_meter_wh) if total_meter_wh is not None else None
+
     if __name__ == "__main__":
         exit()

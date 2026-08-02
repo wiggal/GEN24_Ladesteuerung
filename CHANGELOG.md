@@ -2,7 +2,7 @@
 - Fix: Download im FcastMgr
 - **NEU** Ladesteuerung abhänging vom Strompreis. Dadurch kann eine Maximale Ladung z.B. bei negativen Strompreisen erfolgen.  
   **Änderung in CONFIG/charge.ini** im Block `[Ladeberechnung]` wurde hierzu die Variable `strompreis_einspeisegrenze` eingefügt, in `priv.ini` nachziehen.  
-- Vorbereitung zur Darstellung der Verbräuche des Wattpilot und Ohmpilot.    
+- Darstellung der Verbräuche des Wattpilot und Ohmpilot.    
 
 **[0.42.9] – 2026-07-19**  
 - **Neuer Prognosedienst** DWD_mosmix_forecast.py basierend auf den Daten des DWD.  

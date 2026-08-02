@@ -54,9 +54,6 @@ class sqlall:
 
     def save_SQLite(self, database, AC_Produktion, DC_Produktion, AC_to_DC, Netzverbrauch,
                 Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, Wallbox=0, Ohmpilot=0):
-        # 0. Nur bei X:01, X:11, X:21, ... schreiben
-        if self.now.minute % 10 != 1:
-            return False
 
         # 1. Vorbereitung
         Zeitpunkt = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
@@ -102,80 +99,6 @@ class sqlall:
 
         verbindung.commit()
         verbindung.close()
-        return gespeichert
-
-    def old_save_SQLite(self, database, AC_Produktion, DC_Produktion, AC_to_DC, Netzverbrauch,
-                Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, Wallbox=0, Ohmpilot=0):
-
-        # 1. Vorbereitung
-        Zeitpunkt = datetime.strftime(self.now, "%Y-%m-%d %H:%M:%S")
-        sekunden_limit = 580  # höchstens fast 10 Minuten Abstand
-
-        verbindung = sqlite3.connect(database)
-        zeiger = verbindung.cursor()
-        gespeichert = False
-
-        # 2. Die SQL-Logik:
-        # Blockieren des Einfügens (WHERE NOT EXISTS) NUR DANN, wenn:
-        # (Zeitabstand < Limit) UND (Werte sind identisch).
-        # Sobald eine dieser Bedingungen NICHT mehr zutrifft (Zeit um ODER Werte neu),
-        # wird gespeichert.
-        sql_query = """
-            INSERT INTO pv_daten (
-                Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch,
-                Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC, Wallbox, Ohmpilot
-            )
-            SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-            WHERE NOT EXISTS (
-                SELECT 1 FROM pv_daten
-                WHERE (strftime('%s', ?) - strftime('%s', Zeitpunkt)) < ?
-                AND AC_Produktion = ?
-                AND DC_Produktion = ?
-                AND Batterie_IN = ?
-                AND Batterie_OUT = ?
-                AND AC_to_DC = ?
-                ORDER BY Zeitpunkt DESC
-                LIMIT 1
-            )
-        """
-
-        # 3. Parameter-Liste (19 Werte)
-        params = (
-            # INSERT Teil (1-10)
-            Zeitpunkt, AC_Produktion, DC_Produktion, Netzverbrauch,
-            Einspeisung, Batterie_IN, Batterie_OUT, Vorhersage, BattStatus, AC_to_DC, Wallbox, Ohmpilot,
-    
-            # Zeit-Check (11-12)
-            Zeitpunkt,
-            sekunden_limit,
-
-            # Werte-Check (13-19)
-            AC_Produktion, DC_Produktion, Batterie_IN, Batterie_OUT, AC_to_DC
-        )
-
-        try:
-            # 1. Daten speichern
-            zeiger.execute(sql_query, params)
-            gespeichert = True
-
-        except sqlite3.OperationalError:
-            # 2. Falls Tabelle fehlt: Tabelle & Index anlegen und erneut versuchen
-            self.create_database_PVDaten(database)
-
-            # Sicherstellen, dass auch der Index existiert
-            zeiger.execute("CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)")
-
-            # Erneuter Versuch zu speichern
-            zeiger.execute(sql_query, params)
-            gespeichert = True
-
-        except Exception as e:
-            print(f"Fehler beim Speichern: {e}")
-
-        verbindung.commit()
-        verbindung.close()
-
-
         return gespeichert
 
     def getSQLlastProduktion(self, database):

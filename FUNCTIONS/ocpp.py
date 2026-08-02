@@ -1178,7 +1178,9 @@ class OCPPManager:
             return None
         for mv in payload.get('meterValue', []) or []:
             for s in mv.get('sampledValue', []) or []:
-                meas = s.get('measurand', '')
+                # OCPP 1.6 Default: fehlt 'measurand', gilt laut Spec 'Energy.Active.Import.Register'.
+                # Manche CPs (u.a. Wattpilot) lassen das Feld weg, wenn es der Default ist.
+                meas = s.get('measurand') or 'Energy.Active.Import.Register'
                 if meas.startswith('Energy.'):
                     try:
                         val = float(s.get('value') or 0)
@@ -1230,6 +1232,7 @@ class OCPPManager:
         try:
             energy_wh = self._extract_energy_wh_from_meter_store(cp_id, meter_payload)
             if energy_wh is None:
+                cdebug(f"[{st.log_cp_id}] Kein Energie-Wert in MeterValues gefunden – Roh-Payload: {meter_payload}")
                 return
             last = st.last_energy_wh
             if last is None:
@@ -1354,6 +1357,15 @@ class OCPPManager:
             power_ist  = 0.0
             power_soll = 0.0
 
+        # Roher Gesamt-Zählerstand (Energy.Active.Import.Register), wie ihn der Wattpilot
+        # selbst meldet – lebenslanger Zählerstand, unabhängig von Session/Reset (charged_wh).
+        # Wichtig: NICHT aus st.meter_values (dem zuletzt empfangenen Roh-Payload) neu
+        # extrahieren – der Wattpilot schickt den Energie-Zählerstand nicht in jeder
+        # MeterValues-Nachricht mit, sodass st.meter_values ihn zwischenzeitlich verlieren
+        # kann. st.last_energy_wh wird dagegen bei JEDER MeterValues-Nachricht in
+        # update_charged_energy_from_meter() gepflegt und bleibt daher erhalten.
+        total_meter_wh = st.last_energy_wh if st else None
+
         return web.json_response({
             "meter": st.meter_values if st else {},
             "status": st.status if st else "Unknown",
@@ -1373,7 +1385,8 @@ class OCPPManager:
             "Hausverbrauch": self.hausverbrauch,
             "target_energy_kwh": target_kwh,
             "charged_energy_kwh": round(charged_wh / 1000.0, 4),
-            "remaining_kwh": remaining_kwh_rounded
+            "remaining_kwh": remaining_kwh_rounded,
+            "total_meter_wh": total_meter_wh,
         })
 
     async def reset_counter(self, request):
