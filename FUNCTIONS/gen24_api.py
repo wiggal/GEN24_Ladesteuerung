@@ -87,20 +87,6 @@ class InverterApi:
                 
         return results
 
-    def extract_API_values_old(self, obj, key_patterns):
-        results = {}
-        sums = {}
-
-        # Summen vorbereiten
-        sum_names = {}
-        for entry in key_patterns:
-            pattern, sum_flag, *maybe = entry
-            if sum_flag:
-                clean_pattern = re.sub(r'\[\d+-\d+\]', '', pattern)
-                sum_name = "SUM_" + re.sub(r'[^A-Za-z0-9_]', '_', clean_pattern)
-                sums[sum_name] = 0
-                sum_names[pattern] = sum_name
-
         def recurse(o, inherited_attributes=None):
             if isinstance(o, dict):
                 # attributes aus diesem Knoten merken
@@ -145,13 +131,17 @@ class InverterApi:
 
     # API-Werte lesen unabhängig von den Node-Nummern
     def get_API(self):
-        IP = basics.getVarConf('inverter','hostNameOrIp','str')
-        gen24url = "http://"+IP+"/components/readable"
-        url = requests.get(gen24url)
-        data = json.loads(url.text)
-        # Lokale Datei öffnen und JSON laden  #entWIGGlung
-        #with open("readable.json", "r", encoding="utf-8") as f:
-        #    data = json.load(f)
+        # Hier zum Testen, lesen aus readable.json True setzen.  #entWIGGlung
+        test_aus_file = False
+        if test_aus_file:
+            # Lokale Datei öffnen und JSON laden
+            with open("readable.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            IP = basics.getVarConf('inverter','hostNameOrIp','str')
+            gen24url = "http://"+IP+"/components/readable"
+            url = requests.get(gen24url)
+            data = json.loads(url.text)
         API = {}
         # relevante API-Schlüssel definieren: 
         # schluessel [1-3] bei mehrfachschlussel, "sum" für Summenbildung
@@ -167,6 +157,7 @@ class InverterApi:
             ("BAT_POWERACTIVE_MEAN_F32", False),                                            #WR   Nur vorhanden, wenn Akku an/standby
             ("BAT_ENERGYACTIVE_ACTIVECHARGE_SUM_01_U64", False),                            #WR
             ("BAT_ENERGYACTIVE_ACTIVEDISCHARGE_SUM_01_U64", False),                         #WR
+            ("OHMPILOT_ENERGYACTIVE_CONSUMED_SUM_F64", False),                              #Ohmpilot
             ("PV_POWERACTIVE_MEAN_0[1-2]_F32", "sum"),                                       #WR
             ("ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0[1-3]_U64", "sum"),                        #WR
             ("PV_ENERGYACTIVE_ACTIVE_SUM_0[1-2]_U64", "sum"),                                #WR
@@ -174,6 +165,12 @@ class InverterApi:
             ("PS2.rev-sw", False)                                                           #WR
         ]
         API_result = self.extract_API_values(data, GEN24_API_schluessel)
+
+        # Hier Schluessel, die nicht zwingend vorhanden sein müssen
+        try:
+            API['Ohmpilot']  =  int(API_result['OHMPILOT_ENERGYACTIVE_CONSUMED_SUM_F64']/3600)
+        except:
+            API['Ohmpilot']  =  None
 
         try:
             API['Version'] = API_result['PS2.rev-sw']
@@ -362,22 +359,27 @@ class InverterApi:
                 #print("API_URL zur Fehlersuche: ", wallbox_url)
                 pass
 
-        if total_meter_wh is None:
-            #print("*********** Wallbox: kein aktueller Zählerstand verfügbar, letzten Wert aus PV_Daten.sqlite übernehmen! *********")
-            try:
-                verbindung = sqlite3.connect('PV_Daten.sqlite')
-                zeiger = verbindung.cursor()
-                zeiger.execute("SELECT MAX(Wallbox) FROM pv_daten")
-                row = zeiger.fetchone()
-                verbindung.close()
-                if row and row[0] is not None:
-                    total_meter_wh = row[0]
-            except Exception as e:
-                #print("*********** Letzter Wallbox-Wert aus PV_Daten.sqlite nicht lesbar! *********")
-                #print("Fehlerursache:", e)
-                pass
-
         return int(total_meter_wh) if total_meter_wh is not None else None
+
+    # Liefert den höchsten bisher in PV_Daten.sqlite (Tabelle pv_daten) gespeicherten Wert
+    # für eine oder mehrere Spalten zurück, z.B. als Fallback, wenn eine Live-API gerade
+    # keinen aktuellen Wert liefert. keys: Liste von Spaltennamen, z.B. ["Wallbox"] oder
+    # ["Wallbox", "Ohmpilot"]. Rückgabe: dict {spaltenname: max_wert_oder_None}.
+    def get_last_DB_value(self, keys):
+        max_values = {key: None for key in keys}
+        try:
+            verbindung = sqlite3.connect('PV_Daten.sqlite')
+            zeiger = verbindung.cursor()
+            for key in keys:
+                zeiger.execute(f"SELECT MAX({key}) FROM pv_daten")
+                row = zeiger.fetchone()
+                if row and row[0] is not None:
+                    max_values[key] = row[0]
+            verbindung.close()
+        except Exception as e:
+            print("*********** Letzte(r) DB-Wert(e) aus PV_Daten.sqlite nicht lesbar! *********")
+            print("Fehlerursache:", e)
+        return max_values
 
     if __name__ == "__main__":
         exit()

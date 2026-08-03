@@ -608,9 +608,20 @@ if __name__ == '__main__':
                         if now.minute % 10 == 1:
                             # Zählerstand Wattpilot lesen
                             WattpilotZaehler = inverter_api.get_wallbox_total_meter_wh()
+                            # Wenn WattpilotZaehler oder API['Ohmpilot'] = None, Max-Wert aus DB
+                            DEBUG_Ausgabe+="\nDEBUG <<<<<<<< BEGINN LOGGING >>>>>>>>>>>>>"
+                            DEBUG_Ausgabe += f"\nDEBUG VOR  BD-Abgleich: WattpilotZaehler {WattpilotZaehler!s:>10}, Ohmpilotzaehler {API['Ohmpilot']!s:>10}"
+                            if WattpilotZaehler is None or API['Ohmpilot'] is None:
+                                letzte_werte = inverter_api.get_last_DB_value(["Wallbox", "Ohmpilot"])
+                                if WattpilotZaehler is None:
+                                    WattpilotZaehler = letzte_werte.get("Wallbox") or 0
+                                if API['Ohmpilot'] is None:
+                                    API['Ohmpilot'] = letzte_werte.get("Ohmpilot") or 0
+
+                            DEBUG_Ausgabe += f"\nDEBUG NACH BD-Abgleich: WattpilotZaehler {WattpilotZaehler!s:>10}, Ohmpilotzaehler {API['Ohmpilot']!s:>10}"
                             # In die DB werden die liftime Verbrauchszählerstände gespeichert
                             gespeichert = sqlall.save_SQLite('PV_Daten.sqlite', API['AC_Produktion'], API['DC_Produktion'], API['AC_to_DC'], API['Netzverbrauch'], API['Einspeisung'], \
-                            API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz, WattpilotZaehler)
+                            API['Batterie_IN'], API['Batterie_OUT'], aktuelleVorhersage, BattStatusProz, WattpilotZaehler, API['Ohmpilot'])
                             if gespeichert:
                                 Logging_Schreib_Ausgabe = 'In SQLite-Datei gespeichert!'
                         else:
