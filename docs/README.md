@@ -17,7 +17,7 @@
 ## [📚 Wiki 📚](https://wiggal.github.io/GEN24_Ladesteuerung/)
 
 **Programmfunktionen:**  
-- Prognose basierte Ladesteuerung für Fronius Symo GEN24 Plus und Verto, um eine Einspeisebegrenzung (bei mir 70%) zu umgehen und den Akku schonend zu laden.
+- Prognose basierte Ladesteuerung für Fronius Symo GEN24 Plus und Verto, um eine Einspeisebegrenzung (bei mir 70%) zu umgehen und den Akku schonend zu laden, oder eine Ladung nur bei negativen Strompreisen.
 - Über die Tabelle [Ladesteuerung](#batterieladesteuerung) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt und Ladeleistungen manuell eingestellt werden.
 - Über die Tabelle [Entladesteuerung](#batterieentladesteuerung) kann die Entladung bzw. Zwangsladung des Akkus gesteuert werden. Auch automatisch über dynamische Strompreise.
 - [Logging](#-logging) und grafische Darstellung von Prognoseberechnung, Strompreise und QZ-Bilanz (Produktion und Verbrauch).
@@ -28,6 +28,11 @@
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.43.0**  
+- Ladesteuerung abhängig vom Strompreis, z.B. nur bei negativen Strompreisen laden.  
+- Darstellung der Verbräuche von Wattpilot und Ohmpilot.  
+- Strompreisquelle www.energyforecast.de eingebaut.  
+
 Ab Version: **0.42.8**  
 - Neuer Prognosedienst DWD_mosmix_forecast.py 
 - Im ForecastMgr kann nun eine statistische Auswertung über die Treffsicherheit der Dienste erfolgen.

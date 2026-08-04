@@ -210,6 +210,8 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                         (Batterie_OUT - LAG(Batterie_OUT) OVER(ORDER BY Zeitpunkt)) AS VonBatterie,
                         (Batterie_IN  - LAG(Batterie_IN)  OVER(ORDER BY Zeitpunkt)) AS InBatterie,
                         (Einspeisung  - LAG(Einspeisung)  OVER(ORDER BY Zeitpunkt)) AS Einspeisung,
+                        (COALESCE(Wallbox,0) - COALESCE(LAG(Wallbox) OVER(ORDER BY Zeitpunkt),0)) AS Wallbox,
+                        (COALESCE(Ohmpilot,0) - COALESCE(LAG(Ohmpilot) OVER(ORDER BY Zeitpunkt),0)) AS Ohmpilot,
 
                         Vorhersage * -1 AS Vorhersage,
                         BattStatus
@@ -224,6 +226,8 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                         VonBatterie     * 60 / Zeitabstand AS VonBatterie,
                         InBatterie      * 60 / Zeitabstand AS InBatterie,
                         Einspeisung     * 60 / Zeitabstand AS Einspeisung,
+                        Wallbox         * 60 / Zeitabstand AS Wallbox,
+                        Ohmpilot        * 60 / Zeitabstand AS Ohmpilot,
                         Vorhersage,
                         BattStatus
                     FROM Alle_PVDaten1
@@ -233,14 +237,13 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                         Zeitpunkt,
                         Produktion * -1 AS Produktion,
                         Netzbezug  * -1 AS Netzbezug,
-                        Direktverbrauch,
-                        VonBatterie,
+                        VonBatterie * -1 AS VonBatterie,
+                        Produktion + Netzbezug - Wallbox - Ohmpilot + VonBatterie - Einspeisung - InBatterie AS Hausverbrauch,
                         InBatterie,
                         Einspeisung,
-
-                        Produktion + Netzbezug - Einspeisung - InBatterie - Direktverbrauch AS Netzverbrauch,
+                        Wallbox,
+                        Ohmpilot,
                         Produktion + Netzbezug - Einspeisung + VonBatterie - InBatterie AS Gesamtverbrauch,
-
                         Vorhersage,
                         BattStatus
                     FROM Alle_PVDaten2
@@ -249,14 +252,12 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                     Zeitpunkt,
                     Produktion,
                     Netzbezug,
-                    CASE WHEN Direktverbrauch > 0 THEN Direktverbrauch ELSE 0 END AS Direktverbrauch,
+                    Hausverbrauch,
                     VonBatterie,
                     InBatterie,
                     Einspeisung,
-                    CASE 
-                        WHEN Direktverbrauch > 0 THEN Netzverbrauch
-                        ELSE Netzverbrauch + Direktverbrauch
-                    END AS Netzverbrauch,
+                    Wallbox,
+                    Ohmpilot,
                     Gesamtverbrauch,
                     Vorhersage,
                     BattStatus
@@ -295,6 +296,8 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                         Netzverbrauch,
                         Batterie_IN,
                         Batterie_OUT,
+                        COALESCE(Wallbox, 0) AS Wallbox,
+                        COALESCE(Ohmpilot, 0) AS Ohmpilot,
                         Einspeisung
                     FROM pv_daten
                     WHERE $where
@@ -308,6 +311,8 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                         Netzverbrauch,
                         Batterie_IN,
                         Batterie_OUT,
+                        COALESCE(Wallbox, 0) AS Wallbox,
+                        COALESCE(Ohmpilot, 0) AS Ohmpilot,
                         Einspeisung
                     FROM pv_daten
                     WHERE $where
@@ -320,18 +325,22 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                         LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt)  - Netzverbrauch  AS Netzbezug,
                         LEAD(Batterie_IN)   OVER (ORDER BY Zeitpunkt)  - Batterie_IN    AS InBatterie,
                         LEAD(Batterie_OUT)  OVER (ORDER BY Zeitpunkt)  - Batterie_OUT   AS AusBatterie,
+                        LEAD(Wallbox)  OVER (ORDER BY Zeitpunkt)  - Wallbox   AS Wallbox,
+                        LEAD(Ohmpilot)  OVER (ORDER BY Zeitpunkt)  - Ohmpilot   AS Ohmpilot,
                         LEAD(Einspeisung)   OVER (ORDER BY Zeitpunkt)  - Einspeisung    AS Einspeisung
                     FROM Alle_PVDaten
                 )
                 SELECT 
                     Zeitpunkt,
                     Produktion * -1 AS Produktion,
+                    AusBatterie * -1 AS VonBatterie,
                     Netzbezug  * -1 AS Netzbezug,
                     Einspeisung,
-                    Netzbezug AS Netzverbrauch,
+                    Wallbox,
+                    Ohmpilot,
+                    -- Netzbezug AS Netzverbrauch,
                     InBatterie,
-                    AusBatterie AS VonBatterie,
-                    Produktion - InBatterie - Einspeisung AS Direktverbrauch
+                    Produktion + Netzbezug + AusBatterie - Wallbox - Ohmpilot - InBatterie - Einspeisung AS Hausverbrauch
                 FROM Alle_PVDaten2
                 WHERE AusBatterie IS NOT NULL
                 ORDER BY Zeitpunkt
@@ -351,15 +360,16 @@ $optionen['Vorhersage']=     ['Farbe'=>'rgba(255,140,05,1)',   'fill'=>'false', 
 $optionen['BattStatus']=     ['Farbe'=>'rgba(72,118,255,1)',   'fill'=>'false', 'stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y2', 'hidden'=>'false'];
 $optionen['Einspeisung'] =   ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'5','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
 $optionen['InBatterie'] =    ['Farbe' => 'rgba(60,215,60,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
-$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
-$optionen['Netzverbrauch'] = ['Farbe' => 'rgba(148,148,148,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
-$optionen['Direktverbrauch']=['Farbe' => 'rgba(255,215,0,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'1','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Ohmpilot']      = ['Farbe' => 'rgba(224,86,140,1)', 'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Wallbox']       = ['Farbe' => 'rgba(167,126,198,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Hausverbrauch']  =['Farbe' => 'rgba(255,215,0,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'1','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
 $optionen['Produktion']=     ['Farbe'=>'rgba(255,200,0,1)',    'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'6','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
-$optionen['Netzbezug'] =     ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'7','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'7','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Netzbezug'] =     ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'8','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
 # Ausnahme im Balkendiagramm VonBatterie beim Aufruf ausblenden:
-if ( $Diatype == 'bar') {
-$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'true'];
-}
+#if ( $Diatype == 'bar') {
+#$optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'7','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'true'];
+#}
 
 return $optionen;
 }  # END function Dia_Options
@@ -490,6 +500,29 @@ const isMobile = window.innerWidth < 768;
 const fontSize = isMobile ? 10 : 20;
 const legendboxWidth = isMobile ? 10 : 20;
 
+// Merkt sich ausgeblendete Legenden-Elemente browserübergreifend über
+// den Seitenwechsel (Blättern) hinweg via localStorage.
+const HIDDEN_STORAGE_KEY = 'PVDaten_hiddenDatasets';
+
+function ladeHiddenState() {
+    try {
+        return JSON.parse(localStorage.getItem(HIDDEN_STORAGE_KEY)) || {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function speichereHiddenState(label, hidden) {
+    const state = ladeHiddenState();
+    state[label] = hidden;
+    localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(state));
+}
+
+function getHiddenState(label, defaultHidden) {
+    const state = ladeHiddenState();
+    return state.hasOwnProperty(label) ? state[label] : defaultHidden;
+}
+
 new Chart('PVDaten', {
     type: '". $Diatype ."',
     data: {
@@ -510,7 +543,7 @@ new Chart('PVDaten', {
       echo "stack: '".$optionen[$x]['stack']."',\n";
       echo "order: '".$optionen[$x]['order']."',\n";
       echo "yAxisID: '".$optionen[$x]['yAxisID']."',\n";
-      echo "hidden: ".$optionen[$x]['hidden']."\n";
+      echo "hidden: getHiddenState('".$x."', ".$optionen[$x]['hidden'].")\n";
       $trenner = "},{\n";
       }
 echo "    }]
@@ -533,7 +566,26 @@ echo "    }]
                  boxWidth: legendboxWidth,
                  font: {
                    size: fontSize,
-                 }
+                 },
+                 // Hier den Filter einfügen:
+                filter: (legendItem, data) => {
+                    const dataset = data.datasets[legendItem.datasetIndex];
+                    // Zeigt nur Datasets an, die mindestens einen Wert ungleich 0 haben
+                    return dataset.data.some(value => value !== 0);
+                }
+            },
+            onClick: function(e, legendItem, legend) {
+                const index = legendItem.datasetIndex;
+                const ci = legend.chart;
+                if (ci.isDatasetVisible(index)) {
+                    ci.hide(index);
+                    legendItem.hidden = true;
+                } else {
+                    ci.show(index);
+                    legendItem.hidden = false;
+                }
+                // Zustand für das nächste Blättern merken
+                speichereHiddenState(legendItem.text, legendItem.hidden);
             }
         },
         tooltip: {
@@ -551,7 +603,7 @@ echo "    }]
                         case 'Produktion':
                             total_Q += context.chart.tooltip.dataPoints[i].raw;
                         break;
-                        case 'Direktverbrauch':
+                        case 'Hausverbrauch':
                         case 'InBatterie':
                         case 'VonBatterie':
                         case 'Einspeisung':
