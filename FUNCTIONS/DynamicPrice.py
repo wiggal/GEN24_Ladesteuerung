@@ -205,15 +205,28 @@ class dynamic:
                     pricelist_date.append((time_str, brutto_preis, round(row[1] / 1000, 3)))
 
         except Exception as e:
-            print(f"### ERROR: Keine Daten von {provider}, deshalb die Preise aus DB verwenden!\n")
+            print(f"### WARNUNG: Keine verwertbaren Daten von {provider}: {e}")
+            pricelist_date = []
+
+        return(pricelist_date)
+
+    def getPrice_db(self, BZN=None):
+        # Kein API-Aufruf, sondern Rückgriff auf die zuletzt in PV_Daten.sqlite
+        # gespeicherten Strompreise. Als expliziter, letzter Eintrag in der
+        # Preisquelle-Fallback-Kette gedacht, z.B. Preisquelle = energyforecast;energycharts;db
+        try:
             verbindung = sqlite3.connect('PV_Daten.sqlite')
             zeiger = verbindung.cursor()
             sql_anweisung = "SELECT * from strompreise WHERE DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day');"
             zeiger.execute(sql_anweisung)
             pricelist_date = zeiger.fetchall()
-            if pricelist_date == []:
-                print("### ERROR: In der DB sind auch keine aktuellen Strompreise vorhanden, Programmabbruch:")
-                exit()
+            verbindung.close()
+        except Exception as e:
+            print(f"### WARNUNG: Zugriff auf PV_Daten.sqlite/strompreise fehlgeschlagen: {e}")
+            pricelist_date = []
+
+        if pricelist_date == []:
+            print("### WARNUNG: In der DB sind auch keine aktuellen Strompreise vorhanden!")
 
         return(pricelist_date)
 
@@ -372,6 +385,83 @@ class dynamic:
         # wenn resolution == hour Mittelwerte bilden
         if(resolution == 'hour'):
             pricelist_date = self.get_stuendliches_mittel(pricelist_date)
+
+        return(pricelist_date)
+
+    def getPrice_energyforecast(self, BZN='DE-LU'):
+        # Kostenlose Free-Stufe von energyforecast.de: EPEX SPOT Day-Ahead + Prognose,
+        # bis zu 2 Tage im Voraus, 50 Requests/Tag. API-Key unter energyforecast.de -> API Keys anlegen
+        # und in der Config unter [dynprice] als 'energyforecast_token' hinterlegen.
+        # BZN entspricht dem 'domain'-Parameter von energyforecast.de: DE-LU, AT, FR, NL, BE, PL, DK1, DK2
+        api_token = basics.getVarConf('dynprice','energyforecast_token', 'str')
+
+        # lokale resolution-Einstellung ('hour' / 'quarter_hour') auf das API-Enum abbilden
+        resolution_cfg = basics.getVarConf('dynprice','resolution', 'str')
+        resolution = 'HOURLY' if resolution_cfg == 'hour' else 'QUARTER_HOURLY'
+
+        # fixed_cost_cent und vat bewusst auf 0 gesetzt: die API liefert dann den reinen
+        # EPEX-Preis (ct/kWh), Netzentgelte/Tagesanteil/MwSt werden wie bei den anderen
+        # Providern zentral in get_pricelist_date_viertel() berechnet
+        url = "https://www.energyforecast.de/api/v1/predictions/next_48_hours?token={}&fixed_cost_cent=0&vat=0&resolution={}&domain={}".format(api_token, resolution, BZN)
+
+        #DEBUG
+        if(self.dyn_print_level >= 2):
+            print("\n++ ", url)
+            print("++  BZN = ", BZN, "; resolution = ", resolution, "\n")
+
+        timeout_sec = 30
+        Push_Schreib_Ausgabe = ''
+
+        json_data1 = {}
+        try:
+            apiResponse = requests.get(url, timeout=timeout_sec)
+            apiResponse.raise_for_status()
+            if apiResponse.status_code != 204:
+                raw = json.loads(apiResponse.text)
+                # erwartetes Format: [{"start": "2025-01-20T13:00:00.000000+01:00", "end": "...", "price": 0.0823}, ...]
+                # (price in EUR/kWh bei fixed_cost_cent=0&vat=0) -> in unix_seconds/EUR-MWh für
+                # get_pricelist_date_viertel() umwandeln (Faktor 1000: EUR/kWh -> EUR/MWh)
+                unix_seconds = []
+                prices = []
+                for eintrag in raw:
+                    dt = datetime.strptime(eintrag['start'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                    unix_seconds.append(int(dt.timestamp()))
+                    prices.append(eintrag['price'] * 1000)
+                json_data1 = {
+                    "license_info": "energyforecast.de (EPEX SPOT Day-Ahead + Prognose)",
+                    "unix_seconds": unix_seconds,
+                    "price": prices
+                }
+            else:
+                Ausgabe = "### ERROR:  Keine Strompreise von energyforecast.de"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.Timeout:
+                Ausgabe = "### ERROR: Timeout, keine Strompreise von energyforecast.de"
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.HTTPError as http_err:
+                Ausgabe = (f"### ERROR: HTTP-Fehler: {http_err} (Status Code: {apiResponse.status_code})")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except requests.exceptions.RequestException as req_err:
+                Ausgabe = (f"### ERROR: Verbindungsfehler oder andere Probleme: {req_err}")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+        except (KeyError, ValueError) as parse_err:
+                Ausgabe = (f"### ERROR: Unerwartetes Antwortformat von energyforecast.de: {parse_err}")
+                print(Ausgabe)
+                Push_Schreib_Ausgabe += Ausgabe
+
+        # Wenn Pushmeldung aktiviert und Daten geschrieben an Dienst schicken
+        Push_Message_EIN = basics.getVarConf('messaging','Push_Message_EIN','eval')
+        if (Push_Schreib_Ausgabe != "") and (Push_Message_EIN == 1):
+            Push_Message_Url = basics.getVarConf('messaging','Push_Message_Url','str')
+            apiResponse = requests.post(Push_Message_Url, data=Push_Schreib_Ausgabe.encode(encoding='utf-8'), headers={ "Title": "Meldung Batterieladesteuerung!", "Tags": "sunny,zap" })
+            print("PushMeldung an ", Push_Message_Url, " gesendet.\n")
+
+        # viertelstündliche Netzentgelte addieren
+        pricelist_date = self.get_pricelist_date_viertel(json_data1, 'energyforecast.de')
 
         return(pricelist_date)
 

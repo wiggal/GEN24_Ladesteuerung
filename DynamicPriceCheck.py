@@ -98,10 +98,39 @@ for key in Prognose_24H:
             data.append((key[0], key[1], key2[1]))
 
 # Aktuelle Strompreise holen
-# Variabler Funktionsaufruf
-funktion_string = 'getPrice_'+Preisquelle
-funktion = getattr(dynamic, funktion_string)
-pricelist_date = funktion(LAND)
+# Variabler Funktionsaufruf, mit Fallback-Kette: mehrere Preisquellen durch Semikolon
+# getrennt in der Config, z.B. Preisquelle = energycharts;energyforecast;smard_api
+Preisquelle_liste = [q.strip() for q in Preisquelle.split(';') if q.strip()]
+
+pricelist_date = []
+for i, quelle in enumerate(Preisquelle_liste):
+    funktion_string = 'getPrice_' + quelle
+    try:
+        funktion = getattr(dynamic, funktion_string)
+    except AttributeError:
+        print(f"### WARNUNG: Preisquelle '{quelle}' -> Funktion '{funktion_string}' existiert nicht, überspringe.")
+        continue
+
+    try:
+        pricelist_date = funktion(LAND)
+    except Exception as e:
+        print(f"### WARNUNG: Preisquelle '{quelle}' fehlgeschlagen: {e}")
+        pricelist_date = []
+
+    if pricelist_date:
+        if i > 0:
+            print(f">> Fallback-Preisquelle '{quelle}' erfolgreich verwendet.")
+        break
+    else:
+        print(f"### WARNUNG: Preisquelle '{quelle}' lieferte keine Daten, versuche nächste Quelle...")
+
+if not pricelist_date:
+    print("### WARNUNG: Keine der konfigurierten Preisquellen konnte Daten liefern, versuche DB-Fallback...")
+    pricelist_date = dynamic.getPrice_db(LAND)
+
+if not pricelist_date:
+    print("### ERROR: Auch die DB lieferte keine Daten, Programmabbruch!")
+    exit()
 
 if(dyn_print_level >= 2):
     headers = ["Zeitpunkt", "Strompreis brutto(€/kWh)", "Börsenstrompreis (€/kWh)"]
