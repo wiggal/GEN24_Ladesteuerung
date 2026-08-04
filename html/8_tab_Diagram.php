@@ -192,10 +192,10 @@ if ($energietype == 'option') {
 } else {
 
 # AC Produktion 
-$SQL = getSQL('SUM_DC_Produktion', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
+$SQL = getSQL('SUM_DC_Produktion', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $Diagrammgrenze);
 $DC_Produktion = round($db->querySingle($SQL)/1000, 1);
 # AC Verbrauch
-$SQL = getSQL('SUM_AC_Verbrauch', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
+$SQL = getSQL('SUM_AC_Verbrauch', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $Diagrammgrenze);
 $AC_Verbrauch = round($db->querySingle($SQL)/1000, 1);
 
 # Diagrammtype Auswahl
@@ -204,7 +204,7 @@ if ($diagramtype == 'line') {
     schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $activeTab);
 
     # ProduktionsSQL und Daten holen
-    $SQL = getSQL('line', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR);
+    $SQL = getSQL('line', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $Diagrammgrenze);
     $results = $db->query($SQL);
 
     # Diagrammdaten und Optionen holen
@@ -228,7 +228,7 @@ Diagram_ausgabe($Footer, 'line', $labels, $daten, $optionen, 'W', $Diagrammgrenz
     # Funktion Schalter aufrufen
     schalter_ausgeben($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $DC_Produktion, $AC_Verbrauch, $activeTab);
 
-    $SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $groupSTR);
+    $SQL = getSQL('bar', $DiaDatenVon, $DiaDatenBis_SQL, $groupSTR, $Diagrammgrenze);
     $results = $db->query($SQL);
 
     # Diagrammdaten und Optionen holen

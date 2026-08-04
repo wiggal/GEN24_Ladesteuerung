@@ -164,7 +164,7 @@ $trenner = ",";
 return array($daten, $labels);
 } #END function diagrammdaten
 
-function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, string $groupSTR = null): string  #KI optimiert
+function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, string $groupSTR = null, int $Diagrammgrenze = 25000): string  #KI optimiert
 {
     // Gemeinsame WHERE-Bedingung
     $where = "Zeitpunkt BETWEEN '$DiaDatenVon' AND '$DiaDatenBis'";
@@ -262,6 +262,8 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
                     Vorhersage,
                     BattStatus
                 FROM Netzladen
+                WHERE (COALESCE(Ohmpilot, 0) + COALESCE(Wallbox, 0) + COALESCE(Einspeisung, 0) + COALESCE(InBatterie, 0)) < $Diagrammgrenze
+                  AND  COALESCE(Hausverbrauch, 0) < $Diagrammgrenze;
             ";
 
 
@@ -289,63 +291,48 @@ function getSQL(string $SQLType, string $DiaDatenVon, string $DiaDatenBis, strin
             $group = preg_replace('/[^%a-zA-Z0-9]/', '', $groupSTR);
 
             return "
-                WITH Alle_PVDaten AS (
+                WITH Differenzen_10Min AS (
+                    -- 1. Differenzen für jeden 10-Minuten-Datensatz berechnen
                     SELECT
-                        MIN(Zeitpunkt) AS Zeitpunkt,
-                        DC_Produktion,
-                        Netzverbrauch,
-                        Batterie_IN,
-                        Batterie_OUT,
-                        COALESCE(Wallbox, 0) AS Wallbox,
-                        COALESCE(Ohmpilot, 0) AS Ohmpilot,
-                        Einspeisung
-                    FROM pv_daten
-                    WHERE $where
-                    GROUP BY STRFTIME('$group', Zeitpunkt)
-
-                    UNION
-
-                    SELECT
-                        MAX(Zeitpunkt) AS Zeitpunkt,
-                        DC_Produktion,
-                        Netzverbrauch,
-                        Batterie_IN,
-                        Batterie_OUT,
-                        COALESCE(Wallbox, 0) AS Wallbox,
-                        COALESCE(Ohmpilot, 0) AS Ohmpilot,
-                        Einspeisung
-                    FROM pv_daten
-                    WHERE $where
-                    ORDER BY Zeitpunkt
-                ),
-                Alle_PVDaten2 AS (
-                    SELECT 
                         Zeitpunkt,
-                        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt)  - DC_Produktion  AS Produktion,
-                        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt)  - Netzverbrauch  AS Netzbezug,
-                        LEAD(Batterie_IN)   OVER (ORDER BY Zeitpunkt)  - Batterie_IN    AS InBatterie,
-                        LEAD(Batterie_OUT)  OVER (ORDER BY Zeitpunkt)  - Batterie_OUT   AS AusBatterie,
-                        LEAD(Wallbox)  OVER (ORDER BY Zeitpunkt)  - Wallbox   AS Wallbox,
-                        LEAD(Ohmpilot)  OVER (ORDER BY Zeitpunkt)  - Ohmpilot   AS Ohmpilot,
-                        LEAD(Einspeisung)   OVER (ORDER BY Zeitpunkt)  - Einspeisung    AS Einspeisung
-                    FROM Alle_PVDaten
+                        LEAD(DC_Produktion) OVER (ORDER BY Zeitpunkt) - DC_Produktion AS Diff_Produktion,
+                        LEAD(Netzverbrauch) OVER (ORDER BY Zeitpunkt) - Netzverbrauch AS Diff_Netzbezug,
+                        LEAD(Batterie_IN)   OVER (ORDER BY Zeitpunkt) - Batterie_IN   AS Diff_InBatterie,
+                        LEAD(Batterie_OUT)  OVER (ORDER BY Zeitpunkt) - Batterie_OUT  AS Diff_AusBatterie,
+                        LEAD(COALESCE(Wallbox, 0))  OVER (ORDER BY Zeitpunkt) - COALESCE(Wallbox, 0)  AS Diff_Wallbox,
+                        LEAD(COALESCE(Ohmpilot, 0)) OVER (ORDER BY Zeitpunkt) - COALESCE(Ohmpilot, 0) AS Diff_Ohmpilot,
+                        LEAD(Einspeisung)   OVER (ORDER BY Zeitpunkt) - Einspeisung   AS Diff_Einspeisung
+                    FROM pv_daten
+                    WHERE $where
+                ),
+                Bereinigte_Daten AS (
+                    -- 2. Peaks/Fehlmessungen (> $Diagrammgrenze) im 10-Minuten-Intervall herausfiltern
+                    SELECT *
+                    FROM Differenzen_10Min
+                    WHERE ABS(COALESCE(Diff_Ohmpilot, 0)) < $Diagrammgrenze
+                    AND ABS(COALESCE(Diff_Wallbox, 0)) < $Diagrammgrenze
+                    AND ABS(COALESCE(Diff_Einspeisung, 0)) < $Diagrammgrenze
+                    AND ABS(COALESCE(Diff_InBatterie, 0)) < $Diagrammgrenze
+                    AND ABS(COALESCE(Diff_Produktion, 0)) < $Diagrammgrenze
+                    AND ABS(COALESCE(Diff_Netzbezug, 0)) < $Diagrammgrenze
                 )
-                SELECT 
+                -- 3. Aggregation nach Tag/Monat/Jahr basierend auf $group
+                SELECT
                     Zeitpunkt,
-                    Produktion * -1 AS Produktion,
-                    AusBatterie * -1 AS VonBatterie,
-                    Netzbezug  * -1 AS Netzbezug,
-                    Einspeisung,
-                    Wallbox,
-                    Ohmpilot,
-                    -- Netzbezug AS Netzverbrauch,
-                    InBatterie,
-                    Produktion + Netzbezug + AusBatterie - Wallbox - Ohmpilot - InBatterie - Einspeisung AS Hausverbrauch
-                FROM Alle_PVDaten2
-                WHERE AusBatterie IS NOT NULL
+                    SUM(Diff_Produktion) * -1 AS Produktion,
+                    SUM(Diff_AusBatterie) * -1 AS VonBatterie,
+                    SUM(Diff_Netzbezug) * -1 AS Netzbezug,
+                    SUM(Diff_Einspeisung) AS Einspeisung,
+                    SUM(Diff_Wallbox) AS Wallbox,
+                    SUM(Diff_Ohmpilot) AS Ohmpilot,
+                    SUM(Diff_InBatterie) AS InBatterie,
+                    (SUM(Diff_Produktion) + SUM(Diff_Netzbezug) + SUM(Diff_AusBatterie)
+                    - SUM(Diff_Wallbox) - SUM(Diff_Ohmpilot) - SUM(Diff_InBatterie) - SUM(Diff_Einspeisung)) AS Hausverbrauch
+                FROM Bereinigte_Daten
+                WHERE Diff_AusBatterie IS NOT NULL
+                GROUP BY STRFTIME('$group', Zeitpunkt)
                 ORDER BY Zeitpunkt
             ";
-
 
         default:
             throw new InvalidArgumentException("Unbekannter SQLType: $SQLType");
@@ -360,8 +347,8 @@ $optionen['Vorhersage']=     ['Farbe'=>'rgba(255,140,05,1)',   'fill'=>'false', 
 $optionen['BattStatus']=     ['Farbe'=>'rgba(72,118,255,1)',   'fill'=>'false', 'stack'=>'3','linewidth'=>'2','order'=>'0','borderDash'=>'[0,0]', 'yAxisID'=>'y2', 'hidden'=>'false'];
 $optionen['Einspeisung'] =   ['Farbe' => 'rgba(110,110,110,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'5','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
 $optionen['InBatterie'] =    ['Farbe' => 'rgba(60,215,60,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'4','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
-$optionen['Ohmpilot']      = ['Farbe' => 'rgba(224,86,140,1)', 'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
-$optionen['Wallbox']       = ['Farbe' => 'rgba(167,126,198,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Ohmpilot']      = ['Farbe' => 'rgba(235,131,107,1)', 'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'3','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
+$optionen['Wallbox']       = ['Farbe' => 'rgba(170,107,175,1)','fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'2','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
 $optionen['Hausverbrauch']  =['Farbe' => 'rgba(255,215,0,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'1','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
 $optionen['Produktion']=     ['Farbe'=>'rgba(255,200,0,1)',    'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'6','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
 $optionen['VonBatterie'] =   ['Farbe' => 'rgba(45,180,45,1)',  'fill'=> 'true', 'stack'=>'4','linewidth'=>'0','order'=>'7','borderDash'=>'[0,0]', 'yAxisID'=>'y', 'hidden'=>'false'];
@@ -593,6 +580,10 @@ echo "    }]
             titleFont: { size: fontSize },
             bodyFont: { size: fontSize },
             footerFont: { size: fontSize },
+            filter: function(tooltipItem) {
+                const dataset = tooltipItem.chart.data.datasets[tooltipItem.datasetIndex];
+                return dataset.data.some(val => val !== 0);
+            },
             callbacks: {
                   label: function(context) {
                     let total_Q = 0;
@@ -674,15 +665,6 @@ echo "    }]
            font: {
              size: fontSize,
            }
-        },
-        // Hier die Scala auf X-Wert begrenzen
-        afterDataLimits(scale) {
-          if(scale.max > ".$Diagrammgrenze.") {
-          scale.max = ".$Diagrammgrenze.";
-          }
-          if(scale.min < -".$Diagrammgrenze.") {
-          scale.min = -".$Diagrammgrenze.";
-          }
         }
       },
     y2: {
