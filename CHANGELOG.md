@@ -1,11 +1,11 @@
-**[0.43.0] – 2026-XX-XX**  
+**[0.43.0] – 2026-08-06**  
 - Fix: Download im FcastMgr
-- **NEU** Ladesteuerung abhänging vom Strompreis. Dadurch kann eine Maximale Ladung z.B. bei negativen Strompreisen erfolgen.  
+- **NEU** Ladesteuerung abhänging vom Strompreis. Dadurch kann eine Maximale Akkubeladung z.B. bei negativen Strompreisen erfolgen.  
   **Änderung in CONFIG/charge.ini** im Block `[Ladeberechnung]` wurde hierzu die Variable `strompreis_einspeisegrenze` eingefügt, in `priv.ini` nachziehen.  
-- Darstellung der Verbräuche von Wattpilot und Ohmpilot.    
+- Darstellung der Verbräuche von Wattpilot und Ohmpilot in QZ-Bilanz.    
 - **NEU** Strompreisquelle www.energyforecast.de eingebaut, damit ist eine Zweitagevorhersage möglich.  
   **Änderung in CONFIG/dynprice.ini** Variable `energyforecast_token` eingefügt, in `priv.ini` evtl. nachziehen.  
-  **NEU** in der Variable `Preisquelle` können nun mehrere Quellen als Fallback angegeben werden.  
+  **NEU** in der Variable `Preisquelle` können nun mehrere Quellen für einen evtl. Fallback angegeben werden.  
 
 **[0.42.9] – 2026-07-19**  
 - **Neuer Prognosedienst** DWD_mosmix_forecast.py basierend auf den Daten des DWD.  
