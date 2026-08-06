@@ -591,14 +591,16 @@ echo "    }]
                     for (var i = 0; i < context.chart.tooltip.dataPoints.length; i++){
                     switch (context.chart.tooltip.dataPoints[i].dataset.label) {
                         case 'Netzbezug':
+                        case 'VonBatterie':
                         case 'Produktion':
                             total_Q += context.chart.tooltip.dataPoints[i].raw;
                         break;
                         case 'Hausverbrauch':
                         case 'InBatterie':
-                        case 'VonBatterie':
                         case 'Einspeisung':
                         case 'Netzverbrauch':
+                        case 'Wallbox':
+                        case 'Ohmpilot':
                             total_Z += context.chart.tooltip.dataPoints[i].raw;
                         break;
                     }

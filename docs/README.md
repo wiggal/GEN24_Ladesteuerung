@@ -85,7 +85,7 @@ im Batteriemanagement des Wechselrichters.
 Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
 da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
 
-### 💲🔌 DynamicPriceCheck.pyInst_RaspPi.html
+### 💲🔌 DynamicPriceCheck.py
 Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. 
 Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
 Siehe hierzu Settings => Scheduler.

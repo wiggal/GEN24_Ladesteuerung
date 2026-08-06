@@ -202,7 +202,7 @@ class dynamic:
                     brutto_preis = round((row[1] / 1000 + Nettoaufschlag + Tageszeit_Preisanteil[quarter_time]) * MwSt, 4)
 
                     # Zeitpunkt, Bruttopreis, Börsenpreis
-                    pricelist_date.append((time_str, brutto_preis, round(row[1] / 1000, 3)))
+                    pricelist_date.append((time_str, brutto_preis, round(row[1] / 1000, 5)))
 
         except Exception as e:
             print(f"### WARNUNG: Keine verwertbaren Daten von {provider}: {e}")
