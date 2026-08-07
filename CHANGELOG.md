@@ -1,3 +1,6 @@
+**[0.43.1] – 2026-08-07**  
+- QUICKFIX: Aufruf der QZ-Bilanz vor dem ersten Logging mit v0.43.0 bricht mit Fehler ab.  
+
 **[0.43.0] – 2026-08-06**  
 - Fix: Download im FcastMgr
 - **NEU** Ladesteuerung abhänging vom Strompreis. Dadurch kann eine Maximale Akkubeladung z.B. bei negativen Strompreisen erfolgen.  

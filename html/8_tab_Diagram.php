@@ -100,6 +100,20 @@ if (!$result) {
     exit();
 }
 
+# Prüfen, ob die Spalten Wallbox/Ohmpilot in pv_daten existieren.
+$hasWallbox = false;
+$hasOhmpilot = false;
+$colResult = $db->query("PRAGMA table_info(pv_daten)");
+while ($col = $colResult->fetchArray(SQLITE3_ASSOC)) {
+    if ($col['name'] === 'Wallbox')  $hasWallbox  = true;
+    if ($col['name'] === 'Ohmpilot') $hasOhmpilot = true;
+}
+if (!$hasWallbox || !$hasOhmpilot) {
+    echo "Spalte Wallbox und/oder Ohmpilot existiert nicht in pv_daten, keine Grafik verfügbar!";
+    echo "<br>Spalten werden beim nächsten Logging angelegt!!!";
+    exit();
+}
+
 # Variablendefinitionen
 $labels = '';
 $daten = array();
