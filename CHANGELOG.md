@@ -1,3 +1,6 @@
+**[0.43.2] – 2026-XX-XX**  
+
+
 **[0.43.1] – 2026-08-07**  
 - QUICKFIX: Aufruf der QZ-Bilanz vor dem ersten Logging mit v0.43.0 bricht mit Fehler ab.  
 
