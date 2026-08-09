@@ -1,4 +1,5 @@
     <script src="chart.js"></script>
+    <script src="chartjs-adapter-date-fns.js"></script>
     <script src="chartjs-plugin-datalabels.js"></script>
     <style>
     html, body {

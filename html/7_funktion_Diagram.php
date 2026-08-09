@@ -567,6 +567,15 @@ echo "    }]
     },
     scales: {
       x: {
+        type: 'time',
+        time: {
+            parser: 'HH:mm',
+            unit: 'hour',
+            displayFormats: { hour: 'HH:mm' },
+            tooltipFormat: 'HH:mm'
+        },
+        min: '00:00',
+        max: '23:45',
         ticks: {
           font: {
              size: fontSize,
