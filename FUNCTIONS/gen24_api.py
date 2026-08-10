@@ -130,7 +130,8 @@ class InverterApi:
         return results
 
     # API-Werte lesen unabhängig von den Node-Nummern
-    def get_API(self):
+    # Die maximalen Voltwert nur lesen wenn readvolt=1, aktuell in EnergyController.py
+    def get_API(self, readvolt=0):
         # Hier zum Testen, lesen aus readable.json True setzen.  #entWIGGlung
         test_aus_file = False
         if test_aus_file:
@@ -225,7 +226,7 @@ class InverterApi:
         # Zellspannung von BYD oder Reserva lesen
         API['maxvolt'] = 0
         Akkuschonung = basics.getVarConf('Ladeberechnung','Akkuschonung','eval')
-        if(Akkuschonung == 2):
+        if(Akkuschonung == 2 and readvolt == 1):
             akkuIP = basics.getVarConf('inverter','akkuIP','str')
             if (akkuIP == "reserva"):
                 print("#### Reserva: Akkuschonung mit MaxVolt noch nicht getestet!!!")  #entWIGGlung

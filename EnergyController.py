@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
         print_level = basics.getVarConf('env','print_level','eval')
         if print_level >= 1:
-            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****")
+            print("***** BEGINN: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"), prg_version,"*****")
         host_ip = basics.getVarConf('inverter','hostNameOrIp', 'str')
         user = basics.getVarConf('inverter','user', 'str')
         password = basics.getVarConf('inverter','password', 'str')
@@ -49,7 +49,8 @@ if __name__ == '__main__':
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             # API lesen, wegen Versionsnummer
             inverter_api = InverterApi()
-            API = inverter_api.get_API()
+            # readvolt=1 damit der max Voltwert bei Akkuschonung=2 vom Akku gelesen wird
+            API = inverter_api.get_API(readvolt=1)
             DEBUG_interface = False
             if(print_level == 5): DEBUG_interface = True
             #  Klasse FroniusGEN24 initiieren
@@ -306,7 +307,6 @@ if __name__ == '__main__':
                     if print_level >= 1:
                         try:
                             if(Ausgabe_Parameter != ''): print(Ausgabe_Parameter)
-                            print(f"Programmversion:             {prg_version}")
                             print(f"aktuellePrognose:            {aktuelleVorhersage}")
                             print(f"TagesPrognose:               {TagesPrognoseGesamt}")
                             print(f"BattVollUm (Akkuschonung):   {BattVollUm} ({Akkuschonung_Verzogerung})")
