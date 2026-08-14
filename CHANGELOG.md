@@ -1,5 +1,5 @@
 **[0.43.2] – 2026-XX-XX**  
-
+- Wallbox-TAB: Eine Ladepreisgrenze nach Strompreis ist nun einschalt- und einstellbar. Geladen wird nur, solange der aktuelle Bruttostrompreis darunter liegt.  
 
 **[0.43.1] – 2026-08-07**  
 - QUICKFIX: Aufruf der QZ-Bilanz vor dem ersten Logging mit v0.43.0 bricht mit Fehler ab.  

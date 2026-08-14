@@ -159,8 +159,9 @@ $ladezeit_bis = $EV_Reservierung['4']['Res_Feld2'] ?? "05:00";
 $max_leistung_ha = $EV_Reservierung['4']['Options'] ?? "-0.1";
 
 // Neue Einstellungen ID=5 (Preise)
-$strompreis_fest = $EV_Reservierung['5']['Res_Feld1'] ?? 0.30;
-$einspeise_verg  = $EV_Reservierung['5']['Res_Feld2'] ?? 0.07;
+$strompreis_fest    = $EV_Reservierung['5']['Res_Feld1'] ?? 0.30;
+$einspeise_verg     = $EV_Reservierung['5']['Res_Feld2'] ?? 0.07;
+$ladepreis_grenze   = $EV_Reservierung['5']['Options']   ?? '';   // Leer = keine Ladepreisgrenze aktiv
 
 // -------------------------
 // AJAX poll
@@ -309,6 +310,19 @@ p, label {
     max-width: 100%;
 }
 
+.kein-limit-label {
+    white-space: nowrap;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.kein-limit-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
 /* --- Balkentabelle (PV/Lastenanzeige) --- */
 .wrapper {
     width: 99%;
@@ -354,6 +368,12 @@ p, label {
     .input-inline input {
       width: 70px;     /* oder auto / oder 100% */
       max-width: 100%;
+    }
+    #ladePreisGrenze {
+      width: 55px;     /* schmaler, damit "kein Limit" daneben passt */
+    }
+    .kein-limit-label {
+      font-size: 0.8em;
     }
    .wallboxwerte {
      font-size: 14px;
@@ -545,6 +565,19 @@ echo "</div>";
         <div class="row">
             <span class="label-inline">Lademenge(kWh) (DB=<?php echo htmlspecialchars($default_target_kwh); ?>):</span>
             <span class="input-inline"><input id="defaultTargetKwh" type="number" step="1" min="0" value="<?php echo htmlspecialchars($default_target_kwh); ?>"></span>
+        </div>
+
+        <div class="row">
+            <span class="label-inline">Ladepreisgrenze (€) (DB=<?php echo htmlspecialchars($ladepreis_grenze !== '' ? $ladepreis_grenze : 'kein Limit'); ?>):</span>
+            <span class="input-inline" style="display:flex; align-items:center; gap:4px;">
+                <input id="ladePreisGrenze" type="number" step="0.01" placeholder="kein Limit"
+                    value="<?php echo htmlspecialchars($ladepreis_grenze); ?>"
+                    <?php echo ($ladepreis_grenze === '') ? 'disabled' : ''; ?>>
+                <label class="kein-limit-label">
+                    <input type="checkbox" id="ladePreisGrenzeKeinLimit" <?php echo ($ladepreis_grenze === '') ? 'checked' : ''; ?>>
+                    kein Limit
+                </label>
+            </span>
         </div>
         <hr>
 
@@ -788,6 +821,19 @@ function calculatePower() {
     });
     // =========================================================================
 
+    // =========================================================================
+    // NEU: "kein Limit" Checkbox für Ladepreisgrenze
+    // =========================================================================
+    function updateLadePreisGrenzeState() {
+        var keinLimit = $('#ladePreisGrenzeKeinLimit').is(':checked');
+        $('#ladePreisGrenze').prop('disabled', keinLimit);
+    }
+    updateLadePreisGrenzeState();
+    $('#ladePreisGrenzeKeinLimit').on('change', function() {
+        updateLadePreisGrenzeState();
+    });
+    // =========================================================================
+
     $('#btnSave').click(function(){
     // --- Daten sammeln ---
 
@@ -814,6 +860,7 @@ function calculatePower() {
     // ID 5: Preise (aus Grafik)
     var s_preis = $('#strompreisFest').val();
     var e_verg  = $('#einspeiseVerg').val();
+    var ladepreis_grenze = $('#ladePreisGrenzeKeinLimit').is(':checked') ? '' : $('#ladePreisGrenze').val();
 
     // --- AJAX Request ---
     $.ajax({
@@ -849,7 +896,7 @@ function calculatePower() {
                 auto_sync_interval,      // ID 2
                 phase_change_confirm,    // ID 3
                 max_leistung_ha,         // ID 4
-                ""                       // ID 5
+                ladepreis_grenze         // ID 5
             ]
         },
         success: function(response){

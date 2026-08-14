@@ -6,6 +6,7 @@ FUNCTIONS/ocpp.py — Refactorierte, besser strukturierte Version
 from __future__ import annotations
 import asyncio
 import json
+import sqlite3
 import traceback
 from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass, field
@@ -22,6 +23,7 @@ TIME_SHIFT_SECONDS = 5
 DEFAULT_CONNECTOR_ID = 1
 DEFAULT_IDTAG = "WattpilotUser"
 OCPP_PROTOCOLS = ['ocpp1.6', 'ocpp2.0.1', 'ocpp1.5']
+PV_DATA_DB_PATH = "PV_Daten.sqlite"  # liegt im Stammverzeichnis (nicht unter CONFIG/)
 
 # Externe Module (bestehend aus originalem Projekt)
 import FUNCTIONS.functions
@@ -355,6 +357,11 @@ class OCPPManager:
         self.wb_amp = self.wb_amp_max
         self.wb_is_pv_controlled = False
 
+        # Ladepreisgrenze (DB ID=5, Options) und zuletzt gelesener Strompreis
+        # (Bruttopreis der aktuellen Viertelstunde, PV_Daten.sqlite -> strompreise)
+        self.wb_ladepreis_grenze: Optional[float] = None  # None = keine Preisgrenze aktiv
+        self.current_strompreis: Optional[float] = None
+
         self.AUTO_SYNC_INTERVAL = auto_sync_interval
         self.MIN_CHARGE_DURATION_S = 600
         self.PHASE_CHANGE_CONFIRM_S = 30
@@ -396,6 +403,38 @@ class OCPPManager:
 
         task.add_done_callback(_on_done)
         return task
+
+    # ----------------------------
+    # Strompreis (PV_Daten.sqlite -> strompreise)
+    # ----------------------------
+    def get_current_strompreis(self) -> Optional[float]:
+        """
+        Liest den Bruttopreis der aktuellen Viertelstunde aus PV_Daten.sqlite (Tabelle
+        strompreise, Spalten Zeitpunkt/Bruttopreis/Boersenpreis, 15-Minuten-Raster).
+        Nimmt den jüngsten Eintrag mit Zeitpunkt <= aktuelle (auf 15 Min. abgerundete) Zeit,
+        damit auch bei leicht verspäteter Befüllung noch ein Preis gefunden wird.
+        """
+        try:
+            now = datetime.now()
+            slot = now.replace(minute=(now.minute // 15) * 15, second=0, microsecond=0)
+            slot_str = slot.strftime("%Y-%m-%d %H:%M:%S")
+            conn = sqlite3.connect(PV_DATA_DB_PATH)
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    "SELECT Bruttopreis FROM strompreise WHERE Zeitpunkt <= ? "
+                    "ORDER BY Zeitpunkt DESC LIMIT 1",
+                    (slot_str,),
+                )
+                row = cur.fetchone()
+            finally:
+                conn.close()
+            if row and row[0] is not None:
+                return float(row[0])
+            cwarn(f"Strompreis: kein Eintrag <= {slot_str} in {PV_DATA_DB_PATH} gefunden")
+        except Exception:
+            cerr_exc("Fehler beim Lesen des Strompreises aus PV_Daten.sqlite")
+        return None
 
     # ----------------------------
     # DB / Inverter Zugriff (einmal pro iteration)
@@ -498,6 +537,17 @@ class OCPPManager:
                             self.max_leistung_ha = float(raw_ha)*-1000
                     except Exception:
                         pass
+                # ID=5: Preise / Ladepreisgrenze (Options)
+                row5 = data.get('5') or data.get(5)
+                if row5:
+                    try:
+                        raw_grenze = row5.get('Options')
+                        if raw_grenze is not None and str(raw_grenze).strip() != '':
+                            self.wb_ladepreis_grenze = float(raw_grenze)
+                        else:
+                            self.wb_ladepreis_grenze = None
+                    except Exception:
+                        cwarn("Fehler beim Parsen der Ladepreisgrenze (DB ID=5 Options)")
                 # update autosync interval
                 self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
             except Exception:
@@ -516,7 +566,8 @@ class OCPPManager:
                     f"{self.MIN_CHARGE_DURATION_S}, "
                     f"{self.PHASE_CHANGE_CONFIRM_S}, "
                     f"{self.residualPower}, "
-                    f"{self.max_leistung_ha} "
+                    f"{self.max_leistung_ha}, "
+                    f"{self.wb_ladepreis_grenze}"
                 )
 
 
@@ -535,6 +586,13 @@ class OCPPManager:
             self.Produktion = 0.0
             self.Batteriebezug = 0.0
             self.BattStatusProz = 0.0
+
+        # Aktuellen Strompreis (Bruttopreis der laufenden Viertelstunde) einmal pro Iteration lesen –
+        # nur wenn überhaupt eine Ladepreisgrenze konfiguriert ist, sonst unnötiger DB-Zugriff.
+        if self.wb_ladepreis_grenze is not None:
+            self.current_strompreis = self.get_current_strompreis()
+        else:
+            self.current_strompreis = None
 
         # sync default target_kwh to all existing CPs if changed
         for cid, st in self.states.items():
@@ -610,7 +668,8 @@ class OCPPManager:
             f"Netz={self.Netzbezug:.0f} W, "
             f"Haus={self.hausverbrauch:.0f} W, "
             f"CP={current_charge_power:.0f} W, "
-            f"Überschuss={ueberschuss:.0f} W")
+            f"Überschuss={ueberschuss:.0f} W, "
+            f"Strompreis={self.current_strompreis}")
 
         if float(self.wb_pv_mode) in (1.0, 2.0):
             # Standard: Im Modus 1.0 (Nur PV) darf die Ladung auf 0 abfallen
@@ -686,6 +745,21 @@ class OCPPManager:
                     f"NextTrip: außerhalb Zeitfenster {self.wb_ladezeit_von}–{self.wb_ladezeit_bis} "
                     f"→ kein Laden"
                 )
+
+        # --- Ladepreisgrenze ---
+        # Nur laden, wenn der aktuelle Bruttopreis (PV_Daten.sqlite -> strompreise) unter der
+        # konfigurierten Grenze (DB ID=5, Options) liegt. Gilt für alle PV-Modi gleichermaßen.
+        if self.wb_ladepreis_grenze is not None:
+            if self.current_strompreis is not None:
+                if self.current_strompreis >= self.wb_ladepreis_grenze:
+                    if amp > 0:
+                        cinfo(
+                            f"[{_log_tag}] Ladesperre: Strompreis {self.current_strompreis:.4f}€ "
+                            f"≥ Grenze {self.wb_ladepreis_grenze:.4f}€ → kein Laden"
+                        )
+                    amp = 0
+            else:
+                cwarn(f"[{_log_tag}] Strompreis nicht ermittelbar – Ladepreisgrenze wird ignoriert")
 
         self.wb_amp = amp
         self.wb_is_pv_controlled = is_pv_controlled
