@@ -1,4 +1,4 @@
-**[0.43.2] – 2026-XX-XX**  
+**[0.43.2] – 2026-08-18**  
 - Wallbox-TAB: Eine Ladepreisgrenze nach Strompreis ist nun einschalt- und einstellbar. Geladen wird nur, solange der aktuelle Bruttostrompreis darunter liegt.  
 
 **[0.43.1] – 2026-08-07**  
