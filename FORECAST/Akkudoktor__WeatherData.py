@@ -54,7 +54,7 @@ def loadLatestWeatherData(Quelle, Gewicht):
             if apiResponse.status_code == 200:
                 pvdaten = dict(json.loads(apiResponse.text))
             else:
-                print("### ERROR "+str(apiResponse.status_code)+":  Keine forecasts-Daten von api.akkudoktor.net")
+                print(f"### ERROR {apiResponse.status_code}: Keine forecasts-Daten von api.akkudoktor.net\n### ERROR Response Body: {apiResponse.text}")
                 exit()
         except requests.exceptions.Timeout:
             print("### ERROR:  Timeout von api.akkudoktor.net")
