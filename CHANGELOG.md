@@ -1,4 +1,5 @@
 **[0.43.3] – 2026-XX-XX**  
+- Wallbox-TAB: NextTrip lädt mit den günstigsten Strompreisen.  
 
 **[0.43.2] – 2026-08-18**  
 - Wallbox-TAB: Eine Ladepreisgrenze nach Strompreis ist nun einschalt- und einstellbar. Geladen wird nur, solange der aktuelle Bruttostrompreis darunter liegt.  

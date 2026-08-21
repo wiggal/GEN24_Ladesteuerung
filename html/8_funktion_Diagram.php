@@ -3,7 +3,6 @@
 ## BEGIN FUNCTIONS
 function schalter_ausgeben ($DBersterTag, $diagramtype, $Zeitraum, $DiaDatenVon, $DiaDatenBis, $Produktion, $Verbrauch, $activeTab)
 {
-date_default_timezone_set('Europe/Berlin');
 $date1 = new DateTime($DiaDatenVon);
 $date2 = new DateTime($DiaDatenBis);
 // Differenz berechnen

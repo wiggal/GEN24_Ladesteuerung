@@ -214,7 +214,6 @@ $DB_Slider_selected = '';
 $DB_MaxLadung_selected = '';
 $Akkuschon_check = '';
 # Prüfen, ob Einträge für ManuelleSteuerung schon abgelaufen
-date_default_timezone_set('Europe/Berlin');
 # Wenn Feld in DB keine Zahl
 if (!is_numeric($EV_Reservierung['ManuelleSteuerung']['Options'])){
     $EV_Reservierung['ManuelleSteuerung']['Options'] = 0;

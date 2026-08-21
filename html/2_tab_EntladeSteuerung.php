@@ -159,6 +159,7 @@ input.slider {
 
 <?php
 include 'SQL_steuerfunctions.php';
+require_once "config_parser.php";
 $Akku_EntLadung = getSteuercodes('ENTLadeStrg');
 
 $DB_ManuelleEntladesteuerung_wert = 0;

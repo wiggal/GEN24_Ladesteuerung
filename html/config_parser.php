@@ -62,6 +62,16 @@ try {
         }
     }
 
+    // Zeitzone zentral für ALLE Skripte setzen, die config_parser.php einbinden - ohne das
+    // fällt PHP je nach Server-/php.ini-Konfiguration auf UTC zurück, während z.B. die
+    // Strompreis-Daten in PV_Daten.sqlite in lokaler Zeit befüllt werden. Überschreibbar
+    // über einen "Zeitzone"- oder "timezone"-Key in [General] von config.ini/config_priv.ini,
+    // Default Europe/Berlin, falls dort nichts (oder ein ungültiger Wert) hinterlegt ist.
+    $zeitzone = $GLOBALS['Zeitzone'] ?? $GLOBALS['timezone'] ?? 'Europe/Berlin';
+    if (!@date_default_timezone_set($zeitzone)) {
+        date_default_timezone_set('Europe/Berlin');
+    }
+
     // TAB_config rekonstruieren und $TAB_config global setzen
     $TAB_config = [];
     if (isset($ini['TAB_config'])) {
