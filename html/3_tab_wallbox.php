@@ -43,7 +43,7 @@ if (isset($_POST['ladeDiagrammAjax'])) {
         $ld_lz_von, $ld_lz_bis, $ld_preisgrenze
     );
 
-    $ld_slots = $ld_result['slotZeiten'] ?? [];
+    $ld_slots = nextTripTopKeysToZeiten($ld_result);
     $ld_fenster_ende = ($ld_pv_mode === 4) ? berechneLadefensterEnde($ld_lz_von, $ld_lz_bis) : null;
 
     $ld_html = ($ld_pv_mode === 4)
@@ -691,7 +691,7 @@ echo "</div>";
                         (string)$ladepreis_grenze
                     );
 
-                    $neue_lade_slots = $next_trip_result['slotZeiten'] ?? [];
+                    $neue_lade_slots = nextTripTopKeysToZeiten($next_trip_result);
 
                     echo generateLadeDiagramm(
                         (int)$pv_mode,

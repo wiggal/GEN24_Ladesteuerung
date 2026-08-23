@@ -482,6 +482,28 @@ function berechneNextTripLadeSlots(
 }
 
 /**
+ * Wandelt die von berechneNextTripLadeSlots() gelieferten Viertelstunden-Offsets (topKeys)
+ * in Uhrzeiten ("H:i") um. Gemeinsame Hilfsfunktion für getNextTripSlotZeiten() sowie die
+ * AJAX-/Initial-Render-Stellen in 3_tab_wallbox.php, die direkt mit dem Ergebnis von
+ * berechneNextTripLadeSlots() weiterarbeiten - dessen Rückgabe-Array selbst KEINEN
+ * 'slotZeiten'-Schlüssel enthält (nur 'topKeys' als Viertelstunden-Offsets).
+ *
+ * @param array $result Rückgabe von berechneNextTripLadeSlots()
+ * @return string[] Liste von Uhrzeiten im Format "H:i", z.B. ["05:15", "05:30", ...]
+ */
+function nextTripTopKeysToZeiten(array $result): array
+{
+    if (($result['startTime'] ?? null) === null) {
+        return [];
+    }
+    $zeiten = [];
+    foreach ($result['topKeys'] ?? [] as $offset) {
+        $zeiten[] = date('H:i', $result['startTime'] + ($offset * 900));
+    }
+    return $zeiten;
+}
+
+/**
  * Liefert die Uhrzeiten ("H:i") der Slots, die laut aktuellen Next-Trip-Einstellungen zum
  * Laden genutzt würden – zum Speichern als eigene Datensätze in steuercodes (ID = Anfangszeit,
  * Schluessel = "wallbox", Zeit = eigene Slot-Zeit "HHMM", s. extrahiereLadeSlots()). Nur
@@ -505,15 +527,7 @@ function getNextTripSlotZeiten(
         $ladepreisGrenze, $dbPath, $blockAnzahl
     );
 
-    if ($result['startTime'] === null) {
-        return [];
-    }
-
-    $zeiten = [];
-    foreach ($result['topKeys'] as $offset) {
-        $zeiten[] = date('H:i', $result['startTime'] + ($offset * 900));
-    }
-    return $zeiten;
+    return nextTripTopKeysToZeiten($result);
 }
 
 /**
