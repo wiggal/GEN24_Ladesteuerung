@@ -23,11 +23,14 @@
 - [Logging](#-logging) und grafische Darstellung von Prognoseberechnung, Strompreise und QZ-Bilanz (Produktion und Verbrauch).
 - Akkuschonung: Um einen LFP-Akku zu schonen, kann die Ladeleistung z.B. ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt werden. Es ist auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
 - [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden, mit grafischer Darstellung.  
-- [Ladesteuerung des Wattpiloten](#-wallboxsteuerung), für E-Autos 🚘 über OCPP.
+- [Ladesteuerung des Wattpiloten](#-wallboxsteuerung), für E-Autos 🚘 über OCPP (Nach Überschuß oder Strompreis).
 - [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.43.3**  
+- 🚘 Steuerung des Wattpiloten, bei NextTrip nun nach Strompreis.
+
 Ab Version: **0.43.0**  
 - Ladesteuerung abhängig vom Strompreis, z.B. nur bei negativen Strompreisen laden.  
 - Darstellung der Verbräuche von Wattpilot und Ohmpilot.  

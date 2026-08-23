@@ -1,7 +1,7 @@
 <?php
 // ================================================
 // Wattpilot OCPP Control – Single File PHP UI (angepasst: Kein Fallback-ID, DB-Werte immer anzeigen)
-// Erweiterung: zusätzliche Wallbox-Parameter (IDs 2 und 3) editierbar und in DB speicherbar
+// Erweiterung: zusätzliche Wallbox-Parameter (IDs 2-7) editierbar und in DB speicherbar
 // Änderungen: Details-Bereich "Mehr Optionen" behält manuell gesetzten geöffnet/geschlossen-Status in localStorage
 // ================================================
 // Erkennt automatisch die IP des Servers (z.B. 192.168.178.4)
@@ -19,6 +19,47 @@ $PYTHON_SERVER_CMD = "nohup python3 -u $GEN24_DIR/ocpp_server.py > /tmp/ocpp.log
 
 include 'SQL_steuerfunctions.php';
 require_once '3_funktion_wallbox.php';
+
+// -------------------------
+// AJAX: Next-Trip-Ladediagramm live neu berechnen
+// Wird gebraucht, weil der PV-Modus-Wechsel im Dropdown rein clientseitig (JS) passiert -
+// ohne diesen Endpunkt gäbe es beim Umschalten von z.B. "Aus" auf "NextTrip" weder eine
+// aktualisierte Vorschau noch korrekt berechnete Ladeslots zum Speichern.
+// Nutzt die im Formular AKTUELL eingetragenen (ggf. noch ungespeicherten) Werte, nicht die DB-Werte.
+// -------------------------
+if (isset($_POST['ladeDiagrammAjax'])) {
+    header('Content-Type: application/json; charset=utf-8');
+
+    $ld_pv_mode       = (int)($_POST['pv_mode'] ?? 0);
+    $ld_phases        = (int)($_POST['phases'] ?? 1);
+    $ld_amp_max       = (float)($_POST['amp_max'] ?? 16);
+    $ld_target_kwh    = (float)($_POST['target_kwh'] ?? 0);
+    $ld_lz_von        = (string)($_POST['ladezeit_von'] ?? '12:00');
+    $ld_lz_bis        = (string)($_POST['ladezeit_bis'] ?? '05:00');
+    $ld_preisgrenze   = (string)($_POST['ladepreis_grenze'] ?? '');
+
+    $ld_result = berechneNextTripLadeSlots(
+        $ld_pv_mode, $ld_phases, $ld_amp_max, $ld_target_kwh,
+        $ld_lz_von, $ld_lz_bis, $ld_preisgrenze
+    );
+
+    $ld_slots = $ld_result['slotZeiten'] ?? [];
+    $ld_fenster_ende = ($ld_pv_mode === 4) ? berechneLadefensterEnde($ld_lz_von, $ld_lz_bis) : null;
+
+    $ld_html = ($ld_pv_mode === 4)
+        ? generateLadeDiagramm(
+            $ld_pv_mode, $ld_phases, $ld_amp_max, $ld_target_kwh,
+            $ld_lz_von, $ld_lz_bis, $ld_preisgrenze, null, 96, $ld_result
+          )
+        : '';
+
+    echo json_encode([
+        'html'  => $ld_html,
+        'slots' => $ld_slots,
+        'fensterEnde' => $ld_fenster_ende,
+    ]);
+    exit;
+}
 
 // -------------------------
 // Helper Functions
@@ -136,32 +177,54 @@ if ($client_connected) {
 // -------------------------
 $EV_Reservierung = getSteuercodes('wallbox'); // Fester DB-Schlüssel
 
-// Bestehende ID=1 (bestehende Einstellungen)
+// ID=1 (Basis-Einstellungen)
 $pv_mode = $EV_Reservierung['1']['Res_Feld1'] ?? 0;
-$phases  = $EV_Reservierung['1']['Res_Feld2'] ?? 1;
-$amp_options = $EV_Reservierung['1']['Options'] ?? '6,16';
-$amp_parts = array_map('trim', explode(",", $amp_options));
-$amp_min = $amp_parts[0] ?? '6';
-$amp_max = $amp_parts[1] ?? '16';
+$nexttrip_fenster_ende = $EV_Reservierung['1']['Res_Feld2'] ?? '';        // Unix-Timestamp Fenster-Ende (NextTrip)
+$phases  = $EV_Reservierung['1']['Options'] ?? 1;
 
-// Neue Einstellungen ID=2
-$auto_sync_interval   = $EV_Reservierung['2']['Options']    ?? 20;        // AUTO_SYNC_INTERVAL
-$min_charge_duration_s = $EV_Reservierung['2']['Res_Feld2'] ?? 600;       // MIN_CHARGE_DURATION_S
+// Next-Trip-Fenster bereits abgelaufen? -> PV-Modus für Anzeige/weitere Logik wie "Aus"
+// behandeln (Dropdown, Next-Trip-Details, Diagramm) - das eigentliche Zurückschreiben in
+// die DB passiert unten per Auto-Save (siehe $nextTripAbgelaufen im <script>-Bereich).
+$nextTripAbgelaufen = (
+    (int)$pv_mode === 4
+    && $nexttrip_fenster_ende !== ''
+    && (int)$nexttrip_fenster_ende <= time()
+);
+if ($nextTripAbgelaufen) {
+    $pv_mode = 0;
+}
 
-// Neue Einstellungen ID=3
-$phase_change_confirm_s = $EV_Reservierung['3']['Options'] ?? 300;        // PHASE_CHANGE_CONFIRM_S
-$residualPower        = $EV_Reservierung['3']['Res_Feld1'] ?? 100;      // residualPower (Watt)
-$default_target_kwh   = $EV_Reservierung['3']['Res_Feld2'] ?? 0.0;        // DEFAULT_TARGET_KWH
+// ID=2 (Ampere-Grenzen)
+$amp_min = $EV_Reservierung['2']['Res_Feld1'] ?? 6;                       // A-MIN
+$amp_max = $EV_Reservierung['2']['Res_Feld2'] ?? 16;                      // A-MAX
 
-// Neue Einstellungen ID=4 (Ladezeiten)
-$ladezeit_von = $EV_Reservierung['4']['Res_Feld1'] ?? "12:00";
-$ladezeit_bis = $EV_Reservierung['4']['Res_Feld2'] ?? "05:00";
-$max_leistung_ha = $EV_Reservierung['4']['Options'] ?? "-0.1";
+// ID=3 (Lademenge / Ladepreisgrenze)
+$default_target_kwh = $EV_Reservierung['3']['Res_Feld1'] ?? 0.0;          // DEFAULT_TARGET_KWH (Lademenge)
+$ladepreis_grenze   = $EV_Reservierung['3']['Res_Feld2'] ?? '';           // Leer = keine Ladepreisgrenze aktiv
 
-// Neue Einstellungen ID=5 (Preise)
-$strompreis_fest    = $EV_Reservierung['5']['Res_Feld1'] ?? 0.30;
-$einspeise_verg     = $EV_Reservierung['5']['Res_Feld2'] ?? 0.07;
-$ladepreis_grenze   = $EV_Reservierung['5']['Options']   ?? '';   // Leer = keine Ladepreisgrenze aktiv
+// ID=4 (Zeitintervalle)
+$auto_sync_interval    = $EV_Reservierung['4']['Res_Feld1'] ?? 20;        // AUTO_SYNC_INTERVAL (Wallboxaktualisierung)
+$min_charge_duration_s = $EV_Reservierung['4']['Res_Feld2'] ?? 600;       // MIN_CHARGE_DURATION_S (Mindestladezeit)
+$phase_change_confirm_s = $EV_Reservierung['4']['Options'] ?? 300;        // PHASE_CHANGE_CONFIRM_S (Phasen-Delay)
+
+// ID=5 (Leistung)
+$residualPower   = $EV_Reservierung['5']['Res_Feld1'] ?? 100;             // residualPower (Watt, Verbleibende Leistung)
+$max_leistung_ha = $EV_Reservierung['5']['Res_Feld2'] ?? "-0.1";          // Höchster Akkuladewert kW
+
+// ID=6 (Ladezeit-Fenster)
+$ladezeit_von = $EV_Reservierung['6']['Res_Feld1'] ?? "12:00";
+$ladezeit_bis = $EV_Reservierung['6']['Res_Feld2'] ?? "05:00";
+
+// ID=7 (Preise)
+$strompreis_fest = $EV_Reservierung['7']['Res_Feld1'] ?? 0.30;
+$einspeise_verg  = $EV_Reservierung['7']['Res_Feld2'] ?? 0.07;
+
+// Bestehende Next-Trip-Ladeslots (Zeit="HHMM" = eigene Slot-Zeit, ID=Anfangszeit "HH:MM")
+// aus $EV_Reservierung (bereits oben per getSteuercodes('wallbox') geladen) extrahieren.
+// Diese werden beim Speichern unverändert mitgeschickt, solange NICHT neu mit
+// PV-Modus=NextTrip gespeichert wird - sonst würden sie durch den vollständigen
+// DELETE+REPLACE in SQL_speichern.php sonst verloren gehen.
+$bestehende_lade_slots = extrahiereLadeSlots($EV_Reservierung);
 
 // -------------------------
 // AJAX poll
@@ -389,6 +452,7 @@ p, label {
 } /* @media ENDE */
 
 </style>
+<?php echo generateLadeDiagrammCSS(); ?>
 <?php
   $current_url = urlencode($_SERVER['REQUEST_URI']);
   $hilfe_link = "index.php?tab=Hilfe&file=" . ($activeTab ?? basename(__FILE__, '.php'));
@@ -494,7 +558,7 @@ echo "</div>";
             echo htmlspecialchars(round($ph * $cl * 230 / 1000, 2));
             ?>kW</strong></p>
         <p>Ladedauer (Std:Min): <strong><?php echo gmdate("H:i", intval($meter_values['charging_duration_s'] ?? 0)); ?></strong></p>
-        <p>Geladene kWh: <strong><?php echo htmlspecialchars(round($meter_values['charged_energy_kwh'],1) ?? 0); ?></strong>
+        <p>Geladene kWh: <strong><?php echo htmlspecialchars(round($meter_values['charged_energy_kwh'] ?? 0, 1)); ?></strong>
             &nbsp; Soll: <?php echo htmlspecialchars($meter_values['target_energy_kwh'] ?? '—'); ?>
         <?php
         // Button nur anzeigen, wenn Server läuft und Client verbunden ist.
@@ -613,6 +677,39 @@ echo "</div>";
                 <span class="label-inline">Einspeisevergütung (€) (DB=<?php echo htmlspecialchars($einspeise_verg); ?>):</span>
                 <span class="input-inline"><input id="einspeiseVerg" type="number" step="0.001" value="<?php echo htmlspecialchars($einspeise_verg); ?>"></span>
             </div>
+
+            <div class="row" style="display:block;" id="ladeDiagrammContainer">
+            <?php if ((int)$pv_mode === 4): ?>
+                <?php
+                    $next_trip_result = berechneNextTripLadeSlots(
+                        (int)$pv_mode,
+                        (int)$phases,
+                        (float)$amp_max,
+                        (float)$default_target_kwh,
+                        $ladezeit_von,
+                        $ladezeit_bis,
+                        (string)$ladepreis_grenze
+                    );
+
+                    $neue_lade_slots = $next_trip_result['slotZeiten'] ?? [];
+
+                    echo generateLadeDiagramm(
+                        (int)$pv_mode,
+                        (int)$phases,
+                        (float)$amp_max,
+                        (float)$default_target_kwh,
+                        $ladezeit_von,
+                        $ladezeit_bis,
+                        (string)$ladepreis_grenze,
+                        null,
+                        96,
+                        $next_trip_result
+                    );
+                ?>
+            <?php else: ?>
+                <?php $neue_lade_slots = []; ?>
+            <?php endif; ?>
+            </div>
         </details>
         <hr>
         <details id="moreOptions">
@@ -655,6 +752,14 @@ echo "</div>";
 <script src="jquery.min.js"></script>
 
 <script>
+// Next-Trip-Ladeslots (ID=Anfangszeit "HH:MM", Zeit=eigene Slot-Zeit ohne Doppelpunkt "HHMM"):
+// - bestehendeLadeSlots: aktuell in der DB gespeicherte Slots (werden beim Speichern
+//   unverändert mitgeschickt, solange NICHT neu mit PV-Modus=NextTrip gespeichert wird)
+// - neueLadeSlots: frisch berechnete Slots auf Basis der aktuellen Next-Trip-Einstellungen
+//   (nur befüllt, wenn die Seite mit PV-Modus=NextTrip geladen wurde)
+var bestehendeLadeSlots = <?php echo json_encode(array_values($bestehende_lade_slots)); ?>;
+var neueLadeSlots = <?php echo json_encode(array_values($neue_lade_slots ?? [])); ?>;
+var fensterEndeBestehend = <?php echo json_encode($nexttrip_fenster_ende !== '' ? (int)$nexttrip_fenster_ende : ''); ?>;
 
 $(document).ready(function(){
 
@@ -806,10 +911,40 @@ function calculatePower() {
             // Nur wenn Modus "4" (NextTrip) gewählt ist, aufklappen
             if (selectedMode === '4') {
                 nextTripDetails.setAttribute('open', 'open');
+                refreshLadeDiagramm();
             } else {
                 nextTripDetails.removeAttribute('open');
+                neueLadeSlots = [];
             }
         }
+    }
+
+    // Berechnet das Ladediagramm live neu (aktuelle Formularwerte, nicht DB-Werte) und
+    // ersetzt den Container-Inhalt; aktualisiert neueLadeSlots für den Save-Handler.
+    function refreshLadeDiagramm() {
+        var container = document.getElementById('ladeDiagrammContainer');
+        $.ajax({
+            url: "<?php echo htmlspecialchars(basename(__FILE__)); ?>",
+            method: "post",
+            dataType: "json",
+            data: {
+                ladeDiagrammAjax: 1,
+                pv_mode: $('#pvMode').val(),
+                phases: $('#phases').val(),
+                amp_max: $('#ampMax').val(),
+                target_kwh: $('#defaultTargetKwh').val(),
+                ladezeit_von: $('#ladezeitVon').val(),
+                ladezeit_bis: $('#ladezeitBis').val(),
+                ladepreis_grenze: $('#ladePreisGrenzeKeinLimit').is(':checked') ? '' : $('#ladePreisGrenze').val()
+            },
+            success: function(response) {
+                neueLadeSlots = response.slots || [];
+                if (container) {
+                    container.innerHTML = response.html || '';
+                }
+            }
+            // Bei Fehler bewusst nichts überschreiben - alter Stand von neueLadeSlots/HTML bleibt erhalten
+        });
     }
 
     // Sofort beim Laden der Seite ausführen
@@ -818,6 +953,14 @@ function calculatePower() {
     // Bei jeder Änderung des PV-Modus-Dropdowns ausführen
     $('#pvMode').on('change', function() {
         updateNextTripVisibility();
+    });
+
+    // Bei Änderung der Next-Trip-relevanten Felder das Diagramm ebenfalls live neu berechnen,
+    // solange NextTrip aktuell ausgewählt ist (sonst wären gespeicherte Slots sonst veraltet)
+    $('#phases, #ampMax, #defaultTargetKwh, #ladezeitVon, #ladezeitBis, #ladePreisGrenze, #ladePreisGrenzeKeinLimit').on('change', function() {
+        if ($('#pvMode').val() === '4') {
+            refreshLadeDiagramm();
+        }
     });
     // =========================================================================
 
@@ -840,74 +983,142 @@ function calculatePower() {
     // ID 1: Basis-Einstellungen
     var pv_mode = $('#pvMode').val();
     var phases = $('#phases').val();
+
+    // ID 2: Ampere-Grenzen
     var amp_min = $('#ampMin').val();
     var amp_max = $('#ampMax').val();
 
-    // ID 2: Zeitintervalle
-    var auto_sync_interval = $('#autoSyncInterval').val();
-    var min_charge_dur = $('#minChargeDur').val();
-
-    // ID 3: Leistung & Target
-    var phase_change_confirm = $('#phaseChangeConfirm').val();
-    var residual_power = $('#residualPower').val();
+    // ID 3: Lademenge & Ladepreisgrenze
     var default_target_kwh = $('#defaultTargetKwh').val();
-
-    // ID 4: Next Trip Zeiten (aus Grafik)
-    var lz_von = $('#ladezeitVon').val();
-    var lz_bis = $('#ladezeitBis').val();
-    var max_leistung_ha = $('#MaxLeistHAkW').val();
-
-    // ID 5: Preise (aus Grafik)
-    var s_preis = $('#strompreisFest').val();
-    var e_verg  = $('#einspeiseVerg').val();
     var ladepreis_grenze = $('#ladePreisGrenzeKeinLimit').is(':checked') ? '' : $('#ladePreisGrenze').val();
 
-    // --- AJAX Request ---
-    $.ajax({
-        url: "SQL_speichern.php",
-        method: "post",
-        data: {
-            // Die Arrays müssen exakt gleich lang sein (5 Einträge)
-            ID:         ["1", "2", "3", "4", "5"],
-            Schluessel: ["wallbox", "wallbox", "wallbox", "wallbox", "wallbox"],
-            Tag_Zeit:   ["1", "2", "3", "4", "5"],
+    // ID 4: Zeitintervalle
+    var auto_sync_interval = $('#autoSyncInterval').val();
+    var min_charge_dur = $('#minChargeDur').val();
+    var phase_change_confirm = $('#phaseChangeConfirm').val();
 
-            // Zuordnung Res_Feld1
-            Res_Feld1: [
-                pv_mode,           // ID 1
-                0,                 // ID 2 (MIN_PHASE_DURATION_S entfernt)
-                residual_power,    // ID 3
-                lz_von,            // ID 4
-                s_preis            // ID 5
-            ],
+    // ID 5: Leistung
+    var residual_power = $('#residualPower').val();
+    var max_leistung_ha = $('#MaxLeistHAkW').val();
 
-            // Zuordnung Res_Feld2
-            Res_Feld2: [
-                phases,            // ID 1
-                min_charge_dur,    // ID 2
-                default_target_kwh,// ID 3
-                lz_bis,            // ID 4
-                e_verg             // ID 5
-            ],
+    // ID 6: Next Trip Zeiten (aus Grafik)
+    var lz_von = $('#ladezeitVon').val();
+    var lz_bis = $('#ladezeitBis').val();
 
-            // Zuordnung Options
-            Options: [
-                amp_min + "," + amp_max, // ID 1
-                auto_sync_interval,      // ID 2
-                phase_change_confirm,    // ID 3
-                max_leistung_ha,         // ID 4
-                ladepreis_grenze         // ID 5
-            ]
-        },
-        success: function(response){
-            // Seite neu laden (mit Scroll-Position-Erhalt durch deinen bestehenden Listener)
-            refreshData();
-        },
-        error: function(xhr, status, err) {
-            alert("Fehler beim Speichern in die Datenbank: " + err);
-        }
-     });
+    // ID 7: Preise (aus Grafik)
+    var s_preis = $('#strompreisFest').val();
+    var e_verg  = $('#einspeiseVerg').val();
+
+    // --- Next-Trip-Ladeslots (ID=Anfangszeit, Zeit=eigene Slot-Zeit "HHMM") anhängen ---
+    // SQL_speichern.php löscht + ersetzt ALLE "wallbox"-Datensätze bei jedem Speichern -
+    // daher müssen bestehende Ladeslots hier immer mitgeschickt werden, sonst gehen sie
+    // verloren. Nur bei PV-Modus=NextTrip (4) werden sie durch die frisch berechneten
+    // Slots überschrieben; sonst bleiben die zuletzt gespeicherten Slots unverändert
+    // erhalten (werden von ocpp.py bei anderem PV-Modus ohnehin nicht verwendet).
+    // --- Next-Trip-Ladeslots bestimmen und dann speichern ---
+    function speichereMitSlots(ladeSlots, fensterEnde) {
+        var saveID         = ["1", "2", "3", "4", "5", "6", "7"];
+        var saveSchluessel = ["wallbox", "wallbox", "wallbox", "wallbox", "wallbox", "wallbox", "wallbox"];
+        var saveTagZeit     = ["1", "2", "3", "4", "5", "6", "7"];
+        var saveRes_Feld1 = [
+            pv_mode,                 // ID 1: PV-Modus
+            amp_min,                 // ID 2: A-MIN
+            default_target_kwh,      // ID 3: Lademenge
+            auto_sync_interval,      // ID 4: Wallboxaktualisierung
+            residual_power,          // ID 5: Verbleibende Leistung
+            lz_von,                  // ID 6: Ladezeit-von
+            s_preis                  // ID 7: Strompreis-fest
+        ];
+        var saveRes_Feld2 = [
+            fensterEnde || "",  // ID 1: Unix-Timestamp Fenster-Ende (nur bei NextTrip gesetzt)
+            amp_max,            // ID 2: A-MAX
+            ladepreis_grenze,   // ID 3: LadePreisGrenze €
+            min_charge_dur,     // ID 4: Mindestladezeit
+            max_leistung_ha,    // ID 5: Max Akku-ladewert kW
+            lz_bis,             // ID 6: Ladezeit-bis
+            e_verg              // ID 7: Einspeisevergütung
+        ];
+        var saveOptions = [
+            phases,                 // ID 1: Phasen
+            "",                     // ID 2: unbenutzt
+            "",                     // ID 3: unbenutzt
+            phase_change_confirm,   // ID 4: Phasen-Delay
+            "",                     // ID 5: unbenutzt
+            "",                     // ID 6: unbenutzt
+            ""                      // ID 7: unbenutzt
+        ];
+
+        ladeSlots.forEach(function(zeit){
+            saveID.push(zeit);
+            saveSchluessel.push("wallbox");
+            saveTagZeit.push(zeit.replace(":", "")); // z.B. "05:15" -> "0515"
+            saveRes_Feld1.push("");
+            saveRes_Feld2.push("");
+            saveOptions.push("");
+        });
+
+        $.ajax({
+            url: "SQL_speichern.php",
+            method: "post",
+            data: {
+                ID:         saveID,
+                Schluessel: saveSchluessel,
+                Tag_Zeit:   saveTagZeit,
+                Res_Feld1:  saveRes_Feld1,
+                Res_Feld2:  saveRes_Feld2,
+                Options:    saveOptions
+            },
+            success: function(response){
+                // Seite neu laden (mit Scroll-Position-Erhalt durch deinen bestehenden Listener)
+                refreshData();
+            },
+            error: function(xhr, status, err) {
+                alert("Fehler beim Speichern in die Datenbank: " + err);
+            }
+        });
+    }
+
+    if (pv_mode === '4') {
+        // Formularwerte können sich seit dem letzten Diagramm-Refresh geändert haben (z.B.
+        // Ladezeit-Feld editiert, aber "change" noch nicht gefeuert) - daher hier nochmal
+        // synchron live neu berechnen, BEVOR gespeichert wird.
+        $.ajax({
+            url: "<?php echo htmlspecialchars(basename(__FILE__)); ?>",
+            method: "post",
+            dataType: "json",
+            data: {
+                ladeDiagrammAjax: 1,
+                pv_mode: pv_mode,
+                phases: phases,
+                amp_max: amp_max,
+                target_kwh: default_target_kwh,
+                ladezeit_von: lz_von,
+                ladezeit_bis: lz_bis,
+                ladepreis_grenze: ladepreis_grenze
+            },
+            success: function(resp) {
+                neueLadeSlots = resp.slots || [];
+                speichereMitSlots(neueLadeSlots, resp.fensterEnde);
+            },
+            error: function() {
+                // Fallback: letzten bekannten Stand verwenden statt Speichern ganz abzubrechen
+                speichereMitSlots(neueLadeSlots, fensterEndeBestehend);
+            }
+        });
+    } else {
+        // Kein NextTrip -> kein Fenster-Ende relevant, ID=1/Res_Feld2 leeren.
+        speichereMitSlots(bestehendeLadeSlots, "");
+    }
     });
+
+    <?php if ($nextTripAbgelaufen): ?>
+    // Next-Trip-Zeitfenster ist laut Server bereits abgelaufen (ID=1/Res_Feld2 <= jetzt).
+    // Automatisch wie ein manuelles Speichern mit PV-Modus=Aus auslösen, damit der
+    // zurückgefallene Zustand (PV-Modus=0, Fenster-Ende geleert) auch tatsächlich in der
+    // DB persistiert wird - #pvMode steht dank $pv_mode-Override serverseitig oben
+    // bereits auf "0". Nutzt exakt denselben, bereits getesteten Save-Pfad wie der Button.
+    $('#btnSave').trigger('click');
+    <?php endif; ?>
 });
 
   // Scroll-Position speichern
@@ -983,8 +1194,48 @@ setInterval(pollLoadbar, 10000);
 // Erster Poll nach 5s (initiales HTML ist bereits korrekt gerendert)
 setTimeout(pollLoadbar, 5000);
 
-// Full-Reload alle 60s (aktualisiert Konfigurationsfelder und Wallboxwerte)
-setInterval(refreshData, 60000);
+// Full-Reload alle 60s (aktualisiert Konfigurationsfelder und Wallboxwerte) -
+// wird ausgesetzt, solange ein Feld vom beim Laden angezeigten DB-Stand abweicht, damit
+// eine gerade getroffene Auswahl (z.B. PV-Modus-Wechsel) nicht durch den automatischen
+// Reload überschrieben wird. Wird ein Feld wieder auf seinen Original-Wert zurückgestellt,
+// greift der Reload sofort wieder ganz normal (kein Timer, direkter Wertvergleich).
+// Die Live-Ladeleistungs-Anzeige (pollLoadbar, alle 10s) ist davon NICHT betroffen -
+// die läuft unabhängig per eigenem AJAX-Polling weiter.
+var ueberwachteFelder = ['#pvMode', '#phases', '#ampMin', '#ampMax', '#autoSyncInterval',
+    '#minChargeDur', '#phaseChangeConfirm', '#residualPower', '#defaultTargetKwh',
+    '#ladezeitVon', '#ladezeitBis', '#MaxLeistHAkW', '#strompreisFest', '#einspeiseVerg',
+    '#ladePreisGrenze', '#ladePreisGrenzeKeinLimit'];
+var originalFeldWerte = {};
+
+function feldWert($el) {
+    return $el.is(':checkbox') ? $el.is(':checked') : $el.val();
+}
+
+$(document).ready(function(){
+    ueberwachteFelder.forEach(function(sel){
+        var $el = $(sel);
+        if ($el.length) {
+            originalFeldWerte[sel] = feldWert($el);
+        }
+    });
+});
+
+function hatUngespeicherteAenderung() {
+    return ueberwachteFelder.some(function(sel){
+        var $el = $(sel);
+        if (!$el.length || !(sel in originalFeldWerte)) return false;
+        return feldWert($el) !== originalFeldWerte[sel];
+    });
+}
+
+function autoRefreshData() {
+    if (hatUngespeicherteAenderung()) {
+        // Aktueller Wert weicht vom DB-Stand ab - Reload überspringen, in 60s erneut prüfen
+        return;
+    }
+    refreshData();
+}
+setInterval(autoRefreshData, 60000);
 
 // ===================================
 // Zähler-Reset Logik 

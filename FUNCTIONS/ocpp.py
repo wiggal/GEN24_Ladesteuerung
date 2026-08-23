@@ -357,7 +357,7 @@ class OCPPManager:
         self.wb_amp = self.wb_amp_max
         self.wb_is_pv_controlled = False
 
-        # Ladepreisgrenze (DB ID=5, Options) und zuletzt gelesener Strompreis
+        # Ladepreisgrenze (DB ID=3, Res_Feld2) und zuletzt gelesener Strompreis
         # (Bruttopreis der aktuellen Viertelstunde, PV_Daten.sqlite -> strompreise)
         self.wb_ladepreis_grenze: Optional[float] = None  # None = keine Preisgrenze aktiv
         self.current_strompreis: Optional[float] = None
@@ -369,9 +369,22 @@ class OCPPManager:
         self.max_leistung_ha = -100
         self.DEFAULT_TARGET_KWH = 0.0
 
-        # NextTrip (PV-Mode 4) Ladezeiten aus DB (ID=4)
+        # NextTrip (PV-Mode 4) Ladezeiten aus DB (ID=6)
         self.wb_ladezeit_von: str = "22:00"   # Res_Feld1
         self.wb_ladezeit_bis: str = "06:00"   # Res_Feld2
+
+        # NextTrip (PV-Mode 4): von 3_tab_wallbox.php berechnete/gespeicherte Ladeslots
+        # (Schluessel='wallbox', Zeit=eigene Slot-Zeit "HHMM", ID=Anfangszeit "HH:MM").
+        # Nur innerhalb dieser Slots wird im PV-Mode 4 geladen - Extraktion siehe
+        # refresh_wallbox_settings().
+        self.wb_nexttrip_slots: set = set()
+
+        # NextTrip (PV-Mode 4): Unix-Timestamp, an dem das zuletzt gespeicherte Ladezeit-
+        # Fenster endet (DB ID=1/Res_Feld2, von 3_tab_wallbox.php beim Speichern berechnet).
+        # Ist dieser Zeitpunkt überschritten, fällt der PV-Modus automatisch auf "Aus" (0.0)
+        # zurück statt das Fenster wie ein normales Ladezeit-Fenster täglich zu wiederholen -
+        # siehe refresh_wallbox_settings(). None = kein Fenster-Ende hinterlegt.
+        self.wb_nexttrip_fenster_ende: Optional[float] = None
 
         # Inverter / energy cache (updated each autosync iteration)
         self.Netzbezug = 0.0
@@ -461,62 +474,114 @@ class OCPPManager:
             amp_min_val = getattr(self, 'wb_amp_min', 6.0)
             amp_max_val = getattr(self, 'wb_amp_max', 16.0)
             try:
+                # ID=1: PV-Modus (Res_Feld1), NextTrip-Fenster-Ende (Res_Feld2), Phasen (Options)
                 row = data.get('1') or data.get(1)
                 if row:
-                    parts = (row.get('Options') or "").split(',')
-                    try:
-                        amp_min_val = max(6.0, float(parts[0]))
-                    except Exception:
-                        amp_min_val = getattr(self, 'wb_amp_min', 6.0)
-                    try:
-                        amp_max_val = min(16.0, max(amp_min_val, float(parts[1])))
-                    except Exception:
-                        amp_max_val = getattr(self, 'wb_amp_max', 16.0)
-                    self.wb_phases = str(row.get('Res_Feld2', self.wb_phases))
                     try:
                         self.wb_pv_mode = float(row.get('Res_Feld1', self.wb_pv_mode))
                     except Exception:
                         pass
-                    self.wb_amp_max, self.wb_amp_min = amp_max_val, amp_min_val
+                    self.wb_phases = str(row.get('Options', self.wb_phases))
+                    # NextTrip-Fenster-Ende (Unix-Timestamp) - von 3_tab_wallbox.php beim
+                    # Speichern mit PV-Modus=NextTrip berechnet und abgelegt; leer/"0", wenn
+                    # kein NextTrip-Fenster aktiv gespeichert wurde.
+                    try:
+                        raw_ende = row.get('Res_Feld2')
+                        raw_ende_str = str(raw_ende).strip() if raw_ende is not None else ""
+                        self.wb_nexttrip_fenster_ende = float(raw_ende_str) if raw_ende_str not in ("", "0") else None
+                    except Exception:
+                        self.wb_nexttrip_fenster_ende = None
+                    # Fenster bereits abgelaufen? -> PV-Modus wie "Aus" behandeln, statt das
+                    # zuletzt gespeicherte NextTrip-Fenster täglich zu wiederholen. Muss NACH
+                    # dem Parsen von self.wb_pv_mode (oben, selbe Zeile ID=1) passieren, damit
+                    # der Rest von refresh_wallbox_settings() sowie compute_limits_from_global()
+                    # bereits den korrigierten Wert sehen.
+                    if (
+                        float(self.wb_pv_mode) == 4.0
+                        and self.wb_nexttrip_fenster_ende is not None
+                        and datetime.now(timezone.utc).timestamp() >= self.wb_nexttrip_fenster_ende
+                    ):
+                        cinfo(
+                            f"NextTrip-Ladezeit-Fenster abgelaufen "
+                            f"(Ende={self.wb_nexttrip_fenster_ende}) -> PV-Modus automatisch AUS"
+                        )
+                        self.wb_pv_mode = 0.0
                 else:
                     cwarn("DB-Zeile ID=1 (Wallbox-Grundkonfig) nicht gefunden; verwende bisherige Werte")
             except Exception:
                 cwarn("Fehler beim Parsen DB ID=1")
 
             try:
+                # ID=2: Ampere-Grenzen (Res_Feld1 = A-MIN, Res_Feld2 = A-MAX)
                 row2 = data.get('2') or data.get(2)
                 if row2:
                     try:
-                        self.MIN_CHARGE_DURATION_S = int(float(row2.get('Res_Feld2', self.MIN_CHARGE_DURATION_S)))
+                        amp_min_val = max(6.0, float(row2.get('Res_Feld1', amp_min_val)))
+                    except Exception:
+                        amp_min_val = getattr(self, 'wb_amp_min', 6.0)
+                    try:
+                        amp_max_val = min(16.0, max(amp_min_val, float(row2.get('Res_Feld2', amp_max_val))))
+                    except Exception:
+                        amp_max_val = getattr(self, 'wb_amp_max', 16.0)
+                    self.wb_amp_max, self.wb_amp_min = amp_max_val, amp_min_val
+
+                # ID=3: Lademenge (Res_Feld1), Ladepreisgrenze (Res_Feld2)
+                row3 = data.get('3') or data.get(3)
+                if row3:
+                    try:
+                        self.DEFAULT_TARGET_KWH = float(row3.get('Res_Feld1', self.DEFAULT_TARGET_KWH))
                     except Exception:
                         pass
                     try:
-                        opt = row2.get('Options')
+                        raw_grenze = row3.get('Res_Feld2')
+                        if raw_grenze is not None and str(raw_grenze).strip() != '':
+                            self.wb_ladepreis_grenze = float(raw_grenze)
+                        else:
+                            self.wb_ladepreis_grenze = None
+                    except Exception:
+                        cwarn("Fehler beim Parsen der Ladepreisgrenze (DB ID=3 Res_Feld2)")
+
+                # ID=4: Zeitintervalle (Res_Feld1 = Wallboxaktualisierung, Res_Feld2 =
+                # Mindestladezeit, Options = Phasen-Delay)
+                row4 = data.get('4') or data.get(4)
+                if row4:
+                    try:
+                        opt = row4.get('Res_Feld1')
                         if opt is not None and str(opt).strip():
                             self.AUTO_SYNC_INTERVAL = int(float(opt))
                     except Exception:
                         pass
-                row3 = data.get('3') or data.get(3)
-                if row3:
                     try:
-                        self.residualPower = float(row3.get('Res_Feld1', self.residualPower))
+                        self.MIN_CHARGE_DURATION_S = int(float(row4.get('Res_Feld2', self.MIN_CHARGE_DURATION_S)))
                     except Exception:
                         pass
                     try:
-                        self.DEFAULT_TARGET_KWH = float(row3.get('Res_Feld2', self.DEFAULT_TARGET_KWH))
+                        opt4 = row4.get('Options')
+                        if opt4 is not None and str(opt4).strip():
+                            self.PHASE_CHANGE_CONFIRM_S = int(float(opt4))
+                    except Exception:
+                        pass
+
+                # ID=5: Leistung (Res_Feld1 = Verbleibende Leistung, Res_Feld2 = Höchster
+                # Akkuladewert kW)
+                row5 = data.get('5') or data.get(5)
+                if row5:
+                    try:
+                        self.residualPower = float(row5.get('Res_Feld1', self.residualPower))
                     except Exception:
                         pass
                     try:
-                        opt3 = row3.get('Options')
-                        if opt3 is not None and str(opt3).strip():
-                            self.PHASE_CHANGE_CONFIRM_S = int(float(opt3))
+                        raw_ha = row5.get('Res_Feld2')
+                        if raw_ha is not None:
+                            self.max_leistung_ha = float(raw_ha)*-1000
                     except Exception:
                         pass
-                # ID=4: NextTrip Ladezeiten
-                row4 = data.get('4') or data.get(4)
-                if row4:
+
+                # ID=6: NextTrip Ladezeiten (Res_Feld1 = von, Res_Feld2 = bis)
+                row6 = data.get('6') or data.get(6)
+                if row6:
                     try:
-                        raw_v = row4.get('Res_Feld1')
+                        raw_v = row6.get('Res_Feld1')
                         if raw_v is not None:
                             v = str(raw_v).strip()
                             if v:
@@ -524,34 +589,39 @@ class OCPPManager:
                     except Exception:
                         pass
                     try:
-                        raw_b = row4.get('Res_Feld2')
+                        raw_b = row6.get('Res_Feld2')
                         if raw_b is not None:
                             b = str(raw_b).strip()
                             if b:
                                 self.wb_ladezeit_bis = b
                     except Exception:
                         pass
-                    try:
-                        raw_ha = row4.get('Options')
-                        if raw_ha is not None:
-                            self.max_leistung_ha = float(raw_ha)*-1000
-                    except Exception:
-                        pass
-                # ID=5: Preise / Ladepreisgrenze (Options)
-                row5 = data.get('5') or data.get(5)
-                if row5:
-                    try:
-                        raw_grenze = row5.get('Options')
-                        if raw_grenze is not None and str(raw_grenze).strip() != '':
-                            self.wb_ladepreis_grenze = float(raw_grenze)
-                        else:
-                            self.wb_ladepreis_grenze = None
-                    except Exception:
-                        cwarn("Fehler beim Parsen der Ladepreisgrenze (DB ID=5 Options)")
+
+                # ID=7: Preise (Res_Feld1 = Strompreis-fest, Res_Feld2 = Einspeisevergütung)
+                # -> nur relevant, falls hier später zusätzliche Felder ausgewertet werden;
+                # aktuell liest ocpp.py Strompreis-fest/Einspeisevergütung nicht selbst aus.
+
                 # update autosync interval
                 self.auto_sync_interval = getattr(self, 'AUTO_SYNC_INTERVAL', self.auto_sync_interval)
             except Exception:
-                cwarn("Fehler beim Parsen DB ID=2/3")
+                cwarn("Fehler beim Parsen DB ID=2-6")
+
+            # NextTrip: gespeicherte Ladeslots aus dem bereits gelesenen 'data'-Dict
+            # extrahieren - keine eigene DB-Abfrage mehr nötig. Die Ladeslot-Zeilen
+            # speichern ihre eigene (eindeutige) Anfangszeit im Feld 'Zeit' im Format
+            # "HHMM" (z.B. "0515" für 05:15), wodurch getSQLsteuerdaten() (das nach
+            # 'Zeit' schlüsselt) jeden Slot unter seinem eigenen Key einordnet - anders
+            # als früher mit dem gemeinsamen Marker "6", der alle Slot-Zeilen kollidieren
+            # ließ. Basis-Konfigurationszeilen (ID 1-7) haben 1-stellige Zeit-Werte
+            # "1".."7" und werden über das Muster "genau 4 Ziffern" ausgeschlossen.
+            try:
+                self.wb_nexttrip_slots = {
+                    f"{k[0:2]}:{k[2:4]}"
+                    for k in data.keys()
+                    if isinstance(k, str) and len(k) == 4 and k.isdigit()
+                }
+            except Exception:
+                cwarn("NextTrip: Fehler beim Extrahieren der gespeicherten Ladeslots")
             if cp_id:
                 cinfo(
                     f"[{'..' + cp_id[-4:]}] "
@@ -562,6 +632,7 @@ class OCPPManager:
                     f"{amp_max_val}, "
                     f"{self.DEFAULT_TARGET_KWH}, "
                     f"{self.wb_ladezeit_von}–{self.wb_ladezeit_bis}, "
+                    f"NextTrip-Ende={self.wb_nexttrip_fenster_ende}, "
                     f"{self.AUTO_SYNC_INTERVAL}, "
                     f"{self.MIN_CHARGE_DURATION_S}, "
                     f"{self.PHASE_CHANGE_CONFIRM_S}, "
@@ -608,6 +679,10 @@ class OCPPManager:
         Gibt True zurück, wenn die aktuelle Uhrzeit im Zeitfenster
         [wb_ladezeit_von .. wb_ladezeit_bis] liegt.
         Unterstützt Fenster über Mitternacht, z.B. 22:00 – 06:00.
+
+        HINWEIS: Wird seit Umstellung auf slot-basiertes NextTrip-Laden (siehe
+        _is_in_nexttrip_ladeslot()) nicht mehr für die eigentliche Ladeentscheidung genutzt,
+        bleibt aber als reine Fenster-Prüfung erhalten (z.B. für Logging/Diagnose).
         """
         try:
             now_t = datetime.now().time().replace(second=0, microsecond=0)
@@ -626,6 +701,19 @@ class OCPPManager:
         except Exception:
             cwarn(f"NextTrip: Ungültige Zeitangabe von='{self.wb_ladezeit_von}' bis='{self.wb_ladezeit_bis}'")
             return False
+
+    def _is_in_nexttrip_ladeslot(self) -> bool:
+        """
+        Gibt True zurück, wenn der aktuelle Zeitpunkt (auf die laufende Viertelstunde
+        abgerundet, z.B. 05:17 -> "05:15") einer der in self.wb_nexttrip_slots gespeicherten
+        Next-Trip-Ladeslots entspricht. self.wb_nexttrip_slots wird in
+        refresh_wallbox_settings() aus dem regulären getSQLsteuerdaten('wallbox', ...)-Ergebnis
+        extrahiert (Zeit-Feld der Slot-Zeilen im Format "HHMM").
+        """
+        now = datetime.now()
+        slot_minute = (now.minute // 15) * 15
+        slot_str = now.replace(minute=slot_minute, second=0, microsecond=0).strftime("%H:%M")
+        return slot_str in self.wb_nexttrip_slots
 
 
     def compute_limits_from_global(self, cp_id: Optional[str] = None) -> Tuple[float, str, float, bool, float]:
@@ -727,28 +815,30 @@ class OCPPManager:
             amp = max(self.wb_amp_min or self.MIN_WB_AMP, min(self.wb_amp_max, self.MAX_WB_AMP))
 
         elif float(self.wb_pv_mode) == 4.0:
-            # PV-Mode = 4  -> NextTrip: Laden im Zeitfenster mit Max-Leistung bis Lademenge erreicht
+            # PV-Mode = 4 -> NextTrip: Laden NUR in den von 3_tab_wallbox.php berechneten
+            # und gespeicherten Ladeslots (Zeit='6'), mit der eingestellten Max-Leistung.
+            # Kein durchgehendes Laden mehr über das ganze Ladezeit-Fenster.
             is_pv_controlled = False
             if self.wb_phases == "0":
                 phases_to_use = "3"
             else:
                 phases_to_use = self.wb_phases or "3"
-            if self._is_in_nexttrip_window():
+            if self._is_in_nexttrip_ladeslot():
                 amp = max(self.wb_amp_min or self.MIN_WB_AMP, min(self.wb_amp_max, self.MAX_WB_AMP))
                 cinfo(
-                    f"NextTrip: im Zeitfenster {self.wb_ladezeit_von}–{self.wb_ladezeit_bis} "
-                    f"→ {amp}A / {phases_to_use}P"
+                    f"NextTrip: aktueller Slot ist ein gespeicherter Ladeslot "
+                    f"({len(self.wb_nexttrip_slots)} Slots gespeichert) → {amp}A / {phases_to_use}P"
                 )
             else:
                 amp = 0.0
                 cinfo(
-                    f"NextTrip: außerhalb Zeitfenster {self.wb_ladezeit_von}–{self.wb_ladezeit_bis} "
-                    f"→ kein Laden"
+                    f"NextTrip: aktueller Slot ist KEIN gespeicherter Ladeslot "
+                    f"({len(self.wb_nexttrip_slots)} Slots gespeichert) → kein Laden"
                 )
 
         # --- Ladepreisgrenze ---
         # Nur laden, wenn der aktuelle Bruttopreis (PV_Daten.sqlite -> strompreise) unter der
-        # konfigurierten Grenze (DB ID=5, Options) liegt. Gilt für alle PV-Modi gleichermaßen.
+        # konfigurierten Grenze (DB ID=3, Res_Feld2) liegt. Gilt für alle PV-Modi gleichermaßen.
         if self.wb_ladepreis_grenze is not None:
             if self.current_strompreis is not None:
                 if self.current_strompreis >= self.wb_ladepreis_grenze:
