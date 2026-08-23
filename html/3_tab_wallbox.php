@@ -43,13 +43,17 @@ if (isset($_POST['ladeDiagrammAjax'])) {
         $ld_lz_von, $ld_lz_bis, $ld_preisgrenze
     );
 
+    // Tatsächlich gespeicherte DB-Slots zum Vergleich mit anzeigen (unabhängig von den ggf.
+    // noch ungespeicherten Formularwerten oben) - s. generateLadeDiagramm() Parameter dbSlots.
+    $ld_db_slots = extrahiereLadeSlots(getSteuercodes('wallbox'));
+
     $ld_slots = nextTripTopKeysToZeiten($ld_result);
     $ld_fenster_ende = ($ld_pv_mode === 4) ? berechneLadefensterEnde($ld_lz_von, $ld_lz_bis) : null;
 
     $ld_html = ($ld_pv_mode === 4)
         ? generateLadeDiagramm(
             $ld_pv_mode, $ld_phases, $ld_amp_max, $ld_target_kwh,
-            $ld_lz_von, $ld_lz_bis, $ld_preisgrenze, null, 96, $ld_result
+            $ld_lz_von, $ld_lz_bis, $ld_preisgrenze, null, 96, $ld_result, $ld_db_slots
           )
         : '';
 
@@ -703,7 +707,8 @@ echo "</div>";
                         (string)$ladepreis_grenze,
                         null,
                         96,
-                        $next_trip_result
+                        $next_trip_result,
+                        $bestehende_lade_slots
                     );
                 ?>
             <?php else: ?>

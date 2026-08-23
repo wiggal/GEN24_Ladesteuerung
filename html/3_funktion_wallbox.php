@@ -170,6 +170,23 @@ function generateLadeDiagrammCSS(): string
         .chart-area .column.cheap {
             background-color: #2ecc71;
         }
+        /* Zusätzliche, von der Live-Berechnung unabhängige Kennzeichnung: Slot ist
+           tatsächlich in der DB gespeichert. Statt Rahmen (frisst bei schmalen Balken auf
+           Mobile die komplette Breite) wird die UNTERE Hälfte blau eingefärbt - das braucht
+           keine Breite, nur Höhe, und bleibt daher auch bei sehr schmalen Balken erkennbar.
+           Je nach Status (cheap/im-fenster/default) behält die obere Hälfte ihre Farbe. */
+        .chart-area .column.db-slot {
+            background: linear-gradient(to bottom, #D1D1D1 0%, #D1D1D1 50%, #2980b9 50%, #2980b9 100%);
+        }
+        .chart-area .column.im-fenster.db-slot {
+            background: linear-gradient(to bottom, #e74c3c 0%, #e74c3c 50%, #2980b9 50%, #2980b9 100%);
+        }
+        .chart-area .column.cheap.db-slot {
+            background: linear-gradient(to bottom, #2ecc71 0%, #2ecc71 50%, #2980b9 50%, #2980b9 100%);
+        }
+        .legend-item .color-box.db-slot-legend {
+            background: linear-gradient(to bottom, #D1D1D1 0%, #D1D1D1 50%, #2980b9 50%, #2980b9 100%);
+        }
         .chart-area .column:hover {
             opacity: 0.8;
             transform: scaleY(1.02);
@@ -224,7 +241,9 @@ function generateLadeDiagrammCSS(): string
         .chart-container .legend {
             margin-top: 40px;
             display: flex;
-            gap: 20px;
+            flex-wrap: wrap;
+            row-gap: 10px;
+            column-gap: 20px;
             font-size: 0.9rem;
         }
         .chart-container .legend-item { display: flex; align-items: center; gap: 8px; }
@@ -567,7 +586,8 @@ function generateLadeDiagramm(
     string $ladepreisGrenze = '',
     ?string $dbPath = null,
     int $blockAnzahl = 96,
-    ?array $presetResult = null // Neu: Nimmt ein bereits berechnetes Ergebnis entgegen
+    ?array $presetResult = null, // Neu: Nimmt ein bereits berechnetes Ergebnis entgegen
+    array $dbSlots = [] // Tatsächlich in der DB gespeicherte Ladeslots ("H:i"), s. extrahiereLadeSlots()
  ): string {
     // Falls das Ergebnis bereits vorliegt, nutze es. Ansonsten führe die Berechnung durch.
     $result = $presetResult ?? berechneNextTripLadeSlots(
@@ -587,6 +607,10 @@ function generateLadeDiagramm(
     $erreichteMenge = $result['erreichteMenge'];
     $topKeys = $result['topKeys'];
     $hinweis = $result['hinweis'];
+
+    // Schneller Lookup, ob eine Slot-Uhrzeit tatsächlich in der DB gespeichert ist -
+    // unabhängig davon, ob die aktuelle Live-Berechnung (topKeys) sie (noch) auswählt.
+    $dbSlotSet = array_flip($dbSlots);
 
     $maxPreis = max($anzeigeDaten);
     if ($maxPreis <= 0.0) {
@@ -610,14 +634,20 @@ function generateLadeDiagramm(
             $classCheap = '';
         }
 
+        // Zusätzliche, von der Live-Berechnung UNABHÄNGIGE Kennzeichnung: Ist dieser Slot
+        // tatsächlich in der DB gespeichert? (z.B. nach Änderungen am Formular, die noch
+        // nicht gespeichert wurden, kann das von "cheap" abweichen.)
+        $dbClass = isset($dbSlotSet[$zeitString]) ? ' db-slot' : '';
+
         $hoehe = max(($preis / $maxPreis) * 100, 3);
         $preisFormatiert = number_format($preis, 2, ',', '.');
         $leftPercent = $offset * $slotBreitePercent;
+        $dbHinweis = $dbClass !== '' ? ' [in DB gespeichert]' : '';
 
         // Balken werden absolut/prozentual positioniert (statt Flex+Gap), damit sie exakt
         // auf demselben Koordinatensystem wie die Zeitmarken im x-axis-Bereich liegen -
         // sonst laufen beide auf schmalen (mobilen) Bildschirmen auseinander.
-        $columns .= "<div class=\"column {$classCheap}\" style=\"left: {$leftPercent}%; width: calc({$slotBreitePercent}% - 1px); height: {$hoehe}%;\" data-label=\"{$zeitString} Uhr: {$preisFormatiert} ct\"></div>";
+        $columns .= "<div class=\"column {$classCheap}{$dbClass}\" style=\"left: {$leftPercent}%; width: calc({$slotBreitePercent}% - 1px); height: {$hoehe}%;\" data-label=\"{$zeitString} Uhr: {$preisFormatiert} ct{$dbHinweis}\"></div>";
 
         if (date('i', $currentSlotTime) === '00') {
             $stunde = (int)date('H', $currentSlotTime);
@@ -654,6 +684,7 @@ function generateLadeDiagramm(
             <div class="legend-item"><div class="color-box" style="background: #D1D1D1;"></div> Außerhalb Zeitfenster</div>
             <div class="legend-item"><div class="color-box" style="background: #e74c3c;"></div> Ungenutzter Ladeslot</div>
             <div class="legend-item"><div class="color-box" style="background: #2ecc71;"></div> Genutzter Ladeslot</div>
+            <div class="legend-item"><div class="color-box db-slot-legend"></div> Ladeslot in DB</div>
         </div>
         {$hinweis}
     </div>
