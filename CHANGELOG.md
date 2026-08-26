@@ -1,4 +1,4 @@
-**[0.43.3] – 2026-XX-XX**  
+**[0.43.3] – 2026-08-26**  
 - Wallbox-TAB: NextTrip lädt nun mit den günstigsten Strompreisen.  
   Werte in Wallbox-TAB evtl. neu erfassen wegen DB-Neudesign.  
 

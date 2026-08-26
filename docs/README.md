@@ -29,7 +29,7 @@
 
 ![new](pics/new.png)  
 Ab Version: **0.43.3**  
-- 🚘 Steuerung des Wattpiloten, bei NextTrip nun nach Strompreis.
+- 🚘 Wattpilot-Steuerung im NextTrip nun auch nach Strompreis.
 
 Ab Version: **0.43.0**  
 - Ladesteuerung abhängig vom Strompreis, z.B. nur bei negativen Strompreisen laden.  
