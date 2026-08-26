@@ -773,11 +773,26 @@ $(document).ready(function(){
         // Entferne alles außer Zahlen und Doppelpunkt
         var clean = inputVal.replace(/[^0-9:]/g, '');
 
-        // Falls nur Zahlen eingegeben wurden (z.B. 1200 -> 12:00)
-        if (clean.length === 4 && clean.indexOf(':') === -1) {
-            clean = clean.substr(0, 2) + ':' + clean.substr(2, 2);
+        // 1. Punkte, Kommas und Bindestriche in Doppelpunkte umwandeln, Leerzeichen entfernen
+        var clean = inputVal.toString().trim()
+            .replace(/[.,-]/g, ':')
+            .replace(/[^0-9:]/g, '');
+
+        // 2. Falls KEIN Doppelpunkt eingegeben wurde (z.B. 9, 14, 930, 1430)
+        if (clean.indexOf(':') === -1) {
+            if (clean.length === 1 || clean.length === 2) {
+                // "9" -> "9:00", "14" -> "14:00"
+                clean = clean + ':00';
+            } else if (clean.length === 3) {
+                // "930" -> "09:30"
+                clean = '0' + clean.substr(0, 1) + ':' + clean.substr(1, 2);
+            } else if (clean.length === 4) {
+                // "1430" -> "14:30"
+                clean = clean.substr(0, 2) + ':' + clean.substr(2, 2);
+            }
         }
 
+        // 3. Aufteilen in Stunden und Minuten
         var parts = clean.split(':');
         var h = parseInt(parts[0], 10) || 0;
         var m = parseInt(parts[1], 10) || 0;
@@ -928,6 +943,13 @@ function calculatePower() {
     // ersetzt den Container-Inhalt; aktualisiert neueLadeSlots für den Save-Handler.
     function refreshLadeDiagramm() {
         var container = document.getElementById('ladeDiagrammContainer');
+
+        // Werte direkt vor dem Senden normieren
+        var lzVon = formatAndRoundTime($('#ladezeitVon').val());
+        var lzBis = formatAndRoundTime($('#ladezeitBis').val());
+        $('#ladezeitVon').val(lzVon);
+        $('#ladezeitBis').val(lzBis);
+
         $.ajax({
             url: "<?php echo htmlspecialchars(basename(__FILE__)); ?>",
             method: "post",
