@@ -197,6 +197,7 @@ class progladewert:
                 aktuellerLadewert = self.MaxLadung
                 LadewertGrund = "Größter Prognosewert " + str(groestePrognose) + " ist kleiner als GrenzwertGroestePrognose " + str(GrenzwertGroestePrognose)
 
+            aktuellerLadewert_Prognose = aktuellerLadewert
             # Hier noch pruefen ob gesamte Prognose minus Grundlastsumme noch für Akkuladung reicht.
             # Schaltverzögerung (Hysterse)
             if (alterLadewert == self.MaxLadung):
@@ -223,7 +224,7 @@ class progladewert:
                     MaxLadung
                 )
     
-            return int(Pro_Ertrag_Tag), Grundlast_Sum, aktuellerLadewert, LadewertGrund
+            return int(Pro_Ertrag_Tag), Grundlast_Sum, aktuellerLadewert, LadewertGrund, aktuellerLadewert_Prognose
     
     def getLadungEinspeisegrenzeVerguetung(self, aktuellerLadewert, LadewertGrund, BattVollUm, strompreis_einspeisegrenze, MaxLadung):
 

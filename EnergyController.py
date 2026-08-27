@@ -200,6 +200,7 @@ if __name__ == '__main__':
                     Grundlast_Summe = PrognoseUNDUeberschuss[1]
                     aktuellerLadewert = PrognoseUNDUeberschuss[2]
                     LadewertGrund = PrognoseUNDUeberschuss[3] + Ladelimit_80
+                    aktuellerLadewert_Prognose = PrognoseUNDUeberschuss[4]
                     # Ladewert auf Schreibgrenzen prüfen
                     WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
 
@@ -317,6 +318,8 @@ if __name__ == '__main__':
                             print(f"GesamtverbrauchHaus/Watt:    {GesamtverbrauchHaus}")
                             print(f"aktuelleBattKapazität/Watt:  {BattKapaWatt_akt}")
                             print(f"Batteriestatus (MaxVolt):    {BattStatusProz}%({API['maxvolt']}V)")
+                            if (aktuellerLadewert_Prognose != aktuellerLadewert):
+                                print(f"Ladewert nach Prognoseber.:  {aktuellerLadewert_Prognose}")
                             print(f"LadewertGrund:               {LadewertGrund}")
                             print(f"Bisheriger Ladewert/Watt:    {alterLadewert}")
                             print(f"Neuer Ladewert/Watt({BatSparFaktor: .1f}):   {aktuellerLadewert}")

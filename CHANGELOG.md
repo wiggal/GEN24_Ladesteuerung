@@ -1,5 +1,5 @@
 **[0.43.4] – 2026-XX-XX**  
-- Ladewert nach Prognoseberechnung immer ausgeben.  
+- Prognoseladewert bei Unterschied zu Ladewert neu ausgeben.  
 
 **[0.43.3] – 2026-08-26**  
 - Wallbox-TAB: NextTrip lädt nun mit den günstigsten Strompreisen.  
