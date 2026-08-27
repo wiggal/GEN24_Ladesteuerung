@@ -672,7 +672,7 @@ function generateLadeDiagramm(
 
     $html = <<<HTML
     <div class="chart-container">
-        <h2>Strompreis-Vorschau (nächste 24h)</h2>
+        <h2>Strompreis- und Ladeslot-Anzeige</h2>
         {$lademengeZeile}
         <div class="chart-area">
             {$columns}
