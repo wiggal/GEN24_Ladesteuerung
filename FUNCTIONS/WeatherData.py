@@ -5,7 +5,6 @@ import json
 import configparser
 import sqlite3
 from collections import defaultdict
-from statistics import median, mean
 import FUNCTIONS.functions
 
 basics = FUNCTIONS.functions.basics()
@@ -36,12 +35,16 @@ class WeatherData:
                     Zeitpunkt TEXT,
                     Quelle TEXT,
                     Prognose_W INTEGER,
-                    Gewicht INTEGER,
+                    Gewicht REAL,
                     Options TEXT,
                     UNIQUE(Zeitpunkt, Quelle)
                 );
             """)
         print("DB",path,"wurde erstellt.")
+        # Hinweis: bei bereits bestehenden DBs mit "Gewicht INTEGER" ist keine
+        # Migration noetig - SQLite erzwingt Spaltentypen nicht strikt (type
+        # affinity), Fliesskommawerte wie 1.35 werden trotzdem korrekt als
+        # REAL gespeichert und gelesen.
 
 
     def apply_minute_offset(self, data, offset_minutes):
@@ -237,6 +240,33 @@ class WeatherData:
 
         return(Produktion)
 
+    @staticmethod
+    def _gewichteter_mittelwert(werte_gewichte):
+        """Gewichteter Mittelwert aus einer Liste von (wert, gewicht)-Paaren.
+        gewicht darf eine beliebige Fliesskommazahl >= 0 sein (anders als die
+        fruehere Listen-Wiederholungs-Methode, die nur mit ganzzahligen
+        Gewichten funktionierte)."""
+        gesamt_gewicht = sum(g for _, g in werte_gewichte)
+        if gesamt_gewicht <= 0:
+            return None
+        return sum(w * g for w, g in werte_gewichte) / gesamt_gewicht
+
+    @staticmethod
+    def _gewichteter_median(werte_gewichte):
+        """Gewichteter Median aus einer Liste von (wert, gewicht)-Paaren.
+        Werte nach Groesse sortieren, dann den Wert finden, bei dem die
+        kumulierte Gewichtssumme die Haelfte des Gesamtgewichts erreicht."""
+        werte_gewichte = sorted(werte_gewichte, key=lambda x: x[0])
+        gesamt_gewicht = sum(g for _, g in werte_gewichte)
+        if gesamt_gewicht <= 0:
+            return None
+        kumuliert = 0
+        for wert, gewicht in werte_gewichte:
+            kumuliert += gewicht
+            if kumuliert >= gesamt_gewicht / 2:
+                return wert
+        return werte_gewichte[-1][0]
+
     def get_opt_prognose(self, Produktion, Basis, min_samples=3, faktor_min=0.2,
                           faktor_max=3.0, halbwertszeit_tage=10):
         """Ermittelt einen Korrekturfaktor je Uhrzeit (HH:MM:SS) aus dem Verhaeltnis
@@ -290,26 +320,12 @@ class WeatherData:
             uhrzeit = zeit[11:]  # z.B. '05:00:00'
             faktoren_nach_stunde[uhrzeit].append((faktor, gewicht))
 
-        def gewichteter_median(werte_gewichte):
-            # Werte nach Groesse sortieren, dann den Wert finden, bei dem die
-            # kumulierte Gewichtssumme die Haelfte des Gesamtgewichts erreicht
-            werte_gewichte = sorted(werte_gewichte, key=lambda x: x[0])
-            gesamt_gewicht = sum(g for _, g in werte_gewichte)
-            if gesamt_gewicht == 0:
-                return None
-            kumuliert = 0
-            for wert, gewicht in werte_gewichte:
-                kumuliert += gewicht
-                if kumuliert >= gesamt_gewicht / 2:
-                    return wert
-            return werte_gewichte[-1][0]
-
         median_faktoren = {}
         for uhrzeit, werte_gewichte in faktoren_nach_stunde.items():
             # Mindestanzahl Datenpunkte fordern - sonst keine Korrektur (faktor=1.0)
             if len(werte_gewichte) < min_samples:
                 continue
-            median_faktoren[uhrzeit] = gewichteter_median(werte_gewichte)
+            median_faktoren[uhrzeit] = self._gewichteter_median(werte_gewichte)
 
         Opt_Prognose = []
         for zeit in prognose_dict:
@@ -319,6 +335,7 @@ class WeatherData:
             Opt_Prognose.append((zeit, "Prognose", neue_prognose, '0', ''))
 
         return(Opt_Prognose)
+
 
 
     def store_forecast_result(self):
@@ -345,36 +362,38 @@ class WeatherData:
         akt_tag_Std = self.now.strftime("%Y-%m-%d %H:00:00")
         von_tag = '2222-01-01'
 
-        # DB-Prognosewerte aufbereiten
+        # DB-Prognosewerte aufbereiten: (wert, gewicht)-Paare je Stunde sammeln,
+        # statt den Wert gewicht-mal in eine Liste zu kopieren - das erlaubt
+        # Fliesskomma-Gewichte (z.B. 1.35), nicht nur ganzzahlige.
         for zeit_str, wert, gewicht in rows:
             zeit = datetime.fromisoformat(zeit_str)
             akt_tag = zeit.strftime("%Y-%m-%d")
             if akt_tag < von_tag: von_tag = akt_tag
             stunde = zeit.replace(minute=0, second=0, microsecond=0)
-            # extend([wert] * gewicht) fügt den wert genau gewicht-mal der Liste hinzu
-            # Damit hat man einen gewichteten Median
             if (wert > 10):
                 try:
-                    gewicht = int(gewicht)
+                    gewicht = float(gewicht)
                 except (ValueError, TypeError):
-                    gewicht = 0
-                stundenwerte[stunde].extend([wert] * gewicht)
+                    gewicht = 0.0
+                if gewicht > 0:
+                    stundenwerte[stunde].append((wert, gewicht))
 
         result = {}
         result_basis = {}
         for stunde in sorted(stundenwerte):
-            if stundenwerte.get(stunde):
+            werte_gewichte = stundenwerte.get(stunde)
+            if werte_gewichte:
                 zeit_str = stunde.strftime("%Y-%m-%d %H:%M:%S")
 
                 # Statistische Auswertungen nach ForecastCalcMethod
                 if ( 'median' in ForecastCalcMethod):
-                    result[zeit_str] = int(median(stundenwerte[stunde]))
+                    result[zeit_str] = round(self._gewichteter_median(werte_gewichte))
                 elif ( 'mittel' in ForecastCalcMethod):
-                    result[zeit_str] = int(mean(stundenwerte[stunde]))
+                    result[zeit_str] = round(self._gewichteter_mittelwert(werte_gewichte))
                 elif ( 'min' in ForecastCalcMethod):
-                    result[zeit_str] = int(min(stundenwerte[stunde]))
+                    result[zeit_str] = round(min(w for w, g in werte_gewichte))
                 elif ( 'max' in ForecastCalcMethod):
-                    result[zeit_str] = int(max(stundenwerte[stunde]))
+                    result[zeit_str] = round(max(w for w, g in werte_gewichte))
                 else:
                     print("ERROR: Es wurde keine zulässige ForecastCalcMethod gefunden!!!")
                     exit()
