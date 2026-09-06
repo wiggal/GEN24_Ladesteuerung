@@ -261,7 +261,7 @@ if __name__ == '__main__':
                             # volle Ladung ;-)
                             aktuellerLadewert = MaxLadung
                             WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
-                            LadewertGrund = "BattStatusProz < MindBattLad"
+                            LadewertGrund = "BattStatusProz < MindBattLad("+str(MindBattLad)+"%)"
     
                     # Wenn Akkuschonung > 0 ab XX% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
                     if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
