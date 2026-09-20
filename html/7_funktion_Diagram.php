@@ -34,7 +34,7 @@ if (strtotime($DiaDatenVon) <= strtotime($DBersterTag)) {
     $PfeilGrauton_back = '0.3';
 };
 # Mobile Schalter
-$mobile_schaltertext = substr($schaltertext, 2);
+$mobile_schaltertext = substr($schaltertext, 5);
 
 # Schalter zum Blättern usw.
 echo '<table id="schaltertable"><tr><td>';
@@ -100,8 +100,7 @@ echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<input type="hidden" name="programmpunkt" value="option">'."\n";
 echo '<button type="submit" class="navi" >';
 echo '<span class="desktop-text">'.$schaltertext.'</span>';
-#echo '<span class="mobile-text">'.$mobile_schaltertext.'</span>';  #entWIGGlung
-echo '<span class="mobile-text">'.$schaltertext.'</span>';
+echo '<span class="mobile-text">'.$mobile_schaltertext.'</span>';
 echo '</button>';
 echo '</form>'."\n";
 
