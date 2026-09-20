@@ -1,3 +1,5 @@
+**[0.43.5] – 2026-XX-XX**  
+
 **[0.43.4] – 2026-09-14**  
 - Prognoseladewert bei Unterschied zu Ladewert_neu ausgeben.  
 
