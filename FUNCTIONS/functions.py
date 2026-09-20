@@ -8,49 +8,52 @@ import importlib
 from typing import Type
     
 class basics:
-    def __init__(self):
+    def __init__(self, charge_options=None):
         self.now = datetime.now()
+        self.ChargeOption = charge_options or []
+
 
     def loadConfig(self, conf_files):
-            # Damit die Variable config auch in der Funktion "getVarConf" vorhanden ist (global config)
-            global config
-            # Damit kann man auch meherer configs nacheinander lesen
+        # Damit die Variable config auch in der Funktion "getVarConf" vorhanden ist (global config)
+        global config
+        # Damit kann man auch meherer configs nacheinander lesen
+        try:
+            config
+        except NameError:
+            config = configparser.ConfigParser(strict=False)
+        # Standard.ini lesen
+        for conf_file in conf_files:
+            c_file = 'CONFIG/'+conf_file+'.ini'
             try:
-                config
-            except NameError:
-                config = configparser.ConfigParser(strict=False)
-            # Standard.ini lesen
-            for conf_file in conf_files:
-                c_file = 'CONFIG/'+conf_file+'.ini'
+                config.read_file(open(c_file, encoding='utf-8'))
+            except:
+                print("\nERROR: ", e, "\n")
+        # _priv_ini lesen
+        for conf_file in conf_files:
+            c_file = 'CONFIG/'+conf_file+'_priv.ini'
+            try:
                 try:
                     config.read_file(open(c_file, encoding='utf-8'))
                 except:
-                    print("\nERROR: ", e, "\n")
-            # _priv_ini lesen
-            for conf_file in conf_files:
-                c_file = 'CONFIG/'+conf_file+'_priv.ini'
-                try:
+                    # wenn _priv.ini fehlt, kopieren
+                    import shutil
+                    c_org_file = 'CONFIG/'+conf_file+'.ini'
+                    shutil.copyfile(c_org_file, c_file)
+                    print(">>>>>>>>> ",c_file, " angelegt!!")
+            except Exception as e:
+                print("\nERROR: ", e, "\n")
+        # Monatsabhängige ini lesen
+        if ( 'charge' in conf_files ):
+            aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
+            for (c_file, monate) in config.items('monats_priv.ini'):
+                if aktueller_Monat in monate:
+                    c_file = 'CONFIG/'+c_file
                     try:
                         config.read_file(open(c_file, encoding='utf-8'))
-                    except:
-                        # wenn _priv.ini fehlt, kopieren
-                        import shutil
-                        c_org_file = 'CONFIG/'+conf_file+'.ini'
-                        shutil.copyfile(c_org_file, c_file)
-                        print(">>>>>>>>> ",c_file, " angelegt!!")
-                except Exception as e:
-                    print("\nERROR: ", e, "\n")
-            # Monatsabhängige ini lesen
-            if ( 'charge' in conf_files ):
-                aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
-                for (c_file, monate) in config.items('monats_priv.ini'):
-                    if aktueller_Monat in monate:
-                        c_file = 'CONFIG/'+c_file
-                        try:
-                            config.read_file(open(c_file, encoding='utf-8'))
-                        except Exception as e:
-                            print("\nERROR: ", e, "\n")
-                return config
+                    except Exception as e:
+                        print("\nERROR: ", e, "\n")
+
+        return config
 
 
     def get_inverter_class(self, class_type) -> Type:
@@ -104,6 +107,12 @@ class basics:
             else:
                 error_type = ""
                 return_var = raw_value  # String bleibt unverändert, inkl. Kommas
+
+            # Vorhandene DB-Einträge aus ManuelleSteuerung vom TAB-LadeSTRG setzen
+            if (var in self.ChargeOption):
+                return_var = self.ChargeOption[var]['Res_Feld2']
+                print(f"DEBUG: {var} = {return_var}")  #entWIGGlung
+
         except (KeyError, ValueError):
             print(f"ERROR: die Variable [{var_block}][{var}] wurde NICHT {error_type}definiert!")
             exit(0)

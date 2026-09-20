@@ -130,33 +130,51 @@ class sqlall:
         verbindung = sqlite3.connect(DB)
         zeiger = verbindung.cursor()
 
-        try:
-            # Wenn schluessel == Reservierung dann laufende Reservierungen auslesen
-            if (schluessel == 'Reservierung'):
-                # SQL-Abfrage
-                query = """
-                SELECT strftime('%H:00:00', Zeit) AS Stunde,
-                    MIN(Res_Feld2) AS Res_Feld2
-                FROM steuercodes
-                WHERE Res_Feld2 != 0
-                AND ID LIKE '1%'
-                AND Schluessel = 'Reservierung'
-                GROUP BY strftime('%Y-%m-%d %H', Zeit)
-                ORDER BY Stunde;
-                """
-                # Abfrage ausführen
-                zeiger.execute(query)
-            
-                # Ergebnis in ein Array laden (Liste von Tupeln)
-                laufende_array = zeiger.fetchall()
+        # Wenn schluessel == Reservierung dann laufende Reservierungen auslesen
+        if (schluessel == 'Reservierung'):
+            # SQL-Abfrage
+            sql_anweisung = """
+                SELECT
+                    s.Zeit,
+                    s.Res_Feld1,
+                    COALESCE(
+                        NULLIF(s.Res_Feld2, 0),
+                        (
+                            SELECT l.Res_Feld2
+                            FROM steuercodes l
+                            WHERE l.Schluessel = 'Reservierung'
+                            AND strftime('%H:%M', l.Zeit) = strftime('%H:%M', s.Zeit)
+                            AND date(l.Zeit) < date(s.Zeit)
+                            AND l.Res_Feld2 != 0
+                            ORDER BY l.Zeit DESC
+                            LIMIT 1
+                        ),
+                        0
+                    ) AS Res_Feld2,
+                    s.Options
+                FROM steuercodes s
+                WHERE s.Schluessel = 'Reservierung'
+                ORDER BY s.Zeit;
+            """
 
+        elif (schluessel == 'ChargeOption'):
+            # Nur Einträge laden, deren Options-UNIX-Timestamp in der Zukunft liegt
+            sql_anweisung = """
+                SELECT Zeit, Res_Feld1, Res_Feld2, Options
+                FROM steuercodes
+                WHERE Schluessel = 'ChargeOption'
+                AND CAST(Options AS INTEGER) > strftime('%s', 'now');
+            """
+
+        else:
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
             sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
+
+        try:
             zeiger.execute(sql_anweisung)
         except:
             self.create_database_ProgSteuerung(DB)
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
-            sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
             zeiger.execute(sql_anweisung)
 
         rows = zeiger.fetchall()
@@ -177,17 +195,6 @@ class sqlall:
             # Feld 2 kann String enthalten, wegen viertestündlichen Strompreisen
             data[row[0]][columns[2]] = row[2]
             data[row[0]][columns[3]] = row[3]
-
-            # Wenn schluessel == Reservierung dann nach laufenden Reservierungen suchen und einfügen
-            if (schluessel == 'Reservierung' and row[0] != 'ManuelleSteuerung'):
-                # Stunde extrahieren
-                stunde = datetime.fromisoformat(row[0]).strftime("%H:00:00")
-                # Wert suchen
-                wert = None
-                for laufende_row in laufende_array:
-                    if laufende_row[0] == stunde:
-                        data[row[0]][columns[2]] = laufende_row[1]
-                        break
 
         record_json = json.dumps(data)
         record_json = json.loads(record_json)

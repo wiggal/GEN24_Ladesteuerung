@@ -15,9 +15,10 @@ if __name__ == '__main__':
         config_v.read('version.ini')
         prg_version = (config_v['Programm']['version'])
 
-        basics = FUNCTIONS.functions.basics()
-        config = basics.loadConfig(['default', 'charge'])
         sqlall = FUNCTIONS.SQLall.sqlall()
+        ChargeOption = sqlall.getSQLsteuerdaten('ChargeOption')
+        basics = FUNCTIONS.functions.basics(charge_options=ChargeOption)
+        config = basics.loadConfig(['default', 'charge'])
         now = datetime.now()
         format = "%Y-%m-%d %H:%M:%S"
 
@@ -158,7 +159,7 @@ if __name__ == '__main__':
                     LadewertGrund = ""
 
                     # Klasse ProgLadewert initieren
-                    progladewert_inst = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry)
+                    progladewert_inst = FUNCTIONS.PrognoseLadewert.progladewert(weatherdata, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry, basics_instance=basics)
                     # evtl. Ladung des Akku auf SOC_Proz_Grenze begrenzen, und damit BattKapaWatt_akt reduzieren
                     Sdt_24H = datetime.now().hour
                     PrognoseMorgen = progladewert_inst.getPrognoseMorgen(0,24-Sdt_24H)[0]/1000
@@ -207,31 +208,6 @@ if __name__ == '__main__':
                     # Aktuelle Prognose berechnen
                     (aktuelleVorhersage, DEBUG_Ausgabe) = progladewert_inst.getLoggingPrognose(BattKapaWatt_akt)
 
-                    # Wenn über die PV-Planung manuelle Ladung angewählt wurde
-                    MaxladungDurchPV_Planung = ""
-                    ManuelleSteuerung = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld1'])
-                    # Akkuschonung aus PV-Planung ermitteln
-                    ManuelleStrg_Akkuschon = int(reservierungdata_tmp['ManuelleSteuerung']['Res_Feld2'])
-                    # Wenn Akkuschonung in PV-Planung gewählt, und Akkuschonung == 2 (Zellspannung berücksichtigen) ManuelleStrg_Akkuschon =2
-                    if ManuelleStrg_Akkuschon == 1 and Akkuschonung == 2:
-                        ManuelleStrg_Akkuschon = 2
-                    # Prüfen, ob Einträge schon abgelaufen
-                    try: 
-                        Ablaufdatum = int(reservierungdata_tmp['ManuelleSteuerung']['Options'])
-                    except: 
-                        Ablaufdatum = 0
-                    if (Ablaufdatum > int(datetime.now().timestamp())):
-                        if (ManuelleSteuerung >= 0):
-                            FesteLadeleistung = BattganzeLadeKapazWatt * ManuelleSteuerung/100
-                            MaxladungDurchPV_Planung = "Sliderwert in PV-Planung gewählt."
-                        # Wenn über die PV-Planung MaxLadung gewählt wurde (-2), MaxLadung setzen
-                        if (ManuelleSteuerung == -2):
-                            FesteLadeleistung = MaxLadung
-                            MaxladungDurchPV_Planung = "MaxLadung in PV-Planung gewählt."
-                    else:
-                        # Wenn Einträge abgelaufen, wieder die Akkuschoneinstellung aus charge_priv.ini
-                        ManuelleStrg_Akkuschon = Akkuschonung
-
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
                         aktuellerLadewert = FesteLadeleistung
@@ -240,10 +216,7 @@ if __name__ == '__main__':
                             WR_schreiben = 0
                         else:
                             WR_schreiben = 1
-                        if MaxladungDurchPV_Planung == "":
-                            LadewertGrund = "FesteLadeleistung"
-                        else:
-                            LadewertGrund = MaxladungDurchPV_Planung
+                        LadewertGrund = "FesteLadeleistung"
     
                     # Hier Volle Ladung, wenn BattVollUm +eine Stunde Puffer erreicht ist oder Akku = 100%!
                     elif (int(datetime.strftime(now, "%H")) > int(BattVollUm)) or (BattStatusProz == 100):
@@ -263,6 +236,9 @@ if __name__ == '__main__':
                             WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                             LadewertGrund = "BattStatusProz < MindBattLad("+str(MindBattLad)+"%)"
     
+                    # ManuelleStrg_Akkuschon übernehmen
+                    ManuelleStrg_Akkuschon = (ChargeOption.get("Akkuschonung", {}).get("Res_Feld2") or 0)
+
                     # Wenn Akkuschonung > 0 ab XX% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
                     if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
                         (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, 
@@ -274,8 +250,8 @@ if __name__ == '__main__':
                                 BattganzeLadeKapazWatt_Akku, 
                                 alterLadewert, 
                                 aktuellerLadewert, 
-                                ManuelleStrg_Akkuschon, 
                                 aktuellePVProduktion, 
+                                ManuelleStrg_Akkuschon,
                                 SOC_Proz_Grenze, 
                                 PrognoseLimit_SOC, 
                                 PrognoseMorgen, 

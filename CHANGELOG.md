@@ -1,4 +1,6 @@
 **[0.43.5] – 2026-XX-XX**  
+- Die Optionen zur automatischen Ladesteuerung können nun im TAB LadeStrg zeitlich begrenzt verändert werden.
+  Die Optionen können in den html/config_priv.ini konfiguriert werden.
 
 **[0.43.4] – 2026-09-14**  
 - Prognoseladewert bei Unterschied zu Ladewert_neu ausgeben.  
