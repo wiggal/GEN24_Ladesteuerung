@@ -20,62 +20,70 @@
       <h2><b><span style="background: #44c767">TAB</span>--&gt;
           LadeSteuerung</b></h2>
       <p></p>
-      <p>Im Dropdown unter "Ladegrenze" kann ausgewählt werden, wie die
-        Hausakkuladung erfolgen soll.<br>
-        Für die Auswahl <b>Slider</b> oder <b>MaxLadung </b>kann hier
-        mit dem Optionsfeld <b>Ladegrenze mit Akkuschonung</b>,<br>
-        gewählt werden, ob die Akkuschonung angewendet wird, ansonsten
-        wird mit der eingestellten Ladeleistung vollgeladen.<br>
-        Ist in CONFIG/charge_priv.ini Akkuschonung über Zellspannung
-        (=2) eingetragen,&nbsp; wird diese auch hier angewendet. </p>
+      <p>
+        Alle Werte, die mit der <code>charge_priv.ini</code> übereinstimmen, werden
+        <span style="background-color: #ff5733; font-weight: bold; padding: 2px 4px;">rot</span>,
+        abweichende noch gültige Werte
+        <span style="background-color: #44c767; font-weight: bold; padding: 2px 4px;">grün</span> dargestellt.
+        </p>
       <table>
-        <tbody>
+        <tbody>  
+          <tr>
+            <td>
+              <p>Gültigkeitsstunden bis "Auto":</p>
+            </td>
+            <td>
+              <p>Alle unten abweichend zur charge_priv.ini eingestellten Werte sind die hier eingestellten Stunden gültig.
+              <br>Sind noch abweichende Optionen gültig, wird es hier unter "gültig bis ...." angezeigt.</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>Ladegrenze mit Akkuschonung:</p>
+            </td>
+            <td>
+              <p>Hier kann die Akkuschonungsoption abweichend von der charge_priv.ini  eingestellt werden.</p>
+            </td>
+          </tr>
           <tr>
             <td>
               <p>Auto</p>
             </td>
             <td>
-              <p>Automatische Ladesteuerung nach Prognose </p>
+              <p>Automatische Ladesteuerung nach Prognose, und Einstellungen aus CONFIG/charge.ini/_priv.ini </p>
             </td>
           </tr>
           <tr>
             <td>
-              <p>Slider</p>
+              <p>AutoOptions</p>
             </td>
             <td>
-              <p>Batterieladung erfolgt mit der im Slider eingestellten
-                Prozentzahl der <b>"maximalen Ladeleistung"</b> des
-                GEN24 im Zusammenspiel mit dem Akku. <br>
-                Zur genauen Ladeleistung siehe Datenblätter des GEN24
-                und des Akku (= Eingangsstrom am Batterieanschluss X
-                Nennspannung des Akkus)<br>
-                z.B. GEN24 10.0 Plus mit HVM11: 22A X 204.8V = 4505,6W<br>
+              <p>Hier werden alle in der html/config_priv.ini unter [AutoOptionsFelder] eingetragenen Variablen 
+              der CONFIG/charge.ini/_priv.ini angezeigt, und können zeitabhängig verändert werden.
               </p>
             </td>
           </tr>
           <tr>
             <td>
-              <p>MaxLadung</p>
+              <p>Ladeleistung</p>
             </td>
             <td>
-              <p>Batterieladung erfolgt mit der in
-                CONFIG/charge_priv.ini unter MaxLadung definierten
-                Ladeleistung.</p>
+              <p>Hier kann eine Feste Ladeleistung für die eingestellten Stunden definiert werden.
+              <br>Mit dem Button "MaxLadung" kann genau die definierte MaxLadung aus CONFIG/charge.ini/_priv.ini eingestellt werden.
+              </p>
             </td>
           </tr>
         </tbody>
       </table>
-      <p>Beim Speichern werden nach Auswahl von <b>Slider</b> oder <b>MaxLadung</b><br>
-        Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder <b>Auto</b>
-        angewendet.<br>
+      <br>
       </p>
       <p>In der Prognosetabelle können in den Spalten <b>einmal</b> und
         <b>laufend</b><br>
         PV-Leistungen in kW zur Reservierung eingetragen werden. <br>
         Die Werte der Spalte <b>einmal</b> gelten nur für den Tag, bei
-        dem sie eingetragen wurden, und fallen dann weg.<br>
-        &nbsp; Die Werte der Spalte <b>laufend</b> werden jeden Tag
-        wiederholt, bis sie geändert oder gelöscht werden.<br>
+        dem sie eingetragen wurden und fallen dann weg,<br>
+        während sich die Werte der Spalte <b>laufend</b> jeden Tag
+        wiederholen, bis sie geändert oder gelöscht werden.<br>
         Die Leistungsreservierung wird dann bei der Ladungsplanung<br>
         des Hausakkus berücksichtigt (wenn Ladegrenze = AUTO).</p>
     </center>

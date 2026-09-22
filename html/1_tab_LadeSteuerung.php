@@ -80,16 +80,19 @@
   padding: 10px;
   font-size: 30px;
 }
+/* Zeilen-Wrapper der Auto-Options-Felder: eigene Regel, da die generische ".flex-container > div"-Regel
+   (margin/padding) zusammen mit width:100% sonst über den Container hinausragt */
+.flex-container > div.autooption-row {
+  margin: 0;
+  padding: 4px 0;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+}
 /* END LADEGRENZBOX */
 
-/* CHECKBOX */
-input[type="checkbox"] {
-   position: relative;
-   width: 20px;
-   height: 25px;
-   top: +.5em;
-   accent-color: #44c767;
-}
 .dropdown {
   font-size: 2rem;
   line-height: 1.4;
@@ -98,7 +101,17 @@ input[type="checkbox"] {
   grid-template-columns: 1.3em auto;
 }
 
-/* ENDE CHECKBOX */
+/* Reines Textlabel (kein <select>) - ca. 30% kleiner als .dropdown, ohne dessen Grid-Layout */
+.autooption-label {
+  font-size: 1.4rem;
+  line-height: 1.4;
+  display: inline-block;
+}
+
+/* Prozent-Badge bei Auto-Options-Feldern ca. 30% kleiner als der normale .slider-Badge (90% -> 63%) */
+label.slider.autooption-percent {
+  font-size: 63%;
+}
 
 label.slider {
 	background-color:#44c767;
@@ -109,13 +122,60 @@ label.slider {
 	color:#000000;
 	font-size:90%;
 	padding:5px 10px;
+	margin:0;
 	text-decoration:none;
     flex-shrink: 0;
   }
 input.slider {
    width: 100%;
    height: 35px;
+   margin: 0;
    accent-color: #44c767;
+  }
+
+/* Auto-Options-Feld zeigt den Config-Wert (nicht den DB-Wert) - rot wie die Prognosebalken */
+label.slider.autooption-fallback {
+	background-color:#ff5733;
+	border:1px solid #cc4020;
+  }
+input.slider.autooption-fallback {
+   accent-color: #ff5733;
+  }
+
+/* Zahl-/Listen-Felder bei Auto Options (typ 'zahl'/'liste') - grün wie normale Werte, rot als Fallback */
+.autooption-input {
+	background-color:#44c767;
+	border-radius:10px;
+	border:1px solid #18ab29;
+	color:#000000;
+	font-size:90%;
+	padding:5px 10px;
+	width:100%;
+	height:35px;
+	box-sizing:border-box;
+  }
+.autooption-input.autooption-fallback {
+	background-color:#ff5733;
+	border:1px solid #cc4020;
+  }
+
+/* Ladeleistung-Feld: blau, wenn der Wert exakt dem MaxLadung-Wert entspricht (Vorrang vor rot) */
+.autooption-input.autooption-maxladung {
+	background-color:#58ACFA;
+	border:1px solid #2f7fd1;
+  }
+
+/* Radio-Buttons-Gruppe: flexibles Layout statt fester Höhe wie bei Zahl-/Listenfeldern */
+.autooption-input.autooption-radio-group {
+	height: auto;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 16px;
+  }
+.autooption-input.autooption-radio-group input[type="radio"] {
+	margin-right: 4px;
+	vertical-align: middle;
   }
 
 .sliderbeschriftung{
@@ -125,16 +185,11 @@ input.slider {
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  margin-top: 50px !important; /* Abstand nach oben zum Button */
+  margin-top: 50px; /* Abstand nach oben zum Button */
   margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
 }
 .checkbox-wrap {
   white-space: nowrap;
-}
-.prognosevon{
-  position: fixed;
-  top: 8px;
-  left: 0px;
 }
 .gueltig {
   font-weight: normal;
@@ -155,7 +210,7 @@ input.slider {
 
   .sliderbeschriftung{
     font-size:90%;
-    margin-top: 15px !important; /* Abstand nach oben zum Button */
+    margin-top: 20px; /* Abstand nach oben zum Button */
     margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
   }
 
@@ -170,6 +225,12 @@ input.slider {
     font-size: 18px !important; /* Slider-Beschriftung kleiner */
   }
 
+  .flex-container > div.autooption-row {
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+
   .speichern {
     font-size: 100% !important; /* Speicher-Button verkleinern */
     padding: 8px 10px !important;
@@ -177,6 +238,10 @@ input.slider {
 
   .dropdown {
     font-size: 1.2rem !important; /* Dropdown kleiner */
+  }
+
+  .autooption-label {
+    font-size: 0.84rem !important; /* ca. 30% kleiner als .dropdown auf Mobilgeräten */
   }
 
   /* Tabelle zwingen, in die Breite zu passen */
@@ -198,78 +263,204 @@ input.slider {
   <br />
 
 <?php
-# config.ini parsen
-require_once "config_parser.php";
+# $PythonDIR/CONFIG/charge.ini parsen
+merge_config_into_globals($PythonDIR . '/CONFIG/charge.ini');
 
 include 'SQL_steuerfunctions.php';
-$EV_Reservierung = getSteuercodes('Reservierung');
+# Zwei getrennte Aufrufe im bekannten, garantiert funktionierenden Ein-String-Format statt eines
+# einzelnen Aufrufs mit zusammengesetztem Mehrfach-Schlüssel-String (dessen Verhalten unklar ist
+# und vermutlich die Ursache dafür war, dass ChargeOption-Zeilen nicht zuverlässig gelesen wurden).
+$EV_Reservierung_Zeit = getSteuercodes('Reservierung');
+$EV_Reservierung_Options = getSteuercodes('ChargeOption');
+$EV_Reservierung = array_merge($EV_Reservierung_Zeit, $EV_Reservierung_Options);
+#print_r($EV_Reservierung);  #entWIGGlung
 $PrstLadeStd = getPrstLadeStd();
 $Prognose = getPrognose();
 
 $Res_Feld1 = 'einmal';
 $Res_Feld2 = 'laufend';
-$DB_ManuelleSteuerung_wert = 0;
+$DB_AutoOptions_selected = '';
 $DB_Auto_selected = '';
 $DB_Slider_selected = '';
-$DB_MaxLadung_selected = '';
-$Akkuschon_check = '';
 # Prüfen, ob Einträge für ManuelleSteuerung schon abgelaufen
-# Wenn Feld in DB keine Zahl
-if (!is_numeric($EV_Reservierung['ManuelleSteuerung']['Options'])){
+# Wenn Feld in DB keine Zahl (oder die Zeile noch gar nicht existiert)
+if (!isset($EV_Reservierung['ManuelleSteuerung']['Options']) || !is_numeric($EV_Reservierung['ManuelleSteuerung']['Options'])){
     $EV_Reservierung['ManuelleSteuerung']['Options'] = 0;
 }
-# Akkuschonung aus DB
-if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld2']) and ($EV_Reservierung['ManuelleSteuerung']['Res_Feld2']) == 1) {
-    $Akkuschon_check = 'checked';
-}
-if ($EV_Reservierung['ManuelleSteuerung']['Options'] < time() OR $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] == -1) {
+
+# Modus-Kennung: -1 = Auto, -3 = Slider/Ladeleistung, -4 = AutoOptions (Res_Feld1 enthält ab jetzt
+# NUR die Kennung, keinen Prozentwert mehr). -2 (ehemals MaxLadung) ist als eigener Modus entfallen -
+# ein evtl. noch in der DB stehender Altwert -2 fällt einfach mit in den Slider/Ladeleistung-Zweig.
+$ManSteuerung_abgelaufen = ($EV_Reservierung['ManuelleSteuerung']['Options'] < time());
+
+if ($ManSteuerung_abgelaufen) {
     $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] = -1;
     $gueltig_bis = '';
-    $Akkuschon_check = '';
     } else {
     $gueltig_bis = "&nbsp;gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
     }
 $std_diff = ($EV_Reservierung['ManuelleSteuerung']['Options'] - time())/3600;
-$std_diff = ($std_diff <= 0) ? 24 : round($std_diff,2);
-if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
-    $DB_ManuelleSteuerung_wert = $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'];
+$std_diff = ($std_diff <= 0) ? 0 : round($std_diff,2);
 
-    if ($DB_ManuelleSteuerung_wert == -1){
-    $DB_ManuelleSteuerung_wert = 0;
+# Modus zuerst bestimmen, da Res_Feld2 nur noch bei Modus "Slider" ein Prozentwert ist
+# (bei Auto/AutoOptions steht dort -1)
+if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
+    $Modus_wert = $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'];
+
+    if ($Modus_wert == -1){
     $DB_Auto_selected = 'selected';
-    } elseif ($DB_ManuelleSteuerung_wert == -2) {
-    $DB_ManuelleSteuerung_wert = 0;
-    $DB_MaxLadung_selected = 'selected';
+    } elseif ($Modus_wert == -4) {
+    $DB_AutoOptions_selected = 'selected';
     } else {
     $DB_Slider_selected = 'selected';
     }
 }
+
+# Stundenfeld bleibt immer aktiv/vorbelegt (echter Wert bzw. 0 als Default, wenn nichts aus
+# der DB kommt) - auch bei Auto, statt hier auf 0 gezwungen zu werden. Beim Speichern wird das Feld
+# für Auto ohnehin ignoriert (Options wird dort fest auf 0 gesetzt), das betrifft nur die Anzeige.
+$std_diff_anzeige = $std_diff;
+
+/**
+ * Gemeinsame Fallback-Logik für "Config-Wert vs. DB-Wert"-Felder (AutoOptionsFelder-Einträge,
+ * FesteLadeleistung, Akkuschonung): der Config-Wert wird angezeigt - und das Feld als Fallback
+ * markiert -, wenn die zugehörige DB-Zeile ($EV_Reservierung[$zeit_key]) zeitlich abgelaufen ist,
+ * kein DB-Wert existiert, oder der DB-Wert ohnehin identisch mit dem Config-Wert ist.
+ * $ist_numerisch=false vergleicht als String (typ 'liste'/'radio'), sonst als Zahl.
+ */
+function autooption_fallback_werte($EV_Reservierung, $zeit_key, $config_quelle, $config_key, $ist_numerisch = true) {
+    $config_wert_roh = isset($config_quelle[$config_key]) ? $config_quelle[$config_key] : null;
+    $db_wert_roh = isset($EV_Reservierung[$zeit_key]['Res_Feld2']) ? $EV_Reservierung[$zeit_key]['Res_Feld2'] : null;
+
+    $config_wert = $ist_numerisch ? (int) $config_wert_roh : (string) $config_wert_roh;
+    $db_wert = is_null($db_wert_roh) ? null : ($ist_numerisch ? (int) $db_wert_roh : (string) $db_wert_roh);
+
+    $options = isset($EV_Reservierung[$zeit_key]['Options']) ? (int) $EV_Reservierung[$zeit_key]['Options'] : 0;
+    $ist_fallback = ($options < time()) || is_null($db_wert) || ($db_wert === $config_wert);
+
+    return [
+        'config_wert'    => $config_wert,
+        'anzeige_wert'   => $ist_fallback ? $config_wert : $db_wert,
+        'fallback_class' => $ist_fallback ? 'autooption-fallback' : '',
+    ];
+}
+
+# Auto Options: die Feldliste kommt jetzt aus der Sektion [AutoOptionsFelder] von
+# config.ini/config_priv.ini (siehe dort für Format/Beispiele) und wird von config_parser.php
+# beim Einbinden bereits als $GLOBALS['AutoOptionsFelder'] bereitgestellt - hier nur defensiv
+# gegen ein fehlendes/leeres Ergebnis absichern, falls die Sektion (noch) nicht existiert.
+$AutoOptionsFelder = $GLOBALS['AutoOptionsFelder'] ?? [];
+
+$AutoOptionsWerte = [];
+foreach ($AutoOptionsFelder as $Feld_Schluessel => $Feld) {
+    $typ = $Feld['typ'] ?? 'prozent';
+    $ist_numerisch = !in_array($typ, ['liste', 'radio'], true);
+    $section = $Feld['section'] ?? 'Ladeberechnung';
+
+    $w = autooption_fallback_werte($EV_Reservierung, $Feld_Schluessel, $GLOBALS[$section] ?? [], $Feld_Schluessel, $ist_numerisch);
+
+    $AutoOptionsWerte[$Feld_Schluessel] = [
+        'typ'            => $typ,
+        'anzeige_wert'   => $w['anzeige_wert'],
+        'config_wert'    => $w['config_wert'],
+        'fallback_class' => $w['fallback_class'],
+        'input_id'       => 'autooption_' . $Feld_Schluessel . '_input',
+        'label_id'       => 'autooption_' . $Feld_Schluessel . '_label',
+        'radio_name'     => 'autooption_' . $Feld_Schluessel . '_radio',
+    ];
+}
+
+# FesteLadeleistung: eigenständig für den Dropdown-Modus "Slider" (Ladeleistung W) verdrahtet -
+# bewusst NICHT Teil von $AutoOptionsFelder, da es fest an diesen Hauptmodus gebunden ist statt an
+# das Auto-Options-Panel. Gleiche Fallback-Logik wie bei den Auto-Options-Feldern.
+$fl = autooption_fallback_werte($EV_Reservierung, 'FesteLadeleistung', $Ladeberechnung, 'FesteLadeleistung');
+$FesteLadeleistung_Config_Wert = $fl['config_wert'];
+$DB_FesteLadeleistung_wert = $fl['anzeige_wert'];
+# Entspricht der angezeigte Wert exakt dem MaxLadung-Wert, hat Blau Vorrang vor der roten Fallback-Farbe
+$MaxLadung_Config_Wert = isset($Ladeberechnung['MaxLadung']) ? (int) $Ladeberechnung['MaxLadung'] : 0;
+$FesteLadeleistung_Fallback_Class = ($DB_FesteLadeleistung_wert === $MaxLadung_Config_Wert) ? 'autooption-maxladung' : $fl['fallback_class'];
+
+# Akkuschonung: ebenfalls eigenständig verdrahtet, gleiche Fallback-Logik. Ersetzt die frühere
+# feste 0-Erzwingung bei Modus Auto: Auto ist ohnehin immer "abgelaufen" und fällt damit
+# automatisch unter diese Fallback-Logik.
+$ak = autooption_fallback_werte($EV_Reservierung, 'Akkuschonung', $Ladeberechnung, 'Akkuschonung', false);
+$Akkuschonung_Config_Wert = $ak['config_wert'];
+$DB_Akkuschon_wert = $ak['anzeige_wert'];
+$Akkuschonung_Fallback_Class = $ak['fallback_class'];
 ?>
 
 <!-- SLIDER -->
 <div style='text-align: center;'>
-  <p class="sliderbeschriftung">Ladegrenze mit Akkuschonung: 
-  <span class="checkbox-wrap">
-  <input type="checkbox" name="akkuschonung"  <?php echo $Akkuschon_check ?>>
-  </span>
+  <p class="sliderbeschriftung">Stunden bis "Auto":
+  <input type="number" id="gueltigkeitsstunden" name="gueltigkeitsstunden" min="0" max="100" step="1" value="<?php echo $std_diff_anzeige ?>" class="autooption-input <?php echo ($std_diff_anzeige == 0) ? 'autooption-fallback' : '' ?>" data-typ="zahl" data-config-wert="0" style="width:80px; height:auto; font-size:100%;" oninput="autoOptionInput(this, null);">
   <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
+  </p>
+    <p class="sliderbeschriftung" style="margin-top:0 !important;">Ladegrenze mit Akkuschonung:
+    <span class="checkbox-wrap">
+    <select name="akkuschonung" id="akkuschonung" class="autooption-input <?php echo $Akkuschonung_Fallback_Class ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($Akkuschonung_Config_Wert) ?>" style="font-size: 1rem; padding: 2px 5px; width:auto; height:auto;" onchange="autoOptionInput(this, null);">
+        <option value="0" <?php echo ($DB_Akkuschon_wert === '0') ? 'selected' : ''; ?>>0 - Aus</option>
+        <option value="1" <?php echo ($DB_Akkuschon_wert === '1') ? 'selected' : ''; ?>>1 - Ein</option>
+        <option value="2" <?php echo ($DB_Akkuschon_wert === '2') ? 'selected' : ''; ?>>2 - Zell-U</option>
+    </select>
+    </span>
 <div class="flex-container">
     <div>
-      <label for="modus" class="dropdown" ></label>
   <select id="modus" class="dropdown" name="hausakkuladung" >
     <option value="Auto" <?php echo $DB_Auto_selected ?>>Auto</option>
-    <option value="Slider" <?php echo $DB_Slider_selected ?>>Slider</option>
-    <option value="MaxLadung" <?php echo $DB_MaxLadung_selected ?>>MaxLadung</option>
+    <option value="AutoOptions" <?php echo $DB_AutoOptions_selected ?>>AutoOptions</option>
+    <option value="Slider" <?php echo $DB_Slider_selected ?>>Ladeleistung</option>
   </select>
 </div>
-    <div>
-<label class="slider" id="sliderlabel" for="slider"><?php echo $DB_ManuelleSteuerung_wert ?>%</label>
-
+    <div id="slider_wrapper" style="flex-grow: 1; <?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
+<input class="autooption-input <?php echo $FesteLadeleistung_Fallback_Class ?>" id="feste_ladeleistung_feld" data-typ="zahl" data-config-wert="<?php echo htmlspecialchars($FesteLadeleistung_Config_Wert) ?>" data-maxladung-wert="<?php echo htmlspecialchars($MaxLadung_Config_Wert) ?>" type="number" value="<?php echo htmlspecialchars($DB_FesteLadeleistung_wert) ?>" oninput="autoOptionInput(this, null);">
     </div>
-    <div style="flex-grow: 1">
-<input class="slider" id="slider" name="hausakkuladung" type="range" min="0" max="100" step="5" value="<?php echo $DB_ManuelleSteuerung_wert ?>" oninput="sliderlabel.innerText = this.value + '%';">
+    <div id="maxladung_button_wrapper" style="<?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
+<button type="button" id="maxladung_setzen_btn" class="speichern" style="position:static; transform:none; font-size:70%; padding:8px 14px; background-color:#58ACFA; border-color:#2f7fd1;" onclick="feste_ladeleistung_feld.value = <?php echo (int) ($Ladeberechnung['MaxLadung'] ?? 0); ?>; autoOptionInput(feste_ladeleistung_feld, null);">MaxLadung</button>
     </div>
 </div>
+
+<details id="auto_options_details" <?php echo $DB_AutoOptions_selected ? 'open' : '' ?>>
+  <summary class="sliderbeschriftung" style="margin-top:0 !important; display:list-item; cursor:pointer;">Auto Options</summary>
+
+<div class="flex-container" style="flex-direction: column; align-items: stretch;">
+<?php foreach ($AutoOptionsFelder as $Feld_Schluessel => $Feld):
+    $w = $AutoOptionsWerte[$Feld_Schluessel];
+?>
+<div class="autooption-row">
+    <div>
+      <label class="autooption-label" style="cursor:default;"><?php echo htmlspecialchars($Feld_Schluessel) ?></label>
+    </div>
+<?php if ($w['typ'] === 'prozent'): ?>
+    <div style="display:flex; align-items:center; flex-grow: 1; gap: 0;"><label class="slider autooption-percent <?php echo $w['fallback_class'] ?>" id="<?php echo $w['label_id'] ?>" for="<?php echo $w['input_id'] ?>"><?php echo $w['anzeige_wert'] ?>%</label><input class="slider <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="prozent" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" type="range" min="0" max="100" step="5" value="<?php echo $w['anzeige_wert'] ?>" oninput="autoOptionInput(this, '<?php echo $w['label_id'] ?>');" style="flex-grow: 1;">
+    </div>
+<?php elseif ($w['typ'] === 'zahl'): ?>
+    <div style="flex-grow: 1">
+<input class="autooption-input <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="zahl" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" type="number" value="<?php echo htmlspecialchars($w['anzeige_wert']) ?>" oninput="autoOptionInput(this, null);">
+    </div>
+<?php elseif ($w['typ'] === 'liste'): ?>
+    <div style="flex-grow: 1">
+<select class="autooption-input <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" onchange="autoOptionInput(this, null);">
+<?php foreach (($Feld['optionen'] ?? []) as $opt_wert => $opt_label): ?>
+      <option value="<?php echo htmlspecialchars($opt_wert) ?>" <?php echo ((string) $opt_wert === (string) $w['anzeige_wert']) ? 'selected' : '' ?>><?php echo htmlspecialchars($opt_label) ?></option>
+<?php endforeach; ?>
+</select>
+    </div>
+<?php elseif ($w['typ'] === 'radio'): ?>
+    <div style="flex-grow: 1">
+<span class="autooption-input autooption-radio-group <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="radio" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>">
+<?php foreach (($Feld['optionen'] ?? []) as $opt_wert => $opt_label): ?>
+      <label style="white-space:nowrap; cursor:pointer; font-weight:normal;">
+        <input type="radio" name="<?php echo $w['radio_name'] ?>" value="<?php echo htmlspecialchars($opt_wert) ?>" <?php echo ((string) $opt_wert === (string) $w['anzeige_wert']) ? 'checked' : '' ?> onchange="autoOptionInput(this, null, '<?php echo $w['input_id'] ?>');">
+        <?php echo htmlspecialchars($opt_label) ?>
+      </label>
+<?php endforeach; ?>
+</span>
+    </div>
+<?php endif; ?>
+</div>
+<?php endforeach; ?>
+</div>
+</details>
 </div>
 <!-- ENDE SLIDER -->
 
@@ -383,14 +574,69 @@ echo "</tbody></table>\n";
    <br />
   </div>
 <script>
-/* den Slider beim Seitenaufbau auf dem Wert des Labels sezen */
+// Auto-Options-Felder (aus dem PHP-Array $AutoOptionsFelder) - auf Script-Top-Level, da sowohl der
+// DOMContentLoaded-Block als auch der separate Speichern-Handler weiter unten darauf zugreifen.
+// Neue Felder werden automatisch mitgenommen, ohne dass hier oder im Speichern-Handler etwas
+// geändert werden muss - einfach in PHP im Array $AutoOptionsFelder ergänzen.
+const AutoOptionsFelder = <?php echo json_encode(array_map(function ($Feld_Schluessel, $Feld) use ($AutoOptionsWerte) {
+    $w = $AutoOptionsWerte[$Feld_Schluessel];
+    return [
+        'key'         => $Feld_Schluessel,
+        'db_id'       => $Feld['db_id'],
+        'input_id'    => $w['input_id'],
+        'typ'         => $w['typ'],
+        'radio_name'  => $w['radio_name'],
+        'config_wert' => $w['config_wert'],
+    ];
+}, array_keys($AutoOptionsFelder), $AutoOptionsFelder)); ?>;
+
+// Live-Farbumschaltung (rot = Config-Wert, grün = eigener Wert) für jedes Auto-Options-Feld.
+// el ist je nach Feldtyp ein <input type="range">, <input type="number">, <select> oder ein
+// einzelnes <input type="radio"> einer Gruppe. labelId ist nur bei typ 'prozent' gesetzt (das
+// dortige %-Badge). farbZielId wird nur bei typ 'radio' gebraucht: dort trägt nicht das einzelne
+// Radio-Element die Farbe, sondern der umschließende Gruppen-Container.
+function autoOptionInput(el, labelId, farbZielId) {
+  const farbZiel = farbZielId ? document.getElementById(farbZielId) : el;
+  if (labelId) {
+    document.getElementById(labelId).innerText = el.value + '%';
+  }
+  const typ = farbZiel.dataset.typ;
+  const istConfigWert = (typ === 'liste' || typ === 'radio')
+    ? (String(el.value) === String(farbZiel.dataset.configWert))
+    : (parseFloat(el.value) === parseFloat(farbZiel.dataset.configWert));
+  // Entspricht der Wert exakt dem MaxLadung-Wert (nur beim Ladeleistung-Feld gesetzt), hat Blau
+  // Vorrang vor der roten Fallback-Farbe
+  const istMaxLadungWert = (farbZiel.dataset.maxladungWert !== undefined)
+    && (parseFloat(el.value) === parseFloat(farbZiel.dataset.maxladungWert));
+  farbZiel.classList.toggle('autooption-maxladung', istMaxLadungWert);
+  farbZiel.classList.toggle('autooption-fallback', istConfigWert && !istMaxLadungWert);
+  if (labelId) {
+    const labelEl = document.getElementById(labelId);
+    labelEl.classList.toggle('autooption-maxladung', istMaxLadungWert);
+    labelEl.classList.toggle('autooption-fallback', istConfigWert && !istMaxLadungWert);
+  }
+}
+
+/* Auto-Options-Panel und Dropdown-Sichtbarkeit steuern */
   document.addEventListener('DOMContentLoaded', function () {
-    //const slider = document.getElementById('slider');
-    const sliderlabel = document.getElementById('sliderlabel');
-    // Label-Wert lesen  Slider setzen
-    const labelValue = parseInt(sliderlabel.innerText.replace('%', ''), 10);
-    // Wert auf Slider übertragen
-    slider.value = labelValue;
+    // Ursprünglicher Gültigkeitsstunden-Wert aus der DB (vor jeglicher Live-Umschaltung im Dropdown)
+    const DB_Std_Diff = <?php echo json_encode((float) $std_diff); ?>;
+
+    function toggleSliderBereich(zeigen) {
+      document.getElementById('slider_wrapper').style.display = zeigen ? '' : 'none';
+      document.getElementById('maxladung_button_wrapper').style.display = zeigen ? '' : 'none';
+    }
+
+    document.getElementById('modus').addEventListener('change', function () {
+      toggleSliderBereich(this.value === 'Slider');
+      document.getElementById('auto_options_details').open = (this.value === 'AutoOptions');
+
+      const stundenfeld = document.getElementById('gueltigkeitsstunden');
+      if (stundenfeld.value === '') {
+        stundenfeld.value = DB_Std_Diff;
+        autoOptionInput(stundenfeld, null);
+      }
+    });
   });
 
 /* Lesen und speichern der Daten */
@@ -428,41 +674,88 @@ $(document).ready(function(){
   });
 
   const modus = document.querySelector('select[name="hausakkuladung"]').value;
-  let js_value = -1;
-  let hours = 0;
-  let std_diff = <?php echo $std_diff; ?>;
+  let js_value = (modus === "Slider") ? -3 : (modus === "AutoOptions" ? -4 : -1);
+  let manuellesteuerung_options;
 
   if (modus == "Auto") {
-      js_value = -1;
-    } else if (modus == "MaxLadung" || modus == "Slider") {
-      let input = prompt(`Bitte gib die Gültigkeitsstunden für "${modus}" ein:`, std_diff);
-      if (input === null) {
-        // Nutzer hat auf Abbrechen geklickt -> Funktion beenden
-        return;
-        }
-      // Wenn Buchstaben eingegeben werden, hours = 0
-      let trimmed = input.trim();
-      let parsed = parseFloat(trimmed);
-      if (trimmed !== "" && !isNaN(parsed) && parsed >= 0 && parsed <= 100) {
-            hours = parsed;
-        } else {
-            hours = 0;
-        }
-      js_value = (modus === "MaxLadung") ? -2 : parseInt(document.querySelector('input[name="hausakkuladung"]').value);
+      // Auto braucht keine Gültigkeitsstunden -> Options fest auf 0
+      manuellesteuerung_options = 0;
+    } else {
+      // AutoOptions / Slider: Gültigkeitsstunden direkt aus dem Eingabefeld lesen
+      let eingabe = document.getElementById('gueltigkeitsstunden').value;
+      let parsed = parseFloat(String(eingabe).replace(",", "."));
+      let hours = (eingabe !== "" && !isNaN(parsed) && parsed >= 0 && parsed <= 100) ? parsed : 0;
+      // Bei 0 Stunden explizit 0 speichern (statt "jetzt"), damit AutoOptions und der davon
+      // abgeleitete MindBattLad-Timestamp konsistent 0 bekommen
+      manuellesteuerung_options = (hours === 0) ? 0 : Math.floor(Date.now() / 1000) + hours * 3600;
     }
 
-  // Akkuschonung auslesen
-  let as_modus = 0;
-    if (document.querySelector('input[name="akkuschonung"]').checked) {
-    as_modus = 1;
+  // Akkuschonung (0, 1 oder 2) auslesen – bei Modus "Auto" fest 0 speichern
+  let as_modus = (modus === "Auto") ? 0 : (parseInt(document.querySelector('select[name="akkuschonung"]').value, 10) || 0);
+
+  // Res_Feld2 hängt vom Modus ab:
+  // Auto/AutoOptions -> fest -1 (analog zur Kennung in CONFIG/charge_priv.ini)
+  // Slider ("Ladeleistung") -> ungenutzt (0); der eigentliche Watt-Wert steht in der eigenständigen
+  // FesteLadeleistung-Zeile (weiter unten gespeichert) - für die Steuerung reicht Res_Feld1=-3 als
+  // Moduskennung, ein zusätzlicher Wert hier wird von der Oberfläche nicht (mehr) gelesen
+  let res_feld2_wert;
+  if (modus === "Auto" || modus === "AutoOptions") {
+    res_feld2_wert = -1;
+  } else {
+    res_feld2_wert = 0;
   }
 
   ID.push("23:59");
-  Schluessel.push("Reservierung");
+  Schluessel.push("ChargeOption");
   Tag_Zeit.push("ManuelleSteuerung");
   Res_Feld1.push(js_value);
+  Res_Feld2.push(res_feld2_wert);
+  Options.push(manuellesteuerung_options);
+
+  // Akkuschonung als eigene, von der ManuelleSteuerung-Gültigkeit unabhängige Zeile
+  // Eigene ID (nicht "23:59"), da sonst die gleiche ID wie die ManuelleSteuerung-Zeile
+  // beim Speichern zu einem Überschreiben statt zwei getrennten Zeilen führt
+  ID.push("23:58");
+  Schluessel.push("ChargeOption");
+  Tag_Zeit.push("Akkuschonung");
+  Res_Feld1.push(0);
   Res_Feld2.push(as_modus);
-  Options.push(Math.floor(Date.now() / 1000) + hours * 3600);
+  Options.push(manuellesteuerung_options);
+
+  // Alle Auto-Options-Felder (z.B. MindBattLad) generisch speichern - vom Dropdown-Modus
+  // unabhängige, eigene Zeilen. Timestamp wird nur übernommen, wenn "AutoOptions" gewählt ist
+  // (identisch zum ManuelleSteuerung-Timestamp), sonst 0. Neue Felder in $AutoOptionsFelder (PHP)
+  // werden hier automatisch mitgespeichert, ohne dass dieser Code geändert werden muss.
+  AutoOptionsFelder.forEach(function (feld) {
+    let feld_wert;
+    if (feld.typ === 'radio') {
+      let checkedEl = document.querySelector('input[name="' + feld.radio_name + '"]:checked');
+      feld_wert = checkedEl ? (parseInt(checkedEl.value) || 0) : 0;
+    } else {
+      let inputEl = document.getElementById(feld.input_id);
+      feld_wert = parseInt(inputEl.value) || 0;
+    }
+    // Entspricht der Wert ohnehin dem Config-Wert (ini), ist kein eigener Timestamp nötig -> 0
+    let istConfigWert = (String(feld_wert) === String(feld.config_wert));
+    ID.push(feld.db_id);
+    Schluessel.push("ChargeOption");
+    Tag_Zeit.push(feld.key);
+    Res_Feld1.push(0);
+    Res_Feld2.push(feld_wert);
+    Options.push((modus === "AutoOptions" && !istConfigWert) ? manuellesteuerung_options : 0);
+  });
+
+  // FesteLadeleistung: eigenständig für Modus "Slider" (Ladeleistung W) verdrahtet, nicht Teil
+  // von AutoOptionsFelder. Timestamp nur bei Modus Slider UND wenn der Wert vom Config-Wert abweicht.
+  const FesteLadeleistungConfigWert = <?php echo (int) $FesteLadeleistung_Config_Wert; ?>;
+  let feste_ladeleistung_wert = parseInt(document.getElementById('feste_ladeleistung_feld').value) || 0;
+  let FesteLadeleistung_istConfigWert = (feste_ladeleistung_wert === FesteLadeleistungConfigWert);
+  ID.push("23:56");
+  Schluessel.push("ChargeOption");
+  Tag_Zeit.push("FesteLadeleistung");
+  Res_Feld1.push(0);
+  Res_Feld2.push(feste_ladeleistung_wert);
+  Options.push((modus === "Slider" && !FesteLadeleistung_istConfigWert) ? manuellesteuerung_options : 0);
   //alert(js_value);
 
   $.ajax({

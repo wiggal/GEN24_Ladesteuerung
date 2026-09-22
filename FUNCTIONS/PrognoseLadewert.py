@@ -2,10 +2,8 @@ from datetime import datetime, timedelta
 import json
 import FUNCTIONS.functions
 
-basics = FUNCTIONS.functions.basics()
-    
 class progladewert:
-    def __init__(self, data, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry):
+    def __init__(self, data, WR_Kapazitaet, reservierungdata_tmp, MaxLadung, Einspeisegrenze, aktuelleBatteriePower, Eigen_Opt_Std_arry, basics_instance):
         self.now = datetime.now()
         self.data = data
         self.WR_Kapazitaet = WR_Kapazitaet
@@ -15,6 +13,8 @@ class progladewert:
         self.aktuelleBatteriePower = aktuelleBatteriePower
         self.Eigen_Opt_Std_arry = Eigen_Opt_Std_arry
         self.DEBUG_Ausgabe = ''
+        # Bereits existierende basics-Instanz speichern
+        self.basics = basics_instance
 
     def getPrognose(self, Stunde):
             # Spalte 1 und 2 von self.reservierungdata_tmp aufaddieren
@@ -79,8 +79,8 @@ class progladewert:
             # aktuelle Stunde und aktuelle Minute
             Akt_Std = int(datetime.strftime(self.now, "%H"))
             Akt_Minute = int(datetime.strftime(self.now, "%M"))
-            BatSparFaktor = basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
-            strompreis_einspeisegrenze = basics.getVarConf('Ladeberechnung','strompreis_einspeisegrenze','eval')
+            BatSparFaktor = self.basics.getVarConf('Ladeberechnung','BatSparFaktor','eval')
+            strompreis_einspeisegrenze = self.basics.getVarConf('Ladeberechnung','strompreis_einspeisegrenze','eval')
     
             # Gesamte Tagesprognose, Tagesüberschuß aus Prognose ermitteln
             i = Akt_Std
@@ -182,7 +182,7 @@ class progladewert:
                 LadewertGrund = "Prognoseberechnung BatSparFaktor"
 
                 # Um morgens auf Null zu stellen
-                org_WRSchreibGrenze_nachOben = basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
+                org_WRSchreibGrenze_nachOben = self.basics.getVarConf('Ladeberechnung','WRSchreibGrenze_nachOben','eval')
                 if (aktuellerLadewert < org_WRSchreibGrenze_nachOben*0.7 and BatSparFaktor < 1):
                     LadewertGrund = "Ladewert " + str(aktuellerLadewert) + " < Grenze_nachOben * 0.7"
                     aktuellerLadewert = 0
@@ -190,7 +190,7 @@ class progladewert:
             # Prüfungen auf Grenzwerte für beide Berechnungsmethoden
             # Wenn größter Prognosewert je Stunde ist kleiner als GrenzwertGroestePrognose volle Ladung
             aktuellerLadewert = self.getLadewertinGrenzen(aktuellerLadewert)
-            GrenzwertGroestePrognose = basics.getVarConf('Ladeberechnung','GrenzwertGroestePrognose','eval')
+            GrenzwertGroestePrognose = self.basics.getVarConf('Ladeberechnung','GrenzwertGroestePrognose','eval')
             ZeitbisBattVollUm = BattVollUm - datetime.now().hour
             # Nur bis 2 Stunden vor BattVollUm auf GrenzwertGroestePrognose pruefen
             if GrenzwertGroestePrognose > groestePrognose and ZeitbisBattVollUm > 2:
@@ -381,11 +381,11 @@ class progladewert:
         
     def getEigenverbrauchOpt(self, host_ip, user, password, BattStatusProz, BattganzeKapazWatt, EigenverbOpt_steuern, MaxEinspeisung=0):
         DEBUG_Eig_opt ="\nDEBUG\nDEBUG <<<<<<<< Eigenverbrauchs-Optimierung  >>>>>>>>>>>>>"
-        GrundlastNacht = basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
-        AkkuZielProz = basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
-        MindBattLad = basics.getVarConf('Ladeberechnung','MindBattLad','eval')
-        RundungEinspeisewert = basics.getVarConf('EigenverbOptimum','RundungEinspeisewert','eval')
-        PrognoseGrenzeMorgen = basics.getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
+        GrundlastNacht = self.basics.getVarConf('EigenverbOptimum','GrundlastNacht','eval')
+        AkkuZielProz = self.basics.getVarConf('EigenverbOptimum','AkkuZielProz','eval')
+        MindBattLad = self.basics.getVarConf('Ladeberechnung','MindBattLad','eval')
+        RundungEinspeisewert = self.basics.getVarConf('EigenverbOptimum','RundungEinspeisewert','eval')
+        PrognoseGrenzeMorgen = self.basics.getVarConf('EigenverbOptimum','PrognoseGrenzeMorgen','eval')
         PrognoseMorgen_arr = self.getPrognoseMorgen(MaxEinspeisung)
         PrognoseMorgen = PrognoseMorgen_arr[0]/1000
         Ende_Nacht_Std = PrognoseMorgen_arr[1]
@@ -463,7 +463,7 @@ class progladewert:
         AkkuSchonGrund = ""
         Schaltverzoegerung_Diff = 2
         if BattStatusProz > 90: Schaltverzoegerung_Diff = 1
-        Akkuschonung_Werte_tmp = json.loads(basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str'))
+        Akkuschonung_Werte_tmp = json.loads(self.basics.getVarConf('Ladeberechnung','Akkuschonung_Werte','str'))
         Akkuschonung_Werte = dict(sorted(Akkuschonung_Werte_tmp.items(), key=lambda item: int(item[0])))
         DEBUG_Ausgabe += "DEBUG\nDEBUG <<<<<< Meldungen von Akkuschonung >>>>>>> "
         DEBUG_Ausgabe += "\nDEBUG Akkuschonung_Werte: " + str(Akkuschonung_Werte) + "\n"
@@ -546,7 +546,7 @@ class progladewert:
 
         # Wenn Akkuschonung == 2, Ladewert bei hoher Zellspannung reduzieren
         if Akkuschonung == 2:
-            Zellspannungs_Werte = basics.getVarConf('Ladeberechnung','Zellspannungs_Werte','str')
+            Zellspannungs_Werte = self.basics.getVarConf('Ladeberechnung','Zellspannungs_Werte','str')
             Zellspannung_ein, LadewertC, Zellspannung_aus = map(float, Zellspannungs_Werte.split(",")) # ACHTUNG Strigs
             Volt_ladewert = int(BattganzeLadeKapazWatt_Akku * LadewertC)
             if((alterLadewert != Volt_ladewert) and maxvolt >= Zellspannung_ein) or ((alterLadewert == Volt_ladewert) and (maxvolt >= Zellspannung_aus or (maxvolt == 0 and BattStatusProz > 80))): 
