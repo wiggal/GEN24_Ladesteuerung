@@ -153,6 +153,11 @@ function build_tab_config(array $ini_section) {
  * - section:  optional, ini-Sektion für den Config-Wert (Default 'Ladeberechnung')
  * - optionen: optional, nur bei typ 'liste'/'radio' - kommaseparierte "wert:Label"-Paare,
  *             z.B. "0:Aus,1:Ein,2:Automatik"
+ * - sichtbar: 'ein' oder 'aus' - sollte wie bei [TAB_config] immer explizit gesetzt werden. 'aus'
+ *             blendet einen aus config.ini geerbten Eintrag aus - einziger Weg, einen
+ *             Basis-Eintrag per config_priv.ini abzuschalten, da array_replace_recursive()
+ *             Einträge nur überschreiben, nicht löschen kann. Fehlt der Wert (nicht empfohlen),
+ *             gilt der Eintrag als sichtbar.
  */
 function build_auto_options_felder(array $ini_section) {
     $felder_roh = group_indexed_ini_section($ini_section);
@@ -161,6 +166,14 @@ function build_auto_options_felder(array $ini_section) {
     $result = [];
     foreach ($felder_roh as $eintrag) {
         if (!isset($eintrag['key']) || $eintrag['key'] === '') continue;
+
+        // Analog zu "sichtbar" bei [TAB_config]: array_replace_recursive() kann beim Mergen von
+        // config.ini + config_priv.ini keinen Eintrag LÖSCHEN, der in config.ini definiert ist -
+        // nur einzelne Felder überschreiben. Ein in config_priv.ini gesetztes "N.sichtbar = aus"
+        // schaltet einen aus config.ini geerbten Eintrag also gezielt ab, ohne ihn zu duplizieren.
+        if (isset($eintrag['sichtbar']) && strtolower(trim($eintrag['sichtbar'])) === 'aus') {
+            continue;
+        }
 
         $feld = [
             'typ'   => $eintrag['typ'] ?? 'prozent',

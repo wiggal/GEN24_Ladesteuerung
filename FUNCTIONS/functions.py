@@ -110,8 +110,9 @@ class basics:
 
             # Vorhandene DB-Einträge aus ManuelleSteuerung vom TAB-LadeSTRG setzen
             if (var in self.ChargeOption):
-                return_var = self.ChargeOption[var]['Res_Feld2']
-                print(f"DEBUG: {var} = {return_var}")  #entWIGGlung
+                if (self.ChargeOption[var]['Res_Feld2'] != return_var):
+                    return_var = self.ChargeOption[var]['Res_Feld2']
+                    print(f"DEBUG: DB_VAR {var} = {return_var}")
 
         except (KeyError, ValueError):
             print(f"ERROR: die Variable [{var_block}][{var}] wurde NICHT {error_type}definiert!")

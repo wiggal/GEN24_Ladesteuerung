@@ -93,14 +93,6 @@
 }
 /* END LADEGRENZBOX */
 
-/* CHECKBOX */
-input[type="checkbox"] {
-   position: relative;
-   width: 20px;
-   height: 25px;
-   top: +.5em;
-   accent-color: #44c767;
-}
 .dropdown {
   font-size: 2rem;
   line-height: 1.4;
@@ -120,8 +112,6 @@ input[type="checkbox"] {
 label.slider.autooption-percent {
   font-size: 63%;
 }
-
-/* ENDE CHECKBOX */
 
 label.slider {
 	background-color:#44c767;
@@ -195,7 +185,7 @@ input.slider.autooption-fallback {
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  margin-top: 50px !important; /* Abstand nach oben zum Button */
+  margin-top: 50px; /* Abstand nach oben zum Button */
   margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
 }
 .checkbox-wrap {
@@ -220,7 +210,7 @@ input.slider.autooption-fallback {
 
   .sliderbeschriftung{
     font-size:90%;
-    margin-top: 15px !important; /* Abstand nach oben zum Button */
+    margin-top: 20px; /* Abstand nach oben zum Button */
     margin-bottom: 10px !important; /* Abstand nach unten zum Slider */
   }
 
@@ -292,7 +282,6 @@ $Res_Feld2 = 'laufend';
 $DB_AutoOptions_selected = '';
 $DB_Auto_selected = '';
 $DB_Slider_selected = '';
-$Akkuschon_check = '';
 # Prüfen, ob Einträge für ManuelleSteuerung schon abgelaufen
 # Wenn Feld in DB keine Zahl (oder die Zeile noch gar nicht existiert)
 if (!isset($EV_Reservierung['ManuelleSteuerung']['Options']) || !is_numeric($EV_Reservierung['ManuelleSteuerung']['Options'])){
@@ -327,15 +316,33 @@ if (isset($EV_Reservierung['ManuelleSteuerung']['Res_Feld1'])) {
     }
 }
 
-// Ausgelesenen Wert für das Select-Feld vorbereiten (standardmäßig 0)
-$DB_Akkuschon_wert = isset($EV_Reservierung['Akkuschonung']['Res_Feld2']) ? (int)$EV_Reservierung['Akkuschonung']['Res_Feld2'] : 0;
-
-# Stundenfeld bleibt immer aktiv/vorbelegt (echter Wert bzw. 1 Stunde als Default, wenn nichts aus
+# Stundenfeld bleibt immer aktiv/vorbelegt (echter Wert bzw. 0 als Default, wenn nichts aus
 # der DB kommt) - auch bei Auto, statt hier auf 0 gezwungen zu werden. Beim Speichern wird das Feld
 # für Auto ohnehin ignoriert (Options wird dort fest auf 0 gesetzt), das betrifft nur die Anzeige.
 $std_diff_anzeige = $std_diff;
-if ($DB_Auto_selected) {
-    $DB_Akkuschon_wert = 0;
+
+/**
+ * Gemeinsame Fallback-Logik für "Config-Wert vs. DB-Wert"-Felder (AutoOptionsFelder-Einträge,
+ * FesteLadeleistung, Akkuschonung): der Config-Wert wird angezeigt - und das Feld als Fallback
+ * markiert -, wenn die zugehörige DB-Zeile ($EV_Reservierung[$zeit_key]) zeitlich abgelaufen ist,
+ * kein DB-Wert existiert, oder der DB-Wert ohnehin identisch mit dem Config-Wert ist.
+ * $ist_numerisch=false vergleicht als String (typ 'liste'/'radio'), sonst als Zahl.
+ */
+function autooption_fallback_werte($EV_Reservierung, $zeit_key, $config_quelle, $config_key, $ist_numerisch = true) {
+    $config_wert_roh = isset($config_quelle[$config_key]) ? $config_quelle[$config_key] : null;
+    $db_wert_roh = isset($EV_Reservierung[$zeit_key]['Res_Feld2']) ? $EV_Reservierung[$zeit_key]['Res_Feld2'] : null;
+
+    $config_wert = $ist_numerisch ? (int) $config_wert_roh : (string) $config_wert_roh;
+    $db_wert = is_null($db_wert_roh) ? null : ($ist_numerisch ? (int) $db_wert_roh : (string) $db_wert_roh);
+
+    $options = isset($EV_Reservierung[$zeit_key]['Options']) ? (int) $EV_Reservierung[$zeit_key]['Options'] : 0;
+    $ist_fallback = ($options < time()) || is_null($db_wert) || ($db_wert === $config_wert);
+
+    return [
+        'config_wert'    => $config_wert,
+        'anzeige_wert'   => $ist_fallback ? $config_wert : $db_wert,
+        'fallback_class' => $ist_fallback ? 'autooption-fallback' : '',
+    ];
 }
 
 # Auto Options: die Feldliste kommt jetzt aus der Sektion [AutoOptionsFelder] von
@@ -344,32 +351,19 @@ if ($DB_Auto_selected) {
 # gegen ein fehlendes/leeres Ergebnis absichern, falls die Sektion (noch) nicht existiert.
 $AutoOptionsFelder = $GLOBALS['AutoOptionsFelder'] ?? [];
 
-# Werte je Auto-Options-Feld berechnen: Config-Wert (aus charge.ini/charge_priv.ini, via
-# merge_config_into_globals bereits zusammengeführt, Schlüssel = Feldname) wird angezeigt - und das
-# Feld rot markiert - wenn die Zeile zeitlich abgelaufen ist, kein DB-Wert existiert, oder der
-# DB-Wert ohnehin identisch mit dem Config-Wert ist. Bei 'liste' wird als String verglichen, sonst
-# als Zahl.
 $AutoOptionsWerte = [];
 foreach ($AutoOptionsFelder as $Feld_Schluessel => $Feld) {
     $typ = $Feld['typ'] ?? 'prozent';
     $ist_numerisch = !in_array($typ, ['liste', 'radio'], true);
     $section = $Feld['section'] ?? 'Ladeberechnung';
 
-    $config_wert_roh = isset($GLOBALS[$section][$Feld_Schluessel]) ? $GLOBALS[$section][$Feld_Schluessel] : null;
-    $db_wert_roh = isset($EV_Reservierung[$Feld_Schluessel]['Res_Feld2']) ? $EV_Reservierung[$Feld_Schluessel]['Res_Feld2'] : null;
-
-    $config_wert = $ist_numerisch ? (int) $config_wert_roh : (string) $config_wert_roh;
-    $db_wert = is_null($db_wert_roh) ? null : ($ist_numerisch ? (int) $db_wert_roh : (string) $db_wert_roh);
-
-    $options = isset($EV_Reservierung[$Feld_Schluessel]['Options']) ? (int) $EV_Reservierung[$Feld_Schluessel]['Options'] : 0;
-    $abgelaufen = ($options < time());
-    $ist_fallback = $abgelaufen || is_null($db_wert) || ($db_wert === $config_wert);
+    $w = autooption_fallback_werte($EV_Reservierung, $Feld_Schluessel, $GLOBALS[$section] ?? [], $Feld_Schluessel, $ist_numerisch);
 
     $AutoOptionsWerte[$Feld_Schluessel] = [
         'typ'            => $typ,
-        'anzeige_wert'   => $ist_fallback ? $config_wert : $db_wert,
-        'config_wert'    => $config_wert,
-        'fallback_class' => $ist_fallback ? 'autooption-fallback' : '',
+        'anzeige_wert'   => $w['anzeige_wert'],
+        'config_wert'    => $w['config_wert'],
+        'fallback_class' => $w['fallback_class'],
         'input_id'       => 'autooption_' . $Feld_Schluessel . '_input',
         'label_id'       => 'autooption_' . $Feld_Schluessel . '_label',
         'radio_name'     => 'autooption_' . $Feld_Schluessel . '_radio',
@@ -378,34 +372,37 @@ foreach ($AutoOptionsFelder as $Feld_Schluessel => $Feld) {
 
 # FesteLadeleistung: eigenständig für den Dropdown-Modus "Slider" (Ladeleistung W) verdrahtet -
 # bewusst NICHT Teil von $AutoOptionsFelder, da es fest an diesen Hauptmodus gebunden ist statt an
-# das Auto-Options-Panel. Gleiche Fallback-Logik wie bei den Auto-Options-Feldern (Config-Wert +
-# rote Markierung, wenn Zeile abgelaufen/kein DB-Wert/DB-Wert==Config-Wert).
-$FesteLadeleistung_Config_Wert = isset($Ladeberechnung['FesteLadeleistung']) ? (int) $Ladeberechnung['FesteLadeleistung'] : 0;
-$FesteLadeleistung_DB_Wert = isset($EV_Reservierung['FesteLadeleistung']['Res_Feld2']) ? (int) $EV_Reservierung['FesteLadeleistung']['Res_Feld2'] : null;
-$FesteLadeleistung_Options = isset($EV_Reservierung['FesteLadeleistung']['Options']) ? (int) $EV_Reservierung['FesteLadeleistung']['Options'] : 0;
-$FesteLadeleistung_abgelaufen = ($FesteLadeleistung_Options < time());
-$FesteLadeleistung_ist_fallback = $FesteLadeleistung_abgelaufen || is_null($FesteLadeleistung_DB_Wert) || ($FesteLadeleistung_DB_Wert === $FesteLadeleistung_Config_Wert);
-$DB_FesteLadeleistung_wert = $FesteLadeleistung_ist_fallback ? $FesteLadeleistung_Config_Wert : $FesteLadeleistung_DB_Wert;
+# das Auto-Options-Panel. Gleiche Fallback-Logik wie bei den Auto-Options-Feldern.
+$fl = autooption_fallback_werte($EV_Reservierung, 'FesteLadeleistung', $Ladeberechnung, 'FesteLadeleistung');
+$FesteLadeleistung_Config_Wert = $fl['config_wert'];
+$DB_FesteLadeleistung_wert = $fl['anzeige_wert'];
 # Entspricht der angezeigte Wert exakt dem MaxLadung-Wert, hat Blau Vorrang vor der roten Fallback-Farbe
 $MaxLadung_Config_Wert = isset($Ladeberechnung['MaxLadung']) ? (int) $Ladeberechnung['MaxLadung'] : 0;
-$FesteLadeleistung_ist_maxladung = ($DB_FesteLadeleistung_wert === $MaxLadung_Config_Wert);
-$FesteLadeleistung_Fallback_Class = $FesteLadeleistung_ist_maxladung ? 'autooption-maxladung' : ($FesteLadeleistung_ist_fallback ? 'autooption-fallback' : '');
+$FesteLadeleistung_Fallback_Class = ($DB_FesteLadeleistung_wert === $MaxLadung_Config_Wert) ? 'autooption-maxladung' : $fl['fallback_class'];
+
+# Akkuschonung: ebenfalls eigenständig verdrahtet, gleiche Fallback-Logik. Ersetzt die frühere
+# feste 0-Erzwingung bei Modus Auto: Auto ist ohnehin immer "abgelaufen" und fällt damit
+# automatisch unter diese Fallback-Logik.
+$ak = autooption_fallback_werte($EV_Reservierung, 'Akkuschonung', $Ladeberechnung, 'Akkuschonung', false);
+$Akkuschonung_Config_Wert = $ak['config_wert'];
+$DB_Akkuschon_wert = $ak['anzeige_wert'];
+$Akkuschonung_Fallback_Class = $ak['fallback_class'];
 ?>
 
 <!-- SLIDER -->
 <div style='text-align: center;'>
-    <p class="sliderbeschriftung">Ladegrenze mit Akkuschonung:
+  <p class="sliderbeschriftung">Stunden bis "Auto":
+  <input type="number" id="gueltigkeitsstunden" name="gueltigkeitsstunden" min="0" max="100" step="1" value="<?php echo $std_diff_anzeige ?>" class="autooption-input <?php echo ($std_diff_anzeige == 0) ? 'autooption-fallback' : '' ?>" data-typ="zahl" data-config-wert="0" style="width:80px; height:auto; font-size:100%;" oninput="autoOptionInput(this, null);">
+  <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
+  </p>
+    <p class="sliderbeschriftung" style="margin-top:0 !important;">Ladegrenze mit Akkuschonung:
     <span class="checkbox-wrap">
-    <select name="akkuschonung" id="akkuschonung" style="font-size: 1rem; padding: 2px 5px;">
-        <option value="0" <?php echo ($DB_Akkuschon_wert === 0) ? 'selected' : ''; ?>>0 - Aus</option>
-        <option value="1" <?php echo ($DB_Akkuschon_wert === 1) ? 'selected' : ''; ?>>1 - Ein</option>
-        <option value="2" <?php echo ($DB_Akkuschon_wert === 2) ? 'selected' : ''; ?>>2 - Zell-U</option>
+    <select name="akkuschonung" id="akkuschonung" class="autooption-input <?php echo $Akkuschonung_Fallback_Class ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($Akkuschonung_Config_Wert) ?>" style="font-size: 1rem; padding: 2px 5px; width:auto; height:auto;" onchange="autoOptionInput(this, null);">
+        <option value="0" <?php echo ($DB_Akkuschon_wert === '0') ? 'selected' : ''; ?>>0 - Aus</option>
+        <option value="1" <?php echo ($DB_Akkuschon_wert === '1') ? 'selected' : ''; ?>>1 - Ein</option>
+        <option value="2" <?php echo ($DB_Akkuschon_wert === '2') ? 'selected' : ''; ?>>2 - Zell-U</option>
     </select>
     </span>
-  <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
-  <p class="sliderbeschriftung" style="margin-top:0 !important;">Gültigkeitsstunden bis "Auto":
-  <input type="number" id="gueltigkeitsstunden" name="gueltigkeitsstunden" min="0" max="100" step="0.25" value="<?php echo $std_diff_anzeige ?>" style="width:80px; font-size:100%;">
-  </p>
 <div class="flex-container">
     <div>
   <select id="modus" class="dropdown" name="hausakkuladung" >
@@ -606,11 +603,11 @@ function autoOptionInput(el, labelId, farbZielId) {
   const typ = farbZiel.dataset.typ;
   const istConfigWert = (typ === 'liste' || typ === 'radio')
     ? (String(el.value) === String(farbZiel.dataset.configWert))
-    : (parseInt(el.value, 10) === parseInt(farbZiel.dataset.configWert, 10));
+    : (parseFloat(el.value) === parseFloat(farbZiel.dataset.configWert));
   // Entspricht der Wert exakt dem MaxLadung-Wert (nur beim Ladeleistung-Feld gesetzt), hat Blau
   // Vorrang vor der roten Fallback-Farbe
   const istMaxLadungWert = (farbZiel.dataset.maxladungWert !== undefined)
-    && (parseInt(el.value, 10) === parseInt(farbZiel.dataset.maxladungWert, 10));
+    && (parseFloat(el.value) === parseFloat(farbZiel.dataset.maxladungWert));
   farbZiel.classList.toggle('autooption-maxladung', istMaxLadungWert);
   farbZiel.classList.toggle('autooption-fallback', istConfigWert && !istMaxLadungWert);
   if (labelId) {
@@ -634,11 +631,10 @@ function autoOptionInput(el, labelId, farbZielId) {
       toggleSliderBereich(this.value === 'Slider');
       document.getElementById('auto_options_details').open = (this.value === 'AutoOptions');
 
-      // Gültigkeitsstunden immer auf den echten DB-Wert setzen, außer bei Auto (dort 0) -
-      // FesteLadeleistung (Ladeleistung) ist eine eigene, vom Modus unabhängige DB-Zeile und
-      // braucht daher keinen eigenen Restore-Mechanismus mehr wie früher der Prozent-Slider.
-      if (this.value !== 'Auto') {
-        document.getElementById('gueltigkeitsstunden').value = DB_Std_Diff;
+      const stundenfeld = document.getElementById('gueltigkeitsstunden');
+      if (stundenfeld.value === '') {
+        stundenfeld.value = DB_Std_Diff;
+        autoOptionInput(stundenfeld, null);
       }
     });
   });

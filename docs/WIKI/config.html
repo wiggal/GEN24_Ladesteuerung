@@ -681,7 +681,17 @@ Fast-forward
 <tr><td class="variablenname">8.sichtbar</td>
 <td><input type="text" name="Zeile[55][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[56]" value='' ></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[57]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 12.08.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+<tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[57]" value='[AutoOptionsFelder]' >[AutoOptionsFelder]</td></tr>
+<tr class="comment"><td colspan="2">; Hier werden die Felder im &quot;Auto Options&quot;-Panel des TAB LadeStrg  definiert.<br>; N.key      = Anzeigename/charge.ini-Schlüssel/DB-&quot;Zeit&quot; (Pflicht)<br>; N.typ      = prozent (Slider 0-100%) | zahl (Zahleneingabefeld) | liste (Dropdown) | radio (Radio-Buttons)<br>; N.db_id    = eigene, kollisionsfreie ID (Spalte &quot;ID&quot;) für den Speichervorgang<br>; N.section  = optional, ini-Sektion für den Config-Wert (Default: Ladeberechnung)<br>; N.optionen = optional, nur bei typ liste/radio - kommaseparierte &quot;wert:Label&quot;-Paare,<br>;              z.B. &quot;0:Aus,1:Ein,2:Automatik&quot;<br>; N.sichtbar = ein/aus  Ob der Eintrag angezeigt wird - sollte immer explizit gesetzt werden (wie<br>;              bei [TAB_config] oben). Zum Abschalten eines in config.ini definierten Eintrags in<br>;              config_priv.ini &quot;N.sichtbar = aus&quot; setzen (löschen allein in config_priv.ini reicht<br>;              nicht, da config.ini-Einträge sonst weiter durchschlagen) </td></tr>
+<tr><td class="variablenname">0.key</td>
+<td><input type="text" name="Zeile[59][1]" value="MindBattLad" readonly></td></tr>
+<tr><td class="variablenname">0.typ</td>
+<td><input type="text" name="Zeile[60][1]" value="prozent" readonly></td></tr>
+<tr><td class="variablenname">0.db_id</td>
+<td><input type="text" name="Zeile[61][1]" value="23:57" readonly></td></tr>
+<tr><td class="variablenname">0.sichtbar</td>
+<td><input type="text" name="Zeile[62][1]" value="ein" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[63]" value='' ></td></tr>
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 22.09.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>

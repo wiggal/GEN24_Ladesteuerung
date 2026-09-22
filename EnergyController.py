@@ -216,7 +216,7 @@ if __name__ == '__main__':
                             WR_schreiben = 0
                         else:
                             WR_schreiben = 1
-                        LadewertGrund = "FesteLadeleistung"
+                        LadewertGrund = (f"FesteLadeleistung({FesteLadeleistung})")
     
                     # Hier Volle Ladung, wenn BattVollUm +eine Stunde Puffer erreicht ist oder Akku = 100%!
                     elif (int(datetime.strftime(now, "%H")) > int(BattVollUm)) or (BattStatusProz == 100):
