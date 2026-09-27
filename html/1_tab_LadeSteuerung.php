@@ -4,7 +4,7 @@
   {
    max-width:600px;
    width:100%;
-   margin: 0 auto;;
+   margin: 0 auto;
   }
   .center {
   margin-left: auto;
@@ -357,6 +357,12 @@ foreach ($AutoOptionsFelder as $Feld_Schluessel => $Feld) {
     $ist_numerisch = !in_array($typ, ['liste', 'radio'], true);
     $section = $Feld['section'] ?? 'Ladeberechnung';
 
+    // Prüfen, ob der in config_priv.ini/config.ini unter [AutoOptionsFelder] definierte Schlüssel
+    // überhaupt in der zugehörigen, aus CONFIG/charge.ini geladenen Sektion existiert. Fehlt er
+    // dort (z.B. weil ein neues Feld angelegt, aber noch kein passender Wert in charge.ini
+    // hinterlegt wurde), wird das Feld nicht regulär gerendert, sondern es erscheint ein Warntext.
+    $config_fehlt = !isset($GLOBALS[$section][$Feld_Schluessel]);
+
     $w = autooption_fallback_werte($EV_Reservierung, $Feld_Schluessel, $GLOBALS[$section] ?? [], $Feld_Schluessel, $ist_numerisch);
 
     $AutoOptionsWerte[$Feld_Schluessel] = [
@@ -367,6 +373,7 @@ foreach ($AutoOptionsFelder as $Feld_Schluessel => $Feld) {
         'input_id'       => 'autooption_' . $Feld_Schluessel . '_input',
         'label_id'       => 'autooption_' . $Feld_Schluessel . '_label',
         'radio_name'     => 'autooption_' . $Feld_Schluessel . '_radio',
+        'config_fehlt'   => $config_fehlt,
     ];
 }
 
@@ -394,7 +401,6 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
   <p class="sliderbeschriftung">Stunden bis "Auto":
   <input type="number" id="gueltigkeitsstunden" name="gueltigkeitsstunden" min="0" max="100" step="1" value="<?php echo $std_diff_anzeige ?>" class="autooption-input <?php echo ($std_diff_anzeige == 0) ? 'autooption-fallback' : '' ?>" data-typ="zahl" data-config-wert="0" style="width:80px; height:auto; font-size:100%;" oninput="autoOptionInput(this, null);">
   <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
-  </p>
     <p class="sliderbeschriftung" style="margin-top:0 !important;">Ladegrenze mit Akkuschonung:
     <span class="checkbox-wrap">
     <select name="akkuschonung" id="akkuschonung" class="autooption-input <?php echo $Akkuschonung_Fallback_Class ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($Akkuschonung_Config_Wert) ?>" style="font-size: 1rem; padding: 2px 5px; width:auto; height:auto;" onchange="autoOptionInput(this, null);">
@@ -403,7 +409,8 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
         <option value="2" <?php echo ($DB_Akkuschon_wert === '2') ? 'selected' : ''; ?>>2 - Zell-U</option>
     </select>
     </span>
-<div class="flex-container">
+    </p>
+<div class="flex-container">    
     <div>
   <select id="modus" class="dropdown" name="hausakkuladung" >
     <option value="Auto" <?php echo $DB_Auto_selected ?>>Auto</option>
@@ -430,7 +437,11 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
     <div>
       <label class="autooption-label" style="cursor:default;"><?php echo htmlspecialchars($Feld_Schluessel) ?></label>
     </div>
-<?php if ($w['typ'] === 'prozent'): ?>
+<?php if ($w['config_fehlt']): ?>
+    <div class="autooption-label" style="flex-grow: 1; color:#cc0000;">
+      ⚠️ Schlüssel prüfen
+    </div>
+<?php elseif ($w['typ'] === 'prozent'): ?>
     <div style="display:flex; align-items:center; flex-grow: 1; gap: 0;"><label class="slider autooption-percent <?php echo $w['fallback_class'] ?>" id="<?php echo $w['label_id'] ?>" for="<?php echo $w['input_id'] ?>"><?php echo $w['anzeige_wert'] ?>%</label><input class="slider <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="prozent" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" type="range" min="0" max="100" step="5" value="<?php echo $w['anzeige_wert'] ?>" oninput="autoOptionInput(this, '<?php echo $w['label_id'] ?>');" style="flex-grow: 1;">
     </div>
 <?php elseif ($w['typ'] === 'zahl'): ?>
@@ -582,11 +593,12 @@ const AutoOptionsFelder = <?php echo json_encode(array_map(function ($Feld_Schlu
     $w = $AutoOptionsWerte[$Feld_Schluessel];
     return [
         'key'         => $Feld_Schluessel,
-        'db_id'       => $Feld['db_id'],
+        'db_id'       => $Feld['db_id'] ?? null,
         'input_id'    => $w['input_id'],
         'typ'         => $w['typ'],
         'radio_name'  => $w['radio_name'],
         'config_wert' => $w['config_wert'],
+        'config_fehlt'=> $w['config_fehlt'],
     ];
 }, array_keys($AutoOptionsFelder), $AutoOptionsFelder)); ?>;
 
@@ -727,6 +739,13 @@ $(document).ready(function(){
   // (identisch zum ManuelleSteuerung-Timestamp), sonst 0. Neue Felder in $AutoOptionsFelder (PHP)
   // werden hier automatisch mitgespeichert, ohne dass dieser Code geändert werden muss.
   AutoOptionsFelder.forEach(function (feld) {
+    // Für dieses Feld fehlt der Wert in CONFIG/charge.ini - es wurde nur als Warntext angezeigt,
+    // es existiert also kein Eingabeelement im DOM. Zeile beim Speichern überspringen.
+    if (feld.config_fehlt) return;
+    // db_id fehlt in der config_priv.ini/config.ini-Definition dieses Feldes - ohne feste ID
+    // könnte die Zeile beim Speichern nicht zuverlässig zugeordnet werden. Zeile überspringen.
+    if (feld.db_id === null || feld.db_id === undefined) return;
+
     let feld_wert;
     if (feld.typ === 'radio') {
       let checkedEl = document.querySelector('input[name="' + feld.radio_name + '"]:checked');
