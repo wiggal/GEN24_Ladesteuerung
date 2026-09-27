@@ -121,14 +121,14 @@ aus der wird dann durch html/8_tab_Diagram.php das Diagramm **QZ**-Bilanz nach *
 
 ![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
 
-Modul zur Reservierung von größeren Mengen PV-Leistung (z.B. E-Autos) und manuelle Ladesteuerung.   
-Alle eingetragenen Reservierungen werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
+Modul zur manuellen Ladesteuerung und Reservierung von größeren Mengen PV-Leistung (z.B. E-Autos).   
+Alle eingetragenen Werte werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
 
-Ist **AUTO** eingestellt, wird die Reservierung von EnergyController.py in der Ladeberechnung berücksichtigt.
-Bei Einstellung **Slider**, wird mit der eingestellten Prozentzahl der **maximalen Ladeleistung des GEN24**,  
-bei **MaxLadung** mit der in CONFIG/charge_priv.ini unter MaxLadung definierten Ladeleistung,  
-ab dem nächsten Aufruf von EnergyController.py geladen.  
-Beim Speichern werden nach Auswahl von **Slider** oder **MaxLadung** Gültigkeitsstunden abgefragt, nach deren Ablauf wird wieder **AUTO** angewendet.  
+Die Einstellungen sind gültig, bis `Stunden bis "Auto":` abgelaufen ist, `Ladegrenze mit Akkuschonung` wird in dieser Zeit berücksichtigt.  
+
+Ist **AUTO** eingestellt, wird die Reservierung von EnergyController.py berücksichtigt und die Ladesteuerung nach Prognose, und Einstellungen aus `CONFIG/charge.ini/_priv.ini` berechnet.  
+Bei Einstellung **AutoOptions**, werden alle in der `html/config_priv.ini` unter [AutoOptionsFelder] eingetragenen Variablen der `CONFIG/charge.ini/_priv.ini` angezeigt, und können zeitabhängig verändert werden.  
+Bei **Ladeleistung** kann eine Feste Ladeleistung in Watt für die eingestellten Stunden definiert werden. Mit dem Button `MaxLadung` kann die definierte MaxLadung aus CONFIG/charge.ini/_priv.ini eingestellt werden.   
 
 ### ForecastMgr
 Im ForecastMgr können die gespeicherten Prognosedaten mit der Prognosestatistik analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
