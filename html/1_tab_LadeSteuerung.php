@@ -1,3 +1,33 @@
+<?php
+// Zentrale Größen für die kompakten Bedienelemente bei "Ladegrenze mit Akkuschonung" und
+// "Auto Options" (Eingabefelder, Dropdowns, Prozent-Slider, MaxLadung-Button) - an einer
+// Stelle änderbar, statt an vielen Einzelstellen im CSS/HTML.
+$Groesse_Kompakt_FontSize      = '1rem';
+$Groesse_Kompakt_Padding       = '2px 5px';
+$Groesse_Kompakt_BorderRadius  = '10px';
+$Groesse_Kompakt_Hoehe          = '28px';
+$Groesse_AutoOptionsZahl_Breite = '100%';
+$Groesse_ProzentSlider_Hoehe    = '24px';
+
+// Eigene Größe für das "modus"-Dropdown (Auto/AutoOptions/Ladeleistung) - bewusst getrennt von
+// $Groesse_Kompakt_*, da es etwas größer sein soll als die übrigen kompakten Bedienelemente.
+$Groesse_Modus_FontSize = '1.15rem';
+$Groesse_Modus_Padding  = '4px 8px';
+
+// Mobile-Varianten (@media max-width:600px) derselben Bedienelemente - eigene Variablen,
+// damit sich Mobile- und Desktop-Größen unabhängig voneinander anpassen lassen. Standardmäßig
+// identisch zu den Desktop-Werten oben.
+$Groesse_Kompakt_FontSize_Mobile       = '1rem';
+$Groesse_Kompakt_Padding_Mobile        = '2px 5px';
+$Groesse_Kompakt_BorderRadius_Mobile   = '10px';
+$Groesse_Kompakt_Hoehe_Mobile           = '28px';
+$Groesse_AutoOptionsZahl_Breite_Mobile = '6em';
+$Groesse_ProzentSlider_Hoehe_Mobile    = '24px';
+
+// Mobile-Variante der Modus-Dropdown-Größe - standardmäßig identisch zum Desktop-Wert oben.
+$Groesse_Modus_FontSize_Mobile = '1.15rem';
+$Groesse_Modus_Padding_Mobile  = '4px 8px';
+?>
   <script src="jquery.min.js"></script>
   <style>
   .box
@@ -80,6 +110,14 @@
   padding: 10px;
   font-size: 30px;
 }
+/* Wrapper-Divs der Modus-Zeile (Select, Ladeleistung-Feld, MaxLadung-Button): font-size auf 0,
+   damit der Whitespace zwischen den Tags keine unsichtbare, zu hohe Textzeile erzeugt und die
+   Zeile dadurch höher wird als nötig. Nur hier, NICHT generisch auf .flex-container > div, da die
+   Auto-Options-Zeilen (.autooption-row) relative Prozent-Schriftgrößen (label.slider) nutzen, die
+   von der geerbten font-size abhängen. */
+.flex-container > .modus_zeile_item {
+  font-size: 0;
+}
 /* Zeilen-Wrapper der Auto-Options-Felder: eigene Regel, da die generische ".flex-container > div"-Regel
    (margin/padding) zusammen mit width:100% sonst über den Container hinausragt */
 .flex-container > div.autooption-row {
@@ -89,6 +127,7 @@
   width: 100%;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1ch;
 }
 /* END LADEGRENZBOX */
@@ -101,16 +140,25 @@
   grid-template-columns: 1.3em auto;
 }
 
+/* "modus"-Auswahl (Auto/AutoOptions/Ladeleistung) - etwas größer als das Akkuschonung-Dropdown,
+   eigene Werte statt der geteilten Kompakt-Variablen, damit nur dieses Element größer wird.
+   !important nötig, da die mobile Media Query .dropdown sonst mit !important gewinnt. */
+#modus {
+  font-size: <?php echo $Groesse_Modus_FontSize ?> !important;
+  padding: <?php echo $Groesse_Modus_Padding ?> !important;
+}
+
 /* Reines Textlabel (kein <select>) - ca. 30% kleiner als .dropdown, ohne dessen Grid-Layout */
 .autooption-label {
   font-size: 1.4rem;
   line-height: 1.4;
   display: inline-block;
+  min-width: 0;
 }
 
-/* Prozent-Badge bei Auto-Options-Feldern ca. 30% kleiner als der normale .slider-Badge (90% -> 63%) */
+/* Prozent-Badge bei Auto-Options-Feldern - gleiche Größe wie die Eingabefelder ($Groesse_Kompakt_FontSize) */
 label.slider.autooption-percent {
-  font-size: 63%;
+  font-size: <?php echo $Groesse_Kompakt_FontSize ?>;
 }
 
 label.slider {
@@ -120,15 +168,15 @@ label.slider {
 	display:inline-block;
 	cursor:pointer;
 	color:#000000;
-	font-size:90%;
-	padding:5px 10px;
+	font-size: <?php echo $Groesse_Kompakt_FontSize ?>;
+	padding:<?php echo $Groesse_Kompakt_Padding ?>;
 	margin:0;
 	text-decoration:none;
     flex-shrink: 0;
   }
 input.slider {
    width: 100%;
-   height: 35px;
+   height: <?php echo $Groesse_ProzentSlider_Hoehe ?>;
    margin: 0;
    accent-color: #44c767;
   }
@@ -142,17 +190,23 @@ input.slider.autooption-fallback {
    accent-color: #ff5733;
   }
 
-/* Zahl-/Listen-Felder bei Auto Options (typ 'zahl'/'liste') - grün wie normale Werte, rot als Fallback */
+/* Zahl-/Listen-Felder bei Auto Options (typ 'zahl'/'liste') - grün wie normale Werte, rot als Fallback.
+   Größe bewusst an das kompakte Akkuschonung-Dropdown angeglichen (statt volle Breite/feste 35px Höhe),
+   damit kein Eingabefeld optisch größer wirkt als jenes Dropdown - auch auf Mobilgeräten, da font-size
+   in rem und padding/height in px angegeben sind und somit nicht von umgebenden font-size-Overrides
+   beeinflusst werden. */
 .autooption-input {
 	background-color:#44c767;
 	border-radius:10px;
 	border:1px solid #18ab29;
 	color:#000000;
-	font-size:90%;
-	padding:5px 10px;
-	width:100%;
-	height:35px;
-	box-sizing:border-box;
+	font-size: <?php echo $Groesse_Kompakt_FontSize ?>;
+	padding: <?php echo $Groesse_Kompakt_Padding ?>;
+	width: auto;
+	min-width: 0;
+	max-width: 100%;
+	height: <?php echo $Groesse_Kompakt_Hoehe ?>;
+	box-sizing: border-box;
   }
 .autooption-input.autooption-fallback {
 	background-color:#ff5733;
@@ -164,6 +218,12 @@ input.slider.autooption-fallback {
 	background-color:#58ACFA;
 	border:1px solid #2f7fd1;
   }
+
+/* type="number"-Felder (Ladeleistung, Auto Options) füllen die volle Breite ihres Wrappers
+   (die umgebenden Divs haben flex-grow:1) statt einer festen, schmalen Breite */
+input.autooption-input[type="number"] {
+  width: <?php echo $Groesse_AutoOptionsZahl_Breite ?>;
+}
 
 /* Radio-Buttons-Gruppe: flexibles Layout statt fester Höhe wie bei Zahl-/Listenfeldern */
 .autooption-input.autooption-radio-group {
@@ -242,6 +302,49 @@ input.slider.autooption-fallback {
 
   .autooption-label {
     font-size: 0.84rem !important; /* ca. 30% kleiner als .dropdown auf Mobilgeräten */
+  }
+
+  /* Mobile-Größen der kompakten Bedienelemente (Akkuschonung-Dropdown, "modus"-Dropdown,
+     Auto-Options-Eingabefelder, Prozent-Slider, MaxLadung-Button) - eigene _Mobile-Variablen s.o.
+     !important nötig, da teils gegen Inline-Styles bzw. andere !important-Regeln (.dropdown,
+     .speichern) antreten. */
+  #modus {
+    font-size: <?php echo $Groesse_Modus_FontSize_Mobile ?> !important;
+    padding: <?php echo $Groesse_Modus_Padding_Mobile ?> !important;
+  }
+
+  #akkuschonung {
+    font-size: <?php echo $Groesse_Kompakt_FontSize_Mobile ?> !important;
+    padding: <?php echo $Groesse_Kompakt_Padding_Mobile ?> !important;
+  }
+
+  .autooption-input {
+    font-size: <?php echo $Groesse_Kompakt_FontSize_Mobile ?> !important;
+    padding: <?php echo $Groesse_Kompakt_Padding_Mobile ?> !important;
+    height: <?php echo $Groesse_Kompakt_Hoehe_Mobile ?> !important;
+  }
+
+  input.autooption-input[type="number"]:not(#gueltigkeitsstunden) {
+    width: <?php echo $Groesse_AutoOptionsZahl_Breite_Mobile ?> !important;
+  }
+
+  label.slider {
+    font-size: <?php echo $Groesse_Kompakt_FontSize_Mobile ?> !important;
+    padding: <?php echo $Groesse_Kompakt_Padding_Mobile ?> !important;
+  }
+
+  label.slider.autooption-percent {
+    font-size: <?php echo $Groesse_Kompakt_FontSize_Mobile ?> !important;
+  }
+
+  input.slider {
+    height: <?php echo $Groesse_ProzentSlider_Hoehe_Mobile ?> !important;
+  }
+
+  #maxladung_setzen_btn {
+    font-size: <?php echo $Groesse_Kompakt_FontSize_Mobile ?> !important;
+    padding: <?php echo $Groesse_Kompakt_Padding_Mobile ?> !important;
+    border-radius: <?php echo $Groesse_Kompakt_BorderRadius_Mobile ?> !important;
   }
 
   /* Tabelle zwingen, in die Breite zu passen */
@@ -403,7 +506,7 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
   <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
     <p class="sliderbeschriftung" style="margin-top:0 !important;">Ladegrenze mit Akkuschonung:
     <span class="checkbox-wrap">
-    <select name="akkuschonung" id="akkuschonung" class="autooption-input <?php echo $Akkuschonung_Fallback_Class ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($Akkuschonung_Config_Wert) ?>" style="font-size: 1rem; padding: 2px 5px; width:auto; height:auto;" onchange="autoOptionInput(this, null);">
+    <select name="akkuschonung" id="akkuschonung" class="autooption-input <?php echo $Akkuschonung_Fallback_Class ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($Akkuschonung_Config_Wert) ?>" style="font-size: <?php echo $Groesse_Kompakt_FontSize ?>; padding: <?php echo $Groesse_Kompakt_Padding ?>; width:auto; height:auto;" onchange="autoOptionInput(this, null);">
         <option value="0" <?php echo ($DB_Akkuschon_wert === '0') ? 'selected' : ''; ?>>0 - Aus</option>
         <option value="1" <?php echo ($DB_Akkuschon_wert === '1') ? 'selected' : ''; ?>>1 - Ein</option>
         <option value="2" <?php echo ($DB_Akkuschon_wert === '2') ? 'selected' : ''; ?>>2 - Zell-U</option>
@@ -411,18 +514,18 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
     </span>
     </p>
 <div class="flex-container">    
-    <div>
+    <div class="modus_zeile_item">
   <select id="modus" class="dropdown" name="hausakkuladung" >
     <option value="Auto" <?php echo $DB_Auto_selected ?>>Auto</option>
     <option value="AutoOptions" <?php echo $DB_AutoOptions_selected ?>>AutoOptions</option>
     <option value="Slider" <?php echo $DB_Slider_selected ?>>Ladeleistung</option>
   </select>
 </div>
-    <div id="slider_wrapper" style="flex-grow: 1; <?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
+    <div id="slider_wrapper" class="modus_zeile_item" style="flex-grow: 1; <?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
 <input class="autooption-input <?php echo $FesteLadeleistung_Fallback_Class ?>" id="feste_ladeleistung_feld" data-typ="zahl" data-config-wert="<?php echo htmlspecialchars($FesteLadeleistung_Config_Wert) ?>" data-maxladung-wert="<?php echo htmlspecialchars($MaxLadung_Config_Wert) ?>" type="number" value="<?php echo htmlspecialchars($DB_FesteLadeleistung_wert) ?>" oninput="autoOptionInput(this, null);">
     </div>
-    <div id="maxladung_button_wrapper" style="<?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
-<button type="button" id="maxladung_setzen_btn" class="speichern" style="position:static; transform:none; font-size:70%; padding:8px 14px; background-color:#58ACFA; border-color:#2f7fd1;" onclick="feste_ladeleistung_feld.value = <?php echo (int) ($Ladeberechnung['MaxLadung'] ?? 0); ?>; autoOptionInput(feste_ladeleistung_feld, null);">MaxLadung</button>
+    <div id="maxladung_button_wrapper" class="modus_zeile_item" style="<?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
+<button type="button" id="maxladung_setzen_btn" class="speichern" style="position:static; transform:none; font-size:<?php echo $Groesse_Kompakt_FontSize ?> !important; padding:<?php echo $Groesse_Kompakt_Padding ?> !important; border-radius:<?php echo $Groesse_Kompakt_BorderRadius ?>; background-color:#58ACFA; border-color:#2f7fd1;" onclick="feste_ladeleistung_feld.value = <?php echo (int) ($Ladeberechnung['MaxLadung'] ?? 0); ?>; autoOptionInput(feste_ladeleistung_feld, null);">MaxLadung</button>
     </div>
 </div>
 
