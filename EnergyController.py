@@ -218,8 +218,8 @@ if __name__ == '__main__':
                             WR_schreiben = 1
                         LadewertGrund = (f"FesteLadeleistung({FesteLadeleistung})")
     
-                    # Hier Volle Ladung, wenn BattVollUm +eine Stunde Puffer erreicht ist oder Akku = 100%!
-                    elif (int(datetime.strftime(now, "%H")) > int(BattVollUm)) or (BattStatusProz == 100):
+                    # Hier Volle Ladung, wenn BattVollUm +eine Stunde und aktuelle Vorhersage kleiner halbe MaxLadung ist oder Akku = 100%!
+                    elif (int(datetime.strftime(now, "%H")) > int(BattVollUm) and (aktuelleVorhersage < MaxLadung / 2)) or (BattStatusProz == 100):
                          aktuellerLadewert = MaxLadung
                          WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                          LadewertGrund = "BattVollUm oder Akkustand 100% erreicht!"

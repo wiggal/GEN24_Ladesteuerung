@@ -481,8 +481,7 @@ class progladewert:
             HysteProdFakt = 6
 
         if BattStatusProz >= BattStatusProz_Grenze:
-            DEBUG_Ausgabe += "DEBUG AkkuschonungLadewert-alterLadewert: " + str(abs(AkkuschonungLadewert - alterLadewert))
-            DEBUG_Ausgabe += "\nDEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
+            DEBUG_Ausgabe += "DEBUG BattStatusProz_Grenze: " + str(BattStatusProz_Grenze)
             DEBUG_Ausgabe += "\nDEBUG AkkuschonungLadewert: " + str(AkkuschonungLadewert) + "\n"
             DEBUG_Ausgabe += "DEBUG aktuellerLadewert: " + str(aktuellerLadewert) + "\n"
         return AkkuschonungLadewert, HysteProdFakt, BattStatusProz_Grenze, AkkuSchonGrund, DEBUG_Ausgabe 
