@@ -874,8 +874,12 @@ class OCPPManager:
         st = self.states.get(cp_id)
         if not st:
             return 0.0
-        if st.last_meter_ts is not None:
-            return st.last_meter_power_w
+        # Kein Fahrzeug bzw. nicht aktiv ladend -> keine Last
+        if st.status not in ["Charging", "SuspendedEV", "SuspendedEVSE"]:
+            return 0.0
+        if st.meter_values:
+            return self._extract_power_w_from_meter_store(cp_id)
+        # Noch kein MeterValues empfangen: Sollwert als Fallback
         return self.get_current_power_soll(cp_id)
 
     # ----------------------------
