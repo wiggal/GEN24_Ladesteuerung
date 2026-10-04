@@ -236,9 +236,6 @@ if __name__ == '__main__':
                             WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                             LadewertGrund = "BattStatusProz < MindBattLad("+str(MindBattLad)+"%)"
     
-                    # ManuelleStrg_Akkuschon übernehmen
-                    ManuelleStrg_Akkuschon = (ChargeOption.get("Akkuschonung", {}).get("Res_Feld2") or 0)
-
                     # Wenn Akkuschonung > 0 ab XX% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
                     if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
                         (aktuellerLadewert, WR_schreiben, LadewertGrund, DEBUG_Ausgabe, 
@@ -251,7 +248,6 @@ if __name__ == '__main__':
                                 alterLadewert, 
                                 aktuellerLadewert, 
                                 aktuellePVProduktion, 
-                                ManuelleStrg_Akkuschon,
                                 SOC_Proz_Grenze, 
                                 PrognoseLimit_SOC, 
                                 PrognoseMorgen, 

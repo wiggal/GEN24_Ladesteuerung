@@ -488,7 +488,7 @@ class progladewert:
 
 
     def ladeanpassung_akkuschonung(self, Akkuschonung, Batterieentlandung_steuern, BattStatusProz, BattganzeLadeKapazWatt_Akku,
-                                   alterLadewert, aktuellerLadewert, ManuelleStrg_Akkuschon, aktuellePVProduktion,
+                                   alterLadewert, aktuellerLadewert, aktuellePVProduktion,
                                    SOC_Proz_Grenze, PrognoseLimit_SOC, PrognoseMorgen, BattKapaWatt_akt_SOC, BattKapaWatt_akt,
                                    WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten,
                                    DEBUG_Ausgabe, LadewertGrund, WR_schreiben, maxvolt):
@@ -503,7 +503,7 @@ class progladewert:
             AkkuSchonGrund = Akkuschonung_dict[3]
             DEBUG_Ausgabe += Akkuschonung_dict[4]
 
-            if BattStatusProz >= BattStatusProz_Grenze_AkkuSchon and ManuelleStrg_Akkuschon > 0:
+            if BattStatusProz >= BattStatusProz_Grenze_AkkuSchon:
                 # Um das setzen der Akkuschonung zu verhindern, wenn aktuellePVProduktion zu wenig oder der Akku wieder entladen wird.
                 if (AkkuschonungLadewert < aktuellerLadewert) and (aktuellePVProduktion * HysteProdFakt > AkkuschonungLadewert):
                     aktuellerLadewert = AkkuschonungLadewert
@@ -512,8 +512,6 @@ class progladewert:
                     # Aufruf mit self.
                     WR_schreiben = self.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
                     LadewertGrund = "Akkuschonung: Ladestand >= " + AkkuSchonGrund
-            if ManuelleStrg_Akkuschon == 0:
-                DEBUG_Ausgabe += "DEBUG Keine Akkuschonung, da in LadeStrg abgewählt!\n"
 
         # Ladung des Akku auf XX% (SOC_Proz_Grenze) begrenzen, wenn bestimmte Prognose für die nächsten 24 Std. überschritten
         # Hysterese anwenden
@@ -528,17 +526,15 @@ class progladewert:
             DEBUG_Ausgabe += "\nDEBUG PrognoseMorgen: " + str(PrognoseMorgen)
             DEBUG_Ausgabe += ", PrognoseLimit_SOC: " + str(PrognoseLimit_SOC)
             DEBUG_Ausgabe += ", BattStatusProz_Grenze: " + str(SOC_Proz_Grenze_org)
-        if ManuelleStrg_Akkuschon == 0:
-            DEBUG_Ausgabe += "\nDEBUG Keine Begrenzung, da Akkuschonung in LadeStrg abgewählt!"
 
-        # Begrenzung auch wenn ManuelleStrg_Akkuschon > 0
-        if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC and ManuelleStrg_Akkuschon > 0:
+        # Begrenzung auf PrognoseLimit_SOC
+        if BattStatusProz >= SOC_Proz_Grenze and PrognoseLimit_SOC >= 0 and PrognoseMorgen > PrognoseLimit_SOC:
             aktuellerLadewert = 0
             # Aufruf mit self.
             WR_schreiben = self.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, 0, alterLadewert)
             LadewertGrund = "Akkuschonung: Ladebegrenzung auf "+str(SOC_Proz_Grenze_org)+"% SOC"
 
-        if BattKapaWatt_akt_SOC != BattKapaWatt_akt and ManuelleStrg_Akkuschon > 0:
+        if BattKapaWatt_akt_SOC != BattKapaWatt_akt:
             DEBUG_Ausgabe += "\nDEBUG BattKapaWatt_akt orginal: " + str(BattKapaWatt_akt)
             DEBUG_Ausgabe += ", BattKapaWatt_akt um 20% gekürzt: " + str(BattKapaWatt_akt_SOC)
             DEBUG_Ausgabe+="\nDEBUG <<<< SOC "+str(SOC_Proz_Grenze_org)+"% für Ladeberechnung AKTIV!!! >>>>"
