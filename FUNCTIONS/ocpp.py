@@ -365,6 +365,7 @@ class OCPPManager:
         self.AUTO_SYNC_INTERVAL = auto_sync_interval
         self.MIN_CHARGE_DURATION_S = 600
         self.PHASE_CHANGE_CONFIRM_S = 30
+        self.JUST_PLUGGED_GRACE_S = 120  # Zeitfenster nach dem Anstecken: Start- und Phasenwechsel-Hysterese überspringen
         self.residualPower = -300.0
         self.max_leistung_ha = -100
         self.DEFAULT_TARGET_KWH = 0.0
@@ -958,7 +959,17 @@ class OCPPManager:
             is_charging_requested = amp_desired > 0.0
             stop_hysteresis_active = (st.stop_candidate is not None)
             candidate = st.phase_candidate
-            if phase_changed and not is_initial_change and is_charging_requested and self.wb_phases == "0" and not stop_hysteresis_active:
+            # Nach dem Anstecken (ohne laufende Transaktion) Phasenwechsel-Hysterese überspringen –
+            # analog zur Start-Hysterese. Es fließt noch kein Strom, ein Wechsel kostet nichts.
+            plug_phase_skip = (
+                st.just_plugged is not None
+                and (datetime.now() - st.just_plugged).total_seconds() < self.JUST_PLUGGED_GRACE_S
+                and not st.transaction_id
+            )
+            if plug_phase_skip and phase_changed and not is_initial_change and is_charging_requested and self.wb_phases == "0":
+                st.append_debug({"note": "phase-hysteresis-skip-just-plugged", "requested": requested_phase, "ts": iso_now()})
+                cinfo(f"[{st.log_cp_id}] Phasenwechsel-Hysterese übersprungen (frisch angesteckt) – wechsle direkt auf {requested_phase}P.")
+            if phase_changed and not is_initial_change and is_charging_requested and self.wb_phases == "0" and not stop_hysteresis_active and not plug_phase_skip:
                 now = datetime.now()
                 if not candidate or candidate.get('requested') != requested_phase:
                     st.phase_candidate = {'requested': requested_phase, 'since': now}
@@ -1035,10 +1046,9 @@ class OCPPManager:
                     # – außer Fahrzeug wurde gerade erst angesteckt ODER kein PV-Modus aktiv
                     start_confirm_s = self.PHASE_CHANGE_CONFIRM_S // 3
                     now = datetime.now()
-                    JUST_PLUGGED_GRACE_S = 120
                     just_plugged_active = (
                         st.just_plugged is not None and
-                        (datetime.now() - st.just_plugged).total_seconds() < JUST_PLUGGED_GRACE_S
+                        (datetime.now() - st.just_plugged).total_seconds() < self.JUST_PLUGGED_GRACE_S
                     )
                     if not just_plugged_active and st.just_plugged is not None:
                         st.just_plugged = None  # Grace-Period abgelaufen – normales Verhalten
