@@ -488,7 +488,7 @@ Fast-forward
 <tr class="comment"><td colspan="2">; Damit nicht so häufig auf dem WR geschrieben wird nur bei Abweichung größer WRSchreibGrenze_Watt schreiben </td></tr>
 <tr><td class="variablenname">WREntladeSchreibGrenze_Watt</td>
 <td><input type="text" name="Zeile[57][1]" value="200" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Feste Entladebegrenzung ab einem bestimmten Verbrauch (Angaben in Watt)<br>; Funktion nur aktiv, wenn Verbrauch_Feste_Entladegrenze &gt; 0 (z.B. 10000 Watt für Wallbox)<br>; Ist der Verbrauch über Verbrauch_Feste_Entladegrenze, wird die Entnahme aus dem Akku auf Feste_Entladegrenze begrenzt </td></tr>
+<tr class="comment"><td colspan="2">; Entladebegrenzung bei hohem Hausverbrauch (Angaben in Watt, z.B. Wallbox)<br>; Verbrauch_Feste_Entladegrenze: Verbrauch, ab dem begrenzt wird (0 = aus, z.B. 10000)<br>; Feste_Entladegrenze: maximale Entladeleistung des Akkus während der Begrenzung<br>; Die Begrenzung bleibt aktiv, bis der Verbrauch unter 80% der Schwelle fällt.<br>; Gilt nicht, wenn im TAB ENTLadeStrg die Entladetabelle die Stunde eine eigene Regel hat<br>; oder die &quot;Feste Entladegrenze&quot; (Slider) unter 100% steht. </td></tr>
 <tr><td class="variablenname">Verbrauch_Feste_Entladegrenze</td>
 <td><input type="text" name="Zeile[59][1]" value="0" readonly></td></tr>
 <tr><td class="variablenname">Feste_Entladegrenze</td>
@@ -692,6 +692,6 @@ Fast-forward
 <tr><td class="variablenname">0.sichtbar</td>
 <td><input type="text" name="Zeile[62][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[63]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 22.09.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 06.10.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>

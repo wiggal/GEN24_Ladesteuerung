@@ -320,6 +320,7 @@ if __name__ == '__main__':
 
                     if  Batterieentlandung_steuern > 0:
                         MaxEntladung = BattganzeLadeKapazWatt
+                        MaxEntladung_Prozent = 100
 
                         DEBUG_Ausgabe+="DEBUG\nDEBUG <<<<<<<< ENTLADESTEUERUNG >>>>>>>>>>>>>"
                         for eintrag in result_get_time_of_use:
@@ -386,6 +387,7 @@ if __name__ == '__main__':
                             if (Neu_BatteryMaxDischarge > aktuellerLadewert): aktuellerLadewert = Neu_BatteryMaxDischarge + 100
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
                             Ladetype = "CHARGE_MIN"
+                        # Tabelle (Zeile oben) überschreibt die "Feste Entladegrenze %" des Sliders
                         elif (MaxEntladung_Prozent < 100):
                             Neu_BatteryMaxDischarge = MaxEntladung
                         # Hausverbrauch größer z.B. 10kW und Entladung batterie größer Feste_Entladegrenze => wenn AKKU leer dann nicht
@@ -396,7 +398,7 @@ if __name__ == '__main__':
                         elif (EntladeEintragDa == "ja"):
                             EntladeEintragloeschen = "ja"
 
-                        DEBUG_Ausgabe+="\nDEBUG Batterieentladegrenze NEU: " + str(Neu_BatteryMaxDischarge) + "%"
+                        DEBUG_Ausgabe+="\nDEBUG Batterieentladegrenze NEU: " + str(Neu_BatteryMaxDischarge) + "W"
 
                         # Entladung_Daempfung, Unterschied muss größer WREntladeSchreibGrenze_Watt sein
                         if (abs(Neu_BatteryMaxDischarge - BatteryMaxDischarge) < WREntladeSchreibGrenze_Watt) and Ladetype != "CHARGE_MIN":
@@ -405,7 +407,7 @@ if __name__ == '__main__':
                         ## Werte zum Überprüfen ausgeben
                         if print_level >= 1:
                             print("## ENTLADESTEUERUNG ##\n")
-                            print("Feste Entladegrenze in % : ", int(entladesteurungsdata['ManuelleEntladesteuerung']['Res_Feld1']), "%")
+                            print("Feste Entladegrenze in % : ", MaxEntladung_Prozent, "%")
                             print("VerbrauchsgrenzeEntladung: ", VerbrauchsgrenzeEntladung, "W")
                             print("Feste Entladegrenze Table: ", FesteEntladegrenze, "W")
                             if (Ladetype == "DISCHARGE_MAX") and (EntladeEintragloeschen == "nein"):
