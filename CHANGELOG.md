@@ -1,6 +1,8 @@
+**[0.43.7] – 2026-XX-XX**  
+
 **[0.43.6] – 2026-10-05**  
-FIX: Wattpilot liefert Wert, obwohl kein Auto angesteckt
-FIX: Akkuschonung nach % SOC greift nicht mehr
+FIX: Wattpilot liefert Wert, obwohl kein Auto angesteckt.  
+FIX: Akkuschonung nach % SOC greift nicht mehr. 
 
 **[0.43.5] – 2026-09-27**  
 - Die Optionen zur automatischen Ladesteuerung können nun im TAB LadeStrg zeitlich begrenzt verändert werden.
