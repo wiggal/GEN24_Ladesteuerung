@@ -25,6 +25,31 @@ DEFAULT_IDTAG = "WattpilotUser"
 OCPP_PROTOCOLS = ['ocpp1.6', 'ocpp2.0.1', 'ocpp1.5']
 PV_DATA_DB_PATH = "PV_Daten.sqlite"  # liegt im Stammverzeichnis (nicht unter CONFIG/)
 
+# Hausakkusperre: Zeile der manuellen Entladesteuerung in CONFIG/Prog_Steuerung.sqlite (Tabelle steuercodes).
+# Res_Feld1 = "Feste Entladegrenze %" (Slider im Tab EntladeSteuerung), wird von EnergyController.py ausgewertet.
+# Waehrend der Sperre steht dort 0, danach wieder 100 (= keine Begrenzung).
+STEUERCODES_DB_PATH = "CONFIG/Prog_Steuerung.sqlite"
+HAUSAKKU_SPERRE_SCHLUESSEL = "ENTLadeStrg"
+HAUSAKKU_SPERRE_ZEIT = "ManuelleEntladesteuerung"
+
+# Die Entladesteuerung in EnergyController.py ist nur aktiv, wenn Batterieentlandung_steuern >= 1 ist.
+# Der Wert kommt aus CONFIG/charge.ini oder - solange der Zeitstempel in Options in der Zukunft liegt - aus
+# Res_Feld2 dieser Zeile in steuercodes (FUNCTIONS/functions.py: getVarConf):
+#   ID 24:01 | Schluessel ChargeOption | Zeit Batterieentlandung_steuern | Res_Feld1 0 | Res_Feld2 <Wert> | Options <Unix-Zeitstempel>
+# Beim Setzen der Sperre: Res_Feld2 = Wert aus den ini-Dateien, mindestens 1 (also 1 bei ini-Wert 0 oder 1, 2 bei
+# ini-Wert 2), und Options = jetzt + 24 h. Beim Aufheben der Sperre: Options = 0.
+CHARGEOPTION_ID = "24:01"
+CHARGEOPTION_SCHLUESSEL = "ChargeOption"
+CHARGEOPTION_ZEIT = "Batterieentlandung_steuern"
+CHARGEOPTION_GUELTIG_S = 24 * 3600       # Gültigkeit des Zeitstempels beim Eintragen
+CHARGEOPTION_ERNEUERN_UNTER_S = 3600     # während der Sperre erneuern, wenn weniger als 1 h Restlaufzeit
+CHARGEOPTION_AUS_MAX_VERSUCHE = 3        # nach dem Aufheben der Sperre: max. EnergyController-Läufe, bis Options = 0
+
+# Nach jeder Aenderung der Sperre wird EnergyController.py sofort ausgefuehrt (laeuft sonst nur alle 5 Minuten).
+# Das Skript wird aus dem aktuellen Arbeitsverzeichnis gestartet (wie CONFIG/ und PV_Daten.sqlite).
+ENERGYCONTROLLER_CMD = ["./start_PythonScript.sh", "EnergyController.py", "schreiben"]
+ENERGYCONTROLLER_TIMEOUT_S = 60
+
 # Externe Module (bestehend aus originalem Projekt)
 import FUNCTIONS.functions
 import FUNCTIONS.SQLall
@@ -311,12 +336,14 @@ class ChargePointHandler:
                 except Exception:
                     cerr_exc(f"StartTransaction setup failed for {self.state.cp_id}")
                 await self.send_callresult(uid, {"idTagInfo": {"status": "Accepted"}, "transactionId": tx_id})
+                self.manager._sync_hausakku_sperre()  # Laden beginnt -> Hausakkusperre ggf. sofort setzen
             elif action == "StopTransaction":
                 self.state.transaction_id = None
                 # NICHT self.state.status = "Available" setzen!
                 # Die Wallbox schickt danach StatusNotification (z.B. "Finishing" oder "SuspendedEVSE")
                 self.state.transaction_start = None
                 await self.send_callresult(uid, {"idTagInfo": {"status": "Accepted"}})
+                self.manager._sync_hausakku_sperre()  # Laden endet -> Hausakkusperre ggf. sofort aufheben
             else:
                 cwarn(f"[{self.state.log_cp_id}] Unbekannte CALL Aktion: {action}")
                 await self.send_callresult(uid)
@@ -365,6 +392,7 @@ class OCPPManager:
         self.AUTO_SYNC_INTERVAL = auto_sync_interval
         self.MIN_CHARGE_DURATION_S = 600
         self.PHASE_CHANGE_CONFIRM_S = 30
+        self.JUST_PLUGGED_GRACE_S = 120  # Zeitfenster nach dem Anstecken: Start- und Phasenwechsel-Hysterese überspringen
         self.residualPower = -300.0
         self.max_leistung_ha = -100
         self.DEFAULT_TARGET_KWH = 0.0
@@ -372,6 +400,18 @@ class OCPPManager:
         # NextTrip (PV-Mode 4) Ladezeiten aus DB (ID=6)
         self.wb_ladezeit_von: str = "22:00"   # Res_Feld1
         self.wb_ladezeit_bis: str = "06:00"   # Res_Feld2
+
+        # Hausakkusperre (DB ID=6, Options: 1 = ein, 0 = aus). Wirksam nur bei PV-Modus MAX (3)
+        # oder NextTrip (4) UND während das Auto tatsächlich lädt - siehe _sync_hausakku_sperre().
+        self.wb_hausakku_sperre: bool = False
+        self._ec_lock = asyncio.Lock()  # EnergyController-Läufe nacheinander
+        self._hausakku_sperre_aktiv: bool = False  # True, solange wir die Sperre gesetzt haben
+        # Nach dem Aufheben der Sperre muss EnergyController.py ERST mit noch aktiver Entladesteuerung laufen
+        # (sonst wird die Entladegrenze im Wechselrichter nie zurückgenommen, wenn ini Batterieentlandung_steuern = 0
+        # ist); erst danach wird die ChargeOption (Options = 0) beendet.
+        self._chargeoption_aus_offen: bool = False
+        self._chargeoption_aus_laeuft: bool = False
+        self._chargeoption_aus_versuche: int = 0
 
         # NextTrip (PV-Mode 4): von 3_tab_wallbox.php berechnete/gespeicherte Ladeslots
         # (Schluessel='wallbox', Zeit=eigene Slot-Zeit "HHMM", ID=Anfangszeit "HH:MM").
@@ -577,9 +617,14 @@ class OCPPManager:
                     except Exception:
                         pass
 
-                # ID=6: NextTrip Ladezeiten (Res_Feld1 = von, Res_Feld2 = bis)
+                # ID=6: NextTrip Ladezeiten (Res_Feld1 = von, Res_Feld2 = bis),
+                # Options = Hausakkusperre (1 = ein, sonst aus)
                 row6 = data.get('6') or data.get(6)
                 if row6:
+                    try:
+                        self.wb_hausakku_sperre = str(row6.get('Options', '')).strip() in ('1', '1.0')
+                    except Exception:
+                        self.wb_hausakku_sperre = False
                     try:
                         raw_v = row6.get('Res_Feld1')
                         if raw_v is not None:
@@ -670,6 +715,214 @@ class OCPPManager:
             if st.target_kwh != self.DEFAULT_TARGET_KWH:
                 st.target_kwh = self.DEFAULT_TARGET_KWH
                 st.append_debug({"note": "target synced to DEFAULT", "value": self.DEFAULT_TARGET_KWH, "ts": iso_now()})
+
+    # ----------------------------
+    # Hausakkusperre
+    # ----------------------------
+    @staticmethod
+    def _ini_batterieentlandung_steuern() -> Optional[float]:
+        """Wert von [Entladung] Batterieentlandung_steuern aus den ini-Dateien (None, wenn nicht lesbar)."""
+        try:
+            return float(str(config['Entladung']['Batterieentlandung_steuern']).strip().replace(',', '.'))
+        except Exception:
+            return None
+
+    @staticmethod
+    def _ini_neu_laden():
+        """ini-Dateien neu einlesen (damit Änderungen an charge.ini ohne Neustart von ocpp.py wirken)."""
+        try:
+            basics.loadConfig(['default', 'charge'])
+        except Exception:
+            cwarn("Hausakkusperre: ini-Dateien konnten nicht neu gelesen werden")
+
+    def _set_entlade_prozent(self, wert: int, chargeoption_beenden: bool = False) -> Optional[bool]:
+        """Setzt Res_Feld1 (Prozent Entladeleistung, "Feste Entladegrenze %") der Zeile
+        ENTLadeStrg/ManuelleEntladesteuerung (0 = Hausakku-Entladesperre, 100 = frei) und schaltet die
+        Entladesteuerung über die ChargeOption-Zeile 24:01 (Batterieentlandung_steuern):
+          wert == 0 (Sperre)     : Res_Feld1 = 0; ChargeOption Res_Feld2 = Wert aus den ini-Dateien, mindestens 1
+                                   (ini 0/1 -> 1, ini 2 -> 2), Options = jetzt + 24 h (Zeile wird bei Bedarf
+                                   angelegt; nicht erneut geschrieben, solange Res_Feld2 passt und > 1 h Rest)
+          wert != 0 (aufheben)   : nur Res_Feld1 = wert. Die ChargeOption bleibt AKTIV, damit EnergyController.py
+                                   die Entladegrenze noch zurücknehmen kann.
+          chargeoption_beenden   : nur ChargeOption Options = 0 (Res_Feld1 wird nicht angefasst). Erst aufrufen,
+                                   nachdem EnergyController.py nach dem Aufheben gelaufen ist.
+        Geschrieben wird nur bei Abweichung.
+        Rückgabe: True = etwas wurde geändert, False = stand schon richtig, None = Fehler."""
+        conn = None
+        try:
+            conn = sqlite3.connect(STEUERCODES_DB_PATH, timeout=5)
+            geaendert = False
+
+            # 1) Slider "Feste Entladegrenze %"
+            if not chargeoption_beenden:
+                where = (HAUSAKKU_SPERRE_SCHLUESSEL, HAUSAKKU_SPERRE_ZEIT)
+                row = conn.execute(
+                    "SELECT Res_Feld1 FROM steuercodes WHERE Schluessel=? AND Zeit=?", where
+                ).fetchone()
+                if row is None:
+                    cwarn(f"Hausakkusperre: DB-Zeile {HAUSAKKU_SPERRE_SCHLUESSEL}/{HAUSAKKU_SPERRE_ZEIT} nicht gefunden")
+                    return None
+                try:
+                    aktuell = int(float(str(row[0]).strip()))
+                except Exception:
+                    aktuell = None
+                if aktuell != wert:
+                    conn.execute("UPDATE steuercodes SET Res_Feld1=? WHERE Schluessel=? AND Zeit=?", (wert,) + where)
+                    geaendert = True
+                    cinfo(f"Hausakkusperre {'AN' if wert == 0 else 'AUS'}: {HAUSAKKU_SPERRE_ZEIT}/Res_Feld1 = {wert}% (vorher {aktuell}%)")
+
+            # 2) ChargeOption Batterieentlandung_steuern (Wert in Res_Feld2, gültig bis Zeitstempel in Options)
+            if wert == 0 or chargeoption_beenden:
+                co_where = (CHARGEOPTION_SCHLUESSEL, CHARGEOPTION_ZEIT)
+                co = conn.execute(
+                    "SELECT Res_Feld2, Options FROM steuercodes WHERE Schluessel=? AND Zeit=?", co_where
+                ).fetchone()
+                jetzt = int(datetime.now(timezone.utc).timestamp())
+
+                def _zahl(v) -> float:
+                    try:
+                        return float(str(v).strip().replace(',', '.'))
+                    except Exception:
+                        return 0.0
+
+                co_res2 = _zahl(co[0]) if co is not None else 0.0
+                co_ts = _zahl(co[1]) if co is not None else 0.0
+                if chargeoption_beenden:
+                    if co is not None and co_ts != 0:
+                        conn.execute("UPDATE steuercodes SET Options=? WHERE Schluessel=? AND Zeit=?", ("0",) + co_where)
+                        geaendert = True
+                        cinfo(f"Hausakkusperre: ChargeOption {CHARGEOPTION_ZEIT} Zeitstempel auf 0")
+                else:
+                    ini_wert = self._ini_batterieentlandung_steuern()
+                    co_ziel_wert = int(ini_wert) if (ini_wert is not None and ini_wert > 1) else 1
+                    if co is None or co_res2 != co_ziel_wert or co_ts < jetzt + CHARGEOPTION_ERNEUERN_UNTER_S:
+                        ziel = jetzt + CHARGEOPTION_GUELTIG_S
+                        if co is None:
+                            conn.execute(
+                                "INSERT INTO steuercodes (ID, Schluessel, Zeit, Res_Feld1, Res_Feld2, Options) VALUES (?,?,?,?,?,?)",
+                                (CHARGEOPTION_ID, CHARGEOPTION_SCHLUESSEL, CHARGEOPTION_ZEIT, "0", str(co_ziel_wert), str(ziel)),
+                            )
+                        else:
+                            conn.execute("UPDATE steuercodes SET Res_Feld2=?, Options=? WHERE Schluessel=? AND Zeit=?",
+                                         (str(co_ziel_wert), str(ziel)) + co_where)
+                        geaendert = True
+                        cinfo(f"Hausakkusperre: ChargeOption {CHARGEOPTION_ZEIT} = {co_ziel_wert} bis {datetime.fromtimestamp(ziel).strftime('%d.%m. %H:%M')}")
+
+            if geaendert:
+                conn.commit()
+            return geaendert
+        except Exception:
+            cerr_exc("Hausakkusperre: Fehler beim Schreiben in die DB")
+            return None
+        finally:
+            if conn is not None:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
+    async def _run_energycontroller(self, danach_chargeoption_beenden: bool = False):
+        """EnergyController.py sofort ausführen, damit die geänderte Entladegrenze nicht bis zum nächsten
+        5-Minuten-Lauf wartet. Läufe werden nacheinander ausgeführt.
+        danach_chargeoption_beenden: nach erfolgreichem Lauf die ChargeOption beenden (Options = 0). Schlägt der Lauf
+        fehl, bleibt die ChargeOption aktiv und der Versuch wird im nächsten Autosync-Zyklus wiederholt."""
+        try:
+            async with self._ec_lock:
+                erfolg = False
+                try:
+                    proc = await asyncio.create_subprocess_exec(
+                        *ENERGYCONTROLLER_CMD,
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.STDOUT,
+                    )
+                    try:
+                        out, _ = await asyncio.wait_for(proc.communicate(), timeout=ENERGYCONTROLLER_TIMEOUT_S)
+                    except asyncio.TimeoutError:
+                        proc.kill()
+                        await proc.wait()
+                        cwarn(f"EnergyController.py: Timeout nach {ENERGYCONTROLLER_TIMEOUT_S}s - abgebrochen")
+                        return
+                    if proc.returncode == 0:
+                        erfolg = True
+                        cok("EnergyController.py nach Änderung der Hausakkusperre ausgeführt")
+                    else:
+                        tail = (out or b"").decode("utf-8", "replace").strip()[-300:]
+                        cwarn(f"EnergyController.py endete mit Code {proc.returncode}: {tail}")
+                except Exception:
+                    cerr_exc("EnergyController.py konnte nicht gestartet werden")
+                finally:
+                    if danach_chargeoption_beenden and erfolg and not self._hausakku_sperre_aktiv:
+                        if self._set_entlade_prozent(100, chargeoption_beenden=True) is not None:
+                            self._chargeoption_aus_offen = False
+        finally:
+            if danach_chargeoption_beenden:
+                self._chargeoption_aus_laeuft = False
+
+    def _start_energycontroller(self, danach_chargeoption_beenden: bool = False):
+        if danach_chargeoption_beenden:
+            self._chargeoption_aus_laeuft = True
+        coro = self._run_energycontroller(danach_chargeoption_beenden)
+        try:
+            self.spawn_task(coro, name="energycontroller_run")
+        except RuntimeError:
+            coro.close()  # kein laufender Event-Loop
+            if danach_chargeoption_beenden:
+                self._chargeoption_aus_laeuft = False
+            cwarn("EnergyController.py: kein Event-Loop zum Starten")
+
+    def _sync_hausakku_sperre(self):
+        """Hausakku-Entladesperre aus dem aktuellen Zustand ableiten (pro Autosync-Zyklus und bei
+        Start/Stop einer Transaktion). Sperre gewünscht = Hausakkusperre eingeschaltet (ID=6/Options=1)
+        UND PV-Modus MAX/NextTrip UND ein Auto lädt gerade. Damit reagiert sie auch auf einen
+        PV-Modus-Wechsel oder das Abwählen der Option in der Oberfläche, ohne Neustart.
+        - Sperre gewünscht: Res_Feld1 = 0 und ChargeOption 24:01 = ini-Wert (mindestens 1) bis jetzt + 24 h
+          (beides wird in jedem Zyklus sichergestellt, siehe _set_entlade_prozent). Ändert sich etwas,
+          läuft EnergyController.py sofort.
+        - Sperre war von uns gesetzt und ist nicht mehr gewünscht: Res_Feld1 = 100, die ChargeOption bleibt
+          zunächst aktiv. EnergyController.py läuft sofort (nimmt die Entladegrenze zurück) und erst nach
+          erfolgreichem Lauf wird die ChargeOption beendet (Options = 0). Sonst würde bei ini
+          Batterieentlandung_steuern = 0 die Entladesteuerung gar nicht mehr laufen und die Sperre im
+          Wechselrichter stehen bleiben.
+        - Sonst werden Res_Feld1 (Slider des Nutzers) und ChargeOption nicht angefasst."""
+        try:
+            laedt = any(
+                st.status == "Charging" and st.transaction_id
+                for st in self.states.values()
+            )
+            gewuenscht = bool(
+                laedt
+                and self.wb_hausakku_sperre
+                and float(self.wb_pv_mode) in (3.0, 4.0)
+            )
+            if gewuenscht:
+                self._chargeoption_aus_offen = False   # Sperre wieder aktiv: nichts mehr zu beenden
+                if not self._hausakku_sperre_aktiv:
+                    self._ini_neu_laden()   # beim Einschalten der Sperre aktuellen ini-Wert holen
+                ergebnis = self._set_entlade_prozent(0)
+                if ergebnis is not None:
+                    self._hausakku_sperre_aktiv = True
+                if ergebnis is True:
+                    self._start_energycontroller()
+                return
+
+            if self._hausakku_sperre_aktiv:
+                ergebnis = self._set_entlade_prozent(100)   # Slider frei, ChargeOption bleibt aktiv
+                if ergebnis is None:
+                    return   # Fehler: im nächsten Zyklus erneut versuchen
+                self._hausakku_sperre_aktiv = False
+                self._chargeoption_aus_offen = True
+                self._chargeoption_aus_versuche = 0
+
+            if self._chargeoption_aus_offen and not self._chargeoption_aus_laeuft:
+                if self._chargeoption_aus_versuche >= CHARGEOPTION_AUS_MAX_VERSUCHE:
+                    cwarn("Hausakkusperre: EnergyController.py nach dem Aufheben mehrfach fehlgeschlagen - "
+                          "ChargeOption bleibt bis zum Ablauf des Zeitstempels aktiv")
+                    self._chargeoption_aus_offen = False
+                    return
+                self._chargeoption_aus_versuche += 1
+                self._start_energycontroller(danach_chargeoption_beenden=True)
+        except Exception:
+            cerr_exc("Hausakkusperre: Fehler bei der Zustandsprüfung")
 
     # ----------------------------
     # NextTrip: Zeitfenster-Prüfung
@@ -958,7 +1211,17 @@ class OCPPManager:
             is_charging_requested = amp_desired > 0.0
             stop_hysteresis_active = (st.stop_candidate is not None)
             candidate = st.phase_candidate
-            if phase_changed and not is_initial_change and is_charging_requested and self.wb_phases == "0" and not stop_hysteresis_active:
+            # Nach dem Anstecken (ohne laufende Transaktion) Phasenwechsel-Hysterese überspringen –
+            # analog zur Start-Hysterese. Es fließt noch kein Strom, ein Wechsel kostet nichts.
+            plug_phase_skip = (
+                st.just_plugged is not None
+                and (datetime.now() - st.just_plugged).total_seconds() < self.JUST_PLUGGED_GRACE_S
+                and not st.transaction_id
+            )
+            if plug_phase_skip and phase_changed and not is_initial_change and is_charging_requested and self.wb_phases == "0":
+                st.append_debug({"note": "phase-hysteresis-skip-just-plugged", "requested": requested_phase, "ts": iso_now()})
+                cinfo(f"[{st.log_cp_id}] Phasenwechsel-Hysterese übersprungen (frisch angesteckt) – wechsle direkt auf {requested_phase}P.")
+            if phase_changed and not is_initial_change and is_charging_requested and self.wb_phases == "0" and not stop_hysteresis_active and not plug_phase_skip:
                 now = datetime.now()
                 if not candidate or candidate.get('requested') != requested_phase:
                     st.phase_candidate = {'requested': requested_phase, 'since': now}
@@ -1035,10 +1298,9 @@ class OCPPManager:
                     # – außer Fahrzeug wurde gerade erst angesteckt ODER kein PV-Modus aktiv
                     start_confirm_s = self.PHASE_CHANGE_CONFIRM_S // 3
                     now = datetime.now()
-                    JUST_PLUGGED_GRACE_S = 120
                     just_plugged_active = (
                         st.just_plugged is not None and
-                        (datetime.now() - st.just_plugged).total_seconds() < JUST_PLUGGED_GRACE_S
+                        (datetime.now() - st.just_plugged).total_seconds() < self.JUST_PLUGGED_GRACE_S
                     )
                     if not just_plugged_active and st.just_plugged is not None:
                         st.just_plugged = None  # Grace-Period abgelaufen – normales Verhalten
@@ -1621,6 +1883,8 @@ class OCPPManager:
                             await self.apply_wallbox_settings(cp_id)
                         except Exception:
                             cerr_exc(f"AutoSync: Fehler bei apply_wallbox_settings für {cp_id}")
+                # Hausakkusperre auch ohne verbundenen CP prüfen (z.B. Wallbox trennt mitten im Laden -> Sperre aufheben)
+                self._sync_hausakku_sperre()
             except Exception:
                 cerr_exc("AutoSync-Loop Fehler")
             await asyncio.sleep(self.auto_sync_interval)

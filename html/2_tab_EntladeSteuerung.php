@@ -291,7 +291,7 @@ $(document).ready(function(){
   // Res_Feld1 darf nur Zahlen enthalten
   $('.Res_Feld1').each(function(){
     let val = parseFloat($(this).text().replace(",", ".")) * 1000;
-    Res_Feld1.push(Number.isFinite(val) ? val : 0);
+    Res_Feld1.push(Number.isFinite(val) ? Math.round(val) : 0);
   });
   // Hier müssen evtl. viertelstündliche Werte aufgesplitet werden.
   $('.Res_Feld2').each(function() {
