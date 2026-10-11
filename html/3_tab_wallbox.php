@@ -218,6 +218,10 @@ $max_leistung_ha = $EV_Reservierung['5']['Res_Feld2'] ?? "-0.1";          // Hö
 // ID=6 (Ladezeit-Fenster)
 $ladezeit_von = $EV_Reservierung['6']['Res_Feld1'] ?? "12:00";
 $ladezeit_bis = $EV_Reservierung['6']['Res_Feld2'] ?? "05:00";
+$hausakku_sperre_db = (int)($EV_Reservierung['6']['Options'] ?? 0);        // Hausakkusperre (0=aus, 1=ein) - ID=6 / Options
+// Nur bei PV-Modus MAX (3) oder NextTrip (4) überhaupt wählbar, sonst immer aus (0)
+$hausakku_sperre_aktiv = in_array((int)$pv_mode, [3, 4], true);
+$hausakku_sperre = ($hausakku_sperre_aktiv && $hausakku_sperre_db === 1) ? 1 : 0;
 
 // ID=7 (Preise)
 $strompreis_fest = $EV_Reservierung['7']['Res_Feld1'] ?? 0.30;
@@ -388,6 +392,12 @@ p, label {
 .kein-limit-label input[type="checkbox"] {
     width: auto;
     margin: 0;
+}
+
+/* Hausakkusperre: nur das Optionsfeld wird ausgegraut, solange es deaktiviert ist (PV-Modus nicht MAX/NextTrip); der Text bleibt normal */
+#hausakkuSperreRow.deaktiviert input {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 /* --- Balkentabelle (PV/Lastenanzeige) --- */
@@ -644,6 +654,17 @@ echo "</div>";
                 <label class="kein-limit-label">
                     <input type="checkbox" id="ladePreisGrenzeKeinLimit" <?php echo ($ladepreis_grenze === '') ? 'checked' : ''; ?>>
                     kein Limit
+                </label>
+            </span>
+        </div>
+
+        <div class="row<?php echo $hausakku_sperre_aktiv ? '' : ' deaktiviert'; ?>" id="hausakkuSperreRow">
+            <span class="label-inline">Hausakkusperre (DB=<?php echo $hausakku_sperre_db === 1 ? 'ein' : 'aus'; ?>):</span>
+            <span class="input-inline">
+                <label class="kein-limit-label">
+                    <input type="checkbox" id="hausakkuSperre"
+                        <?php echo ($hausakku_sperre === 1) ? 'checked' : ''; ?>
+                        <?php echo $hausakku_sperre_aktiv ? '' : 'disabled'; ?>>
                 </label>
             </span>
         </div>
@@ -977,9 +998,23 @@ function calculatePower() {
     // Sofort beim Laden der Seite ausführen
     updateNextTripVisibility();
 
+    // Hausakkusperre: nur bei PV-Modus MAX (3) oder NextTrip (4) wählbar, sonst aus (0) + deaktiviert
+    function updateHausakkuSperreState() {
+        var pm = $('#pvMode').val();
+        var erlaubt = (pm === '3' || pm === '4');
+        var $cb = $('#hausakkuSperre');
+        if (!erlaubt) {
+            $cb.prop('checked', false);
+        }
+        $cb.prop('disabled', !erlaubt);
+        $('#hausakkuSperreRow').toggleClass('deaktiviert', !erlaubt);
+    }
+    updateHausakkuSperreState();
+
     // Bei jeder Änderung des PV-Modus-Dropdowns ausführen
     $('#pvMode').on('change', function() {
         updateNextTripVisibility();
+        updateHausakkuSperreState();
     });
 
     // Bei Änderung der Next-Trip-relevanten Felder das Diagramm ebenfalls live neu berechnen,
@@ -1031,6 +1066,8 @@ function calculatePower() {
     // ID 6: Next Trip Zeiten (aus Grafik)
     var lz_von = $('#ladezeitVon').val();
     var lz_bis = $('#ladezeitBis').val();
+    // ID 6 / Options: Hausakkusperre (1=ein, 0=aus) - nur bei PV-Modus MAX/NextTrip möglich, sonst immer 0
+    var hausakku_sperre = ((pv_mode === '3' || pv_mode === '4') && $('#hausakkuSperre').is(':checked')) ? "1" : "0";
 
     // ID 7: Preise (aus Grafik)
     var s_preis = $('#strompreisFest').val();
@@ -1071,7 +1108,7 @@ function calculatePower() {
             "",                     // ID 3: unbenutzt
             phase_change_confirm,   // ID 4: Phasen-Delay
             "",                     // ID 5: unbenutzt
-            "",                     // ID 6: unbenutzt
+            hausakku_sperre,        // ID 6: Hausakkusperre (0/1)
             ""                      // ID 7: unbenutzt
         ];
 
@@ -1231,7 +1268,7 @@ setTimeout(pollLoadbar, 5000);
 var ueberwachteFelder = ['#pvMode', '#phases', '#ampMin', '#ampMax', '#autoSyncInterval',
     '#minChargeDur', '#phaseChangeConfirm', '#residualPower', '#defaultTargetKwh',
     '#ladezeitVon', '#ladezeitBis', '#MaxLeistHAkW', '#strompreisFest', '#einspeiseVerg',
-    '#ladePreisGrenze', '#ladePreisGrenzeKeinLimit'];
+    '#ladePreisGrenze', '#ladePreisGrenzeKeinLimit', '#hausakkuSperre'];
 var originalFeldWerte = {};
 
 function feldWert($el) {
