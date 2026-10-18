@@ -1,4 +1,4 @@
-**[0.43.7] – 2026-XX-XX**  
+**[0.43.7] – 2026-10-18**  
 - **NEU** Hausakkusperre im TAB Wallbox, damit kann beim Laden im PV-Modus MAX oder NextTrip die Entladung des Hausakkus gesperrt werden.  
 
 **[0.43.6] – 2026-10-05**  

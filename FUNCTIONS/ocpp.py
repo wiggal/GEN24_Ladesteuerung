@@ -861,7 +861,7 @@ class OCPPManager:
         - Sperre gewünscht: Res_Feld1 = 0 und ChargeOption 24:01 = ini-Wert (mindestens 1) bis jetzt + 24 h
           (beides wird in jedem Zyklus sichergestellt, siehe _set_entlade_prozent). Ändert sich etwas,
           läuft EnergyController.py sofort.
-        - Sperre war von uns gesetzt und ist nicht mehr gewünscht: Res_Feld1 = 100, danach läuft
+        - Sperre war von _set_entlade_prozent gesetzt und ist nicht mehr gewünscht: Res_Feld1 = 100, danach läuft
           EnergyController.py sofort und erst nach diesem Lauf wird die ChargeOption beendet (Options = 0).
         - Sonst werden Res_Feld1 (Slider des Nutzers) und ChargeOption nicht angefasst."""
         try:
