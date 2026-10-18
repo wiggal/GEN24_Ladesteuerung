@@ -43,7 +43,6 @@ CHARGEOPTION_SCHLUESSEL = "ChargeOption"
 CHARGEOPTION_ZEIT = "Batterieentlandung_steuern"
 CHARGEOPTION_GUELTIG_S = 24 * 3600       # Gültigkeit des Zeitstempels beim Eintragen
 CHARGEOPTION_ERNEUERN_UNTER_S = 3600     # während der Sperre erneuern, wenn weniger als 1 h Restlaufzeit
-CHARGEOPTION_AUS_MAX_VERSUCHE = 3        # nach dem Aufheben der Sperre: max. EnergyController-Läufe, bis Options = 0
 
 # Nach jeder Aenderung der Sperre wird EnergyController.py sofort ausgefuehrt (laeuft sonst nur alle 5 Minuten).
 # Das Skript wird aus dem aktuellen Arbeitsverzeichnis gestartet (wie CONFIG/ und PV_Daten.sqlite).
@@ -406,12 +405,6 @@ class OCPPManager:
         self.wb_hausakku_sperre: bool = False
         self._ec_lock = asyncio.Lock()  # EnergyController-Läufe nacheinander
         self._hausakku_sperre_aktiv: bool = False  # True, solange wir die Sperre gesetzt haben
-        # Nach dem Aufheben der Sperre muss EnergyController.py ERST mit noch aktiver Entladesteuerung laufen
-        # (sonst wird die Entladegrenze im Wechselrichter nie zurückgenommen, wenn ini Batterieentlandung_steuern = 0
-        # ist); erst danach wird die ChargeOption (Options = 0) beendet.
-        self._chargeoption_aus_offen: bool = False
-        self._chargeoption_aus_laeuft: bool = False
-        self._chargeoption_aus_versuche: int = 0
 
         # NextTrip (PV-Mode 4): von 3_tab_wallbox.php berechnete/gespeicherte Ladeslots
         # (Schluessel='wallbox', Zeit=eigene Slot-Zeit "HHMM", ID=Anfangszeit "HH:MM").
@@ -824,50 +817,40 @@ class OCPPManager:
     async def _run_energycontroller(self, danach_chargeoption_beenden: bool = False):
         """EnergyController.py sofort ausführen, damit die geänderte Entladegrenze nicht bis zum nächsten
         5-Minuten-Lauf wartet. Läufe werden nacheinander ausgeführt.
-        danach_chargeoption_beenden: nach erfolgreichem Lauf die ChargeOption beenden (Options = 0). Schlägt der Lauf
-        fehl, bleibt die ChargeOption aktiv und der Versuch wird im nächsten Autosync-Zyklus wiederholt."""
-        try:
-            async with self._ec_lock:
-                erfolg = False
+        danach_chargeoption_beenden: nach erfolgreichem Lauf die ChargeOption beenden (Options = 0). Bei
+        ini Batterieentlandung_steuern = 0 darf das erst NACH dem Lauf passieren, sonst läuft die Entladesteuerung
+        nicht mehr und die Entladegrenze im Wechselrichter wird nie zurückgenommen. Schlägt der Lauf fehl, bleibt
+        die ChargeOption bis zum Ablauf ihres Zeitstempels aktiv."""
+        async with self._ec_lock:
+            try:
+                proc = await asyncio.create_subprocess_exec(
+                    *ENERGYCONTROLLER_CMD,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.STDOUT,
+                )
                 try:
-                    proc = await asyncio.create_subprocess_exec(
-                        *ENERGYCONTROLLER_CMD,
-                        stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.STDOUT,
-                    )
-                    try:
-                        out, _ = await asyncio.wait_for(proc.communicate(), timeout=ENERGYCONTROLLER_TIMEOUT_S)
-                    except asyncio.TimeoutError:
-                        proc.kill()
-                        await proc.wait()
-                        cwarn(f"EnergyController.py: Timeout nach {ENERGYCONTROLLER_TIMEOUT_S}s - abgebrochen")
-                        return
-                    if proc.returncode == 0:
-                        erfolg = True
-                        cok("EnergyController.py nach Änderung der Hausakkusperre ausgeführt")
-                    else:
-                        tail = (out or b"").decode("utf-8", "replace").strip()[-300:]
-                        cwarn(f"EnergyController.py endete mit Code {proc.returncode}: {tail}")
-                except Exception:
-                    cerr_exc("EnergyController.py konnte nicht gestartet werden")
-                finally:
-                    if danach_chargeoption_beenden and erfolg and not self._hausakku_sperre_aktiv:
-                        if self._set_entlade_prozent(100, chargeoption_beenden=True) is not None:
-                            self._chargeoption_aus_offen = False
-        finally:
-            if danach_chargeoption_beenden:
-                self._chargeoption_aus_laeuft = False
+                    out, _ = await asyncio.wait_for(proc.communicate(), timeout=ENERGYCONTROLLER_TIMEOUT_S)
+                except asyncio.TimeoutError:
+                    proc.kill()
+                    await proc.wait()
+                    cwarn(f"EnergyController.py: Timeout nach {ENERGYCONTROLLER_TIMEOUT_S}s - abgebrochen")
+                    return
+                if proc.returncode != 0:
+                    tail = (out or b"").decode("utf-8", "replace").strip()[-300:]
+                    cwarn(f"EnergyController.py endete mit Code {proc.returncode}: {tail}")
+                    return
+                cok("EnergyController.py nach Änderung der Hausakkusperre ausgeführt")
+                if danach_chargeoption_beenden and not self._hausakku_sperre_aktiv:
+                    self._set_entlade_prozent(100, chargeoption_beenden=True)
+            except Exception:
+                cerr_exc("EnergyController.py konnte nicht gestartet werden")
 
     def _start_energycontroller(self, danach_chargeoption_beenden: bool = False):
-        if danach_chargeoption_beenden:
-            self._chargeoption_aus_laeuft = True
         coro = self._run_energycontroller(danach_chargeoption_beenden)
         try:
             self.spawn_task(coro, name="energycontroller_run")
         except RuntimeError:
             coro.close()  # kein laufender Event-Loop
-            if danach_chargeoption_beenden:
-                self._chargeoption_aus_laeuft = False
             cwarn("EnergyController.py: kein Event-Loop zum Starten")
 
     def _sync_hausakku_sperre(self):
@@ -878,11 +861,8 @@ class OCPPManager:
         - Sperre gewünscht: Res_Feld1 = 0 und ChargeOption 24:01 = ini-Wert (mindestens 1) bis jetzt + 24 h
           (beides wird in jedem Zyklus sichergestellt, siehe _set_entlade_prozent). Ändert sich etwas,
           läuft EnergyController.py sofort.
-        - Sperre war von uns gesetzt und ist nicht mehr gewünscht: Res_Feld1 = 100, die ChargeOption bleibt
-          zunächst aktiv. EnergyController.py läuft sofort (nimmt die Entladegrenze zurück) und erst nach
-          erfolgreichem Lauf wird die ChargeOption beendet (Options = 0). Sonst würde bei ini
-          Batterieentlandung_steuern = 0 die Entladesteuerung gar nicht mehr laufen und die Sperre im
-          Wechselrichter stehen bleiben.
+        - Sperre war von uns gesetzt und ist nicht mehr gewünscht: Res_Feld1 = 100, danach läuft
+          EnergyController.py sofort und erst nach diesem Lauf wird die ChargeOption beendet (Options = 0).
         - Sonst werden Res_Feld1 (Slider des Nutzers) und ChargeOption nicht angefasst."""
         try:
             laedt = any(
@@ -895,7 +875,6 @@ class OCPPManager:
                 and float(self.wb_pv_mode) in (3.0, 4.0)
             )
             if gewuenscht:
-                self._chargeoption_aus_offen = False   # Sperre wieder aktiv: nichts mehr zu beenden
                 if not self._hausakku_sperre_aktiv:
                     self._ini_neu_laden()   # beim Einschalten der Sperre aktuellen ini-Wert holen
                 ergebnis = self._set_entlade_prozent(0)
@@ -903,24 +882,10 @@ class OCPPManager:
                     self._hausakku_sperre_aktiv = True
                 if ergebnis is True:
                     self._start_energycontroller()
-                return
-
-            if self._hausakku_sperre_aktiv:
-                ergebnis = self._set_entlade_prozent(100)   # Slider frei, ChargeOption bleibt aktiv
-                if ergebnis is None:
-                    return   # Fehler: im nächsten Zyklus erneut versuchen
-                self._hausakku_sperre_aktiv = False
-                self._chargeoption_aus_offen = True
-                self._chargeoption_aus_versuche = 0
-
-            if self._chargeoption_aus_offen and not self._chargeoption_aus_laeuft:
-                if self._chargeoption_aus_versuche >= CHARGEOPTION_AUS_MAX_VERSUCHE:
-                    cwarn("Hausakkusperre: EnergyController.py nach dem Aufheben mehrfach fehlgeschlagen - "
-                          "ChargeOption bleibt bis zum Ablauf des Zeitstempels aktiv")
-                    self._chargeoption_aus_offen = False
-                    return
-                self._chargeoption_aus_versuche += 1
-                self._start_energycontroller(danach_chargeoption_beenden=True)
+            elif self._hausakku_sperre_aktiv:
+                if self._set_entlade_prozent(100) is not None:   # Slider frei, ChargeOption bleibt aktiv
+                    self._hausakku_sperre_aktiv = False
+                    self._start_energycontroller(danach_chargeoption_beenden=True)
         except Exception:
             cerr_exc("Hausakkusperre: Fehler bei der Zustandsprüfung")
 
