@@ -1,3 +1,6 @@
+**[0.43.8] – 2026-XX-XX**  
+- FIX: Forcast DWD erzeugt teilweise in den letzten Tagesstunden einen Sprung nach oben.  
+
 **[0.43.7] – 2026-10-18**  
 - **NEU** Hausakkusperre im TAB Wallbox, damit kann beim Laden im PV-Modus MAX oder NextTrip die Entladung des Hausakkus gesperrt werden.  
 
