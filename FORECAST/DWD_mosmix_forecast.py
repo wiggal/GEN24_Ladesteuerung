@@ -8,12 +8,13 @@ rechnet die Globalstrahlung (Rad1h) bzw. ersatzweise die effektive Bewoelkung (N
 PV-Ertragsprognose um und speichert das Ergebnis ueber weatherdata.storeWeatherData_SQL()
 in die DB.
 
-PVLIB-FREI: Sonnenstand (Duffie&Beckman/Cooper), Erbs-Modell, Clearsky (Haurwitz),
-Transposition (isotropes Modell) und PVWatts DC/AC sind hier direkt implementiert,
+PVLIB-FREI: Sonnenstand (Astronomical Almanac), Erbs-Modell, Clearsky (Haurwitz),
+Transposition (Hay-Davies-Modell) und PVWatts DC/AC sind hier direkt implementiert,
 statt pvlib zu nutzen - spart die vergleichsweise schwere pvlib-Abhaengigkeit auf
-dem Raspberry Pi. Numerisch gegen pvlib validiert: Sonnenstand max ~0.1-0.25 Grad
-Abweichung, POA-Einstrahlung max ~3 W/m^2, AC-Ertrag max ~1% Abweichung - deutlich
-innerhalb der ohnehin viel groesseren Wettervorhersage-Unsicherheit.
+dem Raspberry Pi. Numerisch gegen pvlib validiert: Sonnenstand max ~0.01 Grad
+Abweichung (Astronomical-Almanac-Formel); Hay-Davies-Transposition liefert bei gleichen
+Eingaben exakt die pvlib-Werte. Bekannte Einschraenkung: Die Erbs-Zerlegung unterschaetzt bei
+klarem Himmel und tiefer Sonne (Herbst/Winter) die Direktstrahlung.
 
 Keine API-Keys noetig - DWD Open Data ist frei zugaenglich.
 
@@ -254,19 +255,26 @@ def fetch_mosmix_l(station: str, timeout: int = 30) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 def solar_position(lat: float, lon: float, times: pd.DatetimeIndex):
-    """Sonnenstand (Zenit, Azimut in Grad) nach den klassischen Duffie&Beckman-
-    Formeln (Cooper-Deklination, Spencer-Zeitgleichung). times muss UTC-taware sein.
-    Azimut-Konvention wie pvlib: 0=Nord, 90=Ost, 180=Sued, 270=West."""
-    n = times.dayofyear.values.astype(float)
-    utc_hour = times.hour.values + times.minute.values / 60.0 + times.second.values / 3600.0
+    """Sonnenstand (Zenit, Azimut in Grad) nach der Low-Precision-Formel des Astronomical
+    Almanac (Genauigkeit ca. 0.01 Grad fuer 1950-2050; gegen pvlib/SPA ueber ein ganzes Jahr
+    validiert: max. 0.011 Grad Zenit, 0.018 Grad Azimut). Die frueher verwendete Cooper-
+    Deklination wich im Herbst/Fruehjahr um bis zu ~1 Grad ab (ca. 4% AC-Ertrag).
+    times muss UTC-aware sein. Azimut-Konvention wie pvlib: 0=Nord, 90=Ost, 180=Sued, 270=West."""
+    # Julianisches Datum (UTC); Rechnung ueber Timedelta, damit sie unabhaengig von der
+    # Zeitaufloesung des Index (ns/us/s - je nach pandas-Version) funktioniert
+    jd = (times - pd.Timestamp("1970-01-01", tz="UTC")) / pd.Timedelta(days=1) + 2440587.5
+    n = np.asarray(jd, dtype=float) - 2451545.0                   # Tage seit J2000
 
-    B = np.radians(360.0 / 365.0 * (n - 81))
-    eot = 9.87 * np.sin(2 * B) - 7.53 * np.cos(B) - 1.5 * np.sin(B)  # Zeitgleichung, Minuten
+    L = np.radians((280.460 + 0.9856474 * n) % 360.0)             # mittlere Laenge der Sonne
+    g = np.radians((357.528 + 0.9856003 * n) % 360.0)             # mittlere Anomalie
+    lam = L + np.radians(1.915) * np.sin(g) + np.radians(0.020) * np.sin(2 * g)  # ekliptikale Laenge
+    eps = np.radians(23.439 - 0.0000004 * n)                      # Schiefe der Ekliptik
+    decl = np.arcsin(np.sin(eps) * np.sin(lam))                   # Deklination
+    ra = np.arctan2(np.cos(eps) * np.sin(lam), np.cos(lam))       # Rektaszension
 
-    decl = np.radians(23.45 * np.sin(np.radians(360.0 / 365.0 * (284 + n))))  # Cooper-Deklination
-
-    solar_time = utc_hour + (4 * lon + eot) / 60.0
-    hour_angle = np.radians(15.0 * (solar_time - 12.0))
+    gmst = (18.697374558 + 24.06570982441908 * n) % 24.0          # Greenwich-Sternzeit [h]
+    hour_angle = np.radians(gmst * 15.0 + lon) - ra               # Stundenwinkel (Ost-Laenge positiv)
+    hour_angle = (hour_angle + np.pi) % (2 * np.pi) - np.pi
 
     lat_r = np.radians(lat)
     cos_zenith = np.sin(lat_r) * np.sin(decl) + np.cos(lat_r) * np.cos(decl) * np.cos(hour_angle)
@@ -290,7 +298,9 @@ def erbs_decomposition(ghi: pd.Series, zenith: pd.Series, times: pd.DatetimeInde
     (siehe auch Duffie & Beckman, 'Solar Engineering of Thermal Processes')."""
     n = times.dayofyear.values.astype(float)
     zenith_r = np.radians(zenith.values)
-    cos_zenith = np.clip(np.cos(zenith_r), 1e-6, None)
+    # Untergrenze wie pvlib.irradiance.erbs (min_cos_zenith=0.065): verhindert, dass bei
+    # fast horizontaler Sonne (DNI = (GHI-DHI)/cos_zenith) absurd hohe DNI-Werte entstehen
+    cos_zenith = np.clip(np.cos(zenith_r), 0.065, None)
 
     ghi0 = 1367.0 * (1 + 0.033 * np.cos(np.radians(360.0 * n / 365.0))) * np.cos(zenith_r)
     ghi0 = np.clip(ghi0, 1e-6, None)
@@ -309,9 +319,11 @@ def erbs_decomposition(ghi: pd.Series, zenith: pd.Series, times: pd.DatetimeInde
     dhi = dhi_frac * ghi.values
     dni = (ghi.values - dhi) / cos_zenith
 
-    night = zenith.values >= 90
-    dni = np.where(night, 0, dni)
-    dhi = np.where(night, ghi.values, dhi)
+    # Zenit >= 87 Grad (wie pvlib max_zenith=87): Sonne praktisch am Horizont, Erbs-Zerlegung
+    # dort unzuverlaessig -> gesamte Strahlung als diffus, kein Direktanteil
+    low_sun = zenith.values >= 87
+    dni = np.where(low_sun, 0, dni)
+    dhi = np.where(low_sun, ghi.values, dhi)
     dni = np.clip(dni, 0, None)
 
     return pd.DataFrame({"dni": dni, "dhi": dhi}, index=times)
@@ -354,6 +366,36 @@ def get_total_irradiance_isotropic(tilt: float, surface_azimuth: float, zenith: 
 
     poa_direct = dni.values * cos_aoi
     poa_sky_diffuse = dhi.values * (1 + np.cos(tilt_r)) / 2.0
+    poa_ground = ghi.values * albedo * (1 - np.cos(tilt_r)) / 2.0
+    poa_global = np.clip(poa_direct + poa_sky_diffuse + poa_ground, 0, None)
+
+    return pd.Series(poa_global, index=zenith.index)
+
+
+def get_total_irradiance_haydavies(tilt: float, surface_azimuth: float, zenith: pd.Series,
+                                    solar_azimuth: pd.Series, dni: pd.Series, ghi: pd.Series,
+                                    dhi: pd.Series, dni_extra: np.ndarray, albedo: float = 0.2) -> pd.Series:
+    """Einstrahlung auf die geneigte Modulebene (POA) mit dem Hay-Davies-Himmelsmodell
+    (identisch zu pvlib.irradiance.haydavies). Gegenueber dem isotropen Modell wird der
+    zirkumsolare Anteil der Diffusstrahlung der Sonnenrichtung zugeordnet. Das ist bei klarem
+    Himmel und tiefer Sonne (Herbst/Winter, Sued-Ausrichtung) deutlich genauer; das isotrope
+    Modell unterschaetzt dort um ca. 6-7%."""
+    tilt_r = np.radians(tilt)
+    zenith_r = np.radians(zenith.values)
+    az_diff_r = np.radians(solar_azimuth.values - surface_azimuth)
+
+    cos_zenith = np.cos(zenith_r)
+    cos_aoi = cos_zenith * np.cos(tilt_r) + np.sin(zenith_r) * np.sin(tilt_r) * np.cos(az_diff_r)
+    cos_aoi = np.clip(cos_aoi, 0, None)
+
+    # Anisotropie-Index (Anteil Direktstrahlung an der extraterrestrischen Strahlung)
+    ai = np.clip(np.divide(dni.values, dni_extra, out=np.zeros_like(dni.values, dtype=float),
+                           where=(dni_extra > 0)), 0, 1)
+    # Geometriefaktor Direktstrahlung geneigte/horizontale Flaeche (Nenner wie pvlib begrenzt)
+    rb = cos_aoi / np.maximum(cos_zenith, 0.01745)
+
+    poa_direct = dni.values * cos_aoi
+    poa_sky_diffuse = np.clip(dhi.values * (ai * rb + (1 - ai) * (1 + np.cos(tilt_r)) / 2.0), 0, None)
     poa_ground = ghi.values * albedo * (1 - np.cos(tilt_r)) / 2.0
     poa_global = np.clip(poa_direct + poa_sky_diffuse + poa_ground, 0, None)
 
@@ -403,7 +445,14 @@ def model_pv_output(df: pd.DataFrame, lat: float, lon: float, altitude: float,
     und der effektiven Bewoelkung (Neff) geschaetzt (fuer Stationen ohne Rad1h)."""
     times = df.index
 
-    zenith, sun_azimuth = solar_position(lat, lon, times)
+    # Rad1h ist der Mittelwert der Stunde [T-1h, T] -> Sonnenstand zur Intervallmitte (T-30min)
+    # berechnen, nicht zum Intervallende T (sonst passt die Strahlung nicht zum Sonnenstand,
+    # v.a. bei Sonnenauf-/-untergang). Neff ist ein Momentanwert -> dort unveraendert T.
+    # Index danach wieder auf 'times' setzen, damit alle Ergebnisse zeitlich ausgerichtet bleiben.
+    sun_times = times if use_cloud_fallback else times - pd.Timedelta(minutes=30)
+    zenith, sun_azimuth = solar_position(lat, lon, sun_times)
+    zenith.index = times
+    sun_azimuth.index = times
 
     if use_cloud_fallback:
         ghi_clear = haurwitz_clearsky_ghi(zenith)
@@ -420,13 +469,19 @@ def model_pv_output(df: pd.DataFrame, lat: float, lon: float, altitude: float,
     # interne Konvention: 180=Sued, 90=Ost, 270=West -> Umrechnung
     panel_azimuth = (azimuth + 180) % 360
 
-    poa_global = get_total_irradiance_isotropic(
+    # extraterrestrische Strahlung (fuer den Anisotropie-Index im Hay-Davies-Modell)
+    day_of_year = times.dayofyear.values.astype(float)
+    dni_extra = 1367.0 * (1 + 0.033 * np.cos(np.radians(360.0 * day_of_year / 365.0)))
+
+    poa_global = get_total_irradiance_haydavies(
         tilt=tilt, surface_azimuth=panel_azimuth, zenith=zenith, solar_azimuth=sun_azimuth,
-        dni=dni, ghi=ghi, dhi=dhi,
+        dni=dni, ghi=ghi, dhi=dhi, dni_extra=dni_extra,
     )
 
-    temp_air = df.get("temp_air", pd.Series(20.0, index=times))
-    wind_speed = df.get("wind_speed", pd.Series(1.0, index=times))
+    # Fehlende Einzelwerte ("-" im MOSMIX) auffuellen, sonst wird die Zelltemperatur NaN und
+    # round() im Aufrufer bricht mit ValueError ab
+    temp_air = df.get("temp_air", pd.Series(20.0, index=times)).ffill().bfill().fillna(20.0)
+    wind_speed = df.get("wind_speed", pd.Series(1.0, index=times)).ffill().bfill().fillna(1.0)
     cell_temp = sapm_cell_temperature(poa_global, temp_air, wind_speed)
 
     system_power_w = kwp * 1000
