@@ -1,0 +1,34 @@
+mqtt_prognose.py sendet per MQTT an einen vorhandenen Broker
+  1. Prognose, geplante Lademengen (einmal, laufend) und den Rest (Differenz) für heute, morgen und übermorgen
+  2. den Status der Batteriesteuerung (Werte aus dem Log von EnergyController.py)
+
+Installation
+  1. ADDONS/mqtt_prognose.py und ADDONS/mqtt_prognose.readme in das Verzeichnis ADDONS kopieren
+  2. CONFIG/mqtt.ini in das Verzeichnis CONFIG kopieren (mqtt_priv.ini wird beim ersten Lauf automatisch angelegt)
+     und in der Weboberfläche (Tab config) anpassen. Neue Variablen aus mqtt.ini (z.B. Status_senden) gelten auch dann,
+     wenn sie in einer vorhandenen mqtt_priv.ini noch fehlen.
+  3. Python-Paket installieren:  pip install paho-mqtt   (ggf. mit --break-system-packages)
+  4. Testen im Hauptverzeichnis:  ./start_PythonScript.sh ADDONS/mqtt_prognose.py test
+  5. Senden:                      ./start_PythonScript.sh ADDONS/mqtt_prognose.py
+     Zyklisch z.B. im Scheduler bzw. Crontab, am sinnvollsten nach der Wetterdaten-Aktualisierung.
+  6. Status der Batteriesteuerung: Hook in EnergyController.py einfügen (siehe unten)
+  7. Einmalig die alten Einzel-Topics (je Stunde ein Topic, erste Version) am Broker löschen:
+     ./start_PythonScript.sh ADDONS/mqtt_prognose.py aufraeumen
+
+Topics (alle retained, wenn Retain = 1)
+  Topic_Base/stunden/heute (morgen, uebermorgen)
+      JSON: {"datum": "2026-10-20", "forecast_00h": 0.0, "diff_00h": 0.0, "geplant_00h": 0.0, "laufend_00h": 0.0, ... bis 23h}
+      Werte in kW als Zahl, fehlende Stunden = 0
+  Topic_Base/Serie/Tag/sum/wert   Tagessummen in kWh, Serie = prognose, planung_einmal, planung_laufend, differenz
+  differenz (diff) = prognose (forecast) - planung_einmal (geplant) - planung_laufend (laufend)
+  Topic_Base/status/<name>        siehe STATUS_NAMEN in mqtt_prognose.py: zeit, pv_produktion, einspeisung,
+      batterie_power, verbrauch_haus, batterie_soc, batterie_freie_kapazitaet, ladewert_alt, ladewert_neu,
+      ladewert_grund, batt_voll_um, prognose_aktuell, prognose_tag, grundlast_summe
+
+Hook in EnergyController.py (Status der Batteriesteuerung, bei jedem Lauf)
+  Datei EnergyController_mqtt_hook.patch im Hauptverzeichnis:  patch -p1 < EnergyController_mqtt_hook.patch
+  oder von Hand: oben "import os" ergänzen und den Block "Statuswerte per MQTT senden" direkt nach dem
+  try/except der Print-Befehle ("Fehler in den Printbefehlen") einfügen, bevor "WR Batteriemanagement" bzw. die
+  Entladesteuerung beginnt. Der Block ist in try/except gekapselt, ein Fehler stört die Steuerung nicht.
+  Ist der Broker nicht erreichbar, verzögert sich der Lauf um höchstens ca. 5 Sekunden (Verbindungs-Timeout von paho).
+  Bei Updates des Programms muss der Hook ggf. neu eingefügt werden.

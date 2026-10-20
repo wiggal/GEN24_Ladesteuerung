@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import json
 from sys import argv
 import requests
@@ -301,6 +302,28 @@ if __name__ == '__main__':
                             print("Fehler in den Printbefehlen, Ausgabe nicht möglich!")
                             print("Fehlermeldung:", e)
                             print()
+
+                    # Statuswerte per MQTT senden (Addon ADDONS/mqtt_prognose.py), Fehler stören die Steuerung nicht
+                    if os.path.exists('ADDONS/mqtt_prognose.py'):
+                        try:
+                            import ADDONS.mqtt_prognose
+                            ADDONS.mqtt_prognose.status_senden({
+                                'zeit': datetime.strftime(now, format),
+                                'pv_produktion': aktuellePVProduktion,
+                                'einspeisung': aktuelleEinspeisung,
+                                'batterie_power': aktuelleBatteriePower,
+                                'verbrauch_haus': GesamtverbrauchHaus,
+                                'batterie_soc': BattStatusProz,
+                                'batterie_freie_kapazitaet': BattKapaWatt_akt,
+                                'ladewert_alt': alterLadewert,
+                                'ladewert_neu': aktuellerLadewert,
+                                'ladewert_grund': LadewertGrund,
+                                'batt_voll_um': BattVollUm,
+                                'prognose_aktuell': aktuelleVorhersage,
+                                'prognose_tag': TagesPrognoseGesamt,
+                                'grundlast_summe': Grundlast_Summe})
+                        except Exception as e:
+                            print("ERROR: MQTT-Statusmeldung nicht möglich: ", e)
 
 
                     DEBUG_Ausgabe+="DEBUG\nDEBUG BattVollUm:                 " + str(BattVollUm) + "Uhr"
