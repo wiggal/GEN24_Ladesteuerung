@@ -11,7 +11,21 @@ Installation
   4. Testen im Hauptverzeichnis:  ./start_PythonScript.sh ADDONS/mqtt_prognose.py test
   5. Senden:                      ./start_PythonScript.sh ADDONS/mqtt_prognose.py
      Zyklisch z.B. im Scheduler bzw. Crontab, am sinnvollsten nach der Wetterdaten-Aktualisierung.
-  6. Status der Batteriesteuerung: Hook in EnergyController.py einfügen (siehe unten)
+  6. Status der Batteriesteuerung: Geplanten Verbrauch über MQTT setzen (ADDONS/mqtt_steuerung.py)
+  Scheduler-Eintrag, z.B. jede Minute:  start_PythonScript.sh ADDONS/mqtt_steuerung.py
+  Befehle (retained senden, Werte in kW, 0 löscht den Eintrag):
+    Topic_Base/set/geplant/heute/14h = 3     einmal: heute um 14:00 Uhr 3 kW (auch morgen, uebermorgen oder YYYY-MM-DD)
+    Topic_Base/set/laufend/14h = 3           laufend: ab heute jeden Tag um 14:00 Uhr 3 kW
+  Rückmeldung je Befehl unter Topic_Base/ack/<gleicher Pfad>, z.B. "ok 3.000 kW" oder "fehler ...".
+  Nur geänderte Befehle werden übernommen (letzter Wert je Topic in ADDONS/mqtt_steuerung_last.json) und nur
+  geschrieben, wenn sich der Wert von CONFIG/Prog_Steuerung.sqlite unterscheidet. Die Weboberfläche kann parallel
+  bedient werden, der zuletzt geänderte Wert gilt. Wird derselbe Wert erneut am Broker gesetzt, ohne dass sich
+  der Wert ändert, wird er nicht noch einmal übernommen (dann Datei mqtt_steuerung_last.json löschen oder
+  ein Datum statt heute/morgen verwenden).
+  Das Skript muss mit demselben Benutzer laufen wie der Scheduler, damit die Datenbank beschreibbar bleibt.
+  Testlauf ohne Schreiben:  start_PythonScript.sh ADDONS/mqtt_steuerung.py test
+
+Hook in EnergyController.py einfügen (siehe unten)
   7. Einmalig die alten Einzel-Topics (je Stunde ein Topic, erste Version) am Broker löschen:
      ./start_PythonScript.sh ADDONS/mqtt_prognose.py aufraeumen
 
