@@ -25,6 +25,24 @@ Installation
   Das Skript muss mit demselben Benutzer laufen wie der Scheduler, damit die Datenbank beschreibbar bleibt.
   Testlauf ohne Schreiben:  start_PythonScript.sh ADDONS/mqtt_steuerung.py test
 
+  Seite LadeStrg (wirkt wie das Speichern auf der Seite, geschrieben werden die Zeilen des Schluessels ChargeOption):
+    Topic_Base/set/modus = auto | autooptions | ladeleistung
+    Topic_Base/set/stunden = 3                  "Stunden bis Auto", 0 bis 100. Bei 0 gibt es keine Übersteuerung der Config-Werte.
+    Topic_Base/set/akkuschonung = 0 | 1 | 2     wirkt nur bei autooptions und ladeleistung
+    Topic_Base/set/ladeleistung = 1500          Watt, -1 bis MaxLadung, wirkt nur bei modus ladeleistung
+    Topic_Base/set/autooptions/MindBattLad = 40 Felder aus [AutoOptionsFelder] (html/config.ini, html/config_priv.ini)
+  Der Zeitstempel (gültig bis) wird neu berechnet, wenn stunden geändert wird oder von auto auf einen aktiven Modus
+  gewechselt wird. Beim Wechsel von auto gelten auch die am Broker stehenden Werte für stunden, akkuschonung,
+  ladeleistung und autooptions/... (wie wenn man sie auf der Seite vor dem Speichern einträgt).
+  Bei modus auto werden alle Übersteuerungen beendet, es gelten wieder die Werte aus den ini-Dateien.
+
+  Seite Settings (Zeile ProgrammStrg):
+    Topic_Base/set/betrieb = webui_aus | aus_loeschen | aus_belassen | analyse | ladesteuerung   (auch 0 bis 4)
+    Topic_Base/set/betrieb_optionen = logging,laden,entladen,optimierung,notstrom,dynamicprice  (nur bei ladesteuerung)
+  ACHTUNG: Die Betriebsarten aus_loeschen und aus_belassen schalten die Ladesteuerung ab (bei aus_loeschen werden
+  die zeitabhängigen Batterie-Einträge im Wechselrichter beim nächsten Lauf gelöscht). webui_aus ist der Normalfall,
+  dann gelten die Aufrufparameter des Cronjobs.
+
 Hook in EnergyController.py einfügen (siehe unten)
   7. Einmalig die alten Einzel-Topics (je Stunde ein Topic, erste Version) am Broker löschen:
      ./start_PythonScript.sh ADDONS/mqtt_prognose.py aufraeumen
