@@ -47,6 +47,9 @@ basics = FUNCTIONS.functions.basics()
 def Prognose_holen(Web_URL, SSL_Verify):
     # Prognose aus API_forecast.php (im Verzeichnis der Startseite) holen
     API_URL = urljoin(Web_URL, 'API_forecast.php')
+    if not SSL_Verify:
+        # Web_SSL_Verify = 0 ist gewollt, Warnung von urllib3 nicht bei jedem Lauf ins Log schreiben
+        requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
     antwort = requests.get(API_URL, timeout=20, verify=SSL_Verify)
     antwort.raise_for_status()
     daten = antwort.json()
