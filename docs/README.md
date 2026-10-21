@@ -1,5 +1,3 @@
-![Logo](pics/Logo.png)
-
 ![License](https://img.shields.io/github/license/wiggal/GEN24_Ladesteuerung)
 ![Debian](https://img.shields.io/badge/Debian-supported-A81D33?logo=debian)
 ![Alpine Linux](https://img.shields.io/badge/Alpine%20Linux-3.x-0D597F?logo=alpinelinux)
@@ -13,185 +11,123 @@
 ![Fronius](https://img.shields.io/badge/Fronius-GEN24-E2001A?logo=data:image/svg+xml;base64,...)
 ![Wattpilot](https://img.shields.io/badge/Fronius-Wattpilot-E2001A)
 ![OCPP](https://img.shields.io/badge/OCPP-1.6J-00A651)
-## ⚡☀️ EnergyWIGGAL🔋🚘
-## [📚 Wiki 📚](https://wiggal.github.io/GEN24_Ladesteuerung/)
+![MQTT](https://img.shields.io/badge/MQTT-green)
 
-**Programmfunktionen:**  
-- Prognose basierte Ladesteuerung für Fronius Symo GEN24 Plus und Verto, um eine Einspeisebegrenzung (bei mir 70%) zu umgehen und den Akku schonend zu laden, oder eine Ladung nur bei negativen Strompreisen.
-- Über die Tabelle [Ladesteuerung](#batterieladesteuerung) können große, geplante Verbräuche bei der Ladeplanung berücksichtigt und Ladeleistungen manuell eingestellt werden.
-- Über die Tabelle [Entladesteuerung](#batterieentladesteuerung) kann die Entladung bzw. Zwangsladung des Akkus gesteuert werden. Auch automatisch über dynamische Strompreise.
-- [Logging](#-logging) und grafische Darstellung von Prognoseberechnung, Strompreise und QZ-Bilanz (Produktion und Verbrauch).
-- Akkuschonung: Um einen LFP-Akku zu schonen, kann die Ladeleistung z.B. ab 80% auf 0,2C und ab 90% auf 0,1C beschränkt werden. Es ist auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
-- [Dynamischen Strompreis](#-dynamicpricecheckpy) nutzen um bei niedrigen Preisen den Akku zu laden, mit grafischer Darstellung.  
-- [Ladesteuerung des Wattpiloten](#-wallboxsteuerung), für E-Autos 🚘 über OCPP (Nach Überschuß oder Strompreis).
-- [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)
-- [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
+## ⚡☀️ EnergyWIGGAL mit MQTT🔋🚘
 
-![new](pics/new.png)  
-Ab Version: **0.43.7**  
-- 🚘🔒🔋 Wattpilot-Steuerung: Hausakku Entladesperre.
+<h1>GEN24_Ladesteuerung mit MQTT</h1>
 
-Ab Version: **0.43.3**  
-- 🚘 Wattpilot-Steuerung im NextTrip nun auch nach Strompreis.
+<p>Dieser Fork hat zusätzlich 2 Addons, die MQTT-Statusmeldungen senden und MQTT-Befehle entgegenehmen können</p>
 
-Ab Version: **0.43.0**  
-- Ladesteuerung abhängig vom Strompreis, z.B. nur bei negativen Strompreisen laden.  
-- Darstellung der Verbräuche von Wattpilot und Ohmpilot.  
-- Strompreisquelle www.energyforecast.de eingebaut.  
+<h2>Installation</h2>
+Die 2 Addons mqtt_prognose.py und mqtt_steuerung.py in /ADDONS ablegen, die mqtt.ini unter /CONFIG und nach mqtt_priv.ini kopieren und Einstellungen anpassen.
+Dann 2 Cronjobs über den Scheduler (Settings - Scheduler) eintragen:
+MQTT Statusmeldungen ausgeben:
+Minuten: 0,15,30,45   (auch andere Intervalle gehen)
+Befehl: [Webserververzeichnis]/start_PythonScript.sh ADDONS/mqtt_prognose.py
 
-Ab Version: **0.42.8**  
-- Neuer Prognosedienst DWD_mosmix_forecast.py 
-- Im ForecastMgr kann nun eine statistische Auswertung über die Treffsicherheit der Dienste erfolgen.
+MQTT Statusmeldungen empfangen:
+Minuten: * (jede Minute)
+Befehl: [Webserververzeichnis]/start_PythonScript.sh ADDONS/mqtt_steuerung.py
 
-Ab Version: **0.42.5**  
-- [GEN24 Ladesteuerung – Home Assistant Wrapper](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/HA_README.md)
+[Webserververzeichnis] entsprechend dem eigenen Server anpassen, damit start_PythonScript.sh aufgerufen wird, analog zu den anderen cronjobs
 
-Ab Version: **0.42.4**  
-- Grafische CronJob-Verwaltung in der WebUI unter Settings => Scheduler, dadurch einfachere Installation und Pflege der CronJob's. 
+<h2>Überblick MQTT Topics</h2>
 
-Ab Version: **0.42.0**  
-- 🚘 Steuerung des Wattpiloten, nun auch mit NextTrip.  
+<p>Alle Topics liegen unter dem Basistopic <code>gen24</code> (Einstellung <code>Topic_Base</code> in <code>CONFIG/mqtt.ini</code> bzw. <code>mqtt_priv.ini</code>). Drei Skripte senden oder lesen sie.</p>
 
-Ab Version: **0.41.7**  
-- Es ist nun auch eine Reduzierung der Ladeleistung in Abhängigkeit der höchsten Zellspannung möglich.  
+<table>
+<thead>
+<tr><th>Zweig</th><th>Richtung</th><th>Quelle</th><th>Wann</th><th>Retained</th></tr>
+</thead>
+<tbody>
+<tr><td><code>gen24/stunden/&lt;tag&gt;</code></td><td>Programm → Broker</td><td><code>ADDONS/mqtt_prognose.py</code></td><td>Scheduler, z. B. alle 5 Minuten, und nach jedem geschriebenen Set-Befehl</td><td>nach <code>Retain</code> (Standard 1)</td></tr>
+<tr><td><code>gen24/&lt;serie&gt;/&lt;tag&gt;/sum/wert</code></td><td>Programm → Broker</td><td><code>ADDONS/mqtt_prognose.py</code></td><td>wie oben</td><td>nach <code>Retain</code></td></tr>
+<tr><td><code>gen24/status/&lt;name&gt;</code></td><td>Programm → Broker</td><td>Hook in <code>EnergyController.py</code></td><td>bei jedem Lauf der Batteriesteuerung, wenn <code>Status_senden = 1</code></td><td>nach <code>Retain</code></td></tr>
+<tr><td><code>gen24/set/...</code></td><td>Broker → Programm</td><td><code>ADDONS/mqtt_steuerung.py</code></td><td>Scheduler jede Minute, wenn <code>Steuerung_empfangen = 1</code></td><td>muss retained gesendet werden</td></tr>
+<tr><td><code>gen24/ack/...</code></td><td>Programm → Broker</td><td><code>ADDONS/mqtt_steuerung.py</code></td><td>nur nach neuem Set-Befehl</td><td>nach <code>Retain</code></td></tr>
+</tbody>
+</table>
 
-Ab Version: **0.41.0**  
-- 🚘 Steuerung des Wattpiloten, über OCPP.  
+<p>Platzhalter: <code>&lt;tag&gt;</code> ist <code>heute</code>, <code>morgen</code> oder <code>uebermorgen</code>. <code>&lt;HH&gt;</code> ist die Stunde zweistellig von <code>00</code> bis <code>23</code>.</p>
 
-![new](pics/new2.png)  
+<p>Scheduler-Einträge:</p>
+<pre><code>start_PythonScript.sh ADDONS/mqtt_prognose.py     (z. B. alle 5 Minuten)
+start_PythonScript.sh ADDONS/mqtt_steuerung.py    (jede Minute)</code></pre>
 
-Die Ladung des Hausakkus erfolgt prognosebasiert und kann mit der Variablen „BatSparFaktor“ in der „CONFIG/charge_priv.ini“ gesteuert werden.  
-Hier eine schematische Darstellung um die Auswirkung des „BatSparFaktor“ zu verdeutlichen:  
-![Auswirkung des BatSparFaktor](pics/Ladewertverteilung.png)
+<h2>Prognose und Planung</h2>
 
-## 💾 Installationshinweise: [siehe Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Inst_RaspPi.html).
+<p>Je Tag gibt es ein JSON mit allen Stundenwerten und vier Tagessummen, also 15 Topics für heute, morgen und übermorgen. Stunden ohne Wert werden mit 0 gefüllt.</p>
 
-Die Installation bzw. das Update kann mit dem Sktript install_gen24.sh nach dessen Download automatisch durchgeführt werden. 
-Für eine manuelle Installation, bzw. genauere Installationshinweise siehe [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Inst_RaspPi.html).   
-![new](pics/new.png)
-Cronjobs werden nun unter Settings => Scheduler konfiguriert:
-![Settings=>Scheduler](pics/scheduler.png)
+<table>
+<thead>
+<tr><th>Topic</th><th>Inhalt</th><th>Einheit</th></tr>
+</thead>
+<tbody>
+<tr><td><code>gen24/stunden/&lt;tag&gt;</code></td><td>JSON mit <code>datum</code> (YYYY-MM-DD) und je Stunde <code>forecast_&lt;HH&gt;h</code>, <code>geplant_&lt;HH&gt;h</code>, <code>laufend_&lt;HH&gt;h</code>, <code>diff_&lt;HH&gt;h</code></td><td>kW, 3 Nachkommastellen</td></tr>
+<tr><td><code>gen24/prognose/&lt;tag&gt;/sum/wert</code></td><td>Tagessumme der PV-Prognose</td><td>kWh</td></tr>
+<tr><td><code>gen24/planung_einmal/&lt;tag&gt;/sum/wert</code></td><td>Tagessumme geplanter Verbrauch einmal</td><td>kWh</td></tr>
+<tr><td><code>gen24/planung_laufend/&lt;tag&gt;/sum/wert</code></td><td>Tagessumme geplanter Verbrauch laufend</td><td>kWh</td></tr>
+<tr><td><code>gen24/differenz/&lt;tag&gt;/sum/wert</code></td><td>Tagessumme Rest (Prognose − einmal − laufend)</td><td>kWh</td></tr>
+</tbody>
+</table>
 
-### 🌦️ Prognoseskripte in FORECAST
+<p>Beispiel für einen Ausschnitt aus <code>gen24/stunden/heute</code> (Zahlen ausgedacht):</p>
+<pre><code>{"datum": "2026-10-21", "forecast_12h": 3.2, "diff_12h": 1.2, "geplant_12h": 2.0, "laufend_12h": 0.0, ...}</code></pre>
 
-Holen von den jeweiligen API-Urls die Prognosedaten, bereiten sie auf für EnergyController24, und speichern Mittelwerte in weatherData.sqlite. 
+<p><code>laufend</code> ist der Wert der Zeile selbst, sonst der letzte Wert früherer Tage zur gleichen Uhrzeit (Regel aus <code>SQLall.py</code>).</p>
 
-Besonderheiten:
-- Bei forecast.solar kann mit einem Account die Prognose mit den Werten der Produktion aus der DB angepasst werden.  
-- Bei solcast.com.au ist ein "Home User" Account erforderlich. Leider kann nur 10x am Tag angefordert werden.  
-- Bei api.akkudoktor.net können Abschattungen und weitere Parameter angegeben werden.  
-- Bei open-meteo.com können verschiedene Wetterdienste konfiguriert werden, kein Account nötig.  
-- Bei DWD_mosmix_forecast wird aus den mosmix-Daten des DWD eine Prognose berechnet, kein Account nötig.  
+<h2>Statuswerte der Batteriesteuerung</h2>
 
-### 📉 EnergyController.py
+<p>Bei jedem Lauf von <code>EnergyController.py</code> gehen 14 Einzelwerte unter <code>gen24/status/</code> raus, dieselben Werte wie auf der Seite Logfiles.</p>
 
-Berechnet den aktuell besten Ladewert aufgrund der Prognose in weatherData.sqlite und dem Akkustand und gibt sie aus. 
-Mit dem Parameter "schreiben" aufgerufen (start_PythonScript.sh EnergyController.py **schreiben**) setzt es die `Maximale Ladeleistung` **per HTTP-Request** 
-im Batteriemanagement des Wechselrichters. 
-Die **Einspeisebegrenzung** und die **AC-Kapazität der Wechselrichters** muss hier nicht berücksichtigt werden,
-da dies das Batteriemanagement des GEN24 selber regelt (auch über der definierten `Maximale Ladeleistung`!)
+<table>
+<thead>
+<tr><th>Topic</th><th>Inhalt</th><th>Einheit</th></tr>
+</thead>
+<tbody>
+<tr><td><code>gen24/status/zeit</code></td><td>Zeitpunkt des Laufs (YYYY-MM-DD HH:MM:SS)</td><td></td></tr>
+<tr><td><code>gen24/status/pv_produktion</code></td><td>aktuelle PV-Produktion</td><td>W</td></tr>
+<tr><td><code>gen24/status/einspeisung</code></td><td>aktuelle Einspeisung, positiv = Einspeisung</td><td>W</td></tr>
+<tr><td><code>gen24/status/batterie_power</code></td><td>aktuelle Batterieleistung</td><td>W</td></tr>
+<tr><td><code>gen24/status/verbrauch_haus</code></td><td>Gesamtverbrauch Haus</td><td>W</td></tr>
+<tr><td><code>gen24/status/batterie_soc</code></td><td>Ladestand</td><td>%</td></tr>
+<tr><td><code>gen24/status/batterie_freie_kapazitaet</code></td><td>freie Batteriekapazität (im Log „aktuelleBattKapazität“)</td><td>Wh</td></tr>
+<tr><td><code>gen24/status/ladewert_alt</code></td><td>bisheriger Ladewert</td><td>W</td></tr>
+<tr><td><code>gen24/status/ladewert_neu</code></td><td>neuer Ladewert</td><td>W</td></tr>
+<tr><td><code>gen24/status/ladewert_grund</code></td><td>Begründung für den Ladewert</td><td>Text</td></tr>
+<tr><td><code>gen24/status/batt_voll_um</code></td><td>erwartete Uhrzeit Batterie voll</td><td>Uhr</td></tr>
+<tr><td><code>gen24/status/prognose_aktuell</code></td><td>aktuelle Prognose</td><td>W</td></tr>
+<tr><td><code>gen24/status/prognose_tag</code></td><td>Tagesprognose gesamt</td><td>Wh</td></tr>
+<tr><td><code>gen24/status/grundlast_summe</code></td><td>Summe Grundlast</td><td>Wh</td></tr>
+</tbody>
+</table>
 
-### 💲🔌 DynamicPriceCheck.py
-Es werden die günstigsten Stunden zum Laden des Akkus aus dem Netz, bzw. eines Akku Entladestopps ermittelt. 
-Der Aufruf von DynamicPriceCheck.py sollte einmal stündlich am besten zwei Minuten vor der vollen Stunde erfolgen.  
-Siehe hierzu Settings => Scheduler.
+<h2>Set-Befehle und Rückmeldungen</h2>
 
-Die Werte werden in die Tabelle EntladeSteuerung eingetragen, und beim nächsten Aufruf von EnergyController.py auf den GEN24 geschrieben.  
-Hier das Diagramm zu den dynamischen Strompreisen:
-![Beispiel einer Zwangsladeberechnung](pics/Dyn_Strompreis.png)
-*Einzelne Linien und Balken im Diagramm können durch Anklicken des entsprechenden Legendeneintrags ein- oder ausgeblendet werden.* 
+<p>Befehle werden retained an <code>gen24/set/...</code> gesendet. Zu jedem neuen Befehl meldet das Addon unter <code>gen24/ack/&lt;gleicher Pfad&gt;</code> zurück, z. B. <code>gen24/ack/stunden</code> mit <code>ok ...</code> oder <code>fehler ...</code>.</p>
 
-## Webserver Installation (WebUI):  
+<table>
+<thead>
+<tr><th>Topic</th><th>Seite</th><th>Erlaubte Werte</th><th>Hinweis</th></tr>
+</thead>
+<tbody>
+<tr><td><code>gen24/set/geplant/&lt;tag&gt;/&lt;HH&gt;h</code></td><td>Planung einmal</td><td>kW, 0 bis <code>Geplant_Max_kW</code> (Standard 20)</td><td><code>&lt;tag&gt;</code> auch als Datum YYYY-MM-DD; 0 löscht den Eintrag</td></tr>
+<tr><td><code>gen24/set/laufend/&lt;HH&gt;h</code></td><td>Planung laufend</td><td>kW, 0 bis <code>Geplant_Max_kW</code></td><td>gilt ab heute jeden Tag zur gleichen Uhrzeit; 0 löscht</td></tr>
+<tr><td><code>gen24/set/modus</code></td><td>LadeStrg</td><td><code>auto</code>, <code>autooptions</code>, <code>ladeleistung</code></td><td><code>auto</code> beendet alle Übersteuerungen</td></tr>
+<tr><td><code>gen24/set/stunden</code></td><td>LadeStrg</td><td>0 bis 100</td><td>„Stunden bis Auto“; 0 = keine Wirkung</td></tr>
+<tr><td><code>gen24/set/akkuschonung</code></td><td>LadeStrg</td><td>0, 1, 2</td><td>wirkt nur bei <code>autooptions</code> und <code>ladeleistung</code></td></tr>
+<tr><td><code>gen24/set/ladeleistung</code></td><td>LadeStrg</td><td>W, −1 bis MaxLadung aus <code>charge.ini</code></td><td>wirkt nur bei <code>ladeleistung</code></td></tr>
+<tr><td><code>gen24/set/autooptions/&lt;Schlüssel&gt;</code></td><td>LadeStrg</td><td>je nach Feldtyp, <code>prozent</code> = 0 bis 100</td><td>Felder aus <code>[AutoOptionsFelder]</code> in <code>html/config.ini</code>/<code>config_priv.ini</code>, z. B. <code>autooptions/MindBattLad</code>; Feld muss in <code>charge.ini</code> stehen</td></tr>
+<tr><td><code>gen24/set/betrieb</code></td><td>Settings</td><td><code>webui_aus</code>, <code>aus_loeschen</code>, <code>aus_belassen</code>, <code>analyse</code>, <code>ladesteuerung</code> oder 0 bis 4</td><td><code>aus_loeschen</code> löscht beim nächsten Lauf die zeitabhängigen Batterie-Einträge im Wechselrichter</td></tr>
+<tr><td><code>gen24/set/betrieb_optionen</code></td><td>Settings</td><td>Liste aus <code>logging</code>, <code>laden</code>, <code>entladen</code>, <code>optimierung</code>, <code>notstrom</code>, <code>dynamicprice</code></td><td>nur bei <code>betrieb</code> = <code>ladesteuerung</code>, z. B. <code>logging,laden,entladen</code></td></tr>
+</tbody>
+</table>
 
-**PHP installieren:**
-```
-sudo apt update && sudo apt upgrade
-sudo apt install php php-sqlite3
-```
-Wenn PHP installiert ist, wird durch die Variable `Einfacher_PHP_Webserver = 1` (Standard) in der CONFIG/default_priv.ini beim nächsten Aufruf von `start_PythonScript.sh`
-automatisch der einfache PHP-Webserver gestartet werden. Die Webseite ist dann auf Port: 2424 erreichbar (z.B.: raspberrypi:2424).  
+<p>Das Addon übernimmt einen Befehl nur, wenn sich der Wert am Broker seit dem letzten Abruf geändert hat (gemerkt in <code>ADDONS/mqtt_steuerung_last.json</code>). Die Weboberfläche bleibt so parallel bedienbar, die letzte Änderung gilt.</p>
 
-### 📊 Logging
+<h2>Hinweise</h2>
 
-Beim Aufruf von `EnergyController.py schreiben` wird die Ladesteuerung und das Logging ausgeführt. 
-Beim Aufruf mit dem Parameter `logging` wird nur das Logging ausgeführt, es erfolgt keine Ladesteuerung. 
-Beim `logging` werden Zählerstände und ermittelte Werte in die SQLite-Datei `PV_Daten.sqlite` gespeichert, 
-aus der wird dann durch html/8_tab_Diagram.php das Diagramm **QZ**-Bilanz nach **Q**uelle (wo kommt die Energie her) und **Z**iel (wo geht die Energie hin) erzeugt. 
-![Grafik zur Quelle/Ziel](pics/QZ_Tag.png)
-*Einzelne Linien und Balken im Diagramm können durch Anklicken des entsprechenden Legendeneintrags ein- oder ausgeblendet werden.*
+<p>Nicht mehr gesendet werden die Einzel-Topics der ersten Version (<code>gen24/&lt;serie&gt;/&lt;tag&gt;/&lt;HH&gt;/wert</code> und <code>gen24/&lt;serie&gt;/&lt;tag&gt;/datum</code>). Am Broker werden sie mit <code>start_PythonScript.sh ADDONS/mqtt_prognose.py aufraeumen</code> gelöscht.</p>
 
-### Batterieladesteuerung
-
-![Tabelle zur Ladesteuerung](pics/Ladesteuerung.png)
-
-Modul zur manuellen Ladesteuerung und Reservierung von größeren Mengen PV-Leistung (z.B. E-Autos).   
-Alle eingetragenen Werte werden in die DB-Datei CONFIG/Prog_Steuerung.sqlite geschrieben.  
-
-Die Einstellungen sind gültig, bis `Stunden bis "Auto":` abgelaufen ist, `Ladegrenze mit Akkuschonung` wird in dieser Zeit berücksichtigt.  
-
-Ist **AUTO** eingestellt, wird die Reservierung von EnergyController.py berücksichtigt und die Ladesteuerung nach Prognose, und Einstellungen aus `CONFIG/charge.ini/_priv.ini` berechnet.  
-Bei Einstellung **AutoOptions**, werden alle in der `html/config_priv.ini` unter [AutoOptionsFelder] eingetragenen Variablen der `CONFIG/charge.ini/_priv.ini` angezeigt, und können zeitabhängig verändert werden.  
-Bei **Ladeleistung** kann eine Feste Ladeleistung in Watt für die eingestellten Stunden definiert werden. Mit dem Button `MaxLadung` kann die definierte MaxLadung aus CONFIG/charge.ini/_priv.ini eingestellt werden.   
-
-### ForecastMgr
-Im ForecastMgr können die gespeicherten Prognosedaten mit der Prognosestatistik analysiert, und evtl. gelöscht werden. Sie werden grafisch und als Tabelle dargestellt.   
-![ForecastMgr](pics/ForecastMgr.png)
-
-Die berechnete Prognose kann per API aus der Datenbank ausgelesen werden, um sie in einer anderen Anwendung (z.B. HA) einbinden zu können.  
-Der Aufruf IP-raspberrypi:2424/API_forecast.php liefert ein JSON-Format wie von api.forecast.solar.  
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/LadeStrg.html#weatherDataManager).  
-
-### BatterieENTladesteuerung
-![Tabelle zur Entladesteuerung](pics/Entladesteuerung.png)
-
-Unter "Feste Entladegrenze" kann die maximale Entladeleistung in Prozent der WR-Entladeleistung fest eingestellt werden.
-
-In der Entladetabelle können Leistungen in kW zur Steuerung der Akkuentladung, bzw. zum Laden des Akkus aus dem Netz bei niedrigen Strompreisen, eingetragen werden. 
-Durch einen negativen Wert in "Feste Entladegrenze" erfolgt die Zwangsladung des Akkus.  
-Hier werden auch die Werte für Zwangsladungen aus dem Netz, oder Ladestopps von DynamicPriceCheck.py eingetragen.  
-
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/ENTLadeStrg.html)  
-
-### 🚘 Wallboxsteuerung
-Das Tool startet einen OCPP-Server, zu dem eine Wallbox (aktuell getestet: Fronius Wattpilot) eine Verbindung als Client herstellen kann.  
-Der TAB `Wallbox` ist standardmäßig ausgeblendet, und kann in der html/config_priv.ini eingeblendet werden.  
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Wallbox.html)  
-
-![Tabelle zur Wallbox](pics/Wallbox.png)
-
-### Settings
-![Tabelle zu den Settings](pics/Settings.png)
-Programmfunktionen:  
-Unter Settings kann das Programm zusätzlich gesteuert werden.  
-
-Weitere Erklärungen stehen in der verlinkten Hilfe oder im [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/index.html?page=WIKI/Settings.html)    
-
-### Grafana Beispiele  
-![Beispiele](pics/Grafana.png)
-
-Eine [Beschreibung](../GRAFANA/Grafana_Installation_readme.pdf) und Dashboarddateien liegen im Verzeichnis GRAFANA.
-
-----------
-
-**News History:**  
-Ab Version: **0.40.2**  
-- 🔄 Updatefunktion im TAB `config`, wenn das Quellverzeichnis ein Git-Repository ist.  
-Ab Version: **0.40.0**  
-- Programm von GEN24 auf Generic Inverter angepasst, um später auch andere Inverter steuern zu können.  
-Es ändert sich der Skriptname `http_SymoGen24Controller2.py` in `EnergyController.py`.  
-⚠️ Die **Cronjobs** und die **default_priv.ini** müssen angepasst werden!!  
-- [WikiExtension_Gen24_Ladesteuerung von @killwack](https://github.com/killwack/WikiExtension_Gen24_Ladesteuerung/wiki)  
-Ab Version: **0.38.1**  
-Mit eigenem Skript ADDONS/Fremd_API_priv.py können Produktionswerte von fremden Erzeugern geholt und an die EnergyController24 übergeben werden.  
-Ab Version: **0.38.0**  
-Update auf Firmware 1.38.6-1.  
-Ab Version: **0.31.0**  
- Updatefunktion im config-TAB, damit können `_priv.ini` Files mit den original ini-Files abgeglichen und upgedatet werden.  
-Installationsskript install_gen24.sh für eine automatische Installation bzw. Updating.  
-Ab Version: **0.30.4**  
-Neues Prognoseskripte OpenMeteo_WeatherData.py für https://open-meteo.com.  
-Ab Version: **0.30.2**  
-Konsolidierung der Dokumentation, Hilfen und [Wiki](https://wiggal.github.io/GEN24_Ladesteuerung/) nach GitHub/Pages übernommen.  
-Ab Version: **0.30.0**  
-Speicherung der Prognosedaten in `weatherData.sqlite`, Berechnung der Prognose mit gespeicherten Werten.  
-Mit dem verlinkten  `ForecastMgr` können die Prognosedaten gesichtet und gelöscht werden.  
+<p>Wer in <code>gen24/set/#</code> schreiben darf, kann die Ladesteuerung abschalten. Zugriffsrechte am Broker sind deshalb sinnvoll.</p>
