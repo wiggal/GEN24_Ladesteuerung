@@ -1,8 +1,8 @@
 # The source image to start with
-FROM alpine:3.20.3
+FROM alpine:3.22
 
 # Your contact info
-MAINTAINER wiggal ;ludwig.sporrer@gmx.de
+LABEL maintainer="wiggal <ludwig.sporrer@gmx.de>"
 
 # Setzen der Umgebungsvariablen für die deutsche Sprache
 ENV CONTAINER_TIMEZONE="Europe/Berlin" \
@@ -10,7 +10,8 @@ ENV CONTAINER_TIMEZONE="Europe/Berlin" \
     LANGUAGE=de_DE:de \
     LC_ALL=de_DE.UTF-8
 
-RUN apk add --update-cache git
+RUN apk upgrade --update-cache \
+ && apk add git
 #git clon_Ladesteuerung-main/ nach /home/GEN24
 RUN git clone -b main https://github.com/wiggal/GEN24_Ladesteuerung.git /home/GEN24
 
@@ -24,7 +25,7 @@ RUN apk add --update-cache \
     php-curl \
     tzdata \
     python3 \
-    py-pip \
+    py3-pip \
     bash \
     file \
     py3-yaml \
