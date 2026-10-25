@@ -56,7 +56,7 @@ if __name__ == '__main__':
             if(print_level == 5): DEBUG_interface = True
             #  Klasse FroniusGEN24 initiieren
             inverter_interface = InverterInterface(host_ip, user, password, API['Version'], DEBUG_interface)
-            # Reservierungsdatei lesen, hier am Anfang, damit die DB evtl. angelegt wird 
+            # Reservierungsdaten lesen, hier am Anfang, damit die DB evtl. angelegt wird 
             reservierungdata_tmp = sqlall.getSQLsteuerdaten('Reservierung')
             alterLadewert = 0
             # alten Ladewert lesen
