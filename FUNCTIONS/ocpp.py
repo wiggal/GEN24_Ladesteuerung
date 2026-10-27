@@ -953,6 +953,12 @@ class OCPPManager:
         # Aktuelle Ladepower mit aktuell gesetzten Werten berechnen
         if cp_id and cp_id in self.states:
             current_charge_power = self.get_current_power(cp_id)  # A × P × U(gemessen), Fallback 230V
+            # TEMPORÄRES DEBUG: Quelle des CP-Werts nachvollziehbar machen  #entWIGGlung
+            _dbg = self.states[cp_id]
+            cdebug(f"[{_dbg.log_cp_id}] CP-Debug: status={_dbg.status}, limit={_dbg.current_limit}, "
+                   f"phases={_dbg.phase_limit}, meter_keys={list(_dbg.meter_values.keys())}, "
+                   f"ist={self._extract_power_w_from_meter_store(cp_id)}, "
+                   f"soll={self.get_current_power_soll(cp_id)}, U={self._get_average_voltage(cp_id)}")
 
         # Inverter-Werte verrechnen
         # Hausakku Ladebegrenzung, rechnen -0.1kW = keine Begrenzung
@@ -1093,7 +1099,8 @@ class OCPPManager:
         if not st:
             return 0.0
         # Kein Fahrzeug bzw. nicht aktiv ladend -> keine Last
-        if st.status not in ["Charging", "SuspendedEV", "SuspendedEVSE"]:
+        # SuspendedEVSE: Wallbox gibt keine Energie frei -> Ladeleistung per Definition ~0 W
+        if st.status not in ["Charging", "SuspendedEV"]:
             return 0.0
         if st.meter_values:
             return self._extract_power_w_from_meter_store(cp_id)

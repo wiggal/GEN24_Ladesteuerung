@@ -251,7 +251,18 @@ input.autooption-input[type="number"] {
 .checkbox-wrap {
   white-space: nowrap;
 }
+/* Label + Eingabefeld bilden eine feste Einheit; "gültig bis" hängt rechts daneben und liegt
+   außerhalb des Textflusses, damit das Eingabefeld nie verrutscht (auch nicht beim Ein-/Ausblenden) */
+.gueltig-wrap {
+  position: relative;
+  display: inline-block;
+}
 .gueltig {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
   font-weight: normal;
   color: #555;
   font-size: 90%;
@@ -260,8 +271,11 @@ input.autooption-input[type="number"] {
 /* Spezielle Anpassung für Mobilgeräte */
 @media (max-width: 600px) {
   .gueltig {
+    position: static;
+    transform: none;
     width: 100%;
     display: block;
+    min-height: 1.3em; /* Zeile immer reservieren, damit nichts springt */
   }
 
   th, td {
@@ -400,7 +414,7 @@ if ($ManSteuerung_abgelaufen) {
     $EV_Reservierung['ManuelleSteuerung']['Res_Feld1'] = -1;
     $gueltig_bis = '';
     } else {
-    $gueltig_bis = "&nbsp;gültig bis " . date("Y-m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
+    $gueltig_bis = "&nbsp;=&gt; " . date("m-d H:i", $EV_Reservierung['ManuelleSteuerung']['Options']);
     }
 $std_diff = ($EV_Reservierung['ManuelleSteuerung']['Options'] - time())/3600;
 $std_diff = ($std_diff <= 0) ? 0 : round($std_diff,2);
@@ -501,12 +515,12 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
 
 <!-- SLIDER -->
 <div style='text-align: center;'>
-  <p class="sliderbeschriftung">Stunden bis "Auto":
-  <input type="number" id="gueltigkeitsstunden" name="gueltigkeitsstunden" min="0" max="100" step="1" value="<?php echo $std_diff_anzeige ?>" class="autooption-input <?php echo ($std_diff_anzeige == 0) ? 'autooption-fallback' : '' ?>" data-typ="zahl" data-config-wert="0" style="width:80px; height:auto; font-size:100%;" oninput="autoOptionInput(this, null);">
-  <span class="gueltig" ><?php echo $gueltig_bis ?></span></p>
+  <p class="sliderbeschriftung"><span class="gueltig-wrap">Stunden bis "Auto":
+  <input autocomplete="off" type="number" id="gueltigkeitsstunden" name="gueltigkeitsstunden" min="0" max="100" step="1" value="<?php echo $std_diff_anzeige ?>" class="autooption-input <?php echo ($std_diff_anzeige == 0) ? 'autooption-fallback' : '' ?>" data-typ="zahl" data-config-wert="0" style="width:80px; height:auto; font-size:100%;" oninput="autoOptionInput(this, null); gueltigBisAktualisieren();">
+  <span class="gueltig" id="gueltig_bis_anzeige"><?php echo $gueltig_bis ?></span></span></p>
     <p class="sliderbeschriftung" style="margin-top:0 !important;">Ladegrenze mit Akkuschonung:
     <span class="checkbox-wrap">
-    <select name="akkuschonung" id="akkuschonung" class="autooption-input <?php echo $Akkuschonung_Fallback_Class ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($Akkuschonung_Config_Wert) ?>" style="font-size: <?php echo $Groesse_Kompakt_FontSize ?>; padding: <?php echo $Groesse_Kompakt_Padding ?>; width:auto; height:auto;" onchange="autoOptionInput(this, null);">
+    <select autocomplete="off" name="akkuschonung" id="akkuschonung" class="autooption-input <?php echo $Akkuschonung_Fallback_Class ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($Akkuschonung_Config_Wert) ?>" style="font-size: <?php echo $Groesse_Kompakt_FontSize ?>; padding: <?php echo $Groesse_Kompakt_Padding ?>; width:auto; height:auto;" onchange="autoOptionInput(this, null);">
         <option value="0" <?php echo ($DB_Akkuschon_wert === '0') ? 'selected' : ''; ?>>0 - Aus</option>
         <option value="1" <?php echo ($DB_Akkuschon_wert === '1') ? 'selected' : ''; ?>>1 - Ein</option>
         <option value="2" <?php echo ($DB_Akkuschon_wert === '2') ? 'selected' : ''; ?>>2 - Zell-U</option>
@@ -515,14 +529,14 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
     </p>
 <div class="flex-container">    
     <div class="modus_zeile_item">
-  <select id="modus" class="dropdown" name="hausakkuladung" >
+  <select autocomplete="off" id="modus" class="dropdown" name="hausakkuladung" >
     <option value="Auto" <?php echo $DB_Auto_selected ?>>Auto</option>
     <option value="AutoOptions" <?php echo $DB_AutoOptions_selected ?>>AutoOptions</option>
     <option value="Slider" <?php echo $DB_Slider_selected ?>>Ladeleistung</option>
   </select>
 </div>
     <div id="slider_wrapper" class="modus_zeile_item" style="flex-grow: 1; <?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
-<input class="autooption-input <?php echo $FesteLadeleistung_Fallback_Class ?>" id="feste_ladeleistung_feld" data-typ="zahl" data-config-wert="<?php echo htmlspecialchars($FesteLadeleistung_Config_Wert) ?>" data-maxladung-wert="<?php echo htmlspecialchars($MaxLadung_Config_Wert) ?>" type="number" value="<?php echo htmlspecialchars($DB_FesteLadeleistung_wert) ?>" oninput="autoOptionInput(this, null);">
+<input autocomplete="off" class="autooption-input <?php echo $FesteLadeleistung_Fallback_Class ?>" id="feste_ladeleistung_feld" data-typ="zahl" data-config-wert="<?php echo htmlspecialchars($FesteLadeleistung_Config_Wert) ?>" data-maxladung-wert="<?php echo htmlspecialchars($MaxLadung_Config_Wert) ?>" type="number" value="<?php echo htmlspecialchars($DB_FesteLadeleistung_wert) ?>" oninput="autoOptionInput(this, null);">
     </div>
     <div id="maxladung_button_wrapper" class="modus_zeile_item" style="<?php echo $DB_Slider_selected ? '' : 'display:none;' ?>">
 <button type="button" id="maxladung_setzen_btn" class="speichern" style="position:static; transform:none; font-size:<?php echo $Groesse_Kompakt_FontSize ?> !important; padding:<?php echo $Groesse_Kompakt_Padding ?> !important; border-radius:<?php echo $Groesse_Kompakt_BorderRadius ?>; background-color:#58ACFA; border-color:#2f7fd1;" onclick="feste_ladeleistung_feld.value = <?php echo (int) ($Ladeberechnung['MaxLadung'] ?? 0); ?>; autoOptionInput(feste_ladeleistung_feld, null);">MaxLadung</button>
@@ -549,11 +563,11 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
     </div>
 <?php elseif ($w['typ'] === 'zahl'): ?>
     <div style="flex-grow: 1">
-<input class="autooption-input <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="zahl" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" type="number" value="<?php echo htmlspecialchars($w['anzeige_wert']) ?>" oninput="autoOptionInput(this, null);">
+<input autocomplete="off" class="autooption-input <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="zahl" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" type="number" value="<?php echo htmlspecialchars($w['anzeige_wert']) ?>" oninput="autoOptionInput(this, null);">
     </div>
 <?php elseif ($w['typ'] === 'liste'): ?>
     <div style="flex-grow: 1">
-<select class="autooption-input <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" onchange="autoOptionInput(this, null);">
+<select autocomplete="off" class="autooption-input <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="liste" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>" onchange="autoOptionInput(this, null);">
 <?php foreach (($Feld['optionen'] ?? []) as $opt_wert => $opt_label): ?>
       <option value="<?php echo htmlspecialchars($opt_wert) ?>" <?php echo ((string) $opt_wert === (string) $w['anzeige_wert']) ? 'selected' : '' ?>><?php echo htmlspecialchars($opt_label) ?></option>
 <?php endforeach; ?>
@@ -564,7 +578,7 @@ $Akkuschonung_Fallback_Class = $ak['fallback_class'];
 <span class="autooption-input autooption-radio-group <?php echo $w['fallback_class'] ?>" id="<?php echo $w['input_id'] ?>" data-typ="radio" data-config-wert="<?php echo htmlspecialchars($w['config_wert']) ?>">
 <?php foreach (($Feld['optionen'] ?? []) as $opt_wert => $opt_label): ?>
       <label style="white-space:nowrap; cursor:pointer; font-weight:normal;">
-        <input type="radio" name="<?php echo $w['radio_name'] ?>" value="<?php echo htmlspecialchars($opt_wert) ?>" <?php echo ((string) $opt_wert === (string) $w['anzeige_wert']) ? 'checked' : '' ?> onchange="autoOptionInput(this, null, '<?php echo $w['input_id'] ?>');">
+        <input autocomplete="off" type="radio" name="<?php echo $w['radio_name'] ?>" value="<?php echo htmlspecialchars($opt_wert) ?>" <?php echo ((string) $opt_wert === (string) $w['anzeige_wert']) ? 'checked' : '' ?> onchange="autoOptionInput(this, null, '<?php echo $w['input_id'] ?>');">
         <?php echo htmlspecialchars($opt_label) ?>
       </label>
 <?php endforeach; ?>
@@ -705,6 +719,23 @@ const AutoOptionsFelder = <?php echo json_encode(array_map(function ($Feld_Schlu
     ];
 }, array_keys($AutoOptionsFelder), $AutoOptionsFelder)); ?>;
 
+// "gültig bis" live aus dem Feld "Stunden bis Auto" berechnen (gleiches Format wie PHP: m-d H:i).
+// Bei 0, leer oder ungültig wird die Anzeige geleert - analog zur PHP-Logik bei abgelaufener Steuerung.
+function gueltigBisAktualisieren() {
+  const feld = document.getElementById('gueltigkeitsstunden');
+  const anzeige = document.getElementById('gueltig_bis_anzeige');
+  if (!feld || !anzeige) return;
+  const stunden = parseFloat(String(feld.value).replace(',', '.'));
+  if (isNaN(stunden) || stunden <= 0 || stunden > 100) {
+    anzeige.innerHTML = '';
+    return;
+  }
+  const d = new Date(Date.now() + stunden * 3600 * 1000);
+  const z = n => String(n).padStart(2, '0');
+  anzeige.innerHTML = '&nbsp;=&gt; ' + z(d.getMonth() + 1) + '-' + z(d.getDate())
+    + ' ' + z(d.getHours()) + ':' + z(d.getMinutes());
+}
+
 // Live-Farbumschaltung (rot = Config-Wert, grün = eigener Wert) für jedes Auto-Options-Feld.
 // el ist je nach Feldtyp ein <input type="range">, <input type="number">, <select> oder ein
 // einzelnes <input type="radio"> einer Gruppe. labelId ist nur bei typ 'prozent' gesetzt (das
@@ -750,6 +781,7 @@ function autoOptionInput(el, labelId, farbZielId) {
       if (stundenfeld.value === '') {
         stundenfeld.value = DB_Std_Diff;
         autoOptionInput(stundenfeld, null);
+        gueltigBisAktualisieren();
       }
     });
   });
