@@ -394,6 +394,10 @@ class dynamic:
         # und in der Config unter [dynprice] als 'energyforecast_token' hinterlegen.
         # BZN entspricht dem 'domain'-Parameter von energyforecast.de: DE-LU, AT, FR, NL, BE, PL, DK1, DK2
         api_token = basics.getVarConf('dynprice','energyforecast_token', 'str')
+        # Token nie im Klartext ausgeben (Debug-Ausgabe, Fehlermeldungen, Push-Nachricht)
+        def maskiere(text):
+            text = str(text)
+            return text.replace(api_token, '***') if api_token else text
 
         # lokale resolution-Einstellung ('hour' / 'quarter_hour') auf das API-Enum abbilden
         resolution_cfg = basics.getVarConf('dynprice','resolution', 'str')
@@ -406,7 +410,7 @@ class dynamic:
 
         #DEBUG
         if(self.dyn_print_level >= 2):
-            print("\n++ ", url)
+            print("\n++ ", maskiere(url))
             print("++  BZN = ", BZN, "; resolution = ", resolution, "\n")
 
         timeout_sec = 30
@@ -441,15 +445,15 @@ class dynamic:
                 print(Ausgabe)
                 Push_Schreib_Ausgabe += Ausgabe
         except requests.exceptions.HTTPError as http_err:
-                Ausgabe = (f"### ERROR: HTTP-Fehler: {http_err} (Status Code: {apiResponse.status_code})")
+                Ausgabe = maskiere(f"### ERROR: HTTP-Fehler: {http_err} (Status Code: {apiResponse.status_code})")
                 print(Ausgabe)
                 Push_Schreib_Ausgabe += Ausgabe
         except requests.exceptions.RequestException as req_err:
-                Ausgabe = (f"### ERROR: Verbindungsfehler oder andere Probleme: {req_err}")
+                Ausgabe = maskiere(f"### ERROR: Verbindungsfehler oder andere Probleme: {req_err}")
                 print(Ausgabe)
                 Push_Schreib_Ausgabe += Ausgabe
         except (KeyError, ValueError) as parse_err:
-                Ausgabe = (f"### ERROR: Unerwartetes Antwortformat von energyforecast.de: {parse_err}")
+                Ausgabe = maskiere(f"### ERROR: Unerwartetes Antwortformat von energyforecast.de: {parse_err}")
                 print(Ausgabe)
                 Push_Schreib_Ausgabe += Ausgabe
 
@@ -500,12 +504,17 @@ class dynamic:
                 if Akkustatus[5] == -0.01: Ladewert_tmp = 0
             if min_net_power > charge_rate_kW: min_net_power = charge_rate_kW
             #if Akkustatus[5] < 0:
+            akku_soc_vorher = akku_soc
             if Ladewert_tmp < 0:
                 # Wenn PV-Produktion größer Zwangsladung, PV-Produktion zum SOC.
                 if int(Akkustatus[5] * -1) < min_net_power:
                     akku_soc += int(min_net_power / Stundenteile)
                 else:
                     akku_soc += int(((Akkustatus[5] * -1) / (1 + (Akku_Verlust_Prozent/200))) / Stundenteile)
+                    # Zwangsladung aus dem Netz nur bis max_batt_dyn_ladung (Wh) rechnen.
+                    # -1 = Entladestopp, -0.1/-0.01 = Marker => keine Netzladung
+                    if Akkustatus[5] < -1 and akku_soc > max_batt_dyn_ladung_W:
+                        akku_soc = max(akku_soc_vorher, max_batt_dyn_ladung_W)
             else:
                 if min_net_power > 0:
                     akku_soc += int(min_net_power / Stundenteile)
@@ -621,6 +630,8 @@ class dynamic:
         max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
         netzlade_preisschwelle = basics.getVarConf('dynprice','netzlade_preisschwelle', 'eval')
         max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
+        if max_batt_dyn_ladung_W <= 0 or max_batt_dyn_ladung_W > battery_capacity_Wh:
+            max_batt_dyn_ladung_W = battery_capacity_Wh
         # Ladewert ist -1 wenn kein Profilabler Preis
         max_ladewert = charge_rate_kW * -1
 
@@ -637,7 +648,7 @@ class dynamic:
             charge_rate_kW_tmp = charge_rate_kW
             spaeter_zeile_max_soc = [zeile for zeile in pv_data_charge if zeile[0] >= min_Preis_Std[0]]
             zeile_max_soc = max(spaeter_zeile_max_soc, key=lambda x: x[4])
-            if (battery_capacity_Wh - zeile_max_soc[4] < charge_rate_kW): charge_rate_kW_tmp = int((battery_capacity_Wh - zeile_max_soc[4]) + 1.1)
+            if (max_batt_dyn_ladung_W - zeile_max_soc[4] < charge_rate_kW): charge_rate_kW_tmp = int((max_batt_dyn_ladung_W - zeile_max_soc[4]) + 1.1)
             if charge_rate_kW_tmp > 100:
                 min_Preis_Std[5]= charge_rate_kW_tmp * -1
             # NOCHMAL: Akkustand ohne PV-Leistung ermitteln
@@ -663,6 +674,9 @@ class dynamic:
                     Verbrauch = item[2] - item[1]
                     max_preis = item[3]
                     max_index = index
+            # Keine Zeile mit -0.01 mehr übrig => fertig (sonst würde die letzte Zeile überschrieben)
+            if max_index == -1:
+                break
             # Bewertung auf 0 setzen, wenn Akkustand reicht oder PV > Verbrauch, sonst -0.1
             kleinster_SOC_nach_max_price = min(([zeile for zeile in pv_data_charge if zeile[0] >= pv_data_charge[max_index][0]]), key=lambda x: x[4])
             if(self.dyn_print_level >= 4): print("++ kleinster_SOC_nach_max_price", kleinster_SOC_nach_max_price)
@@ -703,7 +717,10 @@ class dynamic:
             # Wenn zeile_max_price vorhanden, Batterieladung dafür suchen
             if zeile_max_price:
                 zeile_max_price_Ladewert = -1
-                max_akkustand = battery_capacity_Wh - charge_rate_kW * 0.25
+                # Platzbedarf für eine weitere Ladung: ein Viertel der Laderate, bei engem
+                # Limit aber höchstens 10 % des nutzbaren Bereichs (sonst wird nie bis zum Limit geladen)
+                platz_bedarf = min(charge_rate_kW * 0.25, max(0, max_batt_dyn_ladung_W - minimum_batterylevel) * 0.1)
+                max_akkustand = max_batt_dyn_ladung_W - platz_bedarf
                 kleiner_gefilterte_zeilen = [zeile for zeile in pv_data_charge if zeile[0] < zeile_max_price[0] and zeile[4] < max_akkustand and zeile[5] != -1 and zeile[5] > charge_rate_kW * -1 and zeile_max_price[3] > zeile[3]]
                 kleinster_SOC_nach_max_price = min(([zeile for zeile in pv_data_charge if zeile[0] >= zeile_max_price[0]]), key=lambda x: x[4])
                 laden = 0

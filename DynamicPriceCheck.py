@@ -80,7 +80,7 @@ today = datetime.now()
 tomorrow = today + timedelta(days=1)
 today_weekday = (today.weekday() + 1)  % 7  # Montag=0 -> Sonntag=0
 for row in Lastprofil:
-    if (row[0] == today_weekday):
+    if (int(row[0]) == today_weekday):
         time=today.strftime("%Y-%m-%d") + " " + row[1]+":00"
         Verbrauch.append((time, int(row[2] * Lade_Verbrauchs_Faktor)))
     else:
@@ -153,7 +153,7 @@ if(dyn_print_level >= 3):
 
 try:
     # Ping Ersatz, prüft ob WR online
-    response = requests.get('http://'+host_ip)
+    response = requests.get('http://'+host_ip, timeout=10)
     response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
 except requests.exceptions.RequestException as e:
     print(datetime.now())
@@ -202,7 +202,7 @@ if(dyn_print_level >= 3): print("\n*****************  DEBUGGING ****************
 pv_data_charge = [zeile + [0, -0.01] for zeile in pv_data]
 # Prüfen, ob vietelstündliche Strompreise
 Stundenteile = 1
-if(len(pv_data_charge) > 24): Stundenteile = 4
+if any(zeile[0][14:16] != "00" for zeile in pv_data_charge): Stundenteile = 4
 # Mit Funktion get_charge_stop Ladepunkte usw. berechnen
 pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile)
 
@@ -236,14 +236,16 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
         for Stundenliste in pv_data_charge:
             if SuchStunde in Stundenliste:
                 Res_Feld1 = 0
-                Res_Feld2_array[minuten] = Stundenliste[5]
-                if Stundenliste[5] != 0:
+                # EnergyController liest per int(str) => ganze Watt schreiben (nie "-3000.0" oder "-0.1")
+                Ladewert_int = int(round(Stundenliste[5])) if abs(Stundenliste[5]) >= 1 else 0
+                Res_Feld2_array[minuten] = Ladewert_int
+                if Ladewert_int != 0:
                     Options = 'DynPrice'
                 break
     Res_Feld2_werte = list(Res_Feld2_array.values())
     # Wenn alle viertestündlichen Werte gleich, nur einmal ausgeben
     if(len(set(Res_Feld2_werte)) == 1):
-        Res_Feld2 = Res_Feld2_array[0]
+        Res_Feld2 = Res_Feld2_werte[0]
     # Wenn viertestündliche Werte unterschiedlich, alle ausgeben
     if(len(set(Res_Feld2_werte)) > 1):
         Res_Feld2 = ";".join(str(wert) for wert in Res_Feld2_werte)
@@ -251,15 +253,21 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     # Wenn manueller Eintrag, Eintrag nicht überschreiben
     # Damit kein Fehler kommt, wenn Datensatz in SQLsteuerdatei nicht existiert
     try:
-        if entladesteurungsdata[Stunde]['Options'] != 'DynPrice' and entladesteurungsdata[Stunde]['Res_Feld2'] < 0:
-            Res_Feld2 = entladesteurungsdata[Stunde]['Res_Feld2']
-            Options = entladesteurungsdata[Stunde]['Options']
+        alt = entladesteurungsdata[Stunde]
+        try:
+            alt_wert = float(alt['Res_Feld2'])
+        except (TypeError, ValueError):
+            alt_wert = 0  # z.B. "a;b;c;d" aus Viertelstundenwerten => kein manueller Eintrag
+        if alt['Options'] != 'DynPrice' and alt_wert < 0:
+            Res_Feld2 = alt['Res_Feld2']
+            Options = alt['Options']
+            # Alle Slots dieser Stunde (stündlich :00, viertelstündlich :00/:15/:30/:45) setzen.
+            # Vorher stand hier SuchStunde (= :45), das bei stündlichen Preisen nie traf.
             for zeile in pv_data_charge:
-                if zeile[0] == SuchStunde:
-                    zeile[5] = Res_Feld2  
-                    break 
-    except:
-        pass
+                if zeile[0][11:13] == Stunde[:2]:
+                    zeile[5] = alt_wert
+    except KeyError:
+        pass  # Stunde existiert in ENTLadeStrg noch nicht
 
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, Res_Feld1, Res_Feld2, Options))
     # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
