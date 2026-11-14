@@ -363,6 +363,24 @@ class progladewert:
             i  += 1
         return(Sonnenuntergang)
         
+    def getSonnenaufgang(self, PV_Leistung_Watt):
+        # Analog zu getSonnenuntergang: erste Stunde (vor 12 Uhr) mit Prognose > PV_Leistung_Watt/50
+        i = 0
+        Sonnenaufgang = 8
+        gefunden = 25
+        while i < 24:
+            Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
+            Std_morgen_only = int(datetime.strftime(self.now + timedelta(hours=i), "%H"))
+            Prognose = self.getPrognose(Std_morgen)[1]
+            if Std_morgen_only < 12 and Prognose > PV_Leistung_Watt / 50:
+                if Std_morgen_only < gefunden:
+                    gefunden = Std_morgen_only
+            i  += 1
+        # Ohne Prognosewerte Standardwert (8 Uhr) verwenden
+        if gefunden < 25:
+            Sonnenaufgang = gefunden
+        return(Sonnenaufgang)
+
     def getPrognoseMorgen(self, MaxEinspeisung=0, i=0):
         Prognose_Summe = 0
         Ende_Nacht_Std = 0

@@ -1,4 +1,5 @@
 **[0.43.9] – 2026-XX-XX**  
+- Notstromreserve wird nun erst am Morgen (2 Std vor Sonnenaufgang) freigegeben.  
 
 **[0.43.8] – 2026-10-25**  
 - FIX: Forcast DWD erzeugt teilweise in den letzten Tagesstunden einen Sprung nach oben.  

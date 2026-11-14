@@ -184,6 +184,7 @@ if __name__ == '__main__':
                     # BattVollUm setzen evtl. mit DIFF zum Sonnenuntergang
                     BattVollUm = basics.getVarConf('Ladeberechnung','BattVollUm','eval')
                     Sonnenuntergang = progladewert_inst.getSonnenuntergang(PV_Leistung_Watt)
+                    Sonnenaufgang = progladewert_inst.getSonnenaufgang(PV_Leistung_Watt)
                     if BattVollUm <= 0:
                        BattVollUm = Sonnenuntergang + BattVollUm
 
@@ -512,7 +513,11 @@ if __name__ == '__main__':
                     ######## Eigenverbrauchs-Optimierung  ENDE!!!
 
                     ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
-                    if  Notstromreserve_steuern >= 1 and Akt_Std > Sonnenuntergang-2 and Akt_Std < Sonnenuntergang:
+                    # Notstrompruefung nur abends (Stunde vor Sonnenuntergang, wie bisher)
+                    # und morgens in der Stunde 2 Std. vor Sonnenaufgang (nur zum Freigeben der Reserve)
+                    Notstrom_Abend = (Akt_Std == Sonnenuntergang-1)
+                    Notstrom_Morgen = (Akt_Std == Sonnenaufgang-2)
+                    if  Notstromreserve_steuern >= 1 and (Notstrom_Abend or Notstrom_Morgen):
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
                         Notstrom_Werte_tmp = json.loads(basics.getVarConf('Notstrom','Notstrom_Werte','str'))
@@ -521,25 +526,34 @@ if __name__ == '__main__':
                         # Notstromreserve_Min kann nicht kleiner 5% sein
                         if Notstromreserve_Min < 5:
                             Notstromreserve_Min = 5
+                        # Hysterese in kWh (fester Aufschlag auf die Prognosegrenze der aktuellen Stufe)
+                        Notstrom_Hysterese_kWh = 2
                         Prognose_24H = progladewert_inst.getPrognoseMorgen()[0]/1000
+                        if HYB_BACKUP_RESERVED == None:
+                            HYB_BACKUP_RESERVED = Eigen_Opt_Std_arry['HYB_BACKUP_RESERVED']
                         # Aktuelle EntladeGrenze_Max und ProgGrenzeMorgen aus Notstrom_Werte ermitteln
                         EntladeGrenze_Max = Notstromreserve_Min
                         ProgGrenzeMorgen = 0
                         for Notstrom_item in Notstrom_Werte: 
-                            if Prognose_24H < int(Notstrom_item):
+                            Grenze_tmp = int(Notstrom_item)
+                            # Hysterese: Die Stufe, in der die Reserve bereits steht, wird um feste 2 kWh grosszuegiger gehalten,
+                            # damit kleine Aenderungen der Prognose (Neuanforderung) nicht staendig umschalten
+                            if HYB_BACKUP_RESERVED == int(Notstrom_Werte[Notstrom_item]):
+                                Grenze_tmp = Grenze_tmp + Notstrom_Hysterese_kWh
+                            if Prognose_24H < Grenze_tmp:
                                 EntladeGrenze_Max = int(Notstrom_Werte[Notstrom_item])
-                                ProgGrenzeMorgen = int(Notstrom_item)
-
-                        if HYB_BACKUP_RESERVED == None:
-                            HYB_BACKUP_RESERVED = Eigen_Opt_Std_arry['HYB_BACKUP_RESERVED']
-                        # Hysterese wenn Notstrom bereits eingeschaltet
-                        if HYB_BACKUP_RESERVED == EntladeGrenze_Max:
-                            ProgGrenzeMorgen = int(ProgGrenzeMorgen * 1.2)
+                                ProgGrenzeMorgen = Grenze_tmp
                         Neu_HYB_BACKUP_RESERVED = Notstromreserve_Min
                         if (Prognose_24H < ProgGrenzeMorgen and Prognose_24H != 0):
                             Neu_HYB_BACKUP_RESERVED = EntladeGrenze_Max
+                        # Abends wird die Reserve nie freigegeben (nur nach Prognose einschalten bzw. Stufe aendern).
+                        # Die Freigabe (Notstromreserve_Min) erfolgt erst morgens, und nur vor einem Tag mit hoher Prognose.
+                        if Notstrom_Abend and Neu_HYB_BACKUP_RESERVED == Notstromreserve_Min:
+                            Neu_HYB_BACKUP_RESERVED = HYB_BACKUP_RESERVED
+                        if Notstrom_Morgen and Neu_HYB_BACKUP_RESERVED != Notstromreserve_Min:
+                            Neu_HYB_BACKUP_RESERVED = HYB_BACKUP_RESERVED
                         # TEST Notstrom ohne Zwangsladung aus dem Netz
-                        if Notstromreserve_steuern > 1 and BattStatusProz < Neu_HYB_BACKUP_RESERVED:
+                        if Notstrom_Abend and Notstromreserve_steuern > 1 and BattStatusProz < Neu_HYB_BACKUP_RESERVED:
                             print ("TEST Notstrom ohne Zwangsladung aus dem Netz")
                             Neu_HYB_BACKUP_RESERVED = int(BattStatusProz)
                             # aber nicht kleiner 5%
