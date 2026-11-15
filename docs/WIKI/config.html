@@ -495,13 +495,13 @@ Fast-forward
 <td><input type="text" name="Zeile[60][1]" value="300" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[61]" value='' ></td></tr>
 <tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[62]" value='[Notstrom]' >[Notstrom]</td></tr>
-<tr class="comment"><td colspan="2">; Notstromreservekapazität auf bestimmten Prozentsatz begrenzen (1=ein, 0=aus) </td></tr>
+<tr class="comment"><td colspan="2">; Notstromreservekapazität auf bestimmten Prozentsatz begrenzen (1=ein, 0=aus)<br>; 2 = Notstrom wird auf aktuellen SOC gesetzt, wenn er unter Notstrom_Wert liegt (keine Nachladung aus dem Netz). </td></tr>
 <tr><td class="variablenname">Notstromreserve_steuern</td>
 <td><input type="text" name="Zeile[64][1]" value="0" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Notstromreservekapazität Minimum normalerweise 5% kann hier höher gesetzt werden </td></tr>
 <tr><td class="variablenname">Notstromreserve_Min</td>
 <td><input type="text" name="Zeile[66][1]" value="5" readonly></td></tr>
-<tr class="comment"><td colspan="2">; Notstrom_Werte = {&quot;PrognoseGrenzeMorgen/kWh&quot; : &quot;Notstromreservekapazität/%&quot;, ...} </td></tr>
+<tr class="comment"><td colspan="2">; Notstrom_Werte = {&quot;PrognoseGrenzeMorgen/kWh&quot; : &quot;Notstromreservekapazität/%&quot;, ...}<br>; hier können mehrere Stufen definiert werden, (z.B.: unter 9kWh, 30% und 5kWh, 50%) </td></tr>
 <tr><td class="variablenname">Notstrom_Werte</td>
 <td><input type="text" name="Zeile[68][1]" value="{&quot;9&quot;: &quot;30&quot;}" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[69]" value='' ></td></tr>
@@ -692,6 +692,6 @@ Fast-forward
 <tr><td class="variablenname">0.sichtbar</td>
 <td><input type="text" name="Zeile[62][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[63]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 09.10.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 15.11.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>
