@@ -10,7 +10,7 @@ from typing import Type
 class basics:
     def __init__(self, charge_options=None):
         self.now = datetime.now()
-        self.ChargeOption = charge_options or []
+        self.ChargeOption = charge_options or {}
 
 
     def loadConfig(self, conf_files):
@@ -26,7 +26,7 @@ class basics:
             c_file = 'CONFIG/'+conf_file+'.ini'
             try:
                 config.read_file(open(c_file, encoding='utf-8'))
-            except:
+            except Exception as e:
                 print("\nERROR: ", e, "\n")
         # _priv_ini lesen
         for conf_file in conf_files:
@@ -34,7 +34,7 @@ class basics:
             try:
                 try:
                     config.read_file(open(c_file, encoding='utf-8'))
-                except:
+                except FileNotFoundError:
                     # wenn _priv.ini fehlt, kopieren
                     import shutil
                     c_org_file = 'CONFIG/'+conf_file+'.ini'
@@ -43,10 +43,10 @@ class basics:
             except Exception as e:
                 print("\nERROR: ", e, "\n")
         # Monatsabhängige ini lesen
-        if ( 'charge' in conf_files ):
+        if ( 'charge' in conf_files and config.has_section('monats_priv.ini') ):
             aktueller_Monat = str(datetime.strftime(datetime.now(), "%m"))
             for (c_file, monate) in config.items('monats_priv.ini'):
-                if aktueller_Monat in monate:
+                if int(aktueller_Monat) in [int(m) for m in monate.replace(' ', '').split(',') if m.isdigit()]:
                     c_file = 'CONFIG/'+c_file
                     try:
                         config.read_file(open(c_file, encoding='utf-8'))
@@ -110,13 +110,17 @@ class basics:
 
             # Vorhandene DB-Einträge aus ManuelleSteuerung vom TAB-LadeSTRG setzen
             if (var in self.ChargeOption):
-                if (self.ChargeOption[var]['Res_Feld2'] != return_var):
-                    return_var = self.ChargeOption[var]['Res_Feld2']
+                db_value = self.ChargeOption[var]['Res_Feld2']
+                if Type == 'eval' and db_value is not None:
+                    db_value = str(db_value).strip().replace(',', '.')
+                    db_value = float(db_value) if '.' in db_value else int(db_value)
+                if (db_value != return_var):
+                    return_var = db_value
                     print(f"DEBUG: DB_VAR {var} = {return_var}")
 
         except (KeyError, ValueError):
             print(f"ERROR: die Variable [{var_block}][{var}] wurde NICHT {error_type}definiert!")
-            exit(0)
+            exit(1)
         return return_var
 
     def loadWeatherData(self):
@@ -129,7 +133,7 @@ class basics:
             WHERE
                 Prognose_W > 30 AND
                 Quelle IS 'Prognose' AND
-                DATE(Zeitpunkt) BETWEEN DATE('now') AND DATE('now', '+1 day')
+                DATE(Zeitpunkt) BETWEEN DATE('now', 'localtime') AND DATE('now', 'localtime', '+1 day')
             ORDER BY Zeitpunkt ASC
         """
         cursor.execute(query)
@@ -141,5 +145,9 @@ class basics:
 
     def sendPush(self, message, title, tags):
         Push_Message_Url = self.getVarConf('messaging','Push_Message_Url','str')
-        apiResponse = requests.post(Push_Message_Url, data=message.encode(encoding='utf-8'), headers={ "Title": title, "Tags":  tags})
+        try:
+            apiResponse = requests.post(Push_Message_Url, data=message.encode(encoding='utf-8'), headers={ "Title": title.encode('latin-1', 'replace').decode('latin-1'), "Tags":  tags}, timeout=10)
+            apiResponse.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print("ERROR: Push-Nachricht fehlgeschlagen: ", e)
         return(Push_Message_Url)
