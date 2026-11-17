@@ -351,18 +351,16 @@ class progladewert:
             return(ladewert_schreiben)
     
     def getSonnenuntergang(self, PV_Leistung_Watt):
-        i = 0
+        heute_str = datetime.strftime(self.now, "%Y-%m-%d")
         Sonnenuntergang = 25
-        while i < 24:
-            Std_morgen = datetime.strftime(self.now + timedelta(hours=i), "%Y-%m-%d %H:00:00")
-            Std_morgen_only = int(datetime.strftime(self.now + timedelta(hours=i), "%H"))
-            Prognose = self.getPrognose(Std_morgen)[1]
-            if Std_morgen_only > 14 and Prognose <= PV_Leistung_Watt / 50:
-                if Std_morgen_only < Sonnenuntergang:
-                    Sonnenuntergang = Std_morgen_only
-            i  += 1
-        return(Sonnenuntergang)
-        
+        for stunde in range(15, 24):
+            Std_heute = f"{heute_str} {stunde:02d}:00:00"
+            Prognose = self.getPrognose(Std_heute)[1]
+            if Prognose <= PV_Leistung_Watt / 50:
+                Sonnenuntergang = stunde
+                break
+        return Sonnenuntergang
+
     def getSonnenaufgang(self, PV_Leistung_Watt):
         # Analog zu getSonnenuntergang: erste Stunde (vor 12 Uhr) mit Prognose > PV_Leistung_Watt/50
         i = 0
