@@ -516,7 +516,7 @@ if __name__ == '__main__':
                     # Notstrompruefung nur abends (Stunde vor Sonnenuntergang, wie bisher)
                     # und morgens in der Stunde 2 Std. vor Sonnenaufgang (nur zum Freigeben der Reserve)
                     Notstrom_Abend = (Akt_Std == Sonnenuntergang-1)
-                    Notstrom_Morgen = (Akt_Std == Sonnenaufgang-2)
+                    Notstrom_Morgen = (Akt_Std == Sonnenaufgang-5)
                     if  Notstromreserve_steuern >= 1 and (Notstrom_Abend or Notstrom_Morgen):
                         DEBUG_Ausgabe+="\nDEBUG <<<<<<<< Notstromreserve >>>>>>>>>>>>>"
 
