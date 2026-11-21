@@ -1,4 +1,4 @@
-**[0.43.9] – 2026-XX-XX**  
+**[0.43.9] – 2026-11-21**  
 - Notstromreserve wird nun erst 5 Std vor Sonnenaufgang freigegeben.  
 
 **[0.43.8] – 2026-10-25**  
