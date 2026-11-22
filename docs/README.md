@@ -28,6 +28,9 @@
 - [Grafana](#grafana-beispiele) Beschreibung zu Auswertungen mit Grafana inklusive fertige Dashboards von [@Manniene](https://github.com/Manniene).  
 
 ![new](pics/new.png)  
+Ab Version: **0.44.0**  
+- DynamicPriceCheck.py: Nun auch Netzeinspeisung aus Akku möglich.
+
 Ab Version: **0.43.7**  
 - 🚘🔒🔋 Wattpilot-Steuerung: Hausakku Entladesperre.
 

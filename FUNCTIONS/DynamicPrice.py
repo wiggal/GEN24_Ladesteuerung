@@ -956,7 +956,7 @@ class dynamic:
 
         self.akkustand_neu(pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, limit, 1, Stundenteile, einspeisung)
         if(self.dyn_print_level >= 1):
-            print(">> DP-Planung: Restwert %.3f EUR/kWh, Einspeisung %s, Rechenzeit %.1f s" % (pterm, "ja" if feed_levels else "nein", _time.time() - t_start))
+            print("DP-Planung: Restwert %.3f EUR/kWh, Einspeisung %s, Rechenzeit %.1f s" % (pterm, "ja" if feed_levels else "nein", _time.time() - t_start))
         return pv_data_charge, einspeisung
 
     def get_charge_stop(self, pv_data_charge, minimum_batterylevel, akku_soc, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile=1):
