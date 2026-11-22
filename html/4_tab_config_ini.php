@@ -562,7 +562,7 @@ function config_lesen( $priv_ini_file, $readonly, $edit_methode, $org_ini_file )
 }
 }
 
-function Dateiauswahl_button($Anzahl, $ini_file, $updatecheck = 'ja', $activeTab){
+function Dateiauswahl_button($Anzahl, $ini_file, $updatecheck, $activeTab){
     echo "</div>\n";
     echo '<form method="POST" action="">'."\n";
     echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
@@ -585,6 +585,22 @@ $updatecheck = 'ja';
 if (isset($_POST["case"])) $case = $_POST["case"];
 if (isset($_POST["ini_file"])) $ini_file = $_POST["ini_file"];
 if (isset($ini_file)) $org_ini_file = str_replace('_priv', '', $ini_file);
+
+# ini_file nur aus der Auswahlliste (CONFIG/*_priv.ini, html/config_priv.ini) zulassen
+function ini_file_erlaubt($datei) {
+    global $PythonDIR;
+    if (!is_string($datei) || strpos($datei, "\0") !== false) return false;
+    $real = realpath($datei);
+    if ($real === false) return false;
+    $erlaubt = array_map('realpath', glob($PythonDIR.'/CONFIG/*_priv.ini'));
+    if (file_exists('config_priv.ini')) $erlaubt[] = realpath('config_priv.ini');
+    return in_array($real, $erlaubt, true);
+}
+if (isset($ini_file) && !ini_file_erlaubt($ini_file)) {
+    unset($ini_file);
+    $org_ini_file = '';
+    $case = '';
+}
 if (isset($_POST["updatecheck"])) $updatecheck = $_POST["updatecheck"];
 $nachricht = '';
 if (isset($_GET["nachricht"])) $nachricht = $_GET["nachricht"];
@@ -599,7 +615,8 @@ if ($updatecheck == 'ja') {
 } else {
 echo '</div>';
 }
-if ($nachricht != '') echo "<center>" . gzuncompress(base64_decode($nachricht)) . "</center>";
+# Meldung nur anzeigen, wenn sie vom Skript selbst signiert wurde (verhindert XSS über manipulierte URL)
+if ($nachricht != '' && hash_equals(hash_hmac('sha256', $nachricht, (string)$passwd_configedit), (string)($_GET["sig"] ?? ''))) echo "<center>" . gzuncompress(base64_decode($nachricht)) . "</center>";
 echo '<br><center>';
 echo '<form method="POST" action="">'."\n";
 echo '<select name="ini_file">';
@@ -664,7 +681,7 @@ echo '<form method="POST" action="">'."\n";
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="editieren_passwd">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
-echo '<input type="hidden" name="editcase" value="'.$_POST["editcase"].'">'."\n";
+echo '<input type="hidden" name="editcase" value="'.htmlspecialchars($_POST["editcase"] ?? '').'">'."\n";
 echo '<input type="password" name="password" size="10">'."\n";
 echo '<button type="submit">OK</button>';
 echo '</form>'."\n";
@@ -677,12 +694,12 @@ echo '<br>';
 # Button
 Dateiauswahl_button('2', $ini_file, 'nein', $activeTab);
 
-if ($_POST["password"] == $passwd_configedit) {
+if (hash_equals((string)$passwd_configedit, (string)($_POST["password"] ?? ''))) {
 
 echo '<form method="POST" action="">'."\n";
 # Erläuterungen zu Hintergrundfarben ausgeben
 echo '<br><div class="legend-container">';
-echo '  <div class="legend-item title"><b>'.$_POST["editcase"].'</b></div>';
+echo '  <div class="legend-item title"><b>'.htmlspecialchars($_POST["editcase"] ?? '').'</b></div>';
 $SpeichernButton  = ' speichern!';
 if ($_POST["editcase"] == 'update') {
     # SpeichernButton unterschied edit/update
@@ -702,6 +719,7 @@ echo '</table><br><br>';
 echo '<br>';
 echo '<input type="hidden" name="ini_file" value="'.$ini_file.'">'."\n";
 echo '<input type="hidden" name="case" value="schreiben">'."\n";
+echo '<input type="hidden" name="token" value="'.hash_hmac('sha256', $ini_file, (string)$passwd_configedit).'">'."\n";
 echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
 echo '<button class="schreiben" type="submit" >'.basename($ini_file).$SpeichernButton.' </button>';
 echo '</form>';
@@ -711,6 +729,11 @@ echo '</form>';
     break;
 
     case 'schreiben':
+
+if (!isset($ini_file) || !hash_equals(hash_hmac('sha256', $ini_file, (string)$passwd_configedit), (string)($_POST['token'] ?? ''))) {
+    echo '<span style="color:red"><b>Nicht berechtigt!</b></span>';
+    break;
+}
 
 # SCHREIBEN DER INI-Datei
 // Jetzt alle Zeilen flach machen:
@@ -779,6 +802,7 @@ echo "
 <script>
     const params = new URLSearchParams();
     params.set('nachricht', " . json_encode($nachricht_gz) . ");
+    params.set('sig', " . json_encode(hash_hmac('sha256', $nachricht_gz, (string)$passwd_configedit)) . ");
     params.set('tab', " . json_encode($activeTab) . ");
     window.location.href = window.location.pathname + '?' + params.toString();
 </script>

@@ -137,8 +137,52 @@ function fetch_all_jobs(SQLite3 $db): array {
 }
 
 // -------------------------
+// Validierung der Cron-Felder (spiegelt _match_field in db_scheduler.py)
+// Erlaubt: *  |  a  |  a-b  |  Liste a,b,c  |  Schritt (*/n, a-b/n, a/n)
+// -------------------------
+function validateCronField(string $field, int $min, int $max): bool {
+    foreach (explode(',', trim($field)) as $part) {
+        $part = trim($part);
+        if (!preg_match('/^(\*|(\d+)(?:-(\d+))?)(?:\/(\d+))?$/', $part, $m)) {
+            return false;
+        }
+        if ($m[1] !== '*') {
+            $a = (int)$m[2];
+            $b = (isset($m[3]) && $m[3] !== '') ? (int)$m[3] : $a;
+            if ($a < $min || $b > $max || $a > $b) {
+                return false;
+            }
+        }
+        if (isset($m[4]) && $m[4] !== '' && (int)$m[4] < 1) {
+            return false; // Schritt 0 verhindern (ZeroDivisionError im Scheduler)
+        }
+    }
+    return true;
+}
+
+function validateSchedule(array $job): array {
+    $rules = [
+        'Minute'    => [0, 59],
+        'Stunde'    => [0, 23],
+        'Tag_Monat' => [1, 31],
+        'Monat'     => [1, 12],
+        'Tag_Woche' => [1, 7],   // Mo=1 .. So=7, wie im Python-Skript
+    ];
+    $errors = [];
+    foreach ($rules as $name => [$min, $max]) {
+        $val = (string)($job[$name] ?? '');
+        if (!validateCronField($val, $min, $max)) {
+            $errors[] = "Ungültiges Feld '$name' (erlaubt: $min–$max): '" . $val . "'";
+        }
+    }
+    return $errors;
+}
+
+// -------------------------
 // Handle Actions (POST)
 // -------------------------
+$form_errors = [];
+$form_values = null;
 if (isset($_POST['action'])) {
     $action = $_POST['action'];
     $db = get_db($DB_PATH, $GEN24_DIR);
@@ -157,7 +201,20 @@ if (isset($_POST['action'])) {
             $aktiv  = isset($_POST['Aktiv']) ? 1 : 0;
             $notiz  = trim($_POST['Notiz']     ?? '');
 
-            if ($name !== '' && $befehl !== '') {
+            $form_errors = validateSchedule([
+                'Minute' => $minute, 'Stunde' => $stunde, 'Tag_Monat' => $tag_m,
+                'Monat'  => $monat,  'Tag_Woche' => $tag_w,
+            ]);
+            if (!empty($form_errors)) {
+                // Eingaben merken, damit das Formular wieder befüllt werden kann
+                $form_values = [
+                    'ID' => $id, 'Name' => $name, 'Minute' => $minute, 'Stunde' => $stunde,
+                    'Tag_Monat' => $tag_m, 'Monat' => $monat, 'Tag_Woche' => $tag_w,
+                    'Befehl' => $befehl, 'Notiz' => $notiz, 'Aktiv' => $aktiv,
+                ];
+            }
+
+            if ($name !== '' && $befehl !== '' && empty($form_errors)) {
                 if ($id === null) {
                     // Neuer Job
                     $stmt = $db->prepare(
@@ -209,9 +266,11 @@ if (isset($_POST['action'])) {
         $db->close();
     }
 
-    // Redirect zurück zum Tab
-    echo "<script>window.location.href = window.location.pathname + '?tab=ScheduleManager';</script>";
-    exit;
+    // Redirect zurück zum Tab (bei Validierungsfehlern stattdessen Seite mit Fehlermeldung rendern)
+    if (empty($form_errors)) {
+        echo "<script>window.location.href = window.location.pathname + '?tab=ScheduleManager';</script>";
+        exit;
+    }
 }
 
 // -------------------------
@@ -482,6 +541,17 @@ p, label {
 <div class="card" id="formCard">
     <h2 id="formTitle">Job bearbeiten</h2>
 
+    <?php if (!empty($form_errors)): ?>
+    <div class="info" style="background:#fdecea;color:#a94442;">
+        <b>Job wurde nicht gespeichert:</b>
+        <ul style="margin:4px 0 0 18px;">
+            <?php foreach ($form_errors as $e): ?>
+                <li><?php echo htmlspecialchars($e); ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+
     <form id="jobForm" method="post">
         <input type="hidden" name="action"  value="save_job">
         <input type="hidden" name="job_id"  id="fJobId">
@@ -612,6 +682,29 @@ function openForm() {
 function closeForm() {
     document.getElementById('formCard').classList.remove('open');
 }
+
+<?php if (!empty($form_errors) && $form_values !== null): ?>
+// ===================================
+// Nach Validierungsfehler: Formular mit den Eingaben wieder öffnen
+// ===================================
+(function() {
+    var j = <?php echo json_encode($form_values, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    if (j.ID) {
+        editJob(j);
+    } else {
+        newJob();
+        document.getElementById('fName').value     = j.Name;
+        document.getElementById('fMinute').value   = j.Minute;
+        document.getElementById('fStunde').value   = j.Stunde;
+        document.getElementById('fTagMonat').value = j.Tag_Monat;
+        document.getElementById('fMonat').value    = j.Monat;
+        document.getElementById('fTagWoche').value = j.Tag_Woche;
+        document.getElementById('fBefehl').value   = j.Befehl;
+        document.getElementById('fNotiz').value    = j.Notiz;
+        document.getElementById('fAktiv').checked  = (j.Aktiv == 1);
+    }
+})();
+<?php endif; ?>
 
 // ===================================
 // Scroll-Position wiederherstellen

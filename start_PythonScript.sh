@@ -72,7 +72,8 @@ WEB_SERVER_PROC="/usr/bin/php -S 0.0.0.0:2424"
 if [[ "$Einfacher_PHP_Webserver" -eq 1 ]]; then
     if ! pgrep -f "$WEB_SERVER_PROC" > /dev/null; then
         cd "$GEN24_html_Pfad" || { echo "$(date) Fehler: Konnte nicht in das HTML-Verzeichnis wechseln." >> "$LOG_TARGET"; exit 1; }
-        nohup /usr/bin/php -S 0.0.0.0:2424 2>> /dev/null &
+        # nohup /usr/bin/php -S 0.0.0.0:2424 2>> /dev/null &
+        nohup /usr/bin/php -S 0.0.0.0:2424 > /dev/null 2>&1 < /dev/null &
         echo -e "$(date) PHP-Webserver gestartet! \n" >> "$LOG_TARGET"
     fi
 
@@ -98,7 +99,8 @@ server_is_running() {
 if [[ "$Wallboxsteuerung" -eq 1 ]]; then
     if ! server_is_running; then
         cd "$GEN24_Pfad" || exit 1
-        nohup /usr/bin/python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 &
+        #nohup /usr/bin/python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 &
+        nohup /usr/bin/python3 -u ocpp_server.py > /tmp/ocpp.log 2>&1 < /dev/null &
     fi
 # Wenn Wallboxsteuerung=0 ist, wird KEIN Stopp-Befehl ausgeführt.
 # Der Server läuft weiter, auch wenn er durch das Frontend gestartet wurde, und sollte nur dort gestoppt werden.
