@@ -562,28 +562,41 @@ Fast-forward
 <tr><td class="variablenname">netzlade_preisschwelle</td>
 <td><input type="text" name="Zeile[27][1]" value="0.00" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[28]" value='' ></td></tr>
+<tr class="comment"><td colspan="2">; Konfiguration Einspeisung<br>; Einspeisen_aus_Akku: 0 = aus; 1 = ein<br>; Bei 1 darf der Akku zu teuren Börsenpreisen Strom ins Netz einspeisen </td></tr>
+<tr><td class="variablenname">Einspeisen_aus_Akku</td>
+<td><input type="text" name="Zeile[30][1]" value="0" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Einspeiseleistung_max_W: höchste Einspeiseleistung in Watt, die der Plan für eine Stunde ansetzt </td></tr>
+<tr><td class="variablenname">Einspeiseleistung_max_W</td>
+<td><input type="text" name="Zeile[32][1]" value="3000" readonly></td></tr>
+<tr class="comment"><td colspan="2">; DP_Restwert: EUR/kWh, mit dem der Akkustand am Ende der Planung bewertet wird, oder auto<br>; auto = niedrigster Strompreis im Plan, also die Kosten für ein Wiederaufladen. Ein höherer Wert hält mehr Reserve, ein niedrigerer leert den Akku eher </td></tr>
+<tr><td class="variablenname">DP_Restwert</td>
+<td><input type="text" name="Zeile[34][1]" value="auto" readonly></td></tr>
+<tr class="comment"><td colspan="2">; Morgen_Ziel_SOC_Prozent: 0 = aus; sonst soll der Akku bis zum Sonnenaufgang auf diesen Wert (%) geleert sein,<br>; damit PV-Strom über der Einspeisegrenze aufgenommen werden kann. Gilt immer, auch wenn es sich nicht lohnt.<br>; Braucht Einspeisen_aus_Akku = 1, sonst sinkt der Akku nur durch den Hausverbrauch.<br>; Der Mindeststand des Wechselrichters (BAT_M0_SOC_MIN, HYB_BACKUP_RESERVED, Akku_MindestSOC) gilt als Untergrenze. </td></tr>
+<tr><td class="variablenname">Morgen_Ziel_SOC_Prozent</td>
+<td><input type="text" name="Zeile[36][1]" value="0" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[37]" value='' ></td></tr>
 <tr class="comment"><td colspan="2">; Strompreisquellen<br>; energycharts (https://api.energy-charts.info/)<br>; energycharts liefert viertelstündliche Preise, bei resolution = hour wird ein Mittelwert berechnet.<br>;<br>; smard_api (https://smard.api.bund.dev/)<br>; smard_api liefert  hour und quarterhour Preise, je nach resolution.<br>;<br>; awattar (https://api.awattar.at/v1/marketdata/current.yaml?tomorrow=include)<br>; awattar liefert  nur stündliche Preise (nur: DE-LU, AT), viertelstündliche werden gefolgert.<br>;<br>; energyforecast (https://www.energyforecast.de/) zweitage Vorhersage der Strompreise ist kostenlos.<br>; energyforecast liefert  hour und quarterhour Preise, je nach resolution.<br>; energyforecast erfordert eine Registierung und eine Token<br>;<br>; Fallback-Kette möglich: mehrere Preisquellen durch Semikolon z.B. energycharts;energyforecast;smard_api </td></tr>
 <tr><td class="variablenname">Preisquelle</td>
-<td><input type="text" name="Zeile[30][1]" value="energycharts; smard_api" readonly></td></tr>
+<td><input type="text" name="Zeile[39][1]" value="energycharts; smard_api" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Token für energyforecast </td></tr>
 <tr><td class="variablenname">energyforecast_token</td>
-<td><input type="text" name="Zeile[32][1]" value="xxxxxxxxxxxxxxxxxxxx" readonly></td></tr>
+<td><input type="text" name="Zeile[41][1]" value="xxxxxxxxxxxxxxxxxxxx" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Zeitliche Auflösung, resolution: mögliche Werte hour quarterhour </td></tr>
 <tr><td class="variablenname">resolution</td>
-<td><input type="text" name="Zeile[34][1]" value="hour" readonly></td></tr>
+<td><input type="text" name="Zeile[43][1]" value="hour" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Mögliche Ländercodes siehe jeweilige Internetseite der Preisquelle </td></tr>
 <tr><td class="variablenname">LAND</td>
-<td><input type="text" name="Zeile[36][1]" value="DE-LU" readonly></td></tr>
+<td><input type="text" name="Zeile[45][1]" value="DE-LU" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Tageszeit abhängiger Preisanteil in Euro (z.B. Netzentgelte nach $14a BRD)<br>; Hier die Zeitbereiche mit den Nettopreisen in der Form {&quot;Std:Min&quot;:&quot;Nettopreis&quot;, ...} angeben,<br>; Std. muss mit &quot;00:00&quot; beginnen und immer jeweils zweistellig sein.<br>; Das Minutenintervall muss wie die Strompreise im 15-Minutentakt sein.<br>; Beispiel: { &quot;00:00&quot;:&quot;0.027&quot;,&quot;09:30&quot;:&quot;0.1105&quot;,&quot;16:15&quot;:&quot;0.1937&quot;} </td></tr>
 <tr><td class="variablenname">Tageszeit_Preisanteil</td>
-<td><input type="text" name="Zeile[38][1]" value="{ &quot;00:00&quot;:&quot;0.000&quot;,&quot;12:30&quot;:&quot;0.000&quot;}" readonly></td></tr>
+<td><input type="text" name="Zeile[47][1]" value="{ &quot;00:00&quot;:&quot;0.000&quot;,&quot;12:30&quot;:&quot;0.000&quot;}" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Nettoaufschlag EURO/kWh </td></tr>
 <tr><td class="variablenname">Nettoaufschlag</td>
-<td><input type="text" name="Zeile[40][1]" value="0.1528" readonly></td></tr>
+<td><input type="text" name="Zeile[49][1]" value="0.1528" readonly></td></tr>
 <tr class="comment"><td colspan="2">; Prozentualer Aufschlag z.B. MwSt </td></tr>
 <tr><td class="variablenname">MwSt</td>
-<td><input type="text" name="Zeile[42][1]" value="1.19" readonly></td></tr>
-<tr><td colspan="2"><input type="hidden" name="Zeile[43]" value='' ></td></tr>
+<td><input type="text" name="Zeile[51][1]" value="1.19" readonly></td></tr>
+<tr><td colspan="2"><input type="hidden" name="Zeile[52]" value='' ></td></tr>
 </table><div id="Hilfezu/CONFIG/dynpriceini"></div><br><center><a href="#Hilfezu/CONFIG//html/configini" style="font-size: 2.0rem; text-decoration: none;">▼</a>&nbsp;&nbsp;<button type="submit">Hilfe zu html/config.ini</button>&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a></center><br><br><table><tr><td class="ini_block" colspan="2"><input type="hidden" name="Zeile[0]" value='[General]' >[General]</td></tr>
 <tr class="comment"><td colspan="2">; falls die Pythonskripte nicht ein Verzeichnis tiefer liegen, hier anpassen </td></tr>
 <tr><td class="variablenname">PythonDIR</td>
@@ -692,6 +705,6 @@ Fast-forward
 <tr><td class="variablenname">0.sichtbar</td>
 <td><input type="text" name="Zeile[62][1]" value="ein" readonly></td></tr>
 <tr><td colspan="2"><input type="hidden" name="Zeile[63]" value='' ></td></tr>
-</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 15.11.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
+</table><div id="Hilfezu/CONFIG//html/configini"></div><br /><br /><hr />Hilfe erzeugt am 21.11.2026 durch make_config_help.php&nbsp;&nbsp;<a href="#top" style="font-size: 2.0rem; text-decoration: none;">▲</a><br />
 </body>
 </html>

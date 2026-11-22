@@ -188,6 +188,15 @@ class sqlall:
                     data[row[0]][columns[1]] = float(row[1])
                 except (ValueError, TypeError):
                     data[row[0]][columns[1]] = 0
+                    # ENTLadeStrg: Verbrauchsgrenze/Einspeisung darf wie Feld 2 viertelstündliche Werte "a;b;c;d" enthalten
+                    # (nur Zahlen erlaubt, sonst wie bisher 0)
+                    if schluessel == 'ENTLadeStrg' and isinstance(row[1], str) and ';' in row[1]:
+                        try:
+                            for teil in row[1].split(';'):
+                                float(teil)
+                            data[row[0]][columns[1]] = row[1]
+                        except ValueError:
+                            pass
             else:
                 # Bei wallbox den Wert einfach direkt übernehmen
                 data[row[0]][columns[1]] = row[1]

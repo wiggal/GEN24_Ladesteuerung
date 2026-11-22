@@ -87,48 +87,6 @@ class InverterApi:
                 
         return results
 
-        def recurse(o, inherited_attributes=None):
-            if isinstance(o, dict):
-                # attributes aus diesem Knoten merken
-                current_attributes = o.get("attributes", {})
-                if inherited_attributes:
-                    # falls bereits Attribute vom Elternknoten vorhanden → übernehmen
-                    merged_attributes = inherited_attributes.copy()
-                    merged_attributes.update(current_attributes)
-                    current_attributes = merged_attributes
-
-                for k, v in o.items():
-                    for entry in key_patterns:
-                        pattern, sum_flag, *maybe = entry
-                        attr_condition = maybe[0] if maybe else None
-
-                        # Prüfen, ob Attribute passen
-                        if attr_condition:
-                            attr_key, attr_value = attr_condition
-                            if current_attributes.get(attr_key) != attr_value:
-                                continue  # passt nicht → nächsten key_pattern prüfen
-
-                        # Key prüfen
-                        if re.fullmatch(pattern, k):
-                            if sum_flag:
-                                sums[sum_names[pattern]] += v
-                            else:
-                                if k not in results:
-                                    results[k] = v
-                            break
-
-                    # Rekursion, Attribute weitergeben
-                    if isinstance(v, (dict, list)):
-                        recurse(v, current_attributes)
-
-            elif isinstance(o, list):
-                for item in o:
-                    recurse(item, inherited_attributes)
-
-        recurse(obj)
-        results.update(sums)
-        return results
-
     # API-Werte lesen unabhängig von den Node-Nummern
     # Die maximalen Voltwert nur lesen wenn readvolt=1, aktuell in EnergyController.py
     def get_API(self, readvolt=0):
@@ -382,5 +340,5 @@ class InverterApi:
             print("Fehlerursache:", e)
         return max_values
 
-    if __name__ == "__main__":
-        exit()
+if __name__ == "__main__":
+    exit()

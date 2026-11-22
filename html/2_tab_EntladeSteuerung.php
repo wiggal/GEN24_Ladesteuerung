@@ -207,15 +207,35 @@ $Res_Feld2_Watt = "";
 
 if ($date == 'ManuelleEntladesteuerung') break;
 
-if (isset($Akku_EntLadung[$date]['Res_Feld1']) and $Akku_EntLadung[$date]['Res_Feld1'] <> ""){
-    $Res_Feld1_wert = (float) $Akku_EntLadung[$date]['Res_Feld1']/1000;
-} else {
-    $Res_Feld1_wert = 0;
-}
-if ($Res_Feld1_wert <> 0) {
-$Res_Feld1_Watt = number_format($Res_Feld1_wert, 3);
-} else  { 
-$Res_Feld1_Watt = "" ;
+if (isset($Akku_EntLadung[$date]['Res_Feld1']) and (string) $Akku_EntLadung[$date]['Res_Feld1'] !== ""){
+        # String nach ; aufteilen (evtl. viertelstündliche Werte, wie bei Res_Feld2)
+        $teile = explode(";", (string) $Akku_EntLadung[$date]['Res_Feld1']);
+        if (count($teile) == 1) {
+            # ein Wert: Darstellung wie bisher (3 Nachkommastellen, 0 = leer)
+            $Res_Feld1_wert = (float) $teile[0]/1000;
+            if ($Res_Feld1_wert <> 0) {
+                $Res_Feld1_Watt = number_format($Res_Feld1_wert, 3);
+            }
+        } else {
+            # mehrere Werte (viertelstündlich): jeden Wert einzeln von Watt in kW umrechnen
+            $ergebnisse = [];
+            $alle_null = true;
+            foreach ($teile as $wert) {
+                $wert = is_numeric($wert) ? (float) $wert : 0;
+                if($wert == 0){
+                    $ergebnis = 0;
+                }else{
+                    $alle_null = false;
+                    $ergebnis = (string) ($wert/1000);
+                    # Immer mindestens eine Nachkommastelle, auch wenn Null
+                    if (strpos($ergebnis, '.') === false) {
+                        $ergebnis .= '.0';
+                    }
+                }
+                $ergebnisse[] = $ergebnis;
+            }
+            if (!$alle_null) $Res_Feld1_Watt = implode(";", $ergebnisse);
+        }
 }
 
 if (isset($Akku_EntLadung[$date]['Res_Feld2']) and $Akku_EntLadung[$date]['Res_Feld2'] !== ""){
@@ -288,10 +308,14 @@ $(document).ready(function(){
   $('.Options').each(function(){
    Options.push($(this).text());
   });
-  // Res_Feld1 darf nur Zahlen enthalten
+  // Res_Feld1 darf nur Zahlen enthalten, evtl. viertelstündliche Werte (durch ; getrennt) einzeln umrechnen
   $('.Res_Feld1').each(function(){
-    let val = parseFloat($(this).text().replace(",", ".")) * 1000;
-    Res_Feld1.push(Number.isFinite(val) ? Math.round(val) : 0);
+    let teile = $(this).text().split(";");
+    let ergebnisse = teile.map(wert => {
+        let zahl = parseFloat(wert.replace(",", "."));
+        return Number.isFinite(zahl) ? Math.round(zahl * 1000) : 0;
+    });
+    Res_Feld1.push(ergebnisse.join(";"));
   });
   // Hier müssen evtl. viertelstündliche Werte aufgesplitet werden.
   $('.Res_Feld2').each(function() {

@@ -315,6 +315,7 @@ if __name__ == '__main__':
                     BatteryMaxDischarge = BattganzeLadeKapazWatt
                     Neu_BatteryMaxDischarge = BattganzeLadeKapazWatt
                     BatteryMaxDischarge_Zwangsladung = 0
+                    BatteryMinDischarge_Einspeisung = 0
                     EntladeEintragloeschen = "nein"
                     EntladeEintragDa = "nein"
                     Ladetype = ""
@@ -332,6 +333,9 @@ if __name__ == '__main__':
                             elif eintrag.get('Active') and eintrag.get('ScheduleType') == 'CHARGE_MIN':
                                 BatteryMaxDischarge_Zwangsladung = int(eintrag.get('Power'))
                                 EntladeEintragDa = "ja"
+                            elif eintrag.get('Active') and eintrag.get('ScheduleType') == 'DISCHARGE_MIN':
+                                BatteryMinDischarge_Einspeisung = int(eintrag.get('Power'))
+                                EntladeEintragDa = "ja"
 
                         # EntladeSteuerungdaten lesen
                         entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
@@ -343,7 +347,10 @@ if __name__ == '__main__':
 
                         # Verbrauchsgrenze Entladung lesen
                         if (entladesteurungsdata.get(aktStd)):
-                            VerbrauchsgrenzeEntladung = entladesteurungsdata[aktStd]['Res_Feld1']
+                            # Funktion aufrufen, die eine evtl. viertelstündliche zuteilung macht
+                            VerbrauchsgrenzeEntladung_tmp = progladewert_inst.get_Verbrauchsgrenze(str(entladesteurungsdata[aktStd]['Res_Feld1']))
+                            VerbrauchsgrenzeEntladung = VerbrauchsgrenzeEntladung_tmp[0]
+                            DEBUG_Ausgabe += VerbrauchsgrenzeEntladung_tmp[1]
                         else:
                             VerbrauchsgrenzeEntladung = 0
 
@@ -393,6 +400,12 @@ if __name__ == '__main__':
                             if (Neu_BatteryMaxDischarge > aktuellerLadewert): aktuellerLadewert = Neu_BatteryMaxDischarge + 100
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
                             Ladetype = "CHARGE_MIN"
+                        # Verbrauchsgrenze == -2000 (negativ) && Feste Grenze == 0 (leer) # Negativer Wert = Einspeisung
+                        # Die Batterie soll mindestens mit 2000 W entladen (Ladetype "DISCHARGE_MIN")
+                        elif (VerbrauchsgrenzeEntladung < 0 and FesteEntladegrenze == 0):
+                            BatteryMaxDischarge = BatteryMinDischarge_Einspeisung
+                            Neu_BatteryMaxDischarge = abs(int(VerbrauchsgrenzeEntladung))
+                            Ladetype = "DISCHARGE_MIN"
                         # Tabellenregeln (oben) überschreiben die "Feste Entladegrenze %" des Sliders
                         elif (MaxEntladung_Prozent < 100):
                             Neu_BatteryMaxDischarge = MaxEntladung
@@ -426,6 +439,9 @@ if __name__ == '__main__':
                                 print("Zwangsladung ALT:          ", int(BatteryMaxDischarge), "W")
                                 print("Zwangsladung NEU:          ", int(Neu_BatteryMaxDischarge), "W")
                                 print("Ladewert >= Zwangsladung:   ", aktuellerLadewert, "W")
+                            if (Ladetype == "DISCHARGE_MIN") and (EntladeEintragloeschen == "nein"):
+                                print("Einspeisung (min. Entladung) ALT: ", int(BatteryMaxDischarge), "W")
+                                print("Einspeisung (min. Entladung) NEU: ", int(Neu_BatteryMaxDischarge), "W")
                             if (EntladeEintragloeschen == "ja"):
                                 print(">> Entladeeintrag löschen!")
                             print()

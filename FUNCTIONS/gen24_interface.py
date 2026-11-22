@@ -300,16 +300,14 @@ class InverterInterface:
 # Beispiel
 # -------------------------------------------------
 if __name__ == "__main__":
-    fronius = FroniusGEN24("192.168.XXX.XX", "customer", "XXXXXXXXXX", debug=True)
+    fronius = InverterInterface("192.168.XXX.XX", "customer", "XXXXXXXXXX", debug=True)
 
     if fronius.login():
         print("✅ Login erfolgreich")
 
-        batteries = fronius.get_batteries()
+        timeofuse, batteries = fronius.get_http_data()
         print("Batterie-Config:", batteries)
-
-        timeofuse, path = fronius.get_time_of_use()
-        print("Time-of-Use:", timeofuse, "von", path)
+        print("Time-of-Use:", timeofuse)
     else:
         print("❌ Login fehlgeschlagen")
 

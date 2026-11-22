@@ -203,8 +203,29 @@ pv_data_charge = [zeile + [0, -0.01] for zeile in pv_data]
 # Prüfen, ob vietelstündliche Strompreise
 Stundenteile = 1
 if any(zeile[0][14:16] != "00" for zeile in pv_data_charge): Stundenteile = 4
-# Mit Funktion get_charge_stop Ladepunkte usw. berechnen
-pv_data_charge = dynamic.get_charge_stop(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, current_charge_Wh, Stundenteile)
+# Optionale Einstellungen (fehlen sie in der dynprice.ini, gelten die Standardwerte)
+Einspeisen_aus_Akku = dynamic.conf_opt('Einspeisen_aus_Akku', 0, 'eval')                           # 0 = aus, 1 = erlaubt
+Einspeiseleistung_max_W = dynamic.conf_opt('Einspeiseleistung_max_W', 3000, 'eval')
+DP_Restwert = str(dynamic.conf_opt('DP_Restwert', 'auto', 'str')).strip().strip('"\'')            # EUR/kWh oder auto
+Morgen_Ziel_Prozent = dynamic.conf_opt('Morgen_Ziel_SOC_Prozent', 0, 'eval')                       # 0 = aus, z.B. 20
+einspeisung = {}   # {Zeitpunkt: Einspeiseleistung W}
+ziel_info = None
+if not (hasattr(dynamic, 'plan_dp') and hasattr(dynamic, 'get_morgen_ziel')):
+    print("### ERROR: FUNCTIONS/DynamicPrice.py ist veraltet (braucht plan_dp mit Morgen-Ziel). Bitte die aktuelle Datei verwenden!")
+    exit(1)
+# Börsenpreis je Zeitpunkt (Spalte 3 der Preisliste) als Einspeisevergütung
+boerse = {zeile[0]: zeile[2] for zeile in pricelist_date if len(zeile) > 2 and zeile[2] is not None}
+if Morgen_Ziel_Prozent:
+    # Akku bis Sonnenaufgang auf Morgen_Ziel_SOC_Prozent leeren, damit PV-Überschuss aufgenommen werden kann (gilt immer, auch wenn es sich nicht lohnt)
+    ziel_info, ziel_text = dynamic.get_morgen_ziel(pv_data_charge, weatherdata, Lastprofil, minimum_batterylevel_kWh, current_charge_Wh,
+                                                   charge_rate_kW, battery_capacity_Wh, Morgen_Ziel_Prozent)
+    if dyn_print_level >= 1: print(">> Morgen-Ziel:", ziel_text)
+    if ziel_info and not Einspeisen_aus_Akku:
+        print("### HINWEIS: Morgen-Ziel aktiv, aber Einspeisen_aus_Akku = 0: der Akku sinkt bis Sonnenaufgang nur durch den Hausverbrauch.")
+# Ladepunkte, Entladestopps und Einspeisung berechnen
+pv_data_charge, einspeisung = dynamic.plan_dp(pv_data_charge, boerse, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW,
+                                              battery_capacity_Wh, Stundenteile, Einspeisen_aus_Akku, Einspeiseleistung_max_W, DP_Restwert,
+                                              ziel_info['idx'] if ziel_info else None, ziel_info['ziel_wh'] if ziel_info else 0)
 
 if(dyn_print_level >= 3): print("\n***************** ENDE DEBUGGING *****************")
 
@@ -228,6 +249,7 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     Res_Feld2 = 0 
     Res_Feld2_array = {}
     Options = ''
+    Feed_P = 0
     # Wenn viertelstündliche Preise vorhanden, berücksichtigen
     for minuten in [0, 15, 30, 45]:
         zeitpunkt = zeitpunkt.replace(minute=minuten, second=0, microsecond=0)
@@ -241,6 +263,7 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
                 Res_Feld2_array[minuten] = Ladewert_int
                 if Ladewert_int != 0:
                     Options = 'DynPrice'
+                Feed_P = max(Feed_P, einspeisung.get(SuchStunde, 0))
                 break
     Res_Feld2_werte = list(Res_Feld2_array.values())
     # Wenn alle viertestündlichen Werte gleich, nur einmal ausgeben
@@ -250,23 +273,45 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     if(len(set(Res_Feld2_werte)) > 1):
         Res_Feld2 = ";".join(str(wert) for wert in Res_Feld2_werte)
 
+    # Einspeisung Akku -> Netz: Verbrauchsgrenze (Spalte 1) = -Leistung in W, Feste Entladegrenze (Spalte 2) = 0
+    # (nicht leer, sonst bricht int('') im Controller ab). Der Controller wertet das später aus.
+    if Feed_P > 0:
+        Res_Feld1 = -int(Feed_P)
+        Options = 'DynPrice'
+
     # Wenn manueller Eintrag, Eintrag nicht überschreiben
     # Damit kein Fehler kommt, wenn Datensatz in SQLsteuerdatei nicht existiert
     try:
         alt = entladesteurungsdata[Stunde]
-        try:
-            alt_wert = float(alt['Res_Feld2'])
-        except (TypeError, ValueError):
-            alt_wert = 0  # z.B. "a;b;c;d" aus Viertelstundenwerten => kein manueller Eintrag
-        if alt['Options'] != 'DynPrice' and alt_wert < 0:
+        manuell = alt['Options'] != 'DynPrice'
+        # Beide Spalten können eine Zahl oder viertelstündliche Werte "a;b;c;d" enthalten
+        teile2 = dynamic.teile_zahlen(alt['Res_Feld2'])   # Zwangsladung / Entladestopp (negativ)
+        teile1 = dynamic.teile_zahlen(alt['Res_Feld1'])   # Einspeisung (negativ = -Leistung in W)
+        if manuell and min(teile2) < 0:
             Res_Feld2 = alt['Res_Feld2']
             Options = alt['Options']
+            Res_Feld1 = 0   # manueller Eintrag hat Vorrang, keine Einspeisung in dieser Stunde
             # Alle Slots dieser Stunde (stündlich :00, viertelstündlich :00/:15/:30/:45) setzen.
             # Vorher stand hier SuchStunde (= :45), das bei stündlichen Preisen nie traf.
             for zeile in pv_data_charge:
                 if zeile[0][11:13] == Stunde[:2]:
-                    zeile[5] = alt_wert
-    except KeyError:
+                    zeile[5] = dynamic.teil_fuer_slot(teile2, zeile[0], Stundenteile, 'min')
+                    einspeisung.pop(zeile[0], None)
+        elif manuell and min(teile1) < 0:
+            # Manuelle Einspeisung (Verbrauchsgrenze negativ = -Leistung in W): Eintrag bleibt unverändert erhalten
+            # und wird wie die Zwangsladung in der Neuberechnung des Akkustands berücksichtigt
+            Res_Feld1 = alt['Res_Feld1']
+            Res_Feld2 = alt['Res_Feld2']
+            Options = alt['Options']
+            for zeile in pv_data_charge:
+                if zeile[0][11:13] == Stunde[:2]:
+                    zeile[5] = 0
+                    leistung = -dynamic.teil_fuer_slot(teile1, zeile[0], Stundenteile, 'mittel')
+                    if leistung > 0:
+                        einspeisung[zeile[0]] = int(leistung)
+                    else:
+                        einspeisung.pop(zeile[0], None)
+    except (KeyError, TypeError, IndexError):
         pass  # Stunde existiert in ENTLadeStrg noch nicht
 
     SteuerCode.append((Stunde, 'ENTLadeStrg', Stunde, Res_Feld1, Res_Feld2, Options))
@@ -279,18 +324,21 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
 # Akkuzustand nochmal neu berechnen mit manuellen Einträgen aus ENTLadeStrg
 max_batt_dyn_ladung = basics.getVarConf('dynprice','max_batt_dyn_ladung', 'eval')
 max_batt_dyn_ladung_W = int(battery_capacity_Wh * max_batt_dyn_ladung / 100)
-dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile)
+dynamic.akkustand_neu(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, charge_rate_kW, battery_capacity_Wh, max_batt_dyn_ladung_W, 1, Stundenteile, einspeisung)
 
 if(dyn_print_level >= 1):
     print(">>>>>>>> Batteriestand und Ladezeitpunkte")
-    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert"]
-    dynamic.listAStable(headers, pv_data_charge)
+    headers = ["Ladezeitpunkt", "PV_Prognose (W)", "Verbrauch (W)", "Strompreis (€/kWh)", "Akku ("+str(current_charge_Wh)+"W)", "Ladewert", "Entladung (W)", "Einspeisung (W)"]
+    # Entladung der Batterie (an Haus und Netz) und geplante Einspeisung als zusätzliche Anzeigespalten (pv_data_charge bleibt unverändert)
+    entladung = dynamic.entladung_werte(pv_data_charge, minimum_batterylevel_kWh, current_charge_Wh, Stundenteile)
+    anzeige = [zeile + [entl, einspeisung.get(zeile[0], 0)] for zeile, entl in zip(pv_data_charge, entladung)]
+    dynamic.listAStable(headers, anzeige)
 
 if(dyn_print_level >= 1):
     # Zu schreibenen SteuerCode ausgeben
     print("\nFolgende Steuercodes wurden ermittelt:")
-    headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Options"]
-    dynamic.listAStable(headers, SteuerCode)
+    headers = ["Index", "Schlüssel", "Stunde", "Verbrauchsgrenze", "Feste Entladegrenze", "Options", "Aktion"]
+    dynamic.listAStable(headers, [sc + (dynamic.steuercode_aktion(sc[3], sc[4], sc[5]),) for sc in SteuerCode])
 
 # WebUI-Parameter aus CONFIG/Prog_Steuerung.sqlite lesen
 SettingsPara = FUNCTIONS.Steuerdaten.readcontroldata()
@@ -307,8 +355,6 @@ if ('dynamicprice' in Options):
         if(dyn_print_level >= 1): print("\nSteuercodes wurden geschrieben! (siehe Tabelle ENTLadeStrg)")
 else:
     if(dyn_print_level >= 1): print("\nSteuercodes wurden NICHT geschrieben, da Option \"dynamicprice\" NICHT gesetzt!")
-
-if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")
 
 # Strompreise in PV_Daten.sqlite/Strompreise speichern
 # Neue Liste mit den Ergebnissen
@@ -354,3 +400,5 @@ else:
     Logging_Schreib_Ausgabe = "Strompreise NICHT gespeichert, da Option \"logging\" NICHT gesetzt!\n" 
 if dyn_print_level >= 1:
     print(Logging_Schreib_Ausgabe)
+
+if(dyn_print_level >= 1): print("***** ENDE: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"),"*****\n")

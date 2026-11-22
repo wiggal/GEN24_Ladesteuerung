@@ -73,6 +73,23 @@ class progladewert:
         self.DEBUG_Ausgabe += "\nDEBUG FesteEntladegrenze index " + str(index) + " = " + str(values[index])
         return int(values[index]), self.DEBUG_Ausgabe
 
+    def get_Verbrauchsgrenze(self, Verbrauchsgrenze_string):
+        # Wie get_FesteEntladegrenze, aber für die Spalte "Verbrauchsgrenze Entladung" (Res_Feld1):
+        # positiver Wert = Verbrauchsgrenze, negativer Wert = Einspeisung (minimale Entladung in W).
+        # Evtl. viertelstündliche Werte "a;b;c;d" (4 Werte = Viertelstunden, 2 Werte = halbe Stunden).
+        values = Verbrauchsgrenze_string.split(";")
+        num_values = len(values)
+        current_minute = datetime.now().minute
+        interval_size = 60 / num_values
+        index = int(current_minute // interval_size)
+        # Auch "-3000.0" (Zahl aus der DB) und leere/ungültige Werte (= 0) vertragen
+        try:
+            wert = int(float(values[index]))
+        except ValueError:
+            wert = 0
+        # Nur die eigene Debug-Zeile zurückgeben (nicht self.DEBUG_Ausgabe), sonst steht der frühere Text im Controller doppelt im Log
+        return wert, "\nDEBUG Verbrauchsgrenze index " + str(index) + " = " + str(values[index])
+
     def getLadewert(self, BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt, MaxLadung):
             # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
             format_Tag = "%Y-%m-%d"

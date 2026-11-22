@@ -2,7 +2,7 @@
 """
 db_scheduler.py
 Wird jede Minute per Crontab aufgerufen:
-    * * * * * /usr/bin/python3 /DIR/db_scheduler.py >> /DIR/Crontab.log 2>&1
+    * * * * * /usr/bin/python3 /DIR/db_scheduler.py
 
 Liest alle aktiven Jobs aus der SQLite-DB, prüft ob sie jetzt fällig sind,
 und führt sie ggf. aus.
