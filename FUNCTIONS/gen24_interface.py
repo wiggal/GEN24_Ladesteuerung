@@ -257,6 +257,7 @@ class InverterInterface:
             response = self.send_request('config/timeofuse', method='POST', payload=payload, add_praefix=True)
             bereits_geschrieben = 1
             Schreib_Ausgabe += "Time-of-Use Einträge gelöscht.\n"
+            DEBUG_Ausgabe += "\nDEBUG Meldung Time-of-Use löschen: " + str(response)
     
         # ---------------------------
         # MODE 3: Eigenverbrauchsoptimierung
@@ -272,6 +273,7 @@ class InverterInterface:
             response = self.send_request('config/batteries', method='POST', payload=payload, add_praefix=True)
             bereits_geschrieben = 1
             Schreib_Ausgabe += f"Eigenverbrauchsoptimierung gesetzt: Power={Eigen_Opt_Std_neu}, Mode={HYB_EM_MODE}\n"
+            DEBUG_Ausgabe += "\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
     
         # ---------------------------
         # MODE 4: Backup Reserve
@@ -285,6 +287,7 @@ class InverterInterface:
             response = self.send_request('config/batteries', method='POST', payload=payload, add_praefix=True)
             bereits_geschrieben = 1
             Schreib_Ausgabe += f"Backup-Reserve auf {Neu_HYB_BACKUP_RESERVED}% gesetzt.\n"
+            DEBUG_Ausgabe += "\nDEBUG Meldung Notstromreserve schreiben: " + str(response)
     
         # ---------------------------
         # Unbekannter Modus

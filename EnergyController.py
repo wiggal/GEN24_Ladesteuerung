@@ -207,7 +207,8 @@ if __name__ == '__main__':
                     WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
 
                     # Aktuelle Prognose berechnen
-                    (aktuelleVorhersage, DEBUG_Ausgabe) = progladewert_inst.getLoggingPrognose(BattKapaWatt_akt)
+                    (aktuelleVorhersage, DEBUG_Prognose) = progladewert_inst.getLoggingPrognose(BattKapaWatt_akt)
+                    DEBUG_Ausgabe += DEBUG_Prognose
 
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
@@ -513,10 +514,10 @@ if __name__ == '__main__':
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
                                     bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(
-                                        mode="eigenverbrauchsoptimierung", Eigen_Opt_Std_neu = Eigen_Opt_Std_neu, HYB_EM_MODE=HYB_EM_MODE )
+                                        mode="eigenverbrauchsoptimierung", Eigen_Opt_Std_neu = Eigen_Opt_Std_neu, HYB_EM_MODE=HYB_EM_MODE,
+                                        Push_Schreib_Ausgabe=Push_Schreib_Ausgabe, DEBUG_Ausgabe=DEBUG_Ausgabe )
 
                                     bereits_geschrieben = 1
-                                    DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
                                     Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
                                 else:
@@ -587,11 +588,11 @@ if __name__ == '__main__':
                         if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
                             if ('notstrom' in Options):
                                 bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(
-                                    mode="BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED))
+                                    mode="BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED),
+                                    Push_Schreib_Ausgabe=Push_Schreib_Ausgabe, DEBUG_Ausgabe=DEBUG_Ausgabe)
 
 
                                 bereits_geschrieben = 1
-                                DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)
                                 Schreib_Ausgabe = Schreib_Ausgabe + str(Neu_HYB_BACKUP_RESERVED) + "% Notstromreserve geschrieben.\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
