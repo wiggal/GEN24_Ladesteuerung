@@ -1,3 +1,6 @@
+**[0.44.0] – 202X-XX-XX**  
+- DynamicPriceCheck.py: Nun auch Netzeinspeisung aus Akku möglich.  
+
 **[0.43.9] – 2026-11-21**  
 - Notstromreserve wird nun erst 5 Std vor Sonnenaufgang freigegeben.  
 

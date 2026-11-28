@@ -46,12 +46,13 @@ if __name__ == '__main__':
 
         try:
             # Ping Ersatz, prüft ob WR online
-            response = requests.get('http://'+host_ip)
+            response = requests.get('http://'+host_ip, timeout=10)
             response.raise_for_status()  # Auslösen einer Ausnahme, wenn der Statuscode nicht 2xx ist
             # API lesen, wegen Versionsnummer
             inverter_api = InverterApi()
             # readvolt=1 damit der max Voltwert bei Akkuschonung=2 vom Akku gelesen wird
-            API = inverter_api.get_API(readvolt=1)
+            # (hier mit basics, damit auch eine Änderung von Akkuschonung per WebUI berücksichtigt wird)
+            API = inverter_api.get_API(readvolt=1 if basics.getVarConf('Ladeberechnung','Akkuschonung','eval') == 2 else 0)
             DEBUG_interface = False
             if(print_level == 5): DEBUG_interface = True
             #  Klasse FroniusGEN24 initiieren
@@ -74,8 +75,9 @@ if __name__ == '__main__':
             Options = Parameter[2]
         
             Ausgabe_Parameter = ''
-            if(Parameter[1] != "" and print_level >= 1):
-                Ausgabe_Parameter = "DEBUG Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
+            if(Parameter[1] != ""):
+                if print_level >= 1:
+                    Ausgabe_Parameter = "DEBUG Parameteränderung durch WebUI-Settings: "  + str(Parameter[1])
                 if(Parameter[0] == "exit0"):
                     # Batteriemangement zurücksetzen
                     if result_get_time_of_use != []:
@@ -122,16 +124,20 @@ if __name__ == '__main__':
                         try:
                             Grundlast_WoT = basics.getVarConf('Ladeberechnung','Grundlast_WoT','str')
                             Grundlast_WoT_Array = Grundlast_WoT.split(',')
-                            Grundlast = eval(Grundlast_WoT_Array[datetime.today().weekday()])
-                        except:
-                            print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 0 !!")
+                            Grundlast = float(Grundlast_WoT_Array[datetime.today().weekday()].strip())
+                            if Grundlast == int(Grundlast): Grundlast = int(Grundlast)
+                        except (ValueError, IndexError):
+                            print("ERROR: Grundlast für den Wochentag konnte nicht gelesen werden, Grundlast = 1 W (Notwert)!!")
                             Grundlast = 0
+                    # Grundlast darf nicht 0 sein, sonst Division durch 0 in PrognoseLadewert.getLadewert
+                    if Grundlast <= 0:
+                        Grundlast = 1
 
                     BattganzeKapazWatt = (API['BattganzeKapazWatt'])
                     BattganzeLadeKapazWatt_Akku = (API['BattganzeLadeKapazWatt'])
                     LadeAmpere = 50
                     # LadeAmpere bei HVM = 50A bei HVS = 25A
-                    if (BattganzeLadeKapazWatt_Akku / API['udc_mittel']) < 37: LadeAmpere = 25
+                    if API['udc_mittel'] > 0 and (BattganzeLadeKapazWatt_Akku / API['udc_mittel']) < 37: LadeAmpere = 25
                     # LadeAmpere Gen24 = 22A
                     BattganzeLadeKapazWatt = BattganzeLadeKapazWatt_Akku / LadeAmpere * 22
                     BattStatusProz = API['BattStatusProz']
@@ -207,7 +213,8 @@ if __name__ == '__main__':
                     WR_schreiben = progladewert_inst.setLadewert(aktuellerLadewert, WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten, alterLadewert)
 
                     # Aktuelle Prognose berechnen
-                    (aktuelleVorhersage, DEBUG_Ausgabe) = progladewert_inst.getLoggingPrognose(BattKapaWatt_akt)
+                    (aktuelleVorhersage, DEBUG_Prognose) = progladewert_inst.getLoggingPrognose(BattKapaWatt_akt)
+                    DEBUG_Ausgabe += DEBUG_Prognose
 
                     # Wenn die Variable "FesteLadeleistung" größergleich "0" ist, wird der Wert fest als Ladeleistung geschrieben
                     if FesteLadeleistung >= 0:
@@ -315,6 +322,7 @@ if __name__ == '__main__':
                     BatteryMaxDischarge = BattganzeLadeKapazWatt
                     Neu_BatteryMaxDischarge = BattganzeLadeKapazWatt
                     BatteryMaxDischarge_Zwangsladung = 0
+                    BatteryMinDischarge_Einspeisung = 0
                     EntladeEintragloeschen = "nein"
                     EntladeEintragDa = "nein"
                     Ladetype = ""
@@ -332,6 +340,9 @@ if __name__ == '__main__':
                             elif eintrag.get('Active') and eintrag.get('ScheduleType') == 'CHARGE_MIN':
                                 BatteryMaxDischarge_Zwangsladung = int(eintrag.get('Power'))
                                 EntladeEintragDa = "ja"
+                            elif eintrag.get('Active') and eintrag.get('ScheduleType') == 'DISCHARGE_MIN':
+                                BatteryMinDischarge_Einspeisung = int(eintrag.get('Power'))
+                                EntladeEintragDa = "ja"
 
                         # EntladeSteuerungdaten lesen
                         entladesteurungsdata = sqlall.getSQLsteuerdaten('ENTLadeStrg')
@@ -341,9 +352,16 @@ if __name__ == '__main__':
                             MaxEntladung = int(MaxEntladung_Prozent*BattganzeLadeKapazWatt / 100)
                             DEBUG_Ausgabe+="\nDEBUG MaxEntladung = entladesteurungsdata:" + str(MaxEntladung)
 
+                        # Leere Tabellenwerte ('' oder NULL aus der DB) wie 0 behandeln, sonst ValueError in get_FesteEntladegrenze
+                        def leer_zu_null(wert):
+                            return '0' if wert is None or str(wert).strip() in ('', 'None') else str(wert)
+
                         # Verbrauchsgrenze Entladung lesen
                         if (entladesteurungsdata.get(aktStd)):
-                            VerbrauchsgrenzeEntladung = entladesteurungsdata[aktStd]['Res_Feld1']
+                            # Funktion aufrufen, die eine evtl. viertelstündliche zuteilung macht
+                            VerbrauchsgrenzeEntladung_tmp = progladewert_inst.get_Verbrauchsgrenze(leer_zu_null(entladesteurungsdata[aktStd]['Res_Feld1']))
+                            VerbrauchsgrenzeEntladung = VerbrauchsgrenzeEntladung_tmp[0]
+                            DEBUG_Ausgabe += VerbrauchsgrenzeEntladung_tmp[1]
                         else:
                             VerbrauchsgrenzeEntladung = 0
 
@@ -351,7 +369,7 @@ if __name__ == '__main__':
                         # Feste Entladegrenze aus Tabelle  ENTLadeStrg lesen
                         if (entladesteurungsdata.get(aktStd)):
                             # Funktion aufrufen, die eine evtl. viertelstündliche zuteilung macht
-                            FesteEntladegrenze_tmp = progladewert_inst.get_FesteEntladegrenze(str(entladesteurungsdata[aktStd]['Res_Feld2']))
+                            FesteEntladegrenze_tmp = progladewert_inst.get_FesteEntladegrenze(leer_zu_null(entladesteurungsdata[aktStd]['Res_Feld2']))
                             FesteEntladegrenze = FesteEntladegrenze_tmp[0]
                             DEBUG_Ausgabe += FesteEntladegrenze_tmp[1]
                         else:
@@ -393,6 +411,12 @@ if __name__ == '__main__':
                             if (Neu_BatteryMaxDischarge > aktuellerLadewert): aktuellerLadewert = Neu_BatteryMaxDischarge + 100
                             # Ladetype = "CHARGE_MIN" bei Zwangsladung
                             Ladetype = "CHARGE_MIN"
+                        # Verbrauchsgrenze == -2000 (negativ) && Feste Grenze == 0 (leer) # Negativer Wert = Einspeisung
+                        # Die Batterie soll mindestens mit 2000 W entladen (Ladetype "DISCHARGE_MIN")
+                        elif (VerbrauchsgrenzeEntladung < 0 and FesteEntladegrenze == 0):
+                            BatteryMaxDischarge = BatteryMinDischarge_Einspeisung
+                            Neu_BatteryMaxDischarge = abs(int(VerbrauchsgrenzeEntladung))
+                            Ladetype = "DISCHARGE_MIN"
                         # Tabellenregeln (oben) überschreiben die "Feste Entladegrenze %" des Sliders
                         elif (MaxEntladung_Prozent < 100):
                             Neu_BatteryMaxDischarge = MaxEntladung
@@ -426,6 +450,9 @@ if __name__ == '__main__':
                                 print("Zwangsladung ALT:          ", int(BatteryMaxDischarge), "W")
                                 print("Zwangsladung NEU:          ", int(Neu_BatteryMaxDischarge), "W")
                                 print("Ladewert >= Zwangsladung:   ", aktuellerLadewert, "W")
+                            if (Ladetype == "DISCHARGE_MIN") and (EntladeEintragloeschen == "nein"):
+                                print("Einspeisung (min. Entladung) ALT: ", int(BatteryMaxDischarge), "W")
+                                print("Einspeisung (min. Entladung) NEU: ", int(Neu_BatteryMaxDischarge), "W")
                             if (EntladeEintragloeschen == "ja"):
                                 print(">> Entladeeintrag löschen!")
                             print()
@@ -497,10 +524,10 @@ if __name__ == '__main__':
                             if (Eigen_Opt_Std_neu != Eigen_Opt_Std):
                                 if ('optimierung' in Options):
                                     bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(
-                                        mode="eigenverbrauchsoptimierung", Eigen_Opt_Std_neu = Eigen_Opt_Std_neu, HYB_EM_MODE=HYB_EM_MODE )
+                                        mode="eigenverbrauchsoptimierung", Eigen_Opt_Std_neu = Eigen_Opt_Std_neu, HYB_EM_MODE=HYB_EM_MODE,
+                                        Push_Schreib_Ausgabe=Push_Schreib_Ausgabe, DEBUG_Ausgabe=DEBUG_Ausgabe )
 
                                     bereits_geschrieben = 1
-                                    DEBUG_Ausgabe+="\nDEBUG Meldung Eigenverbrauchs-Opt. schreiben: " + str(response)
                                     Opti_Schreib_Ausgabe = Opti_Schreib_Ausgabe + "Eigenverbrauchs-Opt.: " + str(Eigen_Opt_Std_neu) + "W geschrieben\n"
                                     Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Opti_Schreib_Ausgabe
                                 else:
@@ -514,7 +541,7 @@ if __name__ == '__main__':
 
                     ######## N O T S T R O M R E S E R V E ab hier setzen, wenn eingeschaltet!
                     # Notstrompruefung nur abends (Stunde vor Sonnenuntergang, wie bisher)
-                    # und morgens in der Stunde 2 Std. vor Sonnenaufgang (nur zum Freigeben der Reserve)
+                    # und morgens in der Stunde 5 Std. vor Sonnenaufgang (nur zum Freigeben der Reserve)
                     Notstrom_Abend = (Akt_Std == Sonnenuntergang-1)
                     Notstrom_Morgen = (Akt_Std == Sonnenaufgang-5)
                     if  Notstromreserve_steuern >= 1 and (Notstrom_Abend or Notstrom_Morgen):
@@ -529,7 +556,7 @@ if __name__ == '__main__':
                         # Hysterese in kWh (fester Aufschlag auf die Prognosegrenze der aktuellen Stufe)
                         Notstrom_Hysterese_kWh = 2
                         Prognose_24H = progladewert_inst.getPrognoseMorgen()[0]/1000
-                        if HYB_BACKUP_RESERVED == None:
+                        if HYB_BACKUP_RESERVED is None:
                             HYB_BACKUP_RESERVED = Eigen_Opt_Std_arry['HYB_BACKUP_RESERVED']
                         # Aktuelle EntladeGrenze_Max und ProgGrenzeMorgen aus Notstrom_Werte ermitteln
                         EntladeGrenze_Max = Notstromreserve_Min
@@ -571,11 +598,11 @@ if __name__ == '__main__':
                         if (Neu_HYB_BACKUP_RESERVED != HYB_BACKUP_RESERVED):
                             if ('notstrom' in Options):
                                 bereits_geschrieben, Schreib_Ausgabe, Push_Schreib_Ausgabe, DEBUG_Ausgabe = inverter_interface.update_inverter_settings(
-                                    mode="BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED))
+                                    mode="BACKUP_RESERVE", Neu_HYB_BACKUP_RESERVED=str(Neu_HYB_BACKUP_RESERVED),
+                                    Push_Schreib_Ausgabe=Push_Schreib_Ausgabe, DEBUG_Ausgabe=DEBUG_Ausgabe)
 
 
                                 bereits_geschrieben = 1
-                                DEBUG_Ausgabe+="\nDEBUG Meldung Notstromreserve schreiben: " + str(response)
                                 Schreib_Ausgabe = Schreib_Ausgabe + str(Neu_HYB_BACKUP_RESERVED) + "% Notstromreserve geschrieben.\n"
                                 Push_Schreib_Ausgabe = Push_Schreib_Ausgabe + Schreib_Ausgabe 
                             else:
@@ -640,11 +667,16 @@ if __name__ == '__main__':
                         print("***** ENDE: ", datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"),"*****\n")
 
 
-            except OSError:
+            except requests.exceptions.RequestException:
+                # Verbindungsfehler zum WR: vom äußeren Handler ("WR offline") behandeln
+                raise
+            except Exception as e:
+                import traceback
                 Push_title='Es ist ein Fehler aufgetreten!!!'
-                ERROR_Push_Schreib_Ausgabe='Fehler nicht definiert'
+                ERROR_Push_Schreib_Ausgabe='Fehler: ' + type(e).__name__ + ': ' + str(e)
                 Push_Tags='warning'
                 print("Es ist ein Fehler aufgetreten!!!")
+                traceback.print_exc()
 
 
         except requests.exceptions.RequestException as e:
@@ -654,6 +686,14 @@ if __name__ == '__main__':
             ERROR_Push_Schreib_Ausgabe='WR offline'
             Push_Tags='warning'
             print(">>>>>>>>>> WR offline")
+        except Exception as e:
+            # Fehler außerhalb des Rechenteils (z.B. beim Lesen der WR-Daten)
+            import traceback
+            Push_title='Es ist ein Fehler aufgetreten!!!'
+            ERROR_Push_Schreib_Ausgabe='Fehler: ' + type(e).__name__ + ': ' + str(e)
+            Push_Tags='warning'
+            print("Es ist ein Fehler aufgetreten!!!")
+            traceback.print_exc()
 
 
         # Wenn ERROR_Pushmeldung aktiviert und Daten geschrieben an Dienst schicken

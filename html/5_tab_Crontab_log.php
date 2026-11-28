@@ -139,39 +139,72 @@ body {
 <?php
 # config.ini parsen
 require_once "config_parser.php";
+
+/**
+ * Gibt eine Logzeile HTML-sicher aus.
+ * Nur ein fester Satz harmloser Formatierungs-Tags (ohne gefährliche Attribute)
+ * wird als HTML durchgelassen, alles andere wird escaped. Bereits vorhandene
+ * Entities (z.B. &nbsp;) bleiben dabei erhalten.
+ * Tag-Liste bei Bedarf ergänzen (analog zu download_file.php).
+ */
+function log_zeile_html($zeile)
+{
+    if (!preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $zeile)) {
+        return htmlspecialchars($zeile, ENT_QUOTES, 'UTF-8');
+    }
+    $tagMuster = '/(<\/?(?:span|b|i|u|em|strong|font|br)'
+               . '(?:\s+(?:class|color|style)="[A-Za-z0-9#:;.,% _-]*")*\s*\/?>)/i';
+    $teile = preg_split($tagMuster, $zeile, -1, PREG_SPLIT_DELIM_CAPTURE);
+    if ($teile === false) {
+        return htmlspecialchars($zeile, ENT_QUOTES, 'UTF-8');
+    }
+    $out = '';
+    foreach ($teile as $i => $teil) {
+        // Ungerade Indizes sind die erlaubten Tags (Trennzeichen), gerade der Text dazwischen
+        $out .= ($i % 2 === 1)
+            ? $teil
+            : htmlspecialchars($teil, ENT_QUOTES, 'UTF-8', false);
+    }
+    return $out;
+}
+
+// $activeTab einmalig absichern (HTML- und URL-Kontext)
+$activeTabRaw = isset($activeTab) ? (string)$activeTab : '';
+$activeTabH   = htmlspecialchars($activeTabRaw, ENT_QUOTES, 'UTF-8');
+$activeTabUrl = rawurlencode($activeTabRaw);
 ?>
 
 <div id="top"></div>
 
 <?php
-// --- Datei auswählen ---
-$log_file_param = isset($_REQUEST['log_file']) ? $_REQUEST['log_file'] : 'Crontab.log';
-
-if ($log_file_param === 'ocpp.log' || basename($log_file_param) === 'ocpp.log') {
-    $file = '/tmp/ocpp.log';
-    $file_name = 'ocpp.log';
-} elseif (strpos($log_file_param, '/') === 0) {
-    $file = $log_file_param;
-    $file_name = basename($log_file_param);
-} else {
-    $file_name = basename($log_file_param);
-    $file = $PythonDIR . '/' . $file_name;
+// --- Erlaubte Logdateien ermitteln (Whitelist) ---
+$allowed = [];
+$pyReal  = realpath($PythonDIR);
+foreach (glob($PythonDIR . '/*.log') ?: [] as $f) {
+    $real = realpath($f);
+    // Symlinks, die aus dem Verzeichnis herauszeigen, ausschließen
+    if ($real !== false && $pyReal !== false && strpos($real, $pyReal . DIRECTORY_SEPARATOR) === 0) {
+        $allowed[basename($f)] = $real;
+    }
+}
+if (is_file('/tmp/ocpp.log')) {
+    $allowed['ocpp.log'] = '/tmp/ocpp.log';
 }
 
-if(!file_exists($file)) {
-  die("Datei ". htmlspecialchars($file) ." ist nicht vorhanden!");
-} else {
-  if (!is_readable($file)) {
-      die("Datei " . htmlspecialchars($file) . " ist vorhanden, aber PHP hat keine Leserechte! (chmod 666 prüfen)");
-  }
-  $myfile = fopen($file, "r");
+// --- Datei auswählen (nur Dateinamen aus der Whitelist) ---
+$file_name = basename((string)($_REQUEST['log_file'] ?? 'Crontab.log'));
+if (!isset($allowed[$file_name])) {
+    http_response_code(404);
+    die("Logdatei nicht verfügbar.");
 }
+$file = $allowed[$file_name];
 
-// --- Logdateien im Verzeichnis auslesen ---
-$logFiles = glob($PythonDIR . '/*.log');
-
-if (file_exists('/tmp/ocpp.log')) {
-    $logFiles[] = '/tmp/ocpp.log';
+if (!is_readable($file)) {
+    die("Datei " . htmlspecialchars($file_name) . " ist vorhanden, aber PHP hat keine Leserechte! (chmod 666 prüfen)");
+}
+$myfile = fopen($file, "r");
+if ($myfile === false) {
+    die("Datei " . htmlspecialchars($file_name) . " konnte nicht geöffnet werden.");
 }
 
 // --- Tabelle mit Download-Symbol & Anzeige-Link ---
@@ -179,17 +212,13 @@ echo '<div class="download">';
 echo '<details id="logdateien">';
 echo '<summary><b>Logdateien (Größe MB):</b></summary>';
 echo '<table>';
-foreach ($logFiles as $log) {
-    $basename = basename($log); 
+foreach ($allowed as $basename => $logPath) {
     $nameWithoutExt = preg_replace('/\.log$/', '', $basename);
 
-    $fileSizeInMB = 0;
-    if (file_exists($log)) {
-        $bytes = filesize($log);
-        $fileSizeInMB = round($bytes / 1048576, 2);
-    }
+    $bytes = @filesize($logPath);
+    $fileSizeInMB = $bytes === false ? 0 : round($bytes / 1048576, 2);
 
-    if ($log === '/tmp/ocpp.log') {
+    if ($logPath === '/tmp/ocpp.log') {
         $downloadLink = 'download_file.php?dir=tmp&file=ocpp.log';
         $viewLink = '?log_file=ocpp.log';
         $nameWithoutExt = 'ocpp';
@@ -199,8 +228,8 @@ foreach ($logFiles as $log) {
     }
 
     echo '<tr>';
-    echo '<td><a class="ende" href="' . htmlspecialchars($viewLink) . '&tab=' . htmlspecialchars($activeTab) . '">' . htmlspecialchars($nameWithoutExt) . ' (' . $fileSizeInMB . ')</a></td>';
-    echo '<td style="text-align:center;"><a class="ende" href="' . htmlspecialchars($downloadLink) . '" title="Download"><span class="icon">💾</span></a></td>';
+    echo '<td><a class="ende" href="' . htmlspecialchars($viewLink . '&tab=' . $activeTabUrl, ENT_QUOTES) . '">' . htmlspecialchars($nameWithoutExt) . ' (' . $fileSizeInMB . ')</a></td>';
+    echo '<td style="text-align:center;"><a class="ende" href="' . htmlspecialchars($downloadLink, ENT_QUOTES) . '" title="Download"><span class="icon">💾</span></a></td>';
     echo '</tr>';
 }
 echo '</table>';
@@ -217,21 +246,27 @@ $datum = date("Y-m-d", time());
 $datum_kurz = date("m-d", time());
 
 $case = '';
-if (isset($_POST["case"])) $case = $_POST["case"];
+if (isset($_POST["case"])) $case = (string)$_POST["case"];
 $DEBUG = 'aus';
 if (isset($_POST["DEBUG"])) $DEBUG = $_POST["DEBUG"];
 $TAGE = 'aus';
 if (isset($_POST["TAGE"])) $TAGE = $_POST["TAGE"];
 if($TAGE == 'ein') $Ausgabe = 1;
 
-if (!empty($_POST['suchstring'])) {
-    $suchstring_anzeige = htmlspecialchars($_POST['suchstring']);
-} else {
-    $suchstring_anzeige = htmlspecialchars($_POST['letzte_suche'] ?? 'geschrieben');
+// Roh-Suchbegriff (nicht vorab escapen, das passiert erst bei der Ausgabe)
+$suchstring_roh = trim((string)($_POST['suchstring'] ?? ''));
+if ($suchstring_roh === '') {
+    $suchstring_roh = trim((string)($_POST['letzte_suche'] ?? ''));
 }
+if ($suchstring_roh === '') {
+    $suchstring_roh = 'geschrieben';
+}
+$suchstring_roh = substr($suchstring_roh, 0, 200);
+$suchstring_anzeige = htmlspecialchars($suchstring_roh, ENT_QUOTES, 'UTF-8');
+
 echo '<form id="filterform" method="POST" action="">'."\n";
-echo '<input type="hidden" name="log_file" value="'.$file.'">'."\n";
-echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
+echo '<input type="hidden" name="log_file" value="'.htmlspecialchars($file_name, ENT_QUOTES).'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTabH.'">'."\n";
 echo '<input type="hidden" name="case" value="filter">'."\n";
 echo '<label style="display:none"><input type="checkbox" name="DEBUG" value="ein"' . ($DEBUG == 'ein' ? ' checked' : '') . '></label>';
 echo '<label style="display:none"><input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '></label>';
@@ -249,29 +284,28 @@ echo '<pre style="font-family: monospace; white-space: pre-wrap; word-wrap: brea
 switch ($case) {
     case '':
     # AUSGEBEN DER Logdatei
-    
-    // KOMBINTION 1: Extrem-Turbo, wenn ALLES (inklusive Debug) angezeigt werden soll.
+
+    // KOMBINATION 1: Extrem-Turbo, wenn ALLES (inklusive Debug) angezeigt werden soll.
     if ($TAGE == 'ein' && $DEBUG == 'ein') {
         while (!feof($myfile)) {
-            echo htmlspecialchars(fread($myfile, 8192));
+            echo htmlspecialchars((string)fread($myfile, 8192), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         }
     } else {
         // KOMBINATION 2 & 3: Für "Nur Heute" oder "Alle Tage OHNE Debug"
-        while(!feof($myfile)) {
-            $Zeile = fgets($myfile);
-            
+        while (($Zeile = fgets($myfile)) !== false) {
+
             // Datum am Zeilenanfang erkennen: mm-dd HH:MM:SS oder BEGINN mit Datum
             if (strpos($Zeile, 'BEGINN') !== false && (strpos($Zeile, $datum) !== false || strpos($Zeile, $datum_kurz) !== false)) $Ausgabe = 1;
             if (preg_match('/^(\d{2}-\d{2}) \d{2}:\d{2}:\d{2}/', $Zeile, $m) && ($m[1] === $datum_kurz)) $Ausgabe = 1;
             if ($TAGE == 'ein') $Ausgabe = 1;
-            
+
             if ($Ausgabe == 1) {
                 // Wenn DEBUG ausgeschaltet ist, filtern wir hier im Eiltempo
                 if ($DEBUG == "aus") {
                     // PHP 7.4 KOMPATIBEL: strpos() ist genauso schnell wie str_contains
                     if (
-                        strpos($Zeile, 'DEBUG') !== false || 
-                        strpos($Zeile, '>> ') !== false || 
+                        strpos($Zeile, 'DEBUG') !== false ||
+                        strpos($Zeile, '>> ') !== false ||
                         strpos($Zeile, '++ ') !== false
                     ) {
                         continue; // Debug-Zeile überspringen
@@ -284,39 +318,37 @@ switch ($case) {
                 // Leerzeilen prüfen und ggf. überspringen
                 if (trim($Zeile) === '') {
                     if ($letzteWarLeer) {
-                        continue; 
+                        continue;
                     } else {
                         $letzteWarLeer = true;
                         echo "\n";
                         continue;
                     }
                 }
-                
+
                 // Reguläre Zeile anzeigen
                 $letzteWarLeer = false;
-                if (preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $Zeile)) {
-                    echo $Zeile . "\n";
-                } else {
-                    echo htmlspecialchars($Zeile) . "\n";
-                }
+                echo log_zeile_html($Zeile) . "\n";
             }
         }
     }
     break;
 
     case 'filter':
-    if (!empty($_POST['suchstring'])) {
-        $suchstring = trim($_POST["suchstring"] ?? '');
-    } else {
-        $suchstring = htmlspecialchars($_POST['letzte_suche'] ?? 'geschrieben');
+    // Suchbegriffe an | trennen und jeden Teil als Literal behandeln (kein Regex aus Nutzereingabe)
+    $teile = [];
+    foreach (explode('|', $suchstring_roh) as $t) {
+        $t = trim($t);
+        if ($t !== '') $teile[] = preg_quote($t, '/');
     }
-    
+    if (!$teile) $teile[] = preg_quote('geschrieben', '/');
+    $suchMuster = '/(?:' . implode('|', $teile) . ')/';
+
     $BEGIN_DATUM = '';
     $BEGIN_UHRZEIT = '';
     $BEGIN_Merken = '';
-    # Ausgabe der gesuchten Zeile mit Datumszeile 
-    while(!feof($myfile)) {
-        $Zeile = fgets($myfile);
+    # Ausgabe der gesuchten Zeile mit Datumszeile
+    while (($Zeile = fgets($myfile)) !== false) {
         // Datum/Zeit aus Zeilenanfang lesen: mm-dd HH:MM:SS
         if (preg_match('/^(\d{2}-\d{2}) (\d{2}:\d{2}):\d{2}/', $Zeile, $m)) {
             $zeile_datum = $m[1];
@@ -337,21 +369,17 @@ switch ($case) {
             }
         }
         if ($Ausgabe == 1) {
-            if (strpos($Zeile, 'BEGINN') === false && preg_match('/' . $suchstring . '/', $Zeile)) {
+            if (strpos($Zeile, 'BEGINN') === false && preg_match($suchMuster, $Zeile)) {
                 $hatEigeneDatumzeile = preg_match('/^\d{2}-\d{2} \d{2}:\d{2}:\d{2}/', $Zeile);
                 if (!$hatEigeneDatumzeile && ($BEGIN_DATUM !== '' || $BEGIN_UHRZEIT !== '')) {
                     if ($BEGIN_Merken !== $BEGIN_DATUM . $BEGIN_UHRZEIT) {
                         echo "\n" . htmlspecialchars($BEGIN_UHRZEIT . " " . $BEGIN_DATUM) . "\n";
                         $BEGIN_Merken = $BEGIN_DATUM . $BEGIN_UHRZEIT;
-                    }    
+                    }
                 }
                 // Auch beim Filtern die Zeilenenden säubern
                 $Zeile = rtrim($Zeile, "\r\n");
-                if (preg_match('/<[a-zA-Z\/]|&[a-zA-Z#]/', $Zeile)) {
-                    echo $Zeile . "\n";
-                } else {
-                    echo htmlspecialchars($Zeile) . "\n";
-                }
+                echo log_zeile_html($Zeile) . "\n";
             }
         }
     }
@@ -373,8 +401,8 @@ echo '<label class="checkbox">';
 echo '<input type="checkbox" name="TAGE" value="ein"' . ($TAGE == 'ein' ? ' checked' : '') . '> Alle Tage anzeigen';
 echo '</label>';
 echo "\n";
-echo '<input type="hidden" name="log_file" value="'.$file.'">'."\n";
-echo '<input type="hidden" name="tab" value="'.$activeTab.'">'."\n";
+echo '<input type="hidden" name="log_file" value="'.htmlspecialchars($file_name, ENT_QUOTES).'">'."\n";
+echo '<input type="hidden" name="tab" value="'.$activeTabH.'">'."\n";
 echo '<button type="submit">Neu laden</button>';
 echo '</form><br>';
 echo '</div>';
@@ -388,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =========================================================================
-    // NEU: JavaScript-Automatik für die Checkboxen in der bottom-bar
+    // JavaScript-Automatik für die Checkboxen in der bottom-bar
     // =========================================================================
     var debugCb = document.querySelector('.bottom-bar input[name="DEBUG"]');
     var tageCb  = document.querySelector('.bottom-bar input[name="TAGE"]');

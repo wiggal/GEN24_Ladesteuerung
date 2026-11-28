@@ -1,8 +1,4 @@
-import FUNCTIONS.functions
 import socket
-
-basics = FUNCTIONS.functions.basics()
-sqlall = FUNCTIONS.SQLall.sqlall()
 
 class BYD_Status:
     def __init__(self):
@@ -11,7 +7,7 @@ class BYD_Status:
 
     def buf2int16SI(self, byteArray, pos): #signed
         result = byteArray[pos] * 256 + byteArray[pos + 1]
-        if (result > 32768):
+        if (result >= 32768):
             result -= 65536
         return result
 
@@ -20,6 +16,7 @@ class BYD_Status:
         return result
 
     def read(self, byd_ip, byd_port):  
+        client = None
         try:
         
             #connection BYD
@@ -27,15 +24,26 @@ class BYD_Status:
             client.settimeout(5)  # Timeout in Sekunden
             client.connect((byd_ip, byd_port))
             #message 2
-            client.send(bytes.fromhex(self.MESSAGE_2))
-            #read data
-            data = client.recv(self.BUFFER_SIZE)
+            client.sendall(bytes.fromhex(self.MESSAGE_2))
+            #read data: Die Antwort kann in mehreren TCP-Paketen ankommen (z.B. bei seriell-Ethernet-Wandlern),
+            # deshalb lesen, bis die für den Wert benötigten 7 Bytes da sind
+            data = b''
+            while len(data) < 7:
+                chunk = client.recv(self.BUFFER_SIZE)
+                if not chunk:
+                    break   # Gegenstelle hat die Verbindung geschlossen
+                data += chunk
+            if len(data) < 7:
+                raise ValueError("Antwort zu kurz (" + str(len(data)) + " Bytes)")
             maxvolt = self.buf2int16SI(data, 5) * 1.0 / 100.0
 
-            client.close()
-
             return maxvolt
-      
+
         except Exception as ex:
-            print ("### ERROR BYD_Akku nicht erreichbar, Route, IP prüfen: ", ex)
+            # Verbindung/Timeout, unvollständige Antwort oder ungültige IP: Wert 0 liefern, wie bisher
+            print ("### ERROR BYD_Akku nicht erreichbar oder ungültige Antwort, Route, IP prüfen: ", ex)
             return 0
+        finally:
+            # Socket auch im Fehlerfall schließen
+            if client is not None:
+                client.close()

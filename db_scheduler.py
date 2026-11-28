@@ -2,7 +2,7 @@
 """
 db_scheduler.py
 Wird jede Minute per Crontab aufgerufen:
-    * * * * * /usr/bin/python3 /DIR/db_scheduler.py >> /DIR/Crontab.log 2>&1
+    * * * * * /usr/bin/python3 /DIR/db_scheduler.py
 
 Liest alle aktiven Jobs aus der SQLite-DB, prüft ob sie jetzt fällig sind,
 und führt sie ggf. aus.
@@ -89,6 +89,21 @@ def is_due(job: dict, now: datetime) -> bool:
     )
 
 
+def find_due_jobs(jobs: list[dict], now: datetime) -> list[dict]:
+    """Wie is_due, aber ein fehlerhafter Job blockiert nicht die anderen."""
+    due = []
+    for job in jobs:
+        try:
+            if is_due(job, now):
+                due.append(job)
+        except Exception as exc:  # ValueError, TypeError (None), ZeroDivisionError ("*/0") ...
+            log.error(
+                f"Job #{job.get('ID')} '{job.get('Name')}' übersprungen, "
+                f"ungültiges Cron-Feld: {exc}"
+            )
+    return due
+
+
 # ── Datenbankzugriff ──────────────────────────────────────────────────────────
 
 def load_jobs(conn: sqlite3.Connection) -> list[dict]:
@@ -152,7 +167,7 @@ def main():
 
     conn  = sqlite3.connect(DB_PATH)
     jobs  = load_jobs(conn)
-    due   = [j for j in jobs if is_due(j, now)]
+    due   = find_due_jobs(jobs, now)
 
     if not due:
         log.debug(f"Keine Jobs fällig um {now:%H:%M}")

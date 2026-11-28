@@ -1,6 +1,5 @@
 # Funktionen für die Gen24_Ladesteuerung
 from datetime import datetime
-import json
 import requests
 import configparser
 import sqlite3
@@ -25,7 +24,8 @@ class basics:
         for conf_file in conf_files:
             c_file = 'CONFIG/'+conf_file+'.ini'
             try:
-                config.read_file(open(c_file, encoding='utf-8'))
+                with open(c_file, encoding='utf-8') as f:
+                    config.read_file(f)
             except Exception as e:
                 print("\nERROR: ", e, "\n")
         # _priv_ini lesen
@@ -33,7 +33,8 @@ class basics:
             c_file = 'CONFIG/'+conf_file+'_priv.ini'
             try:
                 try:
-                    config.read_file(open(c_file, encoding='utf-8'))
+                    with open(c_file, encoding='utf-8') as f:
+                        config.read_file(f)
                 except FileNotFoundError:
                     # wenn _priv.ini fehlt, kopieren
                     import shutil
@@ -49,7 +50,8 @@ class basics:
                 if int(aktueller_Monat) in [int(m) for m in monate.replace(' ', '').split(',') if m.isdigit()]:
                     c_file = 'CONFIG/'+c_file
                     try:
-                        config.read_file(open(c_file, encoding='utf-8'))
+                        with open(c_file, encoding='utf-8') as f:
+                            config.read_file(f)
                     except Exception as e:
                         print("\nERROR: ", e, "\n")
 
@@ -111,12 +113,20 @@ class basics:
             # Vorhandene DB-Einträge aus ManuelleSteuerung vom TAB-LadeSTRG setzen
             if (var in self.ChargeOption):
                 db_value = self.ChargeOption[var]['Res_Feld2']
-                if Type == 'eval' and db_value is not None:
-                    db_value = str(db_value).strip().replace(',', '.')
-                    db_value = float(db_value) if '.' in db_value else int(db_value)
-                if (db_value != return_var):
-                    return_var = db_value
-                    print(f"DEBUG: DB_VAR {var} = {return_var}")
+                try:
+                    if db_value is None:
+                        raise ValueError("kein Wert")
+                    if Type == 'eval':
+                        db_value = str(db_value).strip().replace(',', '.')
+                        db_value = float(db_value) if '.' in db_value else int(db_value)
+                    else:
+                        db_value = str(db_value)
+                    if (db_value != return_var):
+                        return_var = db_value
+                        print(f"DEBUG: DB_VAR {var} = {return_var}")
+                except ValueError:
+                    # Leerer/ungültiger WebUI-Wert: ini-Wert verwenden, statt das ganze Programm zu beenden
+                    print(f"WARNING: ungültiger WebUI-Wert für {var} ({db_value!r}), ini-Wert {return_var!r} wird verwendet")
 
         except (KeyError, ValueError):
             print(f"ERROR: die Variable [{var_block}][{var}] wurde NICHT {error_type}definiert!")
@@ -127,7 +137,7 @@ class basics:
         conn = sqlite3.connect('weatherData.sqlite')
         cursor = conn.cursor()
     
-        query = f"""
+        query = """
             SELECT Zeitpunkt, Prognose_W
             FROM weatherData
             WHERE
@@ -136,11 +146,12 @@ class basics:
                 DATE(Zeitpunkt) BETWEEN DATE('now', 'localtime') AND DATE('now', 'localtime', '+1 day')
             ORDER BY Zeitpunkt ASC
         """
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(query)
+            rows = cursor.fetchall()
+        finally:
+            conn.close()
         result = dict(rows)
-
-        conn.close()
         return {"result": {"watts": result}}
 
     def sendPush(self, message, title, tags):

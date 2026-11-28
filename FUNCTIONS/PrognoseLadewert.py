@@ -28,8 +28,8 @@ class progladewert:
                     for key2 in self.reservierungdata_tmp[key]:
                         if(i<2):
                             try:
-                                Res_Feld += int(self.reservierungdata_tmp[key][key2])
-                            except (ValueError, TypeError):
+                                Res_Feld += int(float(self.reservierungdata_tmp[key][key2]))
+                            except (ValueError, TypeError, OverflowError):
                                 Res_Feld += 0
                         i += 1
                     reservierungdata[key] = Res_Feld
@@ -42,7 +42,7 @@ class progladewert:
                 # Wenn Reservierung eingeschaltet und Reservierungswert vorhanden von Prognose abziehen.
                 # NUR für berechnung Ladewert, nicht fürs Logging
                 if (reservierungdata.get(Stunde)):
-                    data_fun = self.data['result']['watts'][Stunde] - reservierungdata[Stunde]
+                    data_fun = data_fun - reservierungdata[Stunde]
                     # Minuswerte verhindern
                     if ( data_fun< 0): data_fun = 0
                 getPrognose = data_fun
@@ -58,8 +58,6 @@ class progladewert:
     
             return Ladewert
     
-    from datetime import datetime
-
     def get_FesteEntladegrenze(self, FesteEntladegrenze_string):
         values = FesteEntladegrenze_string.split(";")
         num_values = len(values)
@@ -71,7 +69,29 @@ class progladewert:
         index = int(current_minute // interval_size)
         # Entsprechenden Wert zurückgeben
         self.DEBUG_Ausgabe += "\nDEBUG FesteEntladegrenze index " + str(index) + " = " + str(values[index])
-        return int(values[index]), self.DEBUG_Ausgabe
+        # Auch '500.0' und leere/ungültige Werte (= 0) vertragen, wie in get_Verbrauchsgrenze
+        try:
+            wert = int(float(values[index]))
+        except (ValueError, OverflowError):
+            wert = 0
+        return wert, self.DEBUG_Ausgabe
+
+    def get_Verbrauchsgrenze(self, Verbrauchsgrenze_string):
+        # Wie get_FesteEntladegrenze, aber für die Spalte "Verbrauchsgrenze Entladung" (Res_Feld1):
+        # positiver Wert = Verbrauchsgrenze, negativer Wert = Einspeisung (minimale Entladung in W).
+        # Evtl. viertelstündliche Werte "a;b;c;d" (4 Werte = Viertelstunden, 2 Werte = halbe Stunden).
+        values = Verbrauchsgrenze_string.split(";")
+        num_values = len(values)
+        current_minute = datetime.now().minute
+        interval_size = 60 / num_values
+        index = int(current_minute // interval_size)
+        # Auch "-3000.0" (Zahl aus der DB) und leere/ungültige Werte (= 0) vertragen
+        try:
+            wert = int(float(values[index]))
+        except (ValueError, OverflowError):
+            wert = 0
+        # Nur die eigene Debug-Zeile zurückgeben (nicht self.DEBUG_Ausgabe), sonst steht der frühere Text im Controller doppelt im Log
+        return wert, "\nDEBUG Verbrauchsgrenze index " + str(index) + " = " + str(values[index])
 
     def getLadewert(self, BattVollUm, Grundlast, alterLadewert, BattKapaWatt_akt, MaxLadung):
             # alle Prognosewerte zwischen aktueller Stunde und 22:00 lesen
@@ -136,7 +156,9 @@ class progladewert:
                 Zwangs_Ladung_fun = Zwangs_Ladung_fun * Stunden_fun
 
                 # Restliche Berechnungen
-                PrognAbzug = Progn_aktuell * (Grundlast_fun / Grundlast)
+                # Bei Grundlast = 0 den Stundenanteil verwenden (sonst Division durch 0)
+                Grundlast_Anteil = (Grundlast_fun / Grundlast) if Grundlast else Stunden_fun
+                PrognAbzug = Progn_aktuell * Grundlast_Anteil
                 if (PrognAbzug < Grundlast_fun): PrognAbzug = Grundlast_fun
                 Progn_ueber_aktuell += Prognose_fun - PrognAbzug
 
@@ -152,11 +174,6 @@ class progladewert:
             Prognose_Std_nach_BattVollUm = self.getPrognose(Std)
             BattKapaWatt_akt_fun = BattKapaWatt_akt - Zwangs_Ladung
             if Stunden_sum < 0.1: Stunden_sum = 0.1
-
-            if (BatSparFaktor <= 0):
-                if(BatSparFaktor == 0): BatSparFaktor = -1 # historisch bedingt 
-                BatSparFaktor_kapp = abs(BatSparFaktor)
-                aktuellerLadewert_entw = int(((BattKapaWatt_akt_fun - Progn_ueber_aktuell)/Stunden_sum)*BatSparFaktor_kapp)
 
             # Wenn BatSparFaktor <= 0 Ladeberechnung durch Prognosekappung
             if (BatSparFaktor <= 0):
@@ -228,6 +245,7 @@ class progladewert:
     
     def getLadungEinspeisegrenzeVerguetung(self, aktuellerLadewert, LadewertGrund, BattVollUm, strompreis_einspeisegrenze, MaxLadung):
 
+        verbindung = None
         try:
             # Strompreise bis BattVollUm aus DB lesen
             import sqlite3
@@ -244,12 +262,7 @@ class progladewert:
             )
 
             # 2. Zielzeitpunkt für BattVollUm (z. B. 14:00:00 Uhr)
-            end_zeitpunkt = now.replace(
-                hour=BattVollUm, 
-                minute=0, 
-                second=0, 
-                microsecond=0
-            )
+            end_zeitpunkt = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(hours=BattVollUm)
             if end_zeitpunkt < start_viertelstunde:
                 end_zeitpunkt += timedelta(days=1)
 
@@ -278,12 +291,15 @@ class progladewert:
             # Ergibt: (niedrigster_preis, zeitpunkt)
             niedrigster_preis, min_zeitpunkt = min_eintrag if min_eintrag else (None, None)
 
+            if niedrigster_preis is None:
+                raise ValueError('keine Strompreise für den Zeitraum in der Datenbank')
+
             # Ausgabe / Weiterverarbeitung
             if niedrigster_preis < strompreis_einspeisegrenze:
                 self.DEBUG_Ausgabe += f"DEBUG >>>> Niedrigster Preis bis {BattVollUm}:00 Uhr: {niedrigster_preis} am {min_zeitpunkt}\n"
                 aktuellerLadewert = 0
                 LadewertGrund = f"Strompreis < {niedrigster_preis} erwartet!"
-                if aktueller_preis < strompreis_einspeisegrenze:
+                if aktueller_preis is not None and aktueller_preis < strompreis_einspeisegrenze:
                     aktuellerLadewert = MaxLadung
                     LadewertGrund = f"Aktueller Strompreis < {niedrigster_preis}!"
                     self.DEBUG_Ausgabe += f"DEBUG >>>> Aktueller Preis angewendet: {start_viertelstunde.strftime('%H:%M')}: {aktueller_preis} < {strompreis_einspeisegrenze}\n"
@@ -293,8 +309,11 @@ class progladewert:
                 self.DEBUG_Ausgabe += f"DEBUG >>>> Kein Preis unter {strompreis_einspeisegrenze} gefunden. Niedrigster Preis {niedrigster_preis} am {min_zeitpunkt}\n"
                 return aktuellerLadewert, LadewertGrund
                 
-        except:
-            print(f"ERROR: Es konnte kein Strompreis ermittelt werden, eventuell DynamicPriceCheck im Scheduler aktvieren!!")
+        except Exception as e:
+            print(f"ERROR: Es konnte kein Strompreis ermittelt werden, eventuell DynamicPriceCheck im Scheduler aktvieren!! ({type(e).__name__}: {e})")
+        finally:
+            if verbindung is not None:
+                verbindung.close()
 
         return aktuellerLadewert, LadewertGrund
 
@@ -408,6 +427,7 @@ class progladewert:
         Eigen_Opt_Std = self.Eigen_Opt_Std_arry['HYB_EM_POWER']
         Eigen_Opt_auto = self.Eigen_Opt_Std_arry['HYB_EM_MODE']
         Backup_Reserve = self.Eigen_Opt_Std_arry['HYB_BACKUP_RESERVED']
+        if Eigen_Opt_Std is None: Eigen_Opt_Std = 0
         # Wenn  Eigen_Opt_auto = 0, Eigen_Opt_Std 0 setzen, da der GEN24 noch den alten Wert liefert
         if Eigen_Opt_auto == 0: Eigen_Opt_Std = 0
     
@@ -417,8 +437,10 @@ class progladewert:
         if Dauer_Nacht_Std == 0: Dauer_Nacht_Std = 0.01 # sonst Divison durch Null 
         # fast eine Stunde weniger, da dann schon Nacht vorbei ist
         Akku_Rest_Watt = ((BattStatusProz - AkkuZielProz) * BattganzeKapazWatt/100) - ((Dauer_Nacht_Std - 0.8) * GrundlastNacht)
-        Eigen_Opt_Std_neu = int(Akku_Rest_Watt/(Dauer_Nacht_Std - 0.8))
-        if(Dauer_Nacht_Std < 1.8): Eigen_Opt_Std_neu = int(Akku_Rest_Watt)
+        if(Dauer_Nacht_Std < 1.8):
+            Eigen_Opt_Std_neu = int(Akku_Rest_Watt)
+        else:
+            Eigen_Opt_Std_neu = int(Akku_Rest_Watt/(Dauer_Nacht_Std - 0.8))
         # Schaltverzögerung (hysterese)
         if (abs(Eigen_Opt_Std) < Eigen_Opt_Std_neu): 
             #Eigen_Opt_Std_neu = int(Eigen_Opt_Std_neu * 0.8)
@@ -509,6 +531,7 @@ class progladewert:
                                    WRSchreibGrenze_nachOben, WRSchreibGrenze_nachUnten,
                                    DEBUG_Ausgabe, LadewertGrund, WR_schreiben, maxvolt):
 
+        AkkuschonungLadewert = 0
         # Wenn Akkuschonung > 0 ab XX% Batterieladung mit Ladewert runter fahren, Werte auch für Zwangsladung bestimmen
         if Akkuschonung > 0 or Batterieentlandung_steuern > 1:
             # Aufruf mit self.
@@ -574,9 +597,15 @@ class progladewert:
         Berechnet die reine Verzögerung im Vergleich zur Ladung mit MaxLadung.
         """
         verlaengerung_h = 0.0
+        # Ohne gültige MaxLadung keine Berechnung möglich (Division durch 0)
+        if MaxLadung <= 0:
+            return 0
+
+        # Schlüssel einheitlich als int (z.B. auch "080" oder "80.0" vertragen)
+        stufen_dict = {int(float(k)): v for k, v in stufen_dict.items()}
 
         # 1. Schwellenwerte sortieren
-        schwellen = sorted([int(k) for k in stufen_dict.keys()])
+        schwellen = sorted(stufen_dict.keys())
         stufen_mit_ende = schwellen + [100]
 
         for i in range(len(schwellen)):
@@ -587,7 +616,7 @@ class progladewert:
             energie_phase = kapazitaet_wh * (ende - start) / 100
 
             # Leistung dieser Stufe (Faktor * Kapazität)
-            faktor = float(stufen_dict[str(start)])
+            faktor = float(stufen_dict[start])
             p_red = kapazitaet_wh * faktor
 
             # Vergleich: Wie lange dauert es mit P_red vs. Hardware-Limit?
