@@ -88,28 +88,43 @@ class sqlall:
             # a. Daten speichern
             zeiger.execute(sql_query, params)
             gespeichert = True
-        except sqlite3.OperationalError:
-            # b. Falls Tabelle fehlt: Tabelle & Index anlegen und erneut versuchen
-            self.create_database_PVDaten(database)
-            zeiger.execute("CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)")
-            zeiger.execute(sql_query, params)
-            gespeichert = True
+        except sqlite3.OperationalError as e:
+            if 'locked' in str(e) or 'busy' in str(e):
+                # DB ist gesperrt (z.B. von WebUI/Scheduler): Anlegen von Tabellen würde nichts helfen
+                print(f"Fehler beim Speichern: {e}")
+            else:
+                # b. Falls Tabelle/Spalten fehlen: Tabelle, Spalten & Index anlegen und erneut versuchen
+                try:
+                    self.create_database_PVDaten(database)
+                    zeiger.execute("CREATE INDEX IF NOT EXISTS idx_pv_daten_zeitpunkt ON pv_daten(Zeitpunkt)")
+                    zeiger.execute(sql_query, params)
+                    gespeichert = True
+                except Exception as e2:
+                    print(f"Fehler beim Speichern: {e2}")
         except Exception as e:
             print(f"Fehler beim Speichern: {e}")
-
-        verbindung.commit()
-        verbindung.close()
+        finally:
+            # Verbindung auch im Fehlerfall sauber schließen
+            try:
+                verbindung.commit()
+            except sqlite3.Error as e:
+                print(f"Fehler beim Speichern (commit): {e}")
+                gespeichert = False
+            verbindung.close()
         return gespeichert
 
     def getSQLlastProduktion(self, database):
         verbindung = sqlite3.connect(database)
-        zeiger = verbindung.cursor()
-        sql_anweisung = "SELECT MIN(CASt(AC_Produktion as INTEGER)), DC_Produktion from pv_daten WHERE DC_Produktion = (SELECT MAX(CASt(DC_Produktion as INTEGER))FROM pv_daten);"
-        zeiger.execute(sql_anweisung)
-        row = zeiger.fetchall()
-        AC_Produktion = row[0][0]
-        DC_Produktion = row[0][1]
-        return (AC_Produktion, DC_Produktion)
+        try:
+            zeiger = verbindung.cursor()
+            sql_anweisung = "SELECT MIN(CASt(AC_Produktion as INTEGER)), DC_Produktion from pv_daten WHERE DC_Produktion = (SELECT MAX(CASt(DC_Produktion as INTEGER))FROM pv_daten);"
+            zeiger.execute(sql_anweisung)
+            row = zeiger.fetchall()
+            AC_Produktion = row[0][0]
+            DC_Produktion = row[0][1]
+            return (AC_Produktion, DC_Produktion)
+        finally:
+            verbindung.close()
 
     def create_database_ProgSteuerung(self, path):
         with sqlite3.connect(path) as zeiger:
@@ -128,7 +143,14 @@ class sqlall:
 
     def getSQLsteuerdaten(self, schluessel, DB='CONFIG/Prog_Steuerung.sqlite'):
         verbindung = sqlite3.connect(DB)
+        try:
+            return self._getSQLsteuerdaten(verbindung, schluessel, DB)
+        finally:
+            verbindung.close()
+
+    def _getSQLsteuerdaten(self, verbindung, schluessel, DB):
         zeiger = verbindung.cursor()
+        sql_parameter = ()
 
         # Wenn schluessel == Reservierung dann laufende Reservierungen auslesen
         if (schluessel == 'Reservierung'):
@@ -168,14 +190,19 @@ class sqlall:
 
         else:
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
-            sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = \'" +schluessel+"\';"
+            # Schlüssel als Parameter übergeben (kein SQL-Text zusammensetzen)
+            sql_anweisung = "SELECT Zeit, Res_Feld1, Res_Feld2, Options from steuercodes WHERE Schluessel = ?;"
+            sql_parameter = (schluessel,)
 
         try:
-            zeiger.execute(sql_anweisung)
-        except:
+            zeiger.execute(sql_anweisung, sql_parameter)
+        except sqlite3.OperationalError as e:
+            # Nur wenn die Tabelle fehlt neu anlegen; andere Fehler (z.B. DB gesperrt) nicht verschleiern
+            if 'no such table' not in str(e):
+                raise
             self.create_database_ProgSteuerung(DB)
             # Alle Steuerdaten aus Prog_Steuerung.sqlite lesen
-            zeiger.execute(sql_anweisung)
+            zeiger.execute(sql_anweisung, sql_parameter)
 
         rows = zeiger.fetchall()
         data = {}
@@ -208,6 +235,4 @@ class sqlall:
         record_json = json.dumps(data)
         record_json = json.loads(record_json)
 
-        verbindung.commit()
-        verbindung.close()
         return(record_json)

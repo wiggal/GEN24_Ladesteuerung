@@ -7,6 +7,7 @@
 from sys import argv
 from datetime import datetime, timedelta
 import requests
+import sqlite3
 import configparser
 import FUNCTIONS.functions
 import FUNCTIONS.DynamicPrice
@@ -14,59 +15,66 @@ import FUNCTIONS.SQLall
 import FUNCTIONS.Steuerdaten
 
 
-if __name__ == '__main__':
-    #Versionsnummer lesen
-    config_v = configparser.ConfigParser()
-    config_v.read('version.ini')
-    prg_version = (config_v['Programm']['version'])
+#Versionsnummer lesen
+config_v = configparser.ConfigParser()
+config_v.read('version.ini')
+prg_version = (config_v['Programm']['version'])
 
-    basics = FUNCTIONS.functions.basics()
-    config = basics.loadConfig(['default', 'charge', 'dynprice'])
-    sqlall = FUNCTIONS.SQLall.sqlall()
-    dynamic = FUNCTIONS.DynamicPrice.dynamic()
-    now = datetime.now()
-    format = "%Y-%m-%d %H:%M:%S"
+basics = FUNCTIONS.functions.basics()
+config = basics.loadConfig(['default', 'charge', 'dynprice'])
+sqlall = FUNCTIONS.SQLall.sqlall()
+dynamic = FUNCTIONS.DynamicPrice.dynamic()
+now = datetime.now()
 
-    # Klassen dynamisch laden
-    try:
-        InverterApi = basics.get_inverter_class(class_type="Api")
-        InverterInterface = basics.get_inverter_class(class_type="Interface")
-    except ImportError as e:
-        print(e)  # nur die kurze, selbst definierte Fehlermeldung
-        exit(1) 
+# Klassen dynamisch laden
+try:
+    InverterApi = basics.get_inverter_class(class_type="Api")
+    InverterInterface = basics.get_inverter_class(class_type="Interface")
+except ImportError as e:
+    print(e)  # nur die kurze, selbst definierte Fehlermeldung
+    exit(1) 
 
-    Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
-    dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
-    LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
-    Daysback = basics.getVarConf('dynprice','Daysback', 'eval')
-    LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
-    Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
-    Lade_Verbrauchs_Faktor = basics.getVarConf('dynprice','Lade_Verbrauchs_Faktor', 'eval')
-    Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
-    LAND = basics.getVarConf('dynprice','LAND', 'str')
-    Preisquelle = basics.getVarConf('dynprice','Preisquelle', 'str')
+Lastgrenze = basics.getVarConf('dynprice','Lastgrenze', 'eval')
+dyn_print_level = basics.getVarConf('dynprice','dyn_print_level', 'eval')
+LastprofilNeuTage = basics.getVarConf('dynprice','LastprofilNeuTage', 'eval')
+Daysback = basics.getVarConf('dynprice','Daysback', 'eval')
+Akku_Verlust_Prozent = basics.getVarConf('dynprice','Akku_Verlust_Prozent', 'eval')
+Lade_Verbrauchs_Faktor = basics.getVarConf('dynprice','Lade_Verbrauchs_Faktor', 'eval')
+Gewinnerwartung_kW = basics.getVarConf('dynprice','Gewinnerwartung_kW', 'eval')
+LAND = basics.getVarConf('dynprice','LAND', 'str')
+Preisquelle = basics.getVarConf('dynprice','Preisquelle', 'str')
+try:
     weatherdata = basics.loadWeatherData()
-    if(dyn_print_level >= 1):
-        print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"), prg_version, "***")
-        print("*** Strompreisprovider: ", Preisquelle, "***")
+except sqlite3.OperationalError as e:
+    # z.B. beim ersten Start, wenn weatherData.sqlite noch keine Prognosedaten enthält
+    print(f"### ERROR: Wetterdaten (weatherData.sqlite) nicht lesbar: {e}")
+    print("Bitte zuerst die Wetterdaten abrufen (WeatherData im Scheduler aktivieren)!")
+    exit(1)
+if(dyn_print_level >= 1):
+    print("*** BEGINN DynamicPriceCheck: ",datetime.strftime(datetime.now(),"%Y-%m-%d %H:%M:%S"), prg_version, "***")
+    print("*** Strompreisprovider: ", Preisquelle, "***")
 
-    # Lastprofile holen
-    Lastprofil = dynamic.getLastprofil()
-    TimestampNow = int(datetime.now().timestamp())
+# Lastprofile holen
+Lastprofil = dynamic.getLastprofil()
+TimestampNow = int(datetime.now().timestamp())
 
-    # Lastprofil neu erzeugen, wenn es älter als LastprofilNeuTage
-    PV_Database = 'PV_Daten.sqlite'
-    if len(Lastprofil) > 0 and len(Lastprofil[0]) > 3:
-        if ((TimestampNow) - int(float(Lastprofil[0][3])) > LastprofilNeuTage * 86400):
-            if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als ", LastprofilNeuTage, " Tage!")
-            dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
-            # Lastprofil nochmal neu holen
-            Lastprofil = dynamic.getLastprofil()
-    else:
-        if(dyn_print_level >= 1): print("Erzeuge Lastprofil, erstmalig!!")
+# Lastprofil neu erzeugen, wenn es älter als LastprofilNeuTage
+PV_Database = 'PV_Daten.sqlite'
+if len(Lastprofil) > 0 and len(Lastprofil[0]) > 3:
+    try:
+        Lastprofil_zu_alt = ((TimestampNow) - int(float(Lastprofil[0][3])) > LastprofilNeuTage * 86400)
+    except (ValueError, TypeError):
+        Lastprofil_zu_alt = True   # Erzeugungszeitpunkt fehlt/ungültig => neu erzeugen
+    if Lastprofil_zu_alt:
+        if(dyn_print_level >= 1): print("Erzeuge Lastprofil, da älter als ", LastprofilNeuTage, " Tage!")
         dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
-        if(dyn_print_level >= 1): print("Programmende!")
-        exit()
+        # Lastprofil nochmal neu holen
+        Lastprofil = dynamic.getLastprofil()
+else:
+    if(dyn_print_level >= 1): print("Erzeuge Lastprofil, erstmalig (oder für heute/morgen noch unvollständig)!!")
+    dynamic.makeLastprofil(PV_Database, Lastgrenze, Daysback*-1)
+    if(dyn_print_level >= 1): print("Programmende!")
+    exit()
 
 
 # ***** Ab hier Berechnung des AKKU-Status
@@ -82,10 +90,10 @@ today_weekday = (today.weekday() + 1)  % 7  # Montag=0 -> Sonntag=0
 for row in Lastprofil:
     if (int(row[0]) == today_weekday):
         time=today.strftime("%Y-%m-%d") + " " + row[1]+":00"
-        Verbrauch.append((time, int(row[2] * Lade_Verbrauchs_Faktor)))
+        Verbrauch.append((time, int((row[2] or 0) * Lade_Verbrauchs_Faktor)))
     else:
         time=tomorrow.strftime("%Y-%m-%d") + " " + row[1]+":00"
-        Verbrauch.append((time, int(row[2] * Lade_Verbrauchs_Faktor)))
+        Verbrauch.append((time, int((row[2] or 0) * Lade_Verbrauchs_Faktor)))
 
 # Prognosedaten lesen
 Prognose_24H = dynamic.getPrognosen_24H(weatherdata)
@@ -130,7 +138,7 @@ if not pricelist_date:
 
 if not pricelist_date:
     print("### ERROR: Auch die DB lieferte keine Daten, Programmabbruch!")
-    exit()
+    exit(1)
 
 if(dyn_print_level >= 2):
     headers = ["Zeitpunkt", "Strompreis brutto(€/kWh)", "Börsenstrompreis (€/kWh)"]
@@ -159,28 +167,46 @@ except requests.exceptions.RequestException as e:
     print(datetime.now())
     print(f"Fehler bei der Verbindung: {e}")
     print(">>>>>>>>>> WR offline")
-    exit()
+    exit(1)
 
 # Akku-Kapazität und aktuelle Parameter
-inverter_api = InverterApi()
-API = inverter_api.get_API()
-# Wenn Batterie offline, battery_capacity_Wh = 5% => in GEN24_API.gen24api()
-battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
-current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
-
-# Mindest-Ladestand in Prozent vom GEN24 und aus der dynprice.ini lesen
 user = basics.getVarConf('inverter','user', 'str')
 password = basics.getVarConf('inverter','password', 'str')
 Akku_MindestSOC = basics.getVarConf('dynprice','Akku_MindestSOC', 'eval')
-# Hier Hochkommas am Anfang und am Ende enternen
-password = password[1:-1]
-#  Klasse FroniusGEN24 initiieren
-inverter_interface = InverterInterface(host_ip, user, password, API['Version'])
-batteries_array = inverter_interface.get_http_data()
-BAT_M0_SOC_MIN = batteries_array[1]['BAT_M0_SOC_MIN']
-HYB_BACKUP_RESERVED = batteries_array[1]['HYB_BACKUP_RESERVED']
-minimum_batterylevel_Prozent = BAT_M0_SOC_MIN
-if HYB_BACKUP_RESERVED > BAT_M0_SOC_MIN: minimum_batterylevel_Prozent = HYB_BACKUP_RESERVED
+# Hochkommas am Anfang und am Ende nur entfernen, wenn vorhanden (wie im EnergyController),
+# sonst würde bei einem Kennwort ohne Hochkommas das erste und letzte Zeichen fehlen
+if (password.startswith("'") and password.endswith("'")):
+    password = password[1:-1]
+
+try:
+    inverter_api = InverterApi()
+    API = inverter_api.get_API()
+    # Wenn Batterie offline, battery_capacity_Wh = 5% => in GEN24_API.gen24api()
+    battery_capacity_Wh = (API['BattganzeKapazWatt']) # Kapazität in Wh
+    current_charge_Wh = battery_capacity_Wh - API['BattKapaWatt_akt'] # aktueller Ladestand in Wh
+
+    #  Klasse FroniusGEN24 initiieren
+    inverter_interface = InverterInterface(host_ip, user, password, API['Version'])
+    batteries_array = inverter_interface.get_http_data()
+    # Mindest-Ladestand in Prozent vom GEN24 und aus der dynprice.ini lesen
+    BAT_M0_SOC_MIN = batteries_array[1]['BAT_M0_SOC_MIN']
+    HYB_BACKUP_RESERVED = batteries_array[1]['HYB_BACKUP_RESERVED']
+    minimum_batterylevel_Prozent = BAT_M0_SOC_MIN
+    if HYB_BACKUP_RESERVED > BAT_M0_SOC_MIN: minimum_batterylevel_Prozent = HYB_BACKUP_RESERVED
+except requests.exceptions.RequestException as e:
+    print(datetime.now())
+    print(f"Fehler bei der Verbindung zum Wechselrichter: {e}")
+    print(">>>>>>>>>> WR offline")
+    exit(1)
+except Exception as e:
+    # z.B. falsches Kennwort (InverterLoginError), fehlende/ungültige Werte in der WR-Antwort
+    print(datetime.now())
+    print(f"### ERROR: Wechselrichterdaten konnten nicht gelesen werden: {type(e).__name__}: {e}")
+    exit(1)
+
+if battery_capacity_Wh <= 0:
+    print("### ERROR: Batteriekapazität ist 0, Programmabbruch!")
+    exit(1)
 # größeren Wert als minimum_batterylevel_Prozent definieren
 minimum_batterylevel_Prozent = max(minimum_batterylevel_Prozent, Akku_MindestSOC)
 
@@ -318,7 +344,7 @@ for stunde in range(1, 25):  # die nächsten 24 Stunden beginnend mit nächster 
     # wenn Stundeneintrag in CONFIG/Prog_Steuerung.sqlite noch fehlt
     try:
         DBCode.append((Stunde, 'ENTLadeStrg', Stunde, entladesteurungsdata[Stunde]['Res_Feld1'], entladesteurungsdata[Stunde]['Res_Feld2'], entladesteurungsdata[Stunde]['Options']))
-    except:
+    except (KeyError, TypeError):
         DBCode.append((Stunde, 'ENTLadeStrg', Stunde, 0, 0, ''))
 
 # Akkuzustand nochmal neu berechnen mit manuellen Einträgen aus ENTLadeStrg

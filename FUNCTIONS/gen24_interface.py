@@ -1,7 +1,6 @@
 import requests
 import hashlib
 import os
-import time
 
 # Neue Klasse für http-request nach Umstellungen im Zugriff seit Firmware 1.38.6-1
 # Firmwareversionen kleiner 1.36.6-1 wurden nicht getestet
@@ -10,9 +9,15 @@ import time
 # Changelog => Zeus 3.4.3-21683 = 1.37.6-1 => API PS2.rev-sw = "3.4.3-21683" 
 
 
+class InverterLoginError(Exception):
+    """Anmeldung am Wechselrichter fehlgeschlagen (Kennwort/Benutzer falsch)"""
+
+
 class InverterInterface:
-    def __init__(self, host: str, user: str, password: str, Version = '3.4.3-21683', debug: bool = False):
+    def __init__(self, host: str, user: str, password: str, Version = '3.4.3-21683', debug: bool = False, timeout: float = 15):
         self.host = host
+        # Timeout in Sekunden für jeden HTTP-Request, sonst kann ein hängender WR das Skript blockieren
+        self.timeout = timeout
         self.user = user.lower() # user muss klein geschrieben sein
         self.password = password
         self.session = requests.Session()
@@ -40,7 +45,20 @@ class InverterInterface:
         def parse_version(v: str):
             main = v.split("-")[0]   # nur Major.Minor.Patch beachten
             return [int(x) for x in main.split(".")]
-        return parse_version(version) < parse_version(threshold)
+        try:
+            return parse_version(version) < parse_version(threshold)
+        except (ValueError, AttributeError):
+            # Unlesbare Version => von aktueller Firmware ausgehen
+            return False
+
+    @staticmethod
+    def _leistung(wert):
+        """Leistungswerte für die API als ganze Zahl (z.B. 3000.0 oder '3000' => 3000)"""
+        try:
+            return int(round(float(wert)))
+        except (TypeError, ValueError, OverflowError):
+            # Sonst würde ungültiges JSON (z.B. "Power":None) an den WR geschickt
+            raise ValueError("Ungültiger Leistungswert für den Wechselrichter: " + repr(wert))
 
     def _debug(self, msg: str):
         if self.debug:
@@ -48,7 +66,7 @@ class InverterInterface:
 
     def _get_auth_params(self, url: str):
         """Fordert 401 an, um die Digest-Parameter zu bekommen"""
-        r = self.session.get(url)
+        r = self.session.get(url, timeout=self.timeout)
         if r.status_code != 401:
             raise Exception(f"Erwartet 401, aber {r.status_code}")
         header = r.headers.get("WWW-Authenticate") or r.headers.get("X-WWW-Authenticate")
@@ -105,12 +123,12 @@ class InverterInterface:
     
         self._debug(f"Request {method} {url} mit headers: {headers}, params: {params}, data: {data}")
 
-        r = self.session.request(method=method, url=url, headers=headers, params=params, data=data)
+        r = self.session.request(method=method, url=url, headers=headers, params=params, data=data, timeout=self.timeout)
 
         if r.status_code == 401:
             self._get_auth_params(url)
             headers["Authorization"] = self._build_auth_header(method, uri)
-            r = self.session.request(method=method, url=url, headers=headers, params=params, data=data)
+            r = self.session.request(method=method, url=url, headers=headers, params=params, data=data, timeout=self.timeout)
 
         r.raise_for_status()
         return r
@@ -119,19 +137,25 @@ class InverterInterface:
         """Sendet Request mit Digest-Auth """
         if headers is None:
             headers = {}
-        last_error = None
         # Hier http_request_path_praefix wenn add_praefix=True
         if (add_praefix):
             path = self.http_request_path_praefix + path
         try:
-            r = self._request(method, path, headers=headers, data=payload, params=params)
-            if r.status_code == 200:
-                return r
-        except Exception as e:
-            last_error = e
+            # _request ruft raise_for_status() auf, hier kommen also nur Antworten < 400 an
+            return self._request(method, path, headers=headers, data=payload, params=params)
+        except requests.exceptions.HTTPError as e:
             self._debug(f"Request auf {path} fehlgeschlagen: {e}")
-            print("\nLogin fehlgeschlagen: Kennword prüfen, oder nach Umstieg auf 1.38.6-1 Kennwort am GEN24 neu setzen!!\n")
-            exit()
+            status = e.response.status_code if e.response is not None else None
+            if status in (401, 403):
+                print("\nLogin fehlgeschlagen: Kennword prüfen, oder nach Umstieg auf 1.38.6-1 Kennwort am GEN24 neu setzen!!\n")
+                raise InverterLoginError("Login am Wechselrichter fehlgeschlagen (HTTP " + str(status) + "), Kennwort prüfen") from e
+            # Alle anderen HTTP-Fehler (z.B. 500) an den Aufrufer weiterreichen
+            raise
+        except Exception as e:
+            # Verbindungsfehler/Timeout (requests-Exceptions) und alles andere an den Aufrufer weiterreichen,
+            # nicht mehr fälschlich als Kennwortfehler melden und mit Exit-Code 0 beenden
+            self._debug(f"Request auf {path} fehlgeschlagen: {e}")
+            raise
 
     def login(self) -> bool:
         """Login über Digest-Auth"""
@@ -215,7 +239,7 @@ class InverterInterface:
             if 'laden' in Options:
                 trenner_komma = ','
                 payload_text = (
-                    '{"Active":true,"Power":' + str(aktuellerLadewert) +
+                    '{"Active":true,"Power":' + str(self._leistung(aktuellerLadewert)) +
                     ',"ScheduleType":"CHARGE_MAX","TimeTable":{"Start":"00:00","End":"23:59"},'
                     '"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
                 )
@@ -224,7 +248,7 @@ class InverterInterface:
             if ('entladen' in Options) and (Batterieentlandung_steuern > 0) and (EntladeEintragloeschen == "nein"):
                 if Neu_BatteryMaxDischarge != BatteryMaxDischarge or (payload_text != '' and EntladeEintragDa == "ja"):
                     payload_text += str(trenner_komma) + (
-                        '{"Active":true,"Power":' + str(Neu_BatteryMaxDischarge) +
+                        '{"Active":true,"Power":' + str(self._leistung(Neu_BatteryMaxDischarge)) +
                         ',"ScheduleType":"' + str(Ladetype) + '","TimeTable":{"Start":"00:00","End":"23:59"},'
                         '"Weekdays":{"Mon":true,"Tue":true,"Wed":true,"Thu":true,"Fri":true,"Sat":true,"Sun":true}}'
                     )

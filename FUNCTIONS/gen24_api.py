@@ -5,6 +5,9 @@ import requests
 import json
 import re
 import sqlite3
+
+# Timeout in Sekunden für Abfragen der WR-/Wallbox-APIs, sonst kann ein hängender WR das Skript blockieren
+HTTP_TIMEOUT = 10
         
 basics = FUNCTIONS.functions.basics()
 sqlall = FUNCTIONS.SQLall.sqlall()
@@ -15,8 +18,6 @@ class InverterApi:
         self.dummy = 'dummmy'
 
     def extract_API_values(self, obj, key_patterns):
-        import re
-        
         if isinstance(key_patterns, tuple):
             key_patterns = [key_patterns]
 
@@ -40,12 +41,13 @@ class InverterApi:
 
         def recurse(o, inherited_attrs=None, inherited_label=None):
             if isinstance(o, dict):
-                attrs = o.get("attributes", {})
+                attrs = o.get("attributes")
+                if not isinstance(attrs, dict): attrs = {}   # null/Liste/Text in attributes ignorieren
                 local_label = o.get("label") or attrs.get("label")
                 active_label = local_label if local_label else inherited_label
                 
                 active_attrs = inherited_attrs.copy() if inherited_attrs else {}
-                if isinstance(attrs, dict): active_attrs.update(attrs)
+                active_attrs.update(attrs)
 
                 for k, v in o.items():
                     # Pattern-Matching
@@ -67,7 +69,7 @@ class InverterApi:
                                     if m_type == "sum": aggregates[name] += val
                                     elif m_type == "max": aggregates[name] = max(aggregates[name], val)
                                     elif m_type == "min": aggregates[name] = min(aggregates[name], val)
-                                except: pass
+                                except (ValueError, TypeError): pass
                             elif k not in results:
                                 # EINZELWERT (mode ist False)
                                 results[k] = v
@@ -99,7 +101,8 @@ class InverterApi:
         else:
             IP = basics.getVarConf('inverter','hostNameOrIp','str')
             gen24url = "http://"+IP+"/components/readable"
-            url = requests.get(gen24url)
+            url = requests.get(gen24url, timeout=HTTP_TIMEOUT)
+            url.raise_for_status()
             data = json.loads(url.text)
         API = {}
         # relevante API-Schlüssel definieren: 
@@ -128,7 +131,7 @@ class InverterApi:
         # Hier Schluessel, die nicht zwingend vorhanden sein müssen
         try:
             API['Ohmpilot']  =  int(API_result['OHMPILOT_ENERGYACTIVE_CONSUMED_SUM_F64']/3600)
-        except:
+        except (KeyError, ValueError, TypeError):
             API['Ohmpilot']  =  None
 
         try:
@@ -150,7 +153,7 @@ class InverterApi:
 
             try:
                 API['aktuelleBatteriePower'] = int(API_result['BAT_POWERACTIVE_MEAN_F32'])
-            except:
+            except (KeyError, ValueError, TypeError):
                 API['aktuelleBatteriePower'] = 0
                 print("*********** Batterie ist evtl. offline, aktuelle BatteriePower wird auf 0 gesetzt!!! *********")
             attributes_nameplate = json.loads(API_result['nameplate'])
@@ -179,12 +182,14 @@ class InverterApi:
             ERROR_Push_Message_EIN = basics.getVarConf('messaging','ERROR_Push_Message_EIN','eval')
             if (ERROR_Push_Message_EIN == 1):
                 basics.sendPush('Anlage prüfen', 'ERROR: API-Wert fehlt', 'warning')
-            exit()
+            exit(1)
 
         # Zellspannung von BYD oder Reserva lesen
         API['maxvolt'] = 0
-        Akkuschonung = basics.getVarConf('Ladeberechnung','Akkuschonung','eval')
-        if(Akkuschonung == 2 and readvolt == 1):
+        # Ob die Zellspannung gelesen werden soll, entscheidet der Aufrufer über readvolt
+        # (EnergyController kennt den evtl. per WebUI überschriebenen Wert von Akkuschonung,
+        #  die ini-Datei allein reicht dafür nicht)
+        if(readvolt == 1):
             akkuIP = basics.getVarConf('inverter','akkuIP','str')
             if (akkuIP == "reserva"):
                 print("#### Reserva: Akkuschonung mit MaxVolt noch nicht getestet!!!")  #entWIGGlung
@@ -201,13 +206,19 @@ class InverterApi:
             for weitereIP in IP_weitere_Gen24:
                 try:
                     gen24url = "http://"+weitereIP+"/components/readable"
-                    url = requests.get(gen24url)
+                    url = requests.get(gen24url, timeout=HTTP_TIMEOUT)
+                    url.raise_for_status()
                     data2 = json.loads(url.text)
                     API_result = self.extract_API_values(data2, GEN24_API_schluessel)
-                    API['aktuellePVProduktion'] += int(API_result['SUM_PV_POWERACTIVE_MEAN_0_F32'])
-                    API['AC_Produktion']        += int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
-                    API['DC_Produktion']        += int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
-                    API['AC_to_DC']             += int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
+                    # Erst alle Werte lesen, dann addieren (sonst bleibt bei fehlendem Wert ein Teil schon addiert)
+                    add_PV     = int(API_result['SUM_PV_POWERACTIVE_MEAN_0_F32'])
+                    add_AC     = int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_PRODUCED_SUM_0_U64']/3600)
+                    add_DC     = int(API_result['SUM_PV_ENERGYACTIVE_ACTIVE_SUM_0_U64']/3600)
+                    add_AC_DC  = int(API_result['SUM_ACBRIDGE_ENERGYACTIVE_ACTIVECONSUMED_SUM_0_U64']/3600)
+                    API['aktuellePVProduktion'] += add_PV
+                    API['AC_Produktion']        += add_AC
+                    API['DC_Produktion']        += add_DC
+                    API['AC_to_DC']             += add_AC_DC
                 except Exception as e:
                     print("API von WR", weitereIP, "nicht erreichbar, oder fehlerhaft")
                     print("API_URL zur Fehlersuche: ", gen24url)
@@ -241,9 +252,15 @@ class InverterApi:
                     print("Fehlerursache:", e)
                     print("\nAPI_URL zur Fehlersuche: ", symo_url)
                     API['aktuellePVProduktion'] += 0
-                    Produktion_MAX_DB = sqlall.getSQLlastProduktion('PV_Daten.sqlite')
-                    DB_AC = Produktion_MAX_DB[0]
-                    DB_DC = Produktion_MAX_DB[1]
+                    try:
+                        Produktion_MAX_DB = sqlall.getSQLlastProduktion('PV_Daten.sqlite')
+                    except sqlite3.Error as db_error:
+                        # DB oder Tabelle noch nicht vorhanden (z.B. erster Start)
+                        print("Letzte Produktionswerte aus PV_Daten.sqlite nicht lesbar:", db_error)
+                        Produktion_MAX_DB = (0, 0)
+                    # Leere DB liefert None, dann mit 0 rechnen statt mit TypeError abzustürzen
+                    DB_AC = Produktion_MAX_DB[0] or 0
+                    DB_DC = Produktion_MAX_DB[1] or 0
                     Offline_AC_DIFF = ((DB_DC - DB_AC) - (API['DC_Produktion'] - API['AC_Produktion']))
                     print("Offline_AC_DIFF: ", Offline_AC_DIFF)
                     if(Offline_AC_DIFF < 0): Offline_AC_DIFF = 0
@@ -265,7 +282,8 @@ class InverterApi:
             # mit data werden die API-Daten des erste GEN24 übergeben
             API_ADDDON = ADDONS.Fremd_API_priv.get_API(data)
             for key in API:
-                if key in API_ADDDON:
+                # None-Werte (z.B. Ohmpilot nicht vorhanden) nicht addieren
+                if key in API_ADDDON and API[key] is not None and API_ADDDON[key] is not None:
                     API[key] += API_ADDDON[key]
         except ModuleNotFoundError:
             # Wenn Modul/Datei fehlt still ignorieren
@@ -301,7 +319,7 @@ class InverterApi:
                 list_json = requests.get(wallbox_api + "/list", timeout=3).text
                 connected_list = json.loads(list_json).get('connected', [])
                 cp_id = connected_list[0] if connected_list else None
-            except Exception as e:
+            except Exception:
                 #print("*********** Wallbox-API (/list) nicht erreichbar oder fehlerhaft! *********")
                 #print("Fehlerursache:", e)
                 pass
@@ -312,13 +330,17 @@ class InverterApi:
                 resp = requests.get(wallbox_url, params={"charge_point_id": cp_id}, timeout=3)
                 data = json.loads(resp.text)
                 total_meter_wh = data.get('total_meter_wh')
-            except Exception as e:
+            except Exception:
                 #print("*********** Wallbox-API (Gesamt-Zählerstand) nicht erreichbar oder fehlerhaft! *********")
                 #print("Fehlerursache:", e)
                 #print("API_URL zur Fehlersuche: ", wallbox_url)
                 pass
 
-        return int(total_meter_wh) if total_meter_wh is not None else None
+        # Ungültiger Zählerwert darf den Programmlauf nicht abbrechen
+        try:
+            return int(total_meter_wh) if total_meter_wh is not None else None
+        except (ValueError, TypeError, OverflowError):
+            return None
 
     # Liefert den höchsten bisher in PV_Daten.sqlite (Tabelle pv_daten) gespeicherten Wert
     # für eine oder mehrere Spalten zurück, z.B. als Fallback, wenn eine Live-API gerade
@@ -326,6 +348,7 @@ class InverterApi:
     # ["Wallbox", "Ohmpilot"]. Rückgabe: dict {spaltenname: max_wert_oder_None}.
     def get_last_DB_value(self, keys):
         max_values = {key: None for key in keys}
+        verbindung = None
         try:
             verbindung = sqlite3.connect('PV_Daten.sqlite')
             zeiger = verbindung.cursor()
@@ -334,10 +357,12 @@ class InverterApi:
                 row = zeiger.fetchone()
                 if row and row[0] is not None:
                     max_values[key] = row[0]
-            verbindung.close()
         except Exception as e:
             print("*********** Letzte(r) DB-Wert(e) aus PV_Daten.sqlite nicht lesbar! *********")
             print("Fehlerursache:", e)
+        finally:
+            if verbindung is not None:
+                verbindung.close()
         return max_values
 
 if __name__ == "__main__":
